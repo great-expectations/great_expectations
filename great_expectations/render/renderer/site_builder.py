@@ -108,7 +108,9 @@ class SiteBuilder():
         if profiling_section_config:
             new_index_links_dict = cls.generate_profiling_section(
                 profiling_section_config,
-                data_context
+                data_context,
+                datasources_to_document,
+                specified_data_asset_name,
             )
 
         # validations
@@ -297,12 +299,12 @@ class SiteBuilder():
 
 
     @classmethod
-    def generate_profiling_section(cls, section_config, data_context):
+    def generate_profiling_section(cls, section_config, data_context, datasources_to_document, specified_data_asset_name):
         profiling_renderer_class, profiling_view_class = cls.get_renderer_and_view_classes(section_config)
 
         print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
         print(data_context.stores.profiling_store.config)
-        print("\n".join(data_context.stores['profiling_store'].list_keys()), "??????")
+        print("\n\t".join(data_context.stores['profiling_store'].list_keys()), "??????")
         nested_namespaced_validation_result_dict = cls.pack_validation_result_list_into_nested_dict(
             data_context.stores['profiling_store'].list_keys(),
             run_id_filter=section_config.get("run_id_filter")
@@ -314,8 +316,12 @@ class SiteBuilder():
         for run_id, v0 in nested_namespaced_validation_result_dict.items():
             for datasource, v1 in v0.items():
 
+                print("hi")
+
                 if datasource not in datasources_to_document:
                     continue
+
+                print("hi")
 
                 for generator, v2 in v1.items():
                     for generator_asset, expectation_suite_names in v2.items():
@@ -324,12 +330,14 @@ class SiteBuilder():
                             if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
                                 continue
                         for expectation_suite_name in expectation_suite_names:
+                            print("hererererer")
+                            print(data_asset_name, run_id)
                             #!!! This validations_store_name is hardcoded and might not exist. Tests are passing, though.
                             validation = data_context.get_validation_result(data_asset_name,
                                                                             expectation_suite_name=expectation_suite_name,
                                                                             validations_store_name="profiling_store",#site_config['profiling_store'],
                                                                             run_id=run_id)
-
+                            print("therererer")
                             logger.info("        Rendering profiling for data asset {}".format(data_asset_name))
                             data_asset_name = validation['meta']['data_asset_name']
                             expectation_suite_name = validation['meta']['expectation_suite_name']
@@ -419,15 +427,23 @@ class SiteBuilder():
             datasource_name = components[1]
             generator_name = components[2]
             generator_asset = components[3]
+
+            #FIXME: Dropping the last 5 characters is an EXTREMELY brittle way to drop the file suffix
             expectation_suite = components[4][:-5]
+
             if run_id not in validation_results:
                 validation_results[run_id] = {}
+
             if datasource_name not in validation_results[run_id]:
                 validation_results[run_id][datasource_name] = {}
+
             if generator_name not in validation_results[run_id][datasource_name]:
                 validation_results[run_id][datasource_name][generator_name] = {}
+
             if generator_asset not in validation_results[run_id][datasource_name][generator_name]:
                 validation_results[run_id][datasource_name][generator_name][generator_asset] = []
+            
             validation_results[run_id][datasource_name][generator_name][generator_asset].append(expectation_suite)
 
+        print(validation_results)
         return validation_results
