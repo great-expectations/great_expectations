@@ -171,29 +171,10 @@ class DataContext(object):
 
         self._init_stores()
 
-        expectations_directory = self._project_config.get("expectations_directory", "expectations")
-        if not os.path.isabs(expectations_directory):
-            self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
-        else:
-            self._expectations_directory = expectations_directory
-
-        #TODO: Deprecate this very soon
-        # validations_stores = self._project_config.get("validations_stores", {
-        #     "local": {
-        #         "type": "filesystem",
-        #         "base_directory": "uncommitted/validations"
-        #     }
-        # })
-        # # Normalize paths as appropriate
-        # for validations_store_name in validations_stores:
-        #     validations_stores[validations_store_name] = self._normalize_store_path(validations_stores[validations_store_name])
-        # self._validations_stores = validations_stores
-
-        self._load_evaluation_parameter_store()
-        self._compiled = False
         if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
             raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
+
 
     def _init_stores(self):
         """Initialize all Stores for this DataContext.
@@ -201,6 +182,16 @@ class DataContext(object):
         TODO: Currently, most Stores are hardcoded.
         Eventually, they should be read in from yml configs.
         This will require some work on test fixtures.
+
+        In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
+        However, some files remain the responsiblity of the DataContext:
+            great_expectations.yml
+            plugins
+            DataSource configs
+
+        These files are not good fits to be turned into Stores, because
+            1. they do not follow a clear key-value pattern, and 
+            2. they are not usually written programmatically.
         """
         self._stores = DotDict()
 
@@ -225,7 +216,6 @@ class DataContext(object):
         )
 
         # TODO: these paths should be configurable
-        # self.fixtures_validations_directory = os.path.join(self.root_directory, "fixtures/validations")
         self.add_store(
             "fixture_validation_results_store",
             {
@@ -240,7 +230,17 @@ class DataContext(object):
         )
 
 
+        # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
         self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
+
+        expectations_directory = self._project_config.get("expectations_directory", "expectations")
+        if not os.path.isabs(expectations_directory):
+            self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
+        else:
+            self._expectations_directory = expectations_directory
+
+        self._load_evaluation_parameter_store()
+        self._compiled = False
 
 
     def add_store(self, store_name, store_config):
@@ -295,12 +295,6 @@ class DataContext(object):
         """A single holder for all Stores in this context"""
         # TODO: support multiple stores choices and/or ensure abs paths when appropriate
         return self._stores
-
-    # @property
-    # def validations_store(self):
-    #     """The configuration for the store where validations should be stored"""
-    #     # TODO: support multiple stores choices and/or ensure abs paths when appropriate
-    #     return self._validations_stores[list(self._validations_stores.keys())[0]]
 
     def _load_project_config(self):
         """Loads the project configuration file."""
