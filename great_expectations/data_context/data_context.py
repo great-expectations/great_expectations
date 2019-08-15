@@ -14,6 +14,7 @@ import shutil
 import importlib
 
 from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
+from ..types.base import DotDict
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
 
@@ -171,6 +172,8 @@ class DataContext(object):
             self._plugins_directory = plugins_directory
         sys.path.append(self._plugins_directory)
 
+        self._init_stores()
+
         expectations_directory = self._project_config.get("expectations_directory", "expectations")
         if not os.path.isabs(expectations_directory):
             self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
@@ -194,6 +197,40 @@ class DataContext(object):
             raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
 
+    def _init_stores(self):
+        self._stores = DotDict()
+
+        if "data_asset_snapshot_store" in self._project_config:
+            self.add_store(
+                "data_asset_snapshot_store",
+                self._project_config["data_asset_snapshot_store"]
+            ) 
+    
+    def add_store(self, store_name, store_config):
+        self._stores[store_name] = self._init_store_from_config(store_config)
+
+    def _init_store_from_config(self, config):
+        typed_config = StoreMetaConfig(
+            coerce_types=True,
+            **config
+        )
+
+        loaded_module = importlib.import_module(typed_config.module_name)
+        loaded_class = getattr(loaded_module, typed_config.class_name)
+
+        typed_sub_config = loaded_class.get_config_class()(
+            coerce_types=True,
+            **typed_config.store_config
+        )
+
+        instantiated_store = loaded_class(
+            data_context=self,
+            config=typed_sub_config,
+        )
+
+        return instantiated_store
+
+
     def _normalize_store_path(self, resource_store):
         if resource_store["type"] == "filesystem":
             if not os.path.isabs(resource_store["base_directory"]):
@@ -215,6 +252,12 @@ class DataContext(object):
     def expectations_directory(self):
         """The directory in which custom plugin modules should be placed."""
         return self._expectations_directory
+
+    @property
+    def stores(self):
+        """A single holder for all Stores in this context"""
+        # TODO: support multiple stores choices and/or ensure abs paths when appropriate
+        return self._stores
 
     @property
     def validations_store(self):
@@ -1287,29 +1330,6 @@ class DataContext(object):
 
     #     return validation_results
 
-    def _init_store_from_config(self, config):
-        typed_config = StoreMetaConfig(
-            coerce_types=True,
-            **config
-        )
-        # print(typed_config)
-
-        loaded_module = importlib.import_module(typed_config.module_name)
-        loaded_class = getattr(loaded_module, typed_config.class_name)
-
-        typed_sub_config = loaded_class.get_config_class()(
-            coerce_types=True,
-            **typed_config.store_config
-        )
-
-        instantiated_store = loaded_class(
-            data_context=self,
-            config=typed_sub_config,
-        )
-
-        return instantiated_store
-
-
     def register_validation_results(self, run_id, validation_results, data_asset=None):
         """Process results of a validation run. This method is called by data_asset objects that are connected to
          a DataContext during validation. It performs several actions:
@@ -1397,12 +1417,9 @@ class DataContext(object):
             else:
                 logger.warning("Unrecognized result_callback configuration.")
 
-        if "data_asset_snapshot_store" in self._project_config and validation_results["success"] is False:
+        if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
 
-            data_asset_snapshot_store = self._init_store_from_config(
-                self._project_config["data_asset_snapshot_store"]
-            )
-            data_asset_snapshot_store.set(
+            self.stores.data_asset_snapshot_store.set(
                 key=NameSpaceDotDict(**{
                     "normalized_data_asset_name" : normalized_data_asset_name,
                     "expectation_suite_name" : expectation_suite_name,
