@@ -211,24 +211,29 @@ def test_register_validation_results_saves_data_assset_snapshot(data_context):
     #         "base_directory" : "uncommitted/snapshots"
     #     }
     # }
-    data_context._project_config["data_asset_snapshot_store"] = {
-        "module_name": "great_expectations.data_context.store",
-        "class_name": "NameSpacedFilesystemStore",
-        "store_config" : {
-            "base_directory" : "uncommitted/snapshots",
-            "serialization_type" : "pandas_csv",
-            "file_extension" : ".csv.gz",
-            "compression" : "gzip",
-        }
-    }
-    print(json.dumps(data_context._project_config, indent=2))
-    
+
     snapshot_dir = os.path.join(data_context.root_directory, "uncommitted/snapshots")
     print(snapshot_dir)
 
     #The snapshot directory shouldn't exist yet
     assert not os.path.isfile(snapshot_dir)
-    #So it shouldn't contain any files
+
+    data_context.add_store(
+        "data_asset_snapshot_store",
+        {
+            "module_name": "great_expectations.data_context.store",
+            "class_name": "NameSpacedFilesystemStore",
+            "store_config" : {
+                "base_directory" : "uncommitted/snapshots",
+                "serialization_type" : "pandas_csv",
+                "file_extension" : ".csv.gz",
+                "compression" : "gzip",
+            }
+        }
+    )
+    print(json.dumps(data_context._project_config, indent=2))
+    
+    #The snapshot directory shouldn't contain any files
     assert len(glob(snapshot_dir+"/*/*/*/*/*.csv.gz")) == 0
 
     res = data_context.register_validation_results(
