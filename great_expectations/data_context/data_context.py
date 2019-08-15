@@ -1557,7 +1557,7 @@ class DataContext(object):
         data_asset_name,
         expectation_suite_name="default",
         run_id=None,
-        # validations_store=None,
+        validations_store_name="local_validation_result_store",
         failed_only=False,
     ):
         """Get validation results from a configured store.
@@ -1574,10 +1574,12 @@ class DataContext(object):
 
         """
 
-        if run_id == None:
-            run_id = self.stores.local_validation_result_store.get_most_recent_run_id()
+        selected_store = self.stores.local_validation_result_store
 
-        results_dict = self.stores.local_validation_result_store.get(NameSpaceDotDict(**{
+        if run_id == None:
+            run_id = selected_store.get_most_recent_run_id()
+
+        results_dict = selected_store.get(NameSpaceDotDict(**{
             "normalized_data_asset_name" : self._normalize_data_asset_name(data_asset_name),
             "expectation_suite_name" : expectation_suite_name,
             "run_id" : run_id,
