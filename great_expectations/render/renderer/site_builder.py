@@ -350,6 +350,7 @@ class SiteBuilder():
         relative_paths = validation_result_list
 
         for result in relative_paths:
+            #FIXME: This assumes that validation_result object strings will always be delimited by slashes
             components = result.split("/")
 
             if len(components) != 5:

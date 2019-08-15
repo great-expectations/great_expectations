@@ -1,6 +1,8 @@
 from ...types import LooselyTypedDotDict
 
 class StoreMetaConfig(LooselyTypedDotDict):
+    """Top-level configs for stores look like this
+    """
     _allowed_keys = set([
         "module_name",
         "class_name",
