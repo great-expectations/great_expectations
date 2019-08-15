@@ -18,6 +18,7 @@ from great_expectations.data_context.util import safe_mmkdir
 from great_expectations.data_context.types import NormalizedDataAssetName
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 from great_expectations.dataset import PandasDataset
+from great_expectations.util import gen_directory_tree_str
 
 
 @pytest.fixture()
@@ -511,6 +512,16 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
         str(os.path.join(project_dir, "data/random/f2.csv"))
     )
 
+    assert gen_directory_tree_str(project_dir) == """\
+project_dir0/
+    data/
+        titanic/
+            Titanic.csv
+        random/
+            f2.csv
+            f1.csv
+"""
+
     context = DataContext.create(project_dir)
     ge_directory = os.path.join(project_dir, "great_expectations")
     scaffold_directories_and_notebooks(ge_directory)
@@ -524,12 +535,47 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
         "pandas",
         base_directory=os.path.join(project_dir, "data/random/")
     )
-
+    
     context.profile_datasource("titanic")
+    assert gen_directory_tree_str(project_dir) == """\
+project_dir0/
+    great_expectations/
+        great_expectations.yml
+        .gitignore
+        datasources/
+        plugins/
+        expectations/
+            titanic/
+                default/
+                    Titanic/
+                        BasicDatasetProfiler.json
+        fixtures/
+        uncommitted/
+            documentation/
+            validations/
+                profiling/
+                    titanic/
+                        default/
+                            Titanic/
+                                BasicDatasetProfiler.json
+            samples/
+            credentials/
+        notebooks/
+            integrate_validation_into_pipeline.ipynb
+            create_expectations.ipynb
+    data/
+        titanic/
+            Titanic.csv
+        random/
+            f2.csv
+            f1.csv
+"""
 
     context.profile_datasource("random")
-
+    print(gen_directory_tree_str(project_dir))
+    
     context.build_data_documentation()
+    print(gen_directory_tree_str(project_dir))
 
     # Titanic
 

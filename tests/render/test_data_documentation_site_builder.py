@@ -58,3 +58,23 @@ def test_cli_profile(titanic_data_context):
     assert len(index_links_dict['mydatasource']['mygenerator']['Titanic']['validation_links']) == 0
     assert len(index_links_dict['mydatasource']['mygenerator']['Titanic']['profiling_links']) == 0
 
+
+def test_pack_validation_result_list_into_nested_dict():
+    assert SiteBuilder.pack_validation_result_list_into_nested_dict([
+        "AAA/b/c/d/e",
+        "AAA/b/c/d/f",
+        "AAA/b/g/d/f",
+        "BBB/b/c/d/e",
+    ]) == {
+        "AAA" : {
+            "b" : {
+                "c" : {"d" : ["e", "f"]},
+                "g" : {"d" : ["f"]},
+            }
+        },
+        "BBB" : {
+            "b" : {
+                "c" : {"d" : ["e"]},
+            }
+        }
+    }

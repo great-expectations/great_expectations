@@ -229,6 +229,19 @@ class DataContext(object):
             }
         )
 
+        self.add_store(
+            "profiling_store",
+            {
+                "module_name": "great_expectations.data_context.store",
+                "class_name": "NameSpacedFilesystemStore",
+                "store_config" : {
+                    "base_directory" : "uncommitted/validations/profiling",
+                    "serialization_type" : "json",
+                    "file_extension" : ".json",
+                }
+            }
+        )
+
 
         # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
         self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
@@ -1404,6 +1417,8 @@ class DataContext(object):
                 *path_components
             )
             safe_mmkdir(os.path.dirname(path))
+            # print(path)
+            print(path_components[1:])
             with open(path, "w") as writer:
                 writer.write(resource)
 
@@ -1413,65 +1428,6 @@ class DataContext(object):
 
         return resource_locator_info
 
-    def list_validation_results(self, validations_store=None):
-        """
-        {
-          "run_id":
-            "datasource": {
-                "generator": {
-                    "generator_asset": [expectation_suite_1, expectation_suite_1, ...]
-                }
-            }
-        }
-        """
-        if validations_store is None:
-            validations_store = self.validations_store
-        else:
-            validations_store = self._normalize_store_path(validations_store)
-
-        validation_results = {}
-
-        if validations_store["type"] == "filesystem":
-            result_paths = [y for x in os.walk(validations_store["base_directory"]) for y in glob(os.path.join(x[0], '*.json'))]
-            base_length = len(validations_store["base_directory"])
-            rel_paths = [path[base_length:] for path in result_paths]
-
-            for result in rel_paths:
-                components = result.split("/")
-
-                if len(components) != 5:
-                    logger.error("Unrecognized validation result path: %s" % result)
-                    continue
-                run_id = components[0]
-
-                # run_id_filter attribute in the config of validation store allows to filter run ids
-                run_id_filter = validations_store.get("run_id_filter")
-                if run_id_filter:
-                    if run_id_filter.get("eq"):
-                        if run_id_filter.get("eq") != run_id:
-                            continue
-                    elif run_id_filter.get("ne"):
-                        if run_id_filter.get("ne") == run_id:
-                            continue
-
-                datasource_name = components[1]
-                generator_name = components[2]
-                generator_asset = components[3]
-                expectation_suite = components[4][:-5]
-                if run_id not in validation_results:
-                    validation_results[run_id] = {}
-                if datasource_name not in validation_results[run_id]:
-                    validation_results[run_id][datasource_name] = {}
-                if generator_name not in validation_results[run_id][datasource_name]:
-                    validation_results[run_id][datasource_name][generator_name] = {}
-                if generator_asset not in validation_results[run_id][datasource_name][generator_name]:
-                    validation_results[run_id][datasource_name][generator_name][generator_asset] = []
-                validation_results[run_id][datasource_name][generator_name][generator_asset].append(expectation_suite)
-            return validation_results
-        elif validations_store["type"] == "s3":
-            raise NotImplementedError("s3 validations_store is not yet supported for listing validation results")
-        else:
-            raise DataContextError("unrecognized validations_store type: %s" % validations_store["type"])
 
     def get_validation_result(
         self,
