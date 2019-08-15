@@ -8,7 +8,7 @@ yaml.default_flow_style = False
 
 import great_expectations as ge
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def totally_empty_data_context(tmp_path_factory):
     #TODO: This is such a weird workaround for initializing a DataContext. See https://github.com/great-expectations/great_expectations/issues/617
     project_root_dir = str(tmp_path_factory.mktemp('totally_empty_data_context'))
@@ -63,7 +63,7 @@ def test_add_store(totally_empty_data_context):
         }
     )
     assert "my_inmemory_store" in totally_empty_data_context.stores.keys()
-    assert len(totally_empty_data_context.stores.keys()) == 0
+    assert len(totally_empty_data_context.stores.keys()) == 1
 
 
 def test_config_from_absolute_zero(totally_empty_data_context):
@@ -81,7 +81,7 @@ def test_config_from_absolute_zero(totally_empty_data_context):
         }
     )
     assert "my_inmemory_store" in empty_data_context.stores.keys()
-    assert len(empty_data_context.stores.keys()) == 0
+    assert len(empty_data_context.stores.keys()) == 1
 
 
 def test_config_with_default_yml(tmp_path_factory):
