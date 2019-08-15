@@ -175,6 +175,8 @@ class DataContext(object):
         self._stores = DotDict()
         if "stores" in self._project_config:
             self._init_stores(self._project_config["stores"])
+
+
         # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
         self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
 
@@ -1592,10 +1594,13 @@ class DataContext(object):
 
             When success = False, the error details are under "error" key
         """
+
         if not dry_run:
             logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
 
         profiling_results = {}
+
+        # Get data_asset_name_list
         data_asset_names = self.get_available_data_asset_names(datasource_name)
         if generator_name is None:
             if len(data_asset_names[datasource_name].keys()) == 1:

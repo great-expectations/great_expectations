@@ -250,7 +250,7 @@ class SiteBuilder():
         profiling_renderer_class, profiling_view_class = cls.get_renderer_and_view_classes(section_config)
 
         nested_namespaced_validation_result_dict = cls.pack_validation_result_list_into_nested_dict(
-            data_context.stores['profiling_store'].list_keys(),
+            data_context.stores['local_validation_result_store'].list_keys(),
             run_id_filter=section_config.get("run_id_filter")
         )
         # print(json.dumps(nested_namespaced_validation_result_dict, indent=2))
