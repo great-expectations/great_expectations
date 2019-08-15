@@ -172,7 +172,22 @@ class DataContext(object):
             self._plugins_directory = plugins_directory
         sys.path.append(self._plugins_directory)
 
-        self._init_stores(self._project_config["stores"])
+        self._stores = DotDict()
+        if "stores" in self._project_config:
+            self._init_stores(self._project_config["stores"])
+        # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
+        self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
+
+        expectations_directory = self._project_config.get("expectations_directory", "expectations")
+        if not os.path.isabs(expectations_directory):
+            self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
+        else:
+            self._expectations_directory = expectations_directory
+
+        self._load_evaluation_parameter_store()
+        self._compiled = False
+        # /End store stuff
+
 
         if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
             raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
@@ -196,8 +211,7 @@ class DataContext(object):
             1. they do not follow a clear key-value pattern, and 
             2. they are not usually written programmatically.
         """
-        self._stores = DotDict()
-
+        
         for store_name, store_config in store_configs.items():
             self.add_store(
                 store_name,
@@ -250,19 +264,6 @@ class DataContext(object):
         #         }
         #     }
         # )
-
-
-        # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
-        self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
-
-        expectations_directory = self._project_config.get("expectations_directory", "expectations")
-        if not os.path.isabs(expectations_directory):
-            self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
-        else:
-            self._expectations_directory = expectations_directory
-
-        self._load_evaluation_parameter_store()
-        self._compiled = False
 
 
     def add_store(self, store_name, store_config):
