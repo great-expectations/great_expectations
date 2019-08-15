@@ -1552,14 +1552,21 @@ class DataContext(object):
         else:
             raise DataContextError("unrecognized validations_store type: %s" % validations_store["type"])
 
-    def get_validation_result(self, data_asset_name, expectation_suite_name="default", run_id=None, validations_store=None, failed_only=False):
+    def get_validation_result(
+        self,
+        data_asset_name,
+        expectation_suite_name="default",
+        run_id=None,
+        # validations_store=None,
+        failed_only=False,
+    ):
         """Get validation results from a configured store.
 
         Args:
             data_asset_name: name of data asset for which to get validation result
             expectation_suite_name: expectation_suite name for which to get validation result (default: "default")
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
-            validations_store: the store from which to get validation results
+            # validations_store: the store from which to get validation results
             failed_only: if True, filter the result to return only failed expectations
 
         Returns:
@@ -1576,50 +1583,13 @@ class DataContext(object):
             "run_id" : run_id,
         }))
 
+        #TODO: This should be a convenience method of ValidationResultSuite
         if failed_only:
             failed_results_list = [result for result in results_dict["results"] if not result["success"]]
             results_dict["results"] = failed_results_list
             return results_dict
         else:
             return results_dict
-
-        # validation_location = self.get_validation_location(data_asset_name, expectation_suite_name, run_id, validations_store=validations_store)
-
-        # if 'filepath' in validation_location:
-        #     validation_path = validation_location['filepath']
-        #     with open(validation_path, "r") as infile:
-        #         results_dict = json.load(infile)
-
-        #     if failed_only:
-        #         failed_results_list = [result for result in results_dict["results"] if not result["success"]]
-        #         results_dict["results"] = failed_results_list
-        #         return results_dict
-        #     else:
-        #         return results_dict
-    
-        # elif 'bucket' in validation_location: # s3
-
-        #     try:
-        #         import boto3
-        #         s3 = boto3.client('s3')
-        #     except ImportError:
-        #         raise ImportError("boto3 is required for retrieving a dataset from s3")
-        
-        #     bucket = validation_location["bucket"]
-        #     key = validation_location["key"]
-        #     s3_response_object = s3.get_object(Bucket=bucket, Key=key)
-        #     object_content = s3_response_object['Body'].read()
-            
-        #     results_dict = json.loads(object_content)
-
-        #     if failed_only:
-        #         failed_results_list = [result for result in results_dict["results"] if not result["success"]]
-        #         results_dict["results"] = failed_results_list
-        #         return results_dict
-        #     else:
-        #         return results_dict
-        # else:
-        #     raise DataContextError("Invalid validations_store configuration: only 'filesystem' and 's3' are supported.")
 
     # TODO: refactor this into a snapshot getter based on project_config
     # def get_failed_dataset(self, validation_result, **kwargs):
