@@ -180,6 +180,7 @@ class DataContext(object):
         else:
             self._expectations_directory = expectations_directory
 
+        #TODO: Deprecate this very soon
         validations_stores = self._project_config.get("validations_stores", {
             "local": {
                 "type": "filesystem",
@@ -205,7 +206,20 @@ class DataContext(object):
                 "data_asset_snapshot_store",
                 self._project_config["data_asset_snapshot_store"]
             ) 
-    
+
+        self.add_store(
+            "local_validation_result_store",
+            {
+                "module_name": "great_expectations.data_context.store",
+                "class_name": "NameSpacedFilesystemStore",
+                "store_config" : {
+                    "base_directory" : "uncommitted/validations",
+                    "serialization_type" : "json",
+                    "file_extension" : ".json",
+                }
+            }
+        )
+
     def add_store(self, store_name, store_config):
         self._stores[store_name] = self._init_store_from_config(store_config)
 
@@ -1171,46 +1185,16 @@ class DataContext(object):
             )
 
         expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
-        if self.validations_store:
-            validations_store = self.validations_store
-            if isinstance(validations_store, dict) and validations_store["type"] == "filesystem":
-                validation_filepath = self._get_normalized_data_asset_name_filepath(
-                    normalized_data_asset_name,
-                    expectation_suite_name,
-                    base_path=os.path.join(
-                        self.root_directory,
-                        validations_store["base_directory"],
-                        run_id
-                    )
-                )
-                logger.debug("Storing validation result: %s" % validation_filepath)
-                safe_mmkdir(os.path.dirname(validation_filepath))
-                with open(validation_filepath, "w") as outfile:
-                    json.dump(validation_results, outfile, indent=2)
-            if isinstance(validations_store, dict) and validations_store["type"] == "s3":
-                bucket = validations_store["bucket"]
-                key_prefix = validations_store["key_prefix"]
-                key = os.path.join(
-                    key_prefix,
-                    "validations/{run_id}/{data_asset_name}".format(
-                        run_id=run_id,
-                        data_asset_name=self._get_normalized_data_asset_name_filepath(
-                            normalized_data_asset_name,
-                            expectation_suite_name,
-                            base_path=""
-                        )
-                    )
-                )
-                validation_results["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
-                try:
-                    import boto3
-                    s3 = boto3.resource('s3')
-                    result_s3 = s3.Object(bucket, key)
-                    result_s3.put(Body=json.dumps(validation_results).encode('utf-8'))
-                except ImportError:
-                    logger.error("Error importing boto3 for AWS support.")
-                except Exception:
-                    raise
+
+        if "local_validation_result_store" in self.stores:
+            self.stores.local_validation_result_store.set(
+                key=NameSpaceDotDict(**{
+                    "normalized_data_asset_name" : normalized_data_asset_name,
+                    "expectation_suite_name" : expectation_suite_name,
+                    "run_id" : run_id,
+                }),
+                value=validation_results
+            )
 
         if "result_callback" in self._project_config:
             result_callback = self._project_config["result_callback"]
