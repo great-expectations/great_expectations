@@ -109,8 +109,10 @@ class SiteBuilder():
             new_index_links_dict = cls.generate_profiling_section(
                 profiling_section_config,
                 data_context,
+                index_links_dict,
                 datasources_to_document,
                 specified_data_asset_name,
+                site_config['site_store'],
             )
 
         # validations
@@ -157,7 +159,6 @@ class SiteBuilder():
                                 expectation_suite_name = validation['meta']['expectation_suite_name']
                                 model = validation_renderer_class.render(validation)
 
-                                print("write a validation")
                                 data_context.write_resource(
                                     validation_view_class.render(model),  # bytes
                                     expectation_suite_name + '.html',  # name to be used inside namespace
@@ -167,10 +168,13 @@ class SiteBuilder():
                                     run_id=run_id
                                 )
 
+                                #The next ~20 lines can be pulled out into a shared function
                                 if not datasource in index_links_dict:
                                     index_links_dict[datasource] = OrderedDict()
+
                                 if not generator in index_links_dict[datasource]:
                                     index_links_dict[datasource][generator] = OrderedDict()
+
                                 if not generator_asset in index_links_dict[datasource][generator]:
                                     index_links_dict[datasource][generator][generator_asset] = {
                                         'profiling_links': [],
@@ -234,7 +238,6 @@ class SiteBuilder():
                             expectation_suite_name = expectation_suite['expectation_suite_name']
                             model = expectations_renderer_class.render(expectation_suite)
 
-                            print("write an expectation")
                             data_context.write_resource(
                                 expectations_view_class.render(model),  # bytes
                                 expectation_suite_name + '.html',  # name to be used inside namespace
@@ -243,6 +246,7 @@ class SiteBuilder():
                                 data_asset_name=data_asset_name
                             )
 
+                            #The next ~20 lines can be pulled out into a shared function
                             if not datasource in index_links_dict:
                                 index_links_dict[datasource] = OrderedDict()
                             if not generator in index_links_dict[datasource]:
@@ -299,29 +303,21 @@ class SiteBuilder():
 
 
     @classmethod
-    def generate_profiling_section(cls, section_config, data_context, datasources_to_document, specified_data_asset_name):
+    def generate_profiling_section(cls, section_config, data_context, index_links_dict, datasources_to_document, specified_data_asset_name, resource_store):
         profiling_renderer_class, profiling_view_class = cls.get_renderer_and_view_classes(section_config)
 
-        print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-        print(data_context.stores.profiling_store.config)
-        print("\n\t".join(data_context.stores['profiling_store'].list_keys()), "??????")
         nested_namespaced_validation_result_dict = cls.pack_validation_result_list_into_nested_dict(
             data_context.stores['profiling_store'].list_keys(),
             run_id_filter=section_config.get("run_id_filter")
         )
-        print("----------------------------------")
-        print(json.dumps(nested_namespaced_validation_result_dict, indent=2))
+        # print(json.dumps(nested_namespaced_validation_result_dict, indent=2))
 
         #TODO: filter data sources if the config requires it
         for run_id, v0 in nested_namespaced_validation_result_dict.items():
             for datasource, v1 in v0.items():
 
-                print("hi")
-
                 if datasource not in datasources_to_document:
                     continue
-
-                print("hi")
 
                 for generator, v2 in v1.items():
                     for generator_asset, expectation_suite_names in v2.items():
@@ -330,54 +326,69 @@ class SiteBuilder():
                             if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
                                 continue
                         for expectation_suite_name in expectation_suite_names:
-                            print("hererererer")
-                            print(data_asset_name, run_id)
                             #!!! This validations_store_name is hardcoded and might not exist. Tests are passing, though.
                             validation = data_context.get_validation_result(data_asset_name,
                                                                             expectation_suite_name=expectation_suite_name,
                                                                             validations_store_name="profiling_store",#site_config['profiling_store'],
                                                                             run_id=run_id)
-                            print("therererer")
                             logger.info("        Rendering profiling for data asset {}".format(data_asset_name))
                             data_asset_name = validation['meta']['data_asset_name']
                             expectation_suite_name = validation['meta']['expectation_suite_name']
                             model = profiling_renderer_class.render(validation)
 
-                            print("write a profiling result")
                             data_context.write_resource(
                                 profiling_view_class.render(model),  # bytes
                                 expectation_suite_name + '.html',  # name to be used inside namespace
-                                resource_store=site_config['site_store'],
+                                resource_store=resource_store,
                                 resource_namespace="profiling",
                                 data_asset_name=data_asset_name
                             )
 
-                            if not datasource in index_links_dict:
-                                index_links_dict[datasource] = OrderedDict()
-                            if not generator in index_links_dict[datasource]:
-                                index_links_dict[datasource][generator] = OrderedDict()
-                            if not generator_asset in index_links_dict[datasource][generator]:
-                                index_links_dict[datasource][generator][generator_asset] = {
-                                    'profiling_links': [],
-                                    'validation_links': [],
-                                    'expectation_suite_links': []
-                                }
-
-                            index_links_dict[datasource][generator][generator_asset]["profiling_links"].append(
-                                {
-                                    "full_data_asset_name": data_asset_name,
-                                    "expectation_suite_name": expectation_suite_name,
-                                    "filepath": data_context._get_normalized_data_asset_name_filepath(
-                                        data_asset_name,
-                                        expectation_suite_name,
-                                        base_path='profiling',
-                                        file_extension=".html"
-                                    ),
-                                    "source": datasource,
-                                    "generator": generator,
-                                    "asset": generator_asset
-                                }
+                            #The next ~20 lines can be pulled out into a shared function
+                            index_links_dict = cls.add_resource_info_to_index_links_dict(
+                                data_context,
+                                index_links_dict,
+                                data_asset_name,
+                                datasource, generator, generator_asset, expectation_suite_name
                             )
+
+    @classmethod
+    def add_resource_info_to_index_links_dict(cls,
+        data_context,
+        index_links_dict,
+        data_asset_name,
+        datasource, generator, generator_asset, expectation_suite_name
+    ):
+        if not datasource in index_links_dict:
+            index_links_dict[datasource] = OrderedDict()
+
+        if not generator in index_links_dict[datasource]:
+            index_links_dict[datasource][generator] = OrderedDict()
+
+        if not generator_asset in index_links_dict[datasource][generator]:
+            index_links_dict[datasource][generator][generator_asset] = {
+                'profiling_links': [],
+                'validation_links': [],
+                'expectation_suite_links': []
+            }
+
+        index_links_dict[datasource][generator][generator_asset]["profiling_links"].append(
+            {
+                "full_data_asset_name": data_asset_name,
+                "expectation_suite_name": expectation_suite_name,
+                "filepath": data_context._get_normalized_data_asset_name_filepath(
+                    data_asset_name,
+                    expectation_suite_name,
+                    base_path='profiling',
+                    file_extension=".html"
+                ),
+                "source": datasource,
+                "generator": generator,
+                "asset": generator_asset
+            }
+        )
+
+        return index_links_dict
 
     @classmethod
     def pack_validation_result_list_into_nested_dict(cls, validation_result_list, run_id_filter=None):
@@ -391,8 +402,6 @@ class SiteBuilder():
             }
         }
         """
-        print(validation_result_list)
-
         # if validations_store is None:
         #     validations_store = self.validations_store
         # else:
@@ -445,5 +454,5 @@ class SiteBuilder():
             
             validation_results[run_id][datasource_name][generator_name][generator_asset].append(expectation_suite)
 
-        print(validation_results)
+        # print(validation_results)
         return validation_results
