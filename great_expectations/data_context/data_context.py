@@ -1571,7 +1571,6 @@ class DataContext(object):
                     if index_page_locator_info:
                         index_page_locator_infos[site_name] = index_page_locator_info
         else:
-            logging.info("No ")
             logger.debug("No data_docs_config found. No site(s) built.")
 
         return index_page_locator_infos
