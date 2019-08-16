@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 PROJECT_HELP_COMMENT = """# Welcome to great expectations. 
 # This project configuration file allows you to define datasources, 
 # generators, integrations, and other configuration artifacts that
