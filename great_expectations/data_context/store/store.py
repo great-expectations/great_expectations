@@ -127,7 +127,6 @@ class InMemoryStore(ContextAwareStore):
         return self.store.keys()
 
 
-
 class FilesystemStore(ContextAwareStore):
     """Uses a local filepath as a store.
     """
