@@ -6,7 +6,7 @@ from six import PY3, string_types
 from functools import wraps
 from numbers import Number
 from dateutil.parser import parse
-from datetime import datetime
+from datetime import datetime, timedelta
 
 if sys.version_info.major == 2:  # If python 2
     from itertools import izip_longest as zip_longest
@@ -1033,7 +1033,7 @@ class Dataset(MetaDataset):
                                            max_value=None,
                                            strict_min=False,
                                            strict_max=False,
-                                           strictly_tol=1e-9,
+                                           tolerance=1e-9,
                                            allow_cross_type_comparisons=None,
                                            parse_strings_as_datetimes=False,
                                            output_strftime_format=None,
@@ -1056,7 +1056,7 @@ class Dataset(MetaDataset):
                 If True, values must be strictly larger than min_value, default=False
             strict_max (boolean):
                 If True, values must be strictly smaller than max_value, default=False
-            strictly_tol (float):
+            tolerance (float):
                 tolerance for strict_min, strict_max, default=1e-9
             allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
                 string). Otherwise, attempting such comparisons will raise an exception.
@@ -2127,7 +2127,7 @@ class Dataset(MetaDataset):
         self,
         column,
         min_value=None, max_value=None,
-        strict_min=False, strict_max=False, strictly_tol=1e-9,
+        strict_min=False, strict_max=False, tolerance=1e-9,
         result_format=None, include_config=False, catch_exceptions=None, meta=None,
     ):
         """Expect the column mean to be between a minimum value and a maximum value (inclusive).
@@ -2147,7 +2147,7 @@ class Dataset(MetaDataset):
                 If True, the column mean must be strictly larger than min_value, default=False
             strict_max (boolean):
                 If True, the column mean must be strictly smaller than max_value, default=False
-            strictly_tol (float):
+            tolerance (float):
                 tolerance for strict_min, strict_max, default=1e-9
 
         Other Parameters:
@@ -2198,6 +2198,12 @@ class Dataset(MetaDataset):
 
         column_mean = self.get_column_mean(column)
 
+        if strict_min and min_value:
+            min_value += tolerance
+
+        if strict_max and max_value:
+                max_value -= tolerance
+
         # Handle possible missing values
         if column_mean is None:
             return {
@@ -2239,7 +2245,7 @@ class Dataset(MetaDataset):
         self,
         column,
         min_value=None, max_value=None,
-        strict_min=False, strict_max=False, strictly_tol=1e-9,
+        strict_min=False, strict_max=False, tolerance=1e-9,
         result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
@@ -2260,7 +2266,7 @@ class Dataset(MetaDataset):
                 If True, the column median must be strictly larger than min_value, default=False
             strict_max (boolean):
                 If True, the column median must be strictly smaller than max_value, default=False
-            strictly_tol (float):
+            tolerance (float):
                 tolerance for strict_min, strict_max, default=1e-9
 
         Other Parameters:
@@ -2313,13 +2319,11 @@ class Dataset(MetaDataset):
                 }
             }
 
-        if strict_min:
-            if min_value:
-                min_value += strictly_tol
+        if strict_min and min_value:
+            min_value += tolerance
 
-        if strict_max:
-            if max_value:
-                max_value -= strictly_tol
+        if strict_max and max_value:
+            max_value -= tolerance
 
         if min_value is not None:
             if strict_min:
@@ -2486,7 +2490,7 @@ class Dataset(MetaDataset):
             self,
             column,
             min_value=None, max_value=None,
-            strict_min=False, strict_max=False, strictly_tol=1e-9,
+            strict_min=False, strict_max=False, tolerance=1e-9,
             result_format=None, include_config=False, catch_exceptions=None,
             meta=None
     ):
@@ -2507,7 +2511,7 @@ class Dataset(MetaDataset):
                 If True, the column standard deviation must be strictly larger than min_value, default=False
             strict_max (boolean):
                 If True, the column standard deviation must be strictly smaller than max_value, default=False
-            strictly_tol (float):
+            tolerance (float):
                 tolerance for strict_min, strict_max, default=1e-9
 
         Other Parameters:
@@ -2552,13 +2556,11 @@ class Dataset(MetaDataset):
         """
         column_stdev = self.get_column_stdev(column)
 
-        if strict_min:
-            if min_value:
-                min_value += strictly_tol
+        if strict_min and min_value:
+            min_value += tolerance
 
-        if strict_max:
-            if max_value:
-                max_value -= strictly_tol
+        if strict_max and max_value:
+            max_value -= tolerance
 
         if min_value is not None:
             if strict_min:
@@ -2692,9 +2694,7 @@ class Dataset(MetaDataset):
         self,
         column,
         min_value=0, max_value=1,
-        strict_min=False,
-        strict_max=False,
-        strictly_tol=1e-9,
+        strict_min=False, strict_max=False, tolerance=1e-9,
         result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
@@ -2718,7 +2718,7 @@ class Dataset(MetaDataset):
                 If True, the minimum proportion of unique values must be strictly larger than min_value, default=False
             strict_max (boolean):
                 If True, the maximum proportion of unique values must be strictly smaller than max_value, default=False
-            strictly_tol (float):
+            tolerance (float):
                 tolerance for strict_min, strict_max, default=1e-9
 
         Other Parameters:
@@ -2768,11 +2768,11 @@ class Dataset(MetaDataset):
 
         if strict_min:
             if min_value:
-                min_value += strictly_tol
+                min_value += tolerance
 
         if strict_max:
             if max_value:
-                max_value -= strictly_tol
+                max_value -= tolerance
 
         if min_value is not None:
             if strict_min:
@@ -2881,7 +2881,7 @@ class Dataset(MetaDataset):
         self,
         column,
         min_value=None, max_value=None,
-        strict_min=False, strict_max=False, strictly_tol=1e-9,
+        strict_min=False, strict_max=False, tolerance=1e-9,
         result_format=None, include_config=False, catch_exceptions=None,
         meta=None
     ):
@@ -2901,7 +2901,7 @@ class Dataset(MetaDataset):
                 If True, the minimal sum must be strictly larger than min_value, default=False
             strict_max (boolean):
                 If True, the maximal sum must be strictly smaller than max_value, default=False
-            strictly_tol (float):
+            tolerance (float):
                 tolerance for strict_min, strict_max, default=1e-9
 
         Other Parameters:
@@ -2949,6 +2949,12 @@ class Dataset(MetaDataset):
                 }
             }
 
+        if strict_min and min_value:
+            min_value += tolerance
+
+        if strict_max and max_value:
+            max_value -= tolerance
+
         if min_value is not None:
             if strict_min:
                 above_min = column_sum > min_value
@@ -2982,7 +2988,7 @@ class Dataset(MetaDataset):
         column,
         min_value=None,
         max_value=None,
-        strict_min=False, strict_max=False,
+        strict_min=False, strict_max=False, tolerance=1e-9,
         parse_strings_as_datetimes=False,
         output_strftime_format=None,
         result_format=None, include_config=False, catch_exceptions=None,
@@ -3004,8 +3010,8 @@ class Dataset(MetaDataset):
                 If True, the minimal column minimum must be strictly larger than min_value, default=False
             strict_max (boolean):
                 If True, the maximal column minimum must be strictly smaller than max_value, default=False
-            strictly_tol (float):
-                tolerance for strict_min, strict_max, default=1e-9
+            tolerance (float):
+                tolerance for strict_min, strict_max, default=1e-9. If parse_strings_as_datetimes is True, this tolerance is measured in number of days
 
         Keyword Args:
             parse_strings_as_datetimes (Boolean or None): \
@@ -3049,12 +3055,19 @@ class Dataset(MetaDataset):
 
         """
         if parse_strings_as_datetimes:
+            tolerance = timedelta(days=tolerance)
             if min_value:
                 min_value = parse(min_value)
             if max_value:
                 max_value = parse(max_value)
 
         column_min = self.get_column_min(column, parse_strings_as_datetimes)
+
+        if strict_min and min_value:
+            min_value += tolerance
+
+        if strict_max and max_value:
+            max_value -= tolerance
 
         if column_min is None:
             success = False
@@ -3099,6 +3112,7 @@ class Dataset(MetaDataset):
         max_value=None,
         strict_min=False,
         strict_max=False,
+        tolerance=1e-9,
         parse_strings_as_datetimes=False,
         output_strftime_format=None,
         result_format=None, include_config=False, catch_exceptions=None,
@@ -3123,6 +3137,12 @@ class Dataset(MetaDataset):
                 comparisons.
             output_strftime_format (str or None): \
                 A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
+            strict_min (boolean):
+                If True, the minimal column minimum must be strictly larger than min_value, default=False
+            strict_max (boolean):
+                If True, the maximal column minimum must be strictly smaller than max_value, default=False
+            tolerance (float):
+                tolerance for strict_min, strict_max, default=1e-9. If parse_strings_as_datetimes is True, this tolerance is measured in number of days
 
         Other Parameters:
             result_format (str or None): \
@@ -3159,10 +3179,17 @@ class Dataset(MetaDataset):
 
         """
         if parse_strings_as_datetimes:
+            tolerance = timedelta(days=tolerance)
             if min_value:
                 min_value = parse(min_value)
             if max_value:
                 max_value = parse(max_value)
+        else:
+            if strict_min and min_value:
+                min_value += tolerance
+
+            if strict_max and max_value:
+                max_value -= tolerance
 
         column_max = self.get_column_max(column, parse_strings_as_datetimes)
 

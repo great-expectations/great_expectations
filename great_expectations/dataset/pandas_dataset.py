@@ -2,7 +2,7 @@ from __future__ import division
 
 import inspect
 import json
-from datetime import datetime #, timedelta # Add for case of testing timedelta types
+from datetime import datetime, timedelta
 import logging
 from datetime import datetime
 from functools import wraps
@@ -807,9 +807,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_values_to_be_between(self,
                                            column,
                                            min_value=None, max_value=None,
-                                           strict_min=False,
-                                           strict_max=False,
-                                           strictly_tol=1e-9,
+                                           strict_min=False, strict_max=False, tolerance=1e-9,
                                            parse_strings_as_datetimes=None,
                                            output_strftime_format=None,
                                            allow_cross_type_comparisons=None,
@@ -819,15 +817,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        if strict_min:
-            if min_value:
-                min_value += strictly_tol
+        if strict_min and min_value:
+            min_value += tolerance
 
-        if strict_max:
-            if max_value:
-                max_value -= strictly_tol
+        if strict_max and max_value:
+            max_value -= tolerance
 
         if parse_strings_as_datetimes:
+            tolerance = timedelta(days=tolerance)
             if min_value:
                 min_value = parse(min_value)
 
@@ -960,7 +957,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                                   max_value=None,
                                                   strict_min=False,
                                                   strict_max=False,
-                                                  strictly_tol=1e-9,
                                                   mostly=None,
                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
@@ -977,14 +973,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         except ValueError:
             raise ValueError("min_value and max_value must be integers")
-
-        if strict_min:
-            if min_value:
-                min_value += strictly_tol
-
-        if strict_max:
-            if max_value:
-                max_value -= strictly_tol
 
         column_lengths = column.astype(str).str.len()
 
