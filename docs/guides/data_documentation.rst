@@ -27,14 +27,13 @@ And then detailed statistics for each column:
 .. image:: ../images/movie_db_profiling_screenshot_1.jpg
 
 
-There are three use cases for using documentation in a data project:
+The GE DataContext uses a configurable "data documentation site" to define which artifacts to compile and how to render them as documentation. Multiple sites can be configured inside a project, each suitable for a particular data documentation use case.
 
-1. Visualize all Great Expectations artifacts in the local repo of my project as HTML: expectation suites, validation results and profiling results.
+For example, we have identified three common use cases for using documentation in a data project. They are to:
 
+1. Visualize all Great Expectations artifacts in the local repo of a project as HTML: expectation suites, validation results and profiling results.
 2. Maintain a "shared source of truth" for a team working on a data project. This documentation renders all the artifacts committed in the source control system (expectation suites and profiling results) and a continuously updating data quality report, built from a chronological list of validations by run id.
-
-3. Share a spec of a dataset with a client or a partner. This is similar to an API documentaiton in software development. This documentation would include profiling results of the dataset to give the reader a quick way to grasp what the data looks like, and one or more expectation suites that encode what is expected from the data to be considered valid.
-
+3. Share a spec of a dataset with a client or a partner. This is similar to API documentation in software development. This documentation would include profiling results of the dataset to give the reader a quick way to grasp what the data looks like, and one or more expectation suites that encode what is expected from the data to be considered valid.
 
 To support these (and possibly other) use cases GE has a concept of "data documentation site". Multiple sites can be configured inside a project, each suitable for a particular data documentation use case.
 
@@ -52,7 +51,10 @@ Users can specify
 * where the HTML files should be written (filesystem or S3)
 * which renderer and view class should be used to render each section
 
-Here is an example of a site configuration:
+Data Documentation Site Configuration
+*************************************
+
+Here is an example of a site configuration from great_expectations.yml:
 
 .. code-block:: bash
 
@@ -67,7 +69,7 @@ Here is an example of a site configuration:
             type: filesystem
             base_directory: uncommitted/validations/
             run_id_filter:
-              ne: profiling
+              ne: profiling # exclude validations with run id "profiling" - reserved for profiling results
           profiling_store: # where to look for profiling results (filesystem/S3)
             type: filesystem
             base_directory: uncommitted/validations/
@@ -105,11 +107,19 @@ Here is an example of a site configuration:
                 module: great_expectations.render.view
                 class: DefaultJinjaPageView
 
+* ``validations_store`` and ``profiling_store`` in the example above specify the location of validation and profiling results that the site will include in the documentation. The store's ``type`` can be ``filesystem`` or ``s3`` (S3 store is not currently implemented, but will be supported in the near future.) ``base_directory`` must be specified for ``filesystem`` stores. The optional ``run_id_filter`` attribute allows to include (``eq`` for exact match) or exclude (``ne``) validation results with a particular run id.
+
+
+
+Adjusting Data Documentation For Your Project's Needs
+*****************************************************
 
 By default, GE creates two data documentation sites for a new project:
 
-1. "local_site" renders documentation for all the datasources in the project from GE artifacts in the local repo. The site includes expectation suites and profiling and validation results from `uncommitted` directory. Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
-2. "team_site" is meant to support the "shared source of truth for a team" use case. By default only the expectations section is enabled. Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3). Reach out on `Slack <https://tinyurl.com/great-expectations-slack>`__ if you would like to discuss the best way to configure a team site.
+1. "local_site" renders documentation for all the datasources in the project from GE artifacts in the local filesystem. The site includes expectation suites and profiling and validation results from the `uncommitted` directory. Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
+2. "team_site" is meant to support the "shared source of truth for a team" use case. By default only the expectations section is enabled. Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes) based on the team's decisions about where these are stored.) Reach out on `Slack <https://tinyurl.com/great-expectations-slack>`__ if you would like to discuss the best way to configure a team site.
+
+Users have full control over configuring Data Documentation for their project - they can modify the two pre-configured sites (or remove them altogether) and add new sites with a configuration that meets the project's needs. The easiest way to add a new site to the configuration is to copy the "local_site" configuration block in great_expectations.yml, give the copy a new name and modify the details as needed.
 
 How to build documentation
 ----------------------------
