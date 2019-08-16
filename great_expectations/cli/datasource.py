@@ -308,6 +308,8 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 
 def build_documentation(context, site_name=None, data_asset_name=None):
     """Build documentation in a context"""
+    logger.debug("Starting cli.datasource.build_documentation")
+
     cli_message("\nBuilding documentation...")
 
     if site_name is not None:

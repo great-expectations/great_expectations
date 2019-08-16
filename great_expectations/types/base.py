@@ -136,26 +136,25 @@ class LooselyTypedDotDict(DotDict):
         dict.__delitem__(self, key)
     
     def _validate_value_type(self, key, value, type_):
-        if type(value) != type_:
+        #TODO: Catch errors and raise more informative error messages here
+        if isinstance(type_, ListOf):
+            if not isinstance(value, Iterable):
+                raise TypeError("key: {!r} must be an Iterable type, not {!r}".format(
+                    key,
+                    type(value),
+                ))
 
-            #TODO: Catch errors and raise more informative error messages here
-            if isinstance(type_, ListOf):
-                if not isinstance(value, Iterable):
-                    raise TypeError("key: {!r} must be an Iterable type, not {!r}".format(
+            for v in value:
+                if not isinstance(v, type_.type_):
+                    raise TypeError("values in key: {!r} must be of type: {!r}, not {!r} {!r}".format(
                         key,
-                        type(value),
+                        type_.type_,
+                        v,
+                        type(v),
                     ))
 
-                for v in value:
-                    if not isinstance(v, type_.type_):
-                        raise TypeError("values in key: {!r} must be of type: {!r}, not {!r} {!r}".format(
-                            key,
-                            type_.type_,
-                            v,
-                            type(v),
-                        ))
-
-            else:
+        else:
+            if not isinstance(value, type_):
                 raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
                     key,
                     type_,

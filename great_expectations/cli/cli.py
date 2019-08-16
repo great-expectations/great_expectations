@@ -283,6 +283,8 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory):
 def build_documentation(directory, site_name, data_asset_name):
     """Build data documentation for a project.
     """
+    logger.debug("Starting cli.build_documentation")
+
     if data_asset_name is not None and site_name is None:
         cli_message("Error: When specifying data_asset_name, must also specify site_name.")
         return
