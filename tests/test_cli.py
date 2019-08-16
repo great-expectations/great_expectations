@@ -5,7 +5,6 @@ from datetime import datetime
 from click.testing import CliRunner
 import great_expectations.version
 from great_expectations.cli import cli
-import tempfile
 import pytest
 import json
 import os
@@ -21,6 +20,8 @@ try:
     from unittest import mock
 except ImportError:
     import mock
+
+from six import PY2
 
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 
@@ -134,6 +135,11 @@ def test_validate_basic_operation():
     del json_result["meta"]["great_expectations.__version__"]
     with open('./tests/test_sets/expected_cli_results_default.json', 'r') as f:
         expected_cli_results = json.load(f)
+
+    # In PY2 sorting is possible and order is wonky. Order doesn't matter. So sort in that case
+    if PY2:
+        json_result["results"] = sorted(json_result["results"])
+        expected_cli_results["results"] = sorted(expected_cli_results["results"])
 
     assertDeepAlmostEqual(json_result, expected_cli_results)
 
