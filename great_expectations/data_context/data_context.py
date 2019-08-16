@@ -1472,7 +1472,7 @@ class DataContext(object):
 
         """
 
-        selected_store = self.stores["local_validation_result_store"]
+        selected_store = self.stores[validations_store_name]
 
         if run_id == None:
             run_id = selected_store.get_most_recent_run_id()
