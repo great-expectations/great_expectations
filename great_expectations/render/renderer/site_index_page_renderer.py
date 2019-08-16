@@ -17,13 +17,13 @@ class SiteIndexPageRenderer(Renderer):
         if profiling_links: column_count += 1
         validation_links = link_lists_dict["validation_links"]
         if validation_links: column_count += 1
-        expectation_suite_links = link_lists_dict["expectation_suite_links"]
-        if expectation_suite_links: column_count += 1
+        expectations_links = link_lists_dict["expectations_links"]
+        if expectations_links: column_count += 1
         
         cell_width_pct = 100.0/column_count
 
         first_row = []
-        rowspan = str(len(expectation_suite_links)) if expectation_suite_links else "1"
+        rowspan = str(len(expectations_links)) if expectations_links else "1"
         
         data_asset_name = RenderedComponentContent(**{
             "content_block_type": "string_template",
@@ -93,8 +93,8 @@ class SiteIndexPageRenderer(Renderer):
             })
             first_row.append(profiling_results_bullet_list)
             
-        if expectation_suite_links:
-            expectation_suite_link_dict = expectation_suite_links[0]
+        if expectations_links:
+            expectation_suite_link_dict = expectations_links[0]
 
             expectation_suite_name = expectation_suite_link_dict["expectation_suite_name"]
 
@@ -160,7 +160,7 @@ class SiteIndexPageRenderer(Renderer):
                 })
                 first_row.append(validation_link_bullet_list)
 
-        if not expectation_suite_links and validation_links:
+        if not expectations_links and validation_links:
             validation_link_bullets = [
                 RenderedComponentContent(**{
                     "content_block_type": "string_template",
@@ -199,8 +199,8 @@ class SiteIndexPageRenderer(Renderer):
         
         section_rows.append(first_row)
         
-        if len(expectation_suite_links) > 1:
-            for expectation_suite_link_dict in expectation_suite_links[1:]:
+        if len(expectations_links) > 1:
+            for expectation_suite_link_dict in expectations_links[1:]:
                 expectation_suite_row = []
                 expectation_suite_name = expectation_suite_link_dict["expectation_suite_name"]
     
@@ -320,7 +320,7 @@ class SiteIndexPageRenderer(Renderer):
                 
                 header_dict = OrderedDict([
                     ["profiling_links", "Profiling Results"],
-                    ["expectation_suite_links", "Expectation Suite"],
+                    ["expectations_links", "Expectation Suite"],
                     ["validation_links", "Validation Results"]
                 ])
                 
