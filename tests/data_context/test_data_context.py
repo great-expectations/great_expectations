@@ -686,3 +686,21 @@ def test_move_validation_to_fixtures(titanic_data_context):
     #     "profiling"
     # )
     assert len(titanic_data_context.stores["fixture_validation_results_store"].list_keys()) == 1
+
+
+def test_add_store(empty_data_context):
+    assert "my_new_store" not in empty_data_context.stores.keys()
+    assert "my_new_store" not in empty_data_context.get_config()["stores"]
+    empty_data_context.add_store(
+        "my_new_store",
+        {
+            "module_name": "great_expectations.data_context.store",
+            "class_name": "InMemoryStore",
+            "store_config" : {}
+        }
+    )
+    assert "my_new_store" in empty_data_context.stores.keys()
+    assert "my_new_store" in empty_data_context.get_config()["stores"]
+    print(empty_data_context.stores.keys())
+    print(empty_data_context.stores.keys())
+

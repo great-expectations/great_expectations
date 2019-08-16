@@ -162,6 +162,11 @@ class DataContext(object):
         self._context_root_directory = os.path.abspath(context_root_dir)
 
         self._project_config = self._load_project_config()
+        #TODO: This fails all over the place.
+        # assert "stores" in self._project_config
+        #TODO: Remove this as soon as we have proper typing. It's a crutch. A bandaid. A liability.
+        if not "stores" in self._project_config:
+            self._project_config["stores"] = {}
 
         if not self._project_config.get("datasources"):
             self._project_config["datasources"] = {}
