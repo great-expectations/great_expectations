@@ -9,3 +9,6 @@ datasources:
       mygenerator:
         type: subdir_reader
         base_directory: ../data
+
+
+plugins_directory: plugins/
