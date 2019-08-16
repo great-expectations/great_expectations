@@ -127,7 +127,7 @@ def test_store_config(empty_data_context):
     }
     typed_config = StoreMetaConfig(
         coerce_types=True,
-        **config,
+        **config
     )
     print(typed_config)
 
@@ -136,7 +136,7 @@ def test_store_config(empty_data_context):
 
     typed_sub_config = loaded_class.get_config_class()(
         coerce_types=True,
-        **typed_config.store_config,
+        **typed_config.store_config
     )
 
     data_asset_snapshot_store = loaded_class(
