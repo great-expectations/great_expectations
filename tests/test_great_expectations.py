@@ -7,8 +7,8 @@ try:
     from unittest import mock
 except ImportError:
     import mock
-import math
 
+from six import PY2
 import pandas as pd
 import re
 
@@ -211,6 +211,12 @@ class TestValidation(unittest.TestCase):
 
         del results["meta"]["great_expectations.__version__"]
         self.maxDiff = None
+
+        # order is not guaranteed (or important in this case) but sorting is possible in PY2
+        if PY2:
+            results["results"] = sorted(results["results"])
+            expected_results["results"] = sorted(expected_results["results"])
+
         assertDeepAlmostEqual(
             results,
             expected_results
