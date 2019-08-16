@@ -807,7 +807,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_values_to_be_between(self,
                                            column,
                                            min_value=None, max_value=None,
-                                           strict_min=False, strict_max=False, tolerance=1e-9,
+                                           strict_min=False, strict_max=False,  # tolerance=1e-9,
                                            parse_strings_as_datetimes=None,
                                            output_strftime_format=None,
                                            allow_cross_type_comparisons=None,
@@ -817,14 +817,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        if strict_min and min_value:
-            min_value += tolerance
-
-        if strict_max and max_value:
-            max_value -= tolerance
+        # if strict_min and min_value:
+        #     min_value += tolerance
+        #
+        # if strict_max and max_value:
+        #     max_value -= tolerance
 
         if parse_strings_as_datetimes:
-            tolerance = timedelta(days=tolerance)
+            # tolerance = timedelta(days=tolerance)
             if min_value:
                 min_value = parse(min_value)
 
