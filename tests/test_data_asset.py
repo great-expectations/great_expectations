@@ -9,6 +9,7 @@ import numpy as np
 import great_expectations as ge
 
 import unittest
+from six import PY2
 
 
 def test_data_asset_name_inheritance(dataset):
@@ -800,9 +801,7 @@ class TestDataAsset(unittest.TestCase):
             }]
         )
 
-        self.assertEqual(
-            my_df.find_expectations("expect_column_to_exist"),
-            [{
+        exp1 = [{
                 "expectation_type": "expect_column_to_exist",
                 "kwargs": {
                     "column": "x"
@@ -818,7 +817,11 @@ class TestDataAsset(unittest.TestCase):
                     "column": "z"
                 }
             }]
-        )
+
+        if PY2:
+            self.assertEqual(sorted(my_df.find_expectations("expect_column_to_exist")), sorted(exp1))
+        else:
+            self.assertEqual(my_df.find_expectations("expect_column_to_exist"), exp1)
 
         with self.assertRaises(Exception) as context:
             my_df.find_expectations(
@@ -829,9 +832,7 @@ class TestDataAsset(unittest.TestCase):
         # print 'Conflicting column names in remove_expectation' in context.exception
         # self.assertTrue('Conflicting column names in remove_expectation:' in context.exception)
 
-        self.assertEqual(
-            my_df.find_expectations(column="x"),
-            [{
+        exp1 = [{
                 "expectation_type": "expect_column_to_exist",
                 "kwargs": {
                     "column": "x"
@@ -848,7 +849,11 @@ class TestDataAsset(unittest.TestCase):
                     "column": "x"
                 }
             }]
-        )
+
+        if PY2:
+            self.assertEqual(sorted(my_df.find_expectations(column="x")), sorted(exp1))
+        else:
+            self.assertEqual(my_df.find_expectations(column="x"), exp1)
 
     def test_remove_expectation(self):
         my_df = ge.dataset.PandasDataset({
@@ -909,10 +914,7 @@ class TestDataAsset(unittest.TestCase):
         # FIXME: Python 3 doesn't like this. It would be nice to use assertRaisesRegex, but that's not available in python 2.7
         # self.assertTrue('Multiple expectations matched arguments. No expectations removed.' in context.exception)
 
-        self.assertEqual(
-            my_df.remove_expectation(
-                "expect_column_to_exist", remove_multiple_matches=True, dry_run=True),
-            [{
+        exp1 = [{
                 "expectation_type": "expect_column_to_exist",
                 "kwargs": {
                     "column": "x"
@@ -928,7 +930,17 @@ class TestDataAsset(unittest.TestCase):
                     "column": "z"
                 }
             }]
-        )
+
+        if PY2:
+            self.assertEqual(
+                sorted(my_df.remove_expectation("expect_column_to_exist", remove_multiple_matches=True, dry_run=True)),
+                sorted(exp1)
+            )
+        else:
+            self.assertEqual(
+                my_df.remove_expectation("expect_column_to_exist", remove_multiple_matches=True, dry_run=True),
+                exp1
+            )
 
         with self.assertRaises(Exception) as context:
             my_df.remove_expectation("expect_column_to_exist", "x", {
@@ -939,10 +951,7 @@ class TestDataAsset(unittest.TestCase):
         # print 'Conflicting column names in remove_expectation' in context.exception
         # self.assertTrue('Conflicting column names in remove_expectation:' in context.exception)
 
-        self.assertEqual(
-            my_df.remove_expectation(
-                column="x", remove_multiple_matches=True, dry_run=True),
-            [{
+        exp1 = [{
                 "expectation_type": "expect_column_to_exist",
                 "kwargs": {
                     "column": "x"
@@ -959,7 +968,17 @@ class TestDataAsset(unittest.TestCase):
                     "column": "x"
                 }
             }]
-        )
+
+        if PY2:
+            self.assertEqual(
+                sorted(my_df.remove_expectation(column="x", remove_multiple_matches=True, dry_run=True)),
+                sorted(exp1)
+            )
+        else:
+            self.assertEqual(
+                my_df.remove_expectation(column="x", remove_multiple_matches=True, dry_run=True),
+                exp1
+            )
 
         self.assertEqual(
             len(my_df._expectation_suite.expectations),
@@ -1048,19 +1067,32 @@ class TestDataAsset(unittest.TestCase):
         sub1 = df[:3]
 
         sub1.discard_failing_expectations()
-        self.assertEqual(sub1.find_expectations(), exp1)
+        # PY2 sorting is allowed and order not guaranteed
+        if PY2:
+            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+        else:
+            self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[1:2]
         sub1.discard_failing_expectations()
-        self.assertEqual(sub1.find_expectations(), exp1)
+        if PY2:
+            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+        else:
+            self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[:-1]
         sub1.discard_failing_expectations()
-        self.assertEqual(sub1.find_expectations(), exp1)
+        if PY2:
+            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+        else:
+            self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[-1:]
         sub1.discard_failing_expectations()
-        self.assertEqual(sub1.find_expectations(), exp1)
+        if PY2:
+            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+        else:
+            self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[['A', 'D']]
         exp1 = [
@@ -1074,7 +1106,10 @@ class TestDataAsset(unittest.TestCase):
              'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
         ]
         sub1.discard_failing_expectations()
-        self.assertEqual(sub1.find_expectations(), exp1)
+        if PY2:
+            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+        else:
+            self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[['A']]
         exp1 = [
@@ -1084,7 +1119,10 @@ class TestDataAsset(unittest.TestCase):
              'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}}
         ]
         sub1.discard_failing_expectations()
-        self.assertEqual(sub1.find_expectations(), exp1)
+        if PY2:
+            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+        else:
+            self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df.iloc[:3, 1:4]
         exp1 = [
@@ -1102,7 +1140,10 @@ class TestDataAsset(unittest.TestCase):
              'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
         ]
         sub1.discard_failing_expectations()
-        self.assertEqual(sub1.find_expectations(), exp1)
+        if PY2:
+            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+        else:
+            self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df.loc[0:, 'A':'B']
         exp1 = [
@@ -1116,7 +1157,10 @@ class TestDataAsset(unittest.TestCase):
              'kwargs': {'column': 'B', 'value_set': [5, 6, 7, 8]}}
         ]
         sub1.discard_failing_expectations()
-        self.assertEqual(sub1.find_expectations(), exp1)
+        if PY2:
+            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+        else:
+            self.assertEqual(sub1.find_expectations(), exp1)
 
     def test_test_expectation_function(self):
         D = ge.dataset.PandasDataset({
