@@ -113,6 +113,7 @@ class SiteBuilder():
                 datasources_to_document,
                 specified_data_asset_name,
                 site_config['site_store'],
+                site_config['profiling_store']['name']
             )
 
         # validations
@@ -144,7 +145,7 @@ class SiteBuilder():
                                 #!!! This validations_store_name is hardcoded and might not exist. Tests are passing, though.
                                 validation = data_context.get_validation_result(data_asset_name,
                                                                                 expectation_suite_name=expectation_suite_name,
-                                                                                validations_store_name="local_validation_result_store",#=site_config['validations_store'],
+                                                                                validations_store_name=site_config['validations_store']['name'],
                                                                                 run_id=run_id)
 
                                 logger.info("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id, expectation_suite_name, data_asset_name))
@@ -246,7 +247,7 @@ class SiteBuilder():
 
 
     @classmethod
-    def generate_profiling_section(cls, section_config, data_context, index_links_dict, datasources_to_document, specified_data_asset_name, resource_store):
+    def generate_profiling_section(cls, section_config, data_context, index_links_dict, datasources_to_document, specified_data_asset_name, resource_store, validations_store_name):
         profiling_renderer_class, profiling_view_class = cls.get_renderer_and_view_classes(section_config)
 
         nested_namespaced_validation_result_dict = cls.pack_validation_result_list_into_nested_dict(
@@ -272,7 +273,7 @@ class SiteBuilder():
                             #!!! This validations_store_name is hardcoded and might not exist. Tests are passing, though.
                             validation = data_context.get_validation_result(data_asset_name,
                                                                             expectation_suite_name=expectation_suite_name,
-                                                                            validations_store_name="profiling_store",#site_config['profiling_store'],
+                                                                            validations_store_name=validations_store_name,
                                                                             run_id=run_id)
                             logger.info("        Rendering profiling for data asset {}".format(data_asset_name))
                             data_asset_name = validation['meta']['data_asset_name']
