@@ -125,8 +125,8 @@ class SiteBuilder():
 
             #TODO: filter data sources if the config requires it
             for run_id, v0 in cls.pack_validation_result_list_into_nested_dict(
-                data_context.stores['fixture_validation_results_store'].list_keys(),
-                run_id_filter=site_config["validations_store"].get("run_id_filter")
+                data_context.stores[site_config['validations_store']['name']].list_keys(),
+                run_id_filter=validation_section_config.get("run_id_filter")
             ).items():
 
                 for datasource, v1 in v0.items():
@@ -156,7 +156,7 @@ class SiteBuilder():
                                     validation_view_class.render(model),  # bytes
                                     expectation_suite_name + '.html',  # name to be used inside namespace
                                     resource_store=site_config['site_store'],
-                                    resource_namespace="validations",
+                                    resource_namespace="validation",
                                     data_asset_name=data_asset_name,
                                     run_id=run_id
                                 )
@@ -165,7 +165,7 @@ class SiteBuilder():
                                 data_context,
                                 index_links_dict,
                                 data_asset_name,
-                                datasource, generator, generator_asset, expectation_suite_name, "validation"
+                                datasource, generator, generator_asset, expectation_suite_name, "validation", run_id=run_id
                             )
 
 
@@ -214,7 +214,7 @@ class SiteBuilder():
                                 data_context,
                                 index_links_dict,
                                 data_asset_name,
-                                datasource, generator, generator_asset, expectation_suite_name, "expectation_suite"
+                                datasource, generator, generator_asset, expectation_suite_name, "expectations"
                             )
 
 
@@ -299,8 +299,12 @@ class SiteBuilder():
         data_context,
         index_links_dict,
         data_asset_name,
-        datasource, generator, generator_asset, expectation_suite_name,
-        section_name
+        datasource,
+        generator,
+        generator_asset,
+        expectation_suite_name,
+        section_name,
+        run_id=None
     ):
         if not datasource in index_links_dict:
             index_links_dict[datasource] = OrderedDict()
@@ -312,9 +316,14 @@ class SiteBuilder():
             index_links_dict[datasource][generator][generator_asset] = {
                 'profiling_links': [],
                 'validation_links': [],
-                'expectation_suite_links': []
+                'expectations_links': []
             }
 
+
+        if run_id:
+            base_path = section_name + "/" + run_id
+        else:
+            base_path = section_name
         index_links_dict[datasource][generator][generator_asset][section_name + "_links"].append(
             {
                 "full_data_asset_name": data_asset_name,
@@ -322,12 +331,13 @@ class SiteBuilder():
                 "filepath": data_context._get_normalized_data_asset_name_filepath(
                     data_asset_name,
                     expectation_suite_name,
-                    base_path=section_name,
+                    base_path=base_path,
                     file_extension=".html"
                 ),
                 "source": datasource,
                 "generator": generator,
-                "asset": generator_asset
+                "asset": generator_asset,
+                "run_id": run_id
             }
         )
 

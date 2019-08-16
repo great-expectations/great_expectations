@@ -96,15 +96,9 @@ data_docs:
         type: filesystem
         base_directory: uncommitted/documentation/local_site
       validations_store: # where to look for validation results (filesystem/S3)
-        type: filesystem
-        base_directory: uncommitted/validations/
-        run_id_filter:
-          ne: profiling
+        name: local_validation_result_store
       profiling_store: # where to look for profiling results (filesystem/S3)
-        type: filesystem
-        base_directory: uncommitted/validations/
-        run_id_filter:
-          eq: profiling
+        name: local_validation_result_store
 
       datasources: '*' # by default, all datasources
       sections:
@@ -116,6 +110,8 @@ data_docs:
             module: great_expectations.render.view
             class: DefaultJinjaIndexPageView
         validations: # if not present, validation results are not rendered
+          run_id_filter:
+            ne: profiling
           renderer:
             module: great_expectations.render.renderer
             class: ValidationResultsPageRenderer
@@ -130,6 +126,8 @@ data_docs:
             module: great_expectations.render.view
             class: DefaultJinjaPageView
         profiling: # if not present, profiling results are not rendered
+          run_id_filter:
+            eq: profiling
           renderer:
             module: great_expectations.render.renderer
             class: ProfilingResultsPageRenderer
@@ -147,14 +145,7 @@ data_docs:
         type: filesystem
         base_directory: uncommitted/documentation/team_site
 #      validations_store:
-#        type: s3
-#        bucket: ???
-#        path: ???
 #      profiling_store:
-#        type: filesystem
-#        base_directory: fixtures/validations/
-#        run_id_filter:
-#          eq: profiling
 
       datasources: '*'
       sections:
