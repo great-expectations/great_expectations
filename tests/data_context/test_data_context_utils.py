@@ -1,5 +1,6 @@
 import pytest
 import os
+import six
 
 from great_expectations.data_context.util import (
     safe_mmkdir,
@@ -17,7 +18,9 @@ def test_safe_mmkdir(tmp_path_factory):
         safe_mmkdir(1)
 
     #This should trigger python 2
-    second_path = os.path.join(project_path,"second_path")
-    print(second_path)
-    print(type(second_path))
-    safe_mmkdir(os.path.dirname(second_path))
+    if six.PY2:
+        with pytest.raises(TypeError) as e:
+            next_project_path = tmp_path_factory.mktemp('test_safe_mmkdir__dir_b')
+            safe_mmkdir(next_project_path)
+
+        assert e.value.message == "directory must be of type str, not {'directory_type': \"<class 'pathlib2.PosixPath'>\"}"
