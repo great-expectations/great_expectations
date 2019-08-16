@@ -1161,7 +1161,7 @@ class DataContext(object):
                 logger.warning("Unrecognized result_callback configuration.")
 
         if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
-
+            logging.debug("Storing validation results to data_asset_snapshot_store")
             self.stores.data_asset_snapshot_store.set(
                 key=NameSpaceDotDict(**{
                     "normalized_data_asset_name" : normalized_data_asset_name,
