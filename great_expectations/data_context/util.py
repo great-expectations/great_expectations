@@ -6,6 +6,7 @@ import os
 import json
 import errno
 from collections import namedtuple
+import six
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +122,7 @@ def get_slack_callback(webhook):
 
 def safe_mmkdir(directory, exist_ok=True):
     """Simple wrapper since exist_ok is not available in python 2"""
-    if not isinstance(directory, str):
+    if not isinstance(directory, six.string_types):
         raise TypeError("directory must be of type str, not {0}".format({
             "directory_type": str(type(directory))
         }))
