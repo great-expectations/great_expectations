@@ -172,3 +172,13 @@ for how to profile a single batch of data and build documentation from the valid
   safe_mmkdir(os.path.dirname(profiling_html_filepath))
   with open(profiling_html_filepath, 'w') as writer:
       writer.write(DefaultJinjaPageView.render(document_model))
+
+
+Dependencies
+~~~~~~~~~~~~
+* Font Awesome 5.10.1
+* Bootstrap 4.3.1
+* jQuery 3.2.1
+* Vega 5.3.5
+* Vega-Lite 3.2.1
+* Vega-Embed 4.0.0
