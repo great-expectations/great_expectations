@@ -2,6 +2,9 @@ import pytest
 import json
 import importlib
 
+import six
+if six.PY2: FileNotFoundError = IOError
+
 from great_expectations.data_context.store import (
     # Store,
     ContextAwareStore,
