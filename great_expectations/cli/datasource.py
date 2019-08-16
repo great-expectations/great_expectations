@@ -7,6 +7,8 @@ from great_expectations.data_context import DataContext
 
 from great_expectations.version import __version__ as __version__
 
+import logging
+logger = logging.getLogger(__name__)
 
 def add_datasource(context):
     cli_message(
@@ -316,6 +318,7 @@ def build_documentation(context, site_name=None, data_asset_name=None):
         site_names = [site_name]
     else:
         site_names=None
+
     index_page_locator_infos = context.build_data_documentation(site_names=site_names, data_asset_name=data_asset_name)
 
     msg = """
