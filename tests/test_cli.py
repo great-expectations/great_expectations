@@ -413,7 +413,7 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     result = runner.invoke(
         cli, ["build-documentation", "-d", project_root_dir])
 
-    print(json.dumps(not_so_empty_data_context.get_project_config(), indent=2))
+    print(json.dumps(not_so_empty_data_context.get_project_config()["stores"], indent=2))
     print(result.output)
     print(gen_directory_tree_str(project_root_dir))
 

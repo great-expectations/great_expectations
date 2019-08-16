@@ -701,6 +701,4 @@ def test_add_store(empty_data_context):
     )
     assert "my_new_store" in empty_data_context.stores.keys()
     assert "my_new_store" in empty_data_context.get_config()["stores"]
-    print(empty_data_context.stores.keys())
-    print(empty_data_context.stores.keys())
 
