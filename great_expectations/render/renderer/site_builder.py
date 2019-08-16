@@ -1,7 +1,6 @@
 import logging
 logger = logging.getLogger(__name__)
 
-
 import json
 import importlib
 from collections import OrderedDict
@@ -88,6 +87,7 @@ class SiteBuilder():
                          index_links_dict
 
         """
+        logger.debug("Starting SiteBuilder.build")
 
         index_links_dict = OrderedDict()
 
@@ -248,6 +248,8 @@ class SiteBuilder():
 
     @classmethod
     def generate_profiling_section(cls, section_config, data_context, index_links_dict, datasources_to_document, specified_data_asset_name, resource_store, validations_store_name):
+        logger.debug("Starting SiteBuilder.generate_profiling_section")
+
         profiling_renderer_class, profiling_view_class = cls.get_renderer_and_view_classes(section_config)
 
         nested_namespaced_validation_result_dict = cls.pack_validation_result_list_into_nested_dict(
