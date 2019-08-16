@@ -25,6 +25,7 @@ class ReaderMethods(Enum):
     xlsx = 3
     JSON = 4
     json = 4
+    delta = 5
 
 
 class Datasource(object):
