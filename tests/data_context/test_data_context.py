@@ -497,7 +497,9 @@ def test_data_context_result_store(titanic_data_context):
 
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
-    project_dir = str(tmp_path_factory.mktemp("project_dir"))
+    base_dir = str(tmp_path_factory.mktemp("project_dir"))
+    project_dir = os.path.join(base_dir, "project_path")
+    os.mkdir(project_dir)
 
     os.makedirs(os.path.join(project_dir, "data"))
     os.makedirs(os.path.join(project_dir, "data/titanic"))
@@ -519,13 +521,13 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     )
 
     assert gen_directory_tree_str(project_dir) == """\
-project_dir0/
+project_path/
     data/
+        random/
+            f1.csv
+            f2.csv
         titanic/
             Titanic.csv
-        random/
-            f2.csv
-            f1.csv
 """
 
     context = DataContext.create(project_dir)
@@ -544,38 +546,38 @@ project_dir0/
     
     context.profile_datasource("titanic")
     assert gen_directory_tree_str(project_dir) == """\
-project_dir0/
+project_path/
+    data/
+        random/
+            f1.csv
+            f2.csv
+        titanic/
+            Titanic.csv
     great_expectations/
-        great_expectations.yml
         .gitignore
+        great_expectations.yml
         datasources/
-        plugins/
         expectations/
             titanic/
                 default/
                     Titanic/
                         BasicDatasetProfiler.json
         fixtures/
+        notebooks/
+            create_expectations.ipynb
+            integrate_validation_into_pipeline.ipynb
+        plugins/
         uncommitted/
+            credentials/
             documentation/
+            profiling/
+            samples/
             validations/
                 profiling/
                     titanic/
                         default/
                             Titanic/
                                 BasicDatasetProfiler.json
-            samples/
-            profiling/
-            credentials/
-        notebooks/
-            integrate_validation_into_pipeline.ipynb
-            create_expectations.ipynb
-    data/
-        titanic/
-            Titanic.csv
-        random/
-            f2.csv
-            f1.csv
 """
 
     context.profile_datasource("random")
