@@ -27,8 +27,7 @@ try:
         when,
         year,
         count,
-        countDistinct,
-        rlike
+        countDistinct
     )
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
