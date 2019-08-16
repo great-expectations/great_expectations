@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from datetime import datetime
 from click.testing import CliRunner
 import great_expectations.version
-from great_expectations.cli import cli
+
 import tempfile
 import pytest
 import json
@@ -22,7 +22,8 @@ try:
 except ImportError:
     import mock
 
-
+from great_expectations.cli import cli
+from great_expectations.util import gen_directory_tree_str
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 
 
@@ -53,7 +54,7 @@ Commands:
 def test_cli_command_bad_command():
     runner = CliRunner()
 
-    result = runner.invoke(cli, ["blarg"])
+    result = runner.invoke(cli, [u"blarg"])
     assert result.exit_code == 2
     assert result.output == """Usage: cli [OPTIONS] COMMAND [ARGS]...
 Try "cli --help" for help.
@@ -407,6 +408,8 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
 
     result = runner.invoke(
         cli, ["documentation", "-d", project_root_dir])
+
+    print(gen_directory_tree_str(project_root_dir))
 
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,

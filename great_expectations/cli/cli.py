@@ -20,6 +20,12 @@ from great_expectations.exceptions import DataContextError, ConfigNotFoundError
 from great_expectations import __version__, read_csv
 from pyfiglet import figlet_format
 import click
+#FIXME: This prevents us from seeing a huge stack of these messages in python 2. We'll need to fix that later.
+# tests/test_cli.py::test_cli_profile_with_datasource_arg
+#   /Users/abe/Documents/superconductive/tools/great_expectations/tests/test_cli.py:294: Warning: Click detected the use of the unicode_literals __future__ import.  This is heavily discouraged because it can introduce subtle bugs in your code.  You should instead use explicit u"" literals for your unicode strings.  For more information see https://click.palletsprojects.com/python3/
+#     cli, ["profile", "my_datasource", "-d", project_root_dir])
+click.disable_unicode_literals_warning = True
+
 import six
 import os
 import json

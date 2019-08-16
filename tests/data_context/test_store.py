@@ -1,9 +1,13 @@
 import pytest
 import json
 import importlib
+import os
 
 import six
 if six.PY2: FileNotFoundError = IOError
+
+import pandas as pd
+
 
 from great_expectations.data_context.store import (
     # Store,
@@ -21,6 +25,10 @@ from great_expectations.data_context.types import (
     NameSpaceDotDict,
     NormalizedDataAssetName,
 )
+from great_expectations.util import (
+    gen_directory_tree_str,
+)
+
 # def test_core_store_logic():
 #     pass
 
@@ -231,4 +239,48 @@ def test_NameSpacedFilesystemStore_key_listing(empty_data_context, tmp_path_fact
     ])
 
     assert my_store.get_most_recent_run_id() == "100"
+
+def test_NameSpacedFilesystemStore_pandas_csv_serialization(tmp_path_factory, empty_data_context):
+    #TODO: Generalize this trick, as a way to avoid directory name collisions
+    path = str(tmp_path_factory.mktemp('test_FilesystemStore_pandas_csv_serialization__dir'))
+
+    my_store = NameSpacedFilesystemStore(
+        data_context=empty_data_context,
+        config={
+            "serialization_type": "pandas_csv",
+            "base_directory": path,
+            "file_extension": ".csv",
+        }
+    )
+
+    key1 = NameSpaceDotDict(**{
+        "expectation_suite_name" : "hello",
+        "normalized_data_asset_name" : NormalizedDataAssetName("a", "b", "c"),
+        "run_id" : "100",
+    })
+    with pytest.raises(AssertionError):
+        my_store.set(key1, "hi")
+
+    my_df = pd.DataFrame({"x": [1,2,3], "y": ["a", "b", "c"]})
+    my_store.set(key1, my_df)
+
+    assert gen_directory_tree_str(path) == """\
+test_FilesystemStore_pandas_csv_serialization__dir0/
+    100/
+        a/
+            b/
+                c/
+                    hello.csv
+"""
+
+    with open(os.path.join(path, "100/a/b/c/hello.csv")) as f_:
+        assert f_.read() == """\
+x,y
+1,a
+2,b
+3,c
+"""
+
+    with pytest.raises(NotImplementedError):
+        my_store.get(key1)
     

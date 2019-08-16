@@ -1,11 +1,15 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import json
 import os
 import io
+import six
+
+import pandas as pd
+
 from ..util import safe_mmkdir
 
-# from ..data_context import (
-#     DataContext
-# )
 from .types import (
     InMemoryStoreConfig,
     FilesystemStoreConfig,
@@ -20,7 +24,8 @@ class ContextAwareStore(object):
         data_context,
         config,
     ):
-        #FIXME: Eek. This causes circular imports. What to do?        
+        #FIXME: Eek. This causes circular imports. What to do?
+        #TODO: remove the dependency. Stores should be based on namespaceIdentifier objects, but not Context itself.
         # if not isinstance(data_context, DataContext):
         #     raise TypeError("data_context must be an instance of type DataContext")
 
@@ -75,11 +80,13 @@ class ContextAwareStore(object):
             return json.dumps
 
         elif serialization_type == "pandas_csv":
-            #!!! This is a fast, janky, untested implementation
+
             def convert_to_csv(df):
-                s_buf = io.StringIO()
-                df.to_csv(s_buf)
-                return s_buf.read()
+                logger.debug("Starting convert_to_csv")
+
+                assert isinstance(df, pd.DataFrame)
+            
+                return df.to_csv(index=None)
 
             return convert_to_csv
 
