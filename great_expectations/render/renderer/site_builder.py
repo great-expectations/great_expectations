@@ -165,7 +165,7 @@ class SiteBuilder():
                                 data_context,
                                 index_links_dict,
                                 data_asset_name,
-                                datasource, generator, generator_asset, expectation_suite_name
+                                datasource, generator, generator_asset, expectation_suite_name, "validation"
                             )
 
 
@@ -214,7 +214,7 @@ class SiteBuilder():
                                 data_context,
                                 index_links_dict,
                                 data_asset_name,
-                                datasource, generator, generator_asset, expectation_suite_name
+                                datasource, generator, generator_asset, expectation_suite_name, "expectation_suite"
                             )
 
 
@@ -291,7 +291,7 @@ class SiteBuilder():
                                 data_context,
                                 index_links_dict,
                                 data_asset_name,
-                                datasource, generator, generator_asset, expectation_suite_name
+                                datasource, generator, generator_asset, expectation_suite_name, "profiling"
                             )
 
     @classmethod
@@ -299,7 +299,8 @@ class SiteBuilder():
         data_context,
         index_links_dict,
         data_asset_name,
-        datasource, generator, generator_asset, expectation_suite_name
+        datasource, generator, generator_asset, expectation_suite_name,
+        section_name
     ):
         if not datasource in index_links_dict:
             index_links_dict[datasource] = OrderedDict()
@@ -314,14 +315,14 @@ class SiteBuilder():
                 'expectation_suite_links': []
             }
 
-        index_links_dict[datasource][generator][generator_asset]["profiling_links"].append(
+        index_links_dict[datasource][generator][generator_asset][section_name + "_links"].append(
             {
                 "full_data_asset_name": data_asset_name,
                 "expectation_suite_name": expectation_suite_name,
                 "filepath": data_context._get_normalized_data_asset_name_filepath(
                     data_asset_name,
                     expectation_suite_name,
-                    base_path='profiling',
+                    base_path=section_name,
                     file_extension=".html"
                 ),
                 "source": datasource,
