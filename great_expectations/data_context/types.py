@@ -1,4 +1,5 @@
 from collections import namedtuple
+from six import string_types
 
 from ..types import LooselyTypedDotDict
 
@@ -25,6 +26,6 @@ class NameSpaceDotDict(LooselyTypedDotDict):
 
     _key_types = {
         "normalized_data_asset_name" : NormalizedDataAssetName,
-        "expectation_suite_name" : str,
-        "run_id" : str,
+        "expectation_suite_name" : string_types,
+        "run_id" : string_types,
     }

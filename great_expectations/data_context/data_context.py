@@ -274,6 +274,9 @@ class DataContext(object):
     def add_store(self, store_name, store_config):
         self._stores[store_name] = self._init_store_from_config(store_config)
 
+        self._project_config["stores"][store_name] = store_config
+        self._save_project_config()
+
     def _init_store_from_config(self, config):
         typed_config = StoreMetaConfig(
             coerce_types=True,
@@ -1543,6 +1546,7 @@ class DataContext(object):
             A dictionary with the names of the updated data documentation sites as keys and the the location info
             of their index.html files as values
         """
+        logger.debug("Starting DataContext.build_data_documentation")
 
         index_page_locator_infos = {}
 
@@ -1550,8 +1554,10 @@ class DataContext(object):
 
         data_docs_config = self._project_config.get('data_docs')
         if data_docs_config:
+            logger.debug("Found data_docs_config. Building sites...")
             sites = data_docs_config.get('sites', [])
             for site_name, site_config in sites.items():
+                logger.debug("Building site ", site_name)
                 if (site_names and site_name in site_names) or not site_names or len(site_names) == 0:
                     #TODO: get the builder class
                     #TODO: build the site config by using defaults if needed
@@ -1559,6 +1565,9 @@ class DataContext(object):
                     index_page_locator_info = SiteBuilder.build(self, complete_site_config, specified_data_asset_name=data_asset_name)
                     if index_page_locator_info:
                         index_page_locator_infos[site_name] = index_page_locator_info
+        else:
+            logging.info("No ")
+            logger.debug("No data_docs_config found. No site(s) built.")
 
         return index_page_locator_infos
 
