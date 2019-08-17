@@ -452,7 +452,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         hist = list(self.engine.execute(query).fetchone())
         return hist
 
-    def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+    def get_column_count_in_range(self, column, min_val=None, max_val=None, strict_min=False, strict_max=True):
         if min_val is None and max_val is None:
             raise ValueError('Must specify either min or max value')
         if min_val is not None and max_val is not None and min_val > max_val:
@@ -461,12 +461,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         min_condition = None
         max_condition = None
         if min_val is not None:
-            if min_strictly:
+            if strict_min:
                 min_condition = sa.column(column) > min_val
             else:
                 min_condition = sa.column(column) >= min_val
         if max_val is not None:
-            if max_strictly:
+            if strict_max:
                 max_condition = sa.column(column) < max_val
             else:
                 max_condition = sa.column(column) <= max_val

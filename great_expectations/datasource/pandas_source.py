@@ -7,7 +7,7 @@ from .datasource import Datasource, ReaderMethods
 from great_expectations.datasource.generator.filesystem_path_generator import SubdirReaderGenerator, GlobReaderGenerator
 from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
 from great_expectations.dataset.pandas_dataset import PandasDataset
-
+from great_expectations.data_context.types import ClassConfig
 from great_expectations.exceptions import BatchKwargsError
 
 
@@ -17,7 +17,7 @@ class PandasDatasource(Datasource):
     existing in-memory dataframes.
     """
 
-    def __init__(self, name="pandas", data_context=None, data_asset_type="SqlAlchemyDataset", generators=None, **kwargs):
+    def __init__(self, name="pandas", data_context=None, data_asset_type=None, generators=None, **kwargs):
         if generators is None:
             # Provide a gentle way to build a datasource with a sane default,
             # including ability to specify the base_directory and reader_options
@@ -34,6 +34,16 @@ class PandasDatasource(Datasource):
                     "reader_options": reader_options
                 }
             }
+        if data_asset_type is None:
+            data_asset_type = ClassConfig(
+                class_name="PandasDataset")
+        else:
+            try:
+                data_asset_type = ClassConfig(**data_asset_type)
+            except TypeError:
+                # In this case, we allow the passed config, for now, in case they're using a legacy string-only config
+                pass
+
         super(PandasDatasource, self).__init__(name, type_="pandas",
                                                data_context=data_context,
                                                data_asset_type=data_asset_type,
@@ -52,8 +62,25 @@ class PandasDatasource(Datasource):
 
     def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
         batch_kwargs.update(kwargs)
+        reader_options = batch_kwargs.copy()
+
+        if "data_asset_type" in reader_options:
+            data_asset_type_config = reader_options.pop("data_asset_type")  # Get and remove the config
+            try:
+                data_asset_type_config = ClassConfig(**data_asset_type_config)
+            except TypeError:
+                # We tried; we'll pass the config downstream, probably as a string, and handle an error later
+                pass
+        else:
+            data_asset_type_config = self._data_asset_type
+
+        data_asset_type = self._get_data_asset_class(data_asset_type_config)
+
+        if not issubclass(data_asset_type, PandasDataset):
+            raise ValueError("PandasDatasource cannot instantiate batch with data_asset_type: '%s'. It "
+                             "must be a subclass of PandasDataset." % data_asset_type.__name__)
+
         if "path" in batch_kwargs:
-            reader_options = batch_kwargs.copy()
             path = reader_options.pop("path")  # We need to remove from the reader
             reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
 
@@ -86,10 +113,10 @@ class PandasDatasource(Datasource):
             raise BatchKwargsError("Invalid batch_kwargs: path or df is required for a PandasDatasource",
                                    batch_kwargs)
 
-        return PandasDataset(df,
-                             expectation_suite=expectation_suite,
-                             data_context=self._data_context,
-                             batch_kwargs=batch_kwargs)
+        return data_asset_type(df,
+                               expectation_suite=expectation_suite,
+                               data_context=self._data_context,
+                               batch_kwargs=batch_kwargs)
 
     def build_batch_kwargs(self, *args, **kwargs):
         if len(args) > 0:

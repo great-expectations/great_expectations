@@ -10,6 +10,10 @@ from ruamel.yaml import YAML
 
 from ..data_context.util import NormalizedDataAssetName
 from great_expectations.exceptions import BatchKwargsError
+from great_expectations.data_context.types import ClassConfig
+from great_expectations.exceptions import InvalidConfigError
+import warnings
+from importlib import import_module
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -75,13 +79,18 @@ class Datasource(object):
         """
         self._data_context = data_context
         self._name = name
+        if isinstance(data_asset_type, string_types):
+            warnings.warn(
+                "String-only configuration for data_asset_type is deprecated. Use module_name and class_name instead.",
+                DeprecationWarning)
         self._data_asset_type = data_asset_type
         self._generators = {}
         if generators is None:
             generators = {}
         self._datasource_config = {
             "type": type_,
-            "generators": generators
+            "generators": generators,
+            "data_asset_type": data_asset_type
         }
 
         # extra_config = self._load_datasource_config()
@@ -413,3 +422,54 @@ class Datasource(object):
             return ReaderMethods.JSON
         else:
             return None
+
+    def _get_data_asset_class(self, data_asset_type):
+        """Returns the class to be used to generate a data_asset from this datasource"""
+        if isinstance(data_asset_type, string_types):
+            # We have a custom type, but it is defined with only a string
+            try:
+                logger.warning("Use of custom_data_assets module is deprecated. Please define data_asset_type"
+                               "using a module_name and class_name.")
+                # FOR LEGACY REASONS support the fixed "custom_data_assets" name
+                # FIXME: this option should be removed in a future release
+                custom_data_assets_module = __import__("custom_data_assets", fromlist=["custom_data_assets"])
+                data_asset_type_class = getattr(custom_data_assets_module, data_asset_type)
+                return data_asset_type_class
+            except ImportError:
+                logger.error(
+                    "Unable to import custom_data_asset module. "
+                    "Check the plugins directory for 'custom_data_assets'."
+                )
+                raise InvalidConfigError(
+                    "Unable to import custom_data_asset module. "
+                    "Check the plugins directory for 'custom_data_assets'."
+                )
+            except AttributeError:
+                logger.error(
+                    "Unable to find data_asset_type: '%s'." % data_asset_type
+                )
+                raise InvalidConfigError("Unable to find data_asset_type: '%s'." % data_asset_type)
+        elif isinstance(data_asset_type, ClassConfig):
+            try:
+                if data_asset_type.module_name is None:
+                    data_asset_type.module_name = "great_expectations.dataset"
+
+                loaded_module = import_module(data_asset_type.module_name)
+                data_asset_type_class = getattr(loaded_module, data_asset_type.class_name)
+                return data_asset_type_class
+            except ImportError:
+                logger.error(
+                    "Unable to find module '%s'." % data_asset_type.module_name
+                )
+                raise InvalidConfigError("Unable to find module '%s'." % data_asset_type.module_name)
+            except AttributeError:
+                logger.error(
+                    "Unable to find data_asset_type: '%s' in module '%s'."
+                    % (data_asset_type.class_name, data_asset_type.module_name)
+                )
+                raise InvalidConfigError(
+                    "Unable to find data_asset_type: '%s' in module '%s'."
+                    % (data_asset_type.class_name, data_asset_type.module_name)
+                )
+        else:
+            raise InvalidConfigError("Invalid configuration for data_asset_type")

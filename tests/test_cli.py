@@ -25,6 +25,7 @@ from six import PY2
 
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 
+from .test_utils import assertDeepAlmostEqual
 
 def test_cli_command_entrance():
     runner = CliRunner()
@@ -140,7 +141,7 @@ def test_validate_basic_operation():
         json_result["results"] = sorted(json_result["results"])
         expected_cli_results["results"] = sorted(expected_cli_results["results"])
 
-    assert json_result == expected_cli_results
+    assertDeepAlmostEqual(json_result, expected_cli_results)
 
 
 def test_validate_custom_dataset():
@@ -152,7 +153,7 @@ def test_validate_custom_dataset():
                                          "./tests/test_sets/Titanic.csv",
                                          "./tests/test_sets/titanic_custom_expectations.json",
                                          "-f", "True",
-                                         "-m", "./tests/test_fixtures/custom_dataset.py",
+                                         "-m", "./tests/test_fixtures/custom_pandas_dataset.py",
                                          "-c", "CustomPandasDataset"])
 
             json_result = json.loads(result.output)
@@ -411,7 +412,7 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
 
     result = runner.invoke(
-        cli, ["documentation", "-d", project_root_dir])
+        cli, ["build-documentation", "-d", project_root_dir])
 
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,
