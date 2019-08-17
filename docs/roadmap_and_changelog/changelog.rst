@@ -2,7 +2,8 @@
 
 v.0.7.7
 -----------------
-
+* Add support for strict_min and strict_max to inequality-based expectations to allow strict inequality checks
+(thanks @RoyalTS!)
 
 v.0.7.6
 -----------------

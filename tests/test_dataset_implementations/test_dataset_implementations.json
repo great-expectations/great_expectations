@@ -397,7 +397,7 @@
                 "column": "a",
                 "min_val": 3,
                 "max_val": 7,
-                "min_strictly": true
+                "strict_min": true
             },
             "expected": 3
         },
@@ -408,7 +408,7 @@
                 "column": "a",
                 "min_val": 3,
                 "max_val": 7,
-                "max_strictly": false
+                "strict_max": false
             },
             "expected": 5
         },
