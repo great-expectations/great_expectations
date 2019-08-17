@@ -1,4 +1,5 @@
 import pytest
+import os
 
 import great_expectations as ge
 
@@ -59,3 +60,24 @@ def test_validate_using_data_context_path(dataset, data_context):
 def test_validate_invalid_parameters(dataset, basic_expectation_suite, data_context):
     with pytest.raises(ValueError, match="Either an expectation suite or a DataContext is required for validation."):
         ge.validate(dataset)
+
+def test_gen_directory_tree_str(tmp_path_factory):
+    project_dir = str(tmp_path_factory.mktemp("project_dir"))
+    os.mkdir(os.path.join(project_dir, "BBB"))
+    with open(os.path.join(project_dir, "BBB", "bbb.txt"), 'w') as f:
+        f.write("hello")
+    with open(os.path.join(project_dir, "BBB", "aaa.txt"), 'w') as f:
+        f.write("hello")
+
+    os.mkdir(os.path.join(project_dir, "AAA"))
+
+    print(ge.util.gen_directory_tree_str(project_dir))
+
+    #Note: files and directories are sorteds alphabetically, so that this method can be used for testing.
+    assert ge.util.gen_directory_tree_str(project_dir) == """\
+project_dir0/
+    AAA/
+    BBB/
+        aaa.txt
+        bbb.txt
+"""

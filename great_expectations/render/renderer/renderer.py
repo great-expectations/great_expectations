@@ -47,7 +47,7 @@ class Renderer(object):
             elif "kwargs" in ge_object:
                 return "expectation"
 
-        print(json.dumps(ge_object, indent=2))
+        # print(json.dumps(ge_object, indent=2))
         raise ValueError("Unrecognized great expectations object.")
 
     #TODO: When we implement a ValidationResultSuite class, this method will move there.

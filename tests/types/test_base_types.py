@@ -1,5 +1,8 @@
 import pytest
 
+import six
+from six import string_types
+
 from great_expectations.types import (
     DotDict,
     LooselyTypedDotDict,
@@ -376,3 +379,83 @@ def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
                 },
             }
         )
+
+def test_LooselyTypedDotDict_unicode_issues():
+    class MyLTDD(LooselyTypedDotDict):
+        _allowed_keys = set([
+            "a",
+        ])
+        _required_keys = set([
+            "a",
+        ])
+        _key_types = {
+            "a" : str,
+        }
+
+    MyLTDD(**{
+        "a" : "hello"
+    })
+
+    if six.PY2:
+        with pytest.raises(TypeError):
+            MyLTDD(**{
+                "a" : u"hello"
+            })
+
+    class MyLTDD(LooselyTypedDotDict):
+        _allowed_keys = set([
+            "a",
+        ])
+        _required_keys = set([
+            "a",
+        ])
+        _key_types = {
+            "a" : string_types,
+        }
+
+    MyLTDD(**{
+        "a" : "hello"
+    })
+
+    MyLTDD(**{
+        "a" : u"hello"
+    })
+
+def test_LooselyTypedDotDict_multiple_types():
+    class MyLTDD(LooselyTypedDotDict):
+        _allowed_keys = set(["a"])
+        _key_types = {
+            "a" : [int, float],
+        }
+    
+    A = MyLTDD(**{
+        "a" : 1
+    })
+
+    B = MyLTDD(**{
+        "a" : 1.5
+    })
+
+    with pytest.raises(TypeError):
+        B = MyLTDD(**{
+            "a" : "string"
+        })
+
+    with pytest.raises(TypeError):
+        B = MyLTDD(**{
+            "a" : None
+        })
+
+    class MyLTDD(LooselyTypedDotDict):
+        _allowed_keys = set(["a"])
+        _key_types = {
+            "a" : [int, None],
+        }
+    
+    A = MyLTDD(**{
+        "a" : 1
+    })
+
+    B = MyLTDD(**{
+        "a" : None
+    })

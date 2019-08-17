@@ -10,13 +10,6 @@ import six
 
 logger = logging.getLogger(__name__)
 
-NormalizedDataAssetName = namedtuple("NormalizedDataAssetName", [
-    "datasource",
-    "generator",
-    "generator_asset"
-])
-
-
 def build_slack_notification_request(validation_json=None):
     # Defaults
     timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")

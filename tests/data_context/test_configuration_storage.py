@@ -2,10 +2,11 @@ import pytest
 
 import os
 
+
 @pytest.fixture()
 def data_context_config_string():
     config_str = \
-"""
+        """
 # This is a comment
 # it should be preserved.
 datasources:
@@ -18,6 +19,7 @@ datasources:
         type: filesystem
         base_dir: /data
 """
+
 
 def test_preserve_comments(data_context):
     data_context.add_datasource("test_datasource", "pandas")
