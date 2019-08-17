@@ -1,10 +1,14 @@
 from collections import Iterable
 import inspect
 import copy
+from ruamel.yaml import YAML, yaml_object
+yaml = YAML()
+
 
 class ListOf(object):
     def __init__(self, type_):
         self.type_ = type_
+
 
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
@@ -23,7 +27,7 @@ class DotDict(dict):
         return DotDict([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()])
 
 
-#Inspiration : https://codereview.stackexchange.com/questions/81794/dictionary-with-restricted-keys
+# Inspiration : https://codereview.stackexchange.com/questions/81794/dictionary-with-restricted-keys
 class LooselyTypedDotDict(DotDict):
     """dot.notation access to dictionary attributes, with limited keys
     
@@ -43,9 +47,6 @@ class LooselyTypedDotDict(DotDict):
     _key_types = {}
 
     def __init__(self, coerce_types=False, **kwargs):
-        # print(kwargs)
-        # print(self._allowed_keys)
-        # print(self._required_keys)
 
         if not self._required_keys.issubset(self._allowed_keys):
             raise ValueError("_required_keys : {!r} must be a subset of _allowed_keys {!r}".format(
@@ -94,6 +95,26 @@ class LooselyTypedDotDict(DotDict):
                     key,
                     self._required_keys
                 ))
+
+    def __getattr__(self, attr):
+        if attr in self._allowed_keys:
+            return self.get(attr)
+        else:
+            # We raise AttributeError in the event that someone tries to access a nonexistent property
+            # to be more consistent with usual type semantics without losing dictionary access patterns.
+            # Note that a dictionary would usually raise KeyError
+            raise AttributeError
+
+    # If we did not raise AttributeError from __getattr__, the following would be required to support yaml serialization
+    # # This is required since our dotdict allows *any* access via dotNotation, blocking the normal
+    # # behavior of raising an AttributeError when trying to access a nonexistent function
+    # _yaml_merge = []
+    #
+    # @classmethod
+    # def yaml_anchor(cls):
+    #     # This is required since our dotdict allows *any* access via dotNotation, blocking the normal
+    #     # behavior of raising an AttributeError when trying to access a nonexistent function
+    #     return None
 
     def __setitem__(self, key, val):
         if key not in self._allowed_keys:
@@ -161,3 +182,8 @@ class LooselyTypedDotDict(DotDict):
                     type_,
                     type(value),
                 ))
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        """Use dict representation for DotDict (and subtypes by default)"""
+        return representer.represent_dict(node)
