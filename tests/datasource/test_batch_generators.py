@@ -4,7 +4,7 @@ import os
 
 from great_expectations.exceptions import DataContextError
 from great_expectations.datasource import SubdirReaderGenerator, GlobReaderGenerator
-
+from great_expectations.datasource.generator import DatabricksTableGenerator
 
 def test_file_kwargs_generator(data_context, filesystem_csv):
     base_dir = filesystem_csv
@@ -140,3 +140,16 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
 
     g1_assets = g1.get_available_data_asset_names()
     assert g1_assets == {"f2", "f4", "f6", "f7", "f8", "f9", "f0"}
+
+
+def test_databricks_generator():
+    generator = DatabricksTableGenerator()
+    available_assets = generator.get_available_data_asset_names()
+
+    # We have no tables available
+    assert available_assets == set()
+
+    databricks_kwargs_iterator = generator.get_iterator("foo")
+    kwargs = [batch_kwargs for batch_kwargs in databricks_kwargs_iterator]
+    assert "timestamp" in kwargs[0]
+    assert "select * from" in kwargs[0]["query"].lower()
