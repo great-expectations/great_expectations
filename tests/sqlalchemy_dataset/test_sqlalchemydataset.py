@@ -186,6 +186,30 @@ def test_column_fallback():
     assert (dataset.expect_table_row_count_to_equal(value=3) == 
             fallback_dataset.expect_table_row_count_to_equal(value=3))
 
+
+def test_sqlalchemydataset_with_hive_engine():
+
+    # generate a SQLAlchemy Inspector that does nothing and returns no columns
+    class DummyInspector:
+        def __init__(self):
+            pass
+
+        def get_columns(self, table_name, schema):
+            return []
+
+    with mock.patch('great_expectations.dataset.sqlalchemy_dataset.reflection.Inspector.from_engine') as mock_fe:
+
+        # Inspector creation from engine is patched to return a dummy Inspector
+        mock_fe.return_value = DummyInspector()
+
+        # we are able to initialize an SqlAlchemyDataset with a Hive engine without needing to connect
+        dataset = SqlAlchemyDataset('test_sql_data', engine=sa.create_engine('hive://'))
+
+
+        # check our dialect is the desired type
+        import pyhive
+        assert isinstance(dataset.dialect, type(pyhive.sqlalchemy_hive))
+
 @pytest.fixture
 def unexpected_count_df():
     return  get_dataset("sqlite", {"a": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
