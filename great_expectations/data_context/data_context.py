@@ -112,12 +112,6 @@ class ConfigOnlyDataContext(object):
 
         self._datasources = {}
 
-        #TODO: This fails all over the place.
-        # assert "stores" in self._project_config
-        #TODO: Remove this as soon as we have proper typing. It's a crutch. A bandaid. A liability.
-        # if not "stores" in self._project_config:
-        #     self._project_config["stores"] = {}
-
         if not self._project_config.get("datasources"):
             self._project_config["datasources"] = {}
         for datasource in self._project_config["datasources"].keys():
@@ -125,8 +119,10 @@ class ConfigOnlyDataContext(object):
 
         # self._plugins_directory = self._project_config.get("plugins_directory", "plugins/")
         plugins_directory = self._project_config.get("plugins_directory")
+        #TODO: This check should not be necessary
         if plugins_directory == None:
             plugins_directory =  "plugins/"
+        #TODO: This should be factored out into a _convert_to_absolute_path_for_internal_use method, which should live in the @property, not here
         if not os.path.isabs(plugins_directory):
             self._plugins_directory = os.path.join(self.root_directory, plugins_directory)
         else:
@@ -134,6 +130,7 @@ class ConfigOnlyDataContext(object):
         sys.path.append(self._plugins_directory)
 
         self._stores = DotDict()
+        #TODO: This check should not be necessary
         if "stores" in self._project_config:
             self._init_stores(self._project_config["stores"])
 
@@ -144,6 +141,7 @@ class ConfigOnlyDataContext(object):
         #TODO: Decide if this is part of the config spec or not
         # self._expectations_directory = self._project_config.get("expectations_directory", "expectations")
         expectations_directory = self._project_config.get("expectations_directory", "expectations")
+        #TODO: This should be factored out into a _convert_to_absolute_path_for_internal_use method, which should live in the @property, not here
         if not os.path.isabs(expectations_directory):
             self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
         else:
@@ -182,53 +180,6 @@ class ConfigOnlyDataContext(object):
                 store_name,
                 store_config
             )
-        
-        # if "data_asset_snapshot_store" in self._project_config:
-        #     self.add_store(
-        #         "data_asset_snapshot_store",
-        #         self._project_config["data_asset_snapshot_store"]
-        #     ) 
-
-        # # TODO: these paths should be configurable
-        # self.add_store(
-        #     "local_validation_result_store",
-        #     {
-        #         "module_name": "great_expectations.data_context.store",
-        #         "class_name": "NameSpacedFilesystemStore",
-        #         "store_config" : {
-        #             "base_directory" : "uncommitted/validations",
-        #             "serialization_type" : "json",
-        #             "file_extension" : ".json",
-        #         }
-        #     }
-        # )
-
-        # # TODO: these paths should be configurable
-        # self.add_store(
-        #     "fixture_validation_results_store",
-        #     {
-        #         "module_name": "great_expectations.data_context.store",
-        #         "class_name": "NameSpacedFilesystemStore",
-        #         "store_config" : {
-        #             "base_directory" : "fixtures/validations",
-        #             "serialization_type" : "json",
-        #             "file_extension" : ".json",
-        #         }
-        #     }
-        # )
-
-        # self.add_store(
-        #     "profiling_store",
-        #     {
-        #         "module_name": "great_expectations.data_context.store",
-        #         "class_name": "NameSpacedFilesystemStore",
-        #         "store_config" : {
-        #             "base_directory" : "uncommitted/validations",
-        #             "serialization_type" : "json",
-        #             "file_extension" : ".json",
-        #         }
-        #     }
-        # )
 
 
     def add_store(self, store_name, store_config):
@@ -606,7 +557,6 @@ class ConfigOnlyDataContext(object):
         if not "datasources" in self._project_config:
             self._project_config["datasources"] = {}
         self._project_config["datasources"][name] = datasource.get_config()
-        self._save_project_config()
 
         #!!! This return value isn't used anywhere in the live codebase, and only once in tests.
         #Deprecating for now. Will remove fully later.
@@ -1393,7 +1343,7 @@ class ConfigOnlyDataContext(object):
             )
             safe_mmkdir(os.path.dirname(path))
             # print(path)
-            print(path_components[1:])
+            # print(path_components[1:])
             with open(path, "w") as writer:
                 writer.write(resource)
 
@@ -1780,7 +1730,6 @@ class DataContext(ConfigOnlyDataContext):
     def add_datasource(self, name, type_, **kwargs):
         super(DataContext, self).add_datasource(name, type_, **kwargs)
         self._save_project_config()
-
 
 
 class ExplorerDataContext(ConfigOnlyDataContext):
