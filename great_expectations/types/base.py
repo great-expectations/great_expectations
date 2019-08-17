@@ -2,9 +2,11 @@ from collections import Iterable
 import inspect
 import copy
 
+
 class ListOf(object):
     def __init__(self, type_):
         self.type_ = type_
+
 
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
@@ -23,10 +25,10 @@ class DotDict(dict):
         return DotDict([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()])
 
 
-#Inspiration : https://codereview.stackexchange.com/questions/81794/dictionary-with-restricted-keys
+# Inspiration : https://codereview.stackexchange.com/questions/81794/dictionary-with-restricted-keys
 class LooselyTypedDotDict(DotDict):
     """dot.notation access to dictionary attributes, with limited keys
-    
+
 
     Note: this class is pretty useless on its own.
     You need to subclass it like so:
@@ -64,26 +66,29 @@ class LooselyTypedDotDict(DotDict):
             if key in self._key_types:
                 # print(value)
 
-                #Update values if coerce_types==True
+                # Update values if coerce_types==True
                 if coerce_types:
-                    #TODO: Catch errors and raise more informative error messages here
+                    # TODO: Catch errors and raise more informative error messages here
 
-                    #If the given type is an instance of LooselyTypedDotDict, apply coerce_types recursively
+                    # If the given type is an instance of LooselyTypedDotDict, apply coerce_types recursively
                     if isinstance(self._key_types[key], ListOf):
                         if inspect.isclass(self._key_types[key].type_) and issubclass(self._key_types[key].type_, LooselyTypedDotDict):
-                            value = [self._key_types[key].type_(coerce_types=True, **v) for v in value]
+                            value = [self._key_types[key].type_(
+                                coerce_types=True, **v) for v in value]
                         else:
-                            value = [self._key_types[key].type_(v) for v in value]
+                            value = [self._key_types[key].type_(
+                                v) for v in value]
 
                     else:
                         if inspect.isclass(self._key_types[key]) and issubclass(self._key_types[key], LooselyTypedDotDict):
-                            value = self._key_types[key](coerce_types=True, **value)
+                            value = self._key_types[key](
+                                coerce_types=True, **value)
                         else:
                             value = self._key_types[key](value)
-                
+
                 # print(value)
-                
-                #Validate types
+
+                # Validate types
                 self._validate_value_type(key, value, self._key_types[key])
 
             self[key] = value
@@ -101,7 +106,7 @@ class LooselyTypedDotDict(DotDict):
                 key,
                 self._allowed_keys
             ))
-        
+
         if key in self._key_types:
             self._validate_value_type(key, val, self._key_types[key])
 
@@ -134,9 +139,9 @@ class LooselyTypedDotDict(DotDict):
             ))
 
         dict.__delitem__(self, key)
-    
+
     def _validate_value_type(self, key, value, type_):
-        #TODO: Catch errors and raise more informative error messages here
+        # TODO: Catch errors and raise more informative error messages here
         if isinstance(type_, ListOf):
             if not isinstance(value, Iterable):
                 raise TypeError("key: {!r} must be an Iterable type, not {!r}".format(
@@ -157,13 +162,12 @@ class LooselyTypedDotDict(DotDict):
             if isinstance(type_, list):
                 any_match = False
                 for type_element in type_:
-                    print(key, value, type_, type_element)
                     if type_element == None:
                         if value == None:
                             any_match = True
                     elif isinstance(value, type_element):
                         any_match = True
-                
+
                 if not any_match:
                     raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
                         key,
