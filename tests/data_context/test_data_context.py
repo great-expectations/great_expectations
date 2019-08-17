@@ -13,7 +13,11 @@ from glob import glob
 import pandas as pd
 
 from great_expectations.exceptions import DataContextError
-from great_expectations.data_context import DataContext
+from great_expectations.data_context import (
+    ConfigOnlyDataContext,
+    DataContext,
+    ExplorerDataContext,
+)
 from great_expectations.data_context.util import safe_mmkdir
 from great_expectations.data_context.types import NormalizedDataAssetName
 from great_expectations.cli.init import scaffold_directories_and_notebooks
@@ -701,4 +705,27 @@ def test_add_store(empty_data_context):
     )
     assert "my_new_store" in empty_data_context.stores.keys()
     assert "my_new_store" in empty_data_context.get_config()["stores"]
+
+def test_ExplorerDataContext():
+    ExplorerDataContext({
+        "plugins_directory": "plugins/",
+        "datasources": {},
+        "stores": {},
+        "data_docs": {
+            "sites": {}
+        }
+    }, "testing/")
+
+def test_ConfigOnlyDataContext__initialization():
+    # project_path = str(tmp_path_factory.mktemp('test_ConfigOnlyDataContext__initialization__dir'))
+    ConfigOnlyDataContext({
+        "plugins_directory": "plugins/",
+        "datasources": {},
+        "stores": {},
+        "data_docs": {
+            "sites": {}
+        }
+    }, "testing/")
+
+
 
