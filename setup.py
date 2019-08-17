@@ -6,7 +6,7 @@ with open('requirements.txt') as f:
 
 try:
     import pypandoc
-    long_description = pypandoc.convert('README.md', 'rst')
+    long_description = pypandoc.convert_file('README.md', 'rst')
 except (IOError, ImportError):
     long_description = 'Always know what to expect from your data. (See https://github.com/great-expectations/great_expectations for full description).'
 
@@ -23,7 +23,6 @@ config = {
         'spark':  ['pyspark>=2.3.2'],
         'sqlalchemy': ['sqlalchemy>=1.2'],
         'airflow': ['apache-airflow[s3]>=1.9.0', 'boto3>=1.7.3']
-        
     },
     'packages': find_packages(exclude=['docs', 'tests', 'examples']),
     'entry_points': {
