@@ -1720,9 +1720,9 @@ class DataContext(ConfigOnlyDataContext):
         """Save the current project to disk."""
         with open(os.path.join(self.root_directory, "great_expectations.yml"), "w") as data:
             #FIXME: This method is currently Deactivated
-            print(type(self._project_config))
-            config = self._project_config.as_dict()
-            yaml.dump(config, data)
+            # print(type(self._project_config))
+            # config = self._project_config.as_dict()
+            # yaml.dump(config, data)
             pass
 
     def add_store(self, store_name, store_config):
