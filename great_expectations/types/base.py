@@ -154,9 +154,27 @@ class LooselyTypedDotDict(DotDict):
                     ))
 
         else:
-            if not isinstance(value, type_):
-                raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
-                    key,
-                    type_,
-                    type(value),
-                ))
+            if isinstance(type_, list):
+                any_match = False
+                for type_element in type_:
+                    print(key, value, type_, type_element)
+                    if type_element == None:
+                        if value == None:
+                            any_match = True
+                    elif isinstance(value, type_element):
+                        any_match = True
+                
+                if not any_match:
+                    raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
+                        key,
+                        type_,
+                        type(value),
+                    ))
+
+            else:
+                if not isinstance(value, type_):
+                    raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
+                        key,
+                        type_,
+                        type(value),
+                    ))

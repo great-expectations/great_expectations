@@ -414,3 +414,42 @@ def test_LooselyTypedDotDict_unicode_issues():
     MyLTDD(**{
         "a" : u"hello"
     })
+
+def test_LooselyTypedDotDict_multiple_types():
+    class MyLTDD(LooselyTypedDotDict):
+        _allowed_keys = set(["a"])
+        _key_types = {
+            "a" : [int, float],
+        }
+    
+    A = MyLTDD(**{
+        "a" : 1
+    })
+
+    B = MyLTDD(**{
+        "a" : 1.5
+    })
+
+    with pytest.raises(TypeError):
+        B = MyLTDD(**{
+            "a" : "string"
+        })
+
+    with pytest.raises(TypeError):
+        B = MyLTDD(**{
+            "a" : None
+        })
+
+    class MyLTDD(LooselyTypedDotDict):
+        _allowed_keys = set(["a"])
+        _key_types = {
+            "a" : [int, None],
+        }
+    
+    A = MyLTDD(**{
+        "a" : 1
+    })
+
+    B = MyLTDD(**{
+        "a" : None
+    })

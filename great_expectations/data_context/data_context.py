@@ -40,6 +40,7 @@ from .store.types import (
 from .types import (
     NameSpaceDotDict,
     NormalizedDataAssetName,
+    DataContextConfig,
 )
 from .templates import (
     PROJECT_TEMPLATE,
@@ -92,7 +93,6 @@ class ConfigOnlyDataContext(object):
 
         return cls(os.path.join(project_root_dir, "great_expectations"))
             
-    #TODO: Refactor __init__ so that it accepts a config, rather than a context_root_dir that is then used to attempt ot find a config
     def __init__(self, project_config, context_root_dir, data_asset_name_delimiter='/'):
         """DataContext constructor
 
@@ -105,6 +105,7 @@ class ConfigOnlyDataContext(object):
         Returns:
             None
         """
+        assert isinstance(project_config, DataContextConfig)
 
         self._project_config = project_config
         self._context_root_directory = os.path.abspath(context_root_dir)
@@ -114,8 +115,8 @@ class ConfigOnlyDataContext(object):
         #TODO: This fails all over the place.
         # assert "stores" in self._project_config
         #TODO: Remove this as soon as we have proper typing. It's a crutch. A bandaid. A liability.
-        if not "stores" in self._project_config:
-            self._project_config["stores"] = {}
+        # if not "stores" in self._project_config:
+        #     self._project_config["stores"] = {}
 
         if not self._project_config.get("datasources"):
             self._project_config["datasources"] = {}
@@ -123,7 +124,9 @@ class ConfigOnlyDataContext(object):
             self.get_datasource(datasource)
 
         # self._plugins_directory = self._project_config.get("plugins_directory", "plugins/")
-        plugins_directory = self._project_config.get("plugins_directory", "plugins/")
+        plugins_directory = self._project_config.get("plugins_directory")
+        if plugins_directory == None:
+            plugins_directory =  "plugins/"
         if not os.path.isabs(plugins_directory):
             self._plugins_directory = os.path.join(self.root_directory, plugins_directory)
         else:
@@ -138,6 +141,7 @@ class ConfigOnlyDataContext(object):
         # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
         self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
 
+        #TODO: Decide if this is part of the config spec or not
         # self._expectations_directory = self._project_config.get("expectations_directory", "expectations")
         expectations_directory = self._project_config.get("expectations_directory", "expectations")
         if not os.path.isabs(expectations_directory):
@@ -290,7 +294,13 @@ class ConfigOnlyDataContext(object):
         """Loads the project configuration file."""
         try:
             with open(os.path.join(self.root_directory, "great_expectations.yml"), "r") as data:
-                return yaml.load(data)
+                config = yaml.load(data)
+
+                if config["stores"] == None:
+                    config["stores"] = {}
+
+                return DataContextConfig(**config)
+
         except IOError:
             raise ConfigNotFoundError(self.root_directory)
 
@@ -405,7 +415,8 @@ class ConfigOnlyDataContext(object):
     def _save_project_config(self):
         """Save the current project to disk."""
         with open(os.path.join(self.root_directory, "great_expectations.yml"), "w") as data:
-            yaml.dump(self._project_config, data)
+            #yaml.dump(self._project_config, data)
+            pass
 
     def _get_all_profile_credentials(self):
         """Get all profile credentials from the default location."""
