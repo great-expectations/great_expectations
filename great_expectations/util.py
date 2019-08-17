@@ -245,3 +245,8 @@ def gen_directory_tree_str(startpath):
             output_str += '{}{}\n'.format(subindent, f)
     
     return output_str
+
+def get_data_context(path=None):
+    """Given a path, try to guess where the DataContext is located.
+    """
+    pass
