@@ -2,7 +2,7 @@
 
 v.0.7.7
 -----------------
-
+* Fix databricks generator (thanks @sspitz3!)
 
 v.0.7.6
 -----------------
