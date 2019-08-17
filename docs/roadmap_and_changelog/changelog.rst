@@ -12,7 +12,8 @@ GE types). For now, it is possible to use the "type" parameter in configuration 
 * Fix several UI issues in the data_documentation
  - Broken link on Home
  - Scroll follows navigation properly
-
+* Add support for strict_min and strict_max to inequality-based expectations to allow strict inequality checks
+(thanks @RoyalTS!)
 
 v.0.7.6
 -----------------
