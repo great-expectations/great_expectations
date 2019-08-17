@@ -9,6 +9,10 @@ class DataContextError(GreatExpectationsError):
 
 class ProfilerError(GreatExpectationsError):
     pass
+
+class InvalidConfigError(DataContextError):
+    def __init__(self, message):
+        self.message = message
     
 class ConfigNotFoundError(DataContextError):
     def __init__(self, context_root_directory):
@@ -27,4 +31,3 @@ class BatchKwargsError(DataContextError):
 class DatasourceInitializationError(GreatExpectationsError):
     def __init__(self, datasource_name, message):
         self.message = "Cannot initialize datasource %s, error: %s" % (datasource_name, message)
-
