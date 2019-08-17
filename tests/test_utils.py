@@ -548,6 +548,6 @@ def generate_temporary_table_name_is_correct():
     assert table_name == table_name.lower()
 
     # generated table name is formed from letters and numbers only
-    assert all([c in string.ascii_lowercase + string.digits + '_' for c in table_name])
+    assert all([c in string.ascii_lowercase + string.digits for c in table_name])
 
 
