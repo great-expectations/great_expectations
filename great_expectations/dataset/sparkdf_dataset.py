@@ -360,7 +360,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         return hist
 
-    def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+    def get_column_count_in_range(self, column, min_val=None, max_val=None, strict_min=False, strict_max=True):
         if min_val is None and max_val is None:
             raise ValueError('Must specify either min or max value')
         if min_val is not None and max_val is not None and min_val > max_val:
@@ -368,12 +368,12 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         result = self.spark_df.select(column)
         if min_val is not None:
-            if min_strictly:
+            if strict_min:
                 result = result.filter(col(column) > min_val)
             else:
                 result = result.filter(col(column) >= min_val)
         if max_val is not None:
-            if max_strictly:
+            if strict_max:
                 result = result.filter(col(column) < max_val)
             else:
                 result = result.filter(col(column) <= max_val)
@@ -407,8 +407,13 @@ class SparkDFDataset(MetaSparkDFDataset):
         if parse_strings_as_datetimes:
             column = self._apply_dateutil_parse(column)
             value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
-        success_udf = udf(lambda x: x in value_set)
-        return column.withColumn('__success', success_udf(column[0]))
+        if None in value_set:
+            # spark isin returns None when any value is compared to None
+            logger.error("expect_column_values_to_be_in_set cannot support a None in the value_set in spark")
+            raise ValueError(
+                "expect_column_values_to_be_in_set cannot support a None in the value_set in spark")
+        return column.withColumn('__success', column[0].isin(value_set))
+
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
@@ -422,8 +427,11 @@ class SparkDFDataset(MetaSparkDFDataset):
             catch_exceptions=None,
             meta=None,
     ):
-        success_udf = udf(lambda x: x not in value_set)
-        return column.withColumn('__success', success_udf(column[0]))
+        if None in value_set:
+            # spark isin returns None when any value is compared to None
+            logger.error("expect_column_values_to_not_be_in_set cannot support a None in the value_set in spark")
+            raise ValueError("expect_column_values_to_not_be_in_set cannot support a None in the value_set in spark")
+        return column.withColumn('__success', ~column[0].isin(value_set))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
@@ -652,9 +660,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        # not sure know about casting to string here
-        success_udf = udf(lambda x: re.findall(regex, str(x)) != [])
-        return column.withColumn('__success', success_udf(column[0]))
+        return column.withColumn('__success', column[0].rlike(regex))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
@@ -668,6 +674,4 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        # not sure know about casting to string here
-        success_udf = udf(lambda x: re.findall(regex, str(x)) == [])
-        return column.withColumn('__success', success_udf(column[0]))
+        return column.withColumn('__success', ~column[0].rlike(regex))
