@@ -1,0 +1,1 @@
+from .configurations import ClassConfig

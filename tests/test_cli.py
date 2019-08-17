@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from datetime import datetime
 from click.testing import CliRunner
 import great_expectations.version
+from great_expectations.cli import cli
 
 import tempfile
 import pytest
@@ -21,6 +22,8 @@ try:
     from unittest import mock
 except ImportError:
     import mock
+
+from six import PY2
 
 from great_expectations.cli import cli
 from great_expectations.util import gen_directory_tree_str
@@ -137,6 +140,11 @@ def test_validate_basic_operation():
     with open('./tests/test_sets/expected_cli_results_default.json', 'r') as f:
         expected_cli_results = json.load(f)
 
+    # In PY2 sorting is possible and order is wonky. Order doesn't matter. So sort in that case
+    if PY2:
+        json_result["results"] = sorted(json_result["results"])
+        expected_cli_results["results"] = sorted(expected_cli_results["results"])
+
     assertDeepAlmostEqual(json_result, expected_cli_results)
 
 
@@ -149,7 +157,7 @@ def test_validate_custom_dataset():
                                          "./tests/test_sets/Titanic.csv",
                                          "./tests/test_sets/titanic_custom_expectations.json",
                                          "-f", "True",
-                                         "-m", "./tests/test_fixtures/custom_dataset.py",
+                                         "-m", "./tests/test_fixtures/custom_pandas_dataset.py",
                                          "-c", "CustomPandasDataset"])
 
             json_result = json.loads(result.output)
