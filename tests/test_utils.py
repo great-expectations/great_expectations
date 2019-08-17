@@ -15,6 +15,10 @@ import sqlalchemy.dialects.mysql as mysqltypes
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 from great_expectations.profile import ColumnsExistProfiler
+from great_expectations.dataset.util import (
+    generate_random_temporary_table_name,
+    TEMPORARY_TABLE_NAME_PREFIX,
+    TEMPORARY_TABLE_NAME_MAX_LENGTH)
 
 SQLITE_TYPES = {
     "VARCHAR": sqlitetypes.VARCHAR,
@@ -529,3 +533,21 @@ def evaluate_json_test(data_asset, expectation_type, test):
             else:
                 raise ValueError(
                     "Invalid test specification: unknown key " + key + " in 'out'")
+
+
+def generate_temporary_table_name_is_correct():
+    table_name = generate_random_temporary_table_name()
+
+    # generated table name has the proper length
+    assert len(table_name) == len(TEMPORARY_TABLE_NAME_PREFIX) + TEMPORARY_TABLE_NAME_MAX_LENGTH
+
+    # generated table name has the proper prefix
+    assert TEMPORARY_TABLE_NAME_PREFIX in table_name
+
+    # generated table name is all lowercase
+    assert table_name == table_name.lower()
+
+    # generated table name is formed from letters and numbers only
+    assert all([c in string.ascii_lowercase + string.digits + '_' for c in table_name])
+
+

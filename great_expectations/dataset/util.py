@@ -5,7 +5,12 @@ from __future__ import division
 from scipy import stats
 import pandas as pd
 import numpy as np
+import random
+import string
 import warnings
+
+TEMPORARY_TABLE_NAME_PREFIX = "ge_tmp_"
+TEMPORARY_TABLE_NAME_MAX_LENGTH = 8
 
 
 def is_valid_partition_object(partition_object):
@@ -448,3 +453,21 @@ def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs)
         results.append(expectation(column, *args,  **kwargs))
 
     return results
+
+
+def generate_random_temporary_table_name(length=TEMPORARY_TABLE_NAME_MAX_LENGTH):
+    """Generate a temporary table name.
+
+    The name generated is based on a TEMPORARY_TABLE_NAME_PREFIX (default to ge_tmp_) and a combination
+    of random generated lowercase letters and digits.
+    Examples:
+        - ge_tmp_0ptb4s4x
+        - ge_tmp_sifxr6s3
+
+     Args:
+         length (integer) = TEMPORARY_TABLE_NAME_MAX_LENGTH:
+             max length for the generated the table name
+    """
+    return TEMPORARY_TABLE_NAME_PREFIX + ''.join(
+        [random.choice(string.ascii_lowercase + string.digits) for _ in range(length)]
+    )

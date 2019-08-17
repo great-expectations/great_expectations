@@ -1,7 +1,6 @@
 from __future__ import division
 from six import PY3, string_types
 
-import uuid
 from functools import wraps
 import inspect
 import logging
@@ -18,6 +17,7 @@ from .dataset import Dataset
 from .pandas_dataset import PandasDataset
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+from .util import generate_random_temporary_table_name
 
 logger = logging.getLogger(__name__)
 
@@ -203,8 +203,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                  custom_sql=None, schema=None, *args, **kwargs):
 
         if custom_sql and not table_name:
-            # dashes are special characters in most databases so use undercores
-            table_name = str(uuid.uuid4()).replace("-", "_")
+            table_name = generate_random_temporary_table_name()
 
         if table_name is None:
             raise ValueError("No table_name provided.")
@@ -505,13 +504,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         It hasn't been tested in all SQL dialects, and may change based on community feedback.
         :param custom_sql:
         """
-        if self.engine.dialect.name.lower() == "hive":
-            table_name_formatted = table_name
-        else:  
-            table_name_formatted = "\"{table_name}\"".format(table_name=table_name)
-            
+
         stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
-            table_name=table_name_formatted, custom_sql=custom_sql)
+            table_name=table_name, custom_sql=custom_sql)
         
         self.engine.execute(stmt)
 
