@@ -14,24 +14,8 @@ class DotDict(dict):
     """dot.notation access to dictionary attributes"""
 
     def __getattr__(self, attr):
-        if attr in self:
-            return self.get(attr)
-        else:
-            # We raise AttributeError in the event that someone tries to access a nonexistent property
-            # to be more consistent with usual type semantics without losing dictionary access patterns.
-            # Note that a dictionary would usually raise KeyError
-            raise AttributeError
+        return self.get(attr)
 
-    # If we did not raise AttributeError from __getattr__, the following would be required to support yaml serialization
-    # # This is required since our dotdict allows *any* access via dotNotation, blocking the normal
-    # # behavior of raising an AttributeError when trying to access a nonexistent function
-    # _yaml_merge = []
-    #
-    # @classmethod
-    # def yaml_anchor(cls):
-    #     # This is required since our dotdict allows *any* access via dotNotation, blocking the normal
-    #     # behavior of raising an AttributeError when trying to access a nonexistent function
-    #     return None
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
 
@@ -41,11 +25,6 @@ class DotDict(dict):
     # Cargo-cultishly copied from: https://github.com/spindlelabs/pyes/commit/d2076b385c38d6d00cebfe0df7b0d1ba8df934bc
     def __deepcopy__(self, memo):
         return DotDict([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()])
-
-    @classmethod
-    def to_yaml(cls, representer, node):
-        """Use dict representation for DotDict (and subtypes by default)"""
-        return representer.represent_dict(node)
 
 
 # Inspiration : https://codereview.stackexchange.com/questions/81794/dictionary-with-restricted-keys
@@ -117,6 +96,26 @@ class LooselyTypedDotDict(DotDict):
                     self._required_keys
                 ))
 
+    def __getattr__(self, attr):
+        if attr in self._allowed_keys:
+            return self.get(attr)
+        else:
+            # We raise AttributeError in the event that someone tries to access a nonexistent property
+            # to be more consistent with usual type semantics without losing dictionary access patterns.
+            # Note that a dictionary would usually raise KeyError
+            raise AttributeError
+
+    # If we did not raise AttributeError from __getattr__, the following would be required to support yaml serialization
+    # # This is required since our dotdict allows *any* access via dotNotation, blocking the normal
+    # # behavior of raising an AttributeError when trying to access a nonexistent function
+    # _yaml_merge = []
+    #
+    # @classmethod
+    # def yaml_anchor(cls):
+    #     # This is required since our dotdict allows *any* access via dotNotation, blocking the normal
+    #     # behavior of raising an AttributeError when trying to access a nonexistent function
+    #     return None
+
     def __setitem__(self, key, val):
         if key not in self._allowed_keys:
             raise KeyError("key: {!r} not in allowed keys: {!r}".format(
@@ -183,3 +182,8 @@ class LooselyTypedDotDict(DotDict):
                     type_,
                     type(value),
                 ))
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        """Use dict representation for DotDict (and subtypes by default)"""
+        return representer.represent_dict(node)
