@@ -22,7 +22,8 @@ class DBTModelGenerator(BatchGenerator):
     """This is a helper class that makes using great expectations with dbt easy!"""
 
     def __init__(self, name="dbt_models", datasource=None):
-        super(DBTModelGenerator, self).__init__(name, type_="dbt_models", datasource=datasource)
+        super(DBTModelGenerator, self).__init__(
+            name, type_="dbt_models", datasource=datasource)
         self.dbt_target_path = datasource.dbt_target_path
 
     def _get_iterator(self, data_asset_name, **kwargs):
@@ -66,12 +67,13 @@ class DBTDatasource(SqlAlchemyDatasource):
                  project_filepath="dbt_project.yml",
                  profiles_filepath="~/.dbt/profiles.yml",
                  **kwargs
-        ):
+                 ):
         if generators is None:
             generators = {
                 "dbt_models": {"type": "dbt_models"}
             }
-        super(DBTDatasource, self).__init__(name, type_="dbt", data_context=data_context, generators=generators)
+        super(DBTDatasource, self).__init__(name, type_="dbt",
+                                            data_context=data_context, generators=generators)
         self._datasource_config.update({
             "profile": profile,
             "project_filepath": project_filepath,
@@ -82,7 +84,7 @@ class DBTDatasource(SqlAlchemyDatasource):
         with open(os.path.join(self._data_context.root_directory,
                                self._datasource_config["project_filepath"]), "r") as f:
             self._dbt_project = yaml.load(f) or {}
-            
+
         self.dbt_target_path = os.path.join(
             self._data_context.root_directory,
             self._dbt_project["target-path"],
@@ -99,7 +101,8 @@ class DBTDatasource(SqlAlchemyDatasource):
             profiles_config = yaml.load(data) or {}
 
         target = profiles_config[self._datasource_config["profile"]]["target"]
-        db_config = profiles_config[self._datasource_config["profile"]]["outputs"][target]
+        db_config = profiles_config[self._datasource_config["profile"]
+                                    ]["outputs"][target]
         options = \
             sqlalchemy.engine.url.URL(
                 db_config["type"],
@@ -128,6 +131,6 @@ class DBTDatasource(SqlAlchemyDatasource):
         else:
             batch_kwargs = {}
         batch_kwargs.update({
-             "timestamp": time.time()
+            "timestamp": time.time()
         })
         return batch_kwargs

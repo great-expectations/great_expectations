@@ -30,7 +30,8 @@ class SqlAlchemyDatasource(Datasource):
 
     def __init__(self, name="default", data_context=None, data_asset_type="SqlAlchemyDataset", profile=None, generators=None, **kwargs):
         if not sqlalchemy:
-            raise DatasourceInitializationError(name, "ModuleNotFoundError: No module named 'sqlalchemy'")
+            raise DatasourceInitializationError(
+                name, "ModuleNotFoundError: No module named 'sqlalchemy'")
 
         if generators is None:
             generators = {
@@ -63,11 +64,13 @@ class SqlAlchemyDatasource(Datasource):
 
             # Otherwise, connect using remaining kwargs
             else:
-                self.engine = create_engine(self._get_sqlalchemy_connection_options(**kwargs))
+                self.engine = create_engine(
+                    self._get_sqlalchemy_connection_options(**kwargs))
                 self.engine.connect()
 
         except sqlalchemy.exc.OperationalError as sqlalchemy_error:
-            raise DatasourceInitializationError(self._name, str(sqlalchemy_error))
+            raise DatasourceInitializationError(
+                self._name, str(sqlalchemy_error))
 
         self._build_generators()
 
@@ -108,8 +111,10 @@ class SqlAlchemyDatasource(Datasource):
 
         if data_asset_type_name != "SqlAlchemyDataset":
             try:
-                custom_data_assets_module = __import__("custom_data_assets", fromlist=["custom_data_assets"])
-                data_asset_type = getattr(custom_data_assets_module, data_asset_type_name)
+                custom_data_assets_module = __import__(
+                    "custom_data_assets", fromlist=["custom_data_assets"])
+                data_asset_type = getattr(
+                    custom_data_assets_module, data_asset_type_name)
             except ImportError:
                 logger.error(
                     "Unable to import custom_data_asset module. Check the plugins directory for 'custom_data_assets'. "
@@ -152,9 +157,10 @@ class SqlAlchemyDatasource(Datasource):
                 data_context=self._data_context,
                 expectation_suite=expectation_suite,
                 batch_kwargs=batch_kwargs)
-    
+
         else:
-            raise ValueError("Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified")
+            raise ValueError(
+                "Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified")
 
     def build_batch_kwargs(self, *args, **kwargs):
         """Magically build batch_kwargs by guessing that the first non-keyword argument is a table name"""

@@ -214,7 +214,7 @@ class DataAsset(object):
                 if self._config.get("interactive_evaluation", True):
                     try:
                         return_obj = func(self, **evaluation_args)
-                
+
                     except Exception as err:
                         if catch_exceptions:
                             raised_exception = True
@@ -241,7 +241,7 @@ class DataAsset(object):
                 # If there was no interactive evaluation, success will not have been computed.
                 if "success" in return_obj:
                     # Add a "success" object to the config
-                    expectation_config["success_on_last_run"] = return_obj["success"]                        
+                    expectation_config["success_on_last_run"] = return_obj["success"]
 
                 if catch_exceptions:
                     return_obj["exception_info"] = {
@@ -258,7 +258,8 @@ class DataAsset(object):
                     return_obj)
 
                 if self._data_context is not None:
-                    return_obj = self._data_context.update_return_obj(self, return_obj)
+                    return_obj = self._data_context.update_return_obj(
+                        self, return_obj)
 
                 return return_obj
 
@@ -315,7 +316,8 @@ class DataAsset(object):
         else:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
-            self._expectation_suite = get_empty_expectation_suite(data_asset_name, expectation_suite_name)
+            self._expectation_suite = get_empty_expectation_suite(
+                data_asset_name, expectation_suite_name)
 
         self._expectation_suite["data_asset_type"] = self._data_asset_type
         self.default_expectation_args = {
@@ -672,7 +674,7 @@ class DataAsset(object):
             discard_include_config_kwargs,
             discard_catch_exceptions_kwargs,
             suppress_warnings
-            )
+        )
 
     def get_expectation_suite(self,
                               discard_failed_expectations=True,
@@ -721,12 +723,13 @@ class DataAsset(object):
 
             expectations = new_expectations
 
-        message = "\t%d expectation(s) included in expectation_suite." % len(expectations)
+        message = "\t%d expectation(s) included in expectation_suite." % len(
+            expectations)
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
             message += " Omitting %d expectation(s) that failed when last run; set " \
                        "discard_failed_expectations=False to include them." \
-                        % discards["failed_expectations"]
+                % discards["failed_expectations"]
 
         for expectation in expectations:
             # FIXME: Factor this out into a new function. The logic is duplicated in remove_expectation,
@@ -760,7 +763,8 @@ class DataAsset(object):
         if discards["catch_exceptions"] > 0 and not suppress_warnings:
             settings_message += " catch_exceptions"
 
-        if len(settings_message) > 1:  # Only add this if we added one of the settings above.
+        # Only add this if we added one of the settings above.
+        if len(settings_message) > 1:
             settings_message += " settings filtered."
 
         expectation_suite["expectations"] = expectations
@@ -831,15 +835,16 @@ class DataAsset(object):
             expectation_config_str = json.dumps(expectation_suite, indent=2)
             open(filepath, 'w').write(expectation_config_str)
         else:
-            raise ValueError("Unable to save config: filepath or data_context must be available.")
+            raise ValueError(
+                "Unable to save config: filepath or data_context must be available.")
 
-    def validate(self, 
-                 expectation_suite=None, 
+    def validate(self,
+                 expectation_suite=None,
                  run_id=None,
                  data_context=None,
                  evaluation_parameters=None,
-                 catch_exceptions=True, 
-                 result_format=None, 
+                 catch_exceptions=True,
+                 result_format=None,
                  only_return_failures=False):
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
@@ -906,12 +911,13 @@ class DataAsset(object):
         Raises:
            AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
-        validate__interactive_evaluation = self._config.get("interactive_evaluation")
+        validate__interactive_evaluation = self._config.get(
+            "interactive_evaluation")
         if not validate__interactive_evaluation:
             # Turn this off for an explicit call to validate
             self._config["interactive_evaluation"] = True
 
-        # If a different validation data context was provided, override 
+        # If a different validation data context was provided, override
         validate__data_context = self._data_context
         if data_context is None and self._data_context is not None:
             data_context = self._data_context
@@ -938,13 +944,15 @@ class DataAsset(object):
         # So, we load them in reverse order
 
         if data_context is not None:
-            runtime_evaluation_parameters = data_context.bind_evaluation_parameters(run_id)  # , expectation_suite)
+            runtime_evaluation_parameters = data_context.bind_evaluation_parameters(
+                run_id)  # , expectation_suite)
         else:
             runtime_evaluation_parameters = {}
 
         if "evaluation_parameters" in expectation_suite:
-            runtime_evaluation_parameters.update(expectation_suite["evaluation_parameters"])
-        
+            runtime_evaluation_parameters.update(
+                expectation_suite["evaluation_parameters"])
+
         if evaluation_parameters is not None:
             runtime_evaluation_parameters.update(evaluation_parameters)
 
@@ -966,7 +974,8 @@ class DataAsset(object):
                     self, expectation['expectation_type'])
 
                 if result_format is not None:
-                    expectation['kwargs'].update({'result_format': result_format})
+                    expectation['kwargs'].update(
+                        {'result_format': result_format})
 
                 # A missing parameter should raise a KeyError
                 evaluation_args = self._build_evaluation_parameters(
@@ -1017,7 +1026,8 @@ class DataAsset(object):
             results = abbrev_results
 
         data_asset_name = expectation_suite.get("data_asset_name", None)
-        expectation_suite_name = expectation_suite.get("expectation_suite_name", "default")
+        expectation_suite_name = expectation_suite.get(
+            "expectation_suite_name", "default")
 
         result = {
             "results": results,
@@ -1032,7 +1042,7 @@ class DataAsset(object):
                 "great_expectations.__version__": __version__,
                 "data_asset_name": data_asset_name,
                 "expectation_suite_name": expectation_suite_name
-            }            
+            }
         }
 
         if evaluation_parameters is not None:
@@ -1048,7 +1058,8 @@ class DataAsset(object):
             result["meta"].update({"batch_kwargs": self._batch_kwargs})
 
         if data_context is not None:
-            result = data_context.register_validation_results(run_id, result, self)
+            result = data_context.register_validation_results(
+                run_id, result, self)
 
         self._data_context = validate__data_context
         self._config["interactive_evaluation"] = validate__interactive_evaluation
@@ -1097,7 +1108,7 @@ class DataAsset(object):
     def set_expectation_suite_name(self, expectation_suite_name):
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
         self._expectation_suite["expectation_suite_name"] = expectation_suite_name
-    
+
     def get_expectation_suite_name(self):
         """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
         return self._expectation_suite.get("expectation_suite_name", None)
@@ -1205,7 +1216,8 @@ class DataAsset(object):
                     {'value': key, 'count': value}
                     for key, value
                     in sorted(
-                        Counter(unexpected_list).most_common(result_format['partial_unexpected_count']),
+                        Counter(unexpected_list).most_common(
+                            result_format['partial_unexpected_count']),
                         key=lambda x: (-x[1], x[0]))
                 ]
             except TypeError:

@@ -19,7 +19,8 @@ def set_data_source(context, data_source_type=None):
     data_source_name = None
 
     if not data_source_type:
-        configured_datasources = [datasource for datasource in context.list_datasources()]
+        configured_datasources = [
+            datasource for datasource in context.list_datasources()]
 
         if len(configured_datasources) == 0:
             display(HTML("""
@@ -43,11 +44,12 @@ Uncomment the next cell and set data_source_name to one of these names.
 """.format(data_source_type, ','.join([datasource['name'] for datasource in configured_datasources]))))
         else:
             data_source_name = configured_datasources[0]['name']
-            display(HTML("Will be using this data source from your project's great_expectations.yml: <b>{0:s}</b>".format(data_source_name)))
+            display(HTML(
+                "Will be using this data source from your project's great_expectations.yml: <b>{0:s}</b>".format(data_source_name)))
 
     else:
         configured_datasources = [datasource['name'] for datasource in context.list_datasources() if
-                                         datasource['type'] == data_source_type]
+                                  datasource['type'] == data_source_type]
         if len(configured_datasources) == 0:
             display(HTML("""
 <p>
@@ -70,7 +72,8 @@ Uncomment the next cell and set data_source_name to one of these names.
 """.format(data_source_type, ','.join(configured_datasources))))
         else:
             data_source_name = configured_datasources[0]
-            display(HTML("Will be using this {0:s} data source from your project's great_expectations.yml: <b>{1:s}</b>".format(data_source_type, data_source_name)))
+            display(HTML("Will be using this {0:s} data source from your project's great_expectations.yml: <b>{1:s}</b>".format(
+                data_source_type, data_source_name)))
 
     return data_source_name
 
@@ -104,10 +107,12 @@ def setup_notebook_logging(logger=None):
     chandler = logging.StreamHandler(stream=sys.stdout)
     chandler.setLevel(logging.DEBUG)
     # chandler.setFormatter(Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
-    chandler.setFormatter(Formatter("%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
+    chandler.setFormatter(
+        Formatter("%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
     logger.addHandler(chandler)
     logger.setLevel(logging.INFO)
-    logger.info("Great Expectations logging enabled at INFO level by JupyterUX module.")
+    logger.info(
+        "Great Expectations logging enabled at INFO level by JupyterUX module.")
     #
     # # Filter warnings
     # import warnings
@@ -123,18 +128,20 @@ def list_available_data_asset_names(context, data_source_name=None):
     for datasource in datasources:
         if data_source_name and datasource['name'] != data_source_name:
             continue
-        print('data_source: {0:s} ({1:s})'.format(datasource['name'], datasource['type']))
+        print('data_source: {0:s} ({1:s})'.format(
+            datasource['name'], datasource['type']))
         ds = context.get_datasource(datasource['name'])
         generators = ds.list_generators()
         for generator_info in generators:
-            print('  generator_name: {0:s} ({1:s})'.format(generator_info['name'], generator_info['type']))
+            print('  generator_name: {0:s} ({1:s})'.format(
+                generator_info['name'], generator_info['type']))
             generator = ds.get_generator(generator_info['name'])
             data_asset_names = generator.get_available_data_asset_names()
             if len(data_asset_names) > 0:
                 for data_asset_name in data_asset_names:
                     # print('    data asset: {0:s}. Full name: {1:s}/{2:s}/{0:s}'. \
-                    print('    generator_asset: {0:s}'. \
-                    format(data_asset_name))
+                    print('    generator_asset: {0:s}'.
+                          format(data_asset_name))
             else:
                 display(HTML("""
                 <p>
@@ -145,7 +152,8 @@ def list_available_data_asset_names(context, data_source_name=None):
                 </p>
                             """))
 
-    #TODO: add expectation suite names (existing)
+    # TODO: add expectation suite names (existing)
+
 
 bootstrap_link_element = """<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">"""
 cooltip_style_element = """<style type="text/css">
@@ -219,12 +227,14 @@ def display_column_expectations_as_section(
     display_column_expectations_as_section(exp, "Type")
     """
 
-    #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
-    column_expectation_list = [ e for e in expectation_suite["expectations"] if "column" in e["kwargs"] and e["kwargs"]["column"] == column ]
+    # TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
+    column_expectation_list = [e for e in expectation_suite["expectations"]
+                               if "column" in e["kwargs"] and e["kwargs"]["column"] == column]
 
-    #TODO: Handle the case where zero evrs match the column name
+    # TODO: Handle the case where zero evrs match the column name
 
-    document = render.renderer.ExpectationSuiteColumnSectionRenderer.render(column_expectation_list)
+    document = render.renderer.ExpectationSuiteColumnSectionRenderer.render(
+        column_expectation_list)
     view = render.view.DefaultJinjaSectionView.render(
         render.types.RenderedComponentContentWrapper(**{
             "section": document,
@@ -260,12 +270,14 @@ def display_column_evrs_as_section(
     display_column_evrs_as_section(exp, "my_column")
     """
 
-    #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
-    column_evr_list = [ e for e in evrs["results"] if "column" in e["expectation_config"]["kwargs"] and e["expectation_config"]["kwargs"]["column"] == column ]
+    # TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
+    column_evr_list = [e for e in evrs["results"] if "column" in e["expectation_config"]
+                       ["kwargs"] and e["expectation_config"]["kwargs"]["column"] == column]
 
-    #TODO: Handle the case where zero evrs match the column name
+    # TODO: Handle the case where zero evrs match the column name
 
-    document = render.renderer.ProfilingResultsColumnSectionRenderer.render(column_evr_list)
+    document = render.renderer.ProfilingResultsColumnSectionRenderer.render(
+        column_evr_list)
     view = render.view.DefaultJinjaSectionView.render(
         render.types.RenderedComponentContentWrapper(**{
             "section": document,

@@ -72,14 +72,17 @@ def generate_new_partitions(df):
 if __name__ == "__main__":
     df = generate_new_data(seed=42)
     d = df.to_dict(orient="list")
-    json.dump(d, open('../test_sets/distributional_expectations_data_base.json', 'w'))
+    json.dump(
+        d, open('../test_sets/distributional_expectations_data_base.json', 'w'))
     test_partitions = generate_new_partitions(df)
 
-    test_partitions = ge.data_asset.util.recursively_convert_to_json_serializable(test_partitions)
+    test_partitions = ge.data_asset.util.recursively_convert_to_json_serializable(
+        test_partitions)
     with open('../test_sets/test_partitions_definition_fixture.json', 'w') as file:
         file.write(json.dumps(test_partitions))
 
     df = generate_new_data(seed=20190501)
     d = df.to_dict(orient="list")
-    json.dump(d, open('../test_sets/distributional_expectations_data_test.json', 'w'))
+    json.dump(
+        d, open('../test_sets/distributional_expectations_data_test.json', 'w'))
     print("Done generating new base data, partitions, and test data.")

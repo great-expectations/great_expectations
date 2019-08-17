@@ -54,19 +54,23 @@ class PandasDatasource(Datasource):
         batch_kwargs.update(kwargs)
         if "path" in batch_kwargs:
             reader_options = batch_kwargs.copy()
-            path = reader_options.pop("path")  # We need to remove from the reader
-            reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
+            # We need to remove from the reader
+            path = reader_options.pop("path")
+            # ditto timestamp (but missing ok)
+            reader_options.pop("timestamp", "")
 
             reader_method = reader_options.pop("reader_method", None)
             if reader_method is None:
                 reader_method = self._guess_reader_method_from_path(path)
                 if reader_method is None:
-                    raise BatchKwargsError("Unable to determine reader for path: %s" % path, batch_kwargs)
+                    raise BatchKwargsError(
+                        "Unable to determine reader for path: %s" % path, batch_kwargs)
             else:
                 try:
                     reader_method = ReaderMethods[reader_method]
                 except KeyError:
-                    raise BatchKwargsError("Unknown reader method: %s" % reader_method, batch_kwargs)
+                    raise BatchKwargsError(
+                        "Unknown reader method: %s" % reader_method, batch_kwargs)
 
             if reader_method == ReaderMethods.CSV:
                 df = pd.read_csv(path, **reader_options)
@@ -77,10 +81,12 @@ class PandasDatasource(Datasource):
             elif reader_method == ReaderMethods.JSON:
                 df = pd.read_json(path, **reader_options)
             else:
-                raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
+                raise BatchKwargsError(
+                    "Unsupported reader: %s" % reader_method.name, batch_kwargs)
 
         elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (pd.DataFrame, pd.Series)):
-            df = batch_kwargs.pop("df")  # We don't want to store the actual dataframe in kwargs
+            # We don't want to store the actual dataframe in kwargs
+            df = batch_kwargs.pop("df")
             batch_kwargs["PandasInMemoryDF"] = True
         else:
             raise BatchKwargsError("Invalid batch_kwargs: path or df is required for a PandasDatasource",

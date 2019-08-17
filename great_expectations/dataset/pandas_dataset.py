@@ -2,7 +2,8 @@ from __future__ import division
 
 import inspect
 import json
-from datetime import datetime #, timedelta # Add for case of testing timedelta types
+# , timedelta # Add for case of testing timedelta types
+from datetime import datetime
 import logging
 from datetime import datetime
 from functools import wraps
@@ -107,7 +108,8 @@ class MetaPandasDataset(Dataset):
                     else:
                         if isinstance(val, string_types):
                             val = parse(val)
-                        parsed_unexpected_list.append(datetime.strftime(val, output_strftime_format))
+                        parsed_unexpected_list.append(
+                            datetime.strftime(val, output_strftime_format))
                 unexpected_list = parsed_unexpected_list
 
             success, percent_success = self._calc_map_expectation_success(
@@ -247,7 +249,8 @@ class MetaPandasDataset(Dataset):
             nonnull_count = (~boolean_mapped_skip_values).sum()
             element_count = len(test_df)
 
-            unexpected_list = test_df[(boolean_mapped_skip_values == False) & (boolean_mapped_success_values == False)]
+            unexpected_list = test_df[(boolean_mapped_skip_values == False) & (
+                boolean_mapped_success_values == False)]
             unexpected_index_list = list(unexpected_list.index)
 
             success, percent_success = self._calc_map_expectation_success(
@@ -257,7 +260,8 @@ class MetaPandasDataset(Dataset):
                 result_format, success,
                 element_count, nonnull_count,
                 len(unexpected_list),
-                unexpected_list.to_dict(orient='records'), unexpected_index_list
+                unexpected_list.to_dict(
+                    orient='records'), unexpected_index_list
             )
 
             return return_obj
@@ -356,7 +360,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return len(nonnull_values)
 
     def get_column_value_counts(self, column):
-        cnts =  self[column].value_counts()
+        cnts = self[column].value_counts()
         cnts.sort_index(inplace=True)
         cnts.name = "count"
         cnts.index.name = "value"
@@ -400,7 +404,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             else:
                 result = result[result <= max_val]
         return len(result)
-
 
     ### Expectation methods ###
 
@@ -474,7 +477,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "expect_column_values_to_be_of_type", column
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite["expectations"].pop(existing_expectations[0])
+                self._expectation_suite["expectations"].pop(
+                    existing_expectations[0])
 
             # Now, rename the expectation we just added
 
@@ -498,7 +502,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "expect_column_values_to_be_of_type", column
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite["expectations"].pop(existing_expectations[0])
+                self._expectation_suite["expectations"].pop(
+                    existing_expectations[0])
 
             # Now, rename the expectation we just added
             new_expectations = self.find_expectation_indexes(
@@ -519,7 +524,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if mostly is not None:
-            raise ValueError("PandasDataset cannot support mostly for a column with a non-object dtype.")
+            raise ValueError(
+                "PandasDataset cannot support mostly for a column with a non-object dtype.")
 
         if type_ is None:
             success = True
@@ -658,7 +664,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "expect_column_values_to_be_in_type_list", column
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite["expectations"].pop(existing_expectations[0])
+                self._expectation_suite["expectations"].pop(
+                    existing_expectations[0])
 
             new_expectations = self.find_expectation_indexes(
                 "_expect_column_values_to_be_in_type_list__aggregate", column
@@ -680,7 +687,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "expect_column_values_to_be_in_type_list", column
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite["expectations"].pop(existing_expectations[0])
+                self._expectation_suite["expectations"].pop(
+                    existing_expectations[0])
 
             # Now, rename the expectation we just added
             new_expectations = self.find_expectation_indexes(
@@ -701,7 +709,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if mostly is not None:
-            raise ValueError("PandasDataset cannot support mostly for a column with a non-object dtype.")
+            raise ValueError(
+                "PandasDataset cannot support mostly for a column with a non-object dtype.")
 
         if type_list is None:
             success = True
@@ -769,7 +778,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 comp_types.extend(native_type)
 
         if len(comp_types) < 1:
-            raise ValueError("No recognized numpy/python type in list: %s" % type_list)
+            raise ValueError(
+                "No recognized numpy/python type in list: %s" % type_list)
 
         return column.map(lambda x: isinstance(x, tuple(comp_types)))
 
@@ -1015,7 +1025,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         else:
             raise ValueError("match_on must be either 'any' or 'all'")
 
-
     @DocInherit
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_not_match_regex_list(self, column, regex_list,
@@ -1164,7 +1173,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             raise ValueError("Partition endpoints must be finite.")
 
         if "tail_weights" in partition_object and np.sum(partition_object["tail_weights"]) > 0:
-            raise ValueError("Partition cannot have tail weights -- endpoints must be finite.")
+            raise ValueError(
+                "Partition cannot have tail weights -- endpoints must be finite.")
 
         test_cdf = np.append(np.array([0]), np.cumsum(
             partition_object['weights']))
@@ -1245,7 +1255,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         }
 
         return return_obj
-
 
     @DocInherit
     @MetaPandasDataset.column_pair_map_expectation

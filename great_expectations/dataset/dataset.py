@@ -1,5 +1,14 @@
 from __future__ import division
 
+from scipy import stats
+import numpy as np
+import pandas as pd
+from great_expectations.dataset.util import (
+    is_valid_partition_object,
+    is_valid_categorical_partition_object
+)
+from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.data_asset.data_asset import DataAsset
 import inspect
 import sys
 from six import PY3, string_types
@@ -14,17 +23,6 @@ if sys.version_info.major == 2:  # If python 2
 elif sys.version_info.major == 3:  # If python 3
     from itertools import zip_longest
     from functools import lru_cache
-
-from great_expectations.data_asset.data_asset import DataAsset
-from great_expectations.data_asset.util import DocInherit, parse_result_format
-from great_expectations.dataset.util import (
-    is_valid_partition_object,
-    is_valid_categorical_partition_object
-)
-
-import pandas as pd
-import numpy as np
-from scipy import stats
 
 
 class MetaDataset(DataAsset):
@@ -137,7 +135,7 @@ class MetaDataset(DataAsset):
                 return return_obj
 
             raise ValueError("Unknown result_format %s." %
-                                (result_format['result_format'],))
+                             (result_format['result_format'],))
 
         return inner_wrapper
 
@@ -178,7 +176,7 @@ class Dataset(MetaDataset):
             for func in self.hashable_getters:
                 caching_func = lru_cache(maxsize=None)(getattr(self, func))
                 setattr(self, func, caching_func)
-    
+
     @classmethod
     def from_dataset(cls, dataset=None):
         """This base implementation naively passes arguments on to the real constructor, which
@@ -235,7 +233,7 @@ class Dataset(MetaDataset):
             column (string): name of column
             quantiles (tuple of float): the quantiles to return. quantiles \
             *must* be a tuple to ensure caching is possible
-        
+
         Returns:
             List[any]: the nearest values in the dataset to those quantiles
         """
@@ -266,7 +264,8 @@ class Dataset(MetaDataset):
             # PRECISION NOTE: some implementations of quantiles could produce
             # varying levels of precision (e.g. a NUMERIC column producing
             # Decimal from a SQLAlchemy source, so we cast to float for numpy)
-            bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins+1)
+            bins = np.linspace(start=float(
+                min_), stop=float(max_), num=n_bins+1)
         elif bins in ['ntile', 'quantile', 'percentile']:
             bins = self.get_column_quantiles(
                 column,
@@ -446,7 +445,8 @@ class Dataset(MetaDataset):
             column_index = range(number_of_columns)
 
             # Create a list of the mismatched details
-            compared_lists = list(zip_longest(column_index, list(column_list), list(columns)))
+            compared_lists = list(zip_longest(
+                column_index, list(column_list), list(columns)))
             mismatched = [{"Expected Column Position": i,
                            "Expected": k,
                            "Found": v} for i, k, v in compared_lists if k != v]
@@ -1899,7 +1899,8 @@ class Dataset(MetaDataset):
         else:
             if parse_strings_as_datetimes:
                 parsed_value_set = self._parse_value_set(value_set)
-                parsed_observed_value_set = set(self._parse_value_set(observed_value_counts.index))
+                parsed_observed_value_set = set(
+                    self._parse_value_set(observed_value_counts.index))
             else:
                 parsed_value_set = value_set
                 parsed_observed_value_set = set(observed_value_counts.index)
@@ -2391,7 +2392,8 @@ class Dataset(MetaDataset):
         quantiles = quantile_ranges["quantiles"]
         quantile_value_ranges = quantile_ranges["value_ranges"]
         if len(quantiles) != len(quantile_value_ranges):
-            raise ValueError("quntile_values and quantiles must have the same number of elements")
+            raise ValueError(
+                "quntile_values and quantiles must have the same number of elements")
 
         quantile_vals = self.get_column_quantiles(column, tuple(quantiles))
         # We explicitly allow "None" to be interpreted as +/- infinity
@@ -3136,7 +3138,8 @@ class Dataset(MetaDataset):
         # Handle NaN: if something's there that was not expected, substitute the relevant value for tail_weight_holdout
         if na_counts["expected"] > 0:
             # Scale existing expected values
-            test_df["expected"] = test_df["expected"] * (1 - tail_weight_holdout)
+            test_df["expected"] = test_df["expected"] * \
+                (1 - tail_weight_holdout)
             # Fill NAs with holdout.
             test_df["expected"] = test_df["expected"].fillna(
                 element_count * (tail_weight_holdout / na_counts["expected"]))
@@ -3371,7 +3374,8 @@ class Dataset(MetaDataset):
                 bins = bins.tolist()
             else:
                 bins = list(bins)
-            weights = list(np.array(self.get_column_hist(column, tuple(bins))) / self.get_column_nonnull_count(column))
+            weights = list(np.array(self.get_column_hist(
+                column, tuple(bins))) / self.get_column_nonnull_count(column))
             partition_object = {
                 "bins": bins,
                 "weights": weights
@@ -3393,7 +3397,7 @@ class Dataset(MetaDataset):
                 (internal_weight_holdout < 0) or (internal_weight_holdout > 1):
             raise ValueError(
                 "internal_weight_holdout must be between zero and one.")
-            
+
         if tail_weight_holdout != 0 and "tail_weights" in partition_object:
             raise ValueError(
                 "tail_weight_holdout must be 0 when using tail_weights in partition object")
@@ -3405,7 +3409,8 @@ class Dataset(MetaDataset):
                     "Internal weight holdout cannot be used for discrete data.")
 
             # Data are expected to be discrete, use value_counts
-            observed_weights = self.get_column_value_counts(column) / self.get_column_nonnull_count(column)
+            observed_weights = self.get_column_value_counts(
+                column) / self.get_column_nonnull_count(column)
             expected_weights = pd.Series(
                 partition_object['weights'], index=partition_object['values'], name='expected')
             # Sort not available before pandas 0.23.0
@@ -3460,7 +3465,8 @@ class Dataset(MetaDataset):
         else:
             # Data are expected to be continuous; discretize first
             # Build the histogram first using expected bins so that the largest bin is >=
-            hist = np.array(self.get_column_hist(column, tuple(partition_object['bins'])))
+            hist = np.array(self.get_column_hist(
+                column, tuple(partition_object['bins'])))
             # np.histogram(column, partition_object['bins'], density=False)
             bin_edges = partition_object['bins']
             # Add in the frequencies observed above or below the provided partition
@@ -3474,11 +3480,13 @@ class Dataset(MetaDataset):
             )
 
             # Observed Weights is just the histogram values divided by the total number of observations
-            observed_weights = np.array(hist) / self.get_column_nonnull_count(column)
+            observed_weights = np.array(
+                hist) / self.get_column_nonnull_count(column)
 
             # Adjust expected_weights to account for tail_weight and internal_weight
             if "tail_weights" in partition_object:
-                partition_tail_weight_holdout = np.sum(partition_object["tail_weights"])
+                partition_tail_weight_holdout = np.sum(
+                    partition_object["tail_weights"])
             else:
                 partition_tail_weight_holdout = 0
 
@@ -3493,7 +3501,7 @@ class Dataset(MetaDataset):
                     for index, value in enumerate(expected_weights):
                         if value == 0:
                             expected_weights[index] = internal_weight_holdout / zero_count
-        
+
             # Assign tail weight holdout if applicable
             # We need to check cases to only add tail weight holdout if it makes sense based on the provided partition.
             if (partition_object['bins'][0] == -np.inf) and (partition_object['bins'][-1]) == np.inf:
@@ -3508,21 +3516,23 @@ class Dataset(MetaDataset):
 
                 # Remove -inf and inf
                 expected_bins = partition_object['bins'][1:-1]
-                
+
                 comb_expected_weights = expected_weights
                 # Set aside tail weights
-                expected_tail_weights = np.concatenate(([expected_weights[0]], [expected_weights[-1]]))
+                expected_tail_weights = np.concatenate(
+                    ([expected_weights[0]], [expected_weights[-1]]))
                 # Remove tail weights
                 expected_weights = expected_weights[1:-1]
-                
+
                 comb_observed_weights = observed_weights
                 # Set aside tail weights
-                observed_tail_weights = np.concatenate(([observed_weights[0]], [observed_weights[-1]]))
+                observed_tail_weights = np.concatenate(
+                    ([observed_weights[0]], [observed_weights[-1]]))
                 # Remove tail weights
                 observed_weights = observed_weights[1:-1]
-                
+
             elif partition_object['bins'][0] == -np.inf:
-                
+
                 if "tail_weights" in partition_object:
                     raise ValueError(
                         "There can be no tail weights for partitions with one or both endpoints at infinity"
@@ -3530,23 +3540,27 @@ class Dataset(MetaDataset):
 
                 # Remove -inf
                 expected_bins = partition_object['bins'][1:]
-                
-                comb_expected_weights = np.concatenate((expected_weights, [tail_weight_holdout]))
+
+                comb_expected_weights = np.concatenate(
+                    (expected_weights, [tail_weight_holdout]))
                 # Set aside left tail weight and holdout
-                expected_tail_weights = np.concatenate(([expected_weights[0]], [tail_weight_holdout]))
+                expected_tail_weights = np.concatenate(
+                    ([expected_weights[0]], [tail_weight_holdout]))
                 # Remove left tail weight from main expected_weights
                 expected_weights = expected_weights[1:]
-                
+
                 comb_observed_weights = np.concatenate(
-                    (observed_weights, [above_partition / self.get_column_nonnull_count(column)])
+                    (observed_weights, [above_partition /
+                                        self.get_column_nonnull_count(column)])
                 )
                 # Set aside left tail weight and above partition weight
                 observed_tail_weights = np.concatenate(
-                    ([observed_weights[0]], [above_partition / self.get_column_nonnull_count(column)])
+                    ([observed_weights[0]], [above_partition /
+                                             self.get_column_nonnull_count(column)])
                 )
                 # Remove left tail weight from main observed_weights
                 observed_weights = observed_weights[1:]
-        
+
             elif partition_object['bins'][-1] == np.inf:
 
                 if "tail_weights" in partition_object:
@@ -3557,18 +3571,22 @@ class Dataset(MetaDataset):
                 # Remove inf
                 expected_bins = partition_object['bins'][:-1]
 
-                comb_expected_weights = np.concatenate(([tail_weight_holdout], expected_weights))
+                comb_expected_weights = np.concatenate(
+                    ([tail_weight_holdout], expected_weights))
                 # Set aside right tail weight and holdout
-                expected_tail_weights = np.concatenate(([tail_weight_holdout], [expected_weights[-1]]))
+                expected_tail_weights = np.concatenate(
+                    ([tail_weight_holdout], [expected_weights[-1]]))
                 # Remove right tail weight from main expected_weights
                 expected_weights = expected_weights[:-1]
 
                 comb_observed_weights = np.concatenate(
-                    ([below_partition/self.get_column_nonnull_count(column)], observed_weights)
+                    ([below_partition/self.get_column_nonnull_count(column)],
+                     observed_weights)
                 )
                 # Set aside right tail weight and below partition weight
                 observed_tail_weights = np.concatenate(
-                    ([below_partition/self.get_column_nonnull_count(column)], [observed_weights[-1]])
+                    ([below_partition/self.get_column_nonnull_count(column)],
+                     [observed_weights[-1]])
                 )
                 # Remove right tail weight from main observed_weights
                 observed_weights = observed_weights[:-1]
@@ -3586,11 +3604,12 @@ class Dataset(MetaDataset):
                     expected_tail_weights = np.array(tail_weights)
                 else:
                     comb_expected_weights = np.concatenate(
-                        ([tail_weight_holdout / 2], expected_weights, [tail_weight_holdout / 2])
+                        ([tail_weight_holdout / 2],
+                         expected_weights, [tail_weight_holdout / 2])
                     )
                     # Tail weights are just tail_weight holdout divided equally to both tails
                     expected_tail_weights = np.concatenate(
-                         ([tail_weight_holdout / 2], [tail_weight_holdout / 2])
+                        ([tail_weight_holdout / 2], [tail_weight_holdout / 2])
                     )
 
                 comb_observed_weights = np.concatenate(
@@ -3605,8 +3624,9 @@ class Dataset(MetaDataset):
 
                 # Main expected_weights and main observed weights had no tail_weights, so nothing needs to be removed.
 
-            kl_divergence = stats.entropy(comb_observed_weights, comb_expected_weights) 
-            
+            kl_divergence = stats.entropy(
+                comb_observed_weights, comb_expected_weights)
+
             if np.isinf(kl_divergence) or np.isnan(kl_divergence):
                 observed_value = None
             else:
@@ -3618,25 +3638,25 @@ class Dataset(MetaDataset):
                 success = kl_divergence <= threshold
 
             return_obj = {
-                    "success": success,
-                    "result": {
-                        "observed_value": observed_value,
-                        "details": {
-                            "observed_partition": {
-                                # return expected_bins, since we used those bins to compute the observed_weights
-                                "bins": expected_bins,
-                                "weights": observed_weights.tolist(),
-                                "tail_weights": observed_tail_weights.tolist()
-                            },
-                            "expected_partition": {
-                                "bins": expected_bins,
-                                "weights": expected_weights.tolist(),
-                                "tail_weights": expected_tail_weights.tolist()
-                            }
+                "success": success,
+                "result": {
+                    "observed_value": observed_value,
+                    "details": {
+                        "observed_partition": {
+                            # return expected_bins, since we used those bins to compute the observed_weights
+                            "bins": expected_bins,
+                            "weights": observed_weights.tolist(),
+                            "tail_weights": observed_tail_weights.tolist()
+                        },
+                        "expected_partition": {
+                            "bins": expected_bins,
+                            "weights": expected_weights.tolist(),
+                            "tail_weights": expected_tail_weights.tolist()
                         }
                     }
                 }
-                
+            }
+
         return return_obj
 
     ###
@@ -3824,5 +3844,6 @@ class Dataset(MetaDataset):
 
     @staticmethod
     def _parse_value_set(value_set):
-        parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+        parsed_value_set = [parse(value) if isinstance(
+            value, string_types) else value for value in value_set]
         return parsed_value_set

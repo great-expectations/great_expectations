@@ -16,7 +16,8 @@ try:
     from pyspark.sql import SparkSession, DataFrame
 except ImportError:
     # TODO: review logging more detail here
-    logger.debug("Unable to load pyspark; install optional spark dependency for support.")
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency for support.")
 
 
 class SparkDFDatasource(Datasource):
@@ -36,7 +37,7 @@ class SparkDFDatasource(Datasource):
                     "base_directory": base_directory,
                     "reader_options": reader_options
                 }
-        }
+            }
         super(SparkDFDatasource, self).__init__(name, type_="spark",
                                                 data_context=data_context,
                                                 data_asset_type=data_asset_type,
@@ -44,7 +45,8 @@ class SparkDFDatasource(Datasource):
         try:
             self.spark = SparkSession.builder.getOrCreate()
         except Exception:
-            logger.error("Unable to load spark context; install optional spark dependency for support.")
+            logger.error(
+                "Unable to load spark context; install optional spark dependency for support.")
             self.spark = None
 
         self._build_generators()
@@ -68,18 +70,22 @@ class SparkDFDatasource(Datasource):
         batch_kwargs.update(kwargs)
         reader_options = batch_kwargs.copy()
         if "path" in batch_kwargs:
-            path = reader_options.pop("path")  # We remove this so it is not used as a reader option
-            reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
+            # We remove this so it is not used as a reader option
+            path = reader_options.pop("path")
+            # ditto timestamp (but missing ok)
+            reader_options.pop("timestamp", "")
             reader_method = reader_options.pop("reader_method", None)
             if reader_method is None:
                 reader_method = self._guess_reader_method_from_path(path)
                 if reader_method is None:
-                    raise BatchKwargsError("Unable to determine reader for path: %s" % path, batch_kwargs)
+                    raise BatchKwargsError(
+                        "Unable to determine reader for path: %s" % path, batch_kwargs)
             else:
                 try:
                     reader_method = ReaderMethods[reader_method]
                 except KeyError:
-                    raise BatchKwargsError("Unknown reader method: %s" % reader_method, batch_kwargs)
+                    raise BatchKwargsError(
+                        "Unknown reader method: %s" % reader_method, batch_kwargs)
 
             reader = self.spark.read
 
@@ -91,19 +97,22 @@ class SparkDFDatasource(Datasource):
             elif reader_method == ReaderMethods.parquet:
                 df = reader.parquet(path)
             else:
-                raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
-            
+                raise BatchKwargsError(
+                    "Unsupported reader: %s" % reader_method.name, batch_kwargs)
+
         elif "query" in batch_kwargs:
             df = self.spark.sql(batch_kwargs.query)
 
         elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (DataFrame, SparkDFDataset)):
-            df = batch_kwargs.pop("df")  # We don't want to store the actual DataFrame in kwargs
+            # We don't want to store the actual DataFrame in kwargs
+            df = batch_kwargs.pop("df")
             if isinstance(df, SparkDFDataset):
                 # Grab just the spark_df reference, since we want to override everything else
                 df = df.spark_df
             batch_kwargs["SparkDFRef"] = True
         else:
-            raise BatchKwargsError("Unrecognized batch_kwargs for spark_source", batch_kwargs)
+            raise BatchKwargsError(
+                "Unrecognized batch_kwargs for spark_source", batch_kwargs)
 
         return SparkDFDataset(df,
                               expectation_suite=expectation_suite,

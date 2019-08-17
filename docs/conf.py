@@ -152,7 +152,6 @@ napoleon_use_param = True
 napoleon_use_rtype = True
 
 
-
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
@@ -208,7 +207,6 @@ texinfo_documents = [
      author, 'great_expectations', 'One line description of project.',
      'Miscellaneous'),
 ]
-
 
 
 autodoc_member_order = 'bysource'

@@ -197,12 +197,13 @@ def init(target_directory):
 
     data_source_name = add_datasource_impl(context)
 
-    if not data_source_name: # no datasource was created
+    if not data_source_name:  # no datasource was created
         return
 
     profile_datasource(context, data_source_name)
 
     cli_message(msg_go_to_notebook)
+
 
 @cli.command()
 @click.option('--directory', '-d', default="./great_expectations",
@@ -213,13 +214,13 @@ def add_datasource(directory):
     try:
         context = DataContext(directory)
     except ConfigNotFoundError:
-        cli_message("Error: no great_expectations context configuration found in the specified directory.")
+        cli_message(
+            "Error: no great_expectations context configuration found in the specified directory.")
         return
-
 
     data_source_name = add_datasource_impl(context)
 
-    if not data_source_name: # no datasource was created
+    if not data_source_name:  # no datasource was created
         return
 
     profile_datasource(context, data_source_name)
@@ -253,18 +254,23 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory):
     try:
         context = DataContext(directory)
     except ConfigNotFoundError:
-        cli_message("Error: no great_expectations context configuration found in the specified directory.")
+        cli_message(
+            "Error: no great_expectations context configuration found in the specified directory.")
         return
 
     if datasource_name is None:
-        datasources = [datasource["name"] for datasource in context.list_datasources()]
+        datasources = [datasource["name"]
+                       for datasource in context.list_datasources()]
         if len(datasources) > 1:
-            cli_message("Error: please specify the datasource to profile. Available datasources: " + ", ".join(datasources))
+            cli_message(
+                "Error: please specify the datasource to profile. Available datasources: " + ", ".join(datasources))
             return
         else:
-            profile_datasource(context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets)
+            profile_datasource(
+                context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets)
     else:
-        profile_datasource(context, datasource_name, data_assets=data_assets, profile_all_data_assets=profile_all_data_assets)
+        profile_datasource(context, datasource_name, data_assets=data_assets,
+                           profile_all_data_assets=profile_all_data_assets)
 
 
 @cli.command()
@@ -278,16 +284,19 @@ def build_documentation(directory, site_name, data_asset_name):
     """Build data documentation for a project.
     """
     if data_asset_name is not None and site_name is None:
-        cli_message("Error: When specifying data_asset_name, must also specify site_name.")
+        cli_message(
+            "Error: When specifying data_asset_name, must also specify site_name.")
         return
-        
+
     try:
         context = DataContext(directory)
     except ConfigNotFoundError:
-        cli_message("Error: no great_expectations context configuration found in the specified directory.")
+        cli_message(
+            "Error: no great_expectations context configuration found in the specified directory.")
         return
 
-    build_documentation_impl(context, site_name=site_name, data_asset_name=data_asset_name)
+    build_documentation_impl(context, site_name=site_name,
+                             data_asset_name=data_asset_name)
 
 
 @cli.command()

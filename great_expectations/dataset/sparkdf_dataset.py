@@ -34,7 +34,8 @@ try:
     from pyspark.sql import Window
 except ImportError as e:
     logger.debug(str(e))
-    logger.debug("Unable to load spark context; install optional spark dependency for support.")
+    logger.debug(
+        "Unable to load spark context; install optional spark dependency for support.")
 
 
 class MetaSparkDFDataset(Dataset):
@@ -88,7 +89,7 @@ class MetaSparkDFDataset(Dataset):
             else:
                 unexpected_count_limit = result_format['partial_unexpected_count']
 
-            col_df = self.spark_df.select(column) # pyspark.sql.DataFrame
+            col_df = self.spark_df.select(column)  # pyspark.sql.DataFrame
 
             # a couple of tests indicate that caching here helps performance
             col_df.cache()
@@ -96,7 +97,8 @@ class MetaSparkDFDataset(Dataset):
 
             # FIXME temporary fix for missing/ignored value
             if func.__name__ not in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
-                col_df = col_df.filter('{column} is not null'.format(column=column))
+                col_df = col_df.filter(
+                    '{column} is not null'.format(column=column))
                 # these nonnull_counts are cached by SparkDFDataset
                 nonnull_count = self.get_column_nonnull_count(column)
             else:
@@ -132,7 +134,8 @@ class MetaSparkDFDataset(Dataset):
                         else:
                             if isinstance(val, string_types):
                                 val = parse(val)
-                            parsed_maybe_limited_unexpected_list.append(datetime.strftime(val, output_strftime_format))
+                            parsed_maybe_limited_unexpected_list.append(
+                                datetime.strftime(val, output_strftime_format))
                     maybe_limited_unexpected_list = parsed_maybe_limited_unexpected_list
 
             success, percent_success = self._calc_map_expectation_success(
@@ -240,7 +243,8 @@ class SparkDFDataset(MetaSparkDFDataset):
         pass
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
-        temp_column = self.spark_df.select(column).where(col(column).isNotNull())
+        temp_column = self.spark_df.select(
+            column).where(col(column).isNotNull())
         if parse_strings_as_datetimes:
             temp_column = self._apply_dateutil_parse(temp_column)
         result = temp_column.agg({column: 'max'}).collect()
@@ -249,7 +253,8 @@ class SparkDFDataset(MetaSparkDFDataset):
         return result[0][0]
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
-        temp_column = self.spark_df.select(column).where(col(column).isNotNull())
+        temp_column = self.spark_df.select(
+            column).where(col(column).isNotNull())
         if parse_strings_as_datetimes:
             temp_column = self._apply_dateutil_parse(temp_column)
         result = temp_column.agg({column: 'min'}).collect()
@@ -292,7 +297,8 @@ class SparkDFDataset(MetaSparkDFDataset):
         # spark's ability to estimate.
         # We add two to 2 * n_values to maintain a legitimate quantile
         # in the degnerate case when n_values = 0
-        result = self.spark_df.approxQuantile(column, [0.5, 0.5 + (1 / (2 + (2 * self.get_row_count())))], 0)
+        result = self.spark_df.approxQuantile(
+            column, [0.5, 0.5 + (1 / (2 + (2 * self.get_row_count())))], 0)
         return np.mean(result)
 
     def get_column_quantiles(self, column, quantiles):
@@ -303,7 +309,8 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     def get_column_hist(self, column, bins):
         """return a list of counts corresponding to bins"""
-        bins = list(copy.deepcopy(bins))  # take a copy since we are inserting and popping
+        bins = list(copy.deepcopy(bins)
+                    )  # take a copy since we are inserting and popping
         if bins[0] == -np.inf or bins[0] == -float("inf"):
             added_min = False
             bins[0] = -float("inf")
@@ -318,7 +325,8 @@ class SparkDFDataset(MetaSparkDFDataset):
             added_max = True
             bins.append(float("inf"))
 
-        temp_column = self.spark_df.select(column).where(col(column).isNotNull())
+        temp_column = self.spark_df.select(
+            column).where(col(column).isNotNull())
         bucketizer = Bucketizer(
             splits=bins, inputCol=column, outputCol="buckets")
         bucketed = bucketizer.setHandleInvalid("skip").transform(temp_column)
@@ -334,7 +342,8 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         # We'll try for an optimization by asking for it at the same time
         if added_max == True:
-            upper_bound_count = temp_column.select(column).filter(col(column) == bins[-2]).count()
+            upper_bound_count = temp_column.select(
+                column).filter(col(column) == bins[-2]).count()
         else:
             upper_bound_count = 0
 
@@ -356,7 +365,8 @@ class SparkDFDataset(MetaSparkDFDataset):
             above_bins = hist.pop(-1)
             bins.pop(-1)
             if above_bins > 0:
-                logger.warning("Discarding histogram values above highest bin.")
+                logger.warning(
+                    "Discarding histogram values above highest bin.")
 
         return hist
 
@@ -406,7 +416,8 @@ class SparkDFDataset(MetaSparkDFDataset):
             return column.withColumn('__success', lit(True))
         if parse_strings_as_datetimes:
             column = self._apply_dateutil_parse(column)
-            value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+            value_set = [parse(value) if isinstance(
+                value, string_types) else value for value in value_set]
         success_udf = udf(lambda x: x in value_set)
         return column.withColumn('__success', success_udf(column[0]))
 
@@ -439,8 +450,9 @@ class SparkDFDataset(MetaSparkDFDataset):
         # NOTE: This function is implemented using native functions instead of UDFs, which is a faster
         # implementation. Please ensure new spark implementations migrate to the new style where possible
         if allow_cross_type_comparisons:
-            raise ValueError("Cross-type comparisons are not valid for SparkDFDataset")
-        
+            raise ValueError(
+                "Cross-type comparisons are not valid for SparkDFDataset")
+
         if parse_strings_as_datetimes:
             min_value = parse(min_value)
             max_value = parse(max_value)
@@ -454,7 +466,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         else:
             if min_value > max_value:
                 raise ValueError("minvalue cannot be greater than max_value")
-        
+
         return column.withColumn('__success', when((min_value <= column[0]) & (column[0] <= max_value), lit(True)).otherwise(lit(False)))
 
     @DocInherit
@@ -469,7 +481,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         elif max_value is None:
             return column.withColumn('__success', when(length_(column[0]) >= min_value, lit(True)).otherwise(lit(False)))
         # FIXME: whether the below condition is enforced seems to be somewhat inconsistent
-        
+
         # else:
         #     if min_value > max_value:
         #         raise ValueError("minvalue cannot be greater than max_value")
@@ -494,7 +506,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def expect_column_value_lengths_to_equal(
         self,
         column,
-        value, # int
+        value,  # int
         mostly=None,
         result_format=None,
         include_config=False,
@@ -508,7 +520,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def expect_column_values_to_match_strftime_format(
         self,
         column,
-        strftime_format, # str
+        strftime_format,  # str
         mostly=None,
         result_format=None,
         include_config=False,
@@ -521,7 +533,8 @@ class SparkDFDataset(MetaSparkDFDataset):
             datetime.strptime(datetime.strftime(
                 datetime.now(), strftime_format), strftime_format)
         except ValueError as e:
-            raise ValueError("Unable to use provided strftime_format. " + e.message)
+            raise ValueError(
+                "Unable to use provided strftime_format. " + e.message)
 
         def is_parseable_by_format(val):
             try:
@@ -572,10 +585,12 @@ class SparkDFDataset(MetaSparkDFDataset):
             result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if mostly is not None:
-            raise ValueError("SparkDFDataset does not support column map semantics for column types")
+            raise ValueError(
+                "SparkDFDataset does not support column map semantics for column types")
 
         try:
-            col_data = [f for f in self.spark_df.schema.fields if f.name == column][0]
+            col_data = [
+                f for f in self.spark_df.schema.fields if f.name == column][0]
             col_type = type(col_data.dataType)
         except IndexError:
             raise ValueError("Unrecognized column: %s" % column)
@@ -609,15 +624,18 @@ class SparkDFDataset(MetaSparkDFDataset):
             result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if mostly is not None:
-            raise ValueError("SparkDFDataset does not support column map semantics for column types")
+            raise ValueError(
+                "SparkDFDataset does not support column map semantics for column types")
 
         try:
-            col_data = [f for f in self.spark_df.schema.fields if f.name == column][0]
+            col_data = [
+                f for f in self.spark_df.schema.fields if f.name == column][0]
             col_type = type(col_data.dataType)
         except IndexError:
             raise ValueError("Unrecognized column: %s" % column)
         except KeyError:
-            raise ValueError("No database type data available for column: %s" % column)
+            raise ValueError(
+                "No database type data available for column: %s" % column)
 
         if type_list is None:
             success = True

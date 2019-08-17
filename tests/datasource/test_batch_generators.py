@@ -9,23 +9,26 @@ from great_expectations.datasource import SubdirReaderGenerator, GlobReaderGener
 def test_file_kwargs_generator(data_context, filesystem_csv):
     base_dir = filesystem_csv
 
-    datasource = data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
+    datasource = data_context.add_datasource(
+        "default", "pandas", base_directory=str(base_dir))
     generator = datasource.get_generator("default")
     known_data_asset_names = datasource.get_available_data_asset_names()
 
     assert known_data_asset_names["default"] == {"f1", "f2", "f3"}
 
-    f1_batches = [batch_kwargs for batch_kwargs in generator.get_iterator("f1")]
+    f1_batches = [
+        batch_kwargs for batch_kwargs in generator.get_iterator("f1")]
     assert len(f1_batches) == 1
     assert "timestamp" in f1_batches[0]
     del f1_batches[0]["timestamp"]
     assert f1_batches[0] == {
-            "path": os.path.join(base_dir, "f1.csv"),
-            "sep": None,
-            "engine": "python"
-        }
+        "path": os.path.join(base_dir, "f1.csv"),
+        "sep": None,
+        "engine": "python"
+    }
 
-    f3_batches = [batch_kwargs["path"] for batch_kwargs in generator.get_iterator("f3")]
+    f3_batches = [batch_kwargs["path"]
+                  for batch_kwargs in generator.get_iterator("f3")]
     expected_batches = [
         {
             "path": os.path.join(base_dir, "f3", "f3_20190101.csv")
@@ -41,7 +44,8 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
 
 def test_file_kwargs_generator_error(data_context, filesystem_csv):
     base_dir = filesystem_csv
-    data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
+    data_context.add_datasource(
+        "default", "pandas", base_directory=str(base_dir))
 
     with pytest.raises(DataContextError) as exc:
         data_context.get_batch("f4")
@@ -53,7 +57,7 @@ def test_glob_reader_generator(tmp_path_factory):
     names for data_assets, and an associated glob; the generator
     will take care of providing batches consisting of one file per
     batch corresponding to the glob."""
-    
+
     basedir = str(tmp_path_factory.mktemp("test_glob_reader_generator"))
 
     with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:
@@ -100,7 +104,8 @@ def test_glob_reader_generator(tmp_path_factory):
 
 def test_file_kwargs_generator_extensions(tmp_path_factory):
     """csv, xls, parquet, json should be recognized file extensions"""
-    basedir = str(tmp_path_factory.mktemp("test_file_kwargs_generator_extensions"))
+    basedir = str(tmp_path_factory.mktemp(
+        "test_file_kwargs_generator_extensions"))
 
     # Do not include: invalid extension
     with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:
@@ -123,7 +128,7 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     # Do not include: valid extension, but dot prefix
     with open(os.path.join(basedir, ".f5.csv"), "w") as outfile:
         outfile.write("\n\n\n")
-    
+
     # Include: valid extensions
     with open(os.path.join(basedir, "f6.tsv"), "w") as outfile:
         outfile.write("\n\n\n")

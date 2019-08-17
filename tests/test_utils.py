@@ -131,7 +131,8 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         sql_dtypes = {}
         if schemas and "sqlite" in schemas and isinstance(engine.dialect, sqlitetypes.dialect):
             schema = schemas["sqlite"]
-            sql_dtypes = {col: SQLITE_TYPES[dtype] for (col,dtype) in schema.items()}
+            sql_dtypes = {col: SQLITE_TYPES[dtype]
+                          for (col, dtype) in schema.items()}
             for col in schema:
                 type_ = schema[col]
                 if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
@@ -141,7 +142,9 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
-        tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
+        tablename = "test_data_" + \
+            ''.join([random.choice(string.ascii_letters + string.digits)
+                     for n in range(8)])
         df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
@@ -155,7 +158,8 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         sql_dtypes = {}
         if schemas and "postgresql" in schemas and isinstance(engine.dialect, postgresqltypes.dialect):
             schema = schemas["postgresql"]
-            sql_dtypes = {col: POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
+            sql_dtypes = {col: POSTGRESQL_TYPES[dtype]
+                          for (col, dtype) in schema.items()}
             for col in schema:
                 type_ = schema[col]
                 if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
@@ -165,7 +169,9 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
-        tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
+        tablename = "test_data_" + \
+            ''.join([random.choice(string.ascii_letters + string.digits)
+                     for n in range(8)])
         df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
@@ -178,7 +184,8 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         sql_dtypes = {}
         if schemas and "mysql" in schemas and isinstance(engine.dialect, mysqltypes.dialect):
             schema = schemas["mysql"]
-            sql_dtypes = {col: MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
+            sql_dtypes = {col: MYSQL_TYPES[dtype]
+                          for (col, dtype) in schema.items()}
             for col in schema:
                 type_ = schema[col]
                 if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
@@ -188,7 +195,9 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
-        tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
+        tablename = "test_data_" + \
+            ''.join([random.choice(string.ascii_letters + string.digits)
+                     for n in range(8)])
         df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
@@ -211,17 +220,18 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
             "NullType": sparktypes.NullType
         }
 
-
         spark = SparkSession.builder.getOrCreate()
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
-        data_reshaped = list(zip(*[v for _, v in data.items()]))  # create a list of rows
+        # create a list of rows
+        data_reshaped = list(zip(*[v for _, v in data.items()]))
         if schemas and 'spark' in schemas:
             schema = schemas['spark']
             # sometimes first method causes Spark to throw a TypeError
             try:
                 spark_schema = sparktypes.StructType([
-                    sparktypes.StructField(column, SPARK_TYPES[schema[column]](), True)
+                    sparktypes.StructField(
+                        column, SPARK_TYPES[schema[column]](), True)
                     for column in schema
                 ])
                 # We create these every time, which is painful for testing
@@ -259,8 +269,10 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
                                 vals.append(parse(val))
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
-                data_reshaped = list(zip(*[v for _, v in data.items()]))  # create a list of rows
-                spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
+                # create a list of rows
+                data_reshaped = list(zip(*[v for _, v in data.items()]))
+                spark_df = spark.createDataFrame(
+                    data_reshaped, schema=spark_schema)
             except TypeError:
                 string_schema = sparktypes.StructType([
                     sparktypes.StructField(column, sparktypes.StringType())
@@ -268,7 +280,8 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
                 ])
                 spark_df = spark.createDataFrame(data_reshaped, string_schema)
                 for c in spark_df.columns:
-                    spark_df = spark_df.withColumn(c, spark_df[c].cast(SPARK_TYPES[schema[c]]()))
+                    spark_df = spark_df.withColumn(
+                        c, spark_df[c].cast(SPARK_TYPES[schema[c]]()))
         elif len(data_reshaped) == 0:
             # if we have an empty dataset and no schema, need to assign an arbitrary type
             columns = list(data.keys())
@@ -299,6 +312,7 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
         ]
     if context == 'SparkDFDataset':
         return getter in []
+
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
     if context in ["sqlite", "postgresql", "mysql"]:
@@ -334,8 +348,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_median_to_be_between",
             # "expect_column_quantile_values_to_be_between",
             "expect_column_stdev_to_be_between",
-            #"expect_column_unique_value_count_to_be_between",
-            #"expect_column_proportion_of_unique_values_to_be_between",
+            # "expect_column_unique_value_count_to_be_between",
+            # "expect_column_proportion_of_unique_values_to_be_between",
             "expect_column_most_common_value_to_be_in_set",
             # "expect_column_sum_to_be_between",
             # "expect_column_min_to_be_between",
@@ -379,7 +393,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
             # "expect_column_mean_to_be_between",
-            # "expect_column_median_to_be_between",            
+            # "expect_column_median_to_be_between",
             # "expect_column_quantile_values_to_be_between",
             # "expect_column_stdev_to_be_between",
             # "expect_column_unique_value_count_to_be_between",
@@ -462,11 +476,14 @@ def evaluate_json_test(data_asset, expectation_type, test):
             elif key == 'observed_value':
                 if 'tolerance' in test:
                     if isinstance(value, dict):
-                        assert set(value.keys()) == set(result["result"]["observed_value"].keys())
-                        for k,v in value.items():
-                            assert np.allclose(result["result"]["observed_value"][k], v, rtol=test["tolerance"])
+                        assert set(value.keys()) == set(
+                            result["result"]["observed_value"].keys())
+                        for k, v in value.items():
+                            assert np.allclose(
+                                result["result"]["observed_value"][k], v, rtol=test["tolerance"])
                     else:
-                        assert np.allclose(result['result']['observed_value'], value, rtol=test['tolerance'])
+                        assert np.allclose(
+                            result['result']['observed_value'], value, rtol=test['tolerance'])
                 else:
                     assert value == result['result']['observed_value']
 
@@ -513,18 +530,24 @@ def evaluate_json_test(data_asset, expectation_type, test):
                 assert value in result['exception_info']['exception_traceback'], "expected to find " + \
                     value + " in " + \
                     result['exception_info']['exception_traceback']
-            
+
             elif key == "expected_partition":
-                assert np.allclose(result["result"]["details"]["expected_partition"]["bins"], value["bins"])
-                assert np.allclose(result["result"]["details"]["expected_partition"]["weights"], value["weights"])
+                assert np.allclose(
+                    result["result"]["details"]["expected_partition"]["bins"], value["bins"])
+                assert np.allclose(
+                    result["result"]["details"]["expected_partition"]["weights"], value["weights"])
                 if "tail_weights" in result["result"]["details"]["expected_partition"]:
-                    assert np.allclose(result["result"]["details"]["expected_partition"]["tail_weights"], value["tail_weights"])
-     
+                    assert np.allclose(
+                        result["result"]["details"]["expected_partition"]["tail_weights"], value["tail_weights"])
+
             elif key == "observed_partition":
-                assert np.allclose(result["result"]["details"]["observed_partition"]["bins"], value["bins"])
-                assert np.allclose(result["result"]["details"]["observed_partition"]["weights"], value["weights"])
+                assert np.allclose(
+                    result["result"]["details"]["observed_partition"]["bins"], value["bins"])
+                assert np.allclose(
+                    result["result"]["details"]["observed_partition"]["weights"], value["weights"])
                 if "tail_weights" in result["result"]["details"]["observed_partition"]:
-                    assert np.allclose(result["result"]["details"]["observed_partition"]["tail_weights"], value["tail_weights"])
+                    assert np.allclose(
+                        result["result"]["details"]["observed_partition"]["tail_weights"], value["tail_weights"])
 
             else:
                 raise ValueError(

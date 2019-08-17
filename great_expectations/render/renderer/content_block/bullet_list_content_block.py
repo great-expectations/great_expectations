@@ -20,4 +20,3 @@ class ExpectationSuiteBulletListContentBlockRenderer(ExpectationStringRenderer):
             }
         }
     }
-

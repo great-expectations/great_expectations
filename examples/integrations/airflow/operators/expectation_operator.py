@@ -17,6 +17,7 @@ from examples.integrations.airflow.hooks.db_hook import ExpectationMySQLHook
 #
 ####
 
+
 class ExpectationOperator(BaseOperator):
 
     results_dest_name = None
@@ -63,7 +64,8 @@ class ExpectationOperator(BaseOperator):
 
         # Get destination hook and make sure all required parameters are set
         if dest_conn_id is not None:
-            self._setup_dest_conn(dest_conn_id, results_bucket_name, results_dest_name)
+            self._setup_dest_conn(
+                dest_conn_id, results_bucket_name, results_dest_name)
 
         self.expectations_json = expectations_json
         self.fail_on_error = fail_on_error
@@ -90,7 +92,8 @@ class ExpectationOperator(BaseOperator):
         connection = BaseHook._get_connection_from_env(source_conn_id)
         self.log.info(connection.extra_dejson)
         if connection.conn_type == 's3':
-            self.log.info("Setting up s3 connection {0}".format(source_conn_id))
+            self.log.info(
+                "Setting up s3 connection {0}".format(source_conn_id))
             self.source_conn = S3Hook(aws_conn_id=source_conn_id)
             # End Workaround
             if source_bucket_name is None:
@@ -117,7 +120,8 @@ class ExpectationOperator(BaseOperator):
         self.dest_conn_id = dest_conn_id
 
         if results_bucket_name is None or results_dest_name is None:
-            raise AttributeError("Specify bucket name and key name to store results")
+            raise AttributeError(
+                "Specify bucket name and key name to store results")
 
         self.results_bucket_name = results_bucket_name
         self.results_dest_name = results_dest_name
@@ -147,7 +151,8 @@ class ExpectationOperator(BaseOperator):
         :return:
         """
         if os.path.isfile(self.expectations_json):
-            self.log.info("Loading expectation suite from file {file}".format(file=self.expectations_json))
+            self.log.info("Loading expectation suite from file {file}".format(
+                file=self.expectations_json))
             return json.load(open(self.expectations_json))
         else:
             self.log.info("Loading expectation suite from string")
@@ -160,7 +165,8 @@ class ExpectationOperator(BaseOperator):
     def execute(self, context):
         df = self._get_dataframe()
         suite = self._load_json()
-        self.log.info("Start dataset validation for set {set}".format(set=self.dataset_name))
+        self.log.info("Start dataset validation for set {set}".format(
+            set=self.dataset_name))
         results = df.validate(expectation_suite=suite)
 
         self.log.info(pformat(results))
@@ -171,6 +177,7 @@ class ExpectationOperator(BaseOperator):
         for result in results['results']:
             if result['success'] is False:
                 if self.fail_on_error is True:
-                    raise AirflowException("Validation failed for dataset {name}".format(name=self.dataset_name))
+                    raise AirflowException(
+                        "Validation failed for dataset {name}".format(name=self.dataset_name))
 
         return results

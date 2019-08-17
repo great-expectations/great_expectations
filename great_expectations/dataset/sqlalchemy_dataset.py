@@ -25,7 +25,8 @@ try:
     import sqlalchemy as sa
     from sqlalchemy.engine import reflection
 except ImportError:
-    logger.debug("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
 
 try:
     import sqlalchemy_redshift.dialect
@@ -65,7 +66,8 @@ class MetaSqlAlchemyDataset(Dataset):
             result_format = parse_result_format(result_format)
 
             if result_format['result_format'] == 'COMPLETE':
-                warnings.warn("Setting result format to COMPLETE for a SqlAlchemyDataset can be dangerous because it will not limit the number of returned results.")
+                warnings.warn(
+                    "Setting result format to COMPLETE for a SqlAlchemyDataset can be dangerous because it will not limit the number of returned results.")
                 unexpected_count_limit = None
             else:
                 unexpected_count_limit = result_format['partial_unexpected_count']
@@ -82,7 +84,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 # This only happens on expect_column_values_to_not_be_null expectations.
                 # Since there is no reason to look for most common unexpected values in this case,
                 # we will instruct the result formatting method to skip this step.
-                result_format['partial_unexpected_count'] = 0 
+                result_format['partial_unexpected_count'] = 0
 
             count_query = sa.select([
                 sa.func.count().label('element_count'),
@@ -150,9 +152,11 @@ class MetaSqlAlchemyDataset(Dataset):
                         col = parse(x[column])
                     else:
                         col = x[column]
-                    maybe_limited_unexpected_list.append(datetime.strftime(col, output_strftime_format))
+                    maybe_limited_unexpected_list.append(
+                        datetime.strftime(col, output_strftime_format))
             else:
-                maybe_limited_unexpected_list = [x[column] for x in unexpected_query_results.fetchall()]
+                maybe_limited_unexpected_list = [
+                    x[column] for x in unexpected_query_results.fetchall()]
 
             success_count = nonnull_count - count_results['unexpected_count']
             success, percent_success = self._calc_map_expectation_success(
@@ -221,7 +225,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # Get the dialect **for purposes of identifying types**
         if self.engine.dialect.name.lower() in ["postgresql", "mysql", "sqlite", "oracle", "mssql", "oracle"]:
             # These are the officially included and supported dialects by sqlalchemy
-            self.dialect = import_module("sqlalchemy.dialects." + self.engine.dialect.name)
+            self.dialect = import_module(
+                "sqlalchemy.dialects." + self.engine.dialect.name)
         elif self.engine.dialect.name.lower() == "snowflake":
             self.dialect = import_module("snowflake.sqlalchemy.snowdialect")
         elif self.engine.dialect.name.lower() == "redshift":
@@ -254,7 +259,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             pd.read_sql(
                 sa.select(["*"]).select_from(self._table).limit(n),
                 con=self.engine
-            ), 
+            ),
             expectation_suite=self.get_expectation_suite(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
@@ -309,14 +314,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             sa.select([sa.func.min(sa.column(column))]).select_from(
                 self._table)
         ).scalar()
-    
+
     def get_column_value_counts(self, column):
         results = self.engine.execute(
             sa.select([
                 sa.column(column).label("value"),
                 sa.func.count(sa.column(column)).label("count"),
-            ]).where(sa.column(column) != None) \
-              .group_by(sa.column(column)) \
+            ]).where(sa.column(column) != None)
+              .group_by(sa.column(column))
               .select_from(self._table)).fetchall()
         series = pd.Series(
             [row[1] for row in results],
@@ -368,15 +373,17 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         selects = []
         for quantile in quantiles:
             selects.append(
-                sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
+                sa.func.percentile_disc(quantile).within_group(
+                    sa.column(column).asc())
             )
-        quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
+        quantiles = self.engine.execute(
+            sa.select(selects).select_from(self._table)).fetchone()
         return list(quantiles)
 
     def get_column_stdev(self, column):
         res = self.engine.execute(sa.select([
-                sa.func.stddev_samp(sa.column(column))
-            ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
+            sa.func.stddev_samp(sa.column(column))
+        ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
         return float(res[0])
 
     def get_column_hist(self, column, bins):
@@ -427,7 +434,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     )
                 ).label("bin_" + str(len(bins)-1))
             )
-        else:    
+        else:
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
@@ -444,10 +451,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         query = sa.select(
             case_conditions
         )\
-        .where(
+            .where(
             sa.column(column) != None,
         )\
-        .select_from(self._table)
+            .select_from(self._table)
 
         hist = list(self.engine.execute(query).fetchone())
         return hist
@@ -470,7 +477,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 max_condition = sa.column(column) < max_val
             else:
                 max_condition = sa.column(column) <= max_val
-        
+
         if min_condition is not None and max_condition is not None:
             condition = sa.and_(min_condition, max_condition)
         elif min_condition is not None:
@@ -479,16 +486,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             condition = max_condition
 
         query = query = sa.select([
-                    sa.func.count((sa.column(column)))
-                ]) \
-                .where(
-                    sa.and_(
-                        sa.column(column) != None,
-                        condition
-                    )
-                ) \
-                .select_from(self._table)
-        
+            sa.func.count((sa.column(column)))
+        ]) \
+            .where(
+            sa.and_(
+                sa.column(column) != None,
+                condition
+            )
+        ) \
+            .select_from(self._table)
+
         return self.engine.execute(query).scalar()
 
     def create_temporary_table(self, table_name, custom_sql):
@@ -549,15 +556,18 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if mostly is not None:
-            raise ValueError("SqlAlchemyDataset does not support column map semantics for column types")
+            raise ValueError(
+                "SqlAlchemyDataset does not support column map semantics for column types")
 
         try:
-            col_data = [col for col in self.columns if col["name"] == column][0]
+            col_data = [
+                col for col in self.columns if col["name"] == column][0]
             col_type = type(col_data["type"])
         except IndexError:
             raise ValueError("Unrecognized column: %s" % column)
         except KeyError:
-            raise ValueError("No database type data available for column: %s" % column)
+            raise ValueError(
+                "No database type data available for column: %s" % column)
 
         try:
             # Our goal is to be as explicit as possible. We will match the dialect
@@ -574,17 +584,19 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 success = True
             else:
                 if self.dialect is None:
-                    logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+                    logger.warning(
+                        "No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
                     success = issubclass(col_type, getattr(sa, type_))
                 else:
-                    success = issubclass(col_type, getattr(self.dialect, type_))
-                
+                    success = issubclass(
+                        col_type, getattr(self.dialect, type_))
+
             return {
-                    "success": success,
-                    "result": {
-                        "observed_value": col_type.__name__
-                    }
+                "success": success,
+                "result": {
+                    "observed_value": col_type.__name__
                 }
+            }
 
         except AttributeError:
             raise ValueError("Unrecognized sqlalchemy type: %s" % type_)
@@ -599,15 +611,18 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if mostly is not None:
-            raise ValueError("SqlAlchemyDataset does not support column map semantics for column types")
+            raise ValueError(
+                "SqlAlchemyDataset does not support column map semantics for column types")
 
         try:
-            col_data = [col for col in self.columns if col["name"] == column][0]
+            col_data = [
+                col for col in self.columns if col["name"] == column][0]
             col_type = type(col_data["type"])
         except IndexError:
             raise ValueError("Unrecognized column: %s" % column)
         except KeyError:
-            raise ValueError("No database type data available for column: %s" % column)
+            raise ValueError(
+                "No database type data available for column: %s" % column)
 
         # Our goal is to be as explicit as possible. We will match the dialect
         # if that is possible. If there is no dialect available, we *will*
@@ -622,7 +637,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             success = True
         else:
             if self.dialect is None:
-                logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+                logger.warning(
+                    "No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
                 types = []
                 for type_ in type_list:
                     try:
@@ -631,7 +647,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     except AttributeError:
                         logger.debug("Unrecognized type: %s" % type_)
                 if len(types) == 0:
-                    logger.warning("No recognized sqlalchemy types in type_list")
+                    logger.warning(
+                        "No recognized sqlalchemy types in type_list")
                 types = tuple(types)
             else:
                 types = []
@@ -648,10 +665,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             success = issubclass(col_type, types)
 
         return {
-                "success": success,
-                "result": {
-                    "observed_value": col_type.__name__
-                }
+            "success": success,
+            "result": {
+                "observed_value": col_type.__name__
+            }
         }
 
     @DocInherit
@@ -792,7 +809,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # redshift
             if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
                 return "~" if positive else "!~"
-        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+        # TypeError can occur if the driver was not installed and so is None
+        except (AttributeError, TypeError):
             pass
         try:
             # Mysql
@@ -805,7 +823,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # Snowflake
             if isinstance(self.engine.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect):
                 return "RLIKE" if positive else "NOT RLIKE"
-        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+        # TypeError can occur if the driver was not installed and so is None
+        except (AttributeError, TypeError):
             pass
 
     @MetaSqlAlchemyDataset.column_map_expectation
@@ -819,7 +838,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         regex_fn = self._get_dialect_regex_fn(positive=True)
         if regex_fn is None:
-            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            logger.warning("Regex is not supported for dialect %s" %
+                           str(self.engine.dialect))
             raise NotImplementedError
 
         return sa.text(column + " " + regex_fn + " '" + regex + "'")
@@ -834,7 +854,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     ):
         regex_fn = self._get_dialect_regex_fn(positive=False)
         if regex_fn is None:
-            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            logger.warning("Regex is not supported for dialect %s" %
+                           str(self.engine.dialect))
             raise NotImplementedError
 
         return sa.text(column + " " + regex_fn + " '" + regex + "'")
@@ -853,7 +874,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         regex_fn = self._get_dialect_regex_fn(positive=True)
         if regex_fn is None:
-            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            logger.warning("Regex is not supported for dialect %s" %
+                           str(self.engine.dialect))
             raise NotImplementedError
 
         if match_on == "any":
@@ -875,7 +897,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         regex_fn = self._get_dialect_regex_fn(positive=False)
         if regex_fn is None:
-            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            logger.warning("Regex is not supported for dialect %s" %
+                           str(self.engine.dialect))
             raise NotImplementedError
 
         return sa.and_(

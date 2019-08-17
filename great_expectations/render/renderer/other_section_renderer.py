@@ -53,10 +53,12 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
     @classmethod
     def _render_dataset_info(cls, evrs, content_blocks):
-        expect_table_row_count_to_be_between_evr = cls._find_evr_by_type(evrs['results'], "expect_table_row_count_to_be_between")
+        expect_table_row_count_to_be_between_evr = cls._find_evr_by_type(
+            evrs['results'], "expect_table_row_count_to_be_between")
 
         table_rows = []
-        table_rows.append(["Number of variables", len(cls._get_column_list_from_evrs(evrs)), ])
+        table_rows.append(["Number of variables", len(
+            cls._get_column_list_from_evrs(evrs)), ])
 
         table_rows.append([
             RenderedComponentContent(**{
@@ -76,7 +78,8 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         ])
 
         table_rows += [
-            ["Missing cells", cls._get_percentage_missing_cells_str(evrs), ], # "866 (8.1%)"
+            ["Missing cells", cls._get_percentage_missing_cells_str(
+                evrs), ],  # "866 (8.1%)"
             # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this
         ]
 
@@ -99,9 +102,10 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
     def _render_variable_types(cls, evrs, content_blocks):
 
         column_types = cls._get_column_types(evrs)
-        #TODO: check if we have the information to make this statement. Do all columns have type expectations?
+        # TODO: check if we have the information to make this statement. Do all columns have type expectations?
         column_type_counter = Counter(column_types.values())
-        table_rows = [[type, str(column_type_counter[type])] for type in ["int", "float", "string", "--"]]
+        table_rows = [[type, str(column_type_counter[type])]
+                      for type in ["int", "float", "string", "--"]]
 
         content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "table",
@@ -244,13 +248,16 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         columns = cls._get_column_list_from_evrs(evrs)
         if not columns or len(columns) == 0:
-            warnings.warn("Cannot get % of missing cells - column list is empty")
+            warnings.warn(
+                "Cannot get % of missing cells - column list is empty")
             return "?"
 
-        expect_column_values_to_not_be_null_evrs = cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_not_be_null")
+        expect_column_values_to_not_be_null_evrs = cls._find_all_evrs_by_type(
+            evrs["results"], "expect_column_values_to_not_be_null")
 
         if len(columns) > len(expect_column_values_to_not_be_null_evrs):
-            warnings.warn("Cannot get % of missing cells - not all columns have expect_column_values_to_not_be_null expectations")
+            warnings.warn(
+                "Cannot get % of missing cells - not all columns have expect_column_values_to_not_be_null expectations")
             return "?"
 
         # assume 1.0 missing for columns where ["result"]["unexpected_percent"] is not available
@@ -261,7 +268,8 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         columns = cls._get_column_list_from_evrs(evrs)
 
         type_evrs = cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_be_in_type_list") +\
-            cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_be_of_type")
+            cls._find_all_evrs_by_type(
+                evrs["results"], "expect_column_values_to_be_of_type")
 
         column_types = {}
         for column in columns:
@@ -273,9 +281,11 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 if evr["expectation_config"]["kwargs"]["type_list"] is None:
                     expected_types = {}
                 else:
-                    expected_types = set(evr["expectation_config"]["kwargs"]["type_list"])
+                    expected_types = set(
+                        evr["expectation_config"]["kwargs"]["type_list"])
             else:  # assuming expect_column_values_to_be_of_type
-                expected_types = set([evr["expectation_config"]["kwargs"]["type_"]])
+                expected_types = set(
+                    [evr["expectation_config"]["kwargs"]["type_"]])
 
             if expected_types.issubset(BasicDatasetProfiler.INT_TYPE_NAMES):
                 column_types[column] = "int"
@@ -288,7 +298,8 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             elif expected_types.issubset(BasicDatasetProfiler.BOOLEAN_TYPE_NAMES):
                 column_types[column] = "bool"
             else:
-                warnings.warn("The expected type list is not a subset of any of the profiler type sets: {0:s}".format(str(expected_types)))
+                warnings.warn("The expected type list is not a subset of any of the profiler type sets: {0:s}".format(
+                    str(expected_types)))
                 column_types[column] = "--"
 
         return column_types

@@ -27,7 +27,8 @@ def generate_ids(test):
 @pytest.mark.parametrize('test', test_config['tests'], ids=[generate_ids(t) for t in test_config['tests']])
 def test_implementations(context, test):
     should_skip = (
-        candidate_getter_is_on_temporary_notimplemented_list(context, test['func'])
+        candidate_getter_is_on_temporary_notimplemented_list(
+            context, test['func'])
         or
         context in test.get('suppress_test_for', [])
     )
@@ -47,7 +48,7 @@ def test_implementations(context, test):
     # NOTE: we cannot serialize pd.Series to json directly,
     # so we're going to test our preferred serialization.
     # THIS TEST DOES NOT REPRESENT THE EXPECTED RETURN VALUE
-    # OF THE TESTED FUNCTION; THIS IS A JOINT TEST OF THE 
+    # OF THE TESTED FUNCTION; THIS IS A JOINT TEST OF THE
     # JSON SERIALIZATION AND THE TEST.
     # See test_get_column_value_counts for a series-specific test
     if test['func'] == 'get_column_value_counts':
@@ -77,12 +78,12 @@ def test_get_column_value_counts(context):
         }
     }
     data = {
-                "x": [2.0, 5.0],
-                "y": [5, 5],
-                "z": [0, 10],
-                "n": [0, None],
-                "b": [True, False]
-            }
+        "x": [2.0, 5.0],
+        "y": [5, 5],
+        "z": [0, 10],
+        "n": [0, None],
+        "b": [True, False]
+    }
     dataset = get_dataset(context, data, schemas=schemas)
 
     res = dataset.get_column_value_counts("x")
@@ -114,7 +115,6 @@ def test_get_column_value_counts(context):
     expected.name = "count"
     assert res.equals(expected)
 
-
     res = dataset.get_column_value_counts("b")
     expected = pd.Series(data["b"]).value_counts()
     expected.sort_index(inplace=True)
@@ -123,10 +123,10 @@ def test_get_column_value_counts(context):
     assert res.equals(expected)
 
     data = {
-            "a": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            "b": ["a", "b", "b", "c", "c", "c", "d", "d", "d", "d"],
-            "c": ["a", "b", "b", "c", "c", "c", "d", None, None, None],
-            "d": ["a", "b", "c", "d", "e", "f", "g", None, None, None]
+        "a": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        "b": ["a", "b", "b", "c", "c", "c", "d", "d", "d", "d"],
+        "c": ["a", "b", "b", "c", "c", "c", "d", None, None, None],
+        "d": ["a", "b", "c", "d", "e", "f", "g", None, None, None]
     }
     schemas = {
         "SparkDFDataset": {
@@ -151,7 +151,6 @@ def test_get_column_value_counts(context):
     expected.index.name = "value"
     expected.name = "count"
     assert res.equals(expected)
-
 
     res = dataset.get_column_value_counts("c")
     expected = pd.Series(data["c"]).value_counts()

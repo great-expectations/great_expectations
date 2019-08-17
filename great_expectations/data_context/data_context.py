@@ -96,7 +96,8 @@ class DataContext(object):
             DataContext
         """
         if not os.path.isdir(project_root_dir):
-            raise DataContextError("project_root_dir must be a directory in which to initialize a new DataContext")
+            raise DataContextError(
+                "project_root_dir must be a directory in which to initialize a new DataContext")
         else:
             try:
                 os.mkdir(os.path.join(project_root_dir, "great_expectations"))
@@ -109,7 +110,7 @@ class DataContext(object):
                 template.write(PROJECT_TEMPLATE)
 
         return cls(os.path.join(project_root_dir, "great_expectations"))
-            
+
     def __init__(self, context_root_dir=None, expectation_explorer=False, data_asset_name_delimiter='/'):
         """DataContext constructor
 
@@ -147,8 +148,10 @@ class DataContext(object):
         self._context_root_directory = os.path.abspath(context_root_dir)
 
         # TODO: these paths should be configurable
-        self.fixtures_validations_directory = os.path.join(self.root_directory, "fixtures/validations")
-        self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
+        self.fixtures_validations_directory = os.path.join(
+            self.root_directory, "fixtures/validations")
+        self.data_doc_directory = os.path.join(
+            self.root_directory, "uncommitted/documentation")
 
         self._project_config = self._load_project_config()
 
@@ -157,16 +160,20 @@ class DataContext(object):
         for datasource in self._project_config["datasources"].keys():
             self.get_datasource(datasource)
 
-        plugins_directory = self._project_config.get("plugins_directory", "plugins/")
+        plugins_directory = self._project_config.get(
+            "plugins_directory", "plugins/")
         if not os.path.isabs(plugins_directory):
-            self._plugins_directory = os.path.join(self.root_directory, plugins_directory)
+            self._plugins_directory = os.path.join(
+                self.root_directory, plugins_directory)
         else:
             self._plugins_directory = plugins_directory
         sys.path.append(self._plugins_directory)
 
-        expectations_directory = self._project_config.get("expectations_directory", "expectations")
+        expectations_directory = self._project_config.get(
+            "expectations_directory", "expectations")
         if not os.path.isabs(expectations_directory):
-            self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
+            self._expectations_directory = os.path.join(
+                self.root_directory, expectations_directory)
         else:
             self._expectations_directory = expectations_directory
 
@@ -178,19 +185,22 @@ class DataContext(object):
         })
         # Normalize paths as appropriate
         for validations_store_name in validations_stores:
-            validations_stores[validations_store_name] = self._normalize_store_path(validations_stores[validations_store_name])
+            validations_stores[validations_store_name] = self._normalize_store_path(
+                validations_stores[validations_store_name])
         self._validations_stores = validations_stores
 
         self._load_evaluation_parameter_store()
         self._compiled = False
         if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
-            raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
+            raise DataContextError(
+                "Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
 
     def _normalize_store_path(self, resource_store):
         if resource_store["type"] == "filesystem":
             if not os.path.isabs(resource_store["base_directory"]):
-                resource_store["base_directory"] = os.path.join(self.root_directory, resource_store["base_directory"])
+                resource_store["base_directory"] = os.path.join(
+                    self.root_directory, resource_store["base_directory"])
         return resource_store
 
     @property
@@ -228,12 +238,13 @@ class DataContext(object):
         """Configurable delimiter character used to parse data asset name strings into \
         ``NormalizedDataAssetName`` objects."""
         return self._data_asset_name_delimiter
-    
+
     @data_asset_name_delimiter.setter
     def data_asset_name_delimiter(self, new_delimiter):
         """data_asset_name_delimiter property setter method"""
         if new_delimiter not in ALLOWED_DELIMITERS:
-            raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
+            raise DataContextError(
+                "Invalid delimiter: delimiter must be '.' or '/'")
         else:
             self._data_asset_name_delimiter = new_delimiter
 
@@ -263,7 +274,8 @@ class DataContext(object):
 
             base_directory = validations_store["base_directory"]
             if not os.path.isabs(base_directory):
-                base_directory = os.path.join(self.root_directory, base_directory)
+                base_directory = os.path.join(
+                    self.root_directory, base_directory)
 
             if run_id is None:  # Get most recent run_id
                 runs = [name for name in os.listdir(base_directory) if
@@ -274,7 +286,7 @@ class DataContext(object):
                 base_directory,
                 run_id,
                 self._get_normalized_data_asset_name_filepath(
-                    data_asset_name, 
+                    data_asset_name,
                     expectation_suite_name,
                     base_path=""
                 )
@@ -292,7 +304,8 @@ class DataContext(object):
                 import boto3
                 s3 = boto3.client('s3')
             except ImportError:
-                raise ImportError("boto3 is required for retrieving a dataset from s3")
+                raise ImportError(
+                    "boto3 is required for retrieving a dataset from s3")
 
             bucket = validations_store["bucket"]
             key_prefix = validations_store["key_prefix"]
@@ -301,8 +314,8 @@ class DataContext(object):
                 all_objects = s3.list_objects(Bucket=bucket)
                 # Remove the key_prefix and first slash from the name
                 validations = [
-                    name[len(key_prefix) + 1:] 
-                    for name in all_objects 
+                    name[len(key_prefix) + 1:]
+                    for name in all_objects
                     if name.startswith(key_prefix) and len(name) > len(key_prefix) + 1
                 ]
                 # run id is the first section after the word "validations"
@@ -324,7 +337,8 @@ class DataContext(object):
             result['key'] = key
 
         else:
-            raise DataContextError("Invalid validations_store configuration: only 'filesystem' and 's3' are supported.")
+            raise DataContextError(
+                "Invalid validations_store configuration: only 'filesystem' and 's3' are supported.")
 
         return result
 
@@ -363,7 +377,8 @@ class DataContext(object):
         Returns:
             None
         """
-        source_filepath = self.get_validation_location(data_asset_name, expectation_suite_name, run_id)['filepath']
+        source_filepath = self.get_validation_location(
+            data_asset_name, expectation_suite_name, run_id)['filepath']
 
         destination_filepath = self._get_normalized_data_asset_name_filepath(
             data_asset_name,
@@ -402,7 +417,8 @@ class DataContext(object):
 
         # We need to ensure data_asset_name is a valid filepath no matter its current state
         if isinstance(data_asset_name, NormalizedDataAssetName):
-            name_parts = [name_part.replace("/", "__") for name_part in data_asset_name]
+            name_parts = [name_part.replace("/", "__")
+                          for name_part in data_asset_name]
             relative_path = "/".join(name_parts)
         elif isinstance(data_asset_name, string_types):
             # if our delimiter is not '/', we need to first replace any slashes that exist in the name
@@ -410,9 +426,11 @@ class DataContext(object):
             relative_path = data_asset_name
             if self.data_asset_name_delimiter != "/":
                 relative_path.replace("/", "__")
-                relative_path = relative_path.replace(self.data_asset_name_delimiter, "/")
+                relative_path = relative_path.replace(
+                    self.data_asset_name_delimiter, "/")
         else:
-            raise DataContextError("data_assset_name must be a NormalizedDataAssetName or string")
+            raise DataContextError(
+                "data_assset_name must be a NormalizedDataAssetName or string")
 
         expectation_suite_name += file_extension
 
@@ -473,7 +491,8 @@ class DataContext(object):
         """
         profiles = self._get_all_profile_credentials()
         profiles[profile_name] = dict(**kwargs)
-        profiles_filepath = os.path.join(self.root_directory, "uncommitted/credentials/profiles.yml")
+        profiles_filepath = os.path.join(
+            self.root_directory, "uncommitted/credentials/profiles.yml")
         safe_mmkdir(os.path.dirname(profiles_filepath), exist_ok=True)
         if not os.path.isfile(profiles_filepath):
             logger.info("Creating new profiles store at {profiles_filepath}".format(
@@ -503,13 +522,16 @@ class DataContext(object):
         # Any key duplicated across configs will be updated by the last key read (in the order above)
         datasource_config = {}
         defined_config_path = None
-        default_config_path = os.path.join(self.root_directory, "datasources", datasource_name, "config.yml")
+        default_config_path = os.path.join(
+            self.root_directory, "datasources", datasource_name, "config.yml")
         if datasource_name in self._project_config["datasources"]:
-            base_datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
+            base_datasource_config = copy.deepcopy(
+                self._project_config["datasources"][datasource_name])
             if "config_file" in base_datasource_config:
-                defined_config_path = os.path.join(self.root_directory, base_datasource_config.pop("config_file"))
+                defined_config_path = os.path.join(
+                    self.root_directory, base_datasource_config.pop("config_file"))
             datasource_config.update(base_datasource_config)
-        
+
         try:
             with open(default_config_path, "r") as config_file:
                 default_path_datasource_config = yaml.load(config_file) or {}
@@ -517,18 +539,21 @@ class DataContext(object):
         except IOError as e:
             if e.errno != errno.ENOENT:
                 raise
-            logger.debug("No config file found in default location for datasource %s" % datasource_name)
-        
+            logger.debug(
+                "No config file found in default location for datasource %s" % datasource_name)
+
         if defined_config_path is not None:
             try:
                 with open(defined_config_path, "r") as config_file:
-                    defined_path_datasource_config = yaml.load(config_file) or {}
+                    defined_path_datasource_config = yaml.load(
+                        config_file) or {}
                 datasource_config.update(defined_path_datasource_config)
             except IOError as e:
                 if e.errno != errno.ENOENT:
                     raise
-                logger.warning("No config file found in user-defined location for datasource %s" % datasource_name)
-        
+                logger.warning(
+                    "No config file found in user-defined location for datasource %s" % datasource_name)
+
         return datasource_config
 
     def get_available_data_asset_names(self, datasource_names=None, generator_names=None):
@@ -554,36 +579,40 @@ class DataContext(object):
         """
         data_asset_names = {}
         if datasource_names is None:
-            datasource_names = [datasource["name"] for datasource in self.list_datasources()]
+            datasource_names = [datasource["name"]
+                                for datasource in self.list_datasources()]
         elif isinstance(datasource_names, string_types):
             datasource_names = [datasource_names]
         elif not isinstance(datasource_names, list):
             raise ValueError(
                 "Datasource names must be a datasource name, list of datasource names or None (to list all datasources)"
             )
-        
+
         if generator_names is not None:
             if isinstance(generator_names, string_types):
                 generator_names = [generator_names]
-            if len(generator_names) == len(datasource_names): # Iterate over both together
+            if len(generator_names) == len(datasource_names):  # Iterate over both together
                 for idx, datasource_name in enumerate(datasource_names):
                     datasource = self.get_datasource(datasource_name)
                     data_asset_names[datasource_name] = \
-                        datasource.get_available_data_asset_names(generator_names[idx])
+                        datasource.get_available_data_asset_names(
+                            generator_names[idx])
 
             elif len(generator_names) == 1:
                 datasource = self.get_datasource(datasource_names[0])
-                datasource_names[datasource_names[0]] = datasource.get_available_data_asset_names(generator_names)
+                datasource_names[datasource_names[0]] = datasource.get_available_data_asset_names(
+                    generator_names)
 
             else:
                 raise ValueError(
                     "If providing generators, you must either specify one generator for each datasource or only "
                     "one datasource."
                 )
-        else: # generator_names is None
+        else:  # generator_names is None
             for datasource_name in datasource_names:
                 datasource = self.get_datasource(datasource_name)
-                data_asset_names[datasource_name] = datasource.get_available_data_asset_names(None)
+                data_asset_names[datasource_name] = datasource.get_available_data_asset_names(
+                    None)
 
         return data_asset_names
 
@@ -604,7 +633,8 @@ class DataContext(object):
         Returns:
             Great Expectations data_asset with attached expectation_suite and DataContext
         """
-        normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+        normalized_data_asset_name = self._normalize_data_asset_name(
+            data_asset_name)
 
         datasource = self.get_datasource(normalized_data_asset_name.datasource)
         if not datasource:
@@ -659,7 +689,7 @@ class DataContext(object):
                 return PandasDatasource
             except ImportError:
                 raise
- 
+
     def get_datasource(self, datasource_name="default"):
         """Get the named datasource
 
@@ -672,7 +702,8 @@ class DataContext(object):
         if datasource_name in self._datasources:
             return self._datasources[datasource_name]
         elif datasource_name in self._project_config["datasources"]:
-            datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
+            datasource_config = copy.deepcopy(
+                self._project_config["datasources"][datasource_name])
         # elif len(self._project_config["datasources"]) == 1:
         #     datasource_name = list(self._project_config["datasources"])[0]
         #     datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
@@ -681,11 +712,12 @@ class DataContext(object):
                 "Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name
             )
         type_ = datasource_config.pop("type")
-        datasource_class= self._get_datasource_class(type_)
-        datasource = datasource_class(name=datasource_name, data_context=self, **datasource_config)
+        datasource_class = self._get_datasource_class(type_)
+        datasource = datasource_class(
+            name=datasource_name, data_context=self, **datasource_config)
         self._datasources[datasource_name] = datasource
         return datasource
-            
+
     def _load_evaluation_parameter_store(self):
         """Load the evaluation parameter store to use for managing cross data-asset parameterized expectations.
 
@@ -702,7 +734,7 @@ class DataContext(object):
 
             def get(self, run_id, name):
                 if run_id in self.dict:
-                    return self.dict[run_id][name] 
+                    return self.dict[run_id][name]
                 else:
                     return {}
 
@@ -741,7 +773,8 @@ class DataContext(object):
         #
         #####
         try:
-            config_block = self._project_config.get("evaluation_parameter_store")
+            config_block = self._project_config.get(
+                "evaluation_parameter_store")
             if not config_block or not config_block.get("type"):
                 self._evaluation_parameter_store = MemoryEvaluationParameterStore()
             else:
@@ -751,7 +784,8 @@ class DataContext(object):
                 loaded_module = __import__(module_name, fromlist=[module_name])
                 loaded_class = getattr(loaded_module, class_name)
                 if config_block.get("config"):
-                    self._evaluation_parameter_store = loaded_class(**config_block.get("config"))
+                    self._evaluation_parameter_store = loaded_class(
+                        **config_block.get("config"))
                 else:
                     self._evaluation_parameter_store = loaded_class()
         except Exception:
@@ -780,7 +814,8 @@ class DataContext(object):
 
         # First, we construct the *actual* defined expectation suites
         for datasource in os.listdir(self.expectations_directory):
-            datasource_path = os.path.join(self.expectations_directory, datasource)
+            datasource_path = os.path.join(
+                self.expectations_directory, datasource)
             if not os.path.isdir(datasource_path):
                 continue
             if datasource not in expectation_suites_dict:
@@ -792,7 +827,8 @@ class DataContext(object):
                 if generator not in expectation_suites_dict[datasource]:
                     expectation_suites_dict[datasource][generator] = {}
                 for generator_asset in os.listdir(generator_path):
-                    generator_asset_path = os.path.join(generator_path, generator_asset)
+                    generator_asset_path = os.path.join(
+                        generator_path, generator_asset)
                     if os.path.isdir(generator_asset_path):
                         candidate_suites = os.listdir(generator_asset_path)
                         expectation_suites_dict[datasource][generator][generator_asset] = [
@@ -811,7 +847,7 @@ class DataContext(object):
 
     def _normalize_data_asset_name(self, data_asset_name):
         """Normalizes data_asset_names for a data context.
-        
+
         A data_asset_name is defined per-project and consists of three components that together define a "namespace"
         for data assets, encompassing both expectation suites and batches.
 
@@ -855,11 +891,11 @@ class DataContext(object):
             raise DataContextError(
                 "Invalid data_asset_name '{data_asset_name}': found too many components using delimiter '{delimiter}'"
                 .format(
-                        data_asset_name=data_asset_name,
-                        delimiter=self.data_asset_name_delimiter
+                    data_asset_name=data_asset_name,
+                    delimiter=self.data_asset_name_delimiter
                 )
             )
-        
+
         elif len(split_name) == 1:
             # In this case, the name *must* refer to a unique data_asset_name
             provider_names = set()
@@ -887,16 +923,17 @@ class DataContext(object):
             #         "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
             #         .format(data_asset_name=data_asset_name, provider_names=provider_names)
             #     )
-                    
+
             available_names = self.get_available_data_asset_names()
             for datasource in available_names.keys():
                 for generator in available_names[datasource].keys():
                     names_set = available_names[datasource][generator]
                     if generator_asset in names_set:
                         provider_names.add(
-                            NormalizedDataAssetName(datasource, generator, generator_asset)
+                            NormalizedDataAssetName(
+                                datasource, generator, generator_asset)
                         )
-            
+
             if len(provider_names) == 1:
                 return provider_names.pop()
 
@@ -961,11 +998,12 @@ class DataContext(object):
                 for generator in available_names[datasource_name].keys():
                     generator_assets = available_names[datasource_name][generator]
                     if split_name[0] == datasource_name and split_name[1] in generator_assets:
-                        provider_names.add(NormalizedDataAssetName(datasource_name, generator, split_name[1]))
+                        provider_names.add(NormalizedDataAssetName(
+                            datasource_name, generator, split_name[1]))
 
             if len(provider_names) == 1:
                 return provider_names.pop()
-            
+
             elif len(provider_names) > 1:
                 raise DataContextError(
                     "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
@@ -997,10 +1035,12 @@ class DataContext(object):
         elif len(split_name) == 3:
             # In this case, we *do* check that the datasource and generator names are valid, but
             # allow the user to define a new generator asset
-            datasources = [datasource["name"] for datasource in self.list_datasources()]
+            datasources = [datasource["name"]
+                           for datasource in self.list_datasources()]
             if split_name[0] in datasources:
                 datasource = self.get_datasource(split_name[0])
-                generators = [generator["name"] for generator in datasource.list_generators()]
+                generators = [generator["name"]
+                              for generator in datasource.list_generators()]
                 if split_name[1] in generators:
                     return NormalizedDataAssetName(*split_name)
 
@@ -1023,12 +1063,14 @@ class DataContext(object):
         if not isinstance(data_asset_name, NormalizedDataAssetName):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
 
-        config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name, expectation_suite_name)
+        config_file_path = self._get_normalized_data_asset_name_filepath(
+            data_asset_name, expectation_suite_name)
         if os.path.isfile(config_file_path):
             with open(config_file_path, 'r') as json_file:
                 read_config = json.load(json_file)
             # update the data_asset_name to correspond to the current name (in case the config has been moved/renamed)
-            read_config["data_asset_name"] = self.data_asset_name_delimiter.join(data_asset_name)
+            read_config["data_asset_name"] = self.data_asset_name_delimiter.join(
+                data_asset_name)
             return read_config
         else:
             return get_empty_expectation_suite(
@@ -1063,7 +1105,8 @@ class DataContext(object):
                     "expectation_suite_name must either be specified or present in the provided expectation suite")
         if not isinstance(data_asset_name, NormalizedDataAssetName):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name, expectation_suite_name)
+        config_file_path = self._get_normalized_data_asset_name_filepath(
+            data_asset_name, expectation_suite_name)
         safe_mmkdir(os.path.dirname(config_file_path), exist_ok=True)
         with open(config_file_path, 'w') as outfile:
             json.dump(expectation_suite, outfile, indent=2)
@@ -1104,23 +1147,27 @@ class DataContext(object):
         try:
             data_asset_name = validation_results["meta"]["data_asset_name"]
         except KeyError:
-            logger.warning("No data_asset_name found in validation results; using '_untitled'")
+            logger.warning(
+                "No data_asset_name found in validation results; using '_untitled'")
             data_asset_name = "_untitled"
 
         try:
             expectation_suite_name = validation_results["meta"]["expectation_suite_name"]
         except KeyError:
-            logger.warning("No expectation_suite_name found in validation results; using '_untitled'")
+            logger.warning(
+                "No expectation_suite_name found in validation results; using '_untitled'")
             expectation_suite_name = "_untitled"
 
         try:
-            normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            normalized_data_asset_name = self._normalize_data_asset_name(
+                data_asset_name)
         except DataContextError:
             logger.warning(
                 "Registering validation results for a data_asset_name that cannot be normalized in this context."
             )
 
-        expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
+        expectation_suite_name = validation_results["meta"].get(
+            "expectation_suite_name", "default")
         if self.validations_store:
             validations_store = self.validations_store
             if isinstance(validations_store, dict) and validations_store["type"] == "filesystem":
@@ -1133,7 +1180,8 @@ class DataContext(object):
                         run_id
                     )
                 )
-                logger.debug("Storing validation result: %s" % validation_filepath)
+                logger.debug("Storing validation result: %s" %
+                             validation_filepath)
                 safe_mmkdir(os.path.dirname(validation_filepath))
                 with open(validation_filepath, "w") as outfile:
                     json.dump(validation_results, outfile, indent=2)
@@ -1151,12 +1199,14 @@ class DataContext(object):
                         )
                     )
                 )
-                validation_results["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
+                validation_results["meta"]["result_reference"] = "s3://{bucket}/{key}".format(
+                    bucket=bucket, key=key)
                 try:
                     import boto3
                     s3 = boto3.resource('s3')
                     result_s3 = s3.Object(bucket, key)
-                    result_s3.put(Body=json.dumps(validation_results).encode('utf-8'))
+                    result_s3.put(Body=json.dumps(
+                        validation_results).encode('utf-8'))
                 except ImportError:
                     logger.error("Error importing boto3 for AWS support.")
                 except Exception:
@@ -1165,7 +1215,8 @@ class DataContext(object):
         if "result_callback" in self._project_config:
             result_callback = self._project_config["result_callback"]
             if isinstance(result_callback, dict) and "slack" in result_callback:
-                get_slack_callback(result_callback["slack"])(validation_results)
+                get_slack_callback(result_callback["slack"])(
+                    validation_results)
             else:
                 logger.warning("Unrecognized result_callback configuration.")
 
@@ -1216,9 +1267,11 @@ class DataContext(object):
                         import boto3
                         s3 = boto3.resource('s3')
                         result_s3 = s3.Object(bucket, key)
-                        result_s3.put(Body=data_asset.to_csv(compression="gzip").encode('utf-8'))
+                        result_s3.put(Body=data_asset.to_csv(
+                            compression="gzip").encode('utf-8'))
                     except ImportError:
-                        logger.error("Error importing boto3 for AWS support. Unable to save to result store.")
+                        logger.error(
+                            "Error importing boto3 for AWS support. Unable to save to result store.")
                     except Exception:
                         raise
             else:
@@ -1229,9 +1282,9 @@ class DataContext(object):
             self._compile()
 
         if ("meta" not in validation_results or
-                "data_asset_name" not in validation_results["meta"] or
-                "expectation_suite_name" not in validation_results["meta"]
-        ):
+                    "data_asset_name" not in validation_results["meta"] or
+                    "expectation_suite_name" not in validation_results["meta"]
+                ):
             logger.warning(
                 "Both data_asset_name ane expectation_suite_name must be in validation results to "
                 "register evaluation parameters."
@@ -1241,13 +1294,13 @@ class DataContext(object):
               expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]):
             # This is fine; short-circuit since we do not need to register any results from this dataset.
             return validation_results
-        
+
         for result in validation_results['results']:
             # Unoptimized: loop over all results and check if each is needed
             expectation_type = result['expectation_config']['expectation_type']
             if expectation_type in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name]:
                 # First, bind column-style parameters
-                if (("column" in result['expectation_config']['kwargs']) and 
+                if (("column" in result['expectation_config']['kwargs']) and
                     ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]) and
                     (result['expectation_config']['kwargs']["column"] in
                      self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
@@ -1259,12 +1312,15 @@ class DataContext(object):
                         for desired_param in desired_parameters:
                             desired_key = desired_param.split(":")[-1]
                             if type_key == "result" and desired_key in result['result']:
-                                self.store_validation_param(run_id, desired_param, result["result"][desired_key])
+                                self.store_validation_param(
+                                    run_id, desired_param, result["result"][desired_key])
                             elif type_key == "details" and desired_key in result["result"]["details"]:
-                                self.store_validation_param(run_id, desired_param, result["result"]["details"])
+                                self.store_validation_param(
+                                    run_id, desired_param, result["result"]["details"])
                             else:
-                                logger.warning("Unrecognized key for parameter %s" % desired_param)
-                
+                                logger.warning(
+                                    "Unrecognized key for parameter %s" % desired_param)
+
                 # Next, bind parameters that do not have column parameter
                 for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type].items():
                     if type_key == "columns":
@@ -1272,11 +1328,14 @@ class DataContext(object):
                     for desired_param in desired_parameters:
                         desired_key = desired_param.split(":")[-1]
                         if type_key == "result" and desired_key in result['result']:
-                            self.store_validation_param(run_id, desired_param, result["result"][desired_key])
+                            self.store_validation_param(
+                                run_id, desired_param, result["result"][desired_key])
                         elif type_key == "details" and desired_key in result["result"]["details"]:
-                            self.store_validation_param(run_id, desired_param, result["result"]["details"])
+                            self.store_validation_param(
+                                run_id, desired_param, result["result"]["details"])
                         else:
-                            logger.warning("Unrecognized key for parameter %s" % desired_param)
+                            logger.warning(
+                                "Unrecognized key for parameter %s" % desired_param)
 
         return validation_results
 
@@ -1307,14 +1366,14 @@ class DataContext(object):
 
     def _compile(self):
         """Compiles all current expectation configurations in this context to be ready for result registration.
-        
+
         Compilation only respects parameters with a URN structure beginning with urn:great_expectations:validations
         It splits parameters by the : (colon) character; valid URNs must have one of the following structures to be
         automatically recognized.
 
         "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "columns" : column_name : "result": result_key
          [0]            [1]                 [2]              [3]                   [4]                  [5]             [6]              [7]         [8]        [9]        [10]
-        
+
         "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "columns" : column_name : "details": details_key
          [0]            [1]                 [2]              [3]                   [4]                  [5]             [6]              [7]         [8]        [9]         [10]
 
@@ -1366,7 +1425,8 @@ class DataContext(object):
                         generator + self._data_asset_name_delimiter +
                         data_asset_name
                     ] = known_asset_dict[datasource][generator][data_asset_name]
-        config_paths = [y for x in os.walk(self.expectations_directory) for y in glob(os.path.join(x[0], '*.json'))]
+        config_paths = [y for x in os.walk(
+            self.expectations_directory) for y in glob(os.path.join(x[0], '*.json'))]
 
         for config_file in config_paths:
             config = json.load(open(config_file, 'r'))
@@ -1391,38 +1451,50 @@ class DataContext(object):
                                 else:
                                     param_key = param_parts[7]
                             except IndexError:
-                                logger.warning("Invalid parameter urn (not enough parts): %s" % parameter)
+                                logger.warning(
+                                    "Invalid parameter urn (not enough parts): %s" % parameter)
                                 continue
 
                             if (data_asset_name not in flat_assets_dict or
                                     expectation_suite_name not in flat_assets_dict[data_asset_name]):
-                                logger.warning("Adding parameter %s for unknown data asset config" % parameter)
+                                logger.warning(
+                                    "Adding parameter %s for unknown data asset config" % parameter)
 
                             if data_asset_name not in self._compiled_parameters["data_assets"]:
-                                self._compiled_parameters["data_assets"][data_asset_name] = {}
+                                self._compiled_parameters["data_assets"][data_asset_name] = {
+                                }
 
                             if expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]:
-                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name] = {}
+                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name] = {
+                                }
 
                             if expectation_name not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name]:
-                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name] = {}
+                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name] = {
+                                }
 
                             if column_expectation:
                                 if "columns" not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]:
-                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"] = {}
+                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"] = {
+                                    }
                                 if column_name not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"]:
-                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name] = {}
+                                    self._compiled_parameters["data_assets"][data_asset_name][
+                                        expectation_suite_name][expectation_name]["columns"][column_name] = {}
                                 if param_key not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name]:
-                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name][param_key] = set()
-                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name][param_key].add(parameter)
-                            
+                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][
+                                        expectation_name]["columns"][column_name][param_key] = set()
+                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][
+                                    expectation_name]["columns"][column_name][param_key].add(parameter)
+
                             elif param_key in ["result", "details"]:
                                 if param_key not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]:
-                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key] = set()
-                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key].add(parameter)
-                            
+                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key] = set(
+                                    )
+                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key].add(
+                                    parameter)
+
                             else:
-                                logger.warning("Invalid parameter urn (unrecognized structure): %s" % parameter)
+                                logger.warning(
+                                    "Invalid parameter urn (unrecognized structure): %s" % parameter)
 
         self._compiled = True
 
@@ -1432,7 +1504,8 @@ class DataContext(object):
             resource_name,  # name to be used inside namespace, e.g. "my_file.html"
             resource_store,  # store to use to write the resource
             resource_namespace=None,  # An arbitrary name added to the resource namespace
-            data_asset_name=None,  # A name that will be normalized by the data_context and used in the namespace
+            # A name that will be normalized by the data_context and used in the namespace
+            data_asset_name=None,
             expectation_suite_name=None,  # A string that is part of the namespace
             run_id=None
     ):  # A string that is part of the namespace
@@ -1463,7 +1536,8 @@ class DataContext(object):
         resource_locator_info = {}
 
         if resource_store['type'] == "s3":
-            raise NotImplementedError("s3 is not currently a supported resource_store type for writing")
+            raise NotImplementedError(
+                "s3 is not currently a supported resource_store type for writing")
         elif resource_store['type'] == 'filesystem':
             resource_store = self._normalize_store_path(resource_store)
             path_components = [resource_store['base_directory']]
@@ -1473,11 +1547,13 @@ class DataContext(object):
                 path_components.append(run_id)
             if data_asset_name is not None:
                 if not isinstance(data_asset_name, NormalizedDataAssetName):
-                    normalized_name = self._normalize_data_asset_name(data_asset_name)
+                    normalized_name = self._normalize_data_asset_name(
+                        data_asset_name)
                 else:
                     normalized_name = data_asset_name
                 if expectation_suite_name is not None:
-                    path_components.append(self._get_normalized_data_asset_name_filepath(normalized_name, expectation_suite_name, base_path="", file_extension=""))
+                    path_components.append(self._get_normalized_data_asset_name_filepath(
+                        normalized_name, expectation_suite_name, base_path="", file_extension=""))
                 else:
                     path_components.append(
                         self._get_normalized_data_asset_name_filepath(normalized_name, "",
@@ -1519,7 +1595,8 @@ class DataContext(object):
         validation_results = {}
 
         if validations_store["type"] == "filesystem":
-            result_paths = [y for x in os.walk(validations_store["base_directory"]) for y in glob(os.path.join(x[0], '*.json'))]
+            result_paths = [y for x in os.walk(
+                validations_store["base_directory"]) for y in glob(os.path.join(x[0], '*.json'))]
             base_length = len(validations_store["base_directory"])
             rel_paths = [path[base_length:] for path in result_paths]
 
@@ -1527,7 +1604,8 @@ class DataContext(object):
                 components = result.split("/")
 
                 if len(components) != 5:
-                    logger.error("Unrecognized validation result path: %s" % result)
+                    logger.error(
+                        "Unrecognized validation result path: %s" % result)
                     continue
                 run_id = components[0]
 
@@ -1550,15 +1628,20 @@ class DataContext(object):
                 if datasource_name not in validation_results[run_id]:
                     validation_results[run_id][datasource_name] = {}
                 if generator_name not in validation_results[run_id][datasource_name]:
-                    validation_results[run_id][datasource_name][generator_name] = {}
+                    validation_results[run_id][datasource_name][generator_name] = {
+                    }
                 if generator_asset not in validation_results[run_id][datasource_name][generator_name]:
-                    validation_results[run_id][datasource_name][generator_name][generator_asset] = []
-                validation_results[run_id][datasource_name][generator_name][generator_asset].append(expectation_suite)
+                    validation_results[run_id][datasource_name][generator_name][generator_asset] = [
+                    ]
+                validation_results[run_id][datasource_name][generator_name][generator_asset].append(
+                    expectation_suite)
             return validation_results
         elif validations_store["type"] == "s3":
-            raise NotImplementedError("s3 validations_store is not yet supported for listing validation results")
+            raise NotImplementedError(
+                "s3 validations_store is not yet supported for listing validation results")
         else:
-            raise DataContextError("unrecognized validations_store type: %s" % validations_store["type"])
+            raise DataContextError(
+                "unrecognized validations_store type: %s" % validations_store["type"])
 
     def get_validation_result(self, data_asset_name, expectation_suite_name="default", run_id=None, validations_store=None, failed_only=False):
         """Get validation results from a configured store.
@@ -1575,7 +1658,8 @@ class DataContext(object):
 
         """
 
-        validation_location = self.get_validation_location(data_asset_name, expectation_suite_name, run_id, validations_store=validations_store)
+        validation_location = self.get_validation_location(
+            data_asset_name, expectation_suite_name, run_id, validations_store=validations_store)
 
         if 'filepath' in validation_location:
             validation_path = validation_location['filepath']
@@ -1583,35 +1667,39 @@ class DataContext(object):
                 results_dict = json.load(infile)
 
             if failed_only:
-                failed_results_list = [result for result in results_dict["results"] if not result["success"]]
+                failed_results_list = [
+                    result for result in results_dict["results"] if not result["success"]]
                 results_dict["results"] = failed_results_list
                 return results_dict
             else:
                 return results_dict
-    
-        elif 'bucket' in validation_location: # s3
+
+        elif 'bucket' in validation_location:  # s3
 
             try:
                 import boto3
                 s3 = boto3.client('s3')
             except ImportError:
-                raise ImportError("boto3 is required for retrieving a dataset from s3")
-        
+                raise ImportError(
+                    "boto3 is required for retrieving a dataset from s3")
+
             bucket = validation_location["bucket"]
             key = validation_location["key"]
             s3_response_object = s3.get_object(Bucket=bucket, Key=key)
             object_content = s3_response_object['Body'].read()
-            
+
             results_dict = json.loads(object_content)
 
             if failed_only:
-                failed_results_list = [result for result in results_dict["results"] if not result["success"]]
+                failed_results_list = [
+                    result for result in results_dict["results"] if not result["success"]]
                 results_dict["results"] = failed_results_list
                 return results_dict
             else:
                 return results_dict
         else:
-            raise DataContextError("Invalid validations_store configuration: only 'filesystem' and 's3' are supported.")
+            raise DataContextError(
+                "Invalid validations_store configuration: only 'filesystem' and 's3' are supported.")
 
     # TODO: refactor this into a snapshot getter based on project_config
     # def get_failed_dataset(self, validation_result, **kwargs):
@@ -1619,18 +1707,18 @@ class DataContext(object):
     #         reference_url = validation_result["meta"]["dataset_reference"]
     #     except KeyError:
     #         raise ValueError("Validation result must have a dataset_reference in the meta object to fetch")
-        
+
     #     if reference_url.startswith("s3://"):
     #         try:
     #             import boto3
     #             s3 = boto3.client('s3')
     #         except ImportError:
     #             raise ImportError("boto3 is required for retrieving a dataset from s3")
-        
+
     #         parsed_url = urlparse(reference_url)
     #         bucket = parsed_url.netloc
     #         key = parsed_url.path[1:]
-            
+
     #         s3_response_object = s3.get_object(Bucket=bucket, Key=key)
     #         if key.endswith(".csv"):
     #             # Materialize as dataset
@@ -1675,17 +1763,18 @@ class DataContext(object):
             sites = data_docs_config.get('sites', [])
             for site_name, site_config in sites.items():
                 if (site_names and site_name in site_names) or not site_names or len(site_names) == 0:
-                    #TODO: get the builder class
-                    #TODO: build the site config by using defaults if needed
+                    # TODO: get the builder class
+                    # TODO: build the site config by using defaults if needed
                     complete_site_config = site_config
-                    index_page_locator_info = SiteBuilder.build(self, complete_site_config, specified_data_asset_name=data_asset_name)
+                    index_page_locator_info = SiteBuilder.build(
+                        self, complete_site_config, specified_data_asset_name=data_asset_name)
                     if index_page_locator_info:
                         index_page_locator_infos[site_name] = index_page_locator_info
 
         return index_page_locator_infos
 
     def get_absolute_path(self, path):
-        #TODO: ideally, the data context object should resolve all paths before
+        # TODO: ideally, the data context object should resolve all paths before
         # calling the site builder (or any other specific logic)
         return os.path.join(self._context_root_directory, path)
 
@@ -1720,21 +1809,26 @@ class DataContext(object):
             When success = False, the error details are under "error" key
         """
         if not dry_run:
-            logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
+            logger.info("Profiling '%s' with '%s'" %
+                        (datasource_name, profiler.__name__))
 
         profiling_results = {}
         data_asset_names = self.get_available_data_asset_names(datasource_name)
         if generator_name is None:
             if len(data_asset_names[datasource_name].keys()) == 1:
-                generator_name = list(data_asset_names[datasource_name].keys())[0]
+                generator_name = list(
+                    data_asset_names[datasource_name].keys())[0]
         if generator_name not in data_asset_names[datasource_name]:
-            raise ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
+            raise ProfilerError("Generator %s not found for datasource %s" % (
+                generator_name, datasource_name))
 
-        data_asset_name_list = list(data_asset_names[datasource_name][generator_name])
+        data_asset_name_list = list(
+            data_asset_names[datasource_name][generator_name])
         total_data_assets = len(data_asset_name_list)
 
         if data_assets and len(data_assets) > 0:
-            not_found_data_assets = [name for name in data_assets if name not in data_asset_name_list]
+            not_found_data_assets = [
+                name for name in data_assets if name not in data_asset_name_list]
             if len(not_found_data_assets) > 0:
                 profiling_results = {
                     'success': False,
@@ -1746,12 +1840,12 @@ class DataContext(object):
                 }
                 return profiling_results
 
-
             data_asset_name_list = data_assets
             data_asset_name_list.sort()
             total_data_assets = len(data_asset_name_list)
             if not dry_run:
-                logger.info("Profiling the white-listed data assets: %s, alphabetically." % (",".join(data_asset_name_list)))
+                logger.info("Profiling the white-listed data assets: %s, alphabetically." %
+                            (",".join(data_asset_name_list)))
         else:
             if profile_all_data_assets:
                 data_asset_name_list.sort()
@@ -1768,9 +1862,11 @@ class DataContext(object):
                     return profiling_results
 
         if not dry_run:
-            logger.info("Profiling all %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
+            logger.info("Profiling all %d data assets from generator %s" %
+                        (len(data_asset_name_list), generator_name))
         else:
-            logger.info("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
+            logger.info("Found %d data assets from generator %s" %
+                        (len(data_asset_name_list), generator_name))
 
         profiling_results['success'] = True
 
@@ -1788,49 +1884,59 @@ class DataContext(object):
 
                     # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
                     batch = self.get_batch(
-                        data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
+                        data_asset_name=NormalizedDataAssetName(
+                            datasource_name, generator_name, name),
                         expectation_suite_name=profiler.__name__
                     )
 
                     if not profiler.validate(batch):
                         raise ProfilerError(
-                            "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
+                            "batch '%s' is not a valid batch for the '%s' profiler" % (
+                                name, profiler.__name__)
                         )
 
                     # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
                     # will have more to unpack.
-                    expectation_suite, validation_result = profiler.profile(batch, run_id=run_id)
-                    profiling_results['results'].append((expectation_suite, validation_result))
+                    expectation_suite, validation_result = profiler.profile(
+                        batch, run_id=run_id)
+                    profiling_results['results'].append(
+                        (expectation_suite, validation_result))
 
                     if isinstance(batch, Dataset):
                         # For datasets, we can produce some more detailed statistics
                         row_count = batch.get_row_count()
                         total_rows += row_count
-                        new_column_count = len(set([exp["kwargs"]["column"] for exp in expectation_suite["expectations"] if "column" in exp["kwargs"]]))
+                        new_column_count = len(set(
+                            [exp["kwargs"]["column"] for exp in expectation_suite["expectations"] if "column" in exp["kwargs"]]))
                         total_columns += new_column_count
 
-                    new_expectation_count = len(expectation_suite["expectations"])
+                    new_expectation_count = len(
+                        expectation_suite["expectations"])
                     total_expectations += new_expectation_count
 
                     self.save_expectation_suite(expectation_suite)
-                    duration = (datetime.datetime.now() - start_time).total_seconds()
+                    duration = (datetime.datetime.now() -
+                                start_time).total_seconds()
                     logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
                                 (new_column_count, row_count, name, duration))
 
                 except ProfilerError as err:
                     logger.warning(err.message)
                 except IOError as exc:
-                    logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                    logger.warning(
+                        "IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
                     logger.debug(str(exc))
                     skipped_data_assets += 1
                 # FIXME: this is a workaround for catching SQLAlchemny exceptions without taking SQLAlchemy dependency.
                 # Think how to avoid this.
                 except Exception as e:
-                    logger.warning("Exception while profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                    logger.warning(
+                        "Exception while profiling %s. (Perhaps a loading error?) Skipping." % (name))
                     logger.debug(str(e))
                     skipped_data_assets += 1
 
-            total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+            total_duration = (datetime.datetime.now() -
+                              total_start_time).total_seconds()
             logger.info("""
     Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
     Generated, evaluated, and stored %d candidate Expectations.
@@ -1843,7 +1949,8 @@ class DataContext(object):
                 total_expectations,
             ))
             if skipped_data_assets > 0:
-                logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
+                logger.warning(
+                    "Skipped %d data assets due to errors." % skipped_data_assets)
 
         profiling_results['success'] = True
         return profiling_results
@@ -2002,7 +2109,8 @@ data_docs:
 
 """
 
-PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + "datasources: {}\n" + PROJECT_OPTIONAL_CONFIG_COMMENT
+PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + \
+    "datasources: {}\n" + PROJECT_OPTIONAL_CONFIG_COMMENT
 
 
 PROFILE_COMMENT = """This file stores profiles with database access credentials. 

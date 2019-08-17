@@ -17,6 +17,7 @@ from great_expectations.render.types import (
     RenderedComponentContentWrapper,
 )
 
+
 class NoOpTemplate(object):
     @classmethod
     def render(cls, document):
@@ -82,7 +83,8 @@ class DefaultJinjaView(object):
         elif not isinstance(content_block, (dict, OrderedDict)):
             return content_block
         content_block_type = content_block.get("content_block_type")
-        template = cls._get_template(template="{content_block_type}.j2".format(content_block_type=content_block_type))
+        template = cls._get_template(template="{content_block_type}.j2".format(
+            content_block_type=content_block_type))
         return template.render(context, content_block=content_block)
 
     @classmethod
@@ -114,7 +116,7 @@ class DefaultJinjaView(object):
 
         # NOTE: We should add some kind of type-checking to styling
         """
-    
+
         class_list = styling.get("classes", None)
         if class_list == None:
             class_str = ""
@@ -122,7 +124,7 @@ class DefaultJinjaView(object):
             if type(class_list) == str:
                 raise TypeError("classes must be a list, not a string.")
             class_str = 'class="' + ' '.join(class_list) + '" '
-    
+
         attribute_dict = styling.get("attributes", None)
         if attribute_dict == None:
             attribute_str = ""
@@ -130,21 +132,22 @@ class DefaultJinjaView(object):
             attribute_str = ""
             for k, v in attribute_dict.items():
                 attribute_str += k + '="' + v + '" '
-    
+
         style_dict = styling.get("styles", None)
         if style_dict == None:
             style_str = ""
         else:
             style_str = 'style="'
-            style_str += " ".join([k + ':' + v + ';' for k, v in style_dict.items()])
+            style_str += " ".join([k + ':' + v + ';' for k,
+                                   v in style_dict.items()])
             style_str += '" '
-    
+
         styling_string = pTemplate('$classes$attributes$style').substitute({
             "classes": class_str,
             "attributes": attribute_str,
             "style": style_str,
         })
-    
+
         return styling_string
 
     @classmethod
@@ -154,25 +157,26 @@ class DefaultJinjaView(object):
         """
         if not isinstance(template, (dict, OrderedDict)):
             return template
-    
+
         if "styling" in template:
             return cls.render_styling(template["styling"])
-    
+
         else:
             return ""
 
     @classmethod
     def render_string_template(cls, template):
-        #NOTE: Using this line for debugging. This should probably be logged...? 
+        # NOTE: Using this line for debugging. This should probably be logged...?
         # print(template)
 
         # NOTE: We should add some kind of type-checking to template
         if not isinstance(template, (dict, OrderedDict)):
             return template
-    
+
         tag = template.get("tag", "span")
-        template["template"] = template.get("template", "").replace("\n", "<br>")
-    
+        template["template"] = template.get(
+            "template", "").replace("\n", "<br>")
+
         if "tooltip" in template:
             tooltip_content = template["tooltip"]["content"]
             tooltip_content.replace("\n", "<br>")
@@ -191,29 +195,30 @@ class DefaultJinjaView(object):
                     $template
                 </{tag}>
             """.format(tag=tag)
-    
+
         if "styling" in template:
             params = template.get("params", {})
-        
+
             # Apply default styling
             if "default" in template["styling"]:
                 default_parameter_styling = template["styling"]["default"]
-                default_param_tag = default_parameter_styling.get("tag", "span")
+                default_param_tag = default_parameter_styling.get(
+                    "tag", "span")
                 base_param_template_string = "<{param_tag} $styling>$content</{param_tag}>".format(
                     param_tag=default_param_tag)
-            
+
                 for parameter in template["params"].keys():
-                
+
                     # If this param has styling that over-rides the default, skip it here and get it in the next loop.
                     if "params" in template["styling"]:
                         if parameter in template["styling"]["params"]:
                             continue
-                
+
                     params[parameter] = pTemplate(base_param_template_string).substitute({
                         "styling": cls.render_styling(default_parameter_styling),
                         "content": params[parameter],
                     })
-        
+
             # Apply param-specific styling
             if "params" in template["styling"]:
                 # params = template["params"]
@@ -221,12 +226,13 @@ class DefaultJinjaView(object):
                     if parameter not in params:
                         continue
                     param_tag = parameter_styling.get("tag", "span")
-                    param_template_string = "<{param_tag} $styling>$content</{param_tag}>".format(param_tag=param_tag)
+                    param_template_string = "<{param_tag} $styling>$content</{param_tag}>".format(
+                        param_tag=param_tag)
                     params[parameter] = pTemplate(param_template_string).substitute({
                         "styling": cls.render_styling(parameter_styling),
                         "content": params[parameter],
                     })
-        
+
             string = pTemplate(
                 pTemplate(base_template_string).substitute(
                     {"template": template["template"], "styling": cls.render_styling(template.get("styling", {}))})
@@ -237,14 +243,15 @@ class DefaultJinjaView(object):
             pTemplate(base_template_string).substitute(
                 {"template": template.get("template", ""), "styling": cls.render_styling(template.get("styling", {}))})
         ).substitute(template.get("params", {}))
-    
-    
+
+
 class DefaultJinjaPageView(DefaultJinjaView):
     _template = "page.j2"
 
     @classmethod
     def _validate_document(cls, document):
         assert isinstance(document, RenderedDocumentContent)
+
 
 class DefaultJinjaIndexPageView(DefaultJinjaPageView):
     _template = "index_page.j2"
@@ -257,6 +264,7 @@ class DefaultJinjaSectionView(DefaultJinjaView):
     def _validate_document(cls, document):
         assert isinstance(document, RenderedComponentContentWrapper)
         assert isinstance(document.section, RenderedSectionContent)
+
 
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"

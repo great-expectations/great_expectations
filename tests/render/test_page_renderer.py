@@ -5,29 +5,30 @@ from great_expectations.render.renderer import (
     ProfilingResultsPageRenderer,
 )
 
+
 def test_render_asset_notes():
     # import pypandoc
     # print(pypandoc.convert_text("*hi*", to='html', format="md"))
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : "*hi*"
+        "meta": {
+            "notes": "*hi*"
         }
     })
     print(result)
     assert result["content"] == ["*hi*"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : ["*alpha*", "_bravo_", "charlie"]
+        "meta": {
+            "notes": ["*alpha*", "_bravo_", "charlie"]
         }
     })
     print(result)
     assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : {
+        "meta": {
+            "notes": {
                 "format": "string",
                 "content": ["*alpha*", "_bravo_", "charlie"]
             }
@@ -37,15 +38,15 @@ def test_render_asset_notes():
     assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : {
+        "meta": {
+            "notes": {
                 "format": "markdown",
                 "content": "*alpha*"
             }
         }
     })
     print(result)
-    
+
     try:
         pypandoc.convert_text("*test*", format='md', to="html")
         assert result["content"] == ["<p><em>alpha</em></p>\n"]
@@ -53,41 +54,43 @@ def test_render_asset_notes():
         assert result["content"] == ["*alpha*"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : {
+        "meta": {
+            "notes": {
                 "format": "markdown",
                 "content": ["*alpha*", "_bravo_", "charlie"]
             }
         }
     })
     print(result)
-    
+
     try:
         pypandoc.convert_text("*test*", format='md', to="html")
-        assert result["content"] == ["<p><em>alpha</em></p>\n", "<p><em>bravo</em></p>\n", "<p>charlie</p>\n"]
+        assert result["content"] == ["<p><em>alpha</em></p>\n",
+                                     "<p><em>bravo</em></p>\n", "<p>charlie</p>\n"]
     except OSError:
         assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
 
 
 def test_expectation_summary_in_render_asset_notes():
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {},
-        "expectations" : {}
+        "meta": {},
+        "expectations": {}
     })
     print(result)
-    assert result["content"] == ['This Expectation suite currently contains 0 total Expectations across 0 columns.']
+    assert result["content"] == [
+        'This Expectation suite currently contains 0 total Expectations across 0 columns.']
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : {
+        "meta": {
+            "notes": {
                 "format": "markdown",
                 "content": ["hi"]
             }
         },
-        "expectations" : {}
+        "expectations": {}
     })
     print(result)
-    
+
     try:
         pypandoc.convert_text("*test*", format='md', to="html")
         assert result["content"] == [
@@ -101,19 +104,19 @@ def test_expectation_summary_in_render_asset_notes():
         ]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {},
-        "expectations" : [
+        "meta": {},
+        "expectations": [
             {
                 "expectation_type": "expect_table_row_count_to_be_between",
-                "kwargs": { "min_value": 0, "max_value": None, }
+                "kwargs": {"min_value": 0, "max_value": None, }
             },
             {
                 "expectation_type": "expect_column_to_exist",
-                "kwargs": { "column": "x", }
+                "kwargs": {"column": "x", }
             },
             {
                 "expectation_type": "expect_column_to_exist",
-                "kwargs": { "column": "y", }
+                "kwargs": {"column": "y", }
             },
         ]
     })
@@ -125,4 +128,3 @@ def test_ProfilingResultsPageRenderer(titanic_profiled_evrs_1):
     document = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     print(document)
     # assert document == 0
-

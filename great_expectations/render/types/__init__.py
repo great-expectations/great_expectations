@@ -5,20 +5,22 @@ from great_expectations.types import (
 
 # TODO: Rename to this:
 # class RenderedContent(LooselyTypedDotDict):
-    # class RenderedComponentContent(RenderedContent):
-    # class RenderedSectionContent(RenderedContent):
-    # class RenderedDocumentContentContent(RenderedContent):
-    # class RenderedComponentContentWrapper(RenderedContent):
+# class RenderedComponentContent(RenderedContent):
+# class RenderedSectionContent(RenderedContent):
+# class RenderedDocumentContentContent(RenderedContent):
+# class RenderedComponentContentWrapper(RenderedContent):
+
 
 class RenderedContent(LooselyTypedDotDict):
     pass
 
+
 class RenderedComponentContent(RenderedContent):
-    #TODO: It's weird that 'text'-type blocks are called "content" when all of the other types are named after their types
+    # TODO: It's weird that 'text'-type blocks are called "content" when all of the other types are named after their types
     _allowed_keys = set([
         "content_block_type",
         "header",
-        #TODO: There can be only one!
+        # TODO: There can be only one!
         "subheader",
         "sub_header",
         "styling",
@@ -35,6 +37,7 @@ class RenderedComponentContent(RenderedContent):
         "content_block_type"
     })
 
+
 class RenderedSectionContent(RenderedContent):
     _allowed_keys = set([
         "section_name",
@@ -44,8 +47,9 @@ class RenderedSectionContent(RenderedContent):
         "content_blocks",
     })
     _key_types = {
-        "content_blocks" : ListOf(RenderedComponentContent),
+        "content_blocks": ListOf(RenderedComponentContent),
     }
+
 
 class RenderedDocumentContent(RenderedContent):
     _allowed_keys = set([
@@ -60,8 +64,9 @@ class RenderedDocumentContent(RenderedContent):
         "sections"
     })
     _key_types = {
-        "sections" : ListOf(RenderedSectionContent),
+        "sections": ListOf(RenderedSectionContent),
     }
+
 
 class RenderedComponentContentWrapper(RenderedContent):
     _allowed_keys = set([

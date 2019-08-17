@@ -18,8 +18,10 @@ from ..types import (
     RenderedComponentContent,
 )
 
+
 def convert_to_string_and_escape(var):
     return re.sub("\$", "$$", str(var))
+
 
 class ColumnSectionRenderer(Renderer):
     @classmethod
@@ -45,8 +47,8 @@ class ColumnSectionRenderer(Renderer):
 
 class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
-    #Note: Seems awkward to pass section_name and column_type into this renderer.
-    #Can't we figure that out internally?
+    # Note: Seems awkward to pass section_name and column_type into this renderer.
+    # Can't we figure that out internally?
     @classmethod
     def render(cls, evrs, section_name=None, column_type=None):
         if section_name is None:
@@ -99,22 +101,22 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             column_types = "None"
 
         # assert False
-        
+
         content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": {
-                    "template": convert_to_string_and_escape(column_name),
-                    "tooltip": {
-                        "content": "expect_column_to_exist",
-                        "placement": "top"
-                    },
+                "template": convert_to_string_and_escape(column_name),
+                "tooltip": {
+                    "content": "expect_column_to_exist",
+                    "placement": "top"
                 },
+            },
             "subheader": {
-                    "template": "Type: {column_type}".format(column_type=column_type),
-                    "tooltip": {
-                      "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",
-                    },
+                "template": "Type: {column_type}".format(column_type=column_type),
+                "tooltip": {
+                    "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",
                 },
+            },
             # {
             #     "template": column_type,
             # },
@@ -200,7 +202,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             evrs,
             "expect_column_values_to_not_be_null"
         )
-        evrs = [evr for evr in [unique_n, unique_proportion, null_evr] if (evr is not None and "result" in evr)]
+        evrs = [evr for evr in [unique_n, unique_proportion, null_evr]
+                if (evr is not None and "result" in evr)]
 
         if len(evrs) > 0:
             new_content_block = TableContentBlockRenderer.render(evrs)
@@ -240,7 +243,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             .75: "Q3",
             .50: "Median"
         }
-        
+
         for idx, quantile in enumerate(quantiles):
             quantile_string = quantile_strings.get(quantile)
             table_rows.append([
@@ -371,7 +374,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             partial_unexpected_counts = set_evr["result"]["partial_unexpected_counts"]
             values = [str(v["value"]) for v in partial_unexpected_counts]
         elif set_evr and "partial_unexpected_list" in set_evr["result"]:
-            values = [str(item) for item in set_evr["result"]["partial_unexpected_list"]]
+            values = [str(item) for item in set_evr["result"]
+                      ["partial_unexpected_list"]]
         else:
             return
 
@@ -405,7 +409,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 "styles": {
                     "margin-top": "20px",
                 }
-            }
+                    }
         })
 
         content_blocks.append(new_block)
@@ -468,7 +472,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 "styles": {
                     "margin-top": "20px",
                 }
-            }
+                    }
         })
 
         content_blocks.append(new_block)
@@ -525,14 +529,15 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 "styles": {
                     "margin-top": "20px",
                 }
-            }
+                    }
         })
 
         content_blocks.append(new_block)
 
     @classmethod
     def _render_failed(cls, evrs, content_blocks):
-        failed_block = ExceptionListContentBlockRenderer.render(evrs, include_column_name=False)
+        failed_block = ExceptionListContentBlockRenderer.render(
+            evrs, include_column_name=False)
         if failed_block is not None:
             content_blocks.append(failed_block)
 
@@ -574,7 +579,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
     @classmethod
     def _render_header(cls, validation_results, content_blocks):
         column = cls._get_column_name(validation_results)
-        
+
         content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": convert_to_string_and_escape(column),
@@ -585,9 +590,9 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
                 }
             }
         }))
-        
+
         return validation_results, content_blocks
-    
+
     @classmethod
     def _render_table(cls, validation_results, content_blocks):
         content = ValidationResultsTableContentBlockRenderer.render(
@@ -595,19 +600,19 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
             include_column_name=False
         )
         content_blocks.append(content)
-        
+
         return [], content_blocks
-    
+
     @classmethod
     def render(cls, validation_results={}):
         column = cls._get_column_name(validation_results)
-    
+
         remaining_evrs, content_blocks = cls._render_header(
             validation_results, [])
-    
+
         remaining_evrs, content_blocks = cls._render_table(
             remaining_evrs, content_blocks)
-    
+
         return RenderedSectionContent(**{
             "section_name": column,
             "content_blocks": content_blocks
@@ -646,7 +651,7 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
     @classmethod
     def render(cls, expectations={}):
         column = cls._get_column_name(expectations)
-    
+
         remaining_expectations, content_blocks = cls._render_header(
             expectations, [])
         # remaining_expectations, content_blocks = cls._render_column_type(

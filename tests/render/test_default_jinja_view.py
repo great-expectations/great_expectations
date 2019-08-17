@@ -15,6 +15,7 @@ from great_expectations.render.types import (
     RenderedComponentContentWrapper,
 )
 
+
 @pytest.fixture()
 def validation_results():
     with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
@@ -96,11 +97,12 @@ def test_render_section_page():
             "section": section,
             "section_loop": {"index": 1},
         })
-    )#.replace(" ", "").replace("\t", "").replace("\n", "")
+    )  # .replace(" ", "").replace("\t", "").replace("\n", "")
 
     print(rendered_doc)
-    
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+
+    rendered_doc = rendered_doc.replace(
+        " ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """<div id="section-1" class="ge-section container-fluid">
     <div class="row">
         
@@ -149,7 +151,8 @@ def test_rendering_components_without_section_loop_index():
         })
     )
     print(rendered_doc)
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    rendered_doc = rendered_doc.replace(
+        " ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == \
         """
 <div id="content-block-2" >
@@ -167,7 +170,8 @@ def test_rendering_components_without_section_loop_index():
         })
     )
     print(rendered_doc)
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    rendered_doc = rendered_doc.replace(
+        " ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == \
         """
 <div id="content-block" >
@@ -184,7 +188,8 @@ def test_rendering_components_without_section_loop_index():
         })
     )
     print(rendered_doc)
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    rendered_doc = rendered_doc.replace(
+        " ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == \
         """
 <div id="content-block" >
@@ -270,8 +275,9 @@ def test_rendering_components_with_styling():
         })
     )
     print(rendered_doc)
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
-    
+    rendered_doc = rendered_doc.replace(
+        " ", "").replace("\t", "").replace("\n", "")
+
     assert rendered_doc == \
         """
 <div id="section-1-content-block-2" class="root_foo" root="baz" style="root:bar;" >
@@ -320,7 +326,8 @@ def test_render_header_component():
         })
     )
     print(rendered_doc)
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    rendered_doc = rendered_doc.replace(
+        " ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == \
         """
 <div id="section-1-content-block-2" >
@@ -354,7 +361,8 @@ def test_render_table_component():
         })
     )
     print(rendered_doc)
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    rendered_doc = rendered_doc.replace(
+        " ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == \
         """
 <div id="section-1-content-block-2" class="col-4" >
@@ -402,7 +410,8 @@ def test_render_value_list():
         })
     )
     print(rendered_doc)
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    rendered_doc = rendered_doc.replace(
+        " ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" style="margin-top:20px;" >
 
@@ -446,7 +455,8 @@ def test_render_graph():
         })
     )
     print(rendered_doc)
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    rendered_doc = rendered_doc.replace(
+        " ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" >
 
@@ -487,7 +497,8 @@ def test_render_text():
         })
     )
     print(rendered_doc)
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    rendered_doc = rendered_doc.replace(
+        " ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" >
 
@@ -520,7 +531,8 @@ def test_render_text():
         })
     )
     print(rendered_doc)
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    rendered_doc = rendered_doc.replace(
+        " ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" >
 

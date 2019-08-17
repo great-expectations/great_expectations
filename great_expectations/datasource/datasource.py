@@ -141,7 +141,8 @@ class Datasource(object):
         if self._data_context is not None:
             return self._data_context.get_profile_credentials(profile_name)
         else:
-            raise ValueError("Cannot retrieve credentials without a DataContext.")
+            raise ValueError(
+                "Cannot retrieve credentials without a DataContext.")
 
     def get_config(self):
         """
@@ -199,7 +200,8 @@ class Datasource(object):
              generator (Generator)
         """
         data_asset_generator_class = self._get_generator_class(type_)
-        generator = data_asset_generator_class(name=name, datasource=self, **kwargs)
+        generator = data_asset_generator_class(
+            name=name, datasource=self, **kwargs)
         self._generators[name] = generator
         if "generators" not in self._datasource_config:
             self._datasource_config["generators"] = {}
@@ -220,18 +222,21 @@ class Datasource(object):
         if generator_name in self._generators:
             return self._generators[generator_name]
         elif generator_name in self._datasource_config["generators"]:
-            generator_config = copy.deepcopy(self._datasource_config["generators"][generator_name])
+            generator_config = copy.deepcopy(
+                self._datasource_config["generators"][generator_name])
         elif len(self._datasource_config["generators"]) == 1:
             # If there's only one generator, we will use it by default
             generator_name = list(self._datasource_config["generators"])[0]
-            generator_config = copy.deepcopy(self._datasource_config["generators"][generator_name])
+            generator_config = copy.deepcopy(
+                self._datasource_config["generators"][generator_name])
         else:
             raise ValueError(
                 "Unable to load generator %s -- no configuration found or invalid configuration." % generator_name
             )
         type_ = generator_config.pop("type")
         generator_class = self._get_generator_class(type_)
-        generator = generator_class(name=generator_name, datasource=self, **generator_config)
+        generator = generator_class(
+            name=generator_name, datasource=self, **generator_config)
         self._generators[generator_name] = generator
         return generator
 
@@ -285,7 +290,8 @@ class Datasource(object):
                     "using '/' as a default delimiter."
                 )
         else:
-            generators = [generator["name"] for generator in self.list_generators()]
+            generators = [generator["name"]
+                          for generator in self.list_generators()]
             if len(generators) == 1:
                 generator_name = generators[0]
             elif "default" in generators:
@@ -308,7 +314,8 @@ class Datasource(object):
             if generator is not None:
                 batch_kwargs = generator.yield_batch_kwargs(generator_asset)
             else:
-                raise ValueError("No generator or batch_kwargs available to provide a dataset.")
+                raise ValueError(
+                    "No generator or batch_kwargs available to provide a dataset.")
         elif not isinstance(batch_kwargs, dict):
             batch_kwargs = self.build_batch_kwargs(batch_kwargs)
 
@@ -362,13 +369,15 @@ class Datasource(object):
         """
         available_data_asset_names = {}
         if generator_names is None:
-            generator_names = [generator["name"] for generator in self.list_generators()]
+            generator_names = [generator["name"]
+                               for generator in self.list_generators()]
         elif isinstance(generator_names, string_types):
             generator_names = [generator_names]
 
         for generator_name in generator_names:
             generator = self.get_generator(generator_name)
-            available_data_asset_names[generator_name] = generator.get_available_data_asset_names()
+            available_data_asset_names[generator_name] = generator.get_available_data_asset_names(
+            )
         return available_data_asset_names
 
     def build_batch_kwargs(self, *args, **kwargs):

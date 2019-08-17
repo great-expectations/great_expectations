@@ -13,7 +13,8 @@ class Renderer(object):
         urn_hash = hashlib.md5()
         urn_hash.update(expectation_type.encode('utf-8'))
         urn_hash.update(json.dumps(expectation_kwargs).encode('utf-8'))
-        urn_hash.update(json.dumps(data_asset_name).encode('utf-8')) # Dump first even though this is a string in case it is null;
+        # Dump first even though this is a string in case it is null;
+        urn_hash.update(json.dumps(data_asset_name).encode('utf-8'))
         return base64.b64encode(urn_hash.digest()).decode('utf-8')
 
     @classmethod
@@ -50,14 +51,14 @@ class Renderer(object):
         print(json.dumps(ge_object, indent=2))
         raise ValueError("Unrecognized great expectations object.")
 
-    #TODO: When we implement a ValidationResultSuite class, this method will move there.
+    # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _find_evr_by_type(cls, evrs, type_):
         for evr in evrs:
             if evr["expectation_config"]["expectation_type"] == type_:
                 return evr
 
-    #TODO: When we implement a ValidationResultSuite class, this method will move there.
+    # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _find_all_evrs_by_type(cls, evrs, type_, column_=None):
         ret = []
@@ -68,7 +69,7 @@ class Renderer(object):
 
         return ret
 
-    #TODO: When we implement a ValidationResultSuite class, this method will move there.
+    # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _get_column_list_from_evrs(cls, evrs):
         """
@@ -83,18 +84,21 @@ class Renderer(object):
         """
         evrs_ = evrs["results"] if "results" in evrs else evrs
 
-        expect_table_columns_to_match_ordered_list_evr = cls._find_evr_by_type(evrs_, "expect_table_columns_to_match_ordered_list")
+        expect_table_columns_to_match_ordered_list_evr = cls._find_evr_by_type(
+            evrs_, "expect_table_columns_to_match_ordered_list")
         if expect_table_columns_to_match_ordered_list_evr:
-            ordered_columns = expect_table_columns_to_match_ordered_list_evr["result"]["observed_value"]
+            ordered_columns = expect_table_columns_to_match_ordered_list_evr[
+                "result"]["observed_value"]
         else:
             # Group EVRs by column
-            columns = list(set([evr["expectation_config"]["kwargs"]["column"] for evr in evrs_ if "column" in evr["expectation_config"]["kwargs"]]))
+            columns = list(set([evr["expectation_config"]["kwargs"]["column"]
+                                for evr in evrs_ if "column" in evr["expectation_config"]["kwargs"]]))
 
             ordered_columns = sorted(columns)
 
         return ordered_columns
 
-    #TODO: When we implement a ValidationResultSuite class, this method will move there.
+    # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _group_evrs_by_column(cls, validation_results):
         columns = {}
@@ -110,7 +114,7 @@ class Renderer(object):
 
         return columns
 
-    #TODO: When we implement an ExpectationSuite class, this method will move there.
+    # TODO: When we implement an ExpectationSuite class, this method will move there.
     @classmethod
     def _group_and_order_expectations_by_column(cls, expectations):
         # Group expectations by column
@@ -135,15 +139,15 @@ class Renderer(object):
         # if no order of columns is expected, sort alphabetically
         if not ordered_columns:
             ordered_columns = sorted(list(columns.keys()))
-        
+
         return columns, ordered_columns
 
-    #TODO: When we implement an ExpectationSuite class, this method will move there.
+    # TODO: When we implement an ExpectationSuite class, this method will move there.
     @classmethod
     def _get_expectation_suite_name(cls, expectations):
         if "expectation_suite_name" in expectations:
             expectation_suite_name = expectations["expectation_suite_name"]
         else:
             expectation_suite_name = None
-                
+
         return expectation_suite_name

@@ -4,6 +4,7 @@ from great_expectations.render.types import (
     RenderedComponentContent,
 )
 
+
 class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     """Render a bullet list of exception messages raised for provided EVRs"""
 
@@ -35,7 +36,8 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     }
 
     _default_element_styling = {
-        "classes": ["list-group-item"],  # "d-flex", "justify-content-between", "align-items-center"],
+        # "d-flex", "justify-content-between", "align-items-center"],
+        "classes": ["list-group-item"],
         "params": {
             "column": {
                 "classes": ["badge", "badge-primary"]

@@ -40,13 +40,14 @@ def is_valid_continuous_partition_object(partition_object):
     if (partition_object is None) or ("weights" not in partition_object) or ("bins" not in partition_object):
         return False
     if("tail_weights" in partition_object):
-        if (len(partition_object["tail_weights"])!=2):
+        if (len(partition_object["tail_weights"]) != 2):
             return False
-        comb_weights=partition_object["tail_weights"]+partition_object["weights"]
+        comb_weights = partition_object["tail_weights"] + \
+            partition_object["weights"]
     else:
-        comb_weights=partition_object["weights"]
+        comb_weights = partition_object["weights"]
 
-    ## TODO: Consider adding this check to migrate to the tail_weights structure of partition objects
+    # TODO: Consider adding this check to migrate to the tail_weights structure of partition objects
     # if (partition_object['bins'][0] == -np.inf) or (partition_object['bins'][-1] == np.inf):
     #     return False
 

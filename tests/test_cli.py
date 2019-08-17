@@ -1,6 +1,7 @@
 # Since our cli produces unicode output, but we want tests in python2 as well
 from __future__ import unicode_literals
 
+from great_expectations.cli.init import scaffold_directories_and_notebooks
 from datetime import datetime
 from click.testing import CliRunner
 import great_expectations.version
@@ -21,9 +22,6 @@ try:
     from unittest import mock
 except ImportError:
     import mock
-
-
-from great_expectations.cli.init import scaffold_directories_and_notebooks
 
 
 def test_cli_command_entrance():
@@ -241,6 +239,7 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
     finally:
         os.chdir(curdir)
 
+
 def test_cli_add_datasource(empty_data_context, filesystem_csv_2, capsys):
     runner = CliRunner()
     project_root_dir = empty_data_context.root_directory
@@ -254,11 +253,13 @@ def test_cli_add_datasource(empty_data_context, filesystem_csv_2, capsys):
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
     runner = CliRunner()
-    result = runner.invoke(cli, ["add-datasource", "-d", project_root_dir], input="1\n%s\nmynewsource\nn\n" % str(filesystem_csv_2))
+    result = runner.invoke(cli, ["add-datasource", "-d", project_root_dir],
+                           input="1\n%s\nmynewsource\nn\n" % str(filesystem_csv_2))
 
     captured = capsys.readouterr()
 
-    ccc = [datasource['name'] for datasource in empty_data_context.list_datasources()]
+    ccc = [datasource['name']
+           for datasource in empty_data_context.list_datasources()]
 
     assert "Would you like to profile 'mynewsource'?" in result.stdout
     logger.removeHandler(handler)
@@ -299,6 +300,7 @@ def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, c
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
     logger.removeHandler(handler)
 
+
 def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource(
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
@@ -325,6 +327,7 @@ def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
     assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
     logger.removeHandler(handler)
+
 
 def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource(
@@ -353,6 +356,7 @@ def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_cs
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
     logger.removeHandler(handler)
 
+
 def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource(
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
@@ -372,12 +376,14 @@ def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_
     logger.setLevel(logging.INFO)
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["profile", "my_datasource", "--data_assets", "bad-bad-asset", "-d", project_root_dir],
-    input="2\n")
+        cli, ["profile", "my_datasource", "--data_assets",
+              "bad-bad-asset", "-d", project_root_dir],
+        input="2\n")
 
     assert "Some of the data assets you specified were not found: bad-bad-asset" in result.output
-    
+
     logger.removeHandler(handler)
+
 
 def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource(
@@ -411,13 +417,13 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,
         "uncommitted/documentation/local_site"
-        )
+    )
     )
 
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,
         "uncommitted/documentation/team_site"
-        )
+    )
     )
 
     logger.removeHandler(handler)
@@ -448,11 +454,13 @@ def test_cli_config_not_found(tmp_path_factory):
 
 
 def test_scaffold_directories_and_notebooks(tmp_path_factory):
-    empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks"))
+    empty_directory = str(tmp_path_factory.mktemp(
+        "test_scaffold_directories_and_notebooks"))
     scaffold_directories_and_notebooks(empty_directory)
     print(empty_directory)
 
     assert set(os.listdir(empty_directory)) == \
-           {'datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'}
+        {'datasources', 'plugins', 'expectations', '.gitignore',
+            'fixtures', 'uncommitted', 'notebooks'}
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
-           {'samples', 'documentation', 'validations', 'credentials'}
+        {'samples', 'documentation', 'validations', 'credentials'}

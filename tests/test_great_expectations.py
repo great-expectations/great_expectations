@@ -238,21 +238,21 @@ class TestValidation(unittest.TestCase):
                     "run_id": "1955-11-05T000000Z"
                 },
                 "results": [
-                {"expectation_config": {
-                    "expectation_type": "expect_column_values_to_be_in_set",
-                    "kwargs": {"column": "PClass", "value_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"}
-                },
-                    "success": False,
-                    "exception_info": {"exception_message": None,
-                                       "exception_traceback": None,
-                                       "raised_exception": False},
-                    "result": {"partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
-                               "unexpected_percent": 0.0007616146230007616, "element_count": 1313,
-                               "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],
-                               "partial_unexpected_list": ["*"],
-                               "unexpected_percent_nonmissing": 0.0007616146230007616, "missing_count": 0,
-                               "unexpected_index_list": [456]}}
-            ],
+                    {"expectation_config": {
+                        "expectation_type": "expect_column_values_to_be_in_set",
+                        "kwargs": {"column": "PClass", "value_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"}
+                    },
+                        "success": False,
+                        "exception_info": {"exception_message": None,
+                                           "exception_traceback": None,
+                                           "raised_exception": False},
+                        "result": {"partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
+                                   "unexpected_percent": 0.0007616146230007616, "element_count": 1313,
+                                   "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],
+                                   "partial_unexpected_list": ["*"],
+                                   "unexpected_percent_nonmissing": 0.0007616146230007616, "missing_count": 0,
+                                   "unexpected_index_list": [456]}}
+                ],
                 "success": expected_results["success"],  # unaffected
                 "statistics": expected_results["statistics"],  # unaffected
             }
@@ -312,6 +312,7 @@ class TestValidation(unittest.TestCase):
             "min_value cannot be greater than max_value",
             results[0]['exception_info']['exception_message']
         )
+
 
 class TestValidationStatisticsCalculation(unittest.TestCase):
     def test_no_expectations(self):

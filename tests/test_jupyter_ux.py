@@ -22,7 +22,8 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
         return_without_displaying=True
     )
     print(html_to_display)
-    html_to_display = html_to_display.replace(" ", "").replace("\t", "").replace("\n", "")
+    html_to_display = html_to_display.replace(
+        " ", "").replace("\t", "").replace("\n", "")
     assert html_to_display == """\
 <div id="section-1" class="ge-section container-fluid">
     <div class="row">
@@ -59,7 +60,8 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
         return_without_displaying=True
     )
     print(html_to_display)
-    html_to_display = html_to_display.replace(" ", "").replace("\t", "").replace("\n", "")
+    html_to_display = html_to_display.replace(
+        " ", "").replace("\t", "").replace("\n", "")
     assert html_to_display == """\
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"><style type="text/css">
 .cooltip {
@@ -143,7 +145,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 
 
 def test_display_column_evrs_as_section():
-    #TODO: We should add a fixture that contains EVRs
+    # TODO: We should add a fixture that contains EVRs
     df = ge.read_csv("./tests/test_sets/Titanic.csv")
     df.profile(BasicDatasetProfiler)
     evrs = df.validate(result_format="SUMMARY")  # ["results"]
@@ -156,7 +158,7 @@ def test_display_column_evrs_as_section():
     )
     print(html_to_display)
 
-    #FIXME: This isn't a full snapshot test.
+    # FIXME: This isn't a full snapshot test.
     assert '<div id="section-1" class="ge-section container-fluid">' in html_to_display
     assert '<span class="badge badge-info" >Carlsson, Mr Frans Olof</span>' in html_to_display
     assert """\

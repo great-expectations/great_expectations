@@ -243,7 +243,7 @@ class ExpectationExplorer(object):
             ge_expectation_kwargs = self.expectation_kwarg_widgets_to_ge_kwargs(
                 expectation_state['kwargs'])
             new_result = getattr(ge_df, expectation_type)(include_config=True,
-                **ge_expectation_kwargs)
+                                                          **ge_expectation_kwargs)
 
         min_value_widget.observe(on_min_value_change, names='value')
         max_dl = widgets.link((max_value_widget, 'value'),
@@ -287,7 +287,7 @@ class ExpectationExplorer(object):
             ge_expectation_kwargs = self.expectation_kwarg_widgets_to_ge_kwargs(
                 expectation_state['kwargs'])
             new_result = getattr(ge_df, expectation_type)(include_config=True,
-                **ge_expectation_kwargs)
+                                                          **ge_expectation_kwargs)
 
         max_value_widget.observe(on_max_value_change, names='value')
         min_dl = widgets.link((min_value_widget, 'value'),
@@ -331,7 +331,8 @@ class ExpectationExplorer(object):
         expectation_kwarg_value = expectation_kwargs.get(
             expectation_kwarg_name)
         warning_message = widgets.HTML(
-            value='<div><strong>Warning: </strong>Cannot find dynamic widget for expectation kwarg "{expectation_kwarg_name}". To change kwarg value, please call expectation again with the modified value.</div>'.format(expectation_kwarg_name=expectation_kwarg_name)
+            value='<div><strong>Warning: </strong>Cannot find dynamic widget for expectation kwarg "{expectation_kwarg_name}". To change kwarg value, please call expectation again with the modified value.</div>'.format(
+                expectation_kwarg_name=expectation_kwarg_name)
         )
         static_widget = widgets.Textarea(value=str(
             expectation_kwarg_value), description='{expectation_kwarg_name}: '.format(expectation_kwarg_name=expectation_kwarg_name), disabled=True)
@@ -451,7 +452,8 @@ class ExpectationExplorer(object):
                 result_detail_accordion
             ],
             layout=widgets.Layout(
-                border='2px solid {color}'.format(color="green" if success else "red"),
+                border='2px solid {color}'.format(
+                    color="green" if success else "red"),
                 margin='5px'
             )
         )

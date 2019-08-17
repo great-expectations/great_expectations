@@ -86,10 +86,10 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
                 }
             else:
                 sqlalchemy_url = click.prompt(
-"""What is the url/connection string for the sqlalchemy connection?
+                    """What is the url/connection string for the sqlalchemy connection?
 (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
 """,
-                                    show_default=False)
+                    show_default=False)
                 credentials = {
                     "url": sqlalchemy_url
                 }
@@ -102,23 +102,22 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
                 break
             except (DatasourceInitializationError, ModuleNotFoundError) as de:
                 cli_message(
-"""
+                    """
 Cannot connect to the database. Please check your environment and the configuration you provided.
 
 <red>Actual error: {0:s}</red>>
 """.format(str(de)))
                 if not click.confirm(
-"""
+                    """
 Enter the credentials again?
 """.format(str(de)),
-                    default=True):
+                        default=True):
                     cli_message(
-"""
+                        """
 Exiting datasource configuration.
 You can add a datasource later by editing the great_expectations.yml file.
 """)
                     return None
-
 
     elif data_source_selection == "3":  # Spark
         path = click.prompt(
@@ -150,7 +149,7 @@ You can add a datasource later by editing the great_expectations.yml file.
     if data_source_selection == "4":  # None of the above
         cli_message(msg_unknown_data_source)
         cli_message(
-"""
+            """
 Skipping datasource configuration.
 You can add a datasource later by editing the great_expectations.yml file.
 """)
@@ -210,7 +209,8 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 ?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
 """
 
-    cli_message(msg_intro.format(data_source_name, __version__.replace(".", "_")))
+    cli_message(msg_intro.format(data_source_name,
+                                 __version__.replace(".", "_")))
 
     if data_assets:
         data_assets = [item.strip() for item in data_assets.split(",")]
@@ -224,27 +224,31 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
         dry_run=True
     )
 
-    if profiling_results['success']: # data context is ready to profile - run profiling
+    # data context is ready to profile - run profiling
+    if profiling_results['success']:
         if data_assets or profile_all_data_assets or click.confirm(msg_confirm_ok_to_proceed.format(data_source_name), default=True):
             profiling_results = context.profile_datasource(
-            data_source_name,
-            data_assets=data_assets,
-            profile_all_data_assets=profile_all_data_assets,
-            max_data_assets=max_data_assets,
-            dry_run=False
-        )
+                data_source_name,
+                data_assets=data_assets,
+                profile_all_data_assets=profile_all_data_assets,
+                max_data_assets=max_data_assets,
+                dry_run=False
+            )
         else:
             cli_message(msg_skipping)
             return
-    else: # we need to get arguments from user interactively
+    else:  # we need to get arguments from user interactively
         do_exit = False
         while not do_exit:
             if profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND:
-                cli_message(msg_some_data_assets_not_found.format("," .join(profiling_results['error']['not_found_data_assets'])))
+                cli_message(msg_some_data_assets_not_found.format(
+                    "," .join(profiling_results['error']['not_found_data_assets'])))
             elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS:
-                cli_message(msg_too_many_data_assets.format(profiling_results['error']['num_data_assets'], data_source_name))
-            else: # unknown error
-                raise ValueError("Unknown profiling error code: " + profiling_results['error']['code'])
+                cli_message(msg_too_many_data_assets.format(
+                    profiling_results['error']['num_data_assets'], data_source_name))
+            else:  # unknown error
+                raise ValueError("Unknown profiling error code: " +
+                                 profiling_results['error']['code'])
 
             option_selection = click.prompt(
                 msg_options,
@@ -254,15 +258,17 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 
             if option_selection == "1":
                 data_assets = click.prompt(
-                    msg_prompt_enter_data_asset_list.format(", ".join(profiling_results['error']['data_assets'][:3])),
+                    msg_prompt_enter_data_asset_list.format(
+                        ", ".join(profiling_results['error']['data_assets'][:3])),
                     default=None,
                     show_default=False
                 )
                 if data_assets:
-                    data_assets = [item.strip() for item in data_assets.split(",")]
+                    data_assets = [item.strip()
+                                   for item in data_assets.split(",")]
             elif option_selection == "3":
                 profile_all_data_assets = True
-            elif option_selection == "2": # skip
+            elif option_selection == "2":  # skip
                 cli_message(msg_skipping)
                 return
             else:
@@ -278,9 +284,8 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
                 dry_run=False
             )
 
-            if profiling_results['success']: # data context is ready to profile
+            if profiling_results['success']:  # data context is ready to profile
                 break
-
 
     cli_message(msg_data_doc_intro.format(__version__.replace(".", "_")))
     # if click.confirm("Move the profiled data and build HTML documentation?",
@@ -313,8 +318,9 @@ def build_documentation(context, site_name=None, data_asset_name=None):
     if site_name is not None:
         site_names = [site_name]
     else:
-        site_names=None
-    index_page_locator_infos = context.build_data_documentation(site_names=site_names, data_asset_name=data_asset_name)
+        site_names = None
+    index_page_locator_infos = context.build_data_documentation(
+        site_names=site_names, data_asset_name=data_asset_name)
 
     msg = """
 The following data documentation HTML sites were generated:

@@ -178,7 +178,7 @@ def validate(data_asset, expectation_suite=None, data_asset_name=None, data_cont
         logger.info("Using expectation suite from DataContext.")
         # Allow data_context to be a string, and try loading it from path in that case
         if isinstance(data_context, string_types):
-            data_context = DataContext(data_context)                
+            data_context = DataContext(data_context)
         expectation_suite = data_context.get_expectation_suite(data_asset_name)
     else:
         if data_asset_name in expectation_suite:
@@ -213,4 +213,3 @@ def validate(data_asset, expectation_suite=None, data_asset_name=None, data_cont
     data_asset_ = _convert_to_dataset_class(
         data_asset, data_asset_type, expectation_suite)
     return data_asset_.validate(*args, data_context=data_context, **kwargs)
-

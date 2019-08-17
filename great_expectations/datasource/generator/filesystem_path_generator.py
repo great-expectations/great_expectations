@@ -14,10 +14,11 @@ class GlobReaderGenerator(BatchGenerator):
                  base_directory="/data",
                  reader_options=None,
                  asset_globs=None):
-        super(GlobReaderGenerator, self).__init__(name, type_="glob_reader", datasource=datasource)
+        super(GlobReaderGenerator, self).__init__(
+            name, type_="glob_reader", datasource=datasource)
         if reader_options is None:
             reader_options = {}
-        
+
         if asset_globs is None:
             asset_globs = {
                 "default": "*"
@@ -31,7 +32,7 @@ class GlobReaderGenerator(BatchGenerator):
     def reader_options(self):
         return self._reader_options
 
-    @property 
+    @property
     def asset_globs(self):
         return self._asset_globs
 
@@ -49,7 +50,8 @@ class GlobReaderGenerator(BatchGenerator):
         if not os.path.isdir(self.base_directory):
             return known_assets
         for generator_asset in self.asset_globs.keys():
-            batch_paths = glob.glob(os.path.join(self.base_directory, self.asset_globs[generator_asset]))
+            batch_paths = glob.glob(os.path.join(
+                self.base_directory, self.asset_globs[generator_asset]))
             if len(batch_paths) > 0:
                 known_assets.add(generator_asset)
 
@@ -61,7 +63,8 @@ class GlobReaderGenerator(BatchGenerator):
                 "generator_asset": generator_asset,
             }
             batch_kwargs.update(kwargs)
-            raise BatchKwargsError("Unknown asset_name %s" % generator_asset, batch_kwargs)
+            raise BatchKwargsError("Unknown asset_name %s" %
+                                   generator_asset, batch_kwargs)
 
         glob_ = self.asset_globs[generator_asset]
         paths = glob.glob(os.path.join(self.base_directory, glob_))
@@ -103,7 +106,8 @@ class SubdirReaderGenerator(BatchGenerator):
                  datasource=None,
                  base_directory="/data",
                  reader_options=None):
-        super(SubdirReaderGenerator, self).__init__(name, type_="subdir_reader", datasource=datasource)
+        super(SubdirReaderGenerator, self).__init__(
+            name, type_="subdir_reader", datasource=datasource)
         if reader_options is None:
             reader_options = {}
 
@@ -126,7 +130,8 @@ class SubdirReaderGenerator(BatchGenerator):
     def get_available_data_asset_names(self):
         if not os.path.isdir(self.base_directory):
             return set()
-        known_assets = self._get_valid_file_options(valid_options=set(), base_directory=self.base_directory)
+        known_assets = self._get_valid_file_options(
+            valid_options=set(), base_directory=self.base_directory)
         return known_assets
 
     def _get_valid_file_options(self, valid_options=set(), base_directory=None):
@@ -138,7 +143,8 @@ class SubdirReaderGenerator(BatchGenerator):
                 if file_option.endswith(extension) and not file_option.startswith("."):
                     valid_options.add(file_option[:-len(extension)])
                 elif os.path.isdir(os.path.join(self.base_directory, file_option)):
-                    subdir_options = self._get_valid_file_options(valid_options=set(), base_directory=os.path.join(base_directory, file_option))
+                    subdir_options = self._get_valid_file_options(
+                        valid_options=set(), base_directory=os.path.join(base_directory, file_option))
                     if len(subdir_options) > 0:
                         valid_options.add(file_option)
                 # Make sure there's at least one valid file inside the subdir
@@ -148,13 +154,15 @@ class SubdirReaderGenerator(BatchGenerator):
         # If the generator_asset is a file, then return the path.
         # Otherwise, use files in a subdir as batches
         if os.path.isdir(os.path.join(self.base_directory, generator_asset)):
-            subdir_options = os.listdir(os.path.join(self.base_directory, generator_asset))
+            subdir_options = os.listdir(os.path.join(
+                self.base_directory, generator_asset))
             batches = []
             for file_option in subdir_options:
                 for extension in KNOWN_EXTENSIONS:
                     if file_option.endswith(extension) and not file_option.startswith("."):
-                        batches.append(os.path.join(self.base_directory, generator_asset, file_option))
-            
+                        batches.append(os.path.join(
+                            self.base_directory, generator_asset, file_option))
+
             return self._build_batch_kwargs_path_iter(batches)
             # return self._build_batch_kwargs_path_iter(os.scandir(os.path.join(self.base_directory, generator_asset)))
             # return iter([{
@@ -167,7 +175,8 @@ class SubdirReaderGenerator(BatchGenerator):
         #     return iter([self._build_batch_kwargs(path)])
         else:
             for extension in KNOWN_EXTENSIONS:
-                path = os.path.join(self.base_directory, generator_asset + extension)
+                path = os.path.join(self.base_directory,
+                                    generator_asset + extension)
                 if os.path.isfile(path):
                     return iter([
                         self._build_batch_kwargs(path)

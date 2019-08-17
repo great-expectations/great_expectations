@@ -7,6 +7,7 @@ from great_expectations.render.types import (
     RenderedDocumentContent
 )
 
+
 class SiteIndexPageRenderer(Renderer):
 
     @classmethod
@@ -14,17 +15,21 @@ class SiteIndexPageRenderer(Renderer):
         section_rows = []
         column_count = 1
         profiling_links = link_lists_dict["profiling_links"]
-        if profiling_links: column_count += 1
+        if profiling_links:
+            column_count += 1
         validation_links = link_lists_dict["validation_links"]
-        if validation_links: column_count += 1
+        if validation_links:
+            column_count += 1
         expectation_suite_links = link_lists_dict["expectation_suite_links"]
-        if expectation_suite_links: column_count += 1
-        
+        if expectation_suite_links:
+            column_count += 1
+
         cell_width_pct = 100.0/column_count
 
         first_row = []
-        rowspan = str(len(expectation_suite_links)) if expectation_suite_links else "1"
-        
+        rowspan = str(len(expectation_suite_links)
+                      ) if expectation_suite_links else "1"
+
         data_asset_name = RenderedComponentContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -58,7 +63,7 @@ class SiteIndexPageRenderer(Renderer):
             }
         })
         first_row.append(data_asset_name)
-        
+
         if profiling_links:
             profiling_results_bullets = [
                 RenderedComponentContent(**{
@@ -92,7 +97,7 @@ class SiteIndexPageRenderer(Renderer):
                 }
             })
             first_row.append(profiling_results_bullet_list)
-            
+
         if expectation_suite_links:
             expectation_suite_link_dict = expectation_suite_links[0]
 
@@ -121,7 +126,7 @@ class SiteIndexPageRenderer(Renderer):
                 }
             })
             first_row.append(expectation_suite_link)
-            
+
             if validation_links:
                 validation_link_bullets = [
                     RenderedComponentContent(**{
@@ -196,14 +201,14 @@ class SiteIndexPageRenderer(Renderer):
                 }
             })
             first_row.append(validation_link_bullet_list)
-        
+
         section_rows.append(first_row)
-        
+
         if len(expectation_suite_links) > 1:
             for expectation_suite_link_dict in expectation_suite_links[1:]:
                 expectation_suite_row = []
                 expectation_suite_name = expectation_suite_link_dict["expectation_suite_name"]
-    
+
                 expectation_suite_link = RenderedComponentContent(**{
                     "content_block_type": "string_template",
                     "string_template": {
@@ -227,7 +232,7 @@ class SiteIndexPageRenderer(Renderer):
                     }
                 })
                 expectation_suite_row.append(expectation_suite_link)
-    
+
                 if validation_links:
                     validation_link_bullets = [
                         RenderedComponentContent(**{
@@ -265,11 +270,11 @@ class SiteIndexPageRenderer(Renderer):
                         }
                     })
                     expectation_suite_row.append(validation_link_bullet_list)
-                    
+
                 section_rows.append(expectation_suite_row)
-            
+
         return section_rows
-        
+
     @classmethod
     def render(cls, index_links_dict):
 
@@ -317,20 +322,20 @@ class SiteIndexPageRenderer(Renderer):
 
                 generator_table_rows = []
                 generator_table_header_row = ["Data Asset"]
-                
+
                 header_dict = OrderedDict([
                     ["profiling_links", "Profiling Results"],
                     ["expectation_suite_links", "Expectation Suite"],
                     ["validation_links", "Validation Results"]
                 ])
-                
+
                 for link_lists_key, header in header_dict.items():
                     for data_asset, link_lists in data_assets.items():
                         if header in generator_table_header_row:
                             continue
                         if link_lists[link_lists_key]:
                             generator_table_header_row.append(header)
-                
+
                 generator_table = RenderedComponentContent(**{
                     "content_block_type": "table",
                     "header_row": generator_table_header_row,
@@ -347,8 +352,9 @@ class SiteIndexPageRenderer(Renderer):
                 })
                 # data_assets
                 for data_asset, link_lists in data_assets.items():
-                    generator_table_rows += cls._generate_data_asset_table_section(data_asset, link_lists)
-                    
+                    generator_table_rows += cls._generate_data_asset_table_section(
+                        data_asset, link_lists)
+
                 content_blocks.append(generator_table)
 
             section = RenderedSectionContent(**{
@@ -358,7 +364,6 @@ class SiteIndexPageRenderer(Renderer):
             sections.append(section)
 
         return RenderedDocumentContent(**{
-                "utm_medium": "index-page",
-                "sections": sections
-            })
-
+            "utm_medium": "index-page",
+            "sections": sections
+        })

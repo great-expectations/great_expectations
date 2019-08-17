@@ -20,7 +20,7 @@ class BatchGenerator(object):
 
     A batch is a sample from a data asset, sliced according to a particular rule. For 
     example, an hourly slide of the Events table or “most recent `users` records.” 
-    
+
     A Batch is the primary unit of validation in the Great Expectations DataContext. 
     Batches include metadata that identifies how they were constructed--the same “batch_kwargs”
     assembled by the generator, While not every datasource will enable re-fetching a
@@ -49,10 +49,12 @@ class BatchGenerator(object):
         if self._datasource is not None:
             self._datasource.save_config()
         else:
-            logger.warning("Unable to save generator config without a datasource attached.")
-     
+            logger.warning(
+                "Unable to save generator config without a datasource attached.")
+
     def reset_iterator(self, data_asset_name):
-        self._data_asset_iterators[data_asset_name] = self._get_iterator(data_asset_name)
+        self._data_asset_iterators[data_asset_name] = self._get_iterator(
+            data_asset_name)
 
     def get_iterator(self, data_asset_name):
         if data_asset_name in self._data_asset_iterators:
@@ -73,5 +75,6 @@ class BatchGenerator(object):
             return next(data_asset_iterator)
         except TypeError:
             # If we don't actually have an iterator we can generate, even after resetting, just return empty
-            logger.warning("Unable to generate batch_kwargs for data_asset_name %s" % data_asset_name)
+            logger.warning(
+                "Unable to generate batch_kwargs for data_asset_name %s" % data_asset_name)
             return {}

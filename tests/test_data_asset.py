@@ -18,7 +18,8 @@ def test_data_asset_name_inheritance(dataset):
 
     # A FileDataAsset should pick up its type
     data_asset = ge.data_asset.FileDataAsset()
-    assert data_asset.get_expectation_suite()["data_asset_type"] == "FileDataAsset"
+    assert data_asset.get_expectation_suite(
+    )["data_asset_type"] == "FileDataAsset"
 
     # So should a Dataset
     data_asset = ge.dataset.Dataset()
@@ -32,7 +33,8 @@ def test_data_asset_name_inheritance(dataset):
         _data_asset_type = "MyCustomDataset"
 
     data_asset = MyCustomDataset()
-    assert data_asset.get_expectation_suite()["data_asset_type"] == "MyCustomDataset"
+    assert data_asset.get_expectation_suite(
+    )["data_asset_type"] == "MyCustomDataset"
 
 
 class TestDataAsset(unittest.TestCase):

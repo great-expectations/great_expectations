@@ -8,7 +8,8 @@ logger = logging.getLogger(__name__)
 try:
     from pyspark.sql import SparkSession
 except ImportError:
-    logger.debug("Unable to load spark context; install optional spark dependency for support.")
+    logger.debug(
+        "Unable to load spark context; install optional spark dependency for support.")
 
 
 class DatabricksTableGenerator(BatchGenerator):
@@ -29,8 +30,10 @@ class DatabricksTableGenerator(BatchGenerator):
         query = 'select * from {}.{}'.format(self.database, data_asset_name)
         if kwargs.get('partition'):
             if not kwargs.get('date_field'):
-                raise Exception('Must specify date_field when using partition.')
-            query += ' where {} = "{}"'.format(kwargs.get('date_field'), kwargs.get('partition'))
+                raise Exception(
+                    'Must specify date_field when using partition.')
+            query += ' where {} = "{}"'.format(
+                kwargs.get('date_field'), kwargs.get('partition'))
         return iter(
             {
                 "query": query,

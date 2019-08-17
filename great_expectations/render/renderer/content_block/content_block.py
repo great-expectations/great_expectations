@@ -63,7 +63,7 @@ class ContentBlockRenderer(Renderer):
                 cls._process_content_block(content_block)
 
                 return content_block
-                
+
             else:
                 return None
         else:

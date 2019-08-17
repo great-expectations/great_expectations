@@ -15,6 +15,7 @@ from great_expectations.types import (
 * Values can be typed
 """
 
+
 def test_DotDict_dictionary_syntax():
     D = DotDict({
         'x': [1, 2, 4],
@@ -24,6 +25,7 @@ def test_DotDict_dictionary_syntax():
     D["w"] = 10
     assert D["x"][0] == D["y"][0]
     assert D["w"] == 10
+
 
 def test_DotDict_dot_syntax():
     D = DotDict({
@@ -44,8 +46,8 @@ def test_DotDict_dot_syntax():
     assert d["x"] == 1
 
     assert d == {
-        "x" : 1,
-        "y" : 2
+        "x": 1,
+        "y": 2
     }
 
 
@@ -59,10 +61,10 @@ def test_LooselyTypedDotDict_raises_error():
 
     with pytest.raises(KeyError):
         d["x"] = "hello?"
-    
+
     with pytest.raises(KeyError):
         d.x = "goodbye?"
-    
+
     assert d.x == None
 
     with pytest.raises(KeyError):
@@ -80,7 +82,7 @@ def test_LooselyTypedDotDict_subclass():
     })
     assert d.x == 1
     assert d["x"] == 1
-    
+
     d["y"] = 100
     assert d["y"] == 100
     assert d.y == 100
@@ -152,8 +154,8 @@ def test_LooselyTypedDotDict_subclass_required_keys():
             _required_keys = set([
                 "w"
             ])
-        
-        #Unfortunately, I don't have a good way to test this condition until the class is instantiated
+
+        # Unfortunately, I don't have a good way to test this condition until the class is instantiated
         d = MyLooselyTypedDotDict(x=True)
 
 
@@ -166,8 +168,8 @@ def test_LooselyTypedDotDict_subclass_key_types():
             "x",
         ])
         _key_types = {
-            "x" : int,
-            "y" : str,
+            "x": int,
+            "y": str,
         }
 
     d = MyLooselyTypedDotDict(**{
@@ -216,38 +218,40 @@ def test_LooselyTypedDotDict_subclass_key_types():
             }
         )
 
+
 def test_LooselyTypedDotDict_ListOf_typing():
     class MyLooselyTypedDotDict(LooselyTypedDotDict):
         _allowed_keys = set([
             "a", "b", "c"
         ])
         _key_types = {
-            "a" : int,
-            "b" : ListOf(int),
+            "a": int,
+            "b": ListOf(int),
         }
-    
+
     d = MyLooselyTypedDotDict(
         **{
-            "a" : 10,
-            "b" : [10, 20, 30]
+            "a": 10,
+            "b": [10, 20, 30]
         }
     )
 
     d = MyLooselyTypedDotDict(
         coerce_types=True,
         **{
-            "a" : 10,
-            "b" : ["10", "20", "30"]
+            "a": 10,
+            "b": ["10", "20", "30"]
         }
     )
 
     with pytest.raises(TypeError):
         d = MyLooselyTypedDotDict(
             **{
-                "a" : 10,
-                "b" : [10, 20, "rabbit"]
+                "a": 10,
+                "b": [10, 20, "rabbit"]
             }
         )
+
 
 def test_LooselyTypedDotDict_recursive_coercion():
     class MyNestedDotDict(LooselyTypedDotDict):
@@ -258,8 +262,8 @@ def test_LooselyTypedDotDict_recursive_coercion():
             "a",
         ])
         _key_types = {
-            "a" : int,
-            "b" : str,
+            "a": int,
+            "b": str,
         }
 
     class MyLooselyTypedDotDict(LooselyTypedDotDict):
@@ -270,25 +274,25 @@ def test_LooselyTypedDotDict_recursive_coercion():
             "x",
         ])
         _key_types = {
-            "x" : str,
-            "y" : MyNestedDotDict,
+            "x": str,
+            "y": MyNestedDotDict,
         }
 
     d = MyLooselyTypedDotDict(
         coerce_types=True,
         **{
-            "x" : "hello",
-            "y" : {
-                "a" : 1,
-                "b" : "hello"
+            "x": "hello",
+            "y": {
+                "a": 1,
+                "b": "hello"
             },
         }
     )
     assert d == {
-        "x" : "hello",
-        "y" : {
-            "a" : 1,
-            "b" : "hello"
+        "x": "hello",
+        "y": {
+            "a": 1,
+            "b": "hello"
         },
     }
 
@@ -296,9 +300,9 @@ def test_LooselyTypedDotDict_recursive_coercion():
         MyLooselyTypedDotDict(
             coerce_types=True,
             **{
-                "x" : "hello",
-                "y" : {
-                    "a" : "broken",
+                "x": "hello",
+                "y": {
+                    "a": "broken",
                 },
             }
         )
@@ -307,12 +311,13 @@ def test_LooselyTypedDotDict_recursive_coercion():
         MyLooselyTypedDotDict(
             coerce_types=True,
             **{
-                "x" : "hello",
-                "y" : {
-                    "b" : "wait, a is required!",
+                "x": "hello",
+                "y": {
+                    "b": "wait, a is required!",
                 },
             }
         )
+
 
 def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
     class MyNestedDotDict(LooselyTypedDotDict):
@@ -323,7 +328,7 @@ def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
             "a",
         ])
         _key_types = {
-            "a" : int,
+            "a": int,
         }
 
     class MyLooselyTypedDotDict(LooselyTypedDotDict):
@@ -334,15 +339,15 @@ def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
             "x",
         ])
         _key_types = {
-            "x" : str,
-            "y" : ListOf(MyNestedDotDict),
+            "x": str,
+            "y": ListOf(MyNestedDotDict),
         }
 
     d = MyLooselyTypedDotDict(
         coerce_types=True,
         **{
-            "x" : "hello",
-            "y" : [
+            "x": "hello",
+            "y": [
                 {"a": 1},
                 {"a": 2},
                 {"a": 3},
@@ -351,12 +356,12 @@ def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
         }
     )
     assert d == {
-        "x" : "hello",
-        "y" : [
+        "x": "hello",
+        "y": [
             {"a": 1},
             {"a": 2},
             {"a": 3},
-            {"a": 4}    
+            {"a": 4}
         ]
     }
 
@@ -364,9 +369,9 @@ def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
         d = MyLooselyTypedDotDict(
             coerce_types=True,
             **{
-                "x" : "hello",
-                "y" : {
-                    "a" : [1, 2, 3, 4],
+                "x": "hello",
+                "y": {
+                    "a": [1, 2, 3, 4],
                 },
             }
         )

@@ -3,10 +3,10 @@ import pytest
 from great_expectations.render.renderer.site_builder import SiteBuilder
 
 
-
 def test_cli_profile(titanic_data_context):
 
-    titanic_data_context.profile_datasource(titanic_data_context.list_datasources()[0]["name"])
+    titanic_data_context.profile_datasource(
+        titanic_data_context.list_datasources()[0]["name"])
 
     site_config = {
         "site_store": {
@@ -53,8 +53,11 @@ def test_cli_profile(titanic_data_context):
     index_page_locator_info = res[0]
     index_links_dict = res[1]
 
-    assert index_page_locator_info['path'] == titanic_data_context.data_doc_directory + '/local_site/index.html'
-    assert len(index_links_dict['mydatasource']['mygenerator']['Titanic']['expectation_suite_links']) == 1
-    assert len(index_links_dict['mydatasource']['mygenerator']['Titanic']['validation_links']) == 0
-    assert len(index_links_dict['mydatasource']['mygenerator']['Titanic']['profiling_links']) == 0
-
+    assert index_page_locator_info['path'] == titanic_data_context.data_doc_directory + \
+        '/local_site/index.html'
+    assert len(index_links_dict['mydatasource']['mygenerator']
+               ['Titanic']['expectation_suite_links']) == 1
+    assert len(index_links_dict['mydatasource']
+               ['mygenerator']['Titanic']['validation_links']) == 0
+    assert len(index_links_dict['mydatasource']
+               ['mygenerator']['Titanic']['profiling_links']) == 0

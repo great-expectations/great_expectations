@@ -24,7 +24,8 @@ schemas = {
 
 @pytest.mark.parametrize('context', CONTEXTS)
 def test_caching(context):
-    dataset = get_dataset(context, data, schemas=schemas.get(context), caching=True)
+    dataset = get_dataset(
+        context, data, schemas=schemas.get(context), caching=True)
     dataset.get_column_max('a')
     dataset.get_column_max('a')
     dataset.get_column_max('b')
@@ -32,14 +33,16 @@ def test_caching(context):
     assert dataset.get_column_max.cache_info().misses == 2
     assert dataset.get_column_max.cache_info().misses == 2
 
-    dataset = get_dataset(context, data, schemas=schemas.get(context), caching=False)
+    dataset = get_dataset(
+        context, data, schemas=schemas.get(context), caching=False)
     with pytest.raises(AttributeError):
         dataset.get_column_max.cache_info()
 
 
 @pytest.mark.parametrize('context', CONTEXTS)
 def test_head(context):
-    dataset = get_dataset(context, data, schemas=schemas.get(context), caching=True)
+    dataset = get_dataset(
+        context, data, schemas=schemas.get(context), caching=True)
     dataset.expect_column_mean_to_be_between("b", 5, 5)
     head = dataset.head(1)
     assert isinstance(head, PandasDataset)

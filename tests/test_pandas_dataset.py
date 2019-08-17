@@ -264,10 +264,10 @@ def test_from_pandas():
 
     assert not isinstance(ge_df, CustomPandasDataset)
     assert isinstance(ge_df_custom, CustomPandasDataset)
-    assert list(ge_df_custom.columns)==['x', 'y', 'z']
-    assert list(ge_df_custom['x'])==list(pd_df['x'])
-    assert list(ge_df_custom['y'])==list(pd_df['y'])
-    assert list(ge_df_custom['z'])==list(pd_df['z'])
+    assert list(ge_df_custom.columns) == ['x', 'y', 'z']
+    assert list(ge_df_custom['x']) == list(pd_df['x'])
+    assert list(ge_df_custom['y']) == list(pd_df['y'])
+    assert list(ge_df_custom['z']) == list(pd_df['z'])
 
 
 def test_ge_pandas_concatenating_no_autoinspect():

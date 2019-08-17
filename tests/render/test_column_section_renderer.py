@@ -40,7 +40,8 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
     for column in evrs.keys():
         with open('./tests/render/output/test_render_profiling_results_column_section_renderer__' + column + '.json', 'w') \
                 as outfile:
-            json.dump(ProfilingResultsColumnSectionRenderer.render(evrs[column]), outfile, indent=2)
+            json.dump(ProfilingResultsColumnSectionRenderer.render(
+                evrs[column]), outfile, indent=2)
 
 
 @pytest.mark.smoketest
@@ -60,7 +61,8 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     for column in exp_groups.keys():
         with open('./tests/render/output/test_render_expectation_suite_column_section_renderer' + column + '.json', 'w') \
                 as outfile:
-            json.dump(ExpectationSuiteColumnSectionRenderer.render(exp_groups[column]), outfile, indent=2)
+            json.dump(ExpectationSuiteColumnSectionRenderer.render(
+                exp_groups[column]), outfile, indent=2)
 
     # # This can be used for regression testing
     # for column in exp_groups.keys():
@@ -69,16 +71,16 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
 
 
 def test_ProfilingResultsColumnSectionRenderer_render(titanic_profiled_evrs_1, titanic_profiled_name_column_evrs):
-    #Smoke test for titanic names
-    document = ProfilingResultsColumnSectionRenderer().render(titanic_profiled_name_column_evrs)
+    # Smoke test for titanic names
+    document = ProfilingResultsColumnSectionRenderer().render(
+        titanic_profiled_name_column_evrs)
     print(document)
     assert document != {}
 
+    # Smoke test for titanic Ages
 
-    #Smoke test for titanic Ages
-
-    #This is a janky way to fetch expectations matching a specific name from an EVR suite.
-    #TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
+    # This is a janky way to fetch expectations matching a specific name from an EVR suite.
+    # TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
     from great_expectations.render.renderer.renderer import (
         Renderer,
     )
@@ -103,10 +105,10 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
     ProfilingResultsColumnSectionRenderer()._render_header(
         titanic_profiled_name_column_evrs,
         content_blocks,
-        column_type = None
+        column_type=None
     )
     # print(json.dumps(content_blocks, indent=2))
-    
+
     assert len(content_blocks) == 1
     content_block = content_blocks[0]
     assert content_block["content_block_type"] == "header"
@@ -152,7 +154,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
             },
             "meta": {
                 "BasicDatasetProfiler": {
-                "confidence": "very low"
+                    "confidence": "very low"
                 }
             }
         }
@@ -201,8 +203,9 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
 def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_profiled_evrs_1):
 
     print(titanic_profiled_evrs_1["results"][0])
-    distinct_values_evrs = [evr for evr in titanic_profiled_evrs_1["results"] if evr["expectation_config"]["expectation_type"] == "expect_column_distinct_values_to_be_in_set"]
-    
+    distinct_values_evrs = [evr for evr in titanic_profiled_evrs_1["results"]
+                            if evr["expectation_config"]["expectation_type"] == "expect_column_distinct_values_to_be_in_set"]
+
     assert len(distinct_values_evrs) == 4
 
     content_blocks = []
@@ -217,7 +220,8 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_pr
 
     for content_block in content_blocks:
         assert content_block["content_block_type"] == "graph"
-        assert set(content_block.keys()) == {"header", "content_block_type", "graph", "styling"}
+        assert set(content_block.keys()) == {
+            "header", "content_block_type", "graph", "styling"}
         assert json.loads(content_block["graph"])
 
     # expect_column_kl_divergence_to_be_less_than
@@ -252,7 +256,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_pr
 
 def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_name_column_expectations):
     remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_header(
-        titanic_profiled_name_column_expectations,#["expectations"],
+        titanic_profiled_name_column_expectations,  # ["expectations"],
         [],
     )
 
@@ -262,40 +266,40 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
             "content_block_type": "header",
             "header": "Name",
             "styling": {
-            "classes": [
-                "col-12"
-            ],
-            "header": {
                 "classes": [
-                "alert",
-                "alert-secondary"
-                ]
-            }
+                    "col-12"
+                ],
+                "header": {
+                    "classes": [
+                        "alert",
+                        "alert-secondary"
+                    ]
+                }
             }
         })
     ]
 
     expectation_with_unescaped_dollar_sign = {
-      "expectation_type": "expect_column_values_to_be_in_type_list",
-      "kwargs": {
-        "column": "Car Insurance Premiums ($)",
-        "type_list": [
-          "DOUBLE_PRECISION",
-          "DoubleType",
-          "FLOAT",
-          "FLOAT4",
-          "FLOAT8",
-          "FloatType",
-          "NUMERIC",
-          "float"
-        ],
-        "result_format": "SUMMARY"
-      },
-      "meta": {
-        "BasicDatasetProfiler": {
-          "confidence": "very low"
+        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "kwargs": {
+            "column": "Car Insurance Premiums ($)",
+            "type_list": [
+                "DOUBLE_PRECISION",
+                "DoubleType",
+                "FLOAT",
+                "FLOAT4",
+                "FLOAT8",
+                "FloatType",
+                "NUMERIC",
+                "float"
+            ],
+            "result_format": "SUMMARY"
+        },
+        "meta": {
+            "BasicDatasetProfiler": {
+                "confidence": "very low"
+            }
         }
-      }
     }
     remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_header(
         [expectation_with_unescaped_dollar_sign],
@@ -309,12 +313,9 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
     }
 
 
-
-
-
 def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profiled_name_column_expectations):
     remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_bullet_list(
-        titanic_profiled_name_column_expectations,#["expectations"],
+        titanic_profiled_name_column_expectations,  # ["expectations"],
         [],
     )
 
@@ -327,9 +328,12 @@ def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profil
     assert len(content_block["bullet_list"]) == 4
     assert "value types must belong to this set" in json.dumps(content_block)
     assert "may have any number of unique values" in json.dumps(content_block)
-    assert "may have any percentage of unique values" in json.dumps(content_block)
-    assert "values must not be null, at least $mostly_pct % of the time." in json.dumps(content_block)
-    
+    assert "may have any percentage of unique values" in json.dumps(
+        content_block)
+    assert "values must not be null, at least $mostly_pct % of the time." in json.dumps(
+        content_block)
+
+
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path():
     evr = {
         'success': True,
@@ -351,7 +355,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
     result = ValidationResultsTableContentBlockRenderer.render([evr])
     # print(json.dumps(result, indent=2))
 
-    #Note: A better approach to testing would separate out styling into a separate test.
+    # Note: A better approach to testing would separate out styling into a separate test.
     assert result == {
         "content_block_type": "table",
         "table": [
@@ -365,14 +369,14 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                         },
                         "styling": {
                             "params": {
-                            "icon": {
-                                "classes": [
-                                    "fas",
-                                    "fa-check-circle",
-                                    "text-success"
-                                ],
-                                "tag": "i"
-                            }
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success"
+                                    ],
+                                    "tag": "i"
+                                }
                             }
                         }
                     }
@@ -398,8 +402,8 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             "params": {
                                 "column": {
                                     "classes": [
-                                    "badge",
-                                    "badge-primary"
+                                        "badge",
+                                        "badge-primary"
                                     ]
                                 }
                             }
@@ -426,6 +430,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
             "Observed Value"
         ]
     }
+
 
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation():
     evr = {
@@ -454,82 +459,82 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
         "content_block_type": "table",
         "table": [
             [
-            {
-                "content_block_type": "string_template",
-                "string_template": {
-                "template": "$icon",
-                "params": {
-                    "icon": ""
-                },
-                "styling": {
-                    "params": {
-                    "icon": {
-                        "classes": [
-                        "fas",
-                        "fa-exclamation-triangle",
-                        "text-warning"
-                        ],
-                        "tag": "i"
-                    }
-                    }
-                }
-                }
-            },
-            [
                 {
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "$column Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a provided threshold but no distribution was specified.",
-                    "params": {
-                    "column": "live",
-                    "partition_object": None,
-                    "threshold": None,
-                    "result_format": "SUMMARY"
-                    },
-                    "styling": {
-                    "default": {
-                        "classes": [
-                        "badge",
-                        "badge-secondary"
-                        ]
-                    },
-                    "params": {
-                        "sparklines_histogram": {
-                        "styles": {
-                            "font-family": "serif !important"
-                        }
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {
+                            "icon": ""
+                        },
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-exclamation-triangle",
+                                        "text-warning"
+                                    ],
+                                    "tag": "i"
+                                }
+                            }
                         }
                     }
-                    }
-                }
                 },
-                {
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "Expectation failed to execute.",
-                    "params": {},
-                    "tag": "strong",
-                    "styling": {
-                    "classes": [
-                        "text-warning"
-                    ]
-                    }
-                }
-                },
-                None
-            ],
-            "--"
+                [
+                    {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "$column Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a provided threshold but no distribution was specified.",
+                            "params": {
+                                "column": "live",
+                                "partition_object": None,
+                                "threshold": None,
+                                "result_format": "SUMMARY"
+                            },
+                            "styling": {
+                                "default": {
+                                    "classes": [
+                                        "badge",
+                                        "badge-secondary"
+                                    ]
+                                },
+                                "params": {
+                                    "sparklines_histogram": {
+                                        "styles": {
+                                            "font-family": "serif !important"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "Expectation failed to execute.",
+                            "params": {},
+                            "tag": "strong",
+                            "styling": {
+                                "classes": [
+                                    "text-warning"
+                                ]
+                            }
+                        }
+                    },
+                    None
+                ],
+                "--"
             ]
         ],
         "styling": {
             "body": {
-            "classes": [
-                "table"
-            ]
+                "classes": [
+                    "table"
+                ]
             },
             "classes": [
-            "m-3",
-            "table-responsive"
+                "m-3",
+                "table-responsive"
             ]
         },
         "header_row": [

@@ -23,19 +23,22 @@ def pytest_generate_tests(metafunc):
 
     # Load all the JSON files in the directory
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    expectation_dirs = [dir_ for dir_ in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, dir_))]
+    expectation_dirs = [dir_ for dir_ in os.listdir(
+        dir_path) if os.path.isdir(os.path.join(dir_path, dir_))]
 
     parametrized_tests = []
     ids = []
 
     for expectation_category in expectation_dirs:
 
-        test_configuration_files = glob.glob(dir_path+'/' + expectation_category + '/*.json')
+        test_configuration_files = glob.glob(
+            dir_path+'/' + expectation_category + '/*.json')
         for c in CONTEXTS:
             for filename in test_configuration_files:
                 file = open(filename)
                 # Use OrderedDict so that python2 will use the correct order of columns in all cases
-                test_configuration = json.load(file, object_pairs_hook=OrderedDict)
+                test_configuration = json.load(
+                    file, object_pairs_hook=OrderedDict)
 
                 for d in test_configuration['datasets']:
                     skip_expectation = False
@@ -57,7 +60,7 @@ def pytest_generate_tests(metafunc):
                             generate_test = False
                             if not isinstance(test["only_for"], list):
                                 raise ValueError("Invalid test specification.")
-                            
+
                             if isinstance(data_asset, SqlAlchemyDataset):
                                 # Call out supported dialects
                                 if "sqlalchemy" in test["only_for"]:
@@ -118,7 +121,7 @@ def pytest_generate_tests(metafunc):
 
                         ids.append(c + "/" + expectation_category + "/"
                                    + test_configuration["expectation_type"] + ":" + test["title"])
-                        
+
     metafunc.parametrize(
         "test_case",
         parametrized_tests,

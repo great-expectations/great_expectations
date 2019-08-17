@@ -1,7 +1,8 @@
-#Test File Expectations
+# Test File Expectations
 from __future__ import division
 import pytest
 import great_expectations as ge
+
 
 def test_expect_file_line_regex_match_count_to_be_between():
 
@@ -18,56 +19,56 @@ def test_expect_file_line_regex_match_count_to_be_between():
     complete_file_path = './tests/test_sets/toy_data_complete.csv'
     file_dat = ge.data_asset.FileDataAsset(complete_file_path)
 
-    #Invalid Skip Parameter
+    # Invalid Skip Parameter
     with pytest.raises(ValueError):
         file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                   expected_min_count=0,
                                                                   expected_max_count=4,
                                                                   skip=2.4)
 
-    #Invalid Regex
+    # Invalid Regex
     with pytest.raises(ValueError):
         file_dat.expect_file_line_regex_match_count_to_be_between(regex=2,
                                                                   expected_min_count=1,
                                                                   expected_max_count=8,
                                                                   skip=2)
 
-    #Non-integer min value
+    # Non-integer min value
     with pytest.raises(ValueError):
         file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                   expected_min_count=1.3,
                                                                   expected_max_count=8,
                                                                   skip=1)
 
-    #Negative min value
+    # Negative min value
     with pytest.raises(ValueError):
         file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                   expected_min_count=-2,
                                                                   expected_max_count=8,
                                                                   skip=1)
 
-    #Non-integer max value
+    # Non-integer max value
     with pytest.raises(ValueError):
         file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                   expected_min_count=0,
                                                                   expected_max_count="foo",
                                                                   skip=1)
 
-    #Negative max value
+    # Negative max value
     with pytest.raises(ValueError):
         file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                   expected_min_count=0,
                                                                   expected_max_count=-1,
                                                                   skip=1)
 
-    #Min count more than max count
+    # Min count more than max count
     with pytest.raises(ValueError):
         file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                   expected_min_count=4,
                                                                   expected_max_count=3,
                                                                   skip=1)
 
-    #Count does not fall in range
+    # Count does not fall in range
     fail_trial = file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                            expected_min_count=9,
                                                                            expected_max_count=12,
@@ -77,7 +78,7 @@ def test_expect_file_line_regex_match_count_to_be_between():
     assert fail_trial['result']['unexpected_percent'] == 1
     assert fail_trial['result']['missing_percent'] == 0
 
-    #Count does fall in range
+    # Count does fall in range
     success_trial = file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                               expected_min_count=0,
                                                                               expected_max_count=4,
@@ -87,31 +88,32 @@ def test_expect_file_line_regex_match_count_to_be_between():
     assert success_trial['result']['unexpected_percent'] == 0
     assert success_trial['result']['missing_percent'] == 0
 
+
 def test_expect_file_line_regex_match_count_to_equal():
     complete_file_path = './tests/test_sets/toy_data_complete.csv'
     incomplete_file_path = './tests/test_sets/toy_data_incomplete.csv'
     file_dat = ge.data_asset.FileDataAsset(complete_file_path)
     file_incomplete_dat = ge.data_asset.FileDataAsset(incomplete_file_path)
 
-    #Invalid Regex Value
+    # Invalid Regex Value
     with pytest.raises(ValueError):
         file_dat.expect_file_line_regex_match_count_to_equal(regex=True,
                                                              expected_count=3,
                                                              skip=1)
 
-    #Non-integer expected_count
+    # Non-integer expected_count
     with pytest.raises(ValueError):
         file_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",
                                                              expected_count=6.3,
                                                              skip=1)
 
-    #Negative expected_count
+    # Negative expected_count
     with pytest.raises(ValueError):
         file_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",
                                                              expected_count=-6,
                                                              skip=1)
 
-    #Count does not equal expected count
+    # Count does not equal expected count
     fail_trial = file_incomplete_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",
                                                                                  expected_count=3,
                                                                                  skip=1)
@@ -121,7 +123,7 @@ def test_expect_file_line_regex_match_count_to_equal():
     assert fail_trial['result']['missing_percent'] == 2/9
     assert fail_trial['result']['unexpected_percent_nonmissing'] == 3/7
 
-    #Mostly success
+    # Mostly success
     mostly_trial = file_incomplete_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",
                                                                                    expected_count=3,
                                                                                    skip=1,
@@ -129,7 +131,7 @@ def test_expect_file_line_regex_match_count_to_equal():
 
     assert mostly_trial["success"]
 
-    #Count does fall in range
+    # Count does fall in range
     success_trial = file_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",
                                                                          expected_count=3,
                                                                          skip=1)
@@ -138,6 +140,7 @@ def test_expect_file_line_regex_match_count_to_equal():
     assert success_trial['result']['unexpected_percent'] == 0
     assert success_trial['result']['unexpected_percent_nonmissing'] == 0
     assert success_trial['result']['missing_percent'] == 0
+
 
 def test_expect_file_hash_to_equal():
     # Test for non-existent file
@@ -160,7 +163,8 @@ def test_expect_file_hash_to_equal():
 
     # Test matching hash value with default algorithm
     hash_value = '63188432302f3a6e8c9e9c500ff27c8a'
-    good_hash_default_alg = titanic_file.expect_file_hash_to_equal(value=hash_value)
+    good_hash_default_alg = titanic_file.expect_file_hash_to_equal(
+        value=hash_value)
     assert good_hash_default_alg["success"]
 
     # Test matching hash value with specified algorithm
@@ -168,6 +172,7 @@ def test_expect_file_hash_to_equal():
     good_hash_new_alg = titanic_file.expect_file_hash_to_equal(value=hash_value,
                                                                hash_alg='sha256')
     assert good_hash_new_alg["success"]
+
 
 def test_expect_file_size_to_be_between():
     fake_file = ge.data_asset.FileDataAsset("abc")
@@ -207,6 +212,7 @@ def test_expect_file_size_to_be_between():
     good_range = titanic_file.expect_file_size_to_be_between(70000, 71000)
     assert good_range["success"]
 
+
 def test_expect_file_to_exist():
     # Test for non-existent file
     fake_file = ge.data_asset.FileDataAsset("abc")
@@ -218,6 +224,7 @@ def test_expect_file_to_exist():
     real_file_existence = real_file.expect_file_to_exist()
     assert real_file_existence["success"]
 
+
 def test_expect_file_to_have_valid_table_header():
     # Test for non-existent file
     fake_file = ge.data_asset.FileDataAsset('abc')
@@ -225,15 +232,19 @@ def test_expect_file_to_have_valid_table_header():
         fake_file.expect_file_to_have_valid_table_header(regex='')
 
     # Test for non-unique column names
-    invalid_header_dat = ge.data_asset.FileDataAsset('./tests/test_sets/same_column_names.csv')
+    invalid_header_dat = ge.data_asset.FileDataAsset(
+        './tests/test_sets/same_column_names.csv')
     invalid_header_dat_expectation = invalid_header_dat.expect_file_to_have_valid_table_header(regex='\|',
                                                                                                skip=2)
     assert not invalid_header_dat_expectation["success"]
 
     # Test for unique column names
-    valid_header_dat = ge.data_asset.FileDataAsset('./tests/test_sets/Titanic.csv')
-    valid_header_dat_expectation = valid_header_dat.expect_file_to_have_valid_table_header(regex=',')
+    valid_header_dat = ge.data_asset.FileDataAsset(
+        './tests/test_sets/Titanic.csv')
+    valid_header_dat_expectation = valid_header_dat.expect_file_to_have_valid_table_header(
+        regex=',')
     assert valid_header_dat_expectation["success"]
+
 
 def test_expect_file_to_be_valid_json():
 
@@ -243,23 +254,29 @@ def test_expect_file_to_be_valid_json():
         fake_file.expect_file_to_be_valid_json()
 
     # Test invalid JSON file
-    invalid_JSON_file = ge.data_asset.FileDataAsset('./tests/test_sets/invalid_json_file.json')
+    invalid_JSON_file = ge.data_asset.FileDataAsset(
+        './tests/test_sets/invalid_json_file.json')
     invalid_JSON_expectation = invalid_JSON_file.expect_file_to_be_valid_json()
     assert not invalid_JSON_expectation["success"]
 
     # Test valid JSON file
-    valid_JSON_file = ge.data_asset.FileDataAsset('./tests/test_sets/titanic_expectations.json')
+    valid_JSON_file = ge.data_asset.FileDataAsset(
+        './tests/test_sets/titanic_expectations.json')
     valid_JSON_expectation = valid_JSON_file.expect_file_to_be_valid_json()
     assert valid_JSON_expectation["success"]
 
     # Test valid JSON file with non-matching schema
     schema_file = './tests/test_sets/sample_schema.json'
-    test_file = ge.data_asset.FileDataAsset('./tests/test_sets/json_test1_against_schema.json')
-    test_file_expectation = test_file.expect_file_to_be_valid_json(schema=schema_file)
+    test_file = ge.data_asset.FileDataAsset(
+        './tests/test_sets/json_test1_against_schema.json')
+    test_file_expectation = test_file.expect_file_to_be_valid_json(
+        schema=schema_file)
     assert not test_file_expectation["success"]
 
     # Test valid JSON file with valid schema
-    test_file = ge.data_asset.FileDataAsset('./tests/test_sets/json_test2_against_schema.json')
+    test_file = ge.data_asset.FileDataAsset(
+        './tests/test_sets/json_test2_against_schema.json')
     schema_file = './tests/test_sets/sample_schema.json'
-    test_file_expectation = test_file.expect_file_to_be_valid_json(schema=schema_file)
+    test_file_expectation = test_file.expect_file_to_be_valid_json(
+        schema=schema_file)
     assert test_file_expectation["success"]

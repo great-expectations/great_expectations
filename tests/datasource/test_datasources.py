@@ -62,7 +62,7 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
     data_context.add_datasource(name, type_, base_directory=str(basedir))
     data_context_config = data_context.get_config()
 
-    assert name in data_context_config["datasources"] 
+    assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["type"] == type_
 
     # We should now see updated configs
@@ -74,10 +74,12 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
 
 
 def test_standalone_pandas_datasource(test_folder_connection_path):
-    datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
+    datasource = PandasDatasource(
+        'PandasCSV', base_directory=test_folder_connection_path)
 
     assert datasource.get_available_data_asset_names() == {"default": {"test"}}
-    manual_batch_kwargs = datasource.build_batch_kwargs(os.path.join(str(test_folder_connection_path), "test.csv"))
+    manual_batch_kwargs = datasource.build_batch_kwargs(
+        os.path.join(str(test_folder_connection_path), "test.csv"))
 
     # Get the default (subdir_path) generator
     generator = datasource.get_generator()
@@ -86,7 +88,8 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
     assert manual_batch_kwargs["path"] == auto_batch_kwargs["path"]
 
     # Include some extra kwargs...
-    dataset = datasource.get_batch("test", batch_kwargs=auto_batch_kwargs, sep=",", header=0, index_col=0)
+    dataset = datasource.get_batch(
+        "test", batch_kwargs=auto_batch_kwargs, sep=",", header=0, index_col=0)
     assert isinstance(dataset, PandasDataset)
     assert (dataset["col_1"] == [1, 2, 3, 4, 5]).all()
 
@@ -95,7 +98,8 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
     datasource = SqlAlchemyDatasource(
         'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
 
-    assert datasource.get_available_data_asset_names() == {"default": {"main.table_1", "main.table_2"}}
+    assert datasource.get_available_data_asset_names(
+    ) == {"default": {"main.table_1", "main.table_2"}}
     dataset1 = datasource.get_batch("main.table_1")
     dataset2 = datasource.get_batch("main.table_2")
     assert isinstance(dataset1, SqlAlchemyDataset)
@@ -135,7 +139,8 @@ def test_create_sqlalchemy_datasource(data_context):
 
     # But we should be able to add a source using a profile
     name = "second_source"
-    data_context.add_datasource(name, type_, profile="test_sqlalchemy_datasource")
+    data_context.add_datasource(
+        name, type_, profile="test_sqlalchemy_datasource")
 
     data_context_config = data_context.get_config()
     assert name in data_context_config["datasources"]
@@ -163,19 +168,21 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory):
     data_context.add_datasource(name, type_, base_directory=str(base_dir))
     data_context_config = data_context.get_config()
 
-    assert name in data_context_config["datasources"] 
+    assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["type"] == type_
-    assert data_context_config["datasources"][name]["generators"]["default"]["base_directory"] == str(base_dir)
+    assert data_context_config["datasources"][name]["generators"]["default"]["base_directory"] == str(
+        base_dir)
 
     base_dir = tmp_path_factory.mktemp('test_create_sparkdf_datasource-2')
     name = "test_sparkdf_datasource"
     type_ = "spark"
 
-    data_context.add_datasource(name, type_, reader_options={"sep": "|", "header": False})
+    data_context.add_datasource(name, type_, reader_options={
+                                "sep": "|", "header": False})
     data_context_config = data_context.get_config()
 
-    assert name in data_context_config["datasources"] 
-    assert data_context_config["datasources"][name]["type"] == type_ 
+    assert name in data_context_config["datasources"]
+    assert data_context_config["datasources"][name]["type"] == type_
     assert data_context_config["datasources"][name]["generators"]["default"]["reader_options"]["sep"] == "|"
 
     # Note that pipe is special in yml, so let's also check to see that it was properly serialized
@@ -200,17 +207,20 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
         pytest.skip()
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
     shutil.copy("./tests/test_sets/unicode.csv", basedir)
-    data_context.add_datasource(name="mysource", type_="pandas", reader_options={"encoding": "utf-8"}, base_directory=str(basedir))
+    data_context.add_datasource(name="mysource", type_="pandas", reader_options={
+                                "encoding": "utf-8"}, base_directory=str(basedir))
 
     batch = data_context.get_batch("mysource/unicode")
     assert len(batch["Μ"] == 1)
     assert "😁" in list(batch["Μ"])
 
-    data_context.add_datasource(name="mysource2", type_="pandas", base_directory=str(basedir))
+    data_context.add_datasource(
+        name="mysource2", type_="pandas", base_directory=str(basedir))
     batch = data_context.get_batch("mysource2/unicode")
     assert "😁" in list(batch["Μ"])
 
-    data_context.add_datasource(name="mysource3", type_="pandas", reader_options={"encoding": "utf-16"}, base_directory=str(basedir))
+    data_context.add_datasource(name="mysource3", type_="pandas", reader_options={
+                                "encoding": "utf-16"}, base_directory=str(basedir))
     with pytest.raises(UnicodeError, match="UTF-16 stream does not start with BOM"):
         batch = data_context.get_batch("mysource3/unicode")
 
@@ -223,7 +233,8 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
 
 def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path):
     pyspark_skip = pytest.importorskip("pyspark")
-    datasource = SparkDFDatasource('SparkParquet', base_directory=test_parquet_folder_connection_path)
+    datasource = SparkDFDatasource(
+        'SparkParquet', base_directory=test_parquet_folder_connection_path)
 
     assert datasource.get_available_data_asset_names() == {
         "default": set(['test'])
@@ -236,7 +247,8 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
 
 def test_standalone_spark_csv_datasource(test_folder_connection_path):
     pyspark_skip = pytest.importorskip("pyspark")
-    datasource = SparkDFDatasource('SparkParquet', base_directory=test_folder_connection_path)
+    datasource = SparkDFDatasource(
+        'SparkParquet', base_directory=test_folder_connection_path)
     assert datasource.get_available_data_asset_names() == {
         "default": set(['test'])
     }
@@ -249,7 +261,8 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path):
 def test_standalone_spark_passthrough_generator_datasource(data_context, dataset):
     pyspark_skip = pytest.importorskip("pyspark")
     # noinspection PyUnusedLocal
-    datasource = data_context.add_datasource("spark_source", "spark", generators={"passthrough": {"type": "memory"}})
+    datasource = data_context.add_datasource("spark_source", "spark", generators={
+                                             "passthrough": {"type": "memory"}})
 
     # We want to ensure that an externally-created spark DataFrame can be successfully instantiated using the
     # datasource built in a data context
@@ -257,7 +270,8 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
 
     if isinstance(dataset, SparkDFDataset):
         # We should be smart enough to figure out this is a batch:
-        batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", dataset)
+        batch = data_context.get_batch(
+            "spark_source/passthrough/new_asset", "new_suite", dataset)
         res = batch.expect_column_to_exist("infinities")
         assert res["success"] is True
         res = batch.expect_column_to_exist("not_a_column")
@@ -271,13 +285,15 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
     else:
         with pytest.raises(BatchKwargsError) as exc:
             # noinspection PyUnusedLocal
-            batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", dataset)
+            batch = data_context.get_batch(
+                "spark_source/passthrough/new_asset", "new_suite", dataset)
             assert "Unrecognized batch_kwargs for spark_source" in exc.message
 
 
 def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
     pyspark_skip = pytest.importorskip("pyspark")
-    basepath = str(tmp_path_factory.mktemp("test_invalid_reader_sparkdf_datasource"))
+    basepath = str(tmp_path_factory.mktemp(
+        "test_invalid_reader_sparkdf_datasource"))
     datasource = SparkDFDatasource('mysparksource', base_directory=basepath)
 
     with open(os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w") as newfile:
@@ -302,14 +318,15 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
         assert "Unsupported reader: excel" in exc.message
 
     dataset = datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
-            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
-        },
+        "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
+    },
         reader_method="csv", header=True)
     assert dataset.spark_df.head()["a"] == "1"
 
 
 def test_invalid_reader_pandas_datasource(tmp_path_factory):
-    basepath = str(tmp_path_factory.mktemp("test_invalid_reader_pandas_datasource"))
+    basepath = str(tmp_path_factory.mktemp(
+        "test_invalid_reader_pandas_datasource"))
     datasource = PandasDatasource('mypandassource', base_directory=basepath)
 
     with open(os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w") as newfile:
@@ -328,6 +345,6 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
         assert "Unknown reader method: blarg" in exc.message
 
     dataset = datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
-            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
-        }, reader_method="csv", header=0)
+        "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
+    }, reader_method="csv", header=0)
     assert dataset["a"][0] == 1
