@@ -1,3 +1,5 @@
+from six import string_types
+
 from ruamel.yaml import YAML, yaml_object
 from great_expectations.types import LooselyTypedDotDict
 yaml = YAML()
