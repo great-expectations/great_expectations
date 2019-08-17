@@ -10,11 +10,23 @@ import os
 import shutil
 import json
 from glob import glob
+import pandas as pd
 
 from great_expectations.exceptions import DataContextError
-from great_expectations.data_context import DataContext
-from great_expectations.data_context.util import (NormalizedDataAssetName, safe_mmkdir)
+from great_expectations.data_context import (
+    ConfigOnlyDataContext,
+    DataContext,
+    ExplorerDataContext,
+)
+from great_expectations.data_context.util import safe_mmkdir
+from great_expectations.data_context.types import NormalizedDataAssetName
 from great_expectations.cli.init import scaffold_directories_and_notebooks
+from great_expectations.dataset import PandasDataset
+from great_expectations.util import gen_directory_tree_str
+
+from great_expectations.data_context.types import (
+    DataContextConfig,
+)
 
 
 @pytest.fixture()
@@ -29,7 +41,11 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
     not_so_empty_data_context = empty_data_context
 
     # we should now be able to validate, and have validations saved.
-    assert not_so_empty_data_context._project_config["validations_store"]["local"]["base_directory"] == \
+    # assert not_so_empty_data_context._project_config["validations_store"]["local"]["base_directory"] == \
+    #     "uncommitted/validations/"
+    print(empty_data_context.stores.keys())
+    assert "local_validation_result_store" in not_so_empty_data_context.stores.keys()
+    assert not_so_empty_data_context.stores["local_validation_result_store"].config["base_directory"] == \
         "uncommitted/validations/"
 
     my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
@@ -127,6 +143,7 @@ def test_register_validation_results(data_context):
         ],
         "success": True
     }
+
     res = data_context.register_validation_results(run_id, source_patient_data_results)
     assert res == source_patient_data_results  # results should always be returned, and in this case not modified
     bound_parameters = data_context._evaluation_parameter_store.get_run_parameters(run_id)
@@ -162,12 +179,93 @@ def test_register_validation_results(data_context):
         ],
         "success": True
     }
+
+
     data_context.register_validation_results(run_id, source_diabetes_data_results)
     bound_parameters = data_context._evaluation_parameter_store.get_run_parameters(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024,
         'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value': 2048
     }
+
+    #TODO: Add a test that specifies a data_asset_name
+
+
+def test_register_validation_results_saves_data_assset_snapshot(data_context):
+    run_id = "460d61be-7266-11e9-8848-1681be663d3e"
+    source_patient_data_results = {
+        "meta": {
+            "data_asset_name": "mydatasource/mygenerator/source_patient_data",
+            "expectation_suite_name": "default"
+        },
+        "results": [
+            {
+                "expectation_config": {
+                    "expectation_type": "expect_table_row_count_to_equal",
+                    "kwargs": {
+                        "value": 1024,
+                    }
+                },
+                "success": True,
+                "exception_info": {"exception_message": None,
+                    "exception_traceback": None,
+                    "raised_exception": False},
+                "result": {
+                    "observed_value": 1024,
+                    "element_count": 1024,
+                    "missing_percent": 0.0,
+                    "missing_count": 0
+                }
+            }
+        ],
+        "success": False
+    }
+    data_asset = PandasDataset({"x": [1,2,3,4]})
+
+    #2018/0814: Hijack the project config, since there doesn't appear to be another method to update it
+    # data_context._project_config["data_asset_snapshot_store"] = {
+    #     "filesystem" : {
+    #         "base_directory" : "uncommitted/snapshots"
+    #     }
+    # }
+
+    snapshot_dir = os.path.join(data_context.root_directory, "uncommitted/snapshots")
+    print(snapshot_dir)
+
+    #The snapshot directory shouldn't exist yet
+    assert not os.path.isfile(snapshot_dir)
+
+    data_context.add_store(
+        "data_asset_snapshot_store",
+        {
+            "module_name": "great_expectations.data_context.store",
+            "class_name": "NameSpacedFilesystemStore",
+            "store_config" : {
+                "base_directory" : "uncommitted/snapshots",
+                "serialization_type" : "pandas_csv",
+                "file_extension" : ".csv.gz",
+                "compression" : "gzip",
+            }
+        }
+    )
+    print(json.dumps(data_context._project_config, indent=2))
+    
+    #The snapshot directory shouldn't contain any files
+    assert len(glob(snapshot_dir+"/*/*/*/*/*.csv.gz")) == 0
+
+    res = data_context.register_validation_results(
+        run_id,
+        source_patient_data_results,
+        data_asset=data_asset
+    )
+    
+    #This snapshot directory should now exist
+    assert os.path.isdir(snapshot_dir)
+
+    #we should have one file created as a side effect
+    glob_results = glob(snapshot_dir+"/*/*/*/*/*.csv.gz")
+    print(glob_results)
+    assert len(glob_results) == 1
 
 
 def test_compile(data_context):
@@ -392,9 +490,24 @@ def test_data_context_result_store(titanic_data_context):
         assert data_asset_name in validation_result["meta"]["data_asset_name"]
 
 
+    all_validation_result = titanic_data_context.get_validation_result(
+        "mydatasource/mygenerator/Titanic",
+        "BasicDatasetProfiler",
+    )
+    assert len(all_validation_result["results"]) == 51
+
+    failed_validation_result = titanic_data_context.get_validation_result(
+        "mydatasource/mygenerator/Titanic",
+        "BasicDatasetProfiler",
+        failed_only=True,
+    )
+    assert len(failed_validation_result["results"]) == 8
+
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
-    project_dir = str(tmp_path_factory.mktemp("project_dir"))
-    print(project_dir)
+
+    base_dir = str(tmp_path_factory.mktemp("project_dir"))
+    project_dir = os.path.join(base_dir, "project_path")
+    os.mkdir(project_dir)
 
     os.makedirs(os.path.join(project_dir, "data"))
     os.makedirs(os.path.join(project_dir, "data/titanic"))
@@ -415,6 +528,16 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
         str(os.path.join(project_dir, "data/random/f2.csv"))
     )
 
+    assert gen_directory_tree_str(project_dir) == """\
+project_path/
+    data/
+        random/
+            f1.csv
+            f2.csv
+        titanic/
+            Titanic.csv
+"""
+
     context = DataContext.create(project_dir)
     ge_directory = os.path.join(project_dir, "great_expectations")
     scaffold_directories_and_notebooks(ge_directory)
@@ -428,12 +551,48 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
         "pandas",
         base_directory=os.path.join(project_dir, "data/random/")
     )
-
+    
     context.profile_datasource("titanic")
+    assert gen_directory_tree_str(project_dir) == """\
+project_path/
+    data/
+        random/
+            f1.csv
+            f2.csv
+        titanic/
+            Titanic.csv
+    great_expectations/
+        .gitignore
+        great_expectations.yml
+        datasources/
+        expectations/
+            titanic/
+                default/
+                    Titanic/
+                        BasicDatasetProfiler.json
+        fixtures/
+        notebooks/
+            create_expectations.ipynb
+            integrate_validation_into_pipeline.ipynb
+        plugins/
+        uncommitted/
+            credentials/
+            documentation/
+            profiling/
+            samples/
+            validations/
+                profiling/
+                    titanic/
+                        default/
+                            Titanic/
+                                BasicDatasetProfiler.json
+"""
 
     context.profile_datasource("random")
-
+    # print(gen_directory_tree_str(project_dir))
+    
     context.build_data_documentation()
+    # print(gen_directory_tree_str(project_dir))
 
     # Titanic
 
@@ -509,3 +668,72 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
         ),
         "./tests/data_context/output/documentation"
     )
+
+
+def test_move_validation_to_fixtures(titanic_data_context):
+    profiling_results = titanic_data_context.profile_datasource("mydatasource")
+    all_validation_result = titanic_data_context.get_validation_result(
+        "mydatasource/mygenerator/Titanic",
+        "BasicDatasetProfiler",
+        "profiling"
+    )
+    # print(all_validation_result)
+    assert len(all_validation_result["results"]) == 51
+
+    assert titanic_data_context.stores["fixture_validation_results_store"].list_keys() == []
+
+    titanic_data_context.move_validation_to_fixtures(
+        "mydatasource/mygenerator/Titanic",
+        "BasicDatasetProfiler",
+        "profiling"
+    )
+
+    # titanic_data_context.stores["fixtures"].get(
+    #     "mydatasource/mygenerator/Titanic",
+    #     "BasicDatasetProfiler",
+    #     "profiling"
+    # )
+    assert len(titanic_data_context.stores["fixture_validation_results_store"].list_keys()) == 1
+
+
+def test_add_store(empty_data_context):
+    assert "my_new_store" not in empty_data_context.stores.keys()
+    assert "my_new_store" not in empty_data_context.get_config()["stores"]
+    empty_data_context.add_store(
+        "my_new_store",
+        {
+            "module_name": "great_expectations.data_context.store",
+            "class_name": "InMemoryStore",
+            "store_config" : {}
+        }
+    )
+    assert "my_new_store" in empty_data_context.stores.keys()
+    assert "my_new_store" in empty_data_context.get_config()["stores"]
+
+def test_ExplorerDataContext():
+    ExplorerDataContext(
+        DataContextConfig(**{
+            "plugins_directory": "plugins/",
+            "datasources": {},
+            "stores": {},
+            "data_docs": {
+                "sites": {}
+            }
+        }),
+        "testing/"
+    )
+
+def test_ConfigOnlyDataContext__initialization():
+    # project_path = str(tmp_path_factory.mktemp('test_ConfigOnlyDataContext__initialization__dir'))
+    ConfigOnlyDataContext(
+        DataContextConfig(**{
+            "plugins_directory": "plugins/",
+            "datasources": {},
+            "stores": {},
+            "data_docs": {
+                "sites": {}
+            }
+        }),
+        "testing/"
+    )
+
