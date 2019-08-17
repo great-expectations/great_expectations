@@ -122,7 +122,9 @@ def test_sqlalchemydataset_raises_error_on_missing_table_name():
 def test_sqlalchemydataset_builds_guid_for_table_name_on_custom_sql():
     engine = sa.create_engine('sqlite://')
 
-    with mock.patch("great_expectations.dataset.util.generate_random_temporary_table_name") as mock_table_name_gen:
+    with mock.patch(
+            "great_expectations.dataset.sqlalchemy_dataset.generate_random_temporary_table_name"
+    ) as mock_table_name_gen:
         mock_table_name_gen.return_value = "a_guid_with_expected_format"
 
         dataset = SqlAlchemyDataset(engine=engine, custom_sql="select 1")
