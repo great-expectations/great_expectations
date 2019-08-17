@@ -959,7 +959,31 @@ class DataAsset(object):
             warnings.warn(
                 "WARNING: No great_expectations version found in configuration object.")
 
-        for expectation in expectation_suite['expectations']:
+
+
+        ###
+        # This is an early example of what will become part of the ValidationOperator
+        # This operator would be dataset-semantic aware
+        # Adding now to simply ensure we can be slightly better at ordering our expectation evaluation
+        ###
+
+        # Group expectations by column
+        columns = {}
+
+        for expectation in expectation_suite["expectations"]:
+            if "column" in expectation["kwargs"]:
+                column = expectation["kwargs"]["column"]
+            else:
+                column = "_nocolumn"
+            if column not in columns:
+                columns[column] = []
+            columns[column].append(expectation)
+
+        expectations_to_evaluate = []
+        for col in columns:
+            expectations_to_evaluate.extend(columns[col])
+
+        for expectation in expectations_to_evaluate:
 
             try:
                 expectation_method = getattr(
