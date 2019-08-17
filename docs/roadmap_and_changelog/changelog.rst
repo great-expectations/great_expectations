@@ -2,7 +2,7 @@
 
 v.0.7.7
 -----------------
-
+* Add support for reader_method = "delta" to SparkDFDatasource
 
 v.0.7.6
 -----------------
