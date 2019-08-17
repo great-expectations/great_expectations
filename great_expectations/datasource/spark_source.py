@@ -120,6 +120,8 @@ class SparkDFDatasource(Datasource):
                 df = reader.csv(path)
             elif reader_method == ReaderMethods.parquet:
                 df = reader.parquet(path)
+            elif reader_method == ReaderMethods.delta:
+                df = reader.format("delta").load(path)
             else:
                 raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
             

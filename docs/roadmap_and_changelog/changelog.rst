@@ -2,6 +2,7 @@
 
 v.0.7.7
 -----------------
+* Add support for reader_method = "delta" to SparkDFDatasource
 * Standardize the way that plugin module loading works. DataContext will begin to use the new-style class and plugin
 identification moving forward; yml configs should specify class_name and module_name (with module_name optional for
 GE types). For now, it is possible to use the "type" parameter in configuration (as before).
