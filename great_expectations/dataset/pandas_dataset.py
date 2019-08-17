@@ -2,7 +2,7 @@ from __future__ import division
 
 import inspect
 import json
-from datetime import datetime #, timedelta # Add for case of testing timedelta types
+from datetime import datetime, timedelta
 import logging
 from datetime import datetime
 from functools import wraps
@@ -381,7 +381,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         hist, bin_edges = np.histogram(self[column], bins, density=False)
         return list(hist)
 
-    def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+    def get_column_count_in_range(self, column, min_val=None, max_val=None, strict_min=False, strict_max=True):
         # TODO this logic could probably go in the non-underscore version if we want to cache
         if min_val is None and max_val is None:
             raise ValueError('Must specify either min or max value')
@@ -390,12 +390,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         result = self[column]
         if min_val is not None:
-            if min_strictly:
+            if strict_min:
                 result = result[result > min_val]
             else:
                 result = result[result >= min_val]
         if max_val is not None:
-            if max_strictly:
+            if strict_max:
                 result = result[result < max_val]
             else:
                 result = result[result <= max_val]
@@ -807,6 +807,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_values_to_be_between(self,
                                            column,
                                            min_value=None, max_value=None,
+                                           strict_min=False, strict_max=False,  # tolerance=1e-9,
                                            parse_strings_as_datetimes=None,
                                            output_strftime_format=None,
                                            allow_cross_type_comparisons=None,
@@ -816,7 +817,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
+        # if strict_min and min_value:
+        #     min_value += tolerance
+        #
+        # if strict_max and max_value:
+        #     max_value -= tolerance
+
         if parse_strings_as_datetimes:
+            # tolerance = timedelta(days=tolerance)
             if min_value:
                 min_value = parse(min_value)
 
@@ -944,7 +952,11 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None,
+    def expect_column_value_lengths_to_be_between(self, column,
+                                                  min_value=None,
+                                                  max_value=None,
+                                                  strict_min=False,
+                                                  strict_max=False,
                                                   mostly=None,
                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
