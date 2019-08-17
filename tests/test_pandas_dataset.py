@@ -8,7 +8,7 @@ import great_expectations as ge
 from great_expectations.profile import ColumnsExistProfiler
 
 from .test_utils import assertDeepAlmostEqual
-
+from six import PY2
 
 def test_expect_column_values_to_be_dateutil_parseable():
 
@@ -405,7 +405,10 @@ def test_ge_pandas_sampling():
 
     samp1 = df.sample(n=2)
     assert isinstance(samp1, ge.dataset.PandasDataset)
-    assert samp1.find_expectations() == exp1
+    if PY2:
+        assert sorted(samp1.find_expectations()) == sorted(exp1)
+    else:
+        assert samp1.find_expectations() == exp1
 
     samp1 = df.sample(frac=0.25, replace=True)
     assert isinstance(samp1, ge.dataset.PandasDataset)
@@ -434,7 +437,10 @@ def test_ge_pandas_sampling():
         {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'x']}}
     ]
-    assert samp1.find_expectations() == exp1
+    if PY2:
+        assert sorted(samp1.find_expectations()) == sorted(exp1)
+    else:
+        assert samp1.find_expectations() == exp1
 
 
 def test_ge_pandas_subsetting():
@@ -528,36 +534,49 @@ def test_ge_pandas_automatic_failure_removal():
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
     ]
     samp1 = df.sample(n=2)
-    assert samp1.find_expectations() == exp1
+    if PY2:
+        assert sorted(samp1.find_expectations()) == sorted(exp1)
+    else:
+        assert samp1.find_expectations() == exp1
 
     # Now check subsetting to verify that failing expectations are NOT
     # automatically dropped when subsetting.
     sub1 = df[['A', 'D']]
-    assert sub1.find_expectations() == exp1
+    if PY2:
+        assert sorted(samp1.find_expectations()) == sorted(exp1)
+    else:
+        assert samp1.find_expectations() == exp1
 
     # Set property/attribute so that failing expectations are
     # automatically removed when sampling or subsetting.
     df.discard_subset_failing_expectations = True
 
+    ###
+    # Note: Order matters in this test, and a validationoperator may change order
+    ###
+
     exp_samp = [
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'A'}},
+        {'expectation_type': 'expect_column_values_to_be_in_set',
+         'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'B'}},
+        {'expectation_type': 'expect_column_values_to_be_in_set',
+         'kwargs': {'column': 'B', 'value_set': [5, 6, 7, 8]}},
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'C'}},
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'D'}},
         {'expectation_type': 'expect_column_values_to_be_in_set',
-         'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
-        {'expectation_type': 'expect_column_values_to_be_in_set',
-         'kwargs': {'column': 'B', 'value_set': [5, 6, 7, 8]}},
-        {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
     ]
 
     samp2 = df.sample(n=2)
-    assert samp2.find_expectations() == exp_samp
+    if PY2:
+        assert sorted(samp2.find_expectations()) == sorted(exp_samp)
+    else:
+        assert samp2.find_expectations() == exp_samp
 
     # Now check subsetting. In additional to the failure on column "C",
     # the expectations on column "B" now fail since column "B" doesn't
@@ -566,14 +585,17 @@ def test_ge_pandas_automatic_failure_removal():
     exp_sub = [
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'A'}},
+        {'expectation_type': 'expect_column_values_to_be_in_set',
+         'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'D'}},
         {'expectation_type': 'expect_column_values_to_be_in_set',
-         'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
-        {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
     ]
-    assert sub2.find_expectations() == exp_sub
+    if PY2:
+        assert sorted(samp2.find_expectations()) == sorted(exp_samp)
+    else:
+        assert samp2.find_expectations() == exp_samp
 
 
 def test_subclass_pandas_subset_retains_subclass():

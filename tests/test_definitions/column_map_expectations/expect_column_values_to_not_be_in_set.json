@@ -98,7 +98,7 @@
         }
       },
       {
-        "title": "Positive test, values set is null",
+        "title": "Positive_test__values_set_is_null",
         "exact_match_out": false,
         "in": {
           "column": "n",
@@ -106,7 +106,21 @@
         },
         "out": {
           "success": true
-        }
+        },
+        "suppress_test_for": ["spark"]
+      },
+      {
+        "title": "value_error_spark_cannot_support_values_set_is_null",
+        "exact_match_out": false,
+        "in": {
+          "column": "n",
+          "value_set": [null],
+          "catch_exceptions": true
+        },
+        "out": {
+          "traceback_substring": "expect_column_values_to_not_be_in_set cannot support a None in the value_set in spark"
+        },
+        "only_for": ["spark"]
       },
       {
         "title": "Raise TypeError when Values set is missing",
