@@ -153,7 +153,7 @@ def test_validate_custom_dataset():
                                          "./tests/test_sets/Titanic.csv",
                                          "./tests/test_sets/titanic_custom_expectations.json",
                                          "-f", "True",
-                                         "-m", "./tests/test_fixtures/custom_dataset.py",
+                                         "-m", "./tests/test_fixtures/custom_pandas_dataset.py",
                                          "-c", "CustomPandasDataset"])
 
             json_result = json.loads(result.output)

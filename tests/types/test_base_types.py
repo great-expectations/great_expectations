@@ -62,18 +62,23 @@ def test_LooselyTypedDotDict_raises_error():
     
     with pytest.raises(KeyError):
         d.x = "goodbye?"
-    
-    assert d.x == None
 
+    # Note that we raise AttributeError instead of KeyError here since the
+    # intended semantics when using dot notation are class property style
+    with pytest.raises(AttributeError):
+        assert d.x is None
+
+    # In contrast, when we explicitly use the dictionary notation, we get
+    # the KeyError, also following the standard conventions
     with pytest.raises(KeyError):
-        assert d["x"]
+        assert d["x"] is None
 
 
 def test_LooselyTypedDotDict_subclass():
     class MyLooselyTypedDotDict(LooselyTypedDotDict):
-        _allowed_keys = set([
+        _allowed_keys = {
             "x", "y", "z"
-        ])
+        }
 
     d = MyLooselyTypedDotDict(**{
         'x': 1,
@@ -108,10 +113,11 @@ def test_LooselyTypedDotDict_subclass():
     with pytest.raises(KeyError):
         d.w = 100
 
-    assert d.w == None
+    with pytest.raises(AttributeError):
+        assert d.w is None
 
     with pytest.raises(KeyError):
-        assert d["w"]
+        assert d["w"] is None
 
 
 def test_LooselyTypedDotDict_subclass_required_keys():
