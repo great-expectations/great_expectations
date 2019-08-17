@@ -173,6 +173,8 @@ class Datasource(object):
         Returns:
             None
         """
+
+        #FIXME: Not clear if deprecating this causes any breakages elsewhere...
         
         #Yikes. This is not the datasource's job:
         # if self._data_context is not None:

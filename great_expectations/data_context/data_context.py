@@ -241,6 +241,12 @@ class ConfigOnlyDataContext(object):
         return self._stores
 
     @property
+    def datasources(self):
+        """A single holder for all Datasources in this context"""
+        # TODO: support multiple stores choices and/or ensure abs paths when appropriate
+        return self._datasources
+
+    @property
     def data_asset_name_delimiter(self):
         """Configurable delimiter character used to parse data asset name strings into \
         ``NormalizedDataAssetName`` objects."""
@@ -1725,6 +1731,7 @@ class DataContext(ConfigOnlyDataContext):
 
         config_filepath = os.path.join(self.root_directory, "great_expectations.yml")
         with open(config_filepath, "w") as data:
+            #Note: I don't know how this method preserves commenting, but it seems to work
             config = dict(self._project_config)
             yaml.dump(config, data)
 
