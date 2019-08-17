@@ -551,11 +551,14 @@ class ConfigOnlyDataContext(object):
         Returns:
             datasource (Datasource)
         """
+        logger.debug("Starting ConfigOnlyDataContext.add_datasource")
+
         datasource_class = self._get_datasource_class(type_)
         datasource = datasource_class(name=name, data_context=self, **kwargs)
         self._datasources[name] = datasource
-        if not "datasources" in self._project_config:
-            self._project_config["datasources"] = {}
+        # This check shouldn't be necessary
+        # if not "datasources" in self._project_config:
+        #     self._project_config["datasources"] = {}
         self._project_config["datasources"][name] = datasource.get_config()
 
         #!!! This return value isn't used anywhere in the live codebase, and only once in tests.
@@ -1718,19 +1721,24 @@ class DataContext(ConfigOnlyDataContext):
 
     def _save_project_config(self):
         """Save the current project to disk."""
-        with open(os.path.join(self.root_directory, "great_expectations.yml"), "w") as data:
-            #FIXME: This method is currently Deactivated
-            # print(type(self._project_config))
-            # config = self._project_config.as_dict()
-            # yaml.dump(config, data)
-            pass
+        logger.debug("Starting DataContext._save_project_config")
+
+        config_filepath = os.path.join(self.root_directory, "great_expectations.yml")
+        with open(config_filepath, "w") as data:
+            config = dict(self._project_config)
+            yaml.dump(config, data)
 
     def add_store(self, store_name, store_config):
+        logger.debug("Starting DataContext.add_store")
+        
         super(DataContext, self).add_store(store_name, store_config)
         self._save_project_config()
 
     def add_datasource(self, name, type_, **kwargs):
+        logger.debug("Starting DataContext.add_datasource")
+
         super(DataContext, self).add_datasource(name, type_, **kwargs)
+        logger.debug("x")
         self._save_project_config()
 
 
