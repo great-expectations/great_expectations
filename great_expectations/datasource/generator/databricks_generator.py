@@ -15,13 +15,22 @@ class DatabricksTableGenerator(BatchGenerator):
     """Meant to be used in a Databricks notebook
     """
 
-    def __init__(self, name, type_, datasource, database):
-        super(DatabricksTableGenerator, self).__init__(name, type_, datasource)
-        # this should grab the already instantiated SparkSession available on Databricks notebooks
-        self.spark = datasource.spark
+    def __init__(self, name="default",
+                 datasource=None,
+                 database="default"):
+        super(DatabricksTableGenerator, self).__init__(name, type_="databricks", datasource=datasource)
         self.database = database
+        try:
+            self.spark = SparkSession.builder.getOrCreate()
+        except Exception:
+            logger.error("Unable to load spark context; install optional spark dependency for support.")
+            self.spark = None
 
     def get_available_data_asset_names(self):
+        if self.spark is None:
+            logger.warning("No sparkSession available to query for tables.")
+            return set()
+
         tables = self.spark.sql('show tables in {}'.format(self.database))
         return set([row.tableName for row in tables.collect()])
 
@@ -31,9 +40,9 @@ class DatabricksTableGenerator(BatchGenerator):
             if not kwargs.get('date_field'):
                 raise Exception('Must specify date_field when using partition.')
             query += ' where {} = "{}"'.format(kwargs.get('date_field'), kwargs.get('partition'))
-        return iter(
+        return iter([
             {
                 "query": query,
                 "timestamp": time.time()
             }
-        )
+        ])

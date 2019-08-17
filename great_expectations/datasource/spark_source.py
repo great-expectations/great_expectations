@@ -126,7 +126,7 @@ class SparkDFDatasource(Datasource):
                 raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
             
         elif "query" in batch_kwargs:
-            df = self.spark.sql(batch_kwargs.query)
+            df = self.spark.sql(batch_kwargs["query"])
 
         elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (DataFrame, SparkDFDataset)):
             df = batch_kwargs.pop("df")  # We don't want to store the actual DataFrame in kwargs
