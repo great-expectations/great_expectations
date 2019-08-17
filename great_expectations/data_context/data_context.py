@@ -235,7 +235,6 @@ class ConfigOnlyDataContext(object):
         self._stores[store_name] = self._init_store_from_config(store_config)
 
         self._project_config["stores"][store_name] = store_config
-        self._save_project_config()
 
     def _init_store_from_config(self, config):
         typed_config = StoreMetaConfig(
@@ -289,20 +288,6 @@ class ConfigOnlyDataContext(object):
         """A single holder for all Stores in this context"""
         # TODO: support multiple stores choices and/or ensure abs paths when appropriate
         return self._stores
-
-    def _load_project_config(self):
-        """Loads the project configuration file."""
-        try:
-            with open(os.path.join(self.root_directory, "great_expectations.yml"), "r") as data:
-                config = yaml.load(data)
-
-                if config["stores"] == None:
-                    config["stores"] = {}
-
-                return DataContextConfig(**config)
-
-        except IOError:
-            raise ConfigNotFoundError(self.root_directory)
 
     @property
     def data_asset_name_delimiter(self):
@@ -411,12 +396,6 @@ class ConfigOnlyDataContext(object):
             relative_path,
             expectation_suite_name
         )
-
-    def _save_project_config(self):
-        """Save the current project to disk."""
-        with open(os.path.join(self.root_directory, "great_expectations.yml"), "w") as data:
-            #yaml.dump(self._project_config, data)
-            pass
 
     def _get_all_profile_credentials(self):
         """Get all profile credentials from the default location."""
@@ -629,10 +608,13 @@ class ConfigOnlyDataContext(object):
         self._project_config["datasources"][name] = datasource.get_config()
         self._save_project_config()
 
-        return datasource
+        #!!! This return value isn't used anywhere in the live codebase, and only once in tests.
+        #Deprecating for now. Will remove fully later.
+        # return datasource
 
     def get_config(self):
-        self._save_project_config()
+        #!!! Deprecating this for now, but leaving the code in case there are unanticipated side effect.
+        # self._save_project_config()
         return self._project_config
 
     def _get_datasource_class(self, datasource_type):
@@ -1769,6 +1751,36 @@ class DataContext(ConfigOnlyDataContext):
             context_root_directory,
             data_asset_name_delimiter,
         )
+
+    def _load_project_config(self):
+        """Loads the project configuration file."""
+        try:
+            with open(os.path.join(self.root_directory, "great_expectations.yml"), "r") as data:
+                config = yaml.load(data)
+
+                if config["stores"] == None:
+                    config["stores"] = {}
+
+                return DataContextConfig(**config)
+
+        except IOError:
+            raise ConfigNotFoundError(self.root_directory)
+
+    def _save_project_config(self):
+        """Save the current project to disk."""
+        with open(os.path.join(self.root_directory, "great_expectations.yml"), "w") as data:
+            #FIXME: This method is currently DEactivated
+            # yaml.dump(self._project_config, data)
+            pass
+
+    def add_store(self, store_name, store_config):
+        super(DataContext, self).add_store(store_name, store_config)
+        self._save_project_config()
+
+    def add_datasource(self, name, type_, **kwargs):
+        super(DataContext, self).add_datasource(name, type_, **kwargs)
+        self._save_project_config()
+
 
 
 class ExplorerDataContext(ConfigOnlyDataContext):
