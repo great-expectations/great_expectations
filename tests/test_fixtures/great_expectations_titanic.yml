@@ -9,7 +9,9 @@ datasources:
       mygenerator:
         type: subdir_reader
         base_directory: ../data
-
+plugins_directory:
+data_docs:
+  sites:
 stores:
 
   local_validation_result_store:

@@ -29,3 +29,28 @@ class NameSpaceDotDict(LooselyTypedDotDict):
         "expectation_suite_name" : string_types,
         "run_id" : string_types,
     }
+
+class Config(LooselyTypedDotDict):
+    pass
+
+class DataContextConfig(Config):
+    _allowed_keys = set([
+        "plugins_directory",
+        "datasources",
+        "stores",
+        "data_docs", #TODO: Rename this to sites, to remove a layer of extraneous nesting
+    ])
+
+    _required_keys = set([
+        "plugins_directory",
+        "datasources",
+        "stores",
+        "data_docs",
+    ])
+
+    _key_types = {
+        "plugins_directory" : [string_types, None],
+        "datasources" : dict,
+        "stores" : dict,
+        "data_docs" : dict,
+    }
