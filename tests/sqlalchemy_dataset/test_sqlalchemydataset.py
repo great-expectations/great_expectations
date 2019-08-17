@@ -7,6 +7,9 @@ import pytest
 from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
 import sqlalchemy as sa
 import pandas as pd
+import pyhive
+import sqlalchemy_redshift
+import snowflake
 from ..test_utils import get_dataset
 
 
@@ -186,8 +189,17 @@ def test_column_fallback():
             fallback_dataset.expect_table_row_count_to_equal(value=3))
 
 
-def test_sqlalchemydataset_with_hive_engine():
+DIALECTS = (
+    ("hive", "hive://host:1234", pyhive.sqlalchemy_hive),
+    ("postgresql", "postgresql://host:1234", sa.dialects.postgresql),
+    ("sqlite", "sqlite://", sa.dialects.sqlite),
+    ("snowflake", "snowflake://host:1234", snowflake.sqlalchemy.snowdialect),
+    ("redshift", "redshift://host:1234", sqlalchemy_redshift.dialect)
+)
 
+
+@pytest.mark.parametrize("dialect_name,conn,dialect_type", DIALECTS)
+def test_sqlalchemydataset_dialect_based_on_engine(dialect_name, conn, dialect_type):
     # generate a SQLAlchemy Inspector that does nothing and returns no columns
     class DummyInspector:
         def __init__(self):
@@ -202,12 +214,14 @@ def test_sqlalchemydataset_with_hive_engine():
         mock_fe.return_value = DummyInspector()
 
         # we are able to initialize an SqlAlchemyDataset with a Hive engine without needing to connect
-        dataset = SqlAlchemyDataset('test_sql_data', engine=sa.create_engine('hive://'))
+        dataset = SqlAlchemyDataset('test_sql_data', engine=sa.create_engine(conn))
 
+        # check dialect name is read properly
+        assert dataset.get_dialect_name() == dialect_name
 
         # check our dialect is the desired type
-        import pyhive
-        assert isinstance(dataset.dialect, type(pyhive.sqlalchemy_hive))
+        assert isinstance(dataset.dialect, type(dialect_type))
+
 
 @pytest.fixture
 def unexpected_count_df():

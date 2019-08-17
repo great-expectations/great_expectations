@@ -223,14 +223,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 raise err
 
         # Get the dialect **for purposes of identifying types**
-        if self.engine.dialect.name.lower() in ["postgresql", "mysql", "sqlite", "oracle", "mssql", "oracle"]:
+        if self.get_dialect_name() in ["postgresql", "mysql", "sqlite", "oracle", "mssql", "oracle"]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_module("sqlalchemy.dialects." + self.engine.dialect.name)
-        elif self.engine.dialect.name.lower() == "snowflake":
+        elif self.get_dialect_name() == "snowflake":
             self.dialect = import_module("snowflake.sqlalchemy.snowdialect")
-        elif self.engine.dialect.name.lower() == "redshift":
+        elif self.get_dialect_name() == "redshift":
             self.dialect = import_module("sqlalchemy_redshift.dialect")
-        elif self.engine.dialect.name.lower() == "hive":
+        elif self.get_dialect_name() == "hive":
             self.dialect = import_module("pyhive.sqlalchemy_hive")
         else:
             self.dialect = None
@@ -268,6 +268,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 discard_include_config_kwargs=False
             )
         )
+
+    def get_dialect_name(self):
+        # some engines return dialect name as bytes, so everything gets standardized as str
+        # per example on HiveDialect: https://github.com/dropbox/PyHive/blob/master/pyhive/sqlalchemy_hive.py#L231
+        dialect = self.engine.dialect.name
+        dialect_name = dialect.decode('utf-8') if isinstance(dialect, bytes) else dialect
+        return dialect_name.lower()
 
     def get_row_count(self):
         count_query = sa.select([sa.func.count()]).select_from(
