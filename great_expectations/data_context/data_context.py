@@ -54,42 +54,11 @@ yaml.default_flow_style = False
 ALLOWED_DELIMITERS = ['.', '/']
 
 
-class DataContext(object):
-    """A DataContext represents a Great Expectations project. It organizes storage and access for
-    expectation suites, datasources, notification settings, and data fixtures.
+#TODO: Maybe find a better name for this guy?
+class ConfigOnlyDataContext(object):
+    """This class implements most of the functionality of DataContext, but does *NOT* 
 
-    The DataContext is configured via a yml file stored in a directory called great_expectations; the configuration file
-    as well as managed expectation suites should be stored in version control.
-
-    Use the `create` classmethod to create a new empty config, or instantiate the DataContext
-    by passing the path to an existing data context root directory.
-
-    DataContexts use data sources you're already familiar with. Generators help introspect data stores and data execution
-    frameworks (such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
-    enables fetching, validation, profiling, and documentation of  your data in a way that is meaningful within your
-    existing infrastructure and work environment.
-
-    DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
-    normalized *data_asset_name*, consisting of *datasource/generator/generator_asset*.
-
-    - The datasource actually connects to a source of materialized data and returns Great Expectations DataAssets \
-      connected to a compute environment and ready for validation.
-
-    - The Generator knows how to introspect datasources and produce identifying "batch_kwargs" that define \
-      particular slices of data.
-
-    - The generator_asset is a specific name -- often a table name or other name familiar to users -- that \
-      generators can slice into batches.
-
-    An expectation suite is a collection of expectations ready to be applied to a batch of data. Since
-    in many projects it is useful to have different expectations evaluate in different contexts--profiling
-    vs. testing; warning vs. error; high vs. low compute; ML model or dashboard--suites provide a namespace
-    option for selecting which expectations a DataContext returns.
-
-    In many simple projects, the datasource or generator name may be omitted and the DataContext will infer
-    the correct name when there is no ambiguity.
-
-    Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
+    That makes this class useful for testing.
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
@@ -124,44 +93,24 @@ class DataContext(object):
         return cls(os.path.join(project_root_dir, "great_expectations"))
             
     #TODO: Refactor __init__ so that it accepts a config, rather than a context_root_dir that is then used to attempt ot find a config
-    def __init__(self, context_root_dir=None, expectation_explorer=False, data_asset_name_delimiter='/'):
+    def __init__(self, project_config, context_root_dir, data_asset_name_delimiter='/'):
         """DataContext constructor
 
         Args:
             context_root_dir: location to look for the ``great_expectations.yml`` file. If None, searches for the file \
             based on conventions for project subdirectories.
-            expectation_explorer: If True, load the expectation explorer manager, which will modify GE return objects \
-            to include ipython notebook widgets.
             data_asset_name_delimiter: the delimiter character to use when parsing data_asset_name parameters. \
             Defaults to '/'
 
         Returns:
             None
         """
-        self._expectation_explorer = expectation_explorer
-        self._datasources = {}
-        if expectation_explorer:
-            from great_expectations.jupyter_ux.expectation_explorer import ExpectationExplorer
-            self._expectation_explorer_manager = ExpectationExplorer()
 
-        #TODO: Factor this out into a helper function in GE. It doesn't belong inside this method.
-        # determine the "context root directory" - this is the parent of "great_expectations" dir
-        if context_root_dir is None:
-            if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
-                context_root_dir = "../"
-            elif os.path.isdir("./great_expectations") and \
-                    os.path.isfile("./great_expectations/great_expectations.yml"):
-                context_root_dir = "./great_expectations"
-            elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
-                context_root_dir = "./"
-            else:
-                raise DataContextError(
-                    "Unable to locate context root directory. Please provide a directory name."
-                )
-
+        self._project_config = project_config
         self._context_root_directory = os.path.abspath(context_root_dir)
 
-        self._project_config = self._load_project_config()
+        self._datasources = {}
+
         #TODO: This fails all over the place.
         # assert "stores" in self._project_config
         #TODO: Remove this as soon as we have proper typing. It's a crutch. A bandaid. A liability.
@@ -173,6 +122,7 @@ class DataContext(object):
         for datasource in self._project_config["datasources"].keys():
             self.get_datasource(datasource)
 
+        # self._plugins_directory = self._project_config.get("plugins_directory", "plugins/")
         plugins_directory = self._project_config.get("plugins_directory", "plugins/")
         if not os.path.isabs(plugins_directory):
             self._plugins_directory = os.path.join(self.root_directory, plugins_directory)
@@ -188,6 +138,7 @@ class DataContext(object):
         # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
         self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
 
+        # self._expectations_directory = self._project_config.get("expectations_directory", "expectations")
         expectations_directory = self._project_config.get("expectations_directory", "expectations")
         if not os.path.isabs(expectations_directory):
             self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
@@ -316,6 +267,7 @@ class DataContext(object):
     def root_directory(self):
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located."""
+        # return self._context_root_directory
         return self._context_root_directory
 
     @property
@@ -1539,10 +1491,7 @@ class DataContext(object):
         Returns:
             return_obj: the return object, potentially changed into a widget by the configured expectation explorer
         """
-        if self._expectation_explorer:
-            return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
-        else:
-            return return_obj
+        return return_obj
 
     def build_data_documentation(self, site_names=None, data_asset_name=None):
         """
@@ -1742,3 +1691,105 @@ class DataContext(object):
 
         profiling_results['success'] = True
         return profiling_results
+
+
+class DataContext(ConfigOnlyDataContext):
+    """A DataContext represents a Great Expectations project. It organizes storage and access for
+    expectation suites, datasources, notification settings, and data fixtures.
+
+    The DataContext is configured via a yml file stored in a directory called great_expectations; the configuration file
+    as well as managed expectation suites should be stored in version control.
+
+    Use the `create` classmethod to create a new empty config, or instantiate the DataContext
+    by passing the path to an existing data context root directory.
+
+    DataContexts use data sources you're already familiar with. Generators help introspect data stores and data execution
+    frameworks (such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
+    enables fetching, validation, profiling, and documentation of  your data in a way that is meaningful within your
+    existing infrastructure and work environment.
+
+    DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
+    normalized *data_asset_name*, consisting of *datasource/generator/generator_asset*.
+
+    - The datasource actually connects to a source of materialized data and returns Great Expectations DataAssets \
+      connected to a compute environment and ready for validation.
+
+    - The Generator knows how to introspect datasources and produce identifying "batch_kwargs" that define \
+      particular slices of data.
+
+    - The generator_asset is a specific name -- often a table name or other name familiar to users -- that \
+      generators can slice into batches.
+
+    An expectation suite is a collection of expectations ready to be applied to a batch of data. Since
+    in many projects it is useful to have different expectations evaluate in different contexts--profiling
+    vs. testing; warning vs. error; high vs. low compute; ML model or dashboard--suites provide a namespace
+    option for selecting which expectations a DataContext returns.
+
+    In many simple projects, the datasource or generator name may be omitted and the DataContext will infer
+    the correct name when there is no ambiguity.
+
+    Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
+    """
+
+    # def __init__(self, config, filepath, data_asset_name_delimiter='/'):
+    def __init__(self, context_root_dir=None, data_asset_name_delimiter='/'):
+
+        # #TODO: Factor this out into a helper function in GE. It doesn't belong inside this method.
+        # # determine the "context root directory" - this is the parent of "great_expectations" dir
+        if context_root_dir is None:
+            if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
+                context_root_dir = "../"
+            elif os.path.isdir("./great_expectations") and \
+                    os.path.isfile("./great_expectations/great_expectations.yml"):
+                context_root_dir = "./great_expectations"
+            elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
+                context_root_dir = "./"
+            else:
+                raise DataContextError(
+                    "Unable to locate context root directory. Please provide a directory name."
+                )
+        context_root_directory = os.path.abspath(context_root_dir)
+        self._context_root_directory = context_root_directory
+
+        project_config = self._load_project_config()
+
+        super(DataContext, self).__init__(
+            project_config,
+            context_root_directory,
+            data_asset_name_delimiter,
+        )
+
+
+class ExplorerDataContext(ConfigOnlyDataContext):
+
+    def __init__(self, config, expectation_explorer=False, data_asset_name_delimiter='/'):
+        """
+            expectation_explorer: If True, load the expectation explorer manager, which will modify GE return objects \
+            to include ipython notebook widgets.
+        """
+
+        super(ExplorerDataContext, self).__init__(
+            config,
+            data_asset_name_delimiter,
+        )
+
+        self._expectation_explorer = expectation_explorer
+        if expectation_explorer:
+            from great_expectations.jupyter_ux.expectation_explorer import ExpectationExplorer
+            self._expectation_explorer_manager = ExpectationExplorer()
+
+    def update_return_obj(self, data_asset, return_obj):
+        """Helper called by data_asset.
+
+        Args:
+            data_asset: The data_asset whose validation produced the current return object
+            return_obj: the return object to update
+
+        Returns:
+            return_obj: the return object, potentially changed into a widget by the configured expectation explorer
+        """
+        return return_obj
+        if self._expectation_explorer:
+            return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
+        else:
+            return return_obj
