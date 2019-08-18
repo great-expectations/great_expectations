@@ -199,8 +199,12 @@ DIALECTS = (
 )
 
 
-@pytest.mark.parametrize("dialect_name,conn,dialect_type", DIALECTS)
+@pytest.mark.parametrize("dialect_name,url,dialect_type", DIALECTS)
 def test_sqlalchemydataset_dialect_based_on_engine(dialect_name, url, dialect_type):
+    """Tests the dialect name and type are correct based on the engine
+    provided to SqlAlchemyDataset
+    """
+
     # generate a SQLAlchemy Inspector that does nothing and returns no columns
     class DummyInspector:
         def __init__(self):
