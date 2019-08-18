@@ -8,10 +8,15 @@ import sys
 import copy
 import errno
 from glob import glob
-from six import string_types
+from six import (
+    string_types,
+    PY2,
+    PY3
+)
 import datetime
 import shutil
 import importlib
+from collections import OrderedDict
 
 from .util import get_slack_callback, safe_mmkdir
 from ..types.base import DotDict
@@ -1732,7 +1737,10 @@ class DataContext(ConfigOnlyDataContext):
         config_filepath = os.path.join(self.root_directory, "great_expectations.yml")
         with open(config_filepath, "w") as data:
             #Note: I don't know how this method preserves commenting, but it seems to work
-            config = dict(self._project_config)
+            if PY2:
+                config = dict(self._project_config)
+            else:
+                config = OrderedDict(self._project_config)
             yaml.dump(config, data)
 
     def add_store(self, store_name, store_config):
