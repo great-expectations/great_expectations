@@ -51,6 +51,7 @@ def test_preserve_comments(data_context):
         if PY2:
             assert content == """\
 plugins_directory: plugins/
+expectations_directory: expectations/
 stores: {}
 datasources:
   # For example, this one.
@@ -61,7 +62,6 @@ datasources:
       mygenerator:
         type: subdir_reader
         base_directory: ../data
-
 
   test_datasource:
     generators:
@@ -78,6 +78,7 @@ data_docs:
   sites:
 """
         else:
+          #Python 3 sorts lines differently. This test accomoddates shuffled lines.
           content_lines = set(content.split("\n"))
           test_content_lines = set(content.split("\n"))
           assert content_lines == test_content_lines
