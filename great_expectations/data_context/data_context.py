@@ -1137,19 +1137,6 @@ class ConfigOnlyDataContext(object):
                         else:
                             logger.warning("Unrecognized key for parameter %s" % desired_param)
 
-    # def get_validation_param(self, run_id, key):
-    #     """Get a new validation parameter.
-
-    #     Args:
-    #         run_id: run_id for desired value
-    #         key: parameter key
-
-    #     Returns:
-    #         value stored in evaluation_parameter_store for the provided run_id and key
-    #     """
-    #     evaluation_parameter_store = self.stores[self._project_config.evaluation_parameter_store_name]
-    #     return evaluation_parameter_store.get(run_id, key)
-
     @property
     def evaluation_parameter_store(self):
         return self.stores[self._project_config.evaluation_parameter_store_name]
@@ -1176,6 +1163,7 @@ class ConfigOnlyDataContext(object):
             return {}
 
 
+    #TODO: Can we raname this to _compile_all_evaluation_parameters_from_expectation_suites or something similar?
     def _compile(self):
         """Compiles all current expectation configurations in this context to be ready for result registration.
         
