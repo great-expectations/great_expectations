@@ -116,12 +116,6 @@ class ConfigOnlyDataContext(object):
         self._context_root_directory = os.path.abspath(context_root_dir)
 
         # Init plugins
-        # plugins_directory = self._project_config.get("plugins_directory")
-        # #TODO: This should be factored out into a _convert_to_absolute_path_for_internal_use method, which should live in the @property, not here
-        # if not os.path.isabs(plugins_directory):
-        #     self._plugins_directory = os.path.join(self.root_directory, plugins_directory)
-        # else:
-        #     self._plugins_directory = plugins_directory
         sys.path.append(self.plugins_directory)
 
 
@@ -137,15 +131,6 @@ class ConfigOnlyDataContext(object):
 
         # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
         self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
-
-        #TODO: Decide if this is part of the config spec or not
-        # self._expectations_directory = self._project_config.get("expectations_directory", "expectations")
-        # expectations_directory = self._project_config.get("expectations_directory", "expectations")
-        # #TODO: This should be factored out into a _convert_to_absolute_path_for_internal_use method, which should live in the @property, not here
-        # if not os.path.isabs(expectations_directory):
-        #     self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
-        # else:
-        #     self._expectations_directory = expectations_directory
 
         self._load_evaluation_parameter_store()
         self._compiled = False
@@ -1729,12 +1714,6 @@ class DataContext(ConfigOnlyDataContext):
 
                 if config["stores"] == None:
                     config["stores"] = {}
-
-                # if config["plugins_directory"] == None:
-                #     config["plugins_directory"] =  "plugins/"
-
-                # if config["expectations_directory"] == None:
-                #     config["expectations_directory"] =  "expectations/"
 
                 return DataContextConfig(**config)
 
