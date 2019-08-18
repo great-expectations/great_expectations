@@ -1740,7 +1740,8 @@ class DataContext(ConfigOnlyDataContext):
             if PY2:
                 config = dict(self._project_config)
             else:
-                config = OrderedDict(self._project_config)
+                # config = OrderedDict(self._project_config)
+                config = dict(self._project_config)
             yaml.dump(config, data)
 
     def add_store(self, store_name, store_config):

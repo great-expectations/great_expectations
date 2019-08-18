@@ -1,6 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 import pytest
+from six import PY2
 
 import os
 
@@ -40,7 +41,15 @@ def test_preserve_comments(data_context):
     data_context.add_datasource("test_datasource", "pandas")
 
     with open(config_filepath, "r") as infile:
-        assert infile.read() == """\
+
+        content = infile.read()
+
+        print("++++++++++++++++++++++++++++++++++++++++")
+        print(content)
+        print("----------------------------------------")
+
+        if PY2:
+            assert content == """\
 plugins_directory: plugins/
 stores: {}
 datasources:
@@ -68,3 +77,7 @@ datasources:
 data_docs:
   sites:
 """
+        else:
+          content_lines = set(content.split("\n"))
+          test_content_lines = set(content.split("\n"))
+          assert content_lines == test_content_lines
