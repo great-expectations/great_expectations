@@ -52,7 +52,10 @@ def test_preserve_comments(data_context):
             assert content == """\
 plugins_directory: plugins/
 expectations_directory: expectations/
-stores: {}
+stores:
+  evaluation_parameter_store:
+    module_name: great_expectations.data_context.store
+    class_name: InMemoryStore
 datasources:
   # For example, this one.
   mydatasource:
@@ -74,6 +77,7 @@ datasources:
     data_asset_type:
       class_name: PandasDataset
     type: pandas
+evaluation_parameter_store_name: evaluation_parameter_store
 data_docs:
   sites:
 """
