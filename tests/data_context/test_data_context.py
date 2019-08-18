@@ -146,7 +146,7 @@ def test_register_validation_results(data_context):
 
     res = data_context.register_validation_results(run_id, source_patient_data_results)
     assert res == source_patient_data_results  # results should always be returned, and in this case not modified
-    bound_parameters = data_context.get_parameters_from_evaluation_parameter_store_by_run_id(run_id)
+    bound_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024
     }
@@ -182,7 +182,7 @@ def test_register_validation_results(data_context):
 
 
     data_context.register_validation_results(run_id, source_diabetes_data_results)
-    bound_parameters = data_context._evaluation_parameter_store.get_run_parameters(run_id)
+    bound_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024,
         'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value': 2048

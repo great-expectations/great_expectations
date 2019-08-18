@@ -1002,7 +1002,7 @@ class ConfigOnlyDataContext(object):
             evaluation_parameters (dict)
         """
         # TOOO: only return parameters requested by the given expectations
-        return self._evaluation_parameter_store.get_run_parameters(run_id)
+        return self.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
 
     def register_validation_results(self, run_id, validation_results, data_asset=None):
         """Process results of a validation run. This method is called by data_asset objects that are connected to
@@ -1074,13 +1074,13 @@ class ConfigOnlyDataContext(object):
 
         self.extract_and_store_parameters_from_validation_results(
             validation_results,
-            data_asset,
+            data_asset_name,
             expectation_suite_name
         )
 
         return validation_results
 
-    def extract_and_store_parameters_from_validation_results(self, validation_results, data_asset, expectation_suite_name):
+    def extract_and_store_parameters_from_validation_results(self, validation_results, data_asset_name, expectation_suite_name):
 
         if not self._compiled:
             self._compile()
@@ -1094,7 +1094,7 @@ class ConfigOnlyDataContext(object):
                 "register evaluation parameters."
             )
             return
-            
+
         elif (data_asset_name not in self._compiled_parameters["data_assets"] or
               expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]):
             # This is fine; short-circuit since we do not need to register any results from this dataset.
@@ -1117,9 +1117,9 @@ class ConfigOnlyDataContext(object):
                         for desired_param in desired_parameters:
                             desired_key = desired_param.split(":")[-1]
                             if type_key == "result" and desired_key in result['result']:
-                                self.store_validation_param(run_id, desired_param, result["result"][desired_key])
+                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"][desired_key])
                             elif type_key == "details" and desired_key in result["result"]["details"]:
-                                self.store_validation_param(run_id, desired_param, result["result"]["details"])
+                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"]["details"])
                             else:
                                 logger.warning("Unrecognized key for parameter %s" % desired_param)
                 
@@ -1130,13 +1130,30 @@ class ConfigOnlyDataContext(object):
                     for desired_param in desired_parameters:
                         desired_key = desired_param.split(":")[-1]
                         if type_key == "result" and desired_key in result['result']:
-                            self.store_validation_param(run_id, desired_param, result["result"][desired_key])
+                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"][desired_key])
                         elif type_key == "details" and desired_key in result["result"]["details"]:
-                            self.store_validation_param(run_id, desired_param, result["result"]["details"])
+                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"]["details"])
                         else:
                             logger.warning("Unrecognized key for parameter %s" % desired_param)
 
-    def store_validation_param(self, run_id, key, value):
+    # def get_validation_param(self, run_id, key):
+    #     """Get a new validation parameter.
+
+    #     Args:
+    #         run_id: run_id for desired value
+    #         key: parameter key
+
+    #     Returns:
+    #         value stored in evaluation_parameter_store for the provided run_id and key
+    #     """
+    #     evaluation_parameter_store = self.stores[self._project_config.evaluation_parameter_store_name]
+    #     return evaluation_parameter_store.get(run_id, key)
+
+    @property
+    def evaluation_parameter_store(self):
+        return self.stores[self._project_config.evaluation_parameter_store_name]
+
+    def set_parameters_in_evaluation_parameter_store_by_run_id_and_key(self, run_id, key, value):
         """Store a new validation parameter.
 
         Args:
@@ -1147,27 +1164,11 @@ class ConfigOnlyDataContext(object):
         Returns:
             None
         """
-        evaluation_parameter_store = self.stores[self._project_config.evaluation_parameter_store_name]
-        evaluation_parameter_store.set(run_id, key, value)
+        run_params = self.evaluation_parameter_store.get(run_id) or {}
+        run_params[key] = value
+        self.evaluation_parameter_store.set(run_id, run_params)
 
-    def get_validation_param(self, run_id, key):
-        """Get a new validation parameter.
-
-        Args:
-            run_id: run_id for desired value
-            key: parameter key
-
-        Returns:
-            value stored in evaluation_parameter_store for the provided run_id and key
-        """
-        evaluation_parameter_store = self.stores[self._project_config.evaluation_parameter_store_name]
-        return evaluation_parameter_store.get(run_id, key)
-
-    @property
-    def evaluation_parameter_store(self):
-        return self.stores[self._project_config.evaluation_parameter_store_name]
-
-    def get_parameters_from_evaluation_parameter_store_by_run_id(self, run_id):
+    def get_parameters_in_evaluation_parameter_store_by_run_id(self, run_id):
         if self.evaluation_parameter_store.has_key(run_id):
             return self.evaluation_parameter_store.get(run_id)
         else:
