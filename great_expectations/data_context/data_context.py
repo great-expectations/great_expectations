@@ -8,10 +8,15 @@ import sys
 import copy
 import errno
 from glob import glob
-from six import string_types
+from six import (
+    string_types,
+    PY2,
+    PY3
+)
 import datetime
 import shutil
 import importlib
+from collections import OrderedDict
 
 from .util import get_slack_callback, safe_mmkdir
 from ..types.base import DotDict
@@ -239,6 +244,12 @@ class ConfigOnlyDataContext(object):
         """A single holder for all Stores in this context"""
         # TODO: support multiple stores choices and/or ensure abs paths when appropriate
         return self._stores
+
+    @property
+    def datasources(self):
+        """A single holder for all Datasources in this context"""
+        # TODO: support multiple stores choices and/or ensure abs paths when appropriate
+        return self._datasources
 
     @property
     def data_asset_name_delimiter(self):
@@ -481,11 +492,14 @@ class ConfigOnlyDataContext(object):
         Returns:
             datasource (Datasource)
         """
+        logger.debug("Starting ConfigOnlyDataContext.add_datasource")
+
         datasource_class = self._get_datasource_class(type_)
         datasource = datasource_class(name=name, data_context=self, **kwargs)
         self._datasources[name] = datasource
-        if not "datasources" in self._project_config:
-            self._project_config["datasources"] = {}
+        # This check shouldn't be necessary
+        # if not "datasources" in self._project_config:
+        #     self._project_config["datasources"] = {}
         self._project_config["datasources"][name] = datasource.get_config()
 
         #!!! This return value isn't used anywhere in the live codebase, and only once in tests.
@@ -1643,19 +1657,29 @@ class DataContext(ConfigOnlyDataContext):
 
     def _save_project_config(self):
         """Save the current project to disk."""
-        with open(os.path.join(self.root_directory, "great_expectations.yml"), "w") as data:
-            #FIXME: This method is currently Deactivated
-            print(type(self._project_config))
-            config = self._project_config.as_dict()
+        logger.debug("Starting DataContext._save_project_config")
+
+        config_filepath = os.path.join(self.root_directory, "great_expectations.yml")
+        with open(config_filepath, "w") as data:
+            #Note: I don't know how this method preserves commenting, but it seems to work
+            if PY2:
+                config = dict(self._project_config)
+            else:
+                # config = OrderedDict(self._project_config)
+                config = dict(self._project_config)
             yaml.dump(config, data)
-            pass
 
     def add_store(self, store_name, store_config):
+        logger.debug("Starting DataContext.add_store")
+        
         super(DataContext, self).add_store(store_name, store_config)
         self._save_project_config()
 
     def add_datasource(self, name, type_, **kwargs):
+        logger.debug("Starting DataContext.add_datasource")
+
         super(DataContext, self).add_datasource(name, type_, **kwargs)
+        logger.debug("x")
         self._save_project_config()
 
 
