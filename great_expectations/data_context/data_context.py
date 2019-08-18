@@ -132,7 +132,6 @@ class ConfigOnlyDataContext(object):
         # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
         self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
 
-        # self._load_evaluation_parameter_store()
         self._compiled = False
         # /End store stuff
 
@@ -607,78 +606,6 @@ class ConfigOnlyDataContext(object):
         self._datasources[datasource_name] = datasource
         return datasource
             
-    # def _load_evaluation_parameter_store(self):
-    #     """Load the evaluation parameter store to use for managing cross data-asset parameterized expectations.
-
-    #     By default, the Context uses an in-memory parameter store only suitable for evaluation on a single node.
-
-    #     Returns:
-    #         None
-    #     """
-    #     # This is a trivial class that implements in-memory key value store.
-    #     # We use it when user does not specify a custom class in the config file
-    #     class MemoryEvaluationParameterStore(object):
-    #         def __init__(self):
-    #             self.dict = {}
-
-    #         def get(self, run_id, name):
-    #             if run_id in self.dict:
-    #                 return self.dict[run_id][name] 
-    #             else:
-    #                 return {}
-
-    #         def set(self, run_id, name, value):
-    #             if run_id not in self.dict:
-    #                 self.dict[run_id] = {}
-    #             self.dict[run_id][name] = value
-
-    #         def get_run_parameters(self, run_id):
-    #             if run_id in self.dict:
-    #                 return self.dict[run_id]
-    #             else:
-    #                 return {}
-
-    #     #####
-    #     #
-    #     # If user wishes to provide their own implementation for this key value store (e.g.,
-    #     # Redis-based), they should specify the following in the project config file:
-    #     #
-    #     # evaluation_parameter_store:
-    #     #   type: demostore
-    #     #   config:  - this is optional - this is how we can pass kwargs to the object's c-tor
-    #     #     param1: boo
-    #     #     param2: bah
-    #     #
-    #     # Module called "demostore" must be found in great_expectations/plugins/store.
-    #     # Class "GreatExpectationsEvaluationParameterStore" must be defined in that module.
-    #     # The class must implement the following methods:
-    #     # 1. def __init__(self, **kwargs)
-    #     #
-    #     # 2. def get(self, name)
-    #     #
-    #     # 3. def set(self, name, value)
-    #     #
-    #     # We will load the module dynamically
-    #     #
-    #     #####
-    #     try:
-    #         config_block = self._project_config.get("evaluation_parameter_store")
-    #         if not config_block or not config_block.get("type"):
-    #             self._evaluation_parameter_store = MemoryEvaluationParameterStore()
-    #         else:
-    #             module_name = config_block.get("type")
-    #             class_name = "GreatExpectationsEvaluationParameterStore"
-
-    #             loaded_module = __import__(module_name, fromlist=[module_name])
-    #             loaded_class = getattr(loaded_module, class_name)
-    #             if config_block.get("config"):
-    #                 self._evaluation_parameter_store = loaded_class(**config_block.get("config"))
-    #             else:
-    #                 self._evaluation_parameter_store = loaded_class()
-    #     except Exception:
-    #         logger.exception("Failed to load evaluation_parameter_store class")
-    #         raise
-
     def list_expectation_suites(self):
         """Returns currently-defined expectation suites available in a nested dictionary structure
         reflecting the namespace provided by this DataContext.
@@ -991,19 +918,6 @@ class ConfigOnlyDataContext(object):
             json.dump(expectation_suite, outfile, indent=2)
         self._compiled = False
 
-    def bind_evaluation_parameters(self, run_id):  # , expectations):
-        """Return current evaluation parameters stored for the provided run_id, ready to be bound to parameterized
-        expectation values.
-
-        Args:
-            run_id: the run_id for which to return evaluation parameters
-
-        Returns:
-            evaluation_parameters (dict)
-        """
-        # TOOO: only return parameters requested by the given expectations
-        return self.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
-
     def register_validation_results(self, run_id, validation_results, data_asset=None):
         """Process results of a validation run. This method is called by data_asset objects that are connected to
          a DataContext during validation. It performs several actions:
@@ -1157,10 +1071,52 @@ class ConfigOnlyDataContext(object):
         self.evaluation_parameter_store.set(run_id, run_params)
 
     def get_parameters_in_evaluation_parameter_store_by_run_id(self, run_id):
+        """Fetches all validation parameters for a given run_id.
+
+        Args:
+            run_id: current run_id
+            key: parameter key
+            value: parameter value
+
+        Returns:
+            None
+        """
         if self.evaluation_parameter_store.has_key(run_id):
             return self.evaluation_parameter_store.get(run_id)
         else:
             return {}
+
+    def bind_evaluation_parameters(self, run_id):  # , expectations):
+        """Return current evaluation parameters stored for the provided run_id, ready to be bound to parameterized
+        expectation values.
+
+        Args:
+            run_id: the run_id for which to return evaluation parameters
+
+        Returns:
+            evaluation_parameters (dict)
+
+        TODO: Refactor data_asset to return evaluation_parameters to the DataContext, instead of requiring a mutable
+        object from the evaluation_parameter_store. 
+
+        Details:
+        This method is currently identical to get_parameters_in_evaluation_parameter_store_by_run_id.
+        However, if I understand the usage properly, `bind_...` is currently used to fetch a mutable object,
+        which is written into by data_assets.
+
+        Returning mutable objects is NOT a generally supported use-case for Stores.
+        It happens to work in the case of the current implementation of InMemoryStore, because InMemoryStore
+        is just a wrapper around dict.
+        But this approach will NOT work in the general case.
+
+        I believe that we should re-write DataAsset to pass evaluation_parameters back to the DataContext,
+        and let the Context deal with processing these parameters. This would "re-simplify" DataAssets, and keep
+        Stores simple. DataContexts already have to know about bundling and processing evaluation parameters,
+        so it makes sense to consolidate that logic here.
+        """
+        # TOOO: only return parameters requested by the given expectations
+        return self.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
+
 
 
     #TODO: Can we raname this to _compile_all_evaluation_parameters_from_expectation_suites or something similar?
