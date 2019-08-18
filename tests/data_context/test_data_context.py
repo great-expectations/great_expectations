@@ -505,6 +505,8 @@ def test_data_context_result_store(titanic_data_context):
 
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
+    assert False #for speed
+
     base_dir = str(tmp_path_factory.mktemp("project_dir"))
     project_dir = os.path.join(base_dir, "project_path")
     os.mkdir(project_dir)
@@ -725,7 +727,7 @@ def test_ExplorerDataContext():
 
 def test_ConfigOnlyDataContext__initialization(tmp_path_factory):
     config_path = str(tmp_path_factory.mktemp('test_ConfigOnlyDataContext__initialization__dir'))
-    ConfigOnlyDataContext(
+    context = ConfigOnlyDataContext(
         DataContextConfig(**{
             "plugins_directory": "plugins/",
             "datasources": {},
@@ -736,6 +738,9 @@ def test_ConfigOnlyDataContext__initialization(tmp_path_factory):
         }),
         config_path
     )
+
+    assert context.root_directory.split("/")[-1] == "test_ConfigOnlyDataContext__initialization__dir0"
+    assert context.plugins_directory.split("/")[-3:] == ["test_ConfigOnlyDataContext__initialization__dir0", "plugins",""]
 
 def test__normalize_absolute_or_relative_path(tmp_path_factory):
     config_path = str(tmp_path_factory.mktemp('test__normalize_absolute_or_relative_path__dir'))
