@@ -212,9 +212,10 @@ class ConfigOnlyDataContext(object):
         return instantiated_store
 
     def _normalize_absolute_or_relative_path(self, path):
-        if not os.path.isabs(path):
-            resource_store["base_directory"] = os.path.join(self.root_directory, resource_store["base_directory"])
-        return path
+        if os.path.isabs(path):
+            return path
+        else:
+            os.path.join(self.root_directory, path)
 
     def _normalize_store_path(self, resource_store):
         if resource_store["type"] == "filesystem":
@@ -1725,8 +1726,8 @@ class DataContext(ConfigOnlyDataContext):
                 if config["stores"] == None:
                     config["stores"] = {}
 
-                if config["plugins_directory"] == None:
-                    config["plugins_directory"] =  "plugins/"
+                # if config["plugins_directory"] == None:
+                #     config["plugins_directory"] =  "plugins/"
 
                 return DataContextConfig(**config)
 
