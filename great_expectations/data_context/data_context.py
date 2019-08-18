@@ -254,27 +254,6 @@ class ConfigOnlyDataContext(object):
         else:
             self._data_asset_name_delimiter = new_delimiter
 
-    def get_validation_doc_filepath(self, data_asset_name, expectation_suite_name):
-        """Get the local path where a the rendered html doc for a validation result is stored, given full asset name.
-
-        Args:
-            data_asset_name: name of data asset for which to get documentation filepath
-            expectation_suite_name: name of expectation suite for which to get validation location
-
-        Returns:
-            path (str): Path to the location
-
-        """
-        # TODO: this path should be configurable or parameterized to support descriptive and prescriptive docs
-        validation_filepath = self._get_normalized_data_asset_name_filepath(
-            data_asset_name,
-            expectation_suite_name,
-            base_path=self.data_doc_directory,
-            file_extension=".html"
-        )
-
-        return validation_filepath
-
     def move_validation_to_fixtures(self, data_asset_name, expectation_suite_name, run_id):
         """
         Move validation results from uncommitted to fixtures/validations to make available for the data doc renderer
@@ -402,55 +381,6 @@ class ConfigOnlyDataContext(object):
             )
         with open(profiles_filepath, "w") as profiles_file:
             yaml.dump(profiles, profiles_file)
-
-    def get_datasource_config(self, datasource_name):
-        """Get the configuration for a configured datasource
-
-        Args:
-            datasource_name: The datasource for which to get the config
-
-        Returns:
-            datasource_config (dict): dictionary containing datasource configuration
-        """
-
-        # TODO: Review logic, once described below but not implemented in datasource save, for splitting configuration
-        # We allow a datasource to be defined in any combination of the following ways:
-
-        # 1. It may be fully specified in the datasources section of the great_expectations.yml file
-        # 2. It may be stored in a file by convention located in `datasources/<datasource_name>/config.yml`
-        # 3. It may be listed in the great_expectations.yml file with a config_file key that provides a relative \
-        # path to a different yml config file
-
-        # Any key duplicated across configs will be updated by the last key read (in the order above)
-        datasource_config = {}
-        defined_config_path = None
-        default_config_path = os.path.join(self.root_directory, "datasources", datasource_name, "config.yml")
-        if datasource_name in self._project_config["datasources"]:
-            base_datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
-            if "config_file" in base_datasource_config:
-                defined_config_path = os.path.join(self.root_directory, base_datasource_config.pop("config_file"))
-            datasource_config.update(base_datasource_config)
-        
-        try:
-            with open(default_config_path, "r") as config_file:
-                default_path_datasource_config = yaml.load(config_file) or {}
-            datasource_config.update(default_path_datasource_config)
-        except IOError as e:
-            if e.errno != errno.ENOENT:
-                raise
-            logger.debug("No config file found in default location for datasource %s" % datasource_name)
-        
-        if defined_config_path is not None:
-            try:
-                with open(defined_config_path, "r") as config_file:
-                    defined_path_datasource_config = yaml.load(config_file) or {}
-                datasource_config.update(defined_path_datasource_config)
-            except IOError as e:
-                if e.errno != errno.ENOENT:
-                    raise
-                logger.warning("No config file found in user-defined location for datasource %s" % datasource_name)
-        
-        return datasource_config
 
     def get_available_data_asset_names(self, datasource_names=None, generator_names=None):
         """Inspect datasource and generators to provide available data_asset objects.
@@ -1467,11 +1397,6 @@ class ConfigOnlyDataContext(object):
             logger.debug("No data_docs_config found. No site(s) built.")
 
         return index_page_locator_infos
-
-    def get_absolute_path(self, path):
-        #TODO: ideally, the data context object should resolve all paths before
-        # calling the site builder (or any other specific logic)
-        return os.path.join(self._context_root_directory, path)
 
     def profile_datasource(self,
                            datasource_name,
