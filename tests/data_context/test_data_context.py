@@ -776,6 +776,9 @@ def test_evaluation_parameter_store_methods(basic_data_context_config):
         "bar" : "baz",
         "car" : "caz"
     }
+    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("goo") == {
+        "dar" : "daz",
+    }
 
 def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_context_config):
     config_path = str(tmp_path_factory.mktemp('test__normalize_absolute_or_relative_path__dir'))
