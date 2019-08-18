@@ -1075,12 +1075,13 @@ class ConfigOnlyDataContext(object):
         self.extract_and_store_parameters_from_validation_results(
             validation_results,
             data_asset_name,
-            expectation_suite_name
+            expectation_suite_name,
+            run_id,
         )
 
         return validation_results
 
-    def extract_and_store_parameters_from_validation_results(self, validation_results, data_asset_name, expectation_suite_name):
+    def extract_and_store_parameters_from_validation_results(self, validation_results, data_asset_name, expectation_suite_name, run_id):
 
         if not self._compiled:
             self._compile()
@@ -1164,7 +1165,7 @@ class ConfigOnlyDataContext(object):
         Returns:
             None
         """
-        run_params = self.evaluation_parameter_store.get(run_id) or {}
+        run_params = self.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
         run_params[key] = value
         self.evaluation_parameter_store.set(run_id, run_params)
 
