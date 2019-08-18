@@ -115,13 +115,7 @@ class ConfigOnlyDataContext(object):
         self._project_config = project_config
         self._context_root_directory = os.path.abspath(context_root_dir)
 
-        self._datasources = {}
-
-        if not self._project_config.get("datasources"):
-            self._project_config["datasources"] = {}
-        for datasource in self._project_config["datasources"].keys():
-            self.get_datasource(datasource)
-
+        # Init plugins
         plugins_directory = self._project_config.get("plugins_directory")
         #TODO: This should be factored out into a _convert_to_absolute_path_for_internal_use method, which should live in the @property, not here
         if not os.path.isabs(plugins_directory):
@@ -130,10 +124,15 @@ class ConfigOnlyDataContext(object):
             self._plugins_directory = plugins_directory
         sys.path.append(self._plugins_directory)
 
+
+        # Init data sources
+        self._datasources = {}
+        for datasource in self._project_config["datasources"].keys():
+            self.get_datasource(datasource)
+
+
         self._stores = DotDict()
-        #TODO: This check should not be necessary
-        if "stores" in self._project_config:
-            self._init_stores(self._project_config["stores"])
+        self._init_stores(self._project_config["stores"])
 
 
         # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
@@ -233,7 +232,11 @@ class ConfigOnlyDataContext(object):
     @property
     def plugins_directory(self):
         """The directory in which custom plugin modules should be placed."""
-        return self._plugins_directory
+        # return self._plugins_directory
+        return self._normalize_absolute_or_relative_path(
+            self._project_config.plugins_directory
+        )
+         
 
     @property
     def expectations_directory(self):
