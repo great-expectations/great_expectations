@@ -27,6 +27,9 @@ from great_expectations.util import gen_directory_tree_str
 from great_expectations.data_context.types import (
     DataContextConfig,
 )
+from great_expectations.data_context.store import (
+    InMemoryStore
+)
 
 
 @pytest.fixture()
@@ -746,6 +749,33 @@ def test_ConfigOnlyDataContext__initialization(tmp_path_factory, basic_data_cont
 
     assert context.root_directory.split("/")[-1] == "test_ConfigOnlyDataContext__initialization__dir0"
     assert context.plugins_directory.split("/")[-3:] == ["test_ConfigOnlyDataContext__initialization__dir0", "plugins",""]
+
+
+def test_evaluation_parameter_store_methods(basic_data_context_config):
+    context = ConfigOnlyDataContext(
+        basic_data_context_config,
+        "testing",
+    )
+
+    assert isinstance(context.evaluation_parameter_store, InMemoryStore)
+
+    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {}
+    context.set_parameters_in_evaluation_parameter_store_by_run_id_and_key("foo", "bar", "baz")
+    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {
+        "bar" : "baz"
+    }
+
+    context.set_parameters_in_evaluation_parameter_store_by_run_id_and_key("foo", "car", "caz")
+    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {
+        "bar" : "baz",
+        "car" : "caz"
+    }
+
+    context.set_parameters_in_evaluation_parameter_store_by_run_id_and_key("goo", "dar", "daz")
+    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {
+        "bar" : "baz",
+        "car" : "caz"
+    }
 
 def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_context_config):
     config_path = str(tmp_path_factory.mktemp('test__normalize_absolute_or_relative_path__dir'))
