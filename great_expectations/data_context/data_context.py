@@ -145,14 +145,11 @@ class ConfigOnlyDataContext(object):
     def _init_stores(self, store_configs):
         """Initialize all Stores for this DataContext.
 
-        TODO: Currently, most Stores are hardcoded.
-        Eventually, they should be read in from yml configs.
-        This will require some work on test fixtures.
-
         In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
         However, some files remain the responsiblity of the DataContext:
             great_expectations.yml
             plugins
+            credentials
             DataSource configs
 
         These files are not good fits to be turned into Stores, because
@@ -166,11 +163,9 @@ class ConfigOnlyDataContext(object):
                 store_config
             )
 
-
     def add_store(self, store_name, store_config):
-        self._stores[store_name] = self._init_store_from_config(store_config)
-
         self._project_config["stores"][store_name] = store_config
+        self._stores[store_name] = self._init_store_from_config(store_config)
 
     def _init_store_from_config(self, config):
         typed_config = StoreMetaConfig(
@@ -221,7 +216,6 @@ class ConfigOnlyDataContext(object):
             self._project_config.plugins_directory
         )
          
-
     @property
     def expectations_directory(self):
         """The directory in which custom plugin modules should be placed."""
