@@ -122,11 +122,7 @@ class ConfigOnlyDataContext(object):
         for datasource in self._project_config["datasources"].keys():
             self.get_datasource(datasource)
 
-        # self._plugins_directory = self._project_config.get("plugins_directory", "plugins/")
         plugins_directory = self._project_config.get("plugins_directory")
-        #TODO: This check should not be necessary
-        if plugins_directory == None:
-            plugins_directory =  "plugins/"
         #TODO: This should be factored out into a _convert_to_absolute_path_for_internal_use method, which should live in the @property, not here
         if not os.path.isabs(plugins_directory):
             self._plugins_directory = os.path.join(self.root_directory, plugins_directory)
@@ -215,6 +211,10 @@ class ConfigOnlyDataContext(object):
 
         return instantiated_store
 
+    def _normalize_absolute_or_relative_path(self, path):
+        if not os.path.isabs(path):
+            resource_store["base_directory"] = os.path.join(self.root_directory, resource_store["base_directory"])
+        return path
 
     def _normalize_store_path(self, resource_store):
         if resource_store["type"] == "filesystem":
@@ -1724,6 +1724,9 @@ class DataContext(ConfigOnlyDataContext):
 
                 if config["stores"] == None:
                     config["stores"] = {}
+
+                if config["plugins_directory"] == None:
+                    config["plugins_directory"] =  "plugins/"
 
                 return DataContextConfig(**config)
 

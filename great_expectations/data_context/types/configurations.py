@@ -40,7 +40,7 @@ class DataContextConfig(Config):
     ])
 
     _key_types = {
-        "plugins_directory": [string_types, None],
+        "plugins_directory": string_types,
         "datasources": dict,
         "stores": dict,
         "data_docs": dict,
