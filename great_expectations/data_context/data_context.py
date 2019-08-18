@@ -215,7 +215,7 @@ class ConfigOnlyDataContext(object):
         if os.path.isabs(path):
             return path
         else:
-            os.path.join(self.root_directory, path)
+            return os.path.join(self.root_directory, path)
 
     def _normalize_store_path(self, resource_store):
         if resource_store["type"] == "filesystem":

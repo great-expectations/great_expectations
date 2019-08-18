@@ -723,8 +723,8 @@ def test_ExplorerDataContext():
         "testing/"
     )
 
-def test_ConfigOnlyDataContext__initialization():
-    # project_path = str(tmp_path_factory.mktemp('test_ConfigOnlyDataContext__initialization__dir'))
+def test_ConfigOnlyDataContext__initialization(tmp_path_factory):
+    config_path = str(tmp_path_factory.mktemp('test_ConfigOnlyDataContext__initialization__dir'))
     ConfigOnlyDataContext(
         DataContextConfig(**{
             "plugins_directory": "plugins/",
@@ -734,6 +734,27 @@ def test_ConfigOnlyDataContext__initialization():
                 "sites": {}
             }
         }),
-        "testing/"
+        config_path
     )
+
+def test__normalize_absolute_or_relative_path(tmp_path_factory):
+    config_path = str(tmp_path_factory.mktemp('test__normalize_absolute_or_relative_path__dir'))
+    context = ConfigOnlyDataContext(
+        DataContextConfig(**{
+            "plugins_directory": "plugins/",
+            "datasources": {},
+            "stores": {},
+            "data_docs": {
+                "sites": {}
+            }
+        }),
+        config_path
+    )
+
+    print(context._normalize_absolute_or_relative_path("yikes"))
+    assert "test__normalize_absolute_or_relative_path__dir0/yikes" in context._normalize_absolute_or_relative_path("yikes") 
+
+    context._normalize_absolute_or_relative_path("/yikes")
+    assert "test__normalize_absolute_or_relative_path__dir" not in context._normalize_absolute_or_relative_path("/yikes") 
+    assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes") 
 
