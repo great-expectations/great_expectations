@@ -16,6 +16,7 @@ def totally_empty_data_context(tmp_path_factory):
 
     config = {
         "plugins_directory": "plugins/",
+        "expectations_directory": "expectations/",
         "datasources": {},
         "stores": {},
         "data_docs": {

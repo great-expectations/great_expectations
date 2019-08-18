@@ -10,7 +10,7 @@ datasources:
         type: subdir_reader
         base_directory: ../data
 
-
+expectations_directory: expectations/
 plugins_directory: plugins/
 data_docs:
   sites:

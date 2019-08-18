@@ -505,7 +505,7 @@ def test_data_context_result_store(titanic_data_context):
 
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
-    assert False #for speed
+    # assert False #for speed
 
     base_dir = str(tmp_path_factory.mktemp("project_dir"))
     project_dir = os.path.join(base_dir, "project_path")
@@ -716,6 +716,7 @@ def test_ExplorerDataContext():
     ExplorerDataContext(
         DataContextConfig(**{
             "plugins_directory": "plugins/",
+            "expectations_directory": "expectations/",
             "datasources": {},
             "stores": {},
             "data_docs": {
@@ -730,6 +731,7 @@ def test_ConfigOnlyDataContext__initialization(tmp_path_factory):
     context = ConfigOnlyDataContext(
         DataContextConfig(**{
             "plugins_directory": "plugins/",
+            "expectations_directory": "expectations/",
             "datasources": {},
             "stores": {},
             "data_docs": {
@@ -747,6 +749,7 @@ def test__normalize_absolute_or_relative_path(tmp_path_factory):
     context = ConfigOnlyDataContext(
         DataContextConfig(**{
             "plugins_directory": "plugins/",
+            "expectations_directory": "expectations/",
             "datasources": {},
             "stores": {},
             "data_docs": {
