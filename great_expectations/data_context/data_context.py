@@ -132,7 +132,7 @@ class ConfigOnlyDataContext(object):
         # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
         self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
 
-        self._load_evaluation_parameter_store()
+        # self._load_evaluation_parameter_store()
         self._compiled = False
         # /End store stuff
 
@@ -607,77 +607,77 @@ class ConfigOnlyDataContext(object):
         self._datasources[datasource_name] = datasource
         return datasource
             
-    def _load_evaluation_parameter_store(self):
-        """Load the evaluation parameter store to use for managing cross data-asset parameterized expectations.
+    # def _load_evaluation_parameter_store(self):
+    #     """Load the evaluation parameter store to use for managing cross data-asset parameterized expectations.
 
-        By default, the Context uses an in-memory parameter store only suitable for evaluation on a single node.
+    #     By default, the Context uses an in-memory parameter store only suitable for evaluation on a single node.
 
-        Returns:
-            None
-        """
-        # This is a trivial class that implements in-memory key value store.
-        # We use it when user does not specify a custom class in the config file
-        class MemoryEvaluationParameterStore(object):
-            def __init__(self):
-                self.dict = {}
+    #     Returns:
+    #         None
+    #     """
+    #     # This is a trivial class that implements in-memory key value store.
+    #     # We use it when user does not specify a custom class in the config file
+    #     class MemoryEvaluationParameterStore(object):
+    #         def __init__(self):
+    #             self.dict = {}
 
-            def get(self, run_id, name):
-                if run_id in self.dict:
-                    return self.dict[run_id][name] 
-                else:
-                    return {}
+    #         def get(self, run_id, name):
+    #             if run_id in self.dict:
+    #                 return self.dict[run_id][name] 
+    #             else:
+    #                 return {}
 
-            def set(self, run_id, name, value):
-                if run_id not in self.dict:
-                    self.dict[run_id] = {}
-                self.dict[run_id][name] = value
+    #         def set(self, run_id, name, value):
+    #             if run_id not in self.dict:
+    #                 self.dict[run_id] = {}
+    #             self.dict[run_id][name] = value
 
-            def get_run_parameters(self, run_id):
-                if run_id in self.dict:
-                    return self.dict[run_id]
-                else:
-                    return {}
+    #         def get_run_parameters(self, run_id):
+    #             if run_id in self.dict:
+    #                 return self.dict[run_id]
+    #             else:
+    #                 return {}
 
-        #####
-        #
-        # If user wishes to provide their own implementation for this key value store (e.g.,
-        # Redis-based), they should specify the following in the project config file:
-        #
-        # evaluation_parameter_store:
-        #   type: demostore
-        #   config:  - this is optional - this is how we can pass kwargs to the object's c-tor
-        #     param1: boo
-        #     param2: bah
-        #
-        # Module called "demostore" must be found in great_expectations/plugins/store.
-        # Class "GreatExpectationsEvaluationParameterStore" must be defined in that module.
-        # The class must implement the following methods:
-        # 1. def __init__(self, **kwargs)
-        #
-        # 2. def get(self, name)
-        #
-        # 3. def set(self, name, value)
-        #
-        # We will load the module dynamically
-        #
-        #####
-        try:
-            config_block = self._project_config.get("evaluation_parameter_store")
-            if not config_block or not config_block.get("type"):
-                self._evaluation_parameter_store = MemoryEvaluationParameterStore()
-            else:
-                module_name = config_block.get("type")
-                class_name = "GreatExpectationsEvaluationParameterStore"
+    #     #####
+    #     #
+    #     # If user wishes to provide their own implementation for this key value store (e.g.,
+    #     # Redis-based), they should specify the following in the project config file:
+    #     #
+    #     # evaluation_parameter_store:
+    #     #   type: demostore
+    #     #   config:  - this is optional - this is how we can pass kwargs to the object's c-tor
+    #     #     param1: boo
+    #     #     param2: bah
+    #     #
+    #     # Module called "demostore" must be found in great_expectations/plugins/store.
+    #     # Class "GreatExpectationsEvaluationParameterStore" must be defined in that module.
+    #     # The class must implement the following methods:
+    #     # 1. def __init__(self, **kwargs)
+    #     #
+    #     # 2. def get(self, name)
+    #     #
+    #     # 3. def set(self, name, value)
+    #     #
+    #     # We will load the module dynamically
+    #     #
+    #     #####
+    #     try:
+    #         config_block = self._project_config.get("evaluation_parameter_store")
+    #         if not config_block or not config_block.get("type"):
+    #             self._evaluation_parameter_store = MemoryEvaluationParameterStore()
+    #         else:
+    #             module_name = config_block.get("type")
+    #             class_name = "GreatExpectationsEvaluationParameterStore"
 
-                loaded_module = __import__(module_name, fromlist=[module_name])
-                loaded_class = getattr(loaded_module, class_name)
-                if config_block.get("config"):
-                    self._evaluation_parameter_store = loaded_class(**config_block.get("config"))
-                else:
-                    self._evaluation_parameter_store = loaded_class()
-        except Exception:
-            logger.exception("Failed to load evaluation_parameter_store class")
-            raise
+    #             loaded_module = __import__(module_name, fromlist=[module_name])
+    #             loaded_class = getattr(loaded_module, class_name)
+    #             if config_block.get("config"):
+    #                 self._evaluation_parameter_store = loaded_class(**config_block.get("config"))
+    #             else:
+    #                 self._evaluation_parameter_store = loaded_class()
+    #     except Exception:
+    #         logger.exception("Failed to load evaluation_parameter_store class")
+    #         raise
 
     def list_expectation_suites(self):
         """Returns currently-defined expectation suites available in a nested dictionary structure
@@ -1072,6 +1072,16 @@ class ConfigOnlyDataContext(object):
                 value=data_asset
             )
 
+        self.extract_and_store_parameters_from_validation_results(
+            validation_results,
+            data_asset,
+            expectation_suite_name
+        )
+
+        return validation_results
+
+    def extract_and_store_parameters_from_validation_results(self, validation_results, data_asset, expectation_suite_name):
+
         if not self._compiled:
             self._compile()
 
@@ -1080,14 +1090,15 @@ class ConfigOnlyDataContext(object):
                 "expectation_suite_name" not in validation_results["meta"]
         ):
             logger.warning(
-                "Both data_asset_name ane expectation_suite_name must be in validation results to "
+                "Both data_asset_name and expectation_suite_name must be in validation results to "
                 "register evaluation parameters."
             )
-            return validation_results
+            return
+            
         elif (data_asset_name not in self._compiled_parameters["data_assets"] or
               expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]):
             # This is fine; short-circuit since we do not need to register any results from this dataset.
-            return validation_results
+            return
         
         for result in validation_results['results']:
             # Unoptimized: loop over all results and check if each is needed
@@ -1097,7 +1108,7 @@ class ConfigOnlyDataContext(object):
                 if (("column" in result['expectation_config']['kwargs']) and 
                     ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]) and
                     (result['expectation_config']['kwargs']["column"] in
-                     self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
+                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
 
                     column = result['expectation_config']['kwargs']["column"]
                     # Now that we have a small search space, invert logic, and look for the parameters in our result
@@ -1125,9 +1136,6 @@ class ConfigOnlyDataContext(object):
                         else:
                             logger.warning("Unrecognized key for parameter %s" % desired_param)
 
-        return validation_results
-
-
     def store_validation_param(self, run_id, key, value):
         """Store a new validation parameter.
 
@@ -1139,7 +1147,8 @@ class ConfigOnlyDataContext(object):
         Returns:
             None
         """
-        self._evaluation_parameter_store.set(run_id, key, value)
+        evaluation_parameter_store = self.stores[self._project_config.evaluation_parameter_store_name]
+        evaluation_parameter_store.set(run_id, key, value)
 
     def get_validation_param(self, run_id, key):
         """Get a new validation parameter.
@@ -1151,7 +1160,19 @@ class ConfigOnlyDataContext(object):
         Returns:
             value stored in evaluation_parameter_store for the provided run_id and key
         """
-        return self._evaluation_parameter_store.get(run_id, key)
+        evaluation_parameter_store = self.stores[self._project_config.evaluation_parameter_store_name]
+        return evaluation_parameter_store.get(run_id, key)
+
+    @property
+    def evaluation_parameter_store(self):
+        return self.stores[self._project_config.evaluation_parameter_store_name]
+
+    def get_parameters_from_evaluation_parameter_store_by_run_id(self, run_id):
+        if self.evaluation_parameter_store.has_key(run_id):
+            return self.evaluation_parameter_store.get(run_id)
+        else:
+            return {}
+
 
     def _compile(self):
         """Compiles all current expectation configurations in this context to be ready for result registration.
@@ -1340,8 +1361,6 @@ class ConfigOnlyDataContext(object):
                 *path_components
             )
             safe_mmkdir(os.path.dirname(path))
-            # print(path)
-            # print(path_components[1:])
             with open(path, "w") as writer:
                 writer.write(resource)
 
@@ -1738,7 +1757,6 @@ class DataContext(ConfigOnlyDataContext):
         logger.debug("Starting DataContext.add_datasource")
 
         super(DataContext, self).add_datasource(name, type_, **kwargs)
-        logger.debug("x")
         self._save_project_config()
 
 
