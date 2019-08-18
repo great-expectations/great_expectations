@@ -712,51 +712,46 @@ def test_add_store(empty_data_context):
     assert "my_new_store" in empty_data_context.stores.keys()
     assert "my_new_store" in empty_data_context.get_config()["stores"]
 
-def test_ExplorerDataContext():
-    ExplorerDataContext(
-        DataContextConfig(**{
-            "plugins_directory": "plugins/",
-            "expectations_directory": "expectations/",
-            "datasources": {},
-            "stores": {},
-            "data_docs": {
-                "sites": {}
+@pytest.fixture()
+def basic_data_context_config():
+    return DataContextConfig(**{
+        "plugins_directory": "plugins/",
+        "expectations_directory": "expectations/",
+        "evaluation_parameter_store_name" : "evaluation_parameter_store",
+        "datasources": {},
+        "stores": {
+            "evaluation_parameter_store" : {
+                "module_name": "great_expectations.data_context.store",
+                "class_name": "InMemoryStore",
             }
-        }),
+        },
+        "data_docs": {
+            "sites": {}
+        }
+    })
+
+def test_ExplorerDataContext(basic_data_context_config):
+    print(type(basic_data_context_config))
+    ExplorerDataContext(
+        basic_data_context_config,
         "testing/"
     )
 
-def test_ConfigOnlyDataContext__initialization(tmp_path_factory):
+def test_ConfigOnlyDataContext__initialization(tmp_path_factory, basic_data_context_config):
     config_path = str(tmp_path_factory.mktemp('test_ConfigOnlyDataContext__initialization__dir'))
     context = ConfigOnlyDataContext(
-        DataContextConfig(**{
-            "plugins_directory": "plugins/",
-            "expectations_directory": "expectations/",
-            "datasources": {},
-            "stores": {},
-            "data_docs": {
-                "sites": {}
-            }
-        }),
-        config_path
+        basic_data_context_config,
+        config_path,
     )
 
     assert context.root_directory.split("/")[-1] == "test_ConfigOnlyDataContext__initialization__dir0"
     assert context.plugins_directory.split("/")[-3:] == ["test_ConfigOnlyDataContext__initialization__dir0", "plugins",""]
 
-def test__normalize_absolute_or_relative_path(tmp_path_factory):
+def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_context_config):
     config_path = str(tmp_path_factory.mktemp('test__normalize_absolute_or_relative_path__dir'))
     context = ConfigOnlyDataContext(
-        DataContextConfig(**{
-            "plugins_directory": "plugins/",
-            "expectations_directory": "expectations/",
-            "datasources": {},
-            "stores": {},
-            "data_docs": {
-                "sites": {}
-            }
-        }),
-        config_path
+        basic_data_context_config,
+        config_path,
     )
 
     print(context._normalize_absolute_or_relative_path("yikes"))
