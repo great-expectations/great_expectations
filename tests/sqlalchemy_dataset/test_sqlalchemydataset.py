@@ -190,6 +190,7 @@ def test_column_fallback():
 
 
 DIALECTS = (
+    # dialect name, url to create engine from, loaded dialect
     ("hive", "hive://host:1234", pyhive.sqlalchemy_hive),
     ("postgresql", "postgresql://host:1234", sa.dialects.postgresql),
     ("sqlite", "sqlite://", sa.dialects.sqlite),
@@ -199,7 +200,7 @@ DIALECTS = (
 
 
 @pytest.mark.parametrize("dialect_name,conn,dialect_type", DIALECTS)
-def test_sqlalchemydataset_dialect_based_on_engine(dialect_name, conn, dialect_type):
+def test_sqlalchemydataset_dialect_based_on_engine(dialect_name, url, dialect_type):
     # generate a SQLAlchemy Inspector that does nothing and returns no columns
     class DummyInspector:
         def __init__(self):
@@ -213,13 +214,13 @@ def test_sqlalchemydataset_dialect_based_on_engine(dialect_name, conn, dialect_t
         # Inspector creation from engine is patched to return a dummy Inspector
         mock_fe.return_value = DummyInspector()
 
-        # we are able to initialize an SqlAlchemyDataset with a Hive engine without needing to connect
-        dataset = SqlAlchemyDataset('test_sql_data', engine=sa.create_engine(conn))
+        # we are able to initialize an SqlAlchemyDataset with an engine without needing to connect
+        dataset = SqlAlchemyDataset('test_sql_data', engine=sa.create_engine(url))
 
         # check dialect name is read properly
         assert dataset.get_dialect_name() == dialect_name
 
-        # check our dialect is the desired type
+        # check our dialect in use is the desired type
         assert isinstance(dataset.dialect, type(dialect_type))
 
 
