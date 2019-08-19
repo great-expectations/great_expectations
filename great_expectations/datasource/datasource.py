@@ -10,7 +10,7 @@ from ruamel.yaml import YAML
 
 from ..data_context.util import NormalizedDataAssetName
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.data_context.types import ClassConfig
+from great_expectations.types import ClassConfig
 from great_expectations.exceptions import InvalidConfigError
 import warnings
 from importlib import import_module
