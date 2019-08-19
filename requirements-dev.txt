@@ -8,6 +8,9 @@ jsonschema>=2.5.1
 backports.functools_lru_cache>=1.5
 ruamel.yaml>=0.15.24
 ipywidgets>=7.4.2
+##  Adding an explicit callout for an earlier version of urllib because of a conflict in py2 with snowflake
+urllib3==1.24.3
+# Above can be removed when py2 support is dropped, hopefully
 requests>=2.20
 Click>=7.0
 pyfiglet>=0.8
