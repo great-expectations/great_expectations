@@ -228,6 +228,43 @@ def test_sqlalchemydataset_dialect_based_on_engine(dialect_name, url, dialect_ty
         assert isinstance(dataset.dialect, type(dialect_type))
 
 
+DIALECTS_REGEX_FN = (
+    # dialect name, url to create engine from, is positive_regex, expected_fn
+    ("hive", "hive://host:1234", True, "REGEXP"),
+    ("hive", "hive://host:1234", False, "NOT REGEXP"),
+    ("postgresql", "postgresql://host:1234", True, "~"),
+    ("postgresql", "postgresql://host:1234", False, "!~"),
+    ("snowflake", "snowflake://host:1234", True, "RLIKE"),
+    ("snowflake", "snowflake://host:1234", False, "NOT RLIKE"),
+    ("redshift", "redshift://host:1234", True, "~"),
+    ("redshift", "redshift://host:1234", False, "!~")
+)
+
+
+@pytest.mark.parametrize("dialect_name,url,is_positive_regex, expected_fn", DIALECTS_REGEX_FN)
+def test_something(dialect_name, url, is_positive_regex, expected_fn):
+    """Tests the regex function selected matches the appropriate dialect based on the engine used when
+    generating the SQLAlchemyDataset
+    """
+
+    # generate a SQLAlchemy Inspector that does nothing and returns no columns
+    class DummyInspector:
+        def __init__(self):
+            pass
+
+        def get_columns(self, table_name, schema):
+            return []
+
+    with mock.patch('great_expectations.dataset.sqlalchemy_dataset.reflection.Inspector.from_engine') as mock_fe:
+
+        # Inspector creation from engine is patched to return a dummy Inspector
+        mock_fe.return_value = DummyInspector()
+
+        # we are able to initialize an SqlAlchemyDataset with an engine without needing to connect
+        dataset = SqlAlchemyDataset('test_sql_data', engine=sa.create_engine(url))
+        assert dataset._get_dialect_regex_fn(positive=is_positive_regex) == expected_fn
+
+
 @pytest.fixture
 def unexpected_count_df():
     return  get_dataset("sqlite", {"a": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
