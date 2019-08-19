@@ -822,10 +822,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 return "RLIKE" if positive else "NOT RLIKE"
         except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
             pass
-        
         try:
             # Hive
-            if isinstance(self.engine.dialect, pyhive.sqlalchemy_hive.dialect.HiveDialect):
+            if isinstance(self.engine.dialect, pyhive.sqlalchemy_hive.HiveDialect):
                 return "REGEXP" if positive else "NOT REGEXP"
         except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
             pass
