@@ -11,12 +11,20 @@ GE types). For now, it is possible to use the "type" parameter in configuration 
 (thanks @RoyalTS!)
 * Add support for reader_method = "delta" to SparkDFDatasource
 * Fix databricks generator (thanks @sspitz3!)
+* Improve performance of DataContext loading by moving optional import
 * Fix several memory and performance issues in SparkDFDataset.
  - Use only distinct value count instead of bringing values to driver
  - Migrate away from UDF for set membership, nullity, and regex expectations
 * Fix several UI issues in the data_documentation
- - Broken link on Home
+ - Move prescriptive dataset expectations to Overview section
+ - Fix broken link on Home breadcrumb
  - Scroll follows navigation properly
+ - Improved flow for long items in value_set
+ - Improved testing for ValidationRenderer
+ - Clarify dependencies introduced in documentation sites
+ - Improve testing and documentation for site_builder, including run_id filter
+ - Fix missing header in Index page and cut-off tooltip
+ - Add run_id to path for validation files
 
 
 v.0.7.6
