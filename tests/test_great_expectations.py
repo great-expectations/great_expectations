@@ -7,8 +7,8 @@ try:
     from unittest import mock
 except ImportError:
     import mock
-import math
 
+from six import PY2
 import pandas as pd
 import re
 
@@ -206,12 +206,17 @@ class TestValidation(unittest.TestCase):
             mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
             results = my_df.validate(catch_exceptions=False)
 
-        # with open('./tests/test_sets/expected_cli_results_default.json') as f:
-        with open('./tests/test_sets/expected_results_20180303.json') as f:
+        with open('./tests/test_sets/titanic_expected_data_asset_validate_results.json') as f:
             expected_results = json.load(f)
 
         del results["meta"]["great_expectations.__version__"]
         self.maxDiff = None
+
+        # order is not guaranteed (or important in this case) but sorting is possible in PY2
+        if PY2:
+            results["results"] = sorted(results["results"])
+            expected_results["results"] = sorted(expected_results["results"])
+
         assertDeepAlmostEqual(
             results,
             expected_results

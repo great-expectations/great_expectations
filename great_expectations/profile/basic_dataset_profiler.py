@@ -61,8 +61,8 @@ class BasicDatasetProfiler(DatasetProfiler):
                 'result']['observed_value']
             pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
                 column, None, None)['result']['observed_value']
-        except KeyError: # if observed_value value is not set
-            logger.exception("Failed to get cardinality of column {0:s} - continuing...".format(column))
+        except KeyError:  # if observed_value value is not set
+            logger.error("Failed to get cardinality of column {0:s} - continuing...".format(column))
 
         if num_unique is None or num_unique == 0 or pct_unique is None:
             cardinality = "none"
