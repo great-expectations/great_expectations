@@ -1,6 +1,10 @@
 .. _changelog:
 
 
+v0.7.8__develop
+-----------------
+
+
 v.0.7.7
 -----------------
 * Standardize the way that plugin module loading works. DataContext will begin to use the new-style class and plugin
