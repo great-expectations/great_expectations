@@ -99,7 +99,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         else:
             header_row = ["Unexpected Value"]
             for unexpected_value in result.get("partial_unexpected_list"):
-                if unexpected_value.get("value"):
+                if unexpected_value:
                     table_rows.append([unexpected_value])
                 else:
                     table_rows.append(["null"])

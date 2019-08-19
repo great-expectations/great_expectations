@@ -120,7 +120,7 @@ Datasources allow you to configure connections to data to evaluate Expectations.
 2. Relational databases via SQL Alchemy
 3. Spark DataFrames
 
-Therefore, a Datasource could be a local pandas environment with some configuration to parse CSV files from a directory; a connection to postgresql instance; a Spark cluster connected to an S3 bucket; etc. In the future, we plan to add support for other compute environments, such as dask and BigQuery. (If you'd like to use or contribute to those environments, please chime in on `GitHub issues <https://github.com/great-expectations/great_expectations/issues>`_.)
+Therefore, a Datasource could be a local pandas environment with some configuration to parse CSV files from a directory; a connection to postgresql instance; a Spark cluster connected to an S3 bucket; etc. In the future, we plan to add support for other compute environments, such as dask. (If you'd like to use or contribute to those environments, please chime in on `GitHub issues <https://github.com/great-expectations/great_expectations/issues>`_.)
 
 Our example project has a ``data/`` folder containing several CSVs. Within the CLI, we can configure a Pandas DataFrame Datasource like so:
 

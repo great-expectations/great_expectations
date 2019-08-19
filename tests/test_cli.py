@@ -5,7 +5,6 @@ from datetime import datetime
 from click.testing import CliRunner
 import great_expectations.version
 from great_expectations.cli import cli
-import tempfile
 import pytest
 import json
 import os
@@ -22,9 +21,11 @@ try:
 except ImportError:
     import mock
 
+from six import PY2
 
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 
+from .test_utils import assertDeepAlmostEqual
 
 def test_cli_command_entrance():
     runner = CliRunner()
@@ -41,6 +42,7 @@ Options:
   --help         Show this message and exit.
 
 Commands:
+  add-datasource       Add a new datasource to the data context
   build-documentation  Build data documentation for a project.
   init                 Initialize a new Great Expectations project.
   profile              Profile datasources from the specified context.
@@ -134,7 +136,12 @@ def test_validate_basic_operation():
     with open('./tests/test_sets/expected_cli_results_default.json', 'r') as f:
         expected_cli_results = json.load(f)
 
-    assert json_result == expected_cli_results
+    # In PY2 sorting is possible and order is wonky. Order doesn't matter. So sort in that case
+    if PY2:
+        json_result["results"] = sorted(json_result["results"])
+        expected_cli_results["results"] = sorted(expected_cli_results["results"])
+
+    assertDeepAlmostEqual(json_result, expected_cli_results)
 
 
 def test_validate_custom_dataset():
@@ -146,7 +153,7 @@ def test_validate_custom_dataset():
                                          "./tests/test_sets/Titanic.csv",
                                          "./tests/test_sets/titanic_custom_expectations.json",
                                          "-f", "True",
-                                         "-m", "./tests/test_fixtures/custom_dataset.py",
+                                         "-m", "./tests/test_fixtures/custom_pandas_dataset.py",
                                          "-c", "CustomPandasDataset"])
 
             json_result = json.loads(result.output)
@@ -240,6 +247,27 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
     finally:
         os.chdir(curdir)
 
+def test_cli_add_datasource(empty_data_context, filesystem_csv_2, capsys):
+    runner = CliRunner()
+    project_root_dir = empty_data_context.root_directory
+    # For some reason, even with this logging change (which is required and done in main of the cli)
+    # the click cli runner does not pick up output; capsys appears to intercept it first
+    logger = logging.getLogger("great_expectations")
+    handler = logging.StreamHandler(stream=sys.stdout)
+    formatter = logging.Formatter(
+        '%(levelname)s %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    runner = CliRunner()
+    result = runner.invoke(cli, ["add-datasource", "-d", project_root_dir], input="1\n%s\nmynewsource\nn\n" % str(filesystem_csv_2))
+
+    captured = capsys.readouterr()
+
+    ccc = [datasource['name'] for datasource in empty_data_context.list_datasources()]
+
+    assert "Would you like to profile 'mynewsource'?" in result.stdout
+    logger.removeHandler(handler)
 
 # def test_cli_render(tmp_path_factory):
 #     runner = CliRunner()
@@ -384,7 +412,7 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
 
     result = runner.invoke(
-        cli, ["documentation", "-d", project_root_dir])
+        cli, ["build-documentation", "-d", project_root_dir])
 
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,

@@ -302,7 +302,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 
     else:
         cli_message(
-            "Okay, skipping HTML documentation for now.`."
+            "Okay, skipping HTML documentation for now."
         )
 
 

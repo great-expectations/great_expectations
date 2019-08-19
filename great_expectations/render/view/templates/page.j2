@@ -81,6 +81,7 @@
 
         .cooltip:hover .top {
             display:block;
+            z-index:99999999 !important;
         }
 
         .cooltip .top i {
@@ -159,7 +160,11 @@
       </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(window).on('activate.bs.scrollspy', function () {
+          document.querySelector(".nav-link.active").scrollIntoViewIfNeeded();
+        });
+    </script>
   </body>
 </html>

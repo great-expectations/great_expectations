@@ -354,6 +354,14 @@ def data_context(tmp_path_factory):
                 str(os.path.join(context_path, "great_expectations.yml")))
     shutil.copy("./tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
                 os.path.join(asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"))
+
+    safe_mmkdir(os.path.join(context_path, "plugins"))
+    shutil.copy("./tests/test_fixtures/custom_pandas_dataset.py",
+                str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")))
+    shutil.copy("./tests/test_fixtures/custom_sqlalchemy_dataset.py",
+                str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")))
+    shutil.copy("./tests/test_fixtures/custom_sparkdf_dataset.py",
+                str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")))
     return ge.data_context.DataContext(context_path)
 
 
@@ -452,3 +460,101 @@ def titanic_validation_results():
         return json.load(infile)
 
 
+# various types of evr
+@pytest.fixture()
+def evr_failed():
+    return {
+      "success": False,
+      "result": {
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 3,
+        "unexpected_percent": 0.002284843869002285,
+        "unexpected_percent_nonmissing": 0.002284843869002285,
+        "partial_unexpected_list": [
+          "Daly, Mr Peter Denis ",
+          "Barber, Ms ",
+          "Geiger, Miss Emily "
+        ],
+        "partial_unexpected_index_list": [
+          77,
+          289,
+          303
+        ],
+        "partial_unexpected_counts": [
+          {
+            "value": "Barber, Ms ",
+            "count": 1
+          },
+          {
+            "value": "Daly, Mr Peter Denis ",
+            "count": 1
+          },
+          {
+            "value": "Geiger, Miss Emily ",
+            "count": 1
+          }
+        ]
+      },
+      "exception_info": {
+        "raised_exception": False,
+        "exception_message": None,
+        "exception_traceback": None
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_not_match_regex",
+        "kwargs": {
+          "column": "Name",
+          "regex": "^\\s+|\\s+$",
+          "result_format": "SUMMARY"
+        }
+      }
+    }
+
+
+@pytest.fixture()
+def evr_failed_with_exception():
+    return {
+        'success': False,
+        'exception_info': {
+            'raised_exception': True,
+            'exception_message': 'Invalid partition object.',
+            'exception_traceback': 'Traceback (most recent call last):\n  File "/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n'
+        },
+        'expectation_config': {
+            'expectation_type': 'expect_column_kl_divergence_to_be_less_than',
+            'kwargs': {
+                'column': 'live',
+                'partition_object': None,
+                'threshold': None,
+                'result_format': 'SUMMARY'
+            },
+            'meta': {
+                'BasicDatasetProfiler': {'confidence': 'very low'}
+            }
+        }
+    }
+
+
+@pytest.fixture()
+def evr_success():
+    return {
+      "success": True,
+      "result": {
+        "observed_value": 1313
+      },
+      "exception_info": {
+        "raised_exception": False,
+        "exception_message": None,
+        "exception_traceback": None
+      },
+      "expectation_config": {
+        "expectation_type": "expect_table_row_count_to_be_between",
+        "kwargs": {
+          "min_value": 0,
+          "max_value": None,
+          "result_format": "SUMMARY"
+        }
+      }
+    }

@@ -1,11 +1,14 @@
+import json
 import pypandoc
 
 from great_expectations.render.renderer import (
     ExpectationSuitePageRenderer,
     ProfilingResultsPageRenderer,
+    ValidationResultsPageRenderer
 )
 
-def test_render_asset_notes():
+
+def test_ExpectationSuitePageRenderer_render_asset_notes():
     # import pypandoc
     # print(pypandoc.convert_text("*hi*", to='html', format="md"))
 
@@ -69,7 +72,7 @@ def test_render_asset_notes():
         assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
 
 
-def test_expectation_summary_in_render_asset_notes():
+def test_expectation_summary_in_ExpectationSuitePageRenderer_render_asset_notes():
     result = ExpectationSuitePageRenderer._render_asset_notes({
         "meta" : {},
         "expectations" : {}
@@ -125,4 +128,112 @@ def test_ProfilingResultsPageRenderer(titanic_profiled_evrs_1):
     document = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     print(document)
     # assert document == 0
+    
+    
+def test_ValidationResultsPageRenderer_render_validation_header():
+    validation_header = {
+        "content_block_type": "header",
+        "header": "Validation Overview",
+        "styling": {
+            "classes": ["col-12"],
+            "header": {
+                "classes": ["alert", "alert-secondary"]
+            }
+        }
+    }
+    assert ValidationResultsPageRenderer._render_validation_header() == validation_header
+    
+    
+def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_evrs_1):
+    validation_info = ValidationResultsPageRenderer._render_validation_info(titanic_profiled_evrs_1)
+    print(json.dumps(validation_info, indent=2))
+    
+    expected_validation_info = {
+      "content_block_type": "table",
+      "header": "Info",
+      "table": [
+        [
+          "Full Data Asset Identifier",
+          ""
+        ],
+        [
+          "Expectation Suite Name",
+          "default"
+        ],
+        [
+          "Great Expectations Version",
+          "0.7.3__develop"
+        ],
+        [
+          "Run ID",
+          "2019-07-26T205021.975202Z"
+        ],
+        [
+          "Validation Succeeded",
+          False
+        ]
+      ],
+      "styling": {
+        "classes": [
+          "col-12",
+          "table-responsive"
+        ],
+        "styles": {
+          "margin-top": "20px"
+        },
+        "body": {
+          "classes": [
+            "table",
+            "table-sm"
+          ]
+        }
+      }
+    }
+
+    assert validation_info == expected_validation_info
+
+
+def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_profiled_evrs_1):
+    validation_statistics = ValidationResultsPageRenderer._render_validation_statistics(titanic_profiled_evrs_1)
+    print(json.dumps(validation_statistics, indent=2))
+    
+    expected_validation_statistics = {
+      "content_block_type": "table",
+      "header": "Statistics",
+      "table": [
+        [
+          "Evaluated Expectations",
+          51
+        ],
+        [
+          "Successful Expectations",
+          43
+        ],
+        [
+          "Unsuccessful Expectations",
+          8
+        ],
+        [
+          "Success Percent",
+          "84.31%"
+        ]
+      ],
+      "styling": {
+        "classes": [
+          "col-6",
+          "table-responsive"
+        ],
+        "styles": {
+          "margin-top": "20px"
+        },
+        "body": {
+          "classes": [
+            "table",
+            "table-sm"
+          ]
+        }
+      }
+    }
+
+    assert validation_statistics == expected_validation_statistics
 

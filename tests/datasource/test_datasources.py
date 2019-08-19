@@ -73,6 +73,95 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
     assert data_context_file_config["datasources"][name] == data_context_config["datasources"][name]
 
 
+def test_pandas_datasource_custom_data_asset(data_context, test_folder_connection_path):
+    name = "test_pandas_datasource"
+    type_ = "pandas"
+
+    data_asset_type_config = {
+        "module_name": "custom_pandas_dataset",
+        "class_name": "CustomPandasDataset"
+    }
+    data_context.add_datasource(name,
+                                type_,
+                                base_directory=test_folder_connection_path,
+                                data_asset_type=data_asset_type_config)
+
+    # We should now see updated configs
+    with open(os.path.join(data_context.root_directory, "great_expectations.yml"), "r") as data_context_config_file:
+        data_context_file_config = yaml.load(data_context_config_file)
+
+    assert data_context_file_config["datasources"][name]["data_asset_type"]["module_name"] == "custom_pandas_dataset"
+    assert data_context_file_config["datasources"][name]["data_asset_type"]["class_name"] == "CustomPandasDataset"
+
+    # We should be able to get a dataset of the correct type from the datasource.
+    batch = data_context.get_batch("test_pandas_datasource/default/test")
+    assert type(batch).__name__ == "CustomPandasDataset"
+    res = batch.expect_column_values_to_have_odd_lengths("col_2")
+    assert res["success"] is True
+
+
+def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connection_string):
+    name = "test_sqlalchemy_datasource"
+    type_ = "sqlalchemy"
+
+    data_asset_type_config = {
+        "module_name": "custom_sqlalchemy_dataset",
+        "class_name": "CustomSqlAlchemyDataset"
+    }
+    data_context.add_datasource(name,
+                                type_,
+                                connection_string=test_db_connection_string,
+                                data_asset_type=data_asset_type_config)
+
+    # We should now see updated configs
+    with open(os.path.join(data_context.root_directory, "great_expectations.yml"), "r") as data_context_config_file:
+        data_context_file_config = yaml.load(data_context_config_file)
+
+    assert data_context_file_config["datasources"][name]["data_asset_type"]["module_name"] == "custom_sqlalchemy_dataset"
+    assert data_context_file_config["datasources"][name]["data_asset_type"]["class_name"] == "CustomSqlAlchemyDataset"
+
+    # We should be able to get a dataset of the correct type from the datasource.
+    batch = data_context.get_batch("test_sqlalchemy_datasource/default/table_1")
+    assert type(batch).__name__ == "CustomSqlAlchemyDataset"
+    res = batch.expect_column_func_value_to_be("col_1", 1)
+    assert res["success"] is True
+
+
+def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connection_path):
+    pyspark_skip = pytest.importorskip("pyspark")
+    name = "test_sparkdf_datasource"
+    type_ = "spark"
+
+    data_asset_type_config = {
+        "module_name": "custom_sparkdf_dataset",
+        "class_name": "CustomSparkDFDataset"
+    }
+    data_context.add_datasource(name,
+                                type_,
+                                base_directory=test_folder_connection_path,
+                                data_asset_type=data_asset_type_config)
+
+    # We should now see updated configs
+    with open(os.path.join(data_context.root_directory, "great_expectations.yml"), "r") as data_context_config_file:
+        data_context_file_config = yaml.load(data_context_config_file)
+
+    assert data_context_file_config["datasources"][name]["data_asset_type"]["module_name"] == "custom_sparkdf_dataset"
+    assert data_context_file_config["datasources"][name]["data_asset_type"]["class_name"] == "CustomSparkDFDataset"
+
+    # We should be able to get a dataset of the correct type from the datasource.
+    batch = data_context.get_batch(
+        "test_sparkdf_datasource/default/test",
+        header=True,
+        inferSchema=True
+    )
+    assert type(batch).__name__ == "CustomSparkDFDataset"
+    res = batch.expect_column_approx_quantile_values_to_be_between("col_1", quantile_ranges={
+        "quantiles": [0., 1.],
+        "value_ranges": [[1, 1], [5, 5]]
+    })
+    assert res["success"] is True
+
+
 def test_standalone_pandas_datasource(test_folder_connection_path):
     datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
 
