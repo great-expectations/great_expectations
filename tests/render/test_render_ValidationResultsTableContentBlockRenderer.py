@@ -8,28 +8,8 @@ from great_expectations.render.renderer.content_block import (
 from great_expectations.render.types import RenderedComponentContent
 
 
-def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation():
-    evr = {
-        'success': False,
-        'exception_info': {
-            'raised_exception': True,
-            'exception_message': 'Invalid partition object.',
-            'exception_traceback': 'Traceback (most recent call last):\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n'
-        },
-        'expectation_config': {
-            'expectation_type': 'expect_column_kl_divergence_to_be_less_than',
-            'kwargs': {
-                'column': 'live',
-                'partition_object': None,
-                'threshold': None,
-                'result_format': 'SUMMARY'
-            },
-            'meta': {
-                'BasicDatasetProfiler': {'confidence': 'very low'}
-            }
-        }
-    }
-    result = ValidationResultsTableContentBlockRenderer.render([evr])
+def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(evr_failed_with_exception):
+    result = ValidationResultsTableContentBlockRenderer.render([evr_failed_with_exception])
     print(json.dumps(result, indent=2))
     assert result == {
         "content_block_type": "table",
@@ -143,28 +123,9 @@ def test_ValidationResultsTableContentBlockRenderer_render(titanic_profiled_name
     assert json.dumps(validation_results_table).count("$icon") == 6
     
     
-def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn():
+def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_success):
     content_block_fn = ValidationResultsTableContentBlockRenderer._get_content_block_fn("expect_table_row_count_to_be_between")
-    evr = {
-      "success": True,
-      "result": {
-        "observed_value": 1313
-      },
-      "exception_info": {
-        "raised_exception": False,
-        "exception_message": None,
-        "exception_traceback": None
-      },
-      "expectation_config": {
-        "expectation_type": "expect_table_row_count_to_be_between",
-        "kwargs": {
-          "min_value": 0,
-          "max_value": None,
-          "result_format": "SUMMARY"
-        }
-      }
-    }
-    content_block_fn_output = content_block_fn(evr)
+    content_block_fn_output = content_block_fn(evr_success)
     print(json.dumps(content_block_fn_output, indent=2))
     
     content_block_fn_expected_output = [
@@ -208,27 +169,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn():
     assert content_block_fn_output == content_block_fn_expected_output
     
 
-def test_ValidationResultsTableContentBlockRenderer_get_observed_value():
-    evr = {
-      "success": True,
-      "result": {
-        "observed_value": 1313
-      },
-      "exception_info": {
-        "raised_exception": False,
-        "exception_message": None,
-        "exception_traceback": None
-      },
-      "expectation_config": {
-        "expectation_type": "expect_table_row_count_to_be_between",
-        "kwargs": {
-          "min_value": 0,
-          "max_value": None,
-          "result_format": "SUMMARY"
-        }
-      }
-    }
-    
+def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_success):
     evr_no_result_key = {
       "success": True,
       "exception_info": {
@@ -296,88 +237,25 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value():
         }
     }
     
-    output_1 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr)
+    # test _get_observed_value when evr["result"]["observed_value"] exists
+    output_1 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_success)
     print(output_1)
     assert output_1 == 1313
+    # test _get_observed_value when evr["result"] does not exist
     output_2 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_no_result_key)
     print(output_2)
     assert output_2 == "--"
+    # test _get_observed_value for expect_column_values_to_not_be_null expectation type
     output_3 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_not_be_null)
     print(output_3)
     assert(output_3) == "0 null"
+    # test _get_observed_value for expect_column_values_to_be_null expectation type
     output_4 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_be_null)
     print(output_4)
     assert output_4 == "1313 null"
     
     
-def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement():
-    evr_success = {
-      "success": True,
-      "result": {
-        "observed_value": 1313
-      },
-      "exception_info": {
-        "raised_exception": False,
-        "exception_message": None,
-        "exception_traceback": None
-      },
-      "expectation_config": {
-        "expectation_type": "expect_table_row_count_to_be_between",
-        "kwargs": {
-          "min_value": 0,
-          "max_value": None,
-          "result_format": "SUMMARY"
-        }
-      }
-    }
-    evr_failed = {
-      "success": False,
-      "result": {
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_count": 3,
-        "unexpected_percent": 0.002284843869002285,
-        "unexpected_percent_nonmissing": 0.002284843869002285,
-        "partial_unexpected_list": [
-          "Daly, Mr Peter Denis ",
-          "Barber, Ms ",
-          "Geiger, Miss Emily "
-        ],
-        "partial_unexpected_index_list": [
-          77,
-          289,
-          303
-        ],
-        "partial_unexpected_counts": [
-          {
-            "value": "Barber, Ms ",
-            "count": 1
-          },
-          {
-            "value": "Daly, Mr Peter Denis ",
-            "count": 1
-          },
-          {
-            "value": "Geiger, Miss Emily ",
-            "count": 1
-          }
-        ]
-      },
-      "exception_info": {
-        "raised_exception": False,
-        "exception_message": None,
-        "exception_traceback": None
-      },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_match_regex",
-        "kwargs": {
-          "column": "Name",
-          "regex": "^\\s+|\\s+$",
-          "result_format": "SUMMARY"
-        }
-      }
-    }
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr_success, evr_failed):
     evr_no_result = {
       "success": True,
       "exception_info": {
@@ -442,10 +320,12 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement():
         }
     }
     
+    # test for succeeded evr
     output_1 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_success)
     print(output_1)
     assert output_1 is None
     
+    # test for failed evr
     output_2 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed)
     print(json.dumps(output_2, indent=2))
     assert output_2 == {
@@ -466,6 +346,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement():
       }
     }
     
+    # test for evr with no "result" key
     output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_no_result)
     print(json.dumps(output_3, indent=2))
     assert output_3 == {
@@ -482,32 +363,13 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement():
       }
     }
     
+    # test for evr with no unexpected count
     output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed_no_unexpected_count)
     print(output_4)
     assert output_4 is None
 
 
-def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table():
-    evr_success = {
-      "success": True,
-      "result": {
-        "observed_value": 1313
-      },
-      "exception_info": {
-        "raised_exception": False,
-        "exception_message": None,
-        "exception_traceback": None
-      },
-      "expectation_config": {
-        "expectation_type": "expect_table_row_count_to_be_between",
-        "kwargs": {
-          "min_value": 0,
-          "max_value": None,
-          "result_format": "SUMMARY"
-        }
-      }
-    }
-
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_success):
     evr_failed_no_result = {
         "success": False,
         "exception_info": {
@@ -748,18 +610,22 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table():
         }
     }
     
+    # test for succeeded evr
     output_1 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_success)
     print(output_1)
     assert output_1 is None
     
+    # test for failed evr with no "result" key
     output_2 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_no_result)
     print(output_2)
     assert output_2 is None
     
+    # test for failed evr with no unexpected list or unexpected counts
     output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_no_unexpected_list_or_counts)
     print(output_3)
     assert output_3 is None
     
+    # test for failed evr with partial unexpected list
     output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_partial_unexpected_list)
     print(json.dumps(output_4, indent=2))
     assert output_4 == {
@@ -839,7 +705,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table():
         }
       }
     }
-
+    
+    # test for failed evr with partial unexpected counts
     output_5 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_partial_unexpected_counts)
     print(json.dumps(output_5, indent=2))
     assert output_5 == {
@@ -942,98 +809,9 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table():
     }
 
 
-def test_ValidationResultsTableContentBlockRenderer_get_status_cell():
-    evr_exception = {
-        'success': False,
-        'exception_info': {
-            'raised_exception': True,
-            'exception_message': 'Invalid partition object.',
-            'exception_traceback': 'Traceback (most recent call last):\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n'
-        },
-        'expectation_config': {
-            'expectation_type': 'expect_column_kl_divergence_to_be_less_than',
-            'kwargs': {
-                'column': 'live',
-                'partition_object': None,
-                'threshold': None,
-                'result_format': 'SUMMARY'
-            },
-            'meta': {
-                'BasicDatasetProfiler': {'confidence': 'very low'}
-            }
-        }
-    }
-    
-    evr_success = {
-        "success": True,
-        "result": {
-            "observed_value": 1313
-        },
-        "exception_info": {
-            "raised_exception": False,
-            "exception_message": None,
-            "exception_traceback": None
-        },
-        "expectation_config": {
-            "expectation_type": "expect_table_row_count_to_be_between",
-            "kwargs": {
-                "min_value": 0,
-                "max_value": None,
-                "result_format": "SUMMARY"
-            }
-        }
-    }
-    
-    evr_failed = {
-      "success": False,
-      "result": {
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_count": 3,
-        "unexpected_percent": 0.002284843869002285,
-        "unexpected_percent_nonmissing": 0.002284843869002285,
-        "partial_unexpected_list": [
-          "Daly, Mr Peter Denis ",
-          "Barber, Ms ",
-          "Geiger, Miss Emily "
-        ],
-        "partial_unexpected_index_list": [
-          77,
-          289,
-          303
-        ],
-        "partial_unexpected_counts": [
-          {
-            "value": "Barber, Ms ",
-            "count": 1
-          },
-          {
-            "value": "Daly, Mr Peter Denis ",
-            "count": 1
-          },
-          {
-            "value": "Geiger, Miss Emily ",
-            "count": 1
-          }
-        ]
-      },
-      "exception_info": {
-        "raised_exception": False,
-        "exception_message": None,
-        "exception_traceback": None
-      },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_match_regex",
-        "kwargs": {
-          "column": "Name",
-          "regex": "^\\s+|\\s+$",
-          "result_format": "SUMMARY"
-        }
-      }
-    }
-    
-    output_1 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_exception)
+def test_ValidationResultsTableContentBlockRenderer_get_status_cell(evr_failed_with_exception, evr_success, evr_failed):
+    # test for failed evr with exception
+    output_1 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_failed_with_exception)
     print(json.dumps(output_1, indent=2))
     assert output_1 == {
       "content_block_type": "string_template",
@@ -1057,6 +835,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell():
       }
     }
 
+    # test for succeeded evr
     output_2 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_success)
     print(json.dumps(output_2, indent=2))
     assert output_2 == {
@@ -1081,6 +860,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell():
       }
     }
     
+    # test for failed evr
     output_3 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_failed)
     print(json.dumps(output_3, indent=2))
     assert output_3 == {
