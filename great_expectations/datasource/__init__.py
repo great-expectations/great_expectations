@@ -1,4 +1,4 @@
-from .datasource import  Datasource
+from .datasource import Datasource
 from .pandas_source import PandasDatasource
 from .sqlalchemy_source import SqlAlchemyDatasource
 from .spark_source import SparkDFDatasource
