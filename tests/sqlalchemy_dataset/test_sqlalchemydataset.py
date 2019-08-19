@@ -242,7 +242,7 @@ DIALECTS_REGEX_FN = (
 
 
 @pytest.mark.parametrize("dialect_name,url,is_positive_regex, expected_fn", DIALECTS_REGEX_FN)
-def test_something(dialect_name, url, is_positive_regex, expected_fn):
+def test_regex_fn_is_appropiate_for_dialect(dialect_name, url, is_positive_regex, expected_fn):
     """Tests the regex function selected matches the appropriate dialect based on the engine used when
     generating the SQLAlchemyDataset
     """
