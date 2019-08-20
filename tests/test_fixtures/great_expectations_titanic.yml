@@ -9,7 +9,8 @@ datasources:
       mygenerator:
         type: subdir_reader
         base_directory: ../data
-plugins_directory:
+plugins_directory: plugins/
+expectations_directory: expectations/
 data_docs:
   sites:
 stores:

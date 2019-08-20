@@ -115,42 +115,22 @@ class ConfigOnlyDataContext(object):
         self._project_config = project_config
         self._context_root_directory = os.path.abspath(context_root_dir)
 
-        self._datasources = {}
+        # Init plugins
+        sys.path.append(self.plugins_directory)
 
-        if not self._project_config.get("datasources"):
-            self._project_config["datasources"] = {}
+
+        # Init data sources
+        self._datasources = {}
         for datasource in self._project_config["datasources"].keys():
             self.get_datasource(datasource)
 
-        # self._plugins_directory = self._project_config.get("plugins_directory", "plugins/")
-        plugins_directory = self._project_config.get("plugins_directory")
-        #TODO: This check should not be necessary
-        if plugins_directory == None:
-            plugins_directory =  "plugins/"
-        #TODO: This should be factored out into a _convert_to_absolute_path_for_internal_use method, which should live in the @property, not here
-        if not os.path.isabs(plugins_directory):
-            self._plugins_directory = os.path.join(self.root_directory, plugins_directory)
-        else:
-            self._plugins_directory = plugins_directory
-        sys.path.append(self._plugins_directory)
 
         self._stores = DotDict()
-        #TODO: This check should not be necessary
-        if "stores" in self._project_config:
-            self._init_stores(self._project_config["stores"])
+        self._init_stores(self._project_config["stores"])
 
 
         # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
         self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
-
-        #TODO: Decide if this is part of the config spec or not
-        # self._expectations_directory = self._project_config.get("expectations_directory", "expectations")
-        expectations_directory = self._project_config.get("expectations_directory", "expectations")
-        #TODO: This should be factored out into a _convert_to_absolute_path_for_internal_use method, which should live in the @property, not here
-        if not os.path.isabs(expectations_directory):
-            self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
-        else:
-            self._expectations_directory = expectations_directory
 
         self._load_evaluation_parameter_store()
         self._compiled = False
@@ -165,14 +145,11 @@ class ConfigOnlyDataContext(object):
     def _init_stores(self, store_configs):
         """Initialize all Stores for this DataContext.
 
-        TODO: Currently, most Stores are hardcoded.
-        Eventually, they should be read in from yml configs.
-        This will require some work on test fixtures.
-
         In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
         However, some files remain the responsiblity of the DataContext:
             great_expectations.yml
             plugins
+            credentials
             DataSource configs
 
         These files are not good fits to be turned into Stores, because
@@ -186,11 +163,9 @@ class ConfigOnlyDataContext(object):
                 store_config
             )
 
-
     def add_store(self, store_name, store_config):
-        self._stores[store_name] = self._init_store_from_config(store_config)
-
         self._project_config["stores"][store_name] = store_config
+        self._stores[store_name] = self._init_store_from_config(store_config)
 
     def _init_store_from_config(self, config):
         typed_config = StoreMetaConfig(
@@ -215,6 +190,11 @@ class ConfigOnlyDataContext(object):
 
         return instantiated_store
 
+    def _normalize_absolute_or_relative_path(self, path):
+        if os.path.isabs(path):
+            return path
+        else:
+            return os.path.join(self.root_directory, path)
 
     def _normalize_store_path(self, resource_store):
         if resource_store["type"] == "filesystem":
@@ -232,12 +212,16 @@ class ConfigOnlyDataContext(object):
     @property
     def plugins_directory(self):
         """The directory in which custom plugin modules should be placed."""
-        return self._plugins_directory
-
+        return self._normalize_absolute_or_relative_path(
+            self._project_config.plugins_directory
+        )
+         
     @property
     def expectations_directory(self):
         """The directory in which custom plugin modules should be placed."""
-        return self._expectations_directory
+        return self._normalize_absolute_or_relative_path(
+            self._project_config.expectations_directory
+        )
 
     @property
     def stores(self):
@@ -1737,11 +1721,7 @@ class DataContext(ConfigOnlyDataContext):
         config_filepath = os.path.join(self.root_directory, "great_expectations.yml")
         with open(config_filepath, "w") as data:
             #Note: I don't know how this method preserves commenting, but it seems to work
-            if PY2:
-                config = dict(self._project_config)
-            else:
-                # config = OrderedDict(self._project_config)
-                config = dict(self._project_config)
+            config = dict(self._project_config)
             yaml.dump(config, data)
 
     def add_store(self, store_name, store_config):

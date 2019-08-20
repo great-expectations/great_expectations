@@ -27,6 +27,7 @@ class ClassConfig(Config):
 class DataContextConfig(Config):
     _allowed_keys = set([
         "plugins_directory",
+        "expectations_directory",
         "datasources",
         "stores",
         "data_docs",  # TODO: Rename this to sites, to remove a layer of extraneous nesting
@@ -34,13 +35,15 @@ class DataContextConfig(Config):
 
     _required_keys = set([
         "plugins_directory",
+        "expectations_directory",
         "datasources",
         "stores",
         "data_docs",
     ])
 
     _key_types = {
-        "plugins_directory": [string_types, None],
+        "plugins_directory": string_types,
+        "expectations_directory": string_types,
         "datasources": dict,
         "stores": dict,
         "data_docs": dict,
