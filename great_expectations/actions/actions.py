@@ -1,5 +1,5 @@
 from .types import (
-    BasicValidationActionConfig
+    ActionConfig
 )
 
 class BasicValidationAction():
