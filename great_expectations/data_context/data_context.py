@@ -1721,11 +1721,7 @@ class DataContext(ConfigOnlyDataContext):
         config_filepath = os.path.join(self.root_directory, "great_expectations.yml")
         with open(config_filepath, "w") as data:
             #Note: I don't know how this method preserves commenting, but it seems to work
-            if PY2:
-                config = dict(self._project_config)
-            else:
-                # config = OrderedDict(self._project_config)
-                config = dict(self._project_config)
+            config = dict(self._project_config)
             yaml.dump(config, data)
 
     def add_store(self, store_name, store_config):
