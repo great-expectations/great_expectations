@@ -27,5 +27,6 @@ class ActionSetConfig(LooselyTypedDotDict):
     _key_types = {
         "module_name" : string_types,
         "class_name" : string_types,
+        #TODO: This should be a DictOf, not a ListOf.
         "action_list" : ListOf(ActionConfig),
     }
