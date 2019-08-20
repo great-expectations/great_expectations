@@ -5,6 +5,8 @@ from datetime import datetime
 from click.testing import CliRunner
 import great_expectations.version
 from great_expectations.cli import cli
+
+import tempfile
 import pytest
 import json
 import os
@@ -23,6 +25,8 @@ except ImportError:
 
 from six import PY2
 
+from great_expectations.cli import cli
+from great_expectations.util import gen_directory_tree_str
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 
 from .test_utils import assertDeepAlmostEqual
@@ -54,7 +58,7 @@ Commands:
 def test_cli_command_bad_command():
     runner = CliRunner()
 
-    result = runner.invoke(cli, ["blarg"])
+    result = runner.invoke(cli, [u"blarg"])
     assert result.exit_code == 2
     assert result.output == """Usage: cli [OPTIONS] COMMAND [ARGS]...
 Try "cli --help" for help.
@@ -390,6 +394,8 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
+    print(json.dumps(not_so_empty_data_context.get_project_config(), indent=2))
+
     project_root_dir = not_so_empty_data_context.root_directory
     # print(project_root_dir)
 
@@ -401,7 +407,8 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
         '%(levelname)s %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
+
     runner = CliRunner()
     result = runner.invoke(
         cli, ["profile", "my_datasource", "-d", project_root_dir])
@@ -413,6 +420,10 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
 
     result = runner.invoke(
         cli, ["build-documentation", "-d", project_root_dir])
+
+    # print(json.dumps(not_so_empty_data_context.get_project_config()["stores"], indent=2))
+    print(result.output)
+    # print(gen_directory_tree_str(project_root_dir))
 
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,

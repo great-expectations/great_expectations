@@ -216,3 +216,39 @@ def validate(data_asset, expectation_suite=None, data_asset_name=None, data_cont
         data_asset, data_asset_type, expectation_suite)
     return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
+
+# https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
+def gen_directory_tree_str(startpath):
+    """Print the structure of directory as a tree:
+
+    Ex:
+    project_dir0/
+        AAA/
+        BBB/
+            aaa.txt
+            bbb.txt
+
+    #Note: files and directories are sorted alphabetically, so that this method can be used for testing.
+    """
+
+    output_str = ""
+
+    tuples = list(os.walk(startpath))
+    tuples.sort()
+
+    for root, dirs, files in tuples:
+        level = root.replace(startpath, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        output_str += '{}{}/\n'.format(indent, os.path.basename(root))
+        subindent = ' ' * 4 * (level + 1)
+
+        files.sort()
+        for f in files:
+            output_str += '{}{}\n'.format(subindent, f)
+    
+    return output_str
+
+def get_data_context(path=None):
+    """Given a path, try to guess where the DataContext is located.
+    """
+    pass
