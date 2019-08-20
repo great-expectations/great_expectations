@@ -175,12 +175,17 @@ class Datasource(object):
         Returns:
             None
         """
-        if self._data_context is not None:
-            self._data_context._save_project_config()
-        else:
-            config_filepath = "great_expectations.yml"
-            with open(config_filepath, 'w') as config_file:
-                yaml.dump(self._datasource_config, config_file)
+
+        #FIXME: Not clear if deprecating this causes any breakages elsewhere...
+        
+        #Yikes. This is not the datasource's job:
+        # if self._data_context is not None:
+        #     self._data_context._save_project_config()
+        # else:
+        #     config_filepath = "great_expectations.yml"
+        #     with open(config_filepath, 'w') as config_file:
+        #         yaml.dump(self._datasource_config, config_file)
+
 
         # if self._data_context is not None:
         #     base_config = copy.deepcopy(self._datasource_config)
