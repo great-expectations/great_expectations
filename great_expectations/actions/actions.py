@@ -4,8 +4,10 @@ from .types import (
 
 class BasicValidationAction():
     def __init__(self, config):
-        #Uses config to instantiate itself
-        assert isinstance(config, BasicValidationActionConfig)
+        #TODO: Add type checking
+        # assert isinstance(config, ActionInternalConfig)
+
+        self.config = config
 
     def take_action(self, validation_result_suite):
         return NotImplementedError
