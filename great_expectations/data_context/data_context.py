@@ -1082,42 +1082,11 @@ class ConfigOnlyDataContext(object):
             None
         """
         if self.evaluation_parameter_store.has_key(run_id):
-            return self.evaluation_parameter_store.get(run_id)
+            return copy.deepcopy(
+                self.evaluation_parameter_store.get(run_id)
+            )
         else:
             return {}
-
-    def bind_evaluation_parameters(self, run_id):  # , expectations):
-        """Return current evaluation parameters stored for the provided run_id, ready to be bound to parameterized
-        expectation values.
-
-        Args:
-            run_id: the run_id for which to return evaluation parameters
-
-        Returns:
-            evaluation_parameters (dict)
-
-        TODO: Refactor data_asset to return evaluation_parameters to the DataContext, instead of requiring a mutable
-        object from the evaluation_parameter_store. 
-
-        Details:
-        This method is currently identical to get_parameters_in_evaluation_parameter_store_by_run_id.
-        However, if I understand the usage properly, `bind_...` is currently used to fetch a mutable object,
-        which is written into by data_assets.
-
-        Returning mutable objects is NOT a generally supported use-case for Stores.
-        It happens to work in the case of the current implementation of InMemoryStore, because InMemoryStore
-        is just a wrapper around dict.
-        But this approach will NOT work in the general case.
-
-        I believe that we should re-write DataAsset to pass evaluation_parameters back to the DataContext,
-        and let the Context deal with processing these parameters. This would "re-simplify" DataAssets, and keep
-        Stores simple. DataContexts already have to know about bundling and processing evaluation parameters,
-        so it makes sense to consolidate that logic here.
-        """
-        # TOOO: only return parameters requested by the given expectations
-        return self.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
-
-
 
     #TODO: Can we raname this to _compile_all_evaluation_parameters_from_expectation_suites or something similar?
     def _compile(self):
