@@ -12,42 +12,42 @@ class BasicValidationAction():
     def take_action(self, validation_result_suite):
         return NotImplementedError
 
+class NameSpaceAwareValidationAction(BasicValidationAction):
 
-# class NameSpaceAwareValidationAction(BasicValidationAction):
+    def __init__(self, config, stores, services):
+        #Uses config to instantiate itself
+        super(NameSpaceAwareValidationAction, self).__init__(config)
 
-#     def __init__(self, config, stores, services):
-#         #Uses config to instantiate itself
+        #The config may include references to stores and services.
+        #Both act like endpoints to which results can be sent.
+        #Stores support both reading and writing, in key-value fashion.
+        #Services only support writing.
+        #Future versions of Services may get results returned as part of the call.
+        #(Some) Stores and Services will need persistent connections, which are managed by the DataContext.
 
-#         #The config may inclued references to stores and services.
-#         #Both act like endpoints to which results can be sent.
-#         #Stores support both reading and writing, in key-value fashion.
-#         #Services only support writing.
-#         #Future versions of Services may get results returned as part of the call.
-#         #(Some) Stores and Services will need persistent connections, which are managed by the DataContext.
-
-#     def take_action(self, validation_result_suite, validation_result_suite_identifier):
-#         return NotImplementedError
+    def take_action(self, validation_result_suite, validation_result_suite_identifier):
+        return NotImplementedError
 
 
-# class SummarizeAndSendToStoreAction(NameSpaceAwareValidationAction):
+class SummarizeAndSendToStoreAction(NameSpaceAwareValidationAction):
 
-#     def __init__(self, config, stores, services):
-#         self.config = config
+    def __init__(self, config, stores, services):
+        self.config = config
 
-#         self.summarization_class = self._get_class_from_module_and_class_name(
-#             self.config.summarization_module_name,
-#             self.config.summarization_class_name,
-#         ) #This might be a utility method... It's shared across so many classes.
-#         #Eventually, we probably need some checks to verify that this renderer class is compatible with validation_result_suite_identifiers.
+        self.summarization_class = self._get_class_from_module_and_class_name(
+            self.config.summarization_module_name,
+            self.config.summarization_class_name,
+        ) #This might be a utility method... It's shared across so many classes.
+        #Eventually, we probably need some checks to verify that this renderer class is compatible with validation_result_suite_identifiers.
 
-#         #??? Do we need a view_class as well?
+        #??? Do we need a view_class as well?
 
-#         self.target_store = stores[self.config.target_store_name]
-#         #Eventually, we probably need some checks to verify that this store is compatible with validation_result_suite_identifiers.
+        self.target_store = stores[self.config.target_store_name]
+        #Eventually, we probably need some checks to verify that this store is compatible with validation_result_suite_identifiers.
 
-#     def take_action(self, validation_result_suite, validation_result_suite_identifier):
-#         rendered_summary = self.summarization_class.render(validation_result_suite)
-#         store.set(validation_result_suite_identifier, rendered_summary)
+    def take_action(self, validation_result_suite, validation_result_suite_identifier):
+        rendered_summary = self.summarization_class.render(validation_result_suite)
+        store.set(validation_result_suite_identifier, rendered_summary)
     
 
 # ### Pseudocode for ValidationAction classes:

@@ -44,7 +44,7 @@ def test_action_set_config():
 
 def test_subclass_of_BasicValidationAction():
 
-    # I dunno. This is kind of asilly test.
+    # I dunno. This is kind of a silly test.
 
     class MyCountingValidationAction(BasicValidationAction):
         def __init__(self, config):
