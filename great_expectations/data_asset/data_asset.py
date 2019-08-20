@@ -938,7 +938,7 @@ class DataAsset(object):
         # So, we load them in reverse order
 
         if data_context is not None:
-            runtime_evaluation_parameters = data_context.bind_evaluation_parameters(run_id)  # , expectation_suite)
+            runtime_evaluation_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
         else:
             runtime_evaluation_parameters = {}
 
