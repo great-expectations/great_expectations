@@ -1,22 +1,19 @@
-import logging
-logger = logging.getLogger(__name__)
-
-import json
-import os
-import io
-import six
-
-import pandas as pd
-
-from ..util import safe_mmkdir
-
+from ..types import (
+    NameSpaceDotDict,
+)
 from .types import (
     InMemoryStoreConfig,
     FilesystemStoreConfig,
 )
-from ..types import (
-    NameSpaceDotDict,
-)
+from ..util import safe_mmkdir
+import pandas as pd
+import six
+import io
+import os
+import json
+import logging
+logger = logging.getLogger(__name__)
+
 
 class ContextAwareStore(object):
     def __init__(
@@ -24,15 +21,15 @@ class ContextAwareStore(object):
         data_context,
         config,
     ):
-        #FIXME: Eek. This causes circular imports. What to do?
-        #TODO: remove the dependency. Stores should be based on namespaceIdentifier objects, but not Context itself.
+        # FIXME: Eek. This causes circular imports. What to do?
+        # TODO: remove the dependency. Stores should be based on namespaceIdentifier objects, but not Context itself.
         # if not isinstance(data_context, DataContext):
         #     raise TypeError("data_context must be an instance of type DataContext")
 
         self.data_context = data_context
 
         if not isinstance(config, self.get_config_class()):
-            #Attempt to coerce config to a typed config
+            # Attempt to coerce config to a typed config
             config = self.get_config_class()(
                 coerce_types=True,
                 **config
@@ -47,9 +44,11 @@ class ContextAwareStore(object):
         value = self._get(namespaced_key)
 
         if serialization_type:
-            deserialization_method = self._get_deserialization_method(serialization_type)
+            deserialization_method = self._get_deserialization_method(
+                serialization_type)
         else:
-            deserialization_method = self._get_deserialization_method(self.config.serialization_type)
+            deserialization_method = self._get_deserialization_method(
+                self.config.serialization_type)
         deserialized_value = deserialization_method(value)
         return deserialized_value
 
@@ -57,19 +56,21 @@ class ContextAwareStore(object):
         namespaced_key = self._get_namespaced_key(key)
 
         if serialization_type:
-            serialization_method = self._get_serialization_method(serialization_type)
+            serialization_method = self._get_serialization_method(
+                serialization_type)
         else:
-            serialization_method = self._get_serialization_method(self.config.serialization_type)
-        
+            serialization_method = self._get_serialization_method(
+                self.config.serialization_type)
+
         serialized_value = serialization_method(value)
         self._set(namespaced_key, serialized_value)
 
     @classmethod
     def get_config_class(cls):
         return cls.config_class
-    
+
     def _get_namespaced_key(self, key):
-        #TODO: This method is a placeholder until we bring in _get_namespaced_key from NameSpacedFilesystemStore
+        # TODO: This method is a placeholder until we bring in _get_namespaced_key from NameSpacedFilesystemStore
         return key
 
     def _get_serialization_method(self, serialization_type):
@@ -85,12 +86,12 @@ class ContextAwareStore(object):
                 logger.debug("Starting convert_to_csv")
 
                 assert isinstance(df, pd.DataFrame)
-            
+
                 return df.to_csv(index=None)
 
             return convert_to_csv
 
-        #TODO: Add more serialization methods as needed
+        # TODO: Add more serialization methods as needed
 
     def _get_deserialization_method(self, serialization_type):
         if serialization_type == None:
@@ -100,17 +101,17 @@ class ContextAwareStore(object):
             return json.loads
 
         elif serialization_type == "pandas_csv":
-            #TODO:
+            # TODO:
             raise NotImplementedError
 
-        #TODO: Add more serialization methods as needed
+        # TODO: Add more serialization methods as needed
 
     def _get(self, key):
         raise NotImplementedError
 
     def _set(self, key, value):
         raise NotImplementedError
-    
+
     def list_keys(self):
         raise NotImplementedError
 
@@ -129,7 +130,7 @@ class InMemoryStore(ContextAwareStore):
 
     def _set(self, key, value):
         self.store[key] = value
-    
+
     def list_keys(self):
         return self.store.keys()
 
@@ -185,8 +186,8 @@ class NameSpacedFilesystemStore(FilesystemStore):
 
         safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
-    #TODO: This method should probably live in ContextAwareStore
-    #For the moment, I'm leaving it here, because:
+    # TODO: This method should probably live in ContextAwareStore
+    # For the moment, I'm leaving it here, because:
     #   1. This method and NameSpaceDotDict isn't yet general enough to handle all permutations of namespace objects
     #   2. Rewriting all the tests in test_store is more work than I can take on right now.
     #   3. Probably the best thing to do is to test BOTH classes that take simple strings as keys, and classes that take full NameSpaceDotDicts. But that relies on (1).
@@ -196,7 +197,8 @@ class NameSpacedFilesystemStore(FilesystemStore):
 
     def _get_namespaced_key(self, key):
         if not isinstance(key, NameSpaceDotDict):
-            raise TypeError("key must be an instance of type NameSpaceDotDict, not {0}".format(type(key)))
+            raise TypeError(
+                "key must be an instance of type NameSpaceDotDict, not {0}".format(type(key)))
 
         filepath = self.data_context._get_normalized_data_asset_name_filepath(
             key.normalized_data_asset_name,
@@ -208,7 +210,7 @@ class NameSpacedFilesystemStore(FilesystemStore):
             file_extension=self.config.file_extension
         )
         return filepath
-    
+
     def get_most_recent_run_id(self):
         run_id_list = os.listdir(self.full_base_directory)
 
@@ -231,8 +233,8 @@ class NameSpacedFilesystemStore(FilesystemStore):
 #     def _set(self, key, value):
 #         raise NotImplementedError
 
-#This code is from an earlier (untested) implementation of DataContext.register_validation_results
-#Storing it here in case it can be salvaged
+# This code is from an earlier (untested) implementation of DataContext.register_validation_results
+# Storing it here in case it can be salvaged
 # if isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
 #     bucket = data_asset_snapshot_store["s3"]["bucket"]
 #     key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
