@@ -21,6 +21,7 @@ PROJECT_OPTIONAL_CONFIG_COMMENT = """
 # and any configured evaluation parameter store
 
 plugins_directory: plugins/
+expectations_directory: expectations/
 
 # Configure additional data context options here.
 
