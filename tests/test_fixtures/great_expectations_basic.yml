@@ -12,3 +12,6 @@ datasources:
 
 
 plugins_directory: plugins/
+data_docs:
+  sites:
+stores:

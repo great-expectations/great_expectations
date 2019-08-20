@@ -317,7 +317,7 @@ def sqlitedb_engine():
     return sa.create_engine('sqlite://')
 
 
-@pytest.fixture()
+@pytest.fixture(scope="function")
 def empty_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('empty_data_context'))
     context = ge.data_context.DataContext.create(project_path)
@@ -328,7 +328,7 @@ def empty_data_context(tmp_path_factory):
     return context
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def titanic_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('titanic_data_context'))
     context_path = os.path.join(project_path, "great_expectations")
