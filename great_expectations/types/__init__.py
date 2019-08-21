@@ -12,5 +12,6 @@ from .expectations import (
 )
 
 from .configurations import (
+    Config,
     ClassConfig
 )
