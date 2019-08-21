@@ -203,10 +203,7 @@ later by running `great_expectations profile`.
     msg_data_doc_intro = """
 ========== Data Documentation ==========
 
-To generate documentation from the data you just profiled, the profiling results should be moved from 
-great_expectations/uncommitted (ignored by git) to great_expectations/fixtures.
-
-Before committing, please make sure that this data does not contain sensitive information!
+Great Expectations can create data documentation from the data you just profiled.
 
 To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_documentation.html\
 ?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
@@ -285,17 +282,6 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 
 
     cli_message(msg_data_doc_intro.format(__version__.replace(".", "_")))
-    # if click.confirm("Move the profiled data and build HTML documentation?",
-    #                  default=True
-    #                  ):
-    #     cli_message("\nMoving files...")
-    #
-    #     for profiling_result in profiling_results['results']:
-    #         data_asset_name = profiling_result[1]['meta']['data_asset_name']
-    #         expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
-    #         run_id = profiling_result[1]['meta']['run_id']
-    #         context.move_validation_to_fixtures(
-    #             data_asset_name, expectation_suite_name, run_id)
 
     if click.confirm("Build HTML documentation?",
                      default=True

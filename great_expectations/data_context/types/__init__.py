@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from ...types import LooselyTypedDotDict
 from six import string_types
 from collections import namedtuple

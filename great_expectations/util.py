@@ -16,6 +16,7 @@ def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, profile
     """
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
     """
+    # TODO: Refactor this method to use the new ClassConfig (module_name and class_name convention).
     if expectation_suite is not None:
         # Create a dataset of the new class type, and manually initialize expectations according to
         # the provided expectation suite
@@ -37,6 +38,7 @@ def read_csv(
     profiler=None,
     *args, **kwargs
 ):
+    # TODO: Refactor this method to use the new ClassConfig (module_name and class_name convention).
     df = pd.read_csv(filename, *args, **kwargs)
     df = _convert_to_dataset_class(
         df, dataset_class, expectation_suite, profiler)

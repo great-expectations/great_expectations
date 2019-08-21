@@ -158,7 +158,7 @@ def test_display_column_evrs_as_section():
 
     #FIXME: This isn't a full snapshot test.
     assert '<div id="section-1" class="ge-section container-fluid">' in html_to_display
-    assert '<span class="badge badge-info" >Carlsson, Mr Frans Olof</span>' in html_to_display
+    assert '<span class="badge badge-info" style="word-break:break-all;" >Carlsson, Mr Frans Olof</span>' in html_to_display
     assert """\
     <span class="cooltip" >
                     Type: None

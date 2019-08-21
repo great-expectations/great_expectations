@@ -9,7 +9,7 @@ from great_expectations.datasource.generator.filesystem_path_generator import Su
 from great_expectations.datasource.generator.databricks_generator import DatabricksTableGenerator
 from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
 
-from great_expectations.data_context.types import ClassConfig
+from great_expectations.types import ClassConfig
 
 logger = logging.getLogger(__name__)
 

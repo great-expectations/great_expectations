@@ -185,4 +185,44 @@ A similar approach works for the command-line tool.
         dataset_class=custom_dataset.CustomPandasDataset
 
 
+Using custom expectations with a DataSource
+--------------------------------------------------------------------------------
 
+To use custom expectations in a datasource or DataContext, you need to define the custom DataAsset in the datasource
+configuration or batch_kwargs for a specific batch. Following the same example above, let's suppose you've defined
+`CustomPandasDataset` in a module called `custom_dataset.py`. You can configure your datasource to return instances
+of your custom DataAsset type by passing in a :ref:`ClassConfig` that describes your source.
+
+If you are working a DataContext, simply placing `custom_dataset.py` in your configured plugin directory will make it
+accessible, otherwise, you need to ensure the module is on the import path.
+
+Once you do this, all the functionality of your new expectations will be available for use. For example, you could use
+the datasource snippet below to configure a PandasDatasource that will produce instances of your new
+CustomPandasDataset in a DataContext.
+
+.. code-block:: yaml
+
+    datasources:
+      my_datasource:
+        type: pandas  # class_name: PandasDatasource
+        data_asset_type:
+          module_name: custom_dataset
+          class_name: CustomPandasDataset
+        generators:
+          default:
+            type: subdir_reader  # class_name: SubdirReaderGenerator
+            base_directory: /data
+            reader_options:
+              sep: \t
+
+.. code-block:: bash
+
+    >> import great_expectations as ge
+    >> context = ge.DataContext()
+    >> my_df = context.get_batch("my_datasource/default/my_file")
+
+    >> my_df.expect_column_values_to_equal_1("all_twos")
+    {
+        "success": False,
+        "unexpected_list": [2,2,2,2,2,2,2,2]
+    }
