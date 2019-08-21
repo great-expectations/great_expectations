@@ -246,12 +246,9 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_pr
 def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_name_column_expectations):
     remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_header(
         titanic_profiled_name_column_expectations,#["expectations"],
-        [],
     )
 
-    print(json.dumps(content_blocks, indent=2))
-    assert content_blocks == [
-        RenderedComponentContent(**{
+    assert content_blocks == RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Name",
             "styling": {
@@ -266,7 +263,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
             }
             }
         })
-    ]
+
 
     expectation_with_unescaped_dollar_sign = {
       "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -292,10 +289,8 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
     }
     remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_header(
         [expectation_with_unescaped_dollar_sign],
-        []
     )
-    print(content_blocks)
-    assert content_blocks[0] == {
+    assert content_blocks == {
         'content_block_type': 'header',
         'header': 'Car Insurance Premiums ($$)',
         'styling': {'classes': ['col-12'], 'header': {'classes': ['alert', 'alert-secondary']}}
@@ -303,16 +298,10 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
 
 
 def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profiled_name_column_expectations):
-    remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_bullet_list(
+    remaining_expectations, content_block = ExpectationSuiteColumnSectionRenderer._render_bullet_list(
         titanic_profiled_name_column_expectations,#["expectations"],
-        [],
     )
 
-    print(json.dumps(content_blocks, indent=2))
-
-    assert len(content_blocks) == 1
-
-    content_block = content_blocks[0]
     assert content_block["content_block_type"] == "bullet_list"
     assert len(content_block["bullet_list"]) == 4
     assert "value types must belong to this set" in json.dumps(content_block)

@@ -625,10 +625,10 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
 class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
-    def _render_header(cls, expectations, content_blocks):
+    def _render_header(cls, expectations):
         column = cls._get_column_name(expectations)
 
-        content_blocks.append(RenderedComponentContent(**{
+        new_block = RenderedComponentContent(**{
             "content_block_type": "header",
             "header": convert_to_string_and_escape(column),
             "styling": {
@@ -637,32 +637,33 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        }))
+        })
 
-        return expectations, content_blocks
+        return expectations, new_block
 
     @classmethod
-    def _render_bullet_list(cls, expectations, content_blocks):
-        content = ExpectationSuiteBulletListContentBlockRenderer.render(
+    def _render_bullet_list(cls, expectations):
+        new_block = ExpectationSuiteBulletListContentBlockRenderer.render(
             expectations,
             include_column_name=False,
         )
-        content_blocks.append(content)
 
-        return [], content_blocks
+        return [], new_block
 
     @classmethod
     def render(cls, expectations={}):
         column = cls._get_column_name(expectations)
-    
-        remaining_expectations, content_blocks = cls._render_header(
-            expectations, [])
+
+        content_blocks = []
+        remaining_expectations, header_block = cls._render_header(expectations)
+        content_blocks.append(header_block)
         # remaining_expectations, content_blocks = cls._render_column_type(
         # remaining_expectations, content_blocks)
-        remaining_expectations, content_blocks = cls._render_bullet_list(
-            remaining_expectations, content_blocks)
+        remaining_expectations, bullet_block = cls._render_bullet_list(remaining_expectations)
+        content_blocks.append(bullet_block)
 
+        populated_content_blocks = list(filter(None, content_blocks))
         return RenderedSectionContent(**{
             "section_name": column,
-            "content_blocks": content_blocks
+            "content_blocks": populated_content_blocks
         })
