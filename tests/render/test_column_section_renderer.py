@@ -119,6 +119,8 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
         }
     }
 
+
+def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_dollar_sign(titanic_profiled_name_column_evrs):
     evr_with_unescaped_dollar_sign = {
         "success": True,
         "result": {
@@ -153,7 +155,6 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
         }
     }
 
-    # TODO split into a separate test maybe?
     content_block = ProfilingResultsColumnSectionRenderer._render_header(
         [evr_with_unescaped_dollar_sign],
         column_type=[],
