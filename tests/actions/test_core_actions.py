@@ -4,6 +4,7 @@ from great_expectations.actions import (
     BasicValidationAction,
 )
 from great_expectations.actions.types import (
+    ActionInternalConfig,
     ActionConfig,
     ActionSetConfig,
 )
@@ -11,20 +12,23 @@ from great_expectations.actions.types import (
 
 def test_action_config():
 
-    ActionConfig(**{
-        "module_name" : "great_expectations.actions",
-        "class_name": "SummarizeAndSendToWebhookAction",
-        "kwargs" : {
-            "webhook": "http://myslackwebhook.com/",
-            "summarization_module_name": "great_expectations.render",
-            "summarization_class_name": "SummarizeValidationResultsForSlack",
+    ActionConfig(
+        coerce_types=True,
+        **{
+            "module_name" : "great_expectations.actions",
+            "class_name": "SummarizeAndSendToWebhookAction",
+            "kwargs" : {
+                "webhook": "http://myslackwebhook.com/",
+                "summarization_module_name": "great_expectations.render",
+                "summarization_class_name": "SummarizeValidationResultsForSlack",
+            }
         }
-    })
+    )
 
 def test_action_set_config():
 
     ActionSetConfig(
-        # coerce_types=True, #Need to merge in fixes to LooselyTypedDataDcit before this will work.
+        coerce_types=True, #Need to merge in fixes to LooselyTypedDoDict before this will work.
         #TODO: We'll also need to modify LLTD to take a DictOf argument
         **{
             #TODO: This should be a dict, not a list.
@@ -43,7 +47,6 @@ def test_action_set_config():
     )
 
 def test_subclass_of_BasicValidationAction():
-
     # I dunno. This is kind of a silly test.
 
     class MyCountingValidationAction(BasicValidationAction):
@@ -56,7 +59,9 @@ def test_subclass_of_BasicValidationAction():
 
     fake_validation_result_suite = {}
 
-    my_action = MyCountingValidationAction({})
+    my_action = MyCountingValidationAction(
+        ActionInternalConfig(**{})
+    )
     assert my_action._counter == 0
 
     my_action.take_action(fake_validation_result_suite)
