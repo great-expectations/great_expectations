@@ -383,16 +383,12 @@ def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped
 
     
 def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_name_column_evrs):
-    remaining_evrs, content_blocks = ValidationResultsColumnSectionRenderer._render_table(
+    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_table(
         validation_results=titanic_profiled_name_column_evrs,
-        content_blocks=[]
     )
-    print(json.dumps(content_blocks, indent=2))
-    
-    content_block = content_blocks[0]
+
     content_block_stringified = json.dumps(content_block)
     
-    assert len(content_blocks) == 1
     assert content_block["content_block_type"] == "table"
     assert len(content_block["table"]) == 6
     assert content_block_stringified.count("$icon") == 6

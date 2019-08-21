@@ -598,24 +598,23 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         return validation_results, new_block
     
     @classmethod
-    def _render_table(cls, validation_results, content_blocks):
-        content = ValidationResultsTableContentBlockRenderer.render(
+    def _render_table(cls, validation_results):
+        new_block = ValidationResultsTableContentBlockRenderer.render(
             validation_results,
             include_column_name=False
         )
-        content_blocks.append(content)
         
-        return [], content_blocks
+        return [], new_block
     
     @classmethod
     def render(cls, validation_results={}):
         column = cls._get_column_name(validation_results)
     
         remaining_evrs, content_blocks = cls._render_header(
-            validation_results, [])
+            validation_results)
     
         remaining_evrs, content_blocks = cls._render_table(
-            remaining_evrs, content_blocks)
+            remaining_evrs)
     
         return RenderedSectionContent(**{
             "section_name": column,
