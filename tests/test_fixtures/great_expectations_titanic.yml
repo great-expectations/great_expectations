@@ -11,6 +11,7 @@ datasources:
         base_directory: ../data
 plugins_directory: plugins/
 expectations_directory: expectations/
+evaluation_parameter_store_name: evaluation_parameter_store
 data_docs:
   sites:
 stores:
@@ -51,3 +52,7 @@ stores:
     store_config:
       base_directory: fixtures/validations
       file_extension: .zzz
+
+  evaluation_parameter_store:
+      module_name: great_expectations.data_context.store
+      class_name: InMemoryStore

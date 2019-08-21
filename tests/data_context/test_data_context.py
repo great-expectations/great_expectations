@@ -27,6 +27,9 @@ from great_expectations.util import gen_directory_tree_str
 from great_expectations.data_context.types import (
     DataContextConfig,
 )
+from great_expectations.data_context.store import (
+    InMemoryStore
+)
 
 
 @pytest.fixture()
@@ -146,7 +149,7 @@ def test_register_validation_results(data_context):
 
     res = data_context.register_validation_results(run_id, source_patient_data_results)
     assert res == source_patient_data_results  # results should always be returned, and in this case not modified
-    bound_parameters = data_context._evaluation_parameter_store.get_run_parameters(run_id)
+    bound_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024
     }
@@ -182,7 +185,7 @@ def test_register_validation_results(data_context):
 
 
     data_context.register_validation_results(run_id, source_diabetes_data_results)
-    bound_parameters = data_context._evaluation_parameter_store.get_run_parameters(run_id)
+    bound_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024,
         'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value': 2048
@@ -712,51 +715,76 @@ def test_add_store(empty_data_context):
     assert "my_new_store" in empty_data_context.stores.keys()
     assert "my_new_store" in empty_data_context.get_config()["stores"]
 
-def test_ExplorerDataContext():
-    ExplorerDataContext(
-        DataContextConfig(**{
-            "plugins_directory": "plugins/",
-            "expectations_directory": "expectations/",
-            "datasources": {},
-            "stores": {},
-            "data_docs": {
-                "sites": {}
+@pytest.fixture()
+def basic_data_context_config():
+    return DataContextConfig(**{
+        "plugins_directory": "plugins/",
+        "expectations_directory": "expectations/",
+        "evaluation_parameter_store_name" : "evaluation_parameter_store",
+        "datasources": {},
+        "stores": {
+            "evaluation_parameter_store" : {
+                "module_name": "great_expectations.data_context.store",
+                "class_name": "InMemoryStore",
             }
-        }),
+        },
+        "data_docs": {
+            "sites": {}
+        }
+    })
+
+def test_ExplorerDataContext(basic_data_context_config):
+    print(type(basic_data_context_config))
+    ExplorerDataContext(
+        basic_data_context_config,
         "testing/"
     )
 
-def test_ConfigOnlyDataContext__initialization(tmp_path_factory):
+def test_ConfigOnlyDataContext__initialization(tmp_path_factory, basic_data_context_config):
     config_path = str(tmp_path_factory.mktemp('test_ConfigOnlyDataContext__initialization__dir'))
     context = ConfigOnlyDataContext(
-        DataContextConfig(**{
-            "plugins_directory": "plugins/",
-            "expectations_directory": "expectations/",
-            "datasources": {},
-            "stores": {},
-            "data_docs": {
-                "sites": {}
-            }
-        }),
-        config_path
+        basic_data_context_config,
+        config_path,
     )
 
     assert context.root_directory.split("/")[-1] == "test_ConfigOnlyDataContext__initialization__dir0"
     assert context.plugins_directory.split("/")[-3:] == ["test_ConfigOnlyDataContext__initialization__dir0", "plugins",""]
 
-def test__normalize_absolute_or_relative_path(tmp_path_factory):
+
+def test_evaluation_parameter_store_methods(basic_data_context_config):
+    context = ConfigOnlyDataContext(
+        basic_data_context_config,
+        "testing",
+    )
+
+    assert isinstance(context.evaluation_parameter_store, InMemoryStore)
+
+    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {}
+    context.set_parameters_in_evaluation_parameter_store_by_run_id_and_key("foo", "bar", "baz")
+    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {
+        "bar" : "baz"
+    }
+
+    context.set_parameters_in_evaluation_parameter_store_by_run_id_and_key("foo", "car", "caz")
+    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {
+        "bar" : "baz",
+        "car" : "caz"
+    }
+
+    context.set_parameters_in_evaluation_parameter_store_by_run_id_and_key("goo", "dar", "daz")
+    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {
+        "bar" : "baz",
+        "car" : "caz"
+    }
+    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("goo") == {
+        "dar" : "daz",
+    }
+
+def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_context_config):
     config_path = str(tmp_path_factory.mktemp('test__normalize_absolute_or_relative_path__dir'))
     context = ConfigOnlyDataContext(
-        DataContextConfig(**{
-            "plugins_directory": "plugins/",
-            "expectations_directory": "expectations/",
-            "datasources": {},
-            "stores": {},
-            "data_docs": {
-                "sites": {}
-            }
-        }),
-        config_path
+        basic_data_context_config,
+        config_path,
     )
 
     print(context._normalize_absolute_or_relative_path("yikes"))

@@ -28,6 +28,7 @@ class DataContextConfig(Config):
     _allowed_keys = set([
         "plugins_directory",
         "expectations_directory",
+        "evaluation_parameter_store_name",
         "datasources",
         "stores",
         "data_docs",  # TODO: Rename this to sites, to remove a layer of extraneous nesting
@@ -36,6 +37,7 @@ class DataContextConfig(Config):
     _required_keys = set([
         "plugins_directory",
         "expectations_directory",
+        "evaluation_parameter_store_name",
         "datasources",
         "stores",
         "data_docs",
@@ -44,6 +46,7 @@ class DataContextConfig(Config):
     _key_types = {
         "plugins_directory": string_types,
         "expectations_directory": string_types,
+        "evaluation_parameter_store_name": string_types,
         "datasources": dict,
         "stores": dict,
         "data_docs": dict,
