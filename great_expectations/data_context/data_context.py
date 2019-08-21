@@ -149,16 +149,19 @@ class ConfigOnlyDataContext(object):
     def _init_stores(self, store_configs):
         """Initialize all Stores for this DataContext.
 
-        In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
-        However, some files remain the responsiblity of the DataContext:
-            great_expectations.yml
-            plugins
-            credentials
-            DataSource configs
+        Stores are a good fit for reading/writing objects that:
+            1. follow a clear key-value pattern, and 
+            2. are usually edited programmatically, using the Context
 
-        These files are not good fits to be turned into Stores, because
-            1. they do not follow a clear key-value pattern, and 
-            2. they are not usually written programmatically.
+        In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
+        As of 9/21/2019, the following Stores had not yet been implemented
+            * great_expectations.yml
+            * expectations
+            * data documentation
+            * credentials
+            * anything accessed via write_resource
+
+        Note that stores do NOT manage plugins.
         """
         
         for store_name, store_config in store_configs.items():
