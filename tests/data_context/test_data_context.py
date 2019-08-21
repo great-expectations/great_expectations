@@ -735,18 +735,16 @@ def basic_data_context_config():
     })
 
 
-def test_ExplorerDataContext(basic_data_context_config):
-    print(type(basic_data_context_config))
-    ExplorerDataContext(
-        basic_data_context_config,
-        "testing/"
-    )
-
+def test_ExplorerDataContext(titanic_data_context):
+    context_root_directory = titanic_data_context.root_directory
+    explorer_data_context = ExplorerDataContext(context_root_directory)
+    assert explorer_data_context._expectation_explorer_manager
+    
 
 @freeze_time("2012-01-14")
 def test_ExplorerDataContext_expectation_widget(titanic_data_context):
-    project_config = titanic_data_context.get_project_config()
-    explorer_data_context = ExplorerDataContext(project_config, titanic_data_context._context_root_directory)
+    context_root_directory = titanic_data_context.root_directory
+    explorer_data_context = ExplorerDataContext(context_root_directory)
     data_asset = explorer_data_context.get_batch('Titanic', expectation_suite_name='my_suite')
     widget_output = data_asset.expect_column_to_exist('test')
     expected_widget_output = "Accordion(children=(VBox(children=(HBox(children=(VBox(children=(HTML(value='<div><strong>Data Asset Name: </strong>mydatasource/mygenerator/Titanic</div>'), HTML(value='<div><strong>Column: </strong>test</div>'), HTML(value='<span><strong>Expectation Type: </strong>expect_column_to_exist</span>'), HTML(value='<span><strong>Success: </strong>False</span>'), HTML(value='<div><strong>Date/Time Validated (UTC): </strong>2012-01-14 00:00</div>')), layout=Layout(margin='10px', width='40%')), VBox(children=(Text(value='', description='<strong>column_index: </strong>', description_tooltip='', layout=Layout(width='400px'), placeholder='press enter to confirm...', style=DescriptionStyle(description_width='150px')),), layout=Layout(margin='10px', width='60%')))), Accordion(children=(Output(),), _titles={'0': 'Exceptions/Warnings'}), Accordion(children=(VBox(),), selected_index=None, _titles={'0': 'Validation Result Details'}), Button(button_style='danger', description='Remove Expectation', icon='trash', layout=Layout(width='auto'), style=ButtonStyle(), tooltip='click to remove expectation'))),), layout=Layout(border='2px solid red', margin='5px'), _titles={'0': 'test | expect_column_to_exist'})"
