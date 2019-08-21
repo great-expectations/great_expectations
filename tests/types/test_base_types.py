@@ -1,13 +1,17 @@
 import pytest
 
-import six
-from six import string_types
+from six import PY2, string_types
+import sys
 
 from great_expectations.types import (
     DotDict,
     LooselyTypedDotDict,
+    RequiredKeysDotDict,
     ListOf,
 )
+
+from ruamel.yaml import YAML, yaml_object
+yaml = YAML()
 
 """
 * dictionary syntax works for assignment and lookup `myobj["a"] = 10`, `print(myobjj["a"])`
@@ -18,6 +22,7 @@ from great_expectations.types import (
 * Values can be typed
 """
 
+
 def test_DotDict_dictionary_syntax():
     D = DotDict({
         'x': [1, 2, 4],
@@ -27,6 +32,7 @@ def test_DotDict_dictionary_syntax():
     D["w"] = 10
     assert D["x"][0] == D["y"][0]
     assert D["w"] == 10
+
 
 def test_DotDict_dot_syntax():
     D = DotDict({
@@ -380,6 +386,7 @@ def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
             }
         )
 
+<<<<<<< HEAD
 def test_LooselyTypedDotDict_unicode_issues():
     class MyLTDD(LooselyTypedDotDict):
         _allowed_keys = set([
@@ -396,7 +403,7 @@ def test_LooselyTypedDotDict_unicode_issues():
         "a" : "hello"
     })
 
-    if six.PY2:
+    if PY2:
         with pytest.raises(TypeError):
             MyLTDD(**{
                 "a" : u"hello"
@@ -459,3 +466,56 @@ def test_LooselyTypedDotDict_multiple_types():
     B = MyLTDD(**{
         "a" : None
     })
+=======
+
+def test_dotdict_yaml_serialization(capsys):
+    # To enable yaml serialization, we simply annotate the class as a @yaml_object
+    # Note that this annotation be inherited, even though in our case we know that
+
+    # NOTE: JPC - 20190821: We may want to reach out to the ruamel authors to inquire about
+    # adding support for searching through the entire mro (instead of only the last entry) for supported representers
+
+    # Note that we are also using the nested type coercion in this case.
+    @yaml_object(yaml)
+    class MyLooselyTypedDotDict(LooselyTypedDotDict):
+        _allowed_keys = {"a", "b"}
+        _required_keys = {"a"}
+        _key_types = {
+            "a": str,
+            "b": RequiredKeysDotDict
+        }
+
+    d = MyLooselyTypedDotDict({
+            "a": "fish",
+            "b": {
+                "pet": "dog"
+            }
+        },
+        coerce_types=True
+    )
+
+    yaml.dump(d, sys.stdout)
+
+    assert """\
+a: fish
+b:
+  pet: dog
+""" in capsys.readouterr()
+
+
+def test_required_keys_dotdict():
+    class MyRequiredKeysDotDict(RequiredKeysDotDict):
+        _required_keys = {"class_name"}
+
+    with pytest.raises(KeyError):
+        # required key is missing
+        d = MyRequiredKeysDotDict({"blarg": "isarealthreat"})
+
+    d = MyRequiredKeysDotDict({"class_name": "physics", "blarg": "isarealthreat"})
+    assert d["class_name"] == d.class_name
+    assert d["blarg"] == "isarealthreat"
+
+    # Note that since there is not a concept of allowed_keys, we do not raise attributeerror here, picking
+    # up dictionary semantics instead
+    assert d.doesnotexist is None
+>>>>>>> Add support for RequiredKeysDotDict
