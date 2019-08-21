@@ -1678,21 +1678,16 @@ class DataContext(ConfigOnlyDataContext):
             )
 
 
-class ExplorerDataContext(ConfigOnlyDataContext):
+class ExplorerDataContext(DataContext):
 
-    def __init__(self, config, context_root_dir=None, expectation_explorer=True, data_asset_name_delimiter='/'):
+    def __init__(self, context_root_dir=None, expectation_explorer=True, data_asset_name_delimiter='/'):
         """
             expectation_explorer: If True, load the expectation explorer manager, which will modify GE return objects \
             to include ipython notebook widgets.
         """
-        if context_root_dir is None:
-            context_root_dir = find_context_root_dir()
-        context_root_directory = os.path.abspath(context_root_dir)
-        self._context_root_directory = context_root_directory
 
         super(ExplorerDataContext, self).__init__(
-            config,
-            context_root_directory,
+            context_root_dir,
             data_asset_name_delimiter,
         )
 
