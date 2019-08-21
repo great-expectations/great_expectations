@@ -1788,6 +1788,9 @@ class DataContext(object):
                     start_time = datetime.datetime.now()
 
                     # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
+                    if additional_batch_kwargs is None:
+                        additional_batch_kwargs = {}
+                        
                     batch = self.get_batch(
                         data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
                         expectation_suite_name=profiler.__name__,
