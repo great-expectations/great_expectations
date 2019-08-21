@@ -322,15 +322,11 @@ def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profil
     
     
 def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
-    remaining_evrs, content_blocks = ValidationResultsColumnSectionRenderer._render_header(
+    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_header(
         validation_results=titanic_profiled_name_column_evrs,
-        content_blocks=[]
     )
-    
-    print(json.dumps(content_blocks, indent=2))
-    
-    assert content_blocks == [
-        {
+
+    assert content_block == {
             'content_block_type': 'header',
             'header': 'Name',
             'styling': {
@@ -340,8 +336,9 @@ def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_n
                 }
             }
         }
-    ]
-    
+
+
+def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped_dollar_sign(titanic_profiled_name_column_evrs):
     evr_with_unescaped_dollar_sign = {
         'success': True,
         'result': {
@@ -369,16 +366,11 @@ def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_n
             }
         }
     }
-    
-    remaining_evrs, content_blocks = ValidationResultsColumnSectionRenderer._render_header(
+
+    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_header(
         validation_results=[evr_with_unescaped_dollar_sign],
-        content_blocks=[]
     )
-
-    print(json.dumps(content_blocks, indent=2))
-
-    assert content_blocks == [
-        {
+    assert content_block == {
             'content_block_type': 'header',
             'header': 'Name ($$)',
             'styling': {
@@ -388,8 +380,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_n
                 }
             }
         }
-    ]
-    
+
     
 def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_name_column_evrs):
     remaining_evrs, content_blocks = ValidationResultsColumnSectionRenderer._render_table(

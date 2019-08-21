@@ -581,10 +581,10 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
 class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
     @classmethod
-    def _render_header(cls, validation_results, content_blocks):
+    def _render_header(cls, validation_results):
         column = cls._get_column_name(validation_results)
         
-        content_blocks.append(RenderedComponentContent(**{
+        new_block = RenderedComponentContent(**{
             "content_block_type": "header",
             "header": convert_to_string_and_escape(column),
             "styling": {
@@ -593,9 +593,9 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        }))
+        })
         
-        return validation_results, content_blocks
+        return validation_results, new_block
     
     @classmethod
     def _render_table(cls, validation_results, content_blocks):
