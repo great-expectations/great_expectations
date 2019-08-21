@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Data documentation compiled by Great Expectations</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}{% endblock %}</title>
+
+    {# {# Remove this when not debugging: #}
+    {# <meta http-equiv="refresh" content="1"/> #}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
+    <style>
+      body {
+        position: relative;
+      }
+      .container {
+        padding-top: 50px;
+      }
+      .sticky {
+        position: -webkit-sticky;
+        position: sticky;
+        max-height: 90vh;
+        overflow-y: auto;
+        top: 15px;
+      }
+
+      .ge-section {
+        clear:both;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+      }
+
+      .triangle {
+        border: solid #222;
+        border-width: 0 1px 1px 0;
+        display: inline;
+        cursor: pointer;
+        padding: 3px;
+        position: absolute;
+        right: 0;
+        margin-top: 10px;
+
+        transform: rotate(40deg);
+        -webkit-transform: rotate(40deg);
+        transition: .3s transform ease-in-out;
+      }
+
+      .collapsed .triangle{
+        transform: rotate(-140deg);
+        -webkit-transform: rotate(-140deg);
+        transition: .3s transform ease-in-out;
+      }
+
+      .popover {
+        max-width: 100%;
+      }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.3.5/build/vega.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@3.2.1/build/vega-lite.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@4.0.0/build/vega-embed.js"></script>
+  </head>
+
+  <body
+        data-spy="scroll"
+        data-target="#navigation"
+        data-offset="50"
+    >
+    <div class="container-fluid p-4">
+      <div class="row">
+        <div class="col-md-8 col-lg-9 col-xs-12">
+        {% for section in sections %}
+          {% set section_loop = loop -%}
+          {% include 'section.j2' %}
+        {% endfor %}
+        </div>
+        <div class="col-lg-3 col-md-4 col-xs-12">
+            {% include 'ge_info.j2' %}
+        </div>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  </body>
+</html>

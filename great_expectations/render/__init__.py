@@ -1,0 +1,3 @@
+from .view import (
+    DefaultJinjaPageView,
+)

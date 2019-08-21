@@ -3,8 +3,6 @@ import os
 import pandas as pd
 import json
 import logging
-import uuid
-import errno
 
 from six import string_types
 
@@ -19,7 +17,8 @@ def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, profile
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
     """
     if expectation_suite is not None:
-        # Create a dataset of the new class type, and manually initialize expectations according to the provided expectation suite
+        # Create a dataset of the new class type, and manually initialize expectations according to
+        # the provided expectation suite
         new_df = dataset_class.from_dataset(df)
         new_df._initialize_expectations(expectation_suite)
     else:
@@ -52,7 +51,7 @@ def read_json(
     profiler=None,
     *args, **kwargs
 ):
-    if accessor_func != None:
+    if accessor_func is not None:
         json_obj = json.load(open(filename, 'rb'))
         json_obj = accessor_func(json_obj)
         df = pd.read_json(json.dumps(json_obj), *args, **kwargs)
@@ -78,6 +77,7 @@ def read_excel(
         filename (string): path to file to read
         dataset_class (Dataset class): class to which to convert resulting Pandas df
         expectation_suite (string): path to great_expectations expectation suite file
+        profiler (Profiler class): profiler to use when creating the dataset (default is None)
 
     Returns:
         great_expectations dataset or ordered dict of great_expectations datasets,
@@ -107,6 +107,7 @@ def read_table(
         filename (string): path to file to read
         dataset_class (Dataset class): class to which to convert resulting Pandas df
         expectation_suite (string): path to great_expectations expectation suite file
+        profiler (Profiler class): profiler to use when creating the dataset (default is None)
 
     Returns:
         great_expectations dataset
@@ -130,6 +131,7 @@ def read_parquet(
         filename (string): path to file to read
         dataset_class (Dataset class): class to which to convert resulting Pandas df
         expectation_suite (string): path to great_expectations expectation suite file
+        profiler (Profiler class): profiler to use when creating the dataset (default is None)
 
     Returns:
         great_expectations dataset
@@ -213,13 +215,38 @@ def validate(data_asset, expectation_suite=None, data_asset_name=None, data_cont
     return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
 
-class DotDict(dict):
-    """dot.notation access to dictionary attributes"""
+# https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
+def gen_directory_tree_str(startpath):
+    """Print the structure of directory as a tree:
 
-    def __getattr__(self, attr):
-        return self.get(attr)
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
+    Ex:
+    project_dir0/
+        AAA/
+        BBB/
+            aaa.txt
+            bbb.txt
 
-    def __dir__(self):
-        return self.keys()
+    #Note: files and directories are sorted alphabetically, so that this method can be used for testing.
+    """
+
+    output_str = ""
+
+    tuples = list(os.walk(startpath))
+    tuples.sort()
+
+    for root, dirs, files in tuples:
+        level = root.replace(startpath, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        output_str += '{}{}/\n'.format(indent, os.path.basename(root))
+        subindent = ' ' * 4 * (level + 1)
+
+        files.sort()
+        for f in files:
+            output_str += '{}{}\n'.format(subindent, f)
+    
+    return output_str
+
+def get_data_context(path=None):
+    """Given a path, try to guess where the DataContext is located.
+    """
+    pass

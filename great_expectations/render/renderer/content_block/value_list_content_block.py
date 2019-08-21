@@ -1,9 +1,10 @@
 import pandas as pd
 import altair as alt
 
-from .content_block import ContentBlock
+from .content_block import ContentBlockRenderer
 
-class ValueListContentBlock(ContentBlock):
+
+class ValueListContentBlockRenderer(ContentBlockRenderer):
     """Render ValuesList Style Content Blocks
 
     Produces content blocks with type
@@ -15,16 +16,16 @@ class ValueListContentBlock(ContentBlock):
         new_block = None
         if result_key == "partial_unexpected_counts":
             partial_unexpected_counts = evr["result"]["partial_unexpected_counts"]
-            new_block = {
+            new_block = RenderedComponentContent(**{
                 "content_block_type": "value_list",
                 "value_list": partial_unexpected_counts
-            }
+            })
 
         elif result_key == "partial_unexpected_list":
             partial_unexpected_list = evr["result"]["partial_unexpected_list"]
-            new_block = {
+            new_block = RenderedComponentContent(**{
                 "content_block_type": "value_list",
                 "value_list": partial_unexpected_list
-            }
+            })
 
         return new_block

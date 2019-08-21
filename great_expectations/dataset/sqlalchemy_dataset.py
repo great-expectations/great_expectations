@@ -5,8 +5,19 @@ import uuid
 from functools import wraps
 import inspect
 import logging
-import sys
 import warnings
+from datetime import datetime
+from importlib import import_module
+
+import pandas as pd
+import numpy as np
+
+from dateutil.parser import parse
+
+from .dataset import Dataset
+from .pandas_dataset import PandasDataset
+from great_expectations.data_asset import DataAsset
+from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 logger = logging.getLogger(__name__)
 
@@ -16,13 +27,16 @@ try:
 except ImportError:
     logger.debug("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
 
-import pandas as pd
+try:
+    import sqlalchemy_redshift.dialect
+except ImportError:
+    sqlalchemy_redshift = None
 
-from dateutil.parser import parse
-from datetime import datetime
+try:
+    import snowflake.sqlalchemy.snowdialect
+except ImportError:
+    snowflake = None
 
-from .dataset import Dataset
-from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 class MetaSqlAlchemyDataset(Dataset):
 
@@ -138,8 +152,7 @@ class MetaSqlAlchemyDataset(Dataset):
                         col = x[column]
                     maybe_limited_unexpected_list.append(datetime.strftime(col, output_strftime_format))
             else:
-                maybe_limited_unexpected_list = [x[column]
-                                             for x in unexpected_query_results.fetchall()]
+                maybe_limited_unexpected_list = [x[column] for x in unexpected_query_results.fetchall()]
 
             success_count = nonnull_count - count_results['unexpected_count']
             success, percent_success = self._calc_map_expectation_success(
@@ -205,6 +218,17 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # Currently we do no error handling if the engine doesn't work out of the box.
                 raise err
 
+        # Get the dialect **for purposes of identifying types**
+        if self.engine.dialect.name.lower() in ["postgresql", "mysql", "sqlite", "oracle", "mssql", "oracle"]:
+            # These are the officially included and supported dialects by sqlalchemy
+            self.dialect = import_module("sqlalchemy.dialects." + self.engine.dialect.name)
+        elif self.engine.dialect.name.lower() == "snowflake":
+            self.dialect = import_module("snowflake.sqlalchemy.snowdialect")
+        elif self.engine.dialect.name.lower() == "redshift":
+            self.dialect = import_module("sqlalchemy_redshift.dialect")
+        else:
+            self.dialect = None
+
         if schema is not None and custom_sql is not None:
             # temporary table will be written to temp schema, so don't allow
             # a user-defined schema
@@ -212,7 +236,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql)
-
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
@@ -224,6 +247,21 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
+
+    def head(self, n=5):
+        """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
+        return PandasDataset(
+            pd.read_sql(
+                sa.select(["*"]).select_from(self._table).limit(n),
+                con=self.engine
+            ), 
+            expectation_suite=self.get_expectation_suite(
+                discard_failed_expectations=False,
+                discard_result_format_kwargs=False,
+                discard_catch_exceptions_kwargs=False,
+                discard_include_config_kwargs=False
+            )
+        )
 
     def get_row_count(self):
         count_query = sa.select([sa.func.count()]).select_from(
@@ -280,11 +318,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ]).where(sa.column(column) != None) \
               .group_by(sa.column(column)) \
               .select_from(self._table)).fetchall()
-        return pd.Series(
+        series = pd.Series(
             [row[1] for row in results],
-            index=[row[0] for row in results],
-            name=column
+            index=pd.Index(
+                data=[row[0] for row in results],
+                name="value"
+            ),
+            name="count"
         )
+        series.sort_index(inplace=True)
+        return series
 
     def get_column_mean(self, column):
         return self.engine.execute(
@@ -321,22 +364,95 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    def get_column_hist(self, column, bins):
-        # TODO: this is **terribly** inefficient; consider refactor
-        """return a list of counts corresponding to bins"""
-        hist = []
-        for i in range(0, len(bins) - 1):
-            # all bins except last are half-open
-            if i == len(bins) - 2:
-                max_strictly = False
-            else:
-                max_strictly = True
-            hist.append(
-                self.get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
+    def get_column_quantiles(self, column, quantiles):
+        selects = []
+        for quantile in quantiles:
+            selects.append(
+                sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
             )
+        quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
+        return list(quantiles)
+
+    def get_column_stdev(self, column):
+        res = self.engine.execute(sa.select([
+                sa.func.stddev_samp(sa.column(column))
+            ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
+        return float(res[0])
+
+    def get_column_hist(self, column, bins):
+        """return a list of counts corresponding to bins
+
+        Args:
+            column: the name of the column for which to get the histogram
+            bins: tuple of bin edges for which to get histogram values; *must* be tuple to support caching
+        """
+        case_conditions = []
+        idx = 0
+        bins = list(bins)
+
+        # If we have an infinte lower bound, don't express that in sql
+        if (bins[0] == -np.inf) or (bins[0] == -float("inf")):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.column(column) < bins[idx+1], 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(idx))
+            )
+            idx += 1
+
+        for idx in range(idx, len(bins)-2):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.and_(
+                                bins[idx] <= sa.column(column),
+                                sa.column(column) < bins[idx+1]
+                            ), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(idx))
+            )
+
+        if (bins[-1] == np.inf) or (bins[-1] == float("inf")):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (bins[-2] <= sa.column(column), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(len(bins)-1))
+            )
+        else:    
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.and_(
+                                bins[-2] <= sa.column(column),
+                                sa.column(column) <= bins[-1]
+                            ), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(len(bins)-1))
+            )
+
+        query = sa.select(
+            case_conditions
+        )\
+        .where(
+            sa.column(column) != None,
+        )\
+        .select_from(self._table)
+
+        hist = list(self.engine.execute(query).fetchone())
         return hist
 
-    def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+    def get_column_count_in_range(self, column, min_val=None, max_val=None, strict_min=False, strict_max=True):
         if min_val is None and max_val is None:
             raise ValueError('Must specify either min or max value')
         if min_val is not None and max_val is not None and min_val > max_val:
@@ -345,12 +461,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         min_condition = None
         max_condition = None
         if min_val is not None:
-            if min_strictly:
+            if strict_min:
                 min_condition = sa.column(column) > min_val
             else:
                 min_condition = sa.column(column) >= min_val
         if max_val is not None:
-            if max_strictly:
+            if strict_max:
                 max_condition = sa.column(column) < max_val
             else:
                 max_condition = sa.column(column) <= max_val
@@ -424,6 +540,121 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return sa.column(column) != None
 
     @DocInherit
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    def expect_column_values_to_be_of_type(
+        self,
+        column,
+        type_,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        if mostly is not None:
+            raise ValueError("SqlAlchemyDataset does not support column map semantics for column types")
+
+        try:
+            col_data = [col for col in self.columns if col["name"] == column][0]
+            col_type = type(col_data["type"])
+        except IndexError:
+            raise ValueError("Unrecognized column: %s" % column)
+        except KeyError:
+            raise ValueError("No database type data available for column: %s" % column)
+
+        try:
+            # Our goal is to be as explicit as possible. We will match the dialect
+            # if that is possible. If there is no dialect available, we *will*
+            # match against a top-level SqlAlchemy type if that's possible.
+            #
+            # This is intended to be a conservative approach.
+            #
+            # In particular, we *exclude* types that would be valid under an ORM
+            # such as "float" for postgresql with this approach
+
+            if type_ is None:
+                # vacuously true
+                success = True
+            else:
+                if self.dialect is None:
+                    logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+                    success = issubclass(col_type, getattr(sa, type_))
+                else:
+                    success = issubclass(col_type, getattr(self.dialect, type_))
+                
+            return {
+                    "success": success,
+                    "result": {
+                        "observed_value": col_type.__name__
+                    }
+                }
+
+        except AttributeError:
+            raise ValueError("Unrecognized sqlalchemy type: %s" % type_)
+
+    @DocInherit
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    def expect_column_values_to_be_in_type_list(
+        self,
+        column,
+        type_list,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        if mostly is not None:
+            raise ValueError("SqlAlchemyDataset does not support column map semantics for column types")
+
+        try:
+            col_data = [col for col in self.columns if col["name"] == column][0]
+            col_type = type(col_data["type"])
+        except IndexError:
+            raise ValueError("Unrecognized column: %s" % column)
+        except KeyError:
+            raise ValueError("No database type data available for column: %s" % column)
+
+        # Our goal is to be as explicit as possible. We will match the dialect
+        # if that is possible. If there is no dialect available, we *will*
+        # match against a top-level SqlAlchemy type.
+        #
+        # This is intended to be a conservative approach.
+        #
+        # In particular, we *exclude* types that would be valid under an ORM
+        # such as "float" for postgresql with this approach
+
+        if type_list is None:
+            success = True
+        else:
+            if self.dialect is None:
+                logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+                types = []
+                for type_ in type_list:
+                    try:
+                        type_class = getattr(sa, type_)
+                        types.append(type_class)
+                    except AttributeError:
+                        logger.debug("Unrecognized type: %s" % type_)
+                if len(types) == 0:
+                    logger.warning("No recognized sqlalchemy types in type_list")
+                types = tuple(types)
+            else:
+                types = []
+                for type_ in type_list:
+                    try:
+                        type_class = getattr(self.dialect, type_)
+                        types.append(type_class)
+                    except AttributeError:
+                        logger.debug("Unrecognized type: %s" % type_)
+                if len(types) == 0:
+                    logger.warning("No recognized sqlalchemy types in type_list for dialect %s" %
+                                   self.dialect.__name__)
+                types = tuple(types)
+            success = issubclass(col_type, types)
+
+        return {
+                "success": success,
+                "result": {
+                    "observed_value": col_type.__name__
+                }
+        }
+
+    @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_in_set(self,
                                           column,
@@ -432,6 +663,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                           parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
+        if value_set is None:
+            # vacuously true
+            return True
+
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
         else:
@@ -545,62 +780,64 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return sa.column(column).notin_(dup_query)
 
-    @MetaSqlAlchemyDataset.column_map_expectation
-    def expect_column_values_to_match_regex(self,
-                                                column,
-                                                regex,
-                                                mostly=None,
-                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                ):
+    def _get_dialect_regex_fn(self, positive=True):
         try:
-            # Postgres-only version
+            # postgres
             if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
-                condition = sa.text(column + " ~ '" + regex + "'")
+                return "~" if positive else "!~"
         except AttributeError:
             pass
 
+        try:
+            # redshift
+            if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+                return "~" if positive else "!~"
+        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+            pass
         try:
             # Mysql
             if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
-                condition = sa.text(column + " REGEXP  '" + regex + "'")
+                return "REGEXP" if positive else "NOT REGEXP"
         except AttributeError:
             pass
 
-        if condition is None:
-            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
-            raise NotImplementedError
-
-        return condition
+        try:
+            # Snowflake
+            if isinstance(self.engine.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect):
+                return "RLIKE" if positive else "NOT RLIKE"
+        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+            pass
 
     @MetaSqlAlchemyDataset.column_map_expectation
-    def expect_column_values_to_not_match_regex(self,
-                                                column,
-                                                regex,
-                                                mostly=None,
-                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                ):
+    def expect_column_values_to_match_regex(
+            self,
+            column,
+            regex,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
 
-        
-        condition = None
-        try:
-            # Postgres-only version
-            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
-                condition = sa.text(column + " !~ '" + regex + "'")
-        except AttributeError:
-            pass
-
-        try:
-            # Mysql
-            if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
-                condition = sa.text(column + " NOT REGEXP  '" + regex + "'")
-        except AttributeError:
-            pass
-
-        if condition is None:
+        regex_fn = self._get_dialect_regex_fn(positive=True)
+        if regex_fn is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
-        return condition
+        return sa.text(column + " " + regex_fn + " '" + regex + "'")
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_not_match_regex(
+            self,
+            column,
+            regex,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        regex_fn = self._get_dialect_regex_fn(positive=False)
+        if regex_fn is None:
+            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            raise NotImplementedError
+
+        return sa.text(column + " " + regex_fn + " '" + regex + "'")
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_match_regex_list(self,
@@ -614,43 +851,21 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if match_on not in ["any", "all"]:
             raise ValueError("match_on must be any or all")
 
-        condition = None
-        try:
-        # Postgres-only version
-            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
-                if match_on == "any":
-                    condition = \
-                        sa.or_(
-                        *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
-                        )
-                else:
-                    condition = \
-                        sa.and_(
-                        *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
-                        )
-        except AttributeError:
-            # this can simply indicate no mysql driver is loaded
-            pass
-        try:
-        # Mysql
-            if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
-                if match_on == "any":
-                    condition = \
-                        sa.or_(
-                        *[sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
-                        )
-                else:
-                    condition = \
-                        sa.and_(
-                        *[sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
-                        )
-        except AttributeError:
-            # this can simply indicate no mysql driver is loaded
-            pass
-        if condition is None:
+        regex_fn = self._get_dialect_regex_fn(positive=True)
+        if regex_fn is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
+        if match_on == "any":
+            condition = \
+                sa.or_(
+                    *[sa.text(column + " " + regex_fn + " '" + regex + "'") for regex in regex_list]
+                )
+        else:
+            condition = \
+                sa.and_(
+                    *[sa.text(column + " " + regex_fn + " '" + regex + "'") for regex in regex_list]
+                )
         return condition
 
     @MetaSqlAlchemyDataset.column_map_expectation
@@ -658,30 +873,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                                      mostly=None,
                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
-        condition = None
-        try:
-            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
-                condition = \
-                    sa.and_(
-                        *[sa.text(column + " !~ '" + regex + "'") for regex in regex_list]
-                    )
-        except AttributeError:
-            # this can simply indicate no postgres driver is loaded
-            pass
-
-        try:
-        # Mysql
-            if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
-                condition = \
-                    sa.and_(
-                        *[sa.text(column + " NOT REGEXP '" + regex + "'") for regex in regex_list]
-                    )
-        except AttributeError:
-            # this can simply indicate no mysql driver is loaded
-            pass
-
-        if condition is None:
+        regex_fn = self._get_dialect_regex_fn(positive=False)
+        if regex_fn is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
-        return condition
+        return sa.and_(
+            *[sa.text(column + " " + regex_fn + " '" + regex + "'") for regex in regex_list]
+        )

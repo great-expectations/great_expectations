@@ -28,3 +28,8 @@ export PATH=$JAVA_HOME/bin:$PATH
 echo "Current JAVA_HOME: $JAVA_HOME"
 echo "Current java -version:"
 java -version
+
+
+find / | grep java
+ls -al /usr/lib/jvm
+ls -al /usr/lib/jvm/java-8-openjdk-amd64

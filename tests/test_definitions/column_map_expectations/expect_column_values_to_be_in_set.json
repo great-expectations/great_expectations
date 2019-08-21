@@ -19,6 +19,17 @@
         }
       },
       {
+        "title": "Vacuously true - empty value_set",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "value_set": null
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
         "title": "Negative test case, exclude existing column value",
         "exact_match_out": false,
         "in": {
@@ -125,7 +136,7 @@
       },
       "schemas": {
         "postgresql": {
-          "empty_column": "text"
+          "empty_column": "TEXT"
         }
       },
       "tests": [{
@@ -147,10 +158,10 @@
     },
     "schemas": {
       "sqlite": {
-        "dates": "datetime"
+        "dates": "DATETIME"
       },
       "postgresql": {
-        "dates": "timestamp"
+        "dates": "TIMESTAMP"
       },
       "pandas": {
         "dates": "datetime64"
