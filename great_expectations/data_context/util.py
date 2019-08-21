@@ -8,6 +8,8 @@ import errno
 from collections import namedtuple
 import six
 
+from great_expectations.exceptions import DataContextError
+
 logger = logging.getLogger(__name__)
 
 def build_slack_notification_request(validation_json=None):
@@ -128,3 +130,17 @@ def safe_mmkdir(directory, exist_ok=True):
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
+
+
+def find_context_root_dir():
+    if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
+        return "../"
+    elif os.path.isdir("./great_expectations") and \
+            os.path.isfile("./great_expectations/great_expectations.yml"):
+        return "./great_expectations"
+    elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
+        return "./"
+    else:
+        raise DataContextError(
+            "Unable to locate context root directory. Please provide a directory name."
+        )

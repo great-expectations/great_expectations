@@ -18,7 +18,7 @@ import shutil
 import importlib
 from collections import OrderedDict
 
-from .util import get_slack_callback, safe_mmkdir
+from .util import get_slack_callback, safe_mmkdir, find_context_root_dir
 from ..types.base import DotDict
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
@@ -1612,17 +1612,7 @@ class DataContext(ConfigOnlyDataContext):
         # #TODO: Factor this out into a helper function in GE. It doesn't belong inside this method.
         # # determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
-            if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
-                context_root_dir = "../"
-            elif os.path.isdir("./great_expectations") and \
-                    os.path.isfile("./great_expectations/great_expectations.yml"):
-                context_root_dir = "./great_expectations"
-            elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
-                context_root_dir = "./"
-            else:
-                raise DataContextError(
-                    "Unable to locate context root directory. Please provide a directory name."
-                )
+            context_root_dir = find_context_root_dir()
         context_root_directory = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_directory
 
