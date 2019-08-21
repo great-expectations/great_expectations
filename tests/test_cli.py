@@ -337,9 +337,11 @@ def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
+    project_root_dir = not_so_empty_data_context.root_directory
+
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["profile", "--batch_kwargs", '{"sep": ",", "parse_dates": [0]}'])
+        cli, ["profile", "-d", project_root_dir, "--batch_kwargs", '{"sep": ",", "parse_dates": [0]}'])
     evr = not_so_empty_data_context.get_validation_result("f1",expectation_suite_name="BasicDatasetProfiler")
 
     assert evr["meta"]["batch_kwargs"]["parse_dates"] == [0]
