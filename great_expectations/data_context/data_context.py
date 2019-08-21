@@ -62,9 +62,14 @@ ALLOWED_DELIMITERS = ['.', '/']
 
 #TODO: Maybe find a better name for this guy?
 class ConfigOnlyDataContext(object):
-    """This class implements most of the functionality of DataContext, but does *NOT* 
+    """This class implements most of the functionality of DataContext, with a few exceptions.
 
-    That makes this class useful for testing.
+    1. ConfigOnlyDataContext does not attempt to keep its project_config in sync with a file on disc.
+    2. ConfigOnlyDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed into DataContext class.
+
+    Together, these changes make ConfigOnlyDataContext class more testable.
+    
+    DataContext itself inherits from ConfigOnlyDataContext. It is backward compatible with the v0.7.* implementation of DataContext.
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
