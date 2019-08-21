@@ -1,26 +1,32 @@
-import os
 import logging
+import time
+from six import string_types
 
-from .datasource import Datasource
-from .filesystem_path_generator import SubdirReaderGenerator
-from .databricks_generator import DatabricksTableGenerator
+from ..exceptions import BatchKwargsError
+
+from .datasource import Datasource, ReaderMethods
+from great_expectations.datasource.generator.filesystem_path_generator import SubdirReaderGenerator
+from great_expectations.datasource.generator.databricks_generator import DatabricksTableGenerator
+from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
+
+from great_expectations.data_context.types import ClassConfig
 
 logger = logging.getLogger(__name__)
 
 try:
     from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
-    from pyspark.sql import SparkSession
+    from pyspark.sql import SparkSession, DataFrame
 except ImportError:
     # TODO: review logging more detail here
     logger.debug("Unable to load pyspark; install optional spark dependency for support.")
 
 
 class SparkDFDatasource(Datasource):
-    """The SparkDFDatasource produces spark dataframes and supports generators capable of interacting with local
+    """The SparkDFDatasource produces SparkDFDatasets and supports generators capable of interacting with local
     filesystem (the default subdir_reader generator) and databricks notebooks.
     """
 
-    def __init__(self, name="default", data_context=None, generators=None, **kwargs):
+    def __init__(self, name="default", data_context=None, data_asset_type=None, generators=None, **kwargs):
         if generators is None:
             # Provide a gentle way to build a datasource with a sane default,
             # including ability to specify the base_directory
@@ -33,7 +39,22 @@ class SparkDFDatasource(Datasource):
                     "reader_options": reader_options
                 }
         }
-        super(SparkDFDatasource, self).__init__(name, type_="spark", data_context=data_context, generators=generators)
+
+        if data_asset_type is None:
+            data_asset_type = ClassConfig(
+                class_name="SparkDFDataset"
+            )
+        else:
+            try:
+                data_asset_type = ClassConfig(**data_asset_type)
+            except TypeError:
+                # In this case, we allow the passed config, for now, in case they're using a legacy string-only config
+                pass
+
+        super(SparkDFDatasource, self).__init__(name, type_="spark",
+                                                data_context=data_context,
+                                                data_asset_type=data_asset_type,
+                                                generators=generators)
         try:
             self.spark = SparkSession.builder.getOrCreate()
         except Exception:
@@ -47,29 +68,95 @@ class SparkDFDatasource(Datasource):
             return SubdirReaderGenerator
         elif type_ == "databricks":
             return DatabricksTableGenerator
+        elif type_ == "memory":
+            return InMemoryGenerator
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
-    def _get_data_asset(self, data_asset_name, batch_kwargs, expectation_suite, caching=False, **kwargs):
+    def _get_data_asset(self, batch_kwargs, expectation_suite, caching=True, **kwargs):
+        """class-private implementation of get_data_asset"""
         if self.spark is None:
             logger.error("No spark session available")
             return None
 
+        batch_kwargs.update(kwargs)
+        reader_options = batch_kwargs.copy()
+
+        if "data_asset_type" in reader_options:
+            data_asset_type_config = reader_options.pop("data_asset_type")  # Get and remove the config
+            try:
+                data_asset_type_config = ClassConfig(**data_asset_type_config)
+            except TypeError:
+                # We tried; we'll pass the config downstream, probably as a string, and handle an error later
+                pass
+        else:
+            data_asset_type_config = self._data_asset_type
+
+        data_asset_type = self._get_data_asset_class(data_asset_type_config)
+        if not issubclass(data_asset_type, SparkDFDataset):
+            raise ValueError("SparkDFDatasource cannot instantiate batch with data_asset_type: '%s'. It "
+                             "must be a subclass of SparkDFDataset." % data_asset_type.__name__)
+
         if "path" in batch_kwargs:
-            path = batch_kwargs.pop("path")  # We remove this so it is not used as a reader option
+            path = reader_options.pop("path")  # We remove this so it is not used as a reader option
+            reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
+            reader_method = reader_options.pop("reader_method", None)
+            if reader_method is None:
+                reader_method = self._guess_reader_method_from_path(path)
+                if reader_method is None:
+                    raise BatchKwargsError("Unable to determine reader for path: %s" % path, batch_kwargs)
+            else:
+                try:
+                    reader_method = ReaderMethods[reader_method]
+                except KeyError:
+                    raise BatchKwargsError("Unknown reader method: %s" % reader_method, batch_kwargs)
+
             reader = self.spark.read
-            batch_kwargs.update(kwargs)
 
-            for option in batch_kwargs.items():
+            for option in reader_options.items():
                 reader = reader.option(*option)
-            df = reader.csv(os.path.join(path))
 
+            if reader_method == ReaderMethods.CSV:
+                df = reader.csv(path)
+            elif reader_method == ReaderMethods.parquet:
+                df = reader.parquet(path)
+            elif reader_method == ReaderMethods.delta:
+                df = reader.format("delta").load(path)
+            else:
+                raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
+            
         elif "query" in batch_kwargs:
-            df = self.spark.sql(batch_kwargs.query)
+            df = self.spark.sql(batch_kwargs["query"])
 
-        return SparkDFDataset(df,
-                              expectation_suite=expectation_suite,
-                              data_context=self._data_context,
-                              data_asset_name=data_asset_name,
-                              batch_kwargs=batch_kwargs,
-                              caching=caching)
+        elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (DataFrame, SparkDFDataset)):
+            df = batch_kwargs.pop("df")  # We don't want to store the actual DataFrame in kwargs
+            if isinstance(df, SparkDFDataset):
+                # Grab just the spark_df reference, since we want to override everything else
+                df = df.spark_df
+            batch_kwargs["SparkDFRef"] = True
+        else:
+            raise BatchKwargsError("Unrecognized batch_kwargs for spark_source", batch_kwargs)
+
+        return data_asset_type(df,
+                               expectation_suite=expectation_suite,
+                               data_context=self._data_context,
+                               batch_kwargs=batch_kwargs,
+                               caching=caching)
+
+    def build_batch_kwargs(self, *args, **kwargs):
+        if len(args) > 0:
+            if isinstance(args[0], (DataFrame, SparkDFDataset)):
+                kwargs.update({
+                    "df": args[0],
+                    "timestamp": time.time()
+                })
+            elif isinstance(args[0], string_types):
+                kwargs.update({
+                    "path": args[0],
+                    "timestamp": time.time()
+                })
+        else:
+            kwargs.update({
+                "timestamp": time.time()
+            })
+        return kwargs

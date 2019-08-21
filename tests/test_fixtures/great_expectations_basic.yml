@@ -8,4 +8,14 @@ datasources:
       # The name default is read if no datasource or generator is specified
       mygenerator:
         type: subdir_reader
-        base_directory: /data
+        base_directory: ../data
+
+expectations_directory: expectations/
+plugins_directory: plugins/
+evaluation_parameter_store_name: evaluation_parameter_store
+data_docs:
+  sites:
+stores:
+  evaluation_parameter_store:
+      module_name: great_expectations.data_context.store
+      class_name: InMemoryStore

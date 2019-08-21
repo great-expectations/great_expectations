@@ -8,67 +8,7 @@ import great_expectations as ge
 from great_expectations.profile import ColumnsExistProfiler
 
 from .test_utils import assertDeepAlmostEqual
-
-
-def test_expect_column_values_to_match_strftime_format():
-    """
-    """
-
-    D = ge.dataset.PandasDataset({
-        'x': [1, 2, 4],
-        'us_dates': ['4/30/2017', '4/30/2017', '7/4/1776'],
-        'us_dates_type_error': ['4/30/2017', '4/30/2017', 5],
-        'almost_iso8601': ['1977-05-25T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59'],
-        'almost_iso8601_val_error': ['1977-05-55T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59'],
-        'already_datetime': [datetime.datetime(2015, 1, 1), datetime.datetime(2016, 1, 1), datetime.datetime(2017, 1, 1)]
-    })
-    D.set_default_expectation_argument("result_format", "COMPLETE")
-
-    T = [
-        {
-            'in': {'column': 'us_dates', 'strftime_format': '%m/%d/%Y'},
-            'out': {'success': True, 'unexpected_index_list': [], 'unexpected_list':[]}
-        },
-        {
-            'in': {'column': 'us_dates_type_error', 'strftime_format': '%m/%d/%Y', 'mostly': 0.5, 'catch_exceptions': True},
-            # 'out':{'success':True, 'unexpected_index_list':[2], 'unexpected_list':[5]}},
-            'error': {
-                'traceback_substring': 'TypeError'
-            },
-        },
-        {
-            'in': {'column': 'us_dates_type_error', 'strftime_format': '%m/%d/%Y', 'catch_exceptions': True},
-            'error': {
-                'traceback_substring': 'TypeError'
-            }
-        },
-        {
-            'in': {'column': 'almost_iso8601', 'strftime_format': '%Y-%m-%dT%H:%M:%S'},
-            'out': {'success': True, 'unexpected_index_list': [], 'unexpected_list':[]}},
-        {
-            'in': {'column': 'almost_iso8601_val_error', 'strftime_format': '%Y-%m-%dT%H:%M:%S'},
-            'out': {'success': False, 'unexpected_index_list': [0], 'unexpected_list':['1977-05-55T00:00:00']}},
-        {
-            'in': {'column': 'already_datetime', 'strftime_format': '%Y-%m-%d', 'catch_exceptions': True},
-            # 'out':{'success':False,'unexpected_index_list':[0], 'unexpected_list':['1977-05-55T00:00:00']},
-            'error': {
-                'traceback_substring': 'TypeError: Values passed to expect_column_values_to_match_strftime_format must be of type string.'
-            },
-        }
-    ]
-
-    for t in T:
-        out = D.expect_column_values_to_match_strftime_format(**t['in'])
-        if 'out' in t:
-            assert t['out']['success'] == out['success']
-            if 'unexpected_index_list' in t['out']:
-                assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
-            if 'unexpected_list' in t['out']:
-                assert t['out']['unexpected_list'] == out['result']['unexpected_list']
-        elif 'error' in t:
-            assert out['exception_info']['raised_exception'] == True
-            assert t['error']['traceback_substring'] in out['exception_info']['exception_traceback']
-
+from six import PY2
 
 def test_expect_column_values_to_be_dateutil_parseable():
 
@@ -465,7 +405,10 @@ def test_ge_pandas_sampling():
 
     samp1 = df.sample(n=2)
     assert isinstance(samp1, ge.dataset.PandasDataset)
-    assert samp1.find_expectations() == exp1
+    if PY2:
+        assert sorted(samp1.find_expectations()) == sorted(exp1)
+    else:
+        assert samp1.find_expectations() == exp1
 
     samp1 = df.sample(frac=0.25, replace=True)
     assert isinstance(samp1, ge.dataset.PandasDataset)
@@ -494,7 +437,10 @@ def test_ge_pandas_sampling():
         {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'x']}}
     ]
-    assert samp1.find_expectations() == exp1
+    if PY2:
+        assert sorted(samp1.find_expectations()) == sorted(exp1)
+    else:
+        assert samp1.find_expectations() == exp1
 
 
 def test_ge_pandas_subsetting():
@@ -588,36 +534,49 @@ def test_ge_pandas_automatic_failure_removal():
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
     ]
     samp1 = df.sample(n=2)
-    assert samp1.find_expectations() == exp1
+    if PY2:
+        assert sorted(samp1.find_expectations()) == sorted(exp1)
+    else:
+        assert samp1.find_expectations() == exp1
 
     # Now check subsetting to verify that failing expectations are NOT
     # automatically dropped when subsetting.
     sub1 = df[['A', 'D']]
-    assert sub1.find_expectations() == exp1
+    if PY2:
+        assert sorted(samp1.find_expectations()) == sorted(exp1)
+    else:
+        assert samp1.find_expectations() == exp1
 
     # Set property/attribute so that failing expectations are
     # automatically removed when sampling or subsetting.
     df.discard_subset_failing_expectations = True
 
+    ###
+    # Note: Order matters in this test, and a validationoperator may change order
+    ###
+
     exp_samp = [
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'A'}},
+        {'expectation_type': 'expect_column_values_to_be_in_set',
+         'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'B'}},
+        {'expectation_type': 'expect_column_values_to_be_in_set',
+         'kwargs': {'column': 'B', 'value_set': [5, 6, 7, 8]}},
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'C'}},
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'D'}},
         {'expectation_type': 'expect_column_values_to_be_in_set',
-         'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
-        {'expectation_type': 'expect_column_values_to_be_in_set',
-         'kwargs': {'column': 'B', 'value_set': [5, 6, 7, 8]}},
-        {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
     ]
 
     samp2 = df.sample(n=2)
-    assert samp2.find_expectations() == exp_samp
+    if PY2:
+        assert sorted(samp2.find_expectations()) == sorted(exp_samp)
+    else:
+        assert samp2.find_expectations() == exp_samp
 
     # Now check subsetting. In additional to the failure on column "C",
     # the expectations on column "B" now fail since column "B" doesn't
@@ -626,14 +585,17 @@ def test_ge_pandas_automatic_failure_removal():
     exp_sub = [
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'A'}},
+        {'expectation_type': 'expect_column_values_to_be_in_set',
+         'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'D'}},
         {'expectation_type': 'expect_column_values_to_be_in_set',
-         'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
-        {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
     ]
-    assert sub2.find_expectations() == exp_sub
+    if PY2:
+        assert sorted(samp2.find_expectations()) == sorted(exp_samp)
+    else:
+        assert samp2.find_expectations() == exp_samp
 
 
 def test_subclass_pandas_subset_retains_subclass():

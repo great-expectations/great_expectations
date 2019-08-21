@@ -1,6 +1,11 @@
 import great_expectations as ge
 from airflow.hooks.mysql_hook import MySqlHook
 
+####
+#
+# NOTE: this code has not been updated for the new GE 0.7 naming conventions
+#
+####
 
 class ExpectationMySQLHook(MySqlHook):
 

@@ -8,9 +8,9 @@
     },
     "schemas": {
       "spark": {
-        "a": "string",
-        "b": "string",
-        "c": "string"
+        "a": "StringType",
+        "b": "StringType",
+        "c": "StringType"
       }
     },
     "tests": [{
@@ -95,7 +95,8 @@
         "success":true,
         "unexpected_index_list": [3],
         "unexpected_list": ["bdd"]
-      }
+      },
+      "suppress_test_for": ["sqlite"]
     },{
       "title": "Positive test. all missing values",
       "exact_match_out" : false,

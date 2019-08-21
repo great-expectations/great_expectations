@@ -119,10 +119,10 @@ def test_sqlalchemydataset_raises_error_on_missing_table_name():
     assert str(ve.value) == "No table_name provided."
 
 
-def test_sqlalchemmydataset_builds_guid_for_table_name_on_custom_sql():
+def test_sqlalchemydataset_builds_guid_for_table_name_on_custom_sql():
+    engine = sa.create_engine('sqlite://')
     with mock.patch("uuid.uuid4") as mock_uuid:
         mock_uuid.return_value = "a-guid-with-dashes-that-will-break-sql"
-        engine = mock.MagicMock()
 
         dataset = SqlAlchemyDataset(engine=engine, custom_sql="select 1")
         assert dataset._table.name =="a_guid_with_dashes_that_will_break_sql"
@@ -140,8 +140,7 @@ def test_sqlalchemydataset_with_custom_sql():
     data.to_sql(name='test_sql_data', con=engine, index=False)
 
     custom_sql = "SELECT name, pet FROM test_sql_data WHERE age > 12"
-    custom_sql_dataset = SqlAlchemyDataset(
-        'test_sql_data', engine=engine, custom_sql=custom_sql)
+    custom_sql_dataset = SqlAlchemyDataset(engine=engine, custom_sql=custom_sql)
 
     custom_sql_dataset._initialize_expectations()
     custom_sql_dataset.set_default_expectation_argument(
@@ -183,7 +182,7 @@ def test_column_fallback():
 
 @pytest.fixture
 def unexpected_count_df():
-    return  get_dataset("SqlAlchemyDataset", {"a": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
+    return  get_dataset("sqlite", {"a": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
 
 
 def test_sqlalchemy_dataset_unexpected_count_calculations(unexpected_count_df):

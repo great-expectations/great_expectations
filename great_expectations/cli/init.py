@@ -5,7 +5,7 @@ import glob
 import shutil
 
 from great_expectations.data_context.util import safe_mmkdir
-from great_expectations import __version__
+from great_expectations import __version__ as __version__
 
 
 def script_relative_path(file_path):
@@ -26,20 +26,17 @@ def script_relative_path(file_path):
 
 
 def scaffold_directories_and_notebooks(base_dir):
-    #!!! FIXME: Check to see if the directory already exists. If it does, refuse with:
-    # `great_expectations/` already exists.
-    # If you're certain you want to re-initialize Great Expectations within this project,
-    # please delete the whole `great_expectations/` directory and run `great_expectations init` again.
+    """Add basic directories for an initial, opinionated GE project."""
 
     safe_mmkdir(base_dir, exist_ok=True)
     notebook_dir_name = "notebooks"
 
-    open(os.path.join(base_dir, ".gitignore"), 'w').write("""uncommitted/""")
+    open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
 
     for directory in [notebook_dir_name, "expectations", "datasources", "uncommitted", "plugins", "fixtures"]:
         safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
 
-    for uncommitted_directory in ["validations", "credentials", "samples"]:
+    for uncommitted_directory in ["validations", "credentials", "documentation", "samples"]:
         safe_mmkdir(os.path.join(base_dir, "uncommitted",
                                  uncommitted_directory), exist_ok=True)
 
@@ -49,14 +46,14 @@ def scaffold_directories_and_notebooks(base_dir):
             base_dir, notebook_dir_name, notebook_name))
 
 
-#!!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
+# !!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
 greeting_1 = """
 Always know what to expect from your data.
 
 If you're new to Great Expectations, this tutorial is a good place to start:
 
-    <blue>https://great-expectations.readthedocs.io/en/v%s/intro.html#how-do-i-get-started</blue>
-""" % __version__
+    <blue>https://docs.greatexpectations.io/en/latest/getting_started/cli_init.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+""".format(__version__.replace(".", "_"))
 
 msg_prompt_lets_begin = """
 Let's add Great Expectations to your project, by scaffolding a new great_expectations directory:
@@ -71,6 +68,7 @@ Let's add Great Expectations to your project, by scaffolding a new great_expecta
         ├── uncommitted
         │   ├── validations
         │   ├── credentials
+        │   ├── documentation
         │   └── samples
         └── .gitignore
 

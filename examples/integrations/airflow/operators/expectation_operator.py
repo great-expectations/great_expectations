@@ -11,6 +11,11 @@ import great_expectations as ge
 from examples.integrations.airflow.hooks.s3_csv_hook import ExpectationS3CsvHook
 from examples.integrations.airflow.hooks.db_hook import ExpectationMySQLHook
 
+####
+#
+# NOTE: this code has not been updated for the new GE 0.7 naming conventions
+#
+####
 
 class ExpectationOperator(BaseOperator):
 

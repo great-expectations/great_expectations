@@ -6,14 +6,14 @@
     <title>{% block title %}{% endblock %}</title>
 
     {# {# Remove this when not debugging: #}
-    {# <meta http-equiv="refresh" content="2"/> #}
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
+    {# <meta http-equiv="refresh" content="1"/> #}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
     <style>
       body {
         position: relative;
       }
       .container {
-        margin-top: 50px;
+        padding-top: 50px;
       }
       .sticky {
         position: -webkit-sticky;
@@ -22,41 +22,95 @@
         overflow-y: auto;
         top: 15px;
       }
-      .param-span{
-        background:#eef;
-        padding:5px;
+
+      .ge-section {
+        clear:both;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
       }
 
-      .ge-section{
-        display: flex;
-        flex-flow: row wrap;
-        margin-left: -8px; /* Adjustment for the gutter */
-        width: 100%;
+      .triangle {
+        border: solid #222;
+        border-width: 0 1px 1px 0;
+        display: inline;
+        cursor: pointer;
+        padding: 3px;
+        position: absolute;
+        right: 0;
+        margin-top: 10px;
+
+        transform: rotate(40deg);
+        -webkit-transform: rotate(40deg);
+        transition: .3s transform ease-in-out;
       }
 
-      .ge-section div{
-        flex: auto;
-        {# height: 250px; #}
-        min-width: 150px;
-        margin: 0 8px 8px 0; /* Some gutter */
-        {# background-color: #004;         #}
-        {# border: 1px solid black; #}
+      .collapsed .triangle{
+        transform: rotate(-140deg);
+        -webkit-transform: rotate(-140deg);
+        transition: .3s transform ease-in-out;
       }
 
-      tr{
-        padding: 2px;
+      .popover {
+        max-width: 100%;
       }
-      tr.even{
-        background:#ddd;
+
+      .cooltip {
+        display:inline-block;
+        position:relative;
+        text-align:left;
+        cursor:pointer;
       }
-      td{
-        padding: 1px 10px 1px 10px;
-      }
+
+      .cooltip .top {
+        min-width:200px;
+        top:-6px;
+        left:50%;
+        transform:translate(-50%, -100%);
+        padding:10px 20px;
+        color:#FFFFFF;
+        background-color:#222222;
+        font-weight:normal;
+        font-size:13px;
+        border-radius:8px;
+        position:absolute;
+        z-index:99999999 !important;
+        box-sizing:border-box;
+        box-shadow:0 1px 8px rgba(0,0,0,0.5);
+        display:none;
+        }
+
+        .cooltip:hover .top {
+            display:block;
+            z-index:99999999 !important;
+        }
+
+        .cooltip .top i {
+            position:absolute;
+            top:100%;
+            left:50%;
+            margin-left:-12px;
+            width:24px;
+            height:12px;
+            overflow:hidden;
+        }
+
+        .cooltip .top i::after {
+            content:'';
+            position:absolute;
+            width:12px;
+            height:12px;
+            left:50%;
+            transform:translate(-50%,-50%) rotate(45deg);
+            background-color:#222222;
+            box-shadow:0 1px 8px rgba(0,0,0,0.5);
+        }
+
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/vega@5.3.5/build/vega.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@3.2.1/build/vega-lite.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-embed@4.0.0/build/vega-embed.js"></script>
+    <script src="https://kit.fontawesome.com/8217dffd95.js"></script>
   </head>
 
   <body
@@ -64,20 +118,54 @@
         data-target="#navigation"
         data-offset="50"
     >
-    {% include 'ge_info.j2' %}
-    <div class="container">
+    {% include 'breadcrumbs.j2' %}
+
+    <div class="container-fluid px-3">
       <div class="row">
-        <div class="col-3">
+        <div class="col-2 navbar-collapse">
           {% block navbar %}{% include 'navbar.j2' %}{% endblock %}
         </div>
-        <div class="col-9">
-          {% block sections %}{% include 'sections.j2' %}{% endblock %}
+        <div class="col-md-8 col-lg-8 col-xs-12">
+        {% for section in sections %}
+          {% set section_loop = loop -%}
+          {% include 'section.j2' %}
+        {% endfor %}
         </div>
+        <div class="col-lg-2 col-md-2 col-xs-12 d-none d-md-block">
+            {% include 'ge_info.j2' %}
+        </div>
+        <div class="d-block d-sm-none col-12">
+            <div>
+              <div class="row">
+                <img
+                  src="https://great-expectations.readthedocs.io/en/latest/_images/generic_dickens_protagonist.png"
+                  style="
+                    width: 200px;
+                    margin-left: auto;
+                    margin-right: auto;
+                  ">
+              </div>
+            </div>
+            <div class="col-12">
+              <p>
+                Documentation autogenerated using
+                <a href="https://greatexpectations.io">Great Expectations</a>.
+              </p>
+            </div>
+            <div class="alert alert-danger col-12" role="alert">
+                This is a beta feature! Expect changes in API, behavior, and design.
+            </div>
+          </div>
 
       </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(window).on('activate.bs.scrollspy', function () {
+          document.querySelector(".nav-link.active").scrollIntoViewIfNeeded();
+        });
+    </script>
   </body>
 </html>

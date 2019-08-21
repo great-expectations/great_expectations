@@ -6,23 +6,16 @@ import os
 import json
 import errno
 from collections import namedtuple
+import six
 
 logger = logging.getLogger(__name__)
-
-NormalizedDataAssetName = namedtuple("NormalizedDataAssetName", [
-    "datasource",
-    "generator",
-    "generator_asset",
-    "suite"
-])
-
 
 def build_slack_notification_request(validation_json=None):
     # Defaults
     timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
     status = "Failed :x:"
     run_id = None
-    data_asset_name = "no_name_provided_" + str(uuid.uuid1())
+
     title_block = {
         "type": "section",
         "text": {
@@ -34,8 +27,11 @@ def build_slack_notification_request(validation_json=None):
     query = {"blocks": [title_block]}
 
     if validation_json:
-        if "meta" in validation_json and "data_asset_name" in validation_json["meta"]:
-            data_asset_name = validation_json["meta"]["data_asset_name"]
+        if "meta" in validation_json:
+            data_asset_name = validation_json["meta"].get(
+                "data_asset_name", "no_name_provided_" + datetime.datetime.utcnow().isoformat().replace(":", "") + "Z"
+            )
+            expectation_suite_name = validation_json["meta"].get("expectation_suite_name", "default")
 
         n_checks_succeeded = validation_json["statistics"]["successful_expectations"]
         n_checks = validation_json["statistics"]["evaluated_expectations"]
@@ -49,8 +45,15 @@ def build_slack_notification_request(validation_json=None):
         query["blocks"][0]["text"]["text"] = "*Validated batch from data asset:* `{}`\n*Status: {}*\n{}".format(
             data_asset_name, status, check_details_text)
         if "batch_kwargs" in validation_json["meta"]:
-            query["blocks"][1]["text"]["text"] = "Batch kwargs: {}".format(
+            batch_kwargs = {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Batch kwargs: {}".format(
                 json.dumps(validation_json["meta"]["batch_kwargs"], indent=2))
+                }
+            }
+            query["blocks"].append(batch_kwargs)
 
         if "result_reference" in validation_json["meta"]:
             report_element = {
@@ -112,6 +115,11 @@ def get_slack_callback(webhook):
 
 def safe_mmkdir(directory, exist_ok=True):
     """Simple wrapper since exist_ok is not available in python 2"""
+    if not isinstance(directory, six.string_types):
+        raise TypeError("directory must be of type str, not {0}".format({
+            "directory_type": str(type(directory))
+        }))
+
     if not exist_ok:
         raise ValueError(
             "This wrapper should only be used for exist_ok=True; it is designed to make porting easier later")

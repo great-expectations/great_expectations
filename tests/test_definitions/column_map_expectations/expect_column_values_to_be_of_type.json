@@ -20,24 +20,85 @@
           "b": "bool",
           "s": "float64",
           "s1": "int64"
+        },
+        "postgresql": {
+          "x": "INTEGER",
+          "y": "DOUBLE_PRECISION",
+          "z": "TEXT",
+          "n": "TEXT",
+          "b": "BOOLEAN",
+          "s": "DOUBLE_PRECISION",
+          "s1": "BIGINT"
+        },
+        "spark": {
+          "x": "IntegerType",
+          "y": "FloatType",
+          "z": "StringType",
+          "n": "StringType",
+          "b": "BooleanType",
+          "s": "FloatType",
+          "s1": "LongType"
+        },
+        "sqlite": {
+          "x": "INTEGER",
+          "y": "FLOAT",
+          "z": "VARCHAR",
+          "n": "VARCHAR",
+          "b": "BOOLEAN",
+          "s": "FLOAT",
+          "s1": "INTEGER"
+        },
+        "mysql": {
+          "x": "INTEGER",
+          "y": "FLOAT",
+          "z": "TEXT",
+          "n": "TEXT",
+          "b": "BOOLEAN",
+          "s": "FLOAT",
+          "s1": "BIGINT"
         }
       },
       "tests": [
         {
-          "title": "Basic Python int Positive Test",
+          "title": "basic_python_int_positive_test",
           "exact_match_out": false,
           "in": {
             "column": "x",
             "type_": "int"
           },
           "out": {
-            "success": true,
-            "unexpected_list": [],
-            "unexpected_index_list": []
-          }
+            "success": true
+          },
+          "only_for": ["pandas"]
         },
         {
-          "title": "Negative, Python ints are not ",
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "basic_sqlalchemy_int_positive_test",
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "type_": "INTEGER"
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": ["sqlalchemy"]
+        },
+        {
+          "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "basic_spark_int_positive_test",
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "type_": "IntegerType"
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": ["spark"]
+        },
+        {
+          "title": "negative_test_python_ints_are_not_string",
           "exact_match_out": false,
           "in":
           {
@@ -46,13 +107,57 @@
           },
           "out":
           {
-            "success":false,
-            "unexpected_list":[1,2,4],
-            "unexpected_index_list":[0,1,2]
-          }
+            "success":false
+          },
+          "only_for": ["pandas"]
         },
         {
-          "title": "Positive, floats",
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "negative_test_sql_ints_are_not_text",
+          "exact_match_out": false,
+          "in":
+          {
+            "column":"x",
+            "type_":"TEXT"
+          },
+          "out":
+          {
+            "success":false
+          },
+          "only_for": ["postgresql", "mysql"]
+        },
+        {
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "Negative, sqlite integer is not VARCHAR",
+          "exact_match_out": false,
+          "in":
+          {
+            "column":"x",
+            "type_":"VARCHAR"
+          },
+          "out":
+          {
+            "success":false
+          },
+          "only_for": ["sqlite"]
+        },
+        {
+          "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "negative_test_sql_ints_are_not_text",
+          "exact_match_out": false,
+          "in":
+          {
+            "column":"x",
+            "type_":"StringType"
+          },
+          "out":
+          {
+            "success":false
+          },
+          "only_for": ["spark"]
+        },
+        {
+          "title": "positive_test_pandas_floats",
           "exact_match_out": false,
           "in":
           {
@@ -61,20 +166,195 @@
           },
           "out":
           {
-            "success":true,
-            "unexpected_list":[],
-            "unexpected_index_list":[]
-          }
+            "success":true
+          },
+          "only_for": ["pandas"]
         },
         {
-          "title": "Positive, strings",
+          "_note": "type name here works for tested postgres types; for postgres note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "positive_test_postgres_floats",
           "exact_match_out": false,
-          "in":{"column":"z","type_":"string"},
-          "out":{"success":true, "unexpected_list":[], "unexpected_index_list":[]}},
+          "in":
+          {
+            "column":"y",
+            "type_":"DOUBLE_PRECISION"
+          },
+          "out":
+          {
+            "success":true
+          },
+          "only_for": ["postgres"]
+        },
         {
-          "title": "Negative, python floats are not python bools",
+          "_note": "type name here works for tested sql non-postgres types; for sql non-postgres note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "positive_test_sql_non_postgres_floats",
           "exact_match_out": false,
-          "in":{"column":"b","type_":"boolean"},
-          "out":{"success":true, "unexpected_list":[], "unexpected_index_list":[]}}]
+          "in":
+          {
+            "column":"y",
+            "type_":"FLOAT"
+          },
+          "out":
+          {
+            "success":true
+          },
+          "only_for": ["mysql", "sqlite"]
+        },
+        {
+          "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "positive_test_spark_floats",
+          "exact_match_out": false,
+          "in":
+          {
+            "column":"y",
+            "type_":"FloatType"
+          },
+          "out":
+          {
+            "success":true
+          },
+          "only_for": ["spark"]
+        },
+        {
+          "title": "positive_test_pandas_strings",
+          "exact_match_out": false,
+          "in":{"column":"z","type_":"str"},
+          "out":{"success":true, "unexpected_list":[], "unexpected_index_list":[]},
+          "only_for": ["pandas"]
+        },
+        {
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "positive_test_sql_TEXT",
+          "exact_match_out": false,
+          "in":{"column":"z","type_":"TEXT"},
+          "out":{"success":true},
+          "only_for": ["postgresql", "mysql"]
+        },
+        {
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "positive_test_sql_VARCHAR",
+          "exact_match_out": false,
+          "in":{"column":"z","type_":"VARCHAR"},
+          "out":{"success":true},
+          "only_for": ["sqlite"]
+        },
+        {
+          "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "positive_test_spark_StringType",
+          "exact_match_out": false,
+          "in":{"column":"z","type_":"StringType"},
+          "out":{"success":true},
+          "only_for": ["spark"]
+        },
+        {
+          "title": "negative_test_python_floats_are_not_python_bools",
+          "exact_match_out": false,
+          "in":{"column":"b","type_":"bool"},
+          "out":{
+            "success":true
+          },
+          "only_for": ["pandas"]
+        },
+        {
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "negative_test_sqlalchemy_floats_are_not_BOOLEAN",
+          "exact_match_out": false,
+          "in":{"column":"b","type_":"BOOLEAN"},
+          "out":{
+            "success":true
+          },
+          "only_for": ["sqlalchemy"]
+        },
+        {
+          "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "negative_test_spark_floats_are_not_BooleanType",
+          "exact_match_out": false,
+          "in":{"column":"b","type_":"BooleanType"},
+          "out":{
+            "success":true
+          },
+          "only_for": ["spark"]
+        }
+      ]
+    },
+    {
+      "data": {
+        "datetime" : ["2016-01-01T12:34:56", "2016-01-02T11:59:58", "2016-02-02T10:48:36", "2016-02-02T09:33:21", "2016-03-01T08:56:45", "2017-02-01T00:01:02", null, null, null, null],
+        "datetime_tz" : ["2016-01-01T12:34:56Z", "2016-01-02T11:59:58Z", "2016-02-02T10:48:36Z", "2016-02-02T09:33:21Z", "2016-03-01T08:56:45Z", "2017-02-01T00:01:02Z", null, null, null, null]
+      },
+      "schemas": {
+        "pandas" : {
+          "datetime": "datetime64[ns]",
+          "datetime_tz": "timestamp"
+        },
+        "postgresql": {
+          "datetime": "TIMESTAMP",
+          "datetime_tz": "TIMESTAMP"
+        },
+        "spark": {
+          "datetime": "TimestampType",
+          "datetime_tz": "TimestampType"
+        },
+        "sqlite": {
+          "datetime": "DATETIME",
+          "datetime_tz": "DATETIME"
+        },
+        "mysql": {
+          "timestamp": "DATETIME",
+          "timestamp_tz": "DATETIME"
+        }
+      },
+      "tests": [
+        {
+          "title": "positive_pandas_datetime_no_timezone",
+          "exact_match_out": false,
+          "in":{"column":"datetime","type_":"datetime64"},
+          "out":{
+            "success":true,
+            "observed_value": "datetime64"
+          },
+          "only_for": ["pandas"]
+        },
+        {
+          "title": "positive_pandas_datetime_with_timezone",
+          "exact_match_out": false,
+          "in":{"column":"datetime_tz", "type_":"Timestamp"},
+          "out":{
+            "success":true,
+            "observed_value": "Timestamp"
+          },
+          "only_for": ["pandas>=024"]
+        },
+        {
+          "title": "positive_pandas_datetime_with_timezone_pd_022_pd_023",
+          "exact_match_out": false,
+          "in":{"column":"datetime_tz", "type_":"DatetimeTZDtypeType"},
+          "out":{
+            "success":true,
+            "observed_value": "DatetimeTZDtypeType"
+          },
+          "only_for": ["pandas_022", "pandas_023"]
+        },
+        {
+          "title": "negative_pandas_datetime_with_timezone",
+          "exact_match_out": false,
+          "in":{"column":"datetime_tz","type_":"datetime64"},
+          "out":{
+            "success":false,
+            "observed_value_list": ["Timestamp", "DatetimeTZDtypeType"]
+          },
+          "only_for": ["pandas"]
+        },
+        {
+          "title": "negative_pandas_datetime_expected_int",
+          "exact_match_out": false,
+          "in":{"column":"datetime_tz","type_":"int"},
+          "out":{
+            "success":false,
+            "observed_value_list": ["Timestamp", "DatetimeTZDtypeType"]
+          },
+          "only_for": ["pandas"]
+        }
+      ]
     }]
 }
