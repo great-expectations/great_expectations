@@ -99,17 +99,11 @@ def test_ProfilingResultsColumnSectionRenderer_render(titanic_profiled_evrs_1, t
 
 
 def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
-    content_blocks = []
-    # print(titanic_profiled_name_column_evrs)
-    ProfilingResultsColumnSectionRenderer()._render_header(
-        titanic_profiled_name_column_evrs,
-        content_blocks,
+    content_block = ProfilingResultsColumnSectionRenderer()._render_header(
+        evrs=titanic_profiled_name_column_evrs,
         column_type = None
     )
-    # print(json.dumps(content_blocks, indent=2))
-    
-    assert len(content_blocks) == 1
-    content_block = content_blocks[0]
+
     assert content_block["content_block_type"] == "header"
     assert content_block["header"] == {
         "template": "Name",
@@ -158,14 +152,13 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
             }
         }
     }
-    content_blocks = []
-    ProfilingResultsColumnSectionRenderer._render_header(
+
+    # TODO split into a separate test maybe?
+    content_block = ProfilingResultsColumnSectionRenderer._render_header(
         [evr_with_unescaped_dollar_sign],
-        content_blocks=content_blocks,
         column_type=[],
     )
-    print(content_blocks)
-    assert content_blocks[0] == {
+    assert content_block == {
         'content_block_type': 'header',
         'header': {
             'template': 'Car Insurance Premiums ($$)',

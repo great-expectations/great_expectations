@@ -55,7 +55,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             column = section_name
 
         content_blocks = []
-        cls._render_header(evrs, content_blocks, column_type)
+        content_blocks.append(cls._render_header(evrs, column_type))
         # cls._render_column_type(evrs, content_blocks)
         cls._render_overview_table(evrs, content_blocks)
         cls._render_quantile_table(evrs, content_blocks)
@@ -82,7 +82,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         })
 
     @classmethod
-    def _render_header(cls, evrs, content_blocks, column_type=None):
+    def _render_header(cls, evrs, column_type=None):
         # NOTE: This logic is brittle
         try:
             column_name = evrs[0]["expectation_config"]["kwargs"]["column"]
@@ -93,14 +93,14 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             column_type_list = cls._find_evr_by_type(
                 evrs, "expect_column_values_to_be_in_type_list"
             )["expectation_config"]["kwargs"]["type_list"]
+            # TODO dead code what was the intention?
             column_types = ", ".join(column_type_list)
 
         except TypeError:
+            # TODO dead code what was the intention?
             column_types = "None"
 
-        # assert False
-        
-        content_blocks.append(RenderedComponentContent(**{
+        return RenderedComponentContent(**{
             "content_block_type": "header",
             "header": {
                     "template": convert_to_string_and_escape(column_name),
@@ -124,7 +124,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        }))
+        })
 
     @classmethod
     def _render_expectation_types(cls, evrs, content_blocks):
