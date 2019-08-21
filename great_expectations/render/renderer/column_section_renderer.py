@@ -73,7 +73,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         # content_blocks.append(cls._render_expectation_types(evrs))
         # content_blocks.append(cls._render_unrecognized(evrs))
 
-        cls._render_failed(evrs)
+        content_blocks.append(cls._render_failed(evrs))
         populated_content_blocks = list(filter(None, content_blocks))
 
         return RenderedSectionContent(**{
@@ -609,13 +609,12 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
     @classmethod
     def render(cls, validation_results={}):
         column = cls._get_column_name(validation_results)
-    
-        remaining_evrs, content_blocks = cls._render_header(
-            validation_results)
-    
-        remaining_evrs, content_blocks = cls._render_table(
-            remaining_evrs)
-    
+        content_blocks = []
+        remaining_evrs, content_block = cls._render_header(validation_results)
+        content_blocks.append(content_block)
+        remaining_evrs, content_block = cls._render_table(remaining_evrs)
+        content_blocks.append(content_block)
+
         return RenderedSectionContent(**{
             "section_name": column,
             "content_blocks": content_blocks
