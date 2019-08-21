@@ -89,17 +89,6 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         except KeyError:
             column_name = "Table-level expectations"
 
-        try:
-            column_type_list = cls._find_evr_by_type(
-                evrs, "expect_column_values_to_be_in_type_list"
-            )["expectation_config"]["kwargs"]["type_list"]
-            # TODO dead code what was the intention?
-            column_types = ", ".join(column_type_list)
-
-        except TypeError:
-            # TODO dead code what was the intention?
-            column_types = "None"
-
         return RenderedComponentContent(**{
             "content_block_type": "header",
             "header": {
