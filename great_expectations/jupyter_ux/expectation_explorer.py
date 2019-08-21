@@ -24,6 +24,7 @@ class ExpectationExplorer(object):
             'expect_column_median_to_be_between': ['min_value', 'max_value'],
             'expect_column_mean_to_be_between': ['min_value', 'max_value'],
             'expect_column_stdev_to_be_between': ['min_value', 'max_value'],
+            'expect_column_quantile_values_to_be_between': ['quantile_ranges'],
             'expect_column_sum_to_be_between': ['min_value', 'max_value'],
             'expect_column_values_to_not_be_null': ['mostly'],
             'expect_column_values_to_be_null': ['mostly'],
@@ -38,6 +39,9 @@ class ExpectationExplorer(object):
             'expect_column_values_to_not_match_regex_list': ['regex_list', 'mostly'],
             'expect_column_values_to_be_in_set': ['value_set', 'parse_strings_as_datetimes', 'mostly'],
             'expect_column_values_to_not_be_in_set': ['value_set', 'parse_strings_as_datetimes', 'mostly'],
+            'expect_column_distinct_values_to_be_in_set': ['value_set', 'parse_strings_as_datetimes'],
+            'expect_column_distinct_values_to_equal_set': ['value_set', 'parse_strings_as_datetimes'],
+            'expect_column_distinct_values_to_contain_set': ['value_set', 'parse_strings_as_datetimes'],
             'expect_column_most_common_value_to_be_in_set': ['value_set', 'ties_okay'],
             'expect_column_to_exist': ['column_index'],
             'expect_column_value_lengths_to_equal': ['value', 'mostly'],
@@ -58,6 +62,8 @@ class ExpectationExplorer(object):
             'expect_column_chisquare_test_p_value_to_be_greater_than': ['partition_object', 'p'],
             'expect_column_bootstrapped_ks_test_p_value_to_be_greater_than': ['partition_object', 'p', 'bootstrap_samples', 'bootstrap_sample_size'],
             'expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than': ['distribution', 'p_value', 'params'],
+            '_expect_column_values_to_be_in_type_list__aggregate': ['type_list'],
+            '_expect_column_values_to_be_in_type_list__map': ['type_list']
         }
         self.kwarg_widget_exclusions = [
             'column', 'result_format', 'include_config']
