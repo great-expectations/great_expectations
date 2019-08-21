@@ -1,6 +1,7 @@
 from .base import (
     ListOf,
     DotDict,
+    RequiredKeysDotDict,
     LooselyTypedDotDict,
 )
 
