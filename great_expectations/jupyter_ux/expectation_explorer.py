@@ -1471,8 +1471,9 @@ class ExpectationExplorer(object):
     # expectation_suite_editing
     def get_column_names(self, data_asset_name):
         data_asset_state = self.state['data_assets'].get(data_asset_name)
+        if not data_asset_state: return []
         data_asset_expectations = data_asset_state.get('expectations')
-        if not data_asset_state or not data_asset_expectations: return []
+        if not data_asset_expectations: return []
 
         column_names = [column_name for column_name in data_asset_expectations.keys() if column_name != 'non_column_expectations']
         column_names.sort()
@@ -1498,7 +1499,7 @@ class ExpectationExplorer(object):
         data_asset_name = data_asset.get_data_asset_name()
         column_names = self.get_column_names(data_asset_name)
         column_accordions = []
-        data_asset_state = self.state['data_assets'].get(data_asset_name)
+        data_asset_state = self.state['data_assets'].get(data_asset_name, {})
         data_asset_expectations = data_asset_state.get('expectations', {})
 
         ge_version = expectation_suite.get(
