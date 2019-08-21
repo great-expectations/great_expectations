@@ -106,20 +106,20 @@ class ExpectationExplorer(object):
 
         if column:
             data_asset_expectations[column][expectation_type][
-                'success'].value = f'<span><strong>Success: </strong>{str(new_success_value)}</span>'
+                'success'].value = "<span><strong>Success: </strong>{new_success_value}</span>".format(new_success_value=str(new_success_value))
             data_asset_expectations[column][expectation_type]['result_detail_widget']\
                 .children = new_result_widgets
             data_asset_expectations[column][expectation_type]['editor_widget']\
                 .layout\
-                .border = f'2px solid {new_border_color}'
+                .border = "2px solid {new_border_color}".format(new_border_color=new_border_color)
         else:
             data_asset_expectations['non_column_expectations'][expectation_type][
-                'success'].value = f'<span><strong>Success: </strong>{str(new_success_value)}</span>'
+                'success'].value = "<span><strong>Success: </strong>{new_success_value}</span>".format(new_success_value=str(new_success_value))
             data_asset_expectations['non_column_expectations'][expectation_type]['result_detail_widget']\
                 .children = new_result_widgets
             data_asset_expectations['non_column_expectations'][expectation_type]['editor_widget']\
                 .layout\
-                .border = f'2px solid {new_border_color}'
+                .border = "2px solid {new_border_color}".format(new_border_color=new_border_color)
 
     def get_expectation_state(self, data_asset_name, expectation_type, column=None):
         data_asset_state = self.state['data_assets'].get(data_asset_name, {})
@@ -176,7 +176,7 @@ class ExpectationExplorer(object):
                 continue
             if kwarg_name in ancillary_kwargs:
                 continue
-            elif not hasattr(self, f'generate_{kwarg_name}_widget_dict'):
+            elif not hasattr(self, "generate_{kwarg_name}_widget_dict".format(kwarg_name=kwarg_name)):
                 expectation_kwargs[kwarg_name] = widget_dict.get('ge_kwarg_value')
             else:
                 expectation_kwargs[kwarg_name] = widget_dict.get(
@@ -239,7 +239,7 @@ class ExpectationExplorer(object):
             current_widget_dict = current_expectation_kwarg_dict.get(ge_kwarg_name)
 
             if current_widget_dict:
-                if not hasattr(self, f'generate_{ge_kwarg_name}_widget_dict'):
+                if not hasattr(self, "generate_{ge_kwarg_name}_widget_dict".format(ge_kwarg_name=ge_kwarg_name)):
                     current_expectation_kwarg_dict[ge_kwarg_name] = self.generate_expectation_kwarg_fallback_widget_dict(
                         expectation_kwarg_name=ge_kwarg_name, **new_ge_expectation_kwargs)
                 else:
@@ -251,7 +251,7 @@ class ExpectationExplorer(object):
                     )
             else:
                 widget_dict_generator = getattr(
-                    self, f'generate_{ge_kwarg_name}_widget_dict', None)
+                    self, "generate_{ge_kwarg_name}_widget_dict".format(ge_kwarg_name=ge_kwarg_name), None)
                 widget_dict = widget_dict_generator(expectation_state=existing_expectation_state, **new_ge_expectation_kwargs) if widget_dict_generator \
                     else self.generate_expectation_kwarg_fallback_widget_dict(expectation_kwarg_name=ge_kwarg_name, **new_ge_expectation_kwargs)
                 current_expectation_kwarg_dict[ge_kwarg_name] = widget_dict
@@ -261,7 +261,7 @@ class ExpectationExplorer(object):
         self.update_result(data_asset_name=data_asset_name, new_result=expectation_validation_result, column=column)
         # TODO: This is messy. Figure out better way of storing/accessing UI elements
         validation_time_widget = expectation_editor_widget.children[0].children[0].children[0].children[-1]
-        validation_time_widget.value = f'<div><strong>Date/Time Validated (UTC): </strong>{validation_time}</div>'
+        validation_time_widget.value = "<div><strong>Date/Time Validated (UTC): </strong>{validation_time}</div>".format(validation_time=validation_time)
         return expectation_editor_widget
 
     # widget generators for general input fields
@@ -279,7 +279,7 @@ class ExpectationExplorer(object):
         return widgets.Textarea(
             value=value,
             placeholder=placeholder, 
-            description=f'<strong>{description}: </strong>',
+            description="<strong>{description}: </strong>".format(description=description),
             style=self.styles.get('description_width'),
             layout={'width': '400px'},
             description_tooltip=description_tooltip,
@@ -290,7 +290,7 @@ class ExpectationExplorer(object):
         return widgets.Text(
             value=value,
             placeholder=placeholder,
-            description=f'<strong>{description}: </strong>',
+            description="<strong>{description}: </strong>".format(description=description),
             style=self.styles.get('description_width'),
             layout={'width': '400px'},
             description_tooltip=description_tooltip,
@@ -302,7 +302,7 @@ class ExpectationExplorer(object):
         return widgets.RadioButtons(
             options=options,
             value=value,
-            description=f'<strong>{description}: </strong>',
+            description="<strong>{description}: </strong>".format(description=description),
             layout={'width': '400px'},
             style=self.styles.get('description_width'),
             description_tooltip=description_tooltip
@@ -397,7 +397,7 @@ class ExpectationExplorer(object):
             value=value,
             min=0,
             max=max,
-            description=f'<strong>{description}: </strong>',
+            description="<strong>{description}: </strong>".format(description=description),
             style=self.styles.get('description_width'),
             layout={'width': '400px'},
             continuous_update=continuous_update
@@ -811,7 +811,7 @@ class ExpectationExplorer(object):
         inc_dec = expectation_type.split('_')[-1]
         strictly_widget = self.generate_boolean_checkbox_widget(
             value=strictly,
-            description=f'strictly {inc_dec}'
+            description="strictly {inc_dec}".format(inc_dec=inc_dec)
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
@@ -1269,7 +1269,7 @@ class ExpectationExplorer(object):
         ge_kwarg_value = expectation_kwargs.get(
             expectation_kwarg_name)
         warning_message = widgets.HTML(
-            value=f'<div><strong>Warning: </strong>No input widget for kwarg "{expectation_kwarg_name}". To change value, call expectation again with the modified value.</div>',
+            value='<div><strong>Warning: </strong>No input widget for kwarg "{expectation_kwarg_name}". To change value, call expectation again with the modified value.</div>'.format(expectation_kwarg_name=expectation_kwarg_name),
             layout={
                 'width': '400px',
                 'margin': '0px 0px 0px 10px'
@@ -1277,7 +1277,7 @@ class ExpectationExplorer(object):
         )
         static_widget = widgets.Textarea(
             value=str(ge_kwarg_value),
-            description=f'<strong>{expectation_kwarg_name}: </strong>',
+            description="<strong>{expectation_kwarg_name}: </strong>".format(expectation_kwarg_name=expectation_kwarg_name),
             style=self.styles.get('description_width'),
             layout={'width': '400px'},
             disabled=True
@@ -1291,22 +1291,21 @@ class ExpectationExplorer(object):
 
     # widget generators for general info shared between all expectations
     def generate_column_widget(self, column=None):
-        #         return widgets.HTML(value=f'<span><strong>Column: </strong>{column}</span>') if column else None
-        return widgets.HTML(value=f'<div><strong>Column: </strong>{column}</div>') if column else None
+        return widgets.HTML(value="<div><strong>Column: </strong>{column}</div>".format(column=column)) if column else None
 
     def generate_expectation_type_widget(self, expectation_type):
-        return widgets.HTML(value=f'<span><strong>Expectation Type: </strong>{expectation_type}</span>')
+        return widgets.HTML(value="<span><strong>Expectation Type: </strong>{expectation_type}</span>".format(expectation_type=expectation_type))
 
     def generate_basic_expectation_info_box(
         self, data_asset_name, expectation_type, success_widget, validation_time, column=None):
         if column:
             return widgets.VBox(
                 [
-                    widgets.HTML(value=f'<div><strong>Data Asset Name: </strong>{data_asset_name}</div>'),
+                    widgets.HTML(value="<div><strong>Data Asset Name: </strong>{data_asset_name}</div>".format(data_asset_name=data_asset_name)),
                     self.generate_column_widget(column=column),
                     self.generate_expectation_type_widget(expectation_type),
                     success_widget,
-                    widgets.HTML(value=f'<div><strong>Date/Time Validated (UTC): </strong>{validation_time}</div>'),
+                    widgets.HTML(value="<div><strong>Date/Time Validated (UTC): </strong>{validation_time}</div>".format(validation_time=validation_time)),
                 ],
                 layout=widgets.Layout(margin='10px', width='40%')
             )
@@ -1314,11 +1313,11 @@ class ExpectationExplorer(object):
             return widgets.VBox(
                 [
                     widgets.HTML(
-                        value=f'<div><strong>Data Asset Name: </strong>{data_asset_name}</div>'),
+                        value="<div><strong>Data Asset Name: </strong>{data_asset_name}</div>".format(data_asset_name=data_asset_name)),
                     self.generate_expectation_type_widget(expectation_type),
                     success_widget,
                     widgets.HTML(
-                        value=f'<div><strong>Date/Time Validated (UTC): </strong>{validation_time}</div>'),
+                        value="<div><strong>Date/Time Validated (UTC): </strong>{validation_time}</div>".format(validation_time=validation_time)),
                 ],
                 layout=widgets.Layout(margin='10px', width='40%')
             )
@@ -1330,7 +1329,7 @@ class ExpectationExplorer(object):
             result_detail_widgets.append(
                 widgets.HTML(
                     value="<span><strong>{0}: </strong>{1:.2f}</span>".format(result_title, result_value) if type(result_value) is float
-                    else f'<span><strong>{result_title}: </strong>{result_value}</span>'
+                    else "<span><strong>{result_title}: </strong>{result_value}</span>".format(result_title=result_title, result_value=result_value)
 
                 )
             )
@@ -1366,7 +1365,7 @@ class ExpectationExplorer(object):
         # success_widget
         success = expectation_validation_result['success']
         success_widget = widgets.HTML(
-            value=f'<span><strong>Success: </strong>{str(success)}</span>')
+            value="<span><strong>Success: </strong>{success}</span>".format(success=str(success)))
 
         # widget with result details
         result_detail_widget = widgets.VBox(children=self.generate_expectation_result_detail_widgets(
@@ -1411,7 +1410,7 @@ class ExpectationExplorer(object):
         expectation_kwarg_input_widget_dicts = []
         for expectation_kwarg_name in self.expectation_kwarg_field_names.get(expectation_type):
             widget_dict_generator = getattr(
-                self, f'generate_{expectation_kwarg_name}_widget_dict', None)
+                self, "generate_{expectation_kwarg_name}_widget_dict".format(expectation_kwarg_name=expectation_kwarg_name), None)
             widget_dict = widget_dict_generator(
                 expectation_state=expectation_state,
                 **expectation_kwargs) if widget_dict_generator else \
@@ -1447,7 +1446,8 @@ class ExpectationExplorer(object):
                 margin='5px'
             )
         )
-        expectation_editor_title = f'{column} | {expectation_type}' if column else f'non_column_expectation | {expectation_type}'
+        expectation_editor_title = "{column} | {expectation_type}".format(column=column, expectation_type=expectation_type) if column \
+            else "non_column_expectation | {expectation_type}".format(expectation_type=expectation_type)
         expectation_editor_widget.set_title(0, expectation_editor_title)
 
         if collapsed:
