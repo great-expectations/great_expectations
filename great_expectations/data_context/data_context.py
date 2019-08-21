@@ -69,7 +69,7 @@ class ConfigOnlyDataContext(object):
 
     Together, these changes make ConfigOnlyDataContext class more testable.
     
-    DataContext itself inherits from ConfigOnlyDataContext. It is backward compatible with the v0.7.* implementation of DataContext.
+    DataContext itself inherits from ConfigOnlyDataContext. It behaves essentially the same as the v0.7.* implementation of DataContext.
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
@@ -1235,7 +1235,7 @@ class ConfigOnlyDataContext(object):
             data_asset_name: name of data asset for which to get validation result
             expectation_suite_name: expectation_suite name for which to get validation result (default: "default")
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
-            # validations_store: the store from which to get validation results
+            validations_store_name: the name of the store from which to get validation results
             failed_only: if True, filter the result to return only failed expectations
 
         Returns:
