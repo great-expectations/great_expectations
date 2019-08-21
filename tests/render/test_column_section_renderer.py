@@ -193,8 +193,8 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
 #     evrs = {}
 #     ProfilingResultsColumnSectionRenderer()._render_values_set(evrs, content_blocks)
 
-def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_profiled_evrs_1):
 
+def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_profiled_evrs_1):
     print(titanic_profiled_evrs_1["results"][0])
     distinct_values_evrs = [evr for evr in titanic_profiled_evrs_1["results"] if evr["expectation_config"]["expectation_type"] == "expect_column_distinct_values_to_be_in_set"]
     
@@ -202,11 +202,9 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_pr
 
     content_blocks = []
     for evr in distinct_values_evrs:
-        ProfilingResultsColumnSectionRenderer()._render_bar_chart_table(
-            distinct_values_evrs,
-            content_blocks,
+        content_blocks.append(
+            ProfilingResultsColumnSectionRenderer()._render_bar_chart_table(distinct_values_evrs)
         )
-    print(json.dumps(content_blocks, indent=2))
 
     assert len(content_blocks) == 4
 

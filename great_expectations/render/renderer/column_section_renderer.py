@@ -55,30 +55,30 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             column = section_name
 
         content_blocks = []
+
         content_blocks.append(cls._render_header(evrs, column_type))
-        # cls._render_column_type(evrs, content_blocks)
-        cls._render_overview_table(evrs, content_blocks)
-        cls._render_quantile_table(evrs, content_blocks)
-        cls._render_stats_table(evrs, content_blocks)
-        cls._render_histogram(evrs, content_blocks)
-        cls._render_values_set(evrs, content_blocks)
-        cls._render_bar_chart_table(evrs, content_blocks)
+        # content_blocks.append(cls._render_column_type(evrs))
+        content_blocks.append(cls._render_overview_table(evrs))
+        content_blocks.append(cls._render_quantile_table(evrs))
+        content_blocks.append(cls._render_stats_table(evrs))
+        content_blocks.append(cls._render_histogram(evrs))
+        content_blocks.append(cls._render_values_set(evrs))
+        content_blocks.append(cls._render_bar_chart_table(evrs))
 
-        # cls._render_statistics(evrs, content_blocks)
-        # cls._render_common_values(evrs, content_blocks)
-        # cls._render_extreme_values(evrs, content_blocks)
+        # content_blocks.append(cls._render_statistics(evrs))
+        # content_blocks.append(cls._render_common_values(evrs))
+        # content_blocks.append(cls._render_extreme_values(evrs))
+        # content_blocks.append(cls._render_frequency(evrs))
+        # content_blocks.append(cls._render_composition(evrs))
+        # content_blocks.append(cls._render_expectation_types(evrs))
+        # content_blocks.append(cls._render_unrecognized(evrs))
 
-        # cls._render_frequency(evrs, content_blocks)
-        # cls._render_composition(evrs, content_blocks)
-
-        # cls._render_expectation_types(evrs, content_blocks)
-        # cls._render_unrecognized(evrs, content_blocks)
-
-        cls._render_failed(evrs, content_blocks)
+        cls._render_failed(evrs)
+        populated_content_blocks = list(filter(None, content_blocks))
 
         return RenderedSectionContent(**{
             "section_name": column,
-            "content_blocks": content_blocks,
+            "content_blocks": populated_content_blocks,
         })
 
     @classmethod
@@ -187,7 +187,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         }))
 
     @classmethod
-    def _render_overview_table(cls, evrs, content_blocks):
+    def _render_overview_table(cls, evrs):
         unique_n = cls._find_evr_by_type(
             evrs,
             "expect_column_unique_value_count_to_be_between"
@@ -218,10 +218,10 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 }
 
             }
-            content_blocks.append(new_content_block)
+            return new_content_block
 
     @classmethod
-    def _render_quantile_table(cls, evrs, content_blocks):
+    def _render_quantile_table(cls, evrs):
         table_rows = []
 
         quantile_evr = cls._find_evr_by_type(
@@ -256,7 +256,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 quantile_ranges[idx],
             ])
 
-        content_blocks.append(RenderedComponentContent(**{
+        return RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Quantiles",
             "table": table_rows,
@@ -269,10 +269,10 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["table", "table-sm", "table-unbordered"],
                 }
             },
-        }))
+        })
 
     @classmethod
-    def _render_stats_table(cls, evrs, content_blocks):
+    def _render_stats_table(cls, evrs):
         table_rows = []
 
         mean_evr = cls._find_evr_by_type(
@@ -340,7 +340,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             ])
 
         if len(table_rows) > 0:
-            content_blocks.append(RenderedComponentContent(**{
+            return RenderedComponentContent(**{
                 "content_block_type": "table",
                 "header": "Statistics",
                 "table": table_rows,
@@ -353,12 +353,12 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                         "classes": ["table", "table-sm", "table-unbordered"],
                     }
                 },
-            }))
+            })
         else:
             return
 
     @classmethod
-    def _render_values_set(cls, evrs, content_blocks):
+    def _render_values_set(cls, evrs):
         set_evr = cls._find_evr_by_type(
             evrs,
             "expect_column_values_to_be_in_set"
@@ -419,10 +419,11 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             }
         })
 
-        content_blocks.append(new_block)
+        return new_block
+
 
     @classmethod
-    def _render_histogram(cls, evrs, content_blocks):
+    def _render_histogram(cls, evrs):
         # NOTE: This code is very brittle
         kl_divergence_evr = cls._find_evr_by_type(
             evrs,
@@ -464,7 +465,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         chart = bars.to_json()
 
-        new_block = RenderedComponentContent(**{
+        return RenderedComponentContent(**{
             "content_block_type": "graph",
             "header":
                 {
@@ -482,10 +483,9 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             }
         })
 
-        content_blocks.append(new_block)
 
     @classmethod
-    def _render_bar_chart_table(cls, evrs, content_blocks):
+    def _render_bar_chart_table(cls, evrs):
         distinct_values_set_evr = cls._find_evr_by_type(
             evrs,
             "expect_column_distinct_values_to_be_in_set"
@@ -539,13 +539,11 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             }
         })
 
-        content_blocks.append(new_block)
+        return new_block
 
     @classmethod
-    def _render_failed(cls, evrs, content_blocks):
-        failed_block = ExceptionListContentBlockRenderer.render(evrs, include_column_name=False)
-        if failed_block is not None:
-            content_blocks.append(failed_block)
+    def _render_failed(cls, evrs):
+        return ExceptionListContentBlockRenderer.render(evrs, include_column_name=False)
 
     @classmethod
     def _render_unrecognized(cls, evrs, content_blocks):
