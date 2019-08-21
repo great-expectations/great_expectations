@@ -380,13 +380,19 @@ def test_render_value_list():
         'content_block_type': 'value_list',
         'header': 'Example values',
         'value_list': [{
-            'template': '$value',
-            'params': {'value': '0'},
-            'styling': {'default': {'classes': ['badge', 'badge-info']}}
+            'content_block_type': 'string_template',
+            'string_template': {
+                'template': '$value',
+                'params': {'value': '0'},
+                'styling': {'default': {'classes': ['badge', 'badge-info']}}
+            }
         }, {
-            'template': '$value',
-            'params': {'value': '1'},
-            'styling': {'default': {'classes': ['badge', 'badge-info']}}
+            'content_block_type': 'string_template',
+            'string_template': {
+                'template': '$value',
+                'params': {'value': '1'},
+                'styling': {'default': {'classes': ['badge', 'badge-info']}}
+            }
         }],
         'styling': {
             'classes': ['col-4'],
