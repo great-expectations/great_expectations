@@ -1,9 +1,13 @@
 from six import string_types
 
 from ..types import (
+    DotDict,
     LooselyTypedDotDict,
     ListOf,
 )
+
+class ActionInternalConfig(DotDict):
+    pass
 
 class ActionConfig(LooselyTypedDotDict):
     _allowed_keys = set([
@@ -14,7 +18,7 @@ class ActionConfig(LooselyTypedDotDict):
     _key_types = {
         "module_name" : str, #This should be string_types. Need to merge in fixes to LooselyTypedDataDcit before that will work, though...
         "class_name" : str, #This should be string_types. Need to merge in fixes to LooselyTypedDataDcit before that will work, though...
-        "kwargs" : dict,
+        "kwargs" : ActionInternalConfig,
     }
 
 class ActionSetConfig(LooselyTypedDotDict):

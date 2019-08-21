@@ -2,7 +2,7 @@ from .types import (
     ActionConfig
 )
 
-class BasicValidationAction():
+class BasicValidationAction(object):
     def __init__(self, config):
         #TODO: Add type checking
         # assert isinstance(config, ActionInternalConfig)
@@ -42,8 +42,8 @@ class SummarizeAndSendToStoreAction(NameSpaceAwareValidationAction):
 
         #??? Do we need a view_class as well?
 
+        # NOTE: Eventually, we probably need some checks to verify that this store is compatible with validation_result_suite_identifiers.
         self.target_store = stores[self.config.target_store_name]
-        #Eventually, we probably need some checks to verify that this store is compatible with validation_result_suite_identifiers.
 
     def take_action(self, validation_result_suite, validation_result_suite_identifier):
         rendered_summary = self.summarization_class.render(validation_result_suite)
