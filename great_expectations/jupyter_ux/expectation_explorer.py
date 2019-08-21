@@ -97,7 +97,7 @@ class ExpectationExplorer(object):
             'description_width': {'description_width': '150px'}
         }
 
-    def update_result(self, *, data_asset_name, new_result, column=None):
+    def update_result(self, data_asset_name, new_result, column=None):
         new_success_value = new_result.get('success')
         expectation_type = new_result['expectation_config'].get('expectation_type')
         new_result_widgets = self.generate_expectation_result_detail_widgets(result=new_result.get('result', {}))
@@ -184,7 +184,7 @@ class ExpectationExplorer(object):
 
         return expectation_kwargs
 
-    def update_kwarg_widget_dict(self, *, expectation_state, current_widget_dict, ge_kwarg_name, new_ge_kwarg_value):
+    def update_kwarg_widget_dict(self, expectation_state, current_widget_dict, ge_kwarg_name, new_ge_kwarg_value):
         def update_tag_list_widget_dict(widget_dict, new_list):
             widget_dict['ge_kwarg_value'] = new_list
             widget_display = widget_dict['widget_display']
@@ -265,7 +265,7 @@ class ExpectationExplorer(object):
         return expectation_editor_widget
 
     # widget generators for general input fields
-    def generate_boolean_checkbox_widget(self, *, value, description='', description_tooltip='', disabled=False):
+    def generate_boolean_checkbox_widget(self, value, description='', description_tooltip='', disabled=False):
         return widgets.Checkbox(
             value=value,
             description=description,
@@ -275,7 +275,7 @@ class ExpectationExplorer(object):
             disabled=disabled
         )
 
-    def generate_text_area_widget(self, *, value, description='', description_tooltip='', continuous_update=False, placeholder=''):
+    def generate_text_area_widget(self, value, description='', description_tooltip='', continuous_update=False, placeholder=''):
         return widgets.Textarea(
             value=value,
             placeholder=placeholder, 
@@ -286,7 +286,7 @@ class ExpectationExplorer(object):
             continuous_update=continuous_update
         )
 
-    def generate_text_widget(self, *, value, description='', description_tooltip='', continuous_update=False, placeholder='', disabled=False):
+    def generate_text_widget(self, value, description='', description_tooltip='', continuous_update=False, placeholder='', disabled=False):
         return widgets.Text(
             value=value,
             placeholder=placeholder,
@@ -298,7 +298,7 @@ class ExpectationExplorer(object):
             disabled=disabled
         )
 
-    def generate_radio_buttons_widget(self, *, options=[], value, description='', description_tooltip=''):
+    def generate_radio_buttons_widget(self, value, options=[], description='', description_tooltip=''):
         return widgets.RadioButtons(
             options=options,
             value=value,
@@ -308,7 +308,7 @@ class ExpectationExplorer(object):
             description_tooltip=description_tooltip
         )
 
-    def generate_remove_expectation_button(self, *, expectation_state):
+    def generate_remove_expectation_button(self, expectation_state):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)['data_asset']
         expectation_feedback_widget = expectation_state['expectation_feedback_widget']
@@ -346,7 +346,7 @@ class ExpectationExplorer(object):
 
         return remove_expectation_button
 
-    def generate_tag_button(self, *, expectation_state, tag, tag_list, widget_display):
+    def generate_tag_button(self, expectation_state, tag, tag_list, widget_display):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -382,7 +382,7 @@ class ExpectationExplorer(object):
 
         return tag_button
 
-    def generate_tag_button_list(self, *, expectation_state, tag_list, widget_display):
+    def generate_tag_button_list(self, expectation_state, tag_list, widget_display):
         return [
             self.generate_tag_button(
                 expectation_state=expectation_state,
@@ -392,7 +392,7 @@ class ExpectationExplorer(object):
             ) for tag in tag_list
         ] if tag_list else []
 
-    def generate_zero_or_positive_integer_widget(self, *, value, max=int(9e300), description='', continuous_update=False):
+    def generate_zero_or_positive_integer_widget(self, value, max=int(9e300), description='', continuous_update=False):
         return widgets.BoundedIntText(
             value=value,
             min=0,
@@ -404,7 +404,7 @@ class ExpectationExplorer(object):
         )
 
     # widget dict generators for kwarg input fields
-    def generate_output_strftime_format_widget_dict(self, *, expectation_state, output_strftime_format='', column=None, **expectation_kwargs):
+    def generate_output_strftime_format_widget_dict(self, expectation_state, output_strftime_format='', column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -437,7 +437,7 @@ class ExpectationExplorer(object):
 
         return widget_dict
 
-    def generate_strftime_format_widget_dict(self, *, expectation_state, strftime_format='', column=None, **expectation_kwargs):
+    def generate_strftime_format_widget_dict(self, expectation_state, strftime_format='', column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -466,7 +466,7 @@ class ExpectationExplorer(object):
 
         return widget_dict
 
-    def generate_value_widget_dict(self, *, expectation_state, value=None, column=None, **expectation_kwargs):
+    def generate_value_widget_dict(self, expectation_state, value=None, column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -492,7 +492,7 @@ class ExpectationExplorer(object):
 
         return widget_dict
 
-    def generate_json_schema_widget_dict(self, *, expectation_state, json_schema='', column=None, **expectation_kwargs):
+    def generate_json_schema_widget_dict(self, expectation_state, json_schema='', column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -518,7 +518,7 @@ class ExpectationExplorer(object):
 
         return widget_dict
 
-    def generate_ties_okay_widget_dict(self, *, expectation_state, ties_okay=None, column=None, **expectation_kwargs):
+    def generate_ties_okay_widget_dict(self, expectation_state, ties_okay=None, column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -547,15 +547,15 @@ class ExpectationExplorer(object):
 
         return widget_dict
 
-    def generate_match_on_widget_dict(self, *, expectation_state, match_on='any', column=None, **expectation_kwargs):
+    def generate_match_on_widget_dict(self, expectation_state, match_on='any', column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
         expectation_feedback_widget = expectation_state['expectation_feedback_widget']
         expectation_type = expectation_state['expectation_type']
         match_on_widget = self.generate_radio_buttons_widget(
-            options=['any', 'all'],
             value=match_on,
+            options=['any', 'all'],
             description='match_on',
             description_tooltip='Use “any” if the value should match at least one regular expression in the list. Use “all” if it should match each regular expression in the list.'
         )
@@ -577,7 +577,7 @@ class ExpectationExplorer(object):
 
         return widget_dict
 
-    def generate_regex_list_widget_dict(self, *, expectation_state, regex_list=[], column=None, **expectation_kwargs):
+    def generate_regex_list_widget_dict(self, expectation_state, regex_list=[], column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -636,7 +636,7 @@ class ExpectationExplorer(object):
 
         return widget_dict
 
-    def generate_column_list_widget_dict(self, *, expectation_state, column_list=[], column=None, **expectation_kwargs):
+    def generate_column_list_widget_dict(self, expectation_state, column_list=[], column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -697,7 +697,7 @@ class ExpectationExplorer(object):
 
         return widget_dict
 
-    def generate_column_index_widget_dict(self, *, expectation_state, column_index='', column, **expectation_kwargs):
+    def generate_column_index_widget_dict(self, expectation_state, column, column_index='', **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -738,7 +738,7 @@ class ExpectationExplorer(object):
 
         return widget_dict
 
-    def generate_regex_widget_dict(self, *, expectation_state, regex='', column=None, **expectation_kwargs):
+    def generate_regex_widget_dict(self, expectation_state, regex='', column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -765,7 +765,7 @@ class ExpectationExplorer(object):
         return widget_dict
 
     def generate_parse_strings_as_datetimes_widget_dict(
-            self, *, expectation_state, parse_strings_as_datetimes=None, column=None, **expectation_kwargs):
+            self, expectation_state, parse_strings_as_datetimes=None, column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -802,7 +802,7 @@ class ExpectationExplorer(object):
 
         return widget_dict
  
-    def generate_strictly_widget_dict(self, *, expectation_state, strictly=None, column=None, **expectation_kwargs):
+    def generate_strictly_widget_dict(self, expectation_state, strictly=None, column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -830,7 +830,7 @@ class ExpectationExplorer(object):
 
         return widget_dict
 
-    def generate_mostly_widget_dict(self, *, mostly=1, expectation_state, column=None, **expectation_kwargs):
+    def generate_mostly_widget_dict(self, expectation_state, mostly=1, column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -865,7 +865,7 @@ class ExpectationExplorer(object):
 
         return widget_dict
     
-    def generate_min_max_type_widget_dict(self, *, expectation_state, type_option=None, column=None, **expectation_kwargs):
+    def generate_min_max_type_widget_dict(self, expectation_state, type_option=None, column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -885,7 +885,7 @@ class ExpectationExplorer(object):
             type_option = 'string'
 
         min_max_type_widget = self.generate_radio_buttons_widget(
-            options=['string', 'number'], value=type_option, description='min/max type')
+            value=type_option, options=['string', 'number'], description='min/max type')
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_min_max_type_change(change):
@@ -924,7 +924,7 @@ class ExpectationExplorer(object):
             'kwarg_widget': min_max_type_widget
         }
 
-    def generate_min_value_widget_dict(self, *, expectation_state, min_value=None, column=None, **expectation_kwargs):
+    def generate_min_value_widget_dict(self, expectation_state, min_value=None, column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -1049,7 +1049,7 @@ class ExpectationExplorer(object):
 
         return min_value_widget_dict
 
-    def generate_max_value_widget_dict(self, *, expectation_state, max_value=None, column=None, **expectation_kwargs):
+    def generate_max_value_widget_dict(self, expectation_state, max_value=None, column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -1173,7 +1173,7 @@ class ExpectationExplorer(object):
 
         return max_value_widget_dict
 
-    def generate_value_set_widget_dict(self, *, expectation_state, value_set=[], column=None, **expectation_kwargs):
+    def generate_value_set_widget_dict(self, expectation_state, value_set=[], column=None, **expectation_kwargs):
         data_asset_name = expectation_state['data_asset_name']
         data_asset = self.state['data_assets'].get(data_asset_name)[
             'data_asset']
@@ -1265,7 +1265,7 @@ class ExpectationExplorer(object):
 
         return widget_dict
 
-    def generate_expectation_kwarg_fallback_widget_dict(self, *, expectation_kwarg_name, **expectation_kwargs):
+    def generate_expectation_kwarg_fallback_widget_dict(self, expectation_kwarg_name, **expectation_kwargs):
         ge_kwarg_value = expectation_kwargs.get(
             expectation_kwarg_name)
         warning_message = widgets.HTML(
@@ -1323,7 +1323,7 @@ class ExpectationExplorer(object):
                 layout=widgets.Layout(margin='10px', width='40%')
             )
 
-    def generate_expectation_result_detail_widgets(self, *, result={}):
+    def generate_expectation_result_detail_widgets(self, result={}):
         result_detail_widgets = []
 
         for result_title, result_value in result.items():
