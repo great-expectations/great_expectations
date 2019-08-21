@@ -59,27 +59,28 @@ class RequiredKeysDotDict(DotDict):
                 ))
 
         for key, value in self.items():
-            if key in self._key_types and coerce_types:
-                # Update values if coerce_types==True
-                try:
-                    # If the given type is an instance of LooselyTypedDotDict, apply coerce_types recursively
-                    if isinstance(self._key_types[key], ListOf):
-                        if inspect.isclass(self._key_types[key].type_) and issubclass(self._key_types[key].type_,
-                                                                                      RequiredKeysDotDict):
-                            value = [self._key_types[key].type_(coerce_types=True, **v) for v in value]
-                        else:
-                            value = [self._key_types[key].type_(
-                                v) for v in value]
+            if key in self._key_types:
+                if coerce_types:
+                    # Update values if coerce_types==True
+                    try:
+                        # If the given type is an instance of LooselyTypedDotDict, apply coerce_types recursively
+                        if isinstance(self._key_types[key], ListOf):
+                            if inspect.isclass(self._key_types[key].type_) and issubclass(self._key_types[key].type_,
+                                                                                          RequiredKeysDotDict):
+                                value = [self._key_types[key].type_(coerce_types=True, **v) for v in value]
+                            else:
+                                value = [self._key_types[key].type_(
+                                    v) for v in value]
 
-                    else:
-                        if inspect.isclass(self._key_types[key]) and issubclass(self._key_types[key],
-                                                                                RequiredKeysDotDict):
-                            value = self._key_types[key](coerce_types=True, **value)
                         else:
-                            value = self._key_types[key](value)
-                except TypeError as e:
-                    raise ("Unable to initialize " + self.__class__.__name__ + ": could not convert type. TypeError "
-                                                                               "raised: " + str(e))
+                            if inspect.isclass(self._key_types[key]) and issubclass(self._key_types[key],
+                                                                                    RequiredKeysDotDict):
+                                value = self._key_types[key](coerce_types=True, **value)
+                            else:
+                                value = self._key_types[key](value)
+                    except TypeError as e:
+                        raise ("Unable to initialize " + self.__class__.__name__ + ": could not convert type. TypeError "
+                                                                                   "raised: " + str(e))
                 # Validate types
                 self._validate_value_type(key, value, self._key_types[key])
 
@@ -104,16 +105,22 @@ class RequiredKeysDotDict(DotDict):
 
     __delattr__ = __delitem__
 
-    @classmethod
-    def _validate_value_type(cls, key, value, type_):
-        if type(value) != type_:
-            if isinstance(type_, ListOf):
-                if not isinstance(value, Iterable):
-                    raise TypeError("key: {!r} must be an Iterable type, not {!r}".format(
+    def _validate_value_type(self, key, value, type_):
+        # TODO: Catch errors and raise more informative error messages here
+        if isinstance(type_, ListOf):
+            if not isinstance(value, Iterable):
+                raise TypeError("key: {!r} must be an Iterable type, not {!r}".format(
+                    key,
+                    type(value),
+                ))
+
+            for v in value:
+                if not isinstance(v, type_.type_):
+                    raise TypeError("values in key: {!r} must be of type: {!r}, not {!r} {!r}".format(
                         key,
                         type_.type_,
-                        value,
-                        type(value),
+                        v,
+                        type(v),
                     ))
 
         else:

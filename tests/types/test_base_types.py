@@ -181,8 +181,8 @@ def test_LooselyTypedDotDict_subclass_key_types():
             "x",
         ])
         _key_types = {
-            "x" : int,
-            "y" : str,
+            "x": int,
+            "y": str,
         }
 
     d = MyLooselyTypedDotDict(**{
