@@ -115,6 +115,9 @@ class ContextAwareStore(object):
     def list_keys(self):
         raise NotImplementedError
 
+    def has_key(self, key):
+        raise NotImplementedError
+
 
 class InMemoryStore(ContextAwareStore):
     """Uses an in-memory dictionary as a store.
@@ -133,6 +136,9 @@ class InMemoryStore(ContextAwareStore):
 
     def list_keys(self):
         return self.store.keys()
+
+    def has_key(self, key):
+        return key in self.store
 
 
 class FilesystemStore(ContextAwareStore):
