@@ -18,7 +18,7 @@ import shutil
 import importlib
 from collections import OrderedDict
 
-from .util import get_slack_callback, safe_mmkdir, find_context_root_dir
+from .util import get_slack_callback, safe_mmkdir
 from ..types.base import DotDict
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
@@ -1612,7 +1612,7 @@ class DataContext(ConfigOnlyDataContext):
         # #TODO: Factor this out into a helper function in GE. It doesn't belong inside this method.
         # # determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
-            context_root_dir = find_context_root_dir()
+            context_root_dir = self.find_context_root_dir()
         context_root_directory = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_directory
 
@@ -1663,6 +1663,19 @@ class DataContext(ConfigOnlyDataContext):
 
         super(DataContext, self).add_datasource(name, type_, **kwargs)
         self._save_project_config()
+
+    def find_context_root_dir(self):
+        if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
+            return "../"
+        elif os.path.isdir("./great_expectations") and \
+                os.path.isfile("./great_expectations/great_expectations.yml"):
+            return "./great_expectations"
+        elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
+            return "./"
+        else:
+            raise DataContextError(
+                "Unable to locate context root directory. Please provide a directory name."
+            )
 
 
 class ExplorerDataContext(ConfigOnlyDataContext):
