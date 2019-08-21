@@ -384,7 +384,7 @@ class ExpectationExplorer(object):
                 tag_list=tag_list,
                 widget_display=widget_display
             ) for tag in tag_list
-        ]
+        ] if tag_list else []
 
     def generate_zero_or_positive_integer_widget(self, *, value, max=int(9e300), description='', continuous_update=False):
         return widgets.BoundedIntText(
