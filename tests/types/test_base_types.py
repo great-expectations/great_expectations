@@ -386,7 +386,7 @@ def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
             }
         )
 
-<<<<<<< HEAD
+
 def test_LooselyTypedDotDict_unicode_issues():
     class MyLTDD(LooselyTypedDotDict):
         _allowed_keys = set([
@@ -428,6 +428,7 @@ def test_LooselyTypedDotDict_unicode_issues():
         "a" : u"hello"
     })
 
+
 def test_LooselyTypedDotDict_multiple_types():
     class MyLTDD(LooselyTypedDotDict):
         _allowed_keys = set(["a"])
@@ -466,7 +467,6 @@ def test_LooselyTypedDotDict_multiple_types():
     B = MyLTDD(**{
         "a" : None
     })
-=======
 
 def test_dotdict_yaml_serialization(capsys):
     # To enable yaml serialization, we simply annotate the class as a @yaml_object
@@ -518,4 +518,3 @@ def test_required_keys_dotdict():
     # Note that since there is not a concept of allowed_keys, we do not raise attributeerror here, picking
     # up dictionary semantics instead
     assert d.doesnotexist is None
->>>>>>> Add support for RequiredKeysDotDict
