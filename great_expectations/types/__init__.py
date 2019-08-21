@@ -10,3 +10,7 @@ from .expectations import (
     ValidationResult,
     ValidationResultSuite,
 )
+
+from .configurations import (
+    ClassConfig
+)
