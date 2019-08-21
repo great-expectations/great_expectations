@@ -74,6 +74,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         # content_blocks.append(cls._render_unrecognized(evrs))
 
         content_blocks.append(cls._render_failed(evrs))
+        # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))
 
         return RenderedSectionContent(**{
@@ -650,6 +651,7 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
         remaining_expectations, bullet_block = cls._render_bullet_list(remaining_expectations)
         content_blocks.append(bullet_block)
 
+        # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))
         return RenderedSectionContent(**{
             "section_name": column,
