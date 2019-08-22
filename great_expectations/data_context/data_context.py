@@ -163,6 +163,16 @@ class ConfigOnlyDataContext(object):
             )
 
     def add_store(self, store_name, store_config):
+        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
+
+        Args:
+            store_name (str): a key for the new Store in in self.stores
+            store_config (dict or StoreMetaConfig): a config for the Store to add
+
+        Returns:
+            store (Store)
+        """
+
         self._project_config["stores"][store_name] = store_config
         new_store = self._init_store_from_config(store_config)
         self._stores[store_name] = new_store
@@ -465,6 +475,8 @@ class ConfigOnlyDataContext(object):
                                           **kwargs)
         return data_asset
 
+    # NOTE: Abe 2019//08/22 : I think we want to change this to the new standard class_name, module_name syntax.
+    # Doing this while maintaining backward compatibility to type_s (assuming we choose to do so) will require care.
     def add_datasource(self, name, type_, **kwargs):
         """Add a new datasource to the data context.
 
@@ -482,16 +494,11 @@ class ConfigOnlyDataContext(object):
         datasource_class = self._get_datasource_class(type_)
         datasource = datasource_class(name=name, data_context=self, **kwargs)
         self._datasources[name] = datasource
-        # This check shouldn't be necessary
-        # if not "datasources" in self._project_config:
-        #     self._project_config["datasources"] = {}
         self._project_config["datasources"][name] = datasource.get_config()
 
         return datasource
 
     def get_config(self):
-        #!!! Deprecating this for now, but leaving the code in case there are unanticipated side effect.
-        # self._save_project_config()
         return self._project_config
 
     def _get_datasource_class(self, datasource_type):
