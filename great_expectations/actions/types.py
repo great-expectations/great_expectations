@@ -4,7 +4,7 @@ from ..types import (
     DotDict,
     RequiredKeysDotDict,
     AllowedKeysDotDict,
-    ListOf,
+    DictOf,
 )
 
 class ActionInternalConfig(RequiredKeysDotDict):
@@ -34,5 +34,5 @@ class ActionSetConfig(AllowedKeysDotDict):
     _key_types = {
         "module_name" : string_types,
         "class_name" : string_types,
-        "action_list" : ListOf(ActionConfig),
+        "action_list" : DictOf(ActionConfig),
     }
