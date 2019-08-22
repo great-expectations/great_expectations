@@ -2,11 +2,15 @@ import pytest
 
 from great_expectations.actions import (
     BasicValidationAction,
+    # SummarizeAndSendToStoreAction,
 )
 from great_expectations.actions.types import (
     ActionInternalConfig,
     ActionConfig,
     ActionSetConfig,
+)
+from great_expectations.data_context.store import (
+    InMemoryStore
 )
 
 
@@ -64,3 +68,23 @@ def test_subclass_of_BasicValidationAction():
 
     my_action.take_action(fake_validation_result_suite)
     assert my_action._counter == 1
+
+
+# TODO: Re-activate and finish implementing after refactoring Stores from DataContestAware to NameSpaceAware
+# def test_SummarizeAndSendToStoreAction():
+#     action = SummarizeAndSendToStoreAction(
+#         ActionInternalConfig(**{
+#             "summarization_module_name" : "great_expectations.actions.actions",
+#             "summarization_class_name" : "TemporaryNoOpSummarizer",
+#             "target_store_name" : "fake_in_memory_store",
+#         }),
+#         stores = {
+#             # NOTE: Might need to replace this with an actual Store at some point.
+#             "fake_in_memory_store" : InMemoryStore({}, None)
+#         },
+#         services = {},
+#     )
+#     action.take_action(
+#         validation_result_suite={},
+#         validation_result_suite_identifier={}
+#     )

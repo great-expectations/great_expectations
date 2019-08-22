@@ -1,5 +1,9 @@
+from ..util import (
+    get_class_from_module_name_and_class_name,
+)
 from .types import (
-    ActionConfig
+    ActionConfig,
+    ActionInternalConfig,
 )
 
 class BasicValidationAction(object):
@@ -29,25 +33,46 @@ class NameSpaceAwareValidationAction(BasicValidationAction):
         return NotImplementedError
 
 
-class SummarizeAndSendToStoreAction(NameSpaceAwareValidationAction):
+class TemporaryNoOpSummarizer(object):
+    @classmethod
+    def render(cls, input):
+        return input
 
-    def __init__(self, config, stores, services):
-        self.config = config
+class DropAllVowelsSummarizer(object):
+    @classmethod
+    def render(cls, input):
+        return input
 
-        self.summarization_class = self._get_class_from_module_and_class_name(
-            self.config.summarization_module_name,
-            self.config.summarization_class_name,
-        ) #This might be a utility method... It's shared across so many classes.
-        #Eventually, we probably need some checks to verify that this renderer class is compatible with validation_result_suite_identifiers.
+# # TODO: Re-activate and finish implementing after refactoring Stores from DataContestAware to NameSpaceAware
+# class SummarizeAndSendToStoreAction(NameSpaceAwareValidationAction):
 
-        #??? Do we need a view_class as well?
+#     # NOTE : Abe 2019/08/22 : This pattern feels heavy to me.
+#     # Maybe we can just have `config_required_keys`, and dynamically create the Config class in __init__...
+#     # That would make sense if every Action needs to have a config spec AND we want the spec declared with the Action itself.
+#     class SummarizeAndSendToStoreActionInternalConfig(ActionInternalConfig):
+#         _required_keys = set([
+#             "summarization_module_name",
+#             "summarization_class_name",
+#             "target_store_name",
+#         ])
 
-        # NOTE: Eventually, we probably need some checks to verify that this store is compatible with validation_result_suite_identifiers.
-        self.target_store = stores[self.config.target_store_name]
+#     def __init__(self, config, stores, services):
+#         self.config = self.SummarizeAndSendToStoreActionInternalConfig(config)
 
-    def take_action(self, validation_result_suite, validation_result_suite_identifier):
-        rendered_summary = self.summarization_class.render(validation_result_suite)
-        store.set(validation_result_suite_identifier, rendered_summary)
+#         self.summarization_class = get_class_from_module_name_and_class_name(
+#             self.config.summarization_module_name,
+#             self.config.summarization_class_name,
+#         )
+
+#         #??? Do we need a view_class as well?
+
+#         # NOTE: Eventually, we probably need a check to verify that this store is compatible with validation_result_suite_identifiers.
+#         # Unless ALL stores are compatible...
+#         self.target_store = stores[self.config.target_store_name]
+
+#     def take_action(self, validation_result_suite, validation_result_suite_identifier):
+#         rendered_summary = self.summarization_class.render(validation_result_suite)
+#         self.target_store.set(validation_result_suite_identifier, rendered_summary)
     
 
 # ### Pseudocode for ValidationAction classes:
