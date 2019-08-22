@@ -164,7 +164,9 @@ class ConfigOnlyDataContext(object):
 
     def add_store(self, store_name, store_config):
         self._project_config["stores"][store_name] = store_config
-        self._stores[store_name] = self._init_store_from_config(store_config)
+        new_store = self._init_store_from_config(store_config)
+        self._stores[store_name] = new_store
+        return new_store
 
     def _init_store_from_config(self, config):
         typed_config = StoreMetaConfig(
@@ -1584,8 +1586,10 @@ class DataContext(ConfigOnlyDataContext):
     def add_store(self, store_name, store_config):
         logger.debug("Starting DataContext.add_store")
         
-        super(DataContext, self).add_store(store_name, store_config)
+        new_store = super(DataContext, self).add_store(store_name, store_config)
         self._save_project_config()
+        return new_store
+
 
     def add_datasource(self, name, type_, **kwargs):
         logger.debug("Starting DataContext.add_datasource")
