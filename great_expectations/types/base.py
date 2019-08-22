@@ -1,6 +1,10 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from collections import Iterable
 import inspect
 import copy
+from six import string_types
 
 from ruamel.yaml import YAML, yaml_object
 yaml = YAML()
@@ -96,26 +100,8 @@ class RequiredKeysDotDict(DotDict):
         for key, value in self.items():
             if key in self._key_types:
                 if coerce_types:
-                    # Update values if coerce_types==True
-                    try:
-                        # If the given type is an instance of AllowedKeysDotDict, apply coerce_types recursively
-                        if isinstance(self._key_types[key], ListOf):
-                            if inspect.isclass(self._key_types[key].type_) and issubclass(self._key_types[key].type_,
-                                                                                          RequiredKeysDotDict):
-                                value = [self._key_types[key].type_(coerce_types=True, **v) for v in value]
-                            else:
-                                value = [self._key_types[key].type_(
-                                    v) for v in value]
+                    value = self._coerce_complex_value_to_type(value, self._key_types[key])
 
-                        else:
-                            if inspect.isclass(self._key_types[key]) and issubclass(self._key_types[key],
-                                                                                    RequiredKeysDotDict):
-                                value = self._key_types[key](coerce_types=True, **value)
-                            else:
-                                value = self._key_types[key](value)
-                    except TypeError as e:
-                        raise ("Unable to initialize " + self.__class__.__name__ + ": could not convert type. TypeError "
-                                                                                   "raised: " + str(e))
                 # Validate types
                 self._validate_value_type(key, value, self._key_types[key])
 
@@ -182,6 +168,48 @@ class RequiredKeysDotDict(DotDict):
                         type_,
                         type(value),
                     ))
+    
+    def _coerce_complex_value_to_type(self, value, type_):
+        """Convenience method
+        """
+        logger.debug("RequiredKeysDotDict._coerce_complex_value_to_type")
+
+        try:
+            # If the given type is an instance of AllowedKeysDotDict, apply coerce_types recursively
+            if isinstance(type_, ListOf):
+                if inspect.isclass(type_.type_) and issubclass(type_.type_,
+                                                                                RequiredKeysDotDict):
+                    value = [type_.type_(coerce_types=True, **v) for v in value]
+                else:
+                    value = [
+                        self._coerce_simple_value_to_type(v, type_.type_)
+                        for v in value
+                    ]
+
+            else:
+                if inspect.isclass(type_) and issubclass(type_,
+                                                                        RequiredKeysDotDict):
+                    value = type_(coerce_types=True, **value)
+                else:
+                    value = self._coerce_simple_value_to_type(value, type_)
+        except TypeError as e:
+            raise ("Unable to initialize " + self.__class__.__name__ + ": could not convert type. TypeError "
+                                                                       "raised: " + str(e))
+
+        return value
+        logger.debug(value)
+        logger.debug(type_)
+
+    def _coerce_simple_value_to_type(self, value, type_):
+        """Convenience method
+        """
+        logger.debug("RequiredKeysDotDict._coerce_simple_value_to_type")
+
+        if type_ == string_types:
+            return str(value)
+
+        else:
+            return type_(value)
 
 
 @yaml_object(yaml)

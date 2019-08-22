@@ -7,7 +7,6 @@ from ..types import (
     ListOf,
 )
 
-# NOTE : Some day it might make sense to implement 
 class ActionInternalConfig(RequiredKeysDotDict):
     """A typed object containing the kwargs for a specific subclass of ValidationAction.
     """
@@ -20,10 +19,9 @@ class ActionConfig(AllowedKeysDotDict):
         "kwargs"
     ])
     _key_types = {
-        "module_name" : str, #TODO: This should be string_types. Need to merge in fixes to LooselyTypedDataDcit before that will work, though...
-        "class_name" : str, #TODO: This should be string_types. Need to merge in fixes to LooselyTypedDataDcit before that will work, though...
-        #TODO: Add this back in.
-        # "kwargs" : ActionInternalConfig,
+        "module_name" : string_types,
+        "class_name" : string_types,
+        "kwargs" : ActionInternalConfig,
     }
 
 class ActionSetConfig(AllowedKeysDotDict):
@@ -36,6 +34,5 @@ class ActionSetConfig(AllowedKeysDotDict):
     _key_types = {
         "module_name" : string_types,
         "class_name" : string_types,
-        #TODO: This should be a DictOf, not a ListOf.
         "action_list" : ListOf(ActionConfig),
     }
