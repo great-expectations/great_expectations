@@ -5,6 +5,7 @@ import copy
 from ruamel.yaml import YAML, yaml_object
 yaml = YAML()
 
+
 class ListOf(object):
     def __init__(self, type_):
         self.type_ = type_
@@ -12,7 +13,11 @@ class ListOf(object):
 
 @yaml_object(yaml)
 class DotDict(dict):
-    """dot.notation access to dictionary attributes"""
+    """This class provides dot.notation dot.notation access to dictionary attributes.
+
+    It is also serializable by the ruamel.yaml library used in Great Expectations for managing
+    configuration objects.
+    """
 
     def __getattr__(self, item):
         return self.get(item)
@@ -46,10 +51,40 @@ class DotDict(dict):
 
 @yaml_object(yaml)
 class RequiredKeysDotDict(DotDict):
+    """RequiredKeysDotDict adds support for _required_keys and _key_types to DotDict, making it useful for defining
+    serializable dictionary-like types for GE objects.
+
+    _required_keys must be a *set* of key names that *must* be present. Any key is allowed.
+    _key_types is a dictionary of key_name: key_type pairs that define required types for keys. Note that key_types
+        *may* include keys that are not required.
+
+    Consequently, this class is generally useless on its own.
+    You need to subclass it like so:
+
+    # This class should be yaml-serializable
+    @yaml_object(yaml)
+    class MyLooselyTypedDotDict(RequiredKeysDotDict):
+        # Keys "x", "y", and "z" MUST be present
+        _required_keys = { "x", "y", "z" }
+        # The value for key "y" MUST be a RequiredKeysDotDict
+        _key_types = {
+            "x": RequiredKeysDotDict
+        }
+    """
     _required_keys = set()
     _key_types = {}
 
-    def __init__(self, *args, coerce_types=False, **kwargs):
+    def __init__(self, *args, **kwargs):
+        """Build a new RequiredKeysDotDict.
+
+        Args:
+            *args: A dictionary or RequiredKeysDotDict from which to build this RequiredKeysDotDict
+            coerce_types (boolean): whether or not to attempt to coerce objects in the constructor to the types
+                required by the _key_types dictionary.
+            **kwargs: Additional key-value pairs to be included in the RequiredKeysDotDict
+        """
+        # Support PY2 by leaving coerce_types out of explicit params list
+        coerce_types = kwargs.pop("coerce_types", False)
         super(RequiredKeysDotDict, self).__init__(*args, **kwargs)
         for key in self._required_keys:
             if key not in self.keys():
@@ -151,27 +186,39 @@ class RequiredKeysDotDict(DotDict):
 
 @yaml_object(yaml)
 class LooselyTypedDotDict(RequiredKeysDotDict):
-    """dot.notation access to dictionary attributes, with limited keys
-    
+    """LooselyTypedDotDict adds support an _allowed_keys set to the RequiredKeysDotDict, limiting the total set
+    of keys that may be in the dictionary. It should be used when the type requirements are stronger than
+    RequiredKeysDotDict
 
-    Note: this class is pretty useless on its own.
+    _allowed_keys must be a *set* of key names that *may* be present. No other key is allowed.
+    _required_keys must be a *set* of key names that *must* be present.
+    _key_types is a dictionary of key_name: key_type pairs that define required types for keys. Note that key_types
+        *may* include keys that are not required.
+
+    Consequently, this class is generally useless on its own.
     You need to subclass it like so:
 
-    class MyLooselyTypedDotDict(LooselyTypedDotDict):
-        _allowed_keys = set([
-            "x", "y", "z"
-        ])
-
+    # This class should be yaml-serializable
+    @yaml_object(yaml)
+    class MyLooselyTypedDotDict(RequiredKeysDotDict):
+        # ONLY keys "x", "y", and "z" are allowed
+        _allowed_keys = {"x", "y", "z"}
+        # key "x" MUST be present
+        _required_keys = {"x"}
+        # the value for key "x" MUST be an integer
+        _key_types = {
+            "x": int
+        }
     """
     _allowed_keys = set()
 
-    def __init__(self, *args, coerce_types=False, **kwargs):
+    def __init__(self, *args, **kwargs):
         if not self._required_keys.issubset(self._allowed_keys):
             raise ValueError("_required_keys : {!r} must be a subset of _allowed_keys {!r}".format(
                 self._required_keys,
                 self._allowed_keys,
             ))
-        super(LooselyTypedDotDict, self).__init__(*args, coerce_types=coerce_types, **kwargs)
+        super(LooselyTypedDotDict, self).__init__(*args, **kwargs)
         for key in self.keys():
             if key not in self._allowed_keys:
                 raise KeyError("key: {!r} not in allowed keys: {!r}".format(
