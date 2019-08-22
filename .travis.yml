@@ -1,3 +1,7 @@
+branches:
+  only:
+  - master
+  - develop
 # dist: xenial
 language: python
 os:
@@ -7,12 +11,12 @@ matrix:
   - dist: trusty
     python: 2.7
     env: PANDAS=0.22.0
-  - dist: trusty
-    python: 2.7
-    env: PANDAS=0.23.4
-  - dist: trusty
-    python: 2.7
-    env: PANDAS=0.24.2
+#  - dist: trusty
+#    python: 2.7
+#    env: PANDAS=0.23.4
+#  - dist: trusty
+#    python: 2.7
+#    env: PANDAS=0.24.2
   - dist: trusty
     python: 2.7
     env: PANDAS=latest
