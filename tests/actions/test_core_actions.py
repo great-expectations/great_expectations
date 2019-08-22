@@ -29,23 +29,18 @@ def test_action_set_config():
 
     ActionSetConfig(
         coerce_types=True,
-        #TODO: We'll also need to modify LLTD to take a DictOf argument
         **{
-            #TODO: This should be a dict, not a list.
-            "action_list" : [
-                ActionConfig(
-                    coerce_types=True,
-                    **{
-                        "module_name" : "great_expectations.actions",
-                        "class_name": "SummarizeAndSendToWebhookAction",
-                        "kwargs" : {
-                            "webhook": "http://myslackwebhook.com/",
-                            "summarization_module_name": "great_expectations.render",
-                            "summarization_class_name": "SummarizeValidationResultsForSlack",
-                        }
+            "action_list" : {
+                "my_first_action" : {
+                    "module_name" : "great_expectations.actions",
+                    "class_name": "SummarizeAndSendToWebhookAction",
+                    "kwargs" : {
+                        "webhook": "http://myslackwebhook.com/",
+                        "summarization_module_name": "great_expectations.render",
+                        "summarization_class_name": "SummarizeValidationResultsForSlack",
                     }
-                )
-            ]
+                }
+            }
         }
     )
 
