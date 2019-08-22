@@ -14,6 +14,10 @@ class ListOf(object):
     def __init__(self, type_):
         self.type_ = type_
 
+class DictOf(object):
+    def __init__(self, type_):
+        self.type_ = type_
+
 
 @yaml_object(yaml)
 class DotDict(dict):
@@ -144,6 +148,22 @@ class RequiredKeysDotDict(DotDict):
                         type(v),
                     ))
 
+        elif isinstance(type_, DictOf):
+            if not isinstance(value, dict):
+                raise TypeError("key: {!r} must be a mapping, not {!r}".format(
+                    key,
+                    type(value),
+                ))
+
+            for k, v in value.items():
+                if not isinstance(v, type_.type_):
+                    raise TypeError("values in key: {!r} must be of type: {!r}, not {!r} {!r}".format(
+                        key,
+                        type_.type_,
+                        v,
+                        type(v),
+                    ))
+
         else:
             if isinstance(type_, list):
                 any_match = False
@@ -184,15 +204,25 @@ class RequiredKeysDotDict(DotDict):
                         for v in value
                     ]
 
+            elif isinstance(type_, DictOf):
+                if inspect.isclass(type_.type_) and issubclass(type_.type_,
+                                                                                RequiredKeysDotDict):
+                    value = dict([(k, type_.type_(coerce_types=True, **v)) for k, v in value.items()])
+                else:
+                    value = dict([
+                        (k, self._coerce_simple_value_to_type(v, type_.type_))
+                        for k, v in value.items()
+                    ])
+
             else:
                 if inspect.isclass(type_) and issubclass(type_,
                                                                         RequiredKeysDotDict):
                     value = type_(coerce_types=True, **value)
                 else:
                     value = self._coerce_simple_value_to_type(value, type_)
+
         except TypeError as e:
-            raise ("Unable to initialize " + self.__class__.__name__ + ": could not convert type. TypeError "
-                                                                       "raised: " + str(e))
+            raise TypeError("Unable to initialize " + self.__class__.__name__ + ". TypeError raised: " + str(e))
 
         return value
 
