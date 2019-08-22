@@ -170,8 +170,6 @@ class RequiredKeysDotDict(DotDict):
                     ))
     
     def _coerce_complex_value_to_type(self, value, type_):
-        """Convenience method
-        """
         logger.debug("RequiredKeysDotDict._coerce_complex_value_to_type")
 
         try:
@@ -197,11 +195,9 @@ class RequiredKeysDotDict(DotDict):
                                                                        "raised: " + str(e))
 
         return value
-        logger.debug(value)
-        logger.debug(type_)
 
     def _coerce_simple_value_to_type(self, value, type_):
-        """Convenience method
+        """Convenience method to handle the case where type_ == string type, and any other similarly weird things in the future
         """
         logger.debug("RequiredKeysDotDict._coerce_simple_value_to_type")
 
