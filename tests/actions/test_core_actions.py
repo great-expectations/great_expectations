@@ -28,7 +28,7 @@ def test_action_config():
 def test_action_set_config():
 
     ActionSetConfig(
-        coerce_types=True, #Need to merge in fixes to LooselyTypedDoDict before this will work.
+        coerce_types=True,
         #TODO: We'll also need to modify LLTD to take a DictOf argument
         **{
             #TODO: This should be a dict, not a list.
