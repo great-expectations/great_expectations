@@ -485,9 +485,7 @@ class ConfigOnlyDataContext(object):
         #     self._project_config["datasources"] = {}
         self._project_config["datasources"][name] = datasource.get_config()
 
-        #!!! This return value isn't used anywhere in the live codebase, and only once in tests.
-        #Deprecating for now. Will remove fully later.
-        # return datasource
+        return datasource
 
     def get_config(self):
         #!!! Deprecating this for now, but leaving the code in case there are unanticipated side effect.
@@ -1592,8 +1590,10 @@ class DataContext(ConfigOnlyDataContext):
     def add_datasource(self, name, type_, **kwargs):
         logger.debug("Starting DataContext.add_datasource")
 
-        super(DataContext, self).add_datasource(name, type_, **kwargs)
+        new_datasource = super(DataContext, self).add_datasource(name, type_, **kwargs)
         self._save_project_config()
+
+        return new_datasource
 
 
 class ExplorerDataContext(ConfigOnlyDataContext):
