@@ -795,11 +795,3 @@ def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_conte
     context._normalize_absolute_or_relative_path("/yikes")
     assert "test__normalize_absolute_or_relative_path__dir" not in context._normalize_absolute_or_relative_path("/yikes") 
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes") 
-
-# def test_add_store(basic_data_context_config):
-#     context = ConfigOnlyDataContext(
-#         basic_data_context_config,
-#         "testing/",
-#     )
-
-#     content.add_store()
