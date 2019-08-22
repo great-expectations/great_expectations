@@ -434,7 +434,8 @@ def test_LooselyTypedDotDict_multiple_types():
 
 def test_dotdict_yaml_serialization(capsys):
     # To enable yaml serialization, we simply annotate the class as a @yaml_object
-    # Note that this annotation be inherited, even though in our case we know that
+    # Note that this annotation cannot be inherited, even though in our case we know that
+    # the subtype is still serializable
 
     # NOTE: JPC - 20190821: We may want to reach out to the ruamel authors to inquire about
     # adding support for searching through the entire mro (instead of only the last entry) for supported representers
