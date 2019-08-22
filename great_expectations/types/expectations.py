@@ -1,9 +1,9 @@
 from .base import (
     ListOf,
-    LooselyTypedDotDict,
+    AllowedKeysDotDict,
 )
 
-class Expectation(LooselyTypedDotDict):
+class Expectation(AllowedKeysDotDict):
     _allowed_keys = set([
         "expectation_type",
         "kwargs",
@@ -12,7 +12,7 @@ class Expectation(LooselyTypedDotDict):
     ])
     _key_types = {}
 
-class ExpectationSuite(LooselyTypedDotDict):
+class ExpectationSuite(AllowedKeysDotDict):
     _allowed_keys = set([
         "expectations",
         "meta",
@@ -28,7 +28,7 @@ class ExpectationSuite(LooselyTypedDotDict):
         "meta" : dict, #TODO: Add a type for this field
     }
 
-class ValidationResult(LooselyTypedDotDict):
+class ValidationResult(AllowedKeysDotDict):
     _allowed_keys = set([
         "success",
         "expectation_config",
@@ -48,7 +48,7 @@ class ValidationResult(LooselyTypedDotDict):
         "result" : dict, #TODO: Add a type for this field
     }
 
-class ValidationResultSuite(LooselyTypedDotDict):
+class ValidationResultSuite(AllowedKeysDotDict):
     _allowed_keys = set([
         "results",
         "meta",

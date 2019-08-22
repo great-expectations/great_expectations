@@ -1,16 +1,16 @@
 from great_expectations.types import (
-    LooselyTypedDotDict,
+    AllowedKeysDotDict,
     ListOf,
 )
 
 # TODO: Rename to this:
-# class RenderedContent(LooselyTypedDotDict):
+# class RenderedContent(AllowedKeysDotDict):
     # class RenderedComponentContent(RenderedContent):
     # class RenderedSectionContent(RenderedContent):
     # class RenderedDocumentContentContent(RenderedContent):
     # class RenderedComponentContentWrapper(RenderedContent):
 
-class RenderedContent(LooselyTypedDotDict):
+class RenderedContent(AllowedKeysDotDict):
     pass
 
 class RenderedComponentContent(RenderedContent):
