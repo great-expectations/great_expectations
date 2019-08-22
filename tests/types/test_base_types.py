@@ -5,7 +5,7 @@ import sys
 
 from great_expectations.types import (
     DotDict,
-    LooselyTypedDotDict,
+    AllowedKeysDotDict,
     RequiredKeysDotDict,
     ListOf,
 )
@@ -58,13 +58,13 @@ def test_DotDict_dot_syntax():
     }
 
 
-def test_LooselyTypedDotDict_raises_error():
+def test_allowed_keys_dot_dict_raises_error():
     with pytest.raises(KeyError):
-        D = LooselyTypedDotDict(**{
+        D = AllowedKeysDotDict(**{
             'x': 1,
         })
 
-    d = LooselyTypedDotDict(**{})
+    d = AllowedKeysDotDict(**{})
 
     with pytest.raises(KeyError):
         d["x"] = "hello?"
@@ -83,13 +83,13 @@ def test_LooselyTypedDotDict_raises_error():
         assert d["x"] is None
 
 
-def test_LooselyTypedDotDict_subclass():
-    class MyLooselyTypedDotDict(LooselyTypedDotDict):
+def test_allowed_keys_dot_dict_subclass():
+    class MyAllowedKeysDotDict(AllowedKeysDotDict):
         _allowed_keys = {
             "x", "y", "z"
         }
 
-    d = MyLooselyTypedDotDict(**{
+    d = MyAllowedKeysDotDict(**{
         'x': 1,
     })
     assert d.x == 1
@@ -129,17 +129,17 @@ def test_LooselyTypedDotDict_subclass():
         assert d["w"] is None
 
 
-def test_LooselyTypedDotDict_subclass_required_keys():
-    class MyLooselyTypedDotDict(LooselyTypedDotDict):
+def test_allowed_keys_dot_dict_subclass_required_keys():
+    class MyAllowedKeysDotDict(AllowedKeysDotDict):
         _allowed_keys = {"x", "y", "z"}
         _required_keys = {"x"}
 
     with pytest.raises(KeyError):
-        d = MyLooselyTypedDotDict(**{
+        d = MyAllowedKeysDotDict(**{
             'y': 1,
         })
 
-    d = MyLooselyTypedDotDict(**{
+    d = MyAllowedKeysDotDict(**{
         'x': 1,
     })
     assert d.x == 1
@@ -156,16 +156,16 @@ def test_LooselyTypedDotDict_subclass_required_keys():
 
     # _required_keys must be a subset of _allowed_keys
     with pytest.raises(ValueError):
-        class MyLooselyTypedDotDict(LooselyTypedDotDict):
+        class MyAllowedKeysDotDict(AllowedKeysDotDict):
             _allowed_keys = {"x", "y", "z"}
             _required_keys = {"w"}
         
         #Unfortunately, I don't have a good way to test this condition until the class is instantiated
-        d = MyLooselyTypedDotDict(x=True)
+        d = MyAllowedKeysDotDict(x=True)
 
 
-def test_LooselyTypedDotDict_subclass_key_types():
-    class MyLooselyTypedDotDict(LooselyTypedDotDict):
+def test_allowed_keys_dot_dict_subclass_key_types():
+    class MyAllowedKeysDotDict(AllowedKeysDotDict):
         _allowed_keys = {"x", "y", "z"}
         _required_keys = { "x" }
         _key_types = {
@@ -173,27 +173,27 @@ def test_LooselyTypedDotDict_subclass_key_types():
             "y": str,
         }
 
-    d = MyLooselyTypedDotDict(**{
+    d = MyAllowedKeysDotDict(**{
         'x': 1,
     })
 
     with pytest.raises(TypeError):
-        d = MyLooselyTypedDotDict(**{
+        d = MyAllowedKeysDotDict(**{
             'x': "1",
         })
 
-    d = MyLooselyTypedDotDict(**{
+    d = MyAllowedKeysDotDict(**{
         "x": 1,
         "y": "hello",
     })
 
     with pytest.raises(TypeError):
-        d = MyLooselyTypedDotDict(**{
+        d = MyAllowedKeysDotDict(**{
             'x': 1,
             'y': 10,
         })
 
-    d = MyLooselyTypedDotDict(
+    d = MyAllowedKeysDotDict(
         coerce_types=True,
         **{
             "x": "1",
@@ -212,29 +212,29 @@ def test_LooselyTypedDotDict_subclass_key_types():
         d.x = "not an int"
 
     with pytest.raises(ValueError):
-        d = MyLooselyTypedDotDict(
+        d = MyAllowedKeysDotDict(
             coerce_types=True,
             **{
                 "x": "quack",
             }
         )
 
-def test_LooselyTypedDotDict_ListOf_typing():
-    class MyLooselyTypedDotDict(LooselyTypedDotDict):
+def test_allowed_keys_dot_dict_ListOf_typing():
+    class MyAllowedKeysDotDict(AllowedKeysDotDict):
         _allowed_keys = {"a", "b", "c" }
         _key_types = {
             "a": int,
             "b": ListOf(int),
         }
     
-    d = MyLooselyTypedDotDict(
+    d = MyAllowedKeysDotDict(
         **{
             "a": 10,
             "b": [10, 20, 30]
         }
     )
 
-    d = MyLooselyTypedDotDict(
+    d = MyAllowedKeysDotDict(
         coerce_types=True,
         **{
             "a": 10,
@@ -243,7 +243,7 @@ def test_LooselyTypedDotDict_ListOf_typing():
     )
 
     with pytest.raises(TypeError):
-        d = MyLooselyTypedDotDict(
+        d = MyAllowedKeysDotDict(
             **{
                 "a": 10,
                 "b": [10, 20, "rabbit"]
@@ -251,8 +251,8 @@ def test_LooselyTypedDotDict_ListOf_typing():
         )
 
 
-def test_LooselyTypedDotDict_recursive_coercion():
-    class MyNestedDotDict(LooselyTypedDotDict):
+def test_allowed_keys_dot_dict_recursive_coercion():
+    class MyNestedDotDict(AllowedKeysDotDict):
         _allowed_keys = {"a", "b", "c"}
         _required_keys = {"a"}
         _key_types = {
@@ -260,7 +260,7 @@ def test_LooselyTypedDotDict_recursive_coercion():
             "b": str,
         }
 
-    class MyLooselyTypedDotDict(LooselyTypedDotDict):
+    class MyAllowedKeysDotDict(AllowedKeysDotDict):
         _allowed_keys = {"x", "y", "z"}
         _required_keys = {"x"}
         _key_types = {
@@ -268,7 +268,7 @@ def test_LooselyTypedDotDict_recursive_coercion():
             "y": MyNestedDotDict,
         }
 
-    d = MyLooselyTypedDotDict(
+    d = MyAllowedKeysDotDict(
         coerce_types=True,
         **{
             "x": "hello",
@@ -287,7 +287,7 @@ def test_LooselyTypedDotDict_recursive_coercion():
     }
 
     with pytest.raises(ValueError):
-        MyLooselyTypedDotDict(
+        MyAllowedKeysDotDict(
             coerce_types=True,
             **{
                 "x": "hello",
@@ -298,7 +298,7 @@ def test_LooselyTypedDotDict_recursive_coercion():
         )
 
     with pytest.raises(KeyError):
-        MyLooselyTypedDotDict(
+        MyAllowedKeysDotDict(
             coerce_types=True,
             **{
                 "x": "hello",
@@ -308,15 +308,15 @@ def test_LooselyTypedDotDict_recursive_coercion():
             }
         )
 
-def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
-    class MyNestedDotDict(LooselyTypedDotDict):
+def test_allowed_keys_dot_dict_recursive_coercion_with_ListOf():
+    class MyNestedDotDict(AllowedKeysDotDict):
         _allowed_keys = {"a"}
         _required_keys = {"a"}
         _key_types = {
             "a": int,
         }
 
-    class MyLooselyTypedDotDict(LooselyTypedDotDict):
+    class MyAllowedKeysDotDict(AllowedKeysDotDict):
         _allowed_keys = {"x", "y", "z"}
         _required_keys = {"x"}
         _key_types = {
@@ -324,7 +324,7 @@ def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
             "y": ListOf(MyNestedDotDict),
         }
 
-    d = MyLooselyTypedDotDict(
+    d = MyAllowedKeysDotDict(
         coerce_types=True,
         **{
             "x": "hello",
@@ -347,7 +347,7 @@ def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
     }
 
     with pytest.raises(TypeError):
-        d = MyLooselyTypedDotDict(
+        d = MyAllowedKeysDotDict(
             coerce_types=True,
             **{
                 "x": "hello",
@@ -358,8 +358,8 @@ def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
         )
 
 
-def test_LooselyTypedDotDict_unicode_issues():
-    class MyLTDD(LooselyTypedDotDict):
+def test_allowed_keys_dot_dict_unicode_issues():
+    class MyLTDD(AllowedKeysDotDict):
         _allowed_keys = {"a"}
         _required_keys = {"a"}
         _key_types = {
@@ -376,7 +376,7 @@ def test_LooselyTypedDotDict_unicode_issues():
                 "a": u"hello"
             })
 
-    class MyLTDD(LooselyTypedDotDict):
+    class MyLTDD(AllowedKeysDotDict):
         _allowed_keys = {"a"}
         _required_keys = {"a"}
         _key_types = {
@@ -392,8 +392,8 @@ def test_LooselyTypedDotDict_unicode_issues():
     })
 
 
-def test_LooselyTypedDotDict_multiple_types():
-    class MyLTDD(LooselyTypedDotDict):
+def test_allowed_keys_dot_dict_multiple_types():
+    class MyLTDD(AllowedKeysDotDict):
         _allowed_keys = set(["a"])
         _key_types = {
             "a": [int, float],
@@ -417,7 +417,7 @@ def test_LooselyTypedDotDict_multiple_types():
             "a": None
         })
 
-    class MyLTDD(LooselyTypedDotDict):
+    class MyLTDD(AllowedKeysDotDict):
         _allowed_keys = {"a"}
         _key_types = {
             "a": [int, None],
@@ -442,7 +442,7 @@ def test_dotdict_yaml_serialization(capsys):
 
     # Note that we are also using the nested type coercion in this case.
     @yaml_object(yaml)
-    class MyLooselyTypedDotDict(LooselyTypedDotDict):
+    class MyAllowedKeysDotDict(AllowedKeysDotDict):
         _allowed_keys = {"a", "b"}
         _required_keys = {"a"}
         _key_types = {
@@ -450,7 +450,7 @@ def test_dotdict_yaml_serialization(capsys):
             "b": RequiredKeysDotDict
         }
 
-    d = MyLooselyTypedDotDict({
+    d = MyAllowedKeysDotDict({
             "a": "fish",
             "b": {
                 "pet": "dog"

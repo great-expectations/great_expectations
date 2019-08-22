@@ -1,4 +1,4 @@
-from ...types import LooselyTypedDotDict
+from ...types import AllowedKeysDotDict
 from collections import namedtuple
 from six import string_types
 
@@ -13,7 +13,7 @@ NormalizedDataAssetName = namedtuple("NormalizedDataAssetName", [
 ])
 
 
-class NameSpaceDotDict(LooselyTypedDotDict):
+class NameSpaceDotDict(AllowedKeysDotDict):
     # Note: As of 2018/8/14, this class is VERY MUCH a work in progress
     # It should almost certainly be a namedtuple, to keep it immutable.
     _allowed_keys = set([
