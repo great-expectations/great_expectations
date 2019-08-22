@@ -706,7 +706,7 @@ def test_move_validation_to_fixtures(titanic_data_context):
 def test_add_store(empty_data_context):
     assert "my_new_store" not in empty_data_context.stores.keys()
     assert "my_new_store" not in empty_data_context.get_config()["stores"]
-    empty_data_context.add_store(
+    new_store = empty_data_context.add_store(
         "my_new_store",
         {
             "module_name": "great_expectations.data_context.store",
@@ -716,6 +716,8 @@ def test_add_store(empty_data_context):
     )
     assert "my_new_store" in empty_data_context.stores.keys()
     assert "my_new_store" in empty_data_context.get_config()["stores"]
+
+    assert isinstance(new_store, InMemoryStore)
 
 @pytest.fixture()
 def basic_data_context_config():
@@ -809,4 +811,3 @@ def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_conte
     context._normalize_absolute_or_relative_path("/yikes")
     assert "test__normalize_absolute_or_relative_path__dir" not in context._normalize_absolute_or_relative_path("/yikes") 
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes") 
-

@@ -33,7 +33,18 @@ class PrettyPrintTemplate(object):
 # Down the road, I expect to wind up with class hierarchy along the lines of:
 #   View > JinjaView > GEContentBlockJinjaView
 class DefaultJinjaView(object):
-    """Defines a method for converting a document to human-consumable form"""
+    """
+    Defines a method for converting a document to human-consumable form
+    
+    Dependencies
+    ~~~~~~~~~~~~
+    * Font Awesome 5.10.1
+    * Bootstrap 4.3.1
+    * jQuery 3.2.1
+    * Vega 5.3.5
+    * Vega-Lite 3.2.1
+    * Vega-Embed 4.0.0
+    """
 
     _template = NoOpTemplate
 

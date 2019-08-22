@@ -12,6 +12,22 @@ import unittest
 from six import PY2
 
 
+def test_interactive_evaluation(dataset):
+    # We should be able to enable and disable interactive evaluation
+
+    # Default is on
+    assert dataset.get_config_value("interactive_evaluation") is True
+    res = dataset.expect_column_values_to_be_between("naturals", 1, 10, include_config=True)
+    assert res["success"] is True
+
+    # Disable
+    dataset.set_config_value("interactive_evaluation", False)
+    disable_res = dataset.expect_column_values_to_be_between("naturals", 1, 10)  # No need to explicitly include_config
+    assert "success" not in disable_res
+
+    assert res["expectation_config"] == disable_res["stored_configuration"]
+
+
 def test_data_asset_name_inheritance(dataset):
     # A data_asset should have a generic type
     data_asset = ge.data_asset.DataAsset()

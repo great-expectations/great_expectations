@@ -62,9 +62,14 @@ ALLOWED_DELIMITERS = ['.', '/']
 
 #TODO: Maybe find a better name for this guy?
 class ConfigOnlyDataContext(object):
-    """This class implements most of the functionality of DataContext, but does *NOT* 
+    """This class implements most of the functionality of DataContext, with a few exceptions.
 
-    That makes this class useful for testing.
+    1. ConfigOnlyDataContext does not attempt to keep its project_config in sync with a file on disc.
+    2. ConfigOnlyDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed into DataContext class.
+
+    Together, these changes make ConfigOnlyDataContext class more testable.
+    
+    DataContext itself inherits from ConfigOnlyDataContext. It behaves essentially the same as the v0.7.* implementation of DataContext.
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
@@ -144,16 +149,19 @@ class ConfigOnlyDataContext(object):
     def _init_stores(self, store_configs):
         """Initialize all Stores for this DataContext.
 
-        In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
-        However, some files remain the responsiblity of the DataContext:
-            great_expectations.yml
-            plugins
-            credentials
-            DataSource configs
+        Stores are a good fit for reading/writing objects that:
+            1. follow a clear key-value pattern, and 
+            2. are usually edited programmatically, using the Context
 
-        These files are not good fits to be turned into Stores, because
-            1. they do not follow a clear key-value pattern, and 
-            2. they are not usually written programmatically.
+        In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
+        As of 9/21/2019, the following Stores had not yet been implemented
+            * great_expectations.yml
+            * expectations
+            * data documentation
+            * credentials
+            * anything accessed via write_resource
+
+        Note that stores do NOT manage plugins.
         """
         
         for store_name, store_config in store_configs.items():
@@ -163,8 +171,20 @@ class ConfigOnlyDataContext(object):
             )
 
     def add_store(self, store_name, store_config):
+        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
+
+        Args:
+            store_name (str): a key for the new Store in in self.stores
+            store_config (dict or StoreMetaConfig): a config for the Store to add
+
+        Returns:
+            store (Store)
+        """
+
         self._project_config["stores"][store_name] = store_config
-        self._stores[store_name] = self._init_store_from_config(store_config)
+        new_store = self._init_store_from_config(store_config)
+        self._stores[store_name] = new_store
+        return new_store
 
     def _init_store_from_config(self, config):
         typed_config = StoreMetaConfig(
@@ -247,27 +267,6 @@ class ConfigOnlyDataContext(object):
             raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         else:
             self._data_asset_name_delimiter = new_delimiter
-
-    def get_validation_doc_filepath(self, data_asset_name, expectation_suite_name):
-        """Get the local path where a the rendered html doc for a validation result is stored, given full asset name.
-
-        Args:
-            data_asset_name: name of data asset for which to get documentation filepath
-            expectation_suite_name: name of expectation suite for which to get validation location
-
-        Returns:
-            path (str): Path to the location
-
-        """
-        # TODO: this path should be configurable or parameterized to support descriptive and prescriptive docs
-        validation_filepath = self._get_normalized_data_asset_name_filepath(
-            data_asset_name,
-            expectation_suite_name,
-            base_path=self.data_doc_directory,
-            file_extension=".html"
-        )
-
-        return validation_filepath
 
     def move_validation_to_fixtures(self, data_asset_name, expectation_suite_name, run_id):
         """
@@ -397,55 +396,6 @@ class ConfigOnlyDataContext(object):
         with open(profiles_filepath, "w") as profiles_file:
             yaml.dump(profiles, profiles_file)
 
-    def get_datasource_config(self, datasource_name):
-        """Get the configuration for a configured datasource
-
-        Args:
-            datasource_name: The datasource for which to get the config
-
-        Returns:
-            datasource_config (dict): dictionary containing datasource configuration
-        """
-
-        # TODO: Review logic, once described below but not implemented in datasource save, for splitting configuration
-        # We allow a datasource to be defined in any combination of the following ways:
-
-        # 1. It may be fully specified in the datasources section of the great_expectations.yml file
-        # 2. It may be stored in a file by convention located in `datasources/<datasource_name>/config.yml`
-        # 3. It may be listed in the great_expectations.yml file with a config_file key that provides a relative \
-        # path to a different yml config file
-
-        # Any key duplicated across configs will be updated by the last key read (in the order above)
-        datasource_config = {}
-        defined_config_path = None
-        default_config_path = os.path.join(self.root_directory, "datasources", datasource_name, "config.yml")
-        if datasource_name in self._project_config["datasources"]:
-            base_datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
-            if "config_file" in base_datasource_config:
-                defined_config_path = os.path.join(self.root_directory, base_datasource_config.pop("config_file"))
-            datasource_config.update(base_datasource_config)
-        
-        try:
-            with open(default_config_path, "r") as config_file:
-                default_path_datasource_config = yaml.load(config_file) or {}
-            datasource_config.update(default_path_datasource_config)
-        except IOError as e:
-            if e.errno != errno.ENOENT:
-                raise
-            logger.debug("No config file found in default location for datasource %s" % datasource_name)
-        
-        if defined_config_path is not None:
-            try:
-                with open(defined_config_path, "r") as config_file:
-                    defined_path_datasource_config = yaml.load(config_file) or {}
-                datasource_config.update(defined_path_datasource_config)
-            except IOError as e:
-                if e.errno != errno.ENOENT:
-                    raise
-                logger.warning("No config file found in user-defined location for datasource %s" % datasource_name)
-        
-        return datasource_config
-
     def get_available_data_asset_names(self, datasource_names=None, generator_names=None):
         """Inspect datasource and generators to provide available data_asset objects.
 
@@ -533,6 +483,8 @@ class ConfigOnlyDataContext(object):
                                           **kwargs)
         return data_asset
 
+    # NOTE: Abe 2019//08/22 : I think we want to change this to the new standard class_name, module_name syntax.
+    # Doing this while maintaining backward compatibility to type_s (assuming we choose to do so) will require care.
     def add_datasource(self, name, type_, **kwargs):
         """Add a new datasource to the data context.
 
@@ -550,18 +502,11 @@ class ConfigOnlyDataContext(object):
         datasource_class = self._get_datasource_class(type_)
         datasource = datasource_class(name=name, data_context=self, **kwargs)
         self._datasources[name] = datasource
-        # This check shouldn't be necessary
-        # if not "datasources" in self._project_config:
-        #     self._project_config["datasources"] = {}
         self._project_config["datasources"][name] = datasource.get_config()
 
-        #!!! This return value isn't used anywhere in the live codebase, and only once in tests.
-        #Deprecating for now. Will remove fully later.
-        # return datasource
+        return datasource
 
     def get_config(self):
-        #!!! Deprecating this for now, but leaving the code in case there are unanticipated side effect.
-        # self._save_project_config()
         return self._project_config
 
     def _get_datasource_class(self, datasource_type):
@@ -1300,7 +1245,7 @@ class ConfigOnlyDataContext(object):
             data_asset_name: name of data asset for which to get validation result
             expectation_suite_name: expectation_suite name for which to get validation result (default: "default")
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
-            # validations_store: the store from which to get validation results
+            validations_store_name: the name of the store from which to get validation results
             failed_only: if True, filter the result to return only failed expectations
 
         Returns:
@@ -1399,11 +1344,6 @@ class ConfigOnlyDataContext(object):
             logger.debug("No data_docs_config found. No site(s) built.")
 
         return index_page_locator_infos
-
-    def get_absolute_path(self, path):
-        #TODO: ideally, the data context object should resolve all paths before
-        # calling the site builder (or any other specific logic)
-        return os.path.join(self._context_root_directory, path)
 
     def profile_datasource(self,
                            datasource_name,
@@ -1645,25 +1585,25 @@ class DataContext(ConfigOnlyDataContext):
         config_filepath = os.path.join(self.root_directory, "great_expectations.yml")
         with open(config_filepath, "w") as data:
             #Note: I don't know how this method preserves commenting, but it seems to work
-            if PY2:
-                config = dict(self._project_config)
-            else:
-                # config = OrderedDict(self._project_config)
-                config = dict(self._project_config)
+            config = dict(self._project_config)
             yaml.dump(config, data)
 
     def add_store(self, store_name, store_config):
         logger.debug("Starting DataContext.add_store")
         
-        super(DataContext, self).add_store(store_name, store_config)
+        new_store = super(DataContext, self).add_store(store_name, store_config)
         self._save_project_config()
+        return new_store
+
 
     def add_datasource(self, name, type_, **kwargs):
         logger.debug("Starting DataContext.add_datasource")
 
-        super(DataContext, self).add_datasource(name, type_, **kwargs)
+        new_datasource = super(DataContext, self).add_datasource(name, type_, **kwargs)
         self._save_project_config()
 
+        return new_datasource
+      
     def find_context_root_dir(self):
         if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
             return "../"
@@ -1676,7 +1616,6 @@ class DataContext(ConfigOnlyDataContext):
             raise DataContextError(
                 "Unable to locate context root directory. Please provide a directory name."
             )
-
 
 class ExplorerDataContext(DataContext):
 
