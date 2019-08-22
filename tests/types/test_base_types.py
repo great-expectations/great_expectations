@@ -53,8 +53,8 @@ def test_DotDict_dot_syntax():
     assert d["x"] == 1
 
     assert d == {
-        "x" : 1,
-        "y" : 2
+        "x": 1,
+        "y": 2
     }
 
 
@@ -131,12 +131,8 @@ def test_LooselyTypedDotDict_subclass():
 
 def test_LooselyTypedDotDict_subclass_required_keys():
     class MyLooselyTypedDotDict(LooselyTypedDotDict):
-        _allowed_keys = set([
-            "x", "y", "z"
-        ])
-        _required_keys = set([
-            "x"
-        ])
+        _allowed_keys = {"x", "y", "z"}
+        _required_keys = {"x"}
 
     with pytest.raises(KeyError):
         d = MyLooselyTypedDotDict(**{
@@ -161,12 +157,8 @@ def test_LooselyTypedDotDict_subclass_required_keys():
     # _required_keys must be a subset of _allowed_keys
     with pytest.raises(ValueError):
         class MyLooselyTypedDotDict(LooselyTypedDotDict):
-            _allowed_keys = set([
-                "x", "y", "z"
-            ])
-            _required_keys = set([
-                "w"
-            ])
+            _allowed_keys = {"x", "y", "z"}
+            _required_keys = {"w"}
         
         #Unfortunately, I don't have a good way to test this condition until the class is instantiated
         d = MyLooselyTypedDotDict(x=True)
@@ -174,12 +166,8 @@ def test_LooselyTypedDotDict_subclass_required_keys():
 
 def test_LooselyTypedDotDict_subclass_key_types():
     class MyLooselyTypedDotDict(LooselyTypedDotDict):
-        _allowed_keys = set([
-            "x", "y", "z"
-        ])
-        _required_keys = set([
-            "x",
-        ])
+        _allowed_keys = {"x", "y", "z"}
+        _required_keys = { "x" }
         _key_types = {
             "x": int,
             "y": str,
@@ -233,77 +221,68 @@ def test_LooselyTypedDotDict_subclass_key_types():
 
 def test_LooselyTypedDotDict_ListOf_typing():
     class MyLooselyTypedDotDict(LooselyTypedDotDict):
-        _allowed_keys = set([
-            "a", "b", "c"
-        ])
+        _allowed_keys = {"a", "b", "c" }
         _key_types = {
-            "a" : int,
-            "b" : ListOf(int),
+            "a": int,
+            "b": ListOf(int),
         }
     
     d = MyLooselyTypedDotDict(
         **{
-            "a" : 10,
-            "b" : [10, 20, 30]
+            "a": 10,
+            "b": [10, 20, 30]
         }
     )
 
     d = MyLooselyTypedDotDict(
         coerce_types=True,
         **{
-            "a" : 10,
-            "b" : ["10", "20", "30"]
+            "a": 10,
+            "b": ["10", "20", "30"]
         }
     )
 
     with pytest.raises(TypeError):
         d = MyLooselyTypedDotDict(
             **{
-                "a" : 10,
-                "b" : [10, 20, "rabbit"]
+                "a": 10,
+                "b": [10, 20, "rabbit"]
             }
         )
 
+
 def test_LooselyTypedDotDict_recursive_coercion():
     class MyNestedDotDict(LooselyTypedDotDict):
-        _allowed_keys = set([
-            "a", "b", "c"
-        ])
-        _required_keys = set([
-            "a",
-        ])
+        _allowed_keys = {"a", "b", "c"}
+        _required_keys = {"a"}
         _key_types = {
-            "a" : int,
-            "b" : str,
+            "a": int,
+            "b": str,
         }
 
     class MyLooselyTypedDotDict(LooselyTypedDotDict):
-        _allowed_keys = set([
-            "x", "y", "z"
-        ])
-        _required_keys = set([
-            "x",
-        ])
+        _allowed_keys = {"x", "y", "z"}
+        _required_keys = {"x"}
         _key_types = {
-            "x" : str,
-            "y" : MyNestedDotDict,
+            "x": str,
+            "y": MyNestedDotDict,
         }
 
     d = MyLooselyTypedDotDict(
         coerce_types=True,
         **{
-            "x" : "hello",
-            "y" : {
-                "a" : 1,
-                "b" : "hello"
+            "x": "hello",
+            "y": {
+                "a": 1,
+                "b": "hello"
             },
         }
     )
     assert d == {
-        "x" : "hello",
-        "y" : {
-            "a" : 1,
-            "b" : "hello"
+        "x": "hello",
+        "y": {
+            "a": 1,
+            "b": "hello"
         },
     }
 
@@ -311,9 +290,9 @@ def test_LooselyTypedDotDict_recursive_coercion():
         MyLooselyTypedDotDict(
             coerce_types=True,
             **{
-                "x" : "hello",
-                "y" : {
-                    "a" : "broken",
+                "x": "hello",
+                "y": {
+                    "a": "broken",
                 },
             }
         )
@@ -322,42 +301,34 @@ def test_LooselyTypedDotDict_recursive_coercion():
         MyLooselyTypedDotDict(
             coerce_types=True,
             **{
-                "x" : "hello",
-                "y" : {
-                    "b" : "wait, a is required!",
+                "x": "hello",
+                "y": {
+                    "b": "wait, a is required!",
                 },
             }
         )
 
 def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
     class MyNestedDotDict(LooselyTypedDotDict):
-        _allowed_keys = set([
-            "a",
-        ])
-        _required_keys = set([
-            "a",
-        ])
+        _allowed_keys = {"a"}
+        _required_keys = {"a"}
         _key_types = {
-            "a" : int,
+            "a": int,
         }
 
     class MyLooselyTypedDotDict(LooselyTypedDotDict):
-        _allowed_keys = set([
-            "x", "y", "z"
-        ])
-        _required_keys = set([
-            "x",
-        ])
+        _allowed_keys = {"x", "y", "z"}
+        _required_keys = {"x"}
         _key_types = {
-            "x" : str,
-            "y" : ListOf(MyNestedDotDict),
+            "x": str,
+            "y": ListOf(MyNestedDotDict),
         }
 
     d = MyLooselyTypedDotDict(
         coerce_types=True,
         **{
-            "x" : "hello",
-            "y" : [
+            "x": "hello",
+            "y": [
                 {"a": 1},
                 {"a": 2},
                 {"a": 3},
@@ -366,8 +337,8 @@ def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
         }
     )
     assert d == {
-        "x" : "hello",
-        "y" : [
+        "x": "hello",
+        "y": [
             {"a": 1},
             {"a": 2},
             {"a": 3},
@@ -379,9 +350,9 @@ def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
         d = MyLooselyTypedDotDict(
             coerce_types=True,
             **{
-                "x" : "hello",
-                "y" : {
-                    "a" : [1, 2, 3, 4],
+                "x": "hello",
+                "y": {
+                    "a": [1, 2, 3, 4],
                 },
             }
         )
@@ -389,43 +360,35 @@ def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
 
 def test_LooselyTypedDotDict_unicode_issues():
     class MyLTDD(LooselyTypedDotDict):
-        _allowed_keys = set([
-            "a",
-        ])
-        _required_keys = set([
-            "a",
-        ])
+        _allowed_keys = {"a"}
+        _required_keys = {"a"}
         _key_types = {
-            "a" : str,
+            "a": str,
         }
 
     MyLTDD(**{
-        "a" : "hello"
+        "a": "hello"
     })
 
     if PY2:
         with pytest.raises(TypeError):
             MyLTDD(**{
-                "a" : u"hello"
+                "a": u"hello"
             })
 
     class MyLTDD(LooselyTypedDotDict):
-        _allowed_keys = set([
-            "a",
-        ])
-        _required_keys = set([
-            "a",
-        ])
+        _allowed_keys = {"a"}
+        _required_keys = {"a"}
         _key_types = {
-            "a" : string_types,
+            "a": string_types,
         }
 
     MyLTDD(**{
-        "a" : "hello"
+        "a": "hello"
     })
 
     MyLTDD(**{
-        "a" : u"hello"
+        "a": u"hello"
     })
 
 
@@ -433,40 +396,41 @@ def test_LooselyTypedDotDict_multiple_types():
     class MyLTDD(LooselyTypedDotDict):
         _allowed_keys = set(["a"])
         _key_types = {
-            "a" : [int, float],
+            "a": [int, float],
         }
     
     A = MyLTDD(**{
-        "a" : 1
+        "a": 1
     })
 
     B = MyLTDD(**{
-        "a" : 1.5
+        "a": 1.5
     })
 
     with pytest.raises(TypeError):
         B = MyLTDD(**{
-            "a" : "string"
+            "a": "string"
         })
 
     with pytest.raises(TypeError):
         B = MyLTDD(**{
-            "a" : None
+            "a": None
         })
 
     class MyLTDD(LooselyTypedDotDict):
-        _allowed_keys = set(["a"])
+        _allowed_keys = {"a"}
         _key_types = {
-            "a" : [int, None],
+            "a": [int, None],
         }
     
     A = MyLTDD(**{
-        "a" : 1
+        "a": 1
     })
 
     B = MyLTDD(**{
-        "a" : None
+        "a": None
     })
+
 
 def test_dotdict_yaml_serialization(capsys):
     # To enable yaml serialization, we simply annotate the class as a @yaml_object
