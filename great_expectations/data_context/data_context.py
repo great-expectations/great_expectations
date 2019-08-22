@@ -1551,17 +1551,7 @@ class DataContext(ConfigOnlyDataContext):
         # #TODO: Factor this out into a helper function in GE. It doesn't belong inside this method.
         # # determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
-            if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
-                context_root_dir = "../"
-            elif os.path.isdir("./great_expectations") and \
-                    os.path.isfile("./great_expectations/great_expectations.yml"):
-                context_root_dir = "./great_expectations"
-            elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
-                context_root_dir = "./"
-            else:
-                raise DataContextError(
-                    "Unable to locate context root directory. Please provide a directory name."
-                )
+            context_root_dir = self.find_context_root_dir()
         context_root_directory = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_directory
 
@@ -1612,18 +1602,30 @@ class DataContext(ConfigOnlyDataContext):
         self._save_project_config()
 
         return new_datasource
+      
+    def find_context_root_dir(self):
+        if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
+            return "../"
+        elif os.path.isdir("./great_expectations") and \
+                os.path.isfile("./great_expectations/great_expectations.yml"):
+            return "./great_expectations"
+        elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
+            return "./"
+        else:
+            raise DataContextError(
+                "Unable to locate context root directory. Please provide a directory name."
+            )
 
+class ExplorerDataContext(DataContext):
 
-class ExplorerDataContext(ConfigOnlyDataContext):
-
-    def __init__(self, config, expectation_explorer=False, data_asset_name_delimiter='/'):
+    def __init__(self, context_root_dir=None, expectation_explorer=True, data_asset_name_delimiter='/'):
         """
             expectation_explorer: If True, load the expectation explorer manager, which will modify GE return objects \
             to include ipython notebook widgets.
         """
 
         super(ExplorerDataContext, self).__init__(
-            config,
+            context_root_dir,
             data_asset_name_delimiter,
         )
 
@@ -1642,7 +1644,6 @@ class ExplorerDataContext(ConfigOnlyDataContext):
         Returns:
             return_obj: the return object, potentially changed into a widget by the configured expectation explorer
         """
-        return return_obj
         if self._expectation_explorer:
             return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
         else:
