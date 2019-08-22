@@ -1,6 +1,11 @@
 .. _changelog:
 
 
+v0.8.0__develop
+-----------------
+* INTERNAL: rename LooselyTypedDotDict to AllowedKeysDotDict and add RequiredKeysDotDict as parent
+
+
 v0.7.8__develop
 -----------------
 

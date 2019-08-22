@@ -1,6 +1,6 @@
-from ...types import LooselyTypedDotDict
+from ...types import AllowedKeysDotDict
 
-class StoreMetaConfig(LooselyTypedDotDict):
+class StoreMetaConfig(AllowedKeysDotDict):
     """Top-level configs for stores look like this
     """
     _allowed_keys = set([
@@ -19,13 +19,13 @@ class StoreMetaConfig(LooselyTypedDotDict):
     }
 
 
-class InMemoryStoreConfig(LooselyTypedDotDict):
+class InMemoryStoreConfig(AllowedKeysDotDict):
     _allowed_keys = set([
         "serialization_type"
     ])
 
 
-class FilesystemStoreConfig(LooselyTypedDotDict):
+class FilesystemStoreConfig(AllowedKeysDotDict):
     _allowed_keys = set([
         "serialization_type",
         "base_directory",
