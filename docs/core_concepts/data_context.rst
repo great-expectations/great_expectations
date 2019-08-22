@@ -11,13 +11,13 @@ as well as managed expectation suites should be stored in version control.
 
 DataContexts use data sources you're already familiar with. Generators help introspect data stores and data execution
 frameworks (such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
-enables fetching, validation, profiling, and documentation of  your data in a way that is meaningful within your
+enables fetching, validation, profiling, and documentation of your data in a way that is meaningful within your
 existing infrastructure and work environment.
 
 DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
 normalized *data_asset_name*, consisting of *datasource/generator/generator_asset*.
 
-- The datasource actually connects to a source of materialized data and returns Great Expectations DataAssets \
+- The datasource actually connects to a source of data and returns Great Expectations DataAssets \
   connected to a compute environment and ready for validation.
 
 - The Generator knows how to introspect datasources and produce identifying "batch_kwargs" that define \

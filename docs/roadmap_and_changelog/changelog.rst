@@ -1,21 +1,35 @@
 .. _changelog:
 
+
+v0.7.8__develop
+-----------------
+
+
 v.0.7.7
 -----------------
-* Fix databricks generator (thanks @sspitz3!)
-* Add support for reader_method = "delta" to SparkDFDatasource
 * Standardize the way that plugin module loading works. DataContext will begin to use the new-style class and plugin
 identification moving forward; yml configs should specify class_name and module_name (with module_name optional for
 GE types). For now, it is possible to use the "type" parameter in configuration (as before).
 * Add support for custom data_asset_type to all datasources
+* Add support for strict_min and strict_max to inequality-based expectations to allow strict inequality checks
+(thanks @RoyalTS!)
+* Add support for reader_method = "delta" to SparkDFDatasource
+* Fix databricks generator (thanks @sspitz3!)
+* Improve performance of DataContext loading by moving optional import
 * Fix several memory and performance issues in SparkDFDataset.
  - Use only distinct value count instead of bringing values to driver
  - Migrate away from UDF for set membership, nullity, and regex expectations
 * Fix several UI issues in the data_documentation
- - Broken link on Home
+ - Move prescriptive dataset expectations to Overview section
+ - Fix broken link on Home breadcrumb
  - Scroll follows navigation properly
-* Add support for strict_min and strict_max to inequality-based expectations to allow strict inequality checks
-(thanks @RoyalTS!)
+ - Improved flow for long items in value_set
+ - Improved testing for ValidationRenderer
+ - Clarify dependencies introduced in documentation sites
+ - Improve testing and documentation for site_builder, including run_id filter
+ - Fix missing header in Index page and cut-off tooltip
+ - Add run_id to path for validation files
+
 
 v.0.7.6
 -----------------
