@@ -63,7 +63,7 @@ class RequiredKeysDotDict(DotDict):
 
     # This class should be yaml-serializable
     @yaml_object(yaml)
-    class MyLooselyTypedDotDict(RequiredKeysDotDict):
+    class MyAllowedKeysDotDict(RequiredKeysDotDict):
         # Keys "x", "y", and "z" MUST be present
         _required_keys = { "x", "y", "z" }
         # The value for key "y" MUST be a RequiredKeysDotDict
@@ -98,7 +98,7 @@ class RequiredKeysDotDict(DotDict):
                 if coerce_types:
                     # Update values if coerce_types==True
                     try:
-                        # If the given type is an instance of LooselyTypedDotDict, apply coerce_types recursively
+                        # If the given type is an instance of AllowedKeysDotDict, apply coerce_types recursively
                         if isinstance(self._key_types[key], ListOf):
                             if inspect.isclass(self._key_types[key].type_) and issubclass(self._key_types[key].type_,
                                                                                           RequiredKeysDotDict):
@@ -185,8 +185,8 @@ class RequiredKeysDotDict(DotDict):
 
 
 @yaml_object(yaml)
-class LooselyTypedDotDict(RequiredKeysDotDict):
-    """LooselyTypedDotDict adds support an _allowed_keys set to the RequiredKeysDotDict, limiting the total set
+class AllowedKeysDotDict(RequiredKeysDotDict):
+    """AllowedKeysDotDict adds support an _allowed_keys set to the RequiredKeysDotDict, limiting the total set
     of keys that may be in the dictionary. It should be used when the type requirements are stronger than
     RequiredKeysDotDict
 
@@ -200,7 +200,7 @@ class LooselyTypedDotDict(RequiredKeysDotDict):
 
     # This class should be yaml-serializable
     @yaml_object(yaml)
-    class MyLooselyTypedDotDict(RequiredKeysDotDict):
+    class MyAllowedKeysDotDict(RequiredKeysDotDict):
         # ONLY keys "x", "y", and "z" are allowed
         _allowed_keys = {"x", "y", "z"}
         # key "x" MUST be present
@@ -218,7 +218,7 @@ class LooselyTypedDotDict(RequiredKeysDotDict):
                 self._required_keys,
                 self._allowed_keys,
             ))
-        super(LooselyTypedDotDict, self).__init__(*args, **kwargs)
+        super(AllowedKeysDotDict, self).__init__(*args, **kwargs)
         for key in self.keys():
             if key not in self._allowed_keys:
                 raise KeyError("key: {!r} not in allowed keys: {!r}".format(
@@ -242,6 +242,6 @@ class LooselyTypedDotDict(RequiredKeysDotDict):
                 self._allowed_keys
             ))
 
-        super(LooselyTypedDotDict, self).__setattr__(key, val)
+        super(AllowedKeysDotDict, self).__setattr__(key, val)
 
     __setattr__ = __setitem__
