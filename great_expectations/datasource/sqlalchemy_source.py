@@ -6,7 +6,7 @@ from .datasource import Datasource
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
 from .generator.query_generator import QueryGenerator
 from great_expectations.exceptions import DatasourceInitializationError
-from great_expectations.data_context.types import ClassConfig
+from great_expectations.types import ClassConfig
 
 logger = logging.getLogger(__name__)
 

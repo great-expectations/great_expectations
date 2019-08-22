@@ -6,6 +6,7 @@ from collections import OrderedDict
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ProfilingResultsColumnSectionRenderer,
+    ValidationResultsColumnSectionRenderer
 )
 from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
@@ -98,17 +99,11 @@ def test_ProfilingResultsColumnSectionRenderer_render(titanic_profiled_evrs_1, t
 
 
 def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
-    content_blocks = []
-    # print(titanic_profiled_name_column_evrs)
-    ProfilingResultsColumnSectionRenderer()._render_header(
-        titanic_profiled_name_column_evrs,
-        content_blocks,
+    content_block = ProfilingResultsColumnSectionRenderer()._render_header(
+        evrs=titanic_profiled_name_column_evrs,
         column_type = None
     )
-    # print(json.dumps(content_blocks, indent=2))
-    
-    assert len(content_blocks) == 1
-    content_block = content_blocks[0]
+
     assert content_block["content_block_type"] == "header"
     assert content_block["header"] == {
         "template": "Name",
@@ -124,6 +119,8 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
         }
     }
 
+
+def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_dollar_sign(titanic_profiled_name_column_evrs):
     evr_with_unescaped_dollar_sign = {
         "success": True,
         "result": {
@@ -157,14 +154,12 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
             }
         }
     }
-    content_blocks = []
-    ProfilingResultsColumnSectionRenderer._render_header(
+
+    content_block = ProfilingResultsColumnSectionRenderer._render_header(
         [evr_with_unescaped_dollar_sign],
-        content_blocks=content_blocks,
         column_type=[],
     )
-    print(content_blocks)
-    assert content_blocks[0] == {
+    assert content_block == {
         'content_block_type': 'header',
         'header': {
             'template': 'Car Insurance Premiums ($$)',
@@ -198,8 +193,8 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
 #     evrs = {}
 #     ProfilingResultsColumnSectionRenderer()._render_values_set(evrs, content_blocks)
 
-def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_profiled_evrs_1):
 
+def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_profiled_evrs_1):
     print(titanic_profiled_evrs_1["results"][0])
     distinct_values_evrs = [evr for evr in titanic_profiled_evrs_1["results"] if evr["expectation_config"]["expectation_type"] == "expect_column_distinct_values_to_be_in_set"]
     
@@ -207,11 +202,9 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_pr
 
     content_blocks = []
     for evr in distinct_values_evrs:
-        ProfilingResultsColumnSectionRenderer()._render_bar_chart_table(
-            distinct_values_evrs,
-            content_blocks,
+        content_blocks.append(
+            ProfilingResultsColumnSectionRenderer()._render_bar_chart_table(distinct_values_evrs)
         )
-    print(json.dumps(content_blocks, indent=2))
 
     assert len(content_blocks) == 4
 
@@ -253,12 +246,9 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_pr
 def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_name_column_expectations):
     remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_header(
         titanic_profiled_name_column_expectations,#["expectations"],
-        [],
     )
 
-    print(json.dumps(content_blocks, indent=2))
-    assert content_blocks == [
-        RenderedComponentContent(**{
+    assert content_blocks == RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Name",
             "styling": {
@@ -273,7 +263,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
             }
             }
         })
-    ]
+
 
     expectation_with_unescaped_dollar_sign = {
       "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -299,36 +289,107 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
     }
     remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_header(
         [expectation_with_unescaped_dollar_sign],
-        []
     )
-    print(content_blocks)
-    assert content_blocks[0] == {
+    assert content_blocks == {
         'content_block_type': 'header',
         'header': 'Car Insurance Premiums ($$)',
         'styling': {'classes': ['col-12'], 'header': {'classes': ['alert', 'alert-secondary']}}
     }
 
 
-
-
-
 def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profiled_name_column_expectations):
-    remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_bullet_list(
+    remaining_expectations, content_block = ExpectationSuiteColumnSectionRenderer._render_bullet_list(
         titanic_profiled_name_column_expectations,#["expectations"],
-        [],
     )
 
-    print(json.dumps(content_blocks, indent=2))
-
-    assert len(content_blocks) == 1
-
-    content_block = content_blocks[0]
     assert content_block["content_block_type"] == "bullet_list"
     assert len(content_block["bullet_list"]) == 4
     assert "value types must belong to this set" in json.dumps(content_block)
     assert "may have any number of unique values" in json.dumps(content_block)
     assert "may have any percentage of unique values" in json.dumps(content_block)
     assert "values must not be null, at least $mostly_pct % of the time." in json.dumps(content_block)
+    
+    
+def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
+    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_header(
+        validation_results=titanic_profiled_name_column_evrs,
+    )
+
+    assert content_block == {
+            'content_block_type': 'header',
+            'header': 'Name',
+            'styling': {
+                'classes': ['col-12'],
+                'header': {
+                    'classes': ['alert', 'alert-secondary']
+                }
+            }
+        }
+
+
+def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped_dollar_sign(titanic_profiled_name_column_evrs):
+    evr_with_unescaped_dollar_sign = {
+        'success': True,
+        'result': {
+            'element_count': 1313,
+            'missing_count': 0,
+            'missing_percent': 0.0,
+            'unexpected_count': 0,
+            'unexpected_percent': 0.0,
+            'unexpected_percent_nonmissing': 0.0,
+            'partial_unexpected_list': [],
+            'partial_unexpected_index_list': [],
+            'partial_unexpected_counts': []
+        },
+        'exception_info': {
+            'raised_exception': False,
+            'exception_message': None,
+            'exception_traceback': None
+        },
+        'expectation_config': {
+            'expectation_type': 'expect_column_values_to_be_in_type_list',
+            'kwargs': {
+                'column': 'Name ($)',
+                'type_list': ['CHAR', 'StringType', 'TEXT', 'VARCHAR', 'str', 'string'],
+                'result_format': 'SUMMARY'
+            }
+        }
+    }
+
+    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_header(
+        validation_results=[evr_with_unescaped_dollar_sign],
+    )
+    assert content_block == {
+            'content_block_type': 'header',
+            'header': 'Name ($$)',
+            'styling': {
+                'classes': ['col-12'],
+                'header': {
+                    'classes': ['alert', 'alert-secondary']
+                }
+            }
+        }
+
+    
+def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_name_column_evrs):
+    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_table(
+        validation_results=titanic_profiled_name_column_evrs,
+    )
+
+    content_block_stringified = json.dumps(content_block)
+    
+    assert content_block["content_block_type"] == "table"
+    assert len(content_block["table"]) == 6
+    assert content_block_stringified.count("$icon") == 6
+    assert "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5." in content_block_stringified
+    assert "may have any number of unique values." in content_block_stringified
+    assert "may have any percentage of unique values." in content_block_stringified
+    assert "values must not be null, at least $mostly_pct % of the time." in content_block_stringified
+    assert "values must belong to this set: [ ]." in content_block_stringified
+    assert "\\n\\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows." in content_block_stringified
+    assert "values must not match this regular expression: $regex." in content_block_stringified
+    assert "\\n\\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows." in content_block_stringified
+    
     
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path():
     evr = {
@@ -427,114 +488,3 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         ]
     }
 
-def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation():
-    evr = {
-        'success': False,
-        'exception_info': {
-            'raised_exception': True,
-            'exception_message': 'Invalid partition object.',
-            'exception_traceback': 'Traceback (most recent call last):\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n'
-        },
-        'expectation_config': {
-            'expectation_type': 'expect_column_kl_divergence_to_be_less_than',
-            'kwargs': {
-                'column': 'live',
-                'partition_object': None,
-                'threshold': None,
-                'result_format': 'SUMMARY'
-            },
-            'meta': {
-                'BasicDatasetProfiler': {'confidence': 'very low'}
-            }
-        }
-    }
-    result = ValidationResultsTableContentBlockRenderer.render([evr])
-    print(json.dumps(result, indent=2))
-    assert result == {
-        "content_block_type": "table",
-        "table": [
-            [
-            {
-                "content_block_type": "string_template",
-                "string_template": {
-                "template": "$icon",
-                "params": {
-                    "icon": ""
-                },
-                "styling": {
-                    "params": {
-                    "icon": {
-                        "classes": [
-                        "fas",
-                        "fa-exclamation-triangle",
-                        "text-warning"
-                        ],
-                        "tag": "i"
-                    }
-                    }
-                }
-                }
-            },
-            [
-                {
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "$column Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a provided threshold but no distribution was specified.",
-                    "params": {
-                    "column": "live",
-                    "partition_object": None,
-                    "threshold": None,
-                    "result_format": "SUMMARY"
-                    },
-                    "styling": {
-                    "default": {
-                        "classes": [
-                        "badge",
-                        "badge-secondary"
-                        ]
-                    },
-                    "params": {
-                        "sparklines_histogram": {
-                        "styles": {
-                            "font-family": "serif !important"
-                        }
-                        }
-                    }
-                    }
-                }
-                },
-                {
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "Expectation failed to execute.",
-                    "params": {},
-                    "tag": "strong",
-                    "styling": {
-                    "classes": [
-                        "text-warning"
-                    ]
-                    }
-                }
-                },
-                None
-            ],
-            "--"
-            ]
-        ],
-        "styling": {
-            "body": {
-            "classes": [
-                "table"
-            ]
-            },
-            "classes": [
-            "m-3",
-            "table-responsive"
-            ]
-        },
-        "header_row": [
-            "Status",
-            "Expectation",
-            "Observed Value"
-        ]
-    }
