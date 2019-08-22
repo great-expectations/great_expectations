@@ -14,14 +14,14 @@ import json
 import logging
 logger = logging.getLogger(__name__)
 
-
+# TODO: Rename this to NamespaceAwareStore
 class ContextAwareStore(object):
     def __init__(
         self,
         data_context,
         config,
     ):
-        # FIXME: Eek. This causes circular imports. What to do?
+        # Note: Eek. We want to do type chcecking, but this would cause circular imports. What to do?
         # TODO: remove the dependency. Stores should be based on namespaceIdentifier objects, but not Context itself.
         # if not isinstance(data_context, DataContext):
         #     raise TypeError("data_context must be an instance of type DataContext")
