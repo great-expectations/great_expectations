@@ -253,11 +253,12 @@ def test_allowed_keys_dot_dict_ListOf_typing():
 
 def test_allowed_keys_dot_dict_recursive_coercion():
     class MyNestedDotDict(AllowedKeysDotDict):
-        _allowed_keys = {"a", "b", "c"}
+        _allowed_keys = {"a", "b", "c", "d"}
         _required_keys = {"a"}
         _key_types = {
             "a": int,
             "b": str,
+            "d": string_types,
         }
 
     class MyAllowedKeysDotDict(AllowedKeysDotDict):
@@ -274,7 +275,8 @@ def test_allowed_keys_dot_dict_recursive_coercion():
             "x": "hello",
             "y": {
                 "a": 1,
-                "b": "hello"
+                "b": "hello",
+                "d": "hi"
             },
         }
     )
@@ -282,7 +284,8 @@ def test_allowed_keys_dot_dict_recursive_coercion():
         "x": "hello",
         "y": {
             "a": 1,
-            "b": "hello"
+            "b": "hello",
+            "d": "hi",
         },
     }
 

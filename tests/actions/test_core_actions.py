@@ -33,16 +33,19 @@ def test_action_set_config():
         **{
             #TODO: This should be a dict, not a list.
             "action_list" : [
-                ActionConfig(**{ #TODO: once we enable coerce_types, this can be diasbled
-                    "module_name" : "great_expectations.actions",
-                    "class_name": "SummarizeAndSendToWebhookAction",
-                    "kwargs" : {
-                        "webhook": "http://myslackwebhook.com/",
-                        "summarization_module_name": "great_expectations.render",
-                        "summarization_class_name": "SummarizeValidationResultsForSlack",
+                ActionConfig(
+                    coerce_types=True,
+                    **{
+                        "module_name" : "great_expectations.actions",
+                        "class_name": "SummarizeAndSendToWebhookAction",
+                        "kwargs" : {
+                            "webhook": "http://myslackwebhook.com/",
+                            "summarization_module_name": "great_expectations.render",
+                            "summarization_class_name": "SummarizeValidationResultsForSlack",
+                        }
                     }
-                }
-            )]
+                )
+            ]
         }
     )
 
