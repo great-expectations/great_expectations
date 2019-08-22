@@ -33,7 +33,7 @@ from great_expectations.util import (
 #     pass
 
 def test_InMemoryStore(empty_data_context):
-    #TODO: Typechecking was causing circular imports. Someday, we can implement this with mypy...?
+    #TODO: Typechecking was causing circular imports. See the note in the Store class.
     # with pytest.raises(TypeError):
     #     my_store = InMemoryStore(
     #         data_context=None,
@@ -241,7 +241,7 @@ def test_NameSpacedFilesystemStore_key_listing(empty_data_context, tmp_path_fact
     assert my_store.get_most_recent_run_id() == "100"
 
 def test_NameSpacedFilesystemStore_pandas_csv_serialization(tmp_path_factory, empty_data_context):
-    #TODO: Generalize this trick, as a way to avoid directory name collisions
+    #TODO: We should consider using this trick everywhere, as a way to avoid directory name collisions
     path = str(tmp_path_factory.mktemp('test_FilesystemStore_pandas_csv_serialization__dir'))
 
     my_store = NameSpacedFilesystemStore(

@@ -60,7 +60,6 @@ yaml.default_flow_style = False
 ALLOWED_DELIMITERS = ['.', '/']
 
 
-#TODO: Maybe find a better name for this guy?
 class ConfigOnlyDataContext(object):
     """This class implements most of the functionality of DataContext, with a few exceptions.
 
@@ -75,6 +74,7 @@ class ConfigOnlyDataContext(object):
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
 
+    # TODO: Consider moving this to DataContext, instead of ConfigOnlyDataContext, since it writes to disc.
     @classmethod
     def create(cls, project_root_dir=None):
         """Build a new great_expectations directory and DataContext object in the provided project_root_dir.
@@ -245,13 +245,11 @@ class ConfigOnlyDataContext(object):
     @property
     def stores(self):
         """A single holder for all Stores in this context"""
-        # TODO: support multiple stores choices and/or ensure abs paths when appropriate
         return self._stores
 
     @property
     def datasources(self):
         """A single holder for all Datasources in this context"""
-        # TODO: support multiple stores choices and/or ensure abs paths when appropriate
         return self._datasources
 
     @property
@@ -1033,7 +1031,8 @@ class ConfigOnlyDataContext(object):
         else:
             return {}
 
-    #TODO: Can we raname this to _compile_all_evaluation_parameters_from_expectation_suites or something similar?
+    #NOTE: Abe 2019/08/22 : Can we rename this to _compile_all_evaluation_parameters_from_expectation_suites, or something similar?
+    # A more descriptive name would have helped me grok this faster when I first encountered it
     def _compile(self):
         """Compiles all current expectation configurations in this context to be ready for result registration.
         
@@ -1315,7 +1314,7 @@ class ConfigOnlyDataContext(object):
 
     def build_data_documentation(self, site_names=None, data_asset_name=None):
         """
-        TODO!!!!
+        TODO: Documentation needed
 
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
