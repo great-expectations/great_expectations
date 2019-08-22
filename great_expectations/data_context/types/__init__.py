@@ -1,12 +1,9 @@
 from ...types import LooselyTypedDotDict
-from six import string_types
 from collections import namedtuple
 from six import string_types
 
 from .configurations import (
-    Config,
-    ClassConfig,
-    DataContextConfig,
+    DataContextConfig
 )
 
 NormalizedDataAssetName = namedtuple("NormalizedDataAssetName", [

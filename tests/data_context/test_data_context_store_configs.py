@@ -17,6 +17,7 @@ def totally_empty_data_context(tmp_path_factory):
     config = {
         "plugins_directory": "plugins/",
         "expectations_directory": "expectations/",
+        "evaluation_parameter_store_name": "not_a_real_store_name",
         "datasources": {},
         "stores": {},
         "data_docs": {
@@ -57,10 +58,7 @@ def test_add_store(totally_empty_data_context):
         "my_inmemory_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "InMemoryStore",
-            "store_config": {
-                "serialization_type": "json"
-            },
+            "class_name": "InMemoryStore"
         }
     )
     assert "my_inmemory_store" in totally_empty_data_context.stores.keys()
