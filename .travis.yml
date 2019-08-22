@@ -26,9 +26,9 @@ matrix:
   - dist: trusty
     python: 3.6
     env: PANDAS=0.23.4
-  - dist: trusty
-    python: 3.6
-    env: PANDAS=0.24.2
+#  - dist: trusty
+#    python: 3.6
+#    env: PANDAS=0.24.2
   - dist: trusty
     python: 3.6
     env: PANDAS=latest
