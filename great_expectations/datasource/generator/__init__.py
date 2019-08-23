@@ -1,1 +1,2 @@
 from .databricks_generator import DatabricksTableGenerator
+from .glob_reader_generator import GlobReaderGenerator
