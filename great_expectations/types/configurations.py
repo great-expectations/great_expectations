@@ -1,10 +1,16 @@
+from six import string_types
+
 from ruamel.yaml import YAML, yaml_object
-from great_expectations.types import LooselyTypedDotDict
+from great_expectations.types import AllowedKeysDotDict
 yaml = YAML()
 
 
+class Config(AllowedKeysDotDict):
+    pass
+
+
 @yaml_object(yaml)
-class ClassConfig(LooselyTypedDotDict):
+class ClassConfig(Config):
     _allowed_keys = {
         "module_name",
         "class_name"
@@ -16,3 +22,5 @@ class ClassConfig(LooselyTypedDotDict):
         "module_name": str,
         "class_name": str
     }
+
+

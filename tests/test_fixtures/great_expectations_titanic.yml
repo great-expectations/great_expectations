@@ -9,7 +9,50 @@ datasources:
       mygenerator:
         type: subdir_reader
         base_directory: ../data
+plugins_directory: plugins/
+expectations_directory: expectations/
+evaluation_parameter_store_name: evaluation_parameter_store
+data_docs:
+  sites:
+stores:
 
-result_store:
-  filesystem:
-    base_directory: uncommitted/validations
+  local_validation_result_store:
+    module_name: great_expectations.data_context.store
+    class_name: NameSpacedFilesystemStore
+    store_config:
+      base_directory: uncommitted/validations/
+      serialization_type: json
+      file_extension: .json
+
+  local_profiling_store:
+    module_name: great_expectations.data_context.store
+    class_name: NameSpacedFilesystemStore
+    store_config:
+      base_directory: uncommitted/profiling/
+      serialization_type: json
+      file_extension: .json
+
+  local_workbench_site_store:
+    module_name: great_expectations.data_context.store
+    class_name: NameSpacedFilesystemStore
+    store_config:
+      base_directory: uncommitted/documentation/local_site
+      file_extension: .html
+
+  shared_team_site_store:
+    module_name: great_expectations.data_context.store
+    class_name: NameSpacedFilesystemStore
+    store_config:
+      base_directory: uncommitted/documentation/team_site
+      file_extension: .html
+
+  fixture_validation_results_store:
+    module_name: great_expectations.data_context.store
+    class_name: NameSpacedFilesystemStore
+    store_config:
+      base_directory: fixtures/validations
+      file_extension: .zzz
+
+  evaluation_parameter_store:
+      module_name: great_expectations.data_context.store
+      class_name: InMemoryStore

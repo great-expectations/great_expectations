@@ -71,6 +71,8 @@ class DataAsset(object):
 
         if profiler is not None:
             profiler.profile(self)
+        if data_context and hasattr(data_context, '_expectation_explorer_manager'):
+            self.set_default_expectation_argument("include_config", True)
 
     def autoinspect(self, profiler):
         """Deprecated: use profile instead.
@@ -100,6 +102,10 @@ class DataAsset(object):
         """
         expectation_suite, validation_results = profiler.profile(self)
         return expectation_suite, validation_results
+
+    #TODO: add warning if no expectation_explorer_manager and how to turn on
+    def edit_expectation_suite(self):
+        return self._data_context._expectation_explorer_manager.edit_expectation_suite(self)
 
     @classmethod
     def expectation(cls, method_arg_names):
@@ -833,6 +839,7 @@ class DataAsset(object):
         else:
             raise ValueError("Unable to save config: filepath or data_context must be available.")
 
+    #TODO: when validate is called and expectation editor is in data_context, need to bypass widget creation
     def validate(self, 
                  expectation_suite=None, 
                  run_id=None,
@@ -938,7 +945,7 @@ class DataAsset(object):
         # So, we load them in reverse order
 
         if data_context is not None:
-            runtime_evaluation_parameters = data_context.bind_evaluation_parameters(run_id)  # , expectation_suite)
+            runtime_evaluation_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
         else:
             runtime_evaluation_parameters = {}
 
@@ -998,6 +1005,7 @@ class DataAsset(object):
 
                 result = expectation_method(
                     catch_exceptions=catch_exceptions,
+                    include_config=True,
                     **evaluation_args
                 )
 
