@@ -1,8 +1,10 @@
 import os
 import sys
 import traceback
-from typing import List
-
+from typing import (
+    Dict,
+    List
+)
 from pyspark.ml.base import Transformer
 from pyspark.ml.pipeline import (
     Pipeline,
@@ -24,6 +26,7 @@ from pyspark.sql.functions import (
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
 from common.utils import (
+    flatten,
     ge_tap
 )
 
@@ -38,9 +41,9 @@ class TitanicCsvPipeline:
 
         self.spark_session = spark_session
 
-        self.stages = self._gather_processing_stages()
+        self.stages = self._gather_stages()
 
-    def _gather_processing_stages(self) -> List[Transformer]:
+    def _gather_stages(self) -> List[Transformer]:
         remove_age_na_rows_transformer: Transformer = RemoveAgeNARowsTransformer(
             spark_session=self.spark_session
         )
@@ -51,11 +54,18 @@ class TitanicCsvPipeline:
             spark_session=self.spark_session
         )
 
+        ge_expectation_suite_transformer: Transformer = GreatExpectationsValidationTransformer(
+            data_asset_name="titanic_victims",
+            spark_session=self.spark_session
+        )
+
         stages: List[Transformer] = [
             remove_age_na_rows_transformer,
             convert_age_to_float_transformer,
-            categorize_life_stage_by_age_transformer
+            categorize_life_stage_by_age_transformer,
+            ge_expectation_suite_transformer
         ]
+        stages = flatten(stages)
 
         return stages
 
@@ -126,26 +136,30 @@ class CategorizeLifeStageByAgeTransformer(Transformer):
         return df_res
 
 
-class ValidationTransformer(Transformer):
+class GreatExpectationsValidationTransformer(Transformer):
     """
     Wraps Great Expectations Data Tap API Call
     """
 
     def __init__(self, data_asset_name: str, spark_session: SparkSession):
-        super(ValidationTransformer, self).__init__()
+        super(GreatExpectationsValidationTransformer, self).__init__()
 
         self.data_asset_name = data_asset_name
         self.spark_session = spark_session
 
     def _transform(self, df: DataFrame) -> DataFrame:
-        df_res: DataFrame = df.withColumn(
-            "life_stage",
-            when(
-                df["age_as_float"] < 18.0, "child"
-            ).otherwise(
-                when(
-                    df["age_as_float"] >= 65.0, "senior"
-                ).otherwise("adult")
-            )
+        validation_result: Dict[str, list] = ge_tap(
+            data_asset_name=self.data_asset_name,
+            df=df
         )
-        return df_res
+        # print(f'[DEBUG] VALIDATION_RESULT_FOR_DATA_ASSET "{self.data_asset_name}" IS: {validation_result["success"]} ; DETAILS: {str(validation_result)}')
+        print('\n')
+
+        if validation_result["success"]:
+            print(f'This batch is valid for data asset "{self.data_asset_name}".')
+        else:
+            print(f'This batch is not valid for data asset "{self.data_asset_name}".')
+
+        print('\n')
+
+        return df

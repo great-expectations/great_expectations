@@ -1,0 +1,35 @@
+{
+  "data_asset_name": "titanic_csv_dataset/default/titanic_victims",
+  "expectation_suite_name": "expectation_suite-titanic_victims",
+  "meta": {
+    "great_expectations.__version__": "0.7.7"
+  },
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "Name"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {
+        "column": "Name",
+        "mostly": 1.0e-1
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "age_as_float"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "life_stage"
+      }
+    }
+  ],
+  "data_asset_type": "Dataset"
+}

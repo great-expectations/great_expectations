@@ -25,6 +25,18 @@ def local_path_to_hdfs_path(local_path: str) -> str:
     return f'file://{local_path}'
 
 
+def flatten(my_list: object) -> object:
+    """
+    :param my_list:
+    :return:
+    """
+    if not my_list:
+        return my_list
+    if isinstance(my_list[0], list):
+        return flatten(my_list[0]) + flatten(my_list[1:])
+    return my_list[:1] + flatten(my_list[1:])
+
+
 def load_csv_file_into_data_frame(
     spark_session: SparkSession,
     path_to_csv: str,
@@ -68,7 +80,7 @@ def load_csv_file_into_data_frame(
 def ge_tap(
     data_asset_name: str,
     df: DataFrame
-) -> Dict[str, str]:
+) -> Dict[str, list]:
     ge_data_context: DataContext = ge.data_context.DataContext()
     expectation_suite_name: str = f'expectation_suite-{data_asset_name}'
     batch: Dataset = ge_data_context.get_batch(

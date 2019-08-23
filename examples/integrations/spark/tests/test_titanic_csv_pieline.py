@@ -47,7 +47,7 @@ def test_titanic_csv_pipeline(
         StructField("Age", StringType(), True),
         StructField("Sex", StringType(), True),
         StructField("Survived", StringType(), True),
-        StructField("SecCode", StringType(), True)
+        StructField("SexCode", StringType(), True)
     ])
 
     df: DataFrame = load_csv_file_into_data_frame(
