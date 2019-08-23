@@ -12,7 +12,6 @@ import os
 import shutil
 import json
 from glob import glob
-import pandas as pd
 
 from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import (

@@ -5,7 +5,7 @@ from six import string_types
 from ..exceptions import BatchKwargsError
 
 from .datasource import Datasource, ReaderMethods
-from great_expectations.datasource.generator.filesystem_path_generator import SubdirReaderGenerator
+from great_expectations.datasource.generator.subdir_reader_generator import SubdirReaderGenerator
 from great_expectations.datasource.generator.databricks_generator import DatabricksTableGenerator
 from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
 
