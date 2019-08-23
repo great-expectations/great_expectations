@@ -1,6 +1,6 @@
 {
-  "data_asset_name": "titanic_csv_dataset/default/titanic_victims",
-  "expectation_suite_name": "expectation_suite-titanic_victims",
+  "data_asset_name": "titanic_csv_dataset/default/titanic_victims_after_processing",
+  "expectation_suite_name": "expectation_suite-titanic_victims_after_processing",
   "meta": {
     "great_expectations.__version__": "0.7.7"
   },

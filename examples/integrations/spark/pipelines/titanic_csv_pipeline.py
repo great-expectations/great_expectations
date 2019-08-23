@@ -1,6 +1,7 @@
 import os
 import sys
 import traceback
+from pathlib import Path
 from typing import (
     Dict,
     List
@@ -15,6 +16,9 @@ from pyspark.sql import (
     SparkSession
 )
 from pyspark.sql.types import (
+    StructField,
+    StructType,
+    StringType,
     FloatType
 )
 from pyspark.sql.functions import (
@@ -26,7 +30,9 @@ from pyspark.sql.functions import (
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
 from common.utils import (
+    local_path_to_hdfs_path,
     flatten,
+    load_csv_file_into_data_frame,
     ge_tap
 )
 
@@ -36,14 +42,23 @@ class TitanicCsvPipeline:
     Pipeline for the "Titanic CSV" example.
     """
 
-    def __init__(self, spark_session: SparkSession):
+    def __init__(self, source_dataset_csv_file_path, spark_session: SparkSession):
         super(TitanicCsvPipeline, self).__init__()
 
+        self.source_dataset_csv_file_path = source_dataset_csv_file_path
         self.spark_session = spark_session
 
         self.stages = self._gather_stages()
 
     def _gather_stages(self) -> List[Transformer]:
+        load_titanic_victims_dataset: Transformer = LoadCsvDatasetTransformer(
+            csv_file_path=self.source_dataset_csv_file_path,
+            spark_session=self.spark_session
+        )
+        ge_source_data_asset_validation_transformer: Transformer = GreatExpectationsValidationTransformer(
+            data_asset_name="titanic_victims_before_processing",
+            spark_session=self.spark_session
+        )
         remove_age_na_rows_transformer: Transformer = RemoveAgeNARowsTransformer(
             spark_session=self.spark_session
         )
@@ -53,17 +68,18 @@ class TitanicCsvPipeline:
         categorize_life_stage_by_age_transformer: Transformer = CategorizeLifeStageByAgeTransformer(
             spark_session=self.spark_session
         )
-
-        ge_expectation_suite_transformer: Transformer = GreatExpectationsValidationTransformer(
-            data_asset_name="titanic_victims",
+        ge_processed_data_asset_validation_transformer: Transformer = GreatExpectationsValidationTransformer(
+            data_asset_name="titanic_victims_after_processing",
             spark_session=self.spark_session
         )
 
         stages: List[Transformer] = [
+            load_titanic_victims_dataset,
+            ge_source_data_asset_validation_transformer,
             remove_age_na_rows_transformer,
             convert_age_to_float_transformer,
             categorize_life_stage_by_age_transformer,
-            ge_expectation_suite_transformer
+            ge_processed_data_asset_validation_transformer
         ]
         stages = flatten(stages)
 
@@ -80,6 +96,47 @@ class TitanicCsvPipeline:
             return df_res
         else:
             return df
+
+
+class LoadCsvDatasetTransformer(Transformer):
+    """
+    Loads a CSV-formatted dataset file from the local filesystem.
+    """
+
+    def __init__(self, csv_file_path: str, spark_session: SparkSession):
+        super(LoadCsvDatasetTransformer, self).__init__()
+
+        self.csv_file_path = csv_file_path
+        self.spark_session = spark_session
+
+    def _transform(self, df: DataFrame) -> DataFrame:
+        schema: StructType = StructType([
+            StructField("", StringType(), True),
+            StructField("Name", StringType(), True),
+            StructField("PClass", StringType(), True),
+            StructField("Age", StringType(), True),
+            StructField("Sex", StringType(), True),
+            StructField("Survived", StringType(), True),
+            StructField("SexCode", StringType(), True)
+        ])
+
+        df: DataFrame = load_csv_file_into_data_frame(
+            spark_session=self.spark_session,
+            path_to_csv=self.csv_file_path,
+            schema=schema,
+            delimiter=",",
+            limit=-1,
+            view=None
+        )
+
+        df.explain(extended=True)
+        df.printSchema()
+        df.collect()
+        df.show(truncate=False)
+
+        print(f'The original "Titanic" DataFrame (obtained from "{self.csv_file_path}") contains {df.count()} rows with {len(df.columns)} columns in each row.')
+
+        return df
 
 
 class RemoveAgeNARowsTransformer(Transformer):
@@ -152,7 +209,9 @@ class GreatExpectationsValidationTransformer(Transformer):
             data_asset_name=self.data_asset_name,
             df=df
         )
+
         # print(f'[DEBUG] VALIDATION_RESULT_FOR_DATA_ASSET "{self.data_asset_name}" IS: {validation_result["success"]} ; DETAILS: {str(validation_result)}')
+
         print('\n')
 
         if validation_result["success"]:

@@ -1,0 +1,26 @@
+{
+  "data_asset_name": "titanic_csv_dataset/default/titanic_victims_before_processing",
+  "expectation_suite_name": "expectation_suite-titanic_victims_before_processing",
+  "meta": {
+    "great_expectations.__version__": "0.7.7"
+  },
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_not_match_regex",
+      "kwargs": {
+        "column": "Age",
+        "regex": "(.*)NA(.*)",
+        "mostly": 4.3e-1
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "PClass",
+        "value_set": ["1st", "2nd", "3rd"],
+        "mostly": 1.0e-2
+      }
+    }
+  ],
+  "data_asset_type": "Dataset"
+}

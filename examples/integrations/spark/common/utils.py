@@ -77,6 +77,19 @@ def load_csv_file_into_data_frame(
     return df
 
 
+def create_empty_data_frame(spark_session: SparkSession) -> DataFrame:
+    """
+    :param spark_session:
+    :return:
+    """
+    schema = StructType([])
+    df: DataFrame = spark_session.createDataFrame(
+        data=spark_session.sparkContext.emptyRDD(),
+        schema=schema
+    )
+    return df
+
+
 def ge_tap(
     data_asset_name: str,
     df: DataFrame
