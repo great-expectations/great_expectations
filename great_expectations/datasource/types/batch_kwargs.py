@@ -29,6 +29,10 @@ class BatchKwargs(RequiredKeysDotDict):
     # is present
 
     _partition_id_key = "partition_id"
+
+    # _batch_id_ignored_keys makes it possible to define keys which, if present, are ignored for purposes
+    # of determining the unique batch id, such that batches differing only in the value in these keys are given
+    # the same id
     _batch_id_ignored_keys = {
         "data_asset_type"
     }
@@ -36,7 +40,7 @@ class BatchKwargs(RequiredKeysDotDict):
         "data_asset_type": ClassConfig
     }
 
-    _partition_id_delimiter = "::"
+    _partition_id_delimiter = "__"
 
     @property
     def batch_id(self):
@@ -50,8 +54,6 @@ class BatchKwargs(RequiredKeysDotDict):
             hash_ = key + ":" + self[key]
         else:
             hash_dict = {k: self[k] for k in set(self.keys()) - set(self._batch_id_ignored_keys) - {self._partition_id_key}}
-            print(sorted(hash_dict))
-            print(str(sorted(hash_dict)))
             hash_ = md5(str(sorted(hash_dict.items())).encode("utf-8")).hexdigest()
 
         return partition_id + self._partition_id_delimiter + hash_

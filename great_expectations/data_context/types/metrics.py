@@ -5,9 +5,9 @@ from great_expectations.types import AllowedKeysDotDict
 
 from collections import OrderedDict
 try:
-    from urllib.parse import urlencode
+    from urllib.parse import urlencode, parse_qsl
 except ImportError:
-    from urllib import urlencode
+    from urllib import urlencode, parse_qsl
 
 # TODO: data_asset_name_delimiter is not taken from a namespace yet
 DATA_ASSET_NAME_DELIMITER = "/"
@@ -47,6 +47,43 @@ class NamespaceAwareValidationMetric(Metric):
         "metric_name": string_types,
         "metric_kwargs": dict
     }
+
+    @classmethod
+    def from_urn(cls, urn):
+        # TODO: Triage importance of dealing with case where : is in a component of the URN (e.g. batch_fingerprint)
+        urn_parts = urn.split(":")
+
+        if not 5 < len(urn_parts) < 8:
+            raise ValueError("Unrecognized URN format for NamespaceAwareValidationMetric. There must be 6 or 7 "
+                             "components.")
+
+        if not urn_parts[1] == "great_expectations":
+            raise ValueError("Unrecognized URN format for NamespaceAwareValidationMetric. URN must begin with "
+                             "urn:great_expectations and no urn component may use ':'")
+
+        # Type coercion can only happen on instantiation
+        if len(urn_parts) == 7:
+            metric = cls(
+                data_asset_name=NormalizedDataAssetName(
+                    *urn_parts[2].split(DATA_ASSET_NAME_DELIMITER)
+                ),
+                batch_fingerprint=urn_parts[3],
+                metric_name=urn_parts[4],
+                metric_kwargs=dict(parse_qsl(urn_parts[5])),
+                metric_value=urn_parts[6],
+                coerce_types=True
+            )
+        else:
+            metric = cls(
+                data_asset_name=NormalizedDataAssetName(
+                    *urn_parts[2].split(DATA_ASSET_NAME_DELIMITER)
+                ),
+                batch_fingerprint=urn_parts[3],
+                metric_name=urn_parts[4],
+                metric_kwargs=dict(parse_qsl(urn_parts[5])),
+                coerce_types=True
+            )
+        return metric
 
     @property
     def urn(self):
