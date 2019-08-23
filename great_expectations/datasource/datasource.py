@@ -234,8 +234,19 @@ class Datasource(object):
             raise ValueError(
                 "Unable to load generator %s -- no configuration found or invalid configuration." % generator_name
             )
-        type_ = generator_config.pop("type")
-        generator_class = self._get_generator_class(type_)
+        if "type" in generator_config:
+            warnings.warn("Using type to configure generators is now deprecated. Please use module_name and class_name"
+                          "instead.")
+            type_ = generator_config.pop("type")
+            generator_class = self._get_generator_class_from_type(type_)
+        else:
+            class_config = ClassConfig(
+                moule_name=generator_config.pop("module_name", "great_expectations.datasource.generator"),
+                class_name=generator_config.pop("class_name")
+            )
+            loaded_module = import_module(class_config.module_name)
+            generator_class = getattr(loaded_module, class_config.class_name)
+
         generator = generator_class(name=generator_name, datasource=self, **generator_config)
         self._generators[generator_name] = generator
         return generator
@@ -334,19 +345,6 @@ class Datasource(object):
         """
         raise NotImplementedError
 
-    def _get_generator_class(self, type_):
-        """
-        Gets the generator class associated with the named type. Generators must be capable of producing batch_kwargs
-        that the associated datasource can understand.
-
-        Args:
-            type_: the name of the generator class type
-
-        Returns:
-            the class of the generator with that name
-        """
-        raise NotImplementedError
-
     def get_available_data_asset_names(self, generator_names=None):
         """Returns a dictionary of data_asset_names that the specified generator can provide. Note that some generators,
         such as the "no-op" in-memory generator may not be capable of describing specific named data assets, and some
@@ -418,6 +416,12 @@ class Datasource(object):
             return ReaderMethods.JSON
         else:
             return None
+
+    def _get_generator_class_from_type(self, type_):
+        """DEPRECATED.
+
+        This method can be used to support legacy-style type-only declaration of generators."""
+        raise NotImplementedError
 
     def _get_data_asset_class(self, data_asset_type):
         """Returns the class to be used to generate a data_asset from this datasource"""

@@ -109,7 +109,6 @@ class RequiredKeysDotDict(DotDict):
                             else:
                                 value = [self._key_types[key].type_(
                                     v) for v in value]
-
                         else:
                             if inspect.isclass(self._key_types[key]) and issubclass(self._key_types[key],
                                                                                     RequiredKeysDotDict):
