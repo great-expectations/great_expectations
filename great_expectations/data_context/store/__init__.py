@@ -1,5 +1,5 @@
 from .store import (
-    ContextAwareStore,
+    NamespaceAwareStore,
     InMemoryStore,
     FilesystemStore,
     NameSpacedFilesystemStore,

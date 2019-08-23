@@ -1,5 +1,9 @@
 from ..types import (
     NameSpaceDotDict,
+    NormalizedDataAssetName,
+)
+from ..types.resource_identifiers import (
+    DataContextResourceIdentifier,
 )
 from .types import (
     InMemoryStoreConfig,
@@ -14,19 +18,17 @@ import json
 import logging
 logger = logging.getLogger(__name__)
 
-# TODO: Rename this to NamespaceAwareStore
-class ContextAwareStore(object):
+class NamespaceAwareStore(object):
     def __init__(
         self,
-        data_context,
         config,
+        root_directory=None,
     ):
-        # Note: Eek. We want to do type chcecking, but this would cause circular imports. What to do?
-        # TODO: remove the dependency. Stores should be based on namespaceIdentifier objects, but not Context itself.
-        # if not isinstance(data_context, DataContext):
-        #     raise TypeError("data_context must be an instance of type DataContext")
+        """
+        """
 
-        self.data_context = data_context
+        if root_directory is not None and not os.path.isabs(root_directory):
+            raise ValueError("root_directory must be an absolute path. Got {0} instead.".format(root_directory))
 
         if not isinstance(config, self.get_config_class()):
             # Attempt to coerce config to a typed config
@@ -36,6 +38,7 @@ class ContextAwareStore(object):
             )
 
         self.config = config
+        self.root_directory = root_directory
 
         self._setup()
 
@@ -119,7 +122,7 @@ class ContextAwareStore(object):
         raise NotImplementedError
 
 
-class InMemoryStore(ContextAwareStore):
+class InMemoryStore(NamespaceAwareStore):
     """Uses an in-memory dictionary as a store.
     """
 
@@ -141,7 +144,7 @@ class InMemoryStore(ContextAwareStore):
         return key in self.store
 
 
-class FilesystemStore(ContextAwareStore):
+class FilesystemStore(NamespaceAwareStore):
     """Uses a local filepath as a store.
     """
 
@@ -184,9 +187,16 @@ class FilesystemStore(ContextAwareStore):
 
 class NameSpacedFilesystemStore(FilesystemStore):
 
+    def __init__(
+        self,
+        config,
+        root_directory, #This argument is REQUIRED for this class
+    ):
+        super(NameSpacedFilesystemStore, self).__init__(config, root_directory)
+
     def _setup(self):
         self.full_base_directory = os.path.join(
-            self.data_context.root_directory,
+            self.root_directory,
             self.config.base_directory,
         )
 
@@ -206,7 +216,8 @@ class NameSpacedFilesystemStore(FilesystemStore):
             raise TypeError(
                 "key must be an instance of type NameSpaceDotDict, not {0}".format(type(key)))
 
-        filepath = self.data_context._get_normalized_data_asset_name_filepath(
+        # filepath = "foo/bar/not_a_real_filepath"
+        filepath = self._get_normalized_data_asset_name_filepath(
             key.normalized_data_asset_name,
             key.expectation_suite_name,
             base_path=os.path.join(
@@ -216,6 +227,53 @@ class NameSpacedFilesystemStore(FilesystemStore):
             file_extension=self.config.file_extension
         )
         return filepath
+
+    # FIXME : This method is duplicated in DataContext. That method should be deprecated soon, but that will require a larger refactor.
+    # Specifically, get_, save_, and list_expectation_suite will need to be refactored into a store so that they don't rely on the method.
+    # The same goes for write_resource.
+    def _get_normalized_data_asset_name_filepath(self,
+        data_asset_name,
+        expectation_suite_name,
+        base_path=None,
+        file_extension=".json"
+    ):
+        """Get the path where the project-normalized data_asset_name expectations are stored. This method is used
+        internally for constructing all absolute and relative paths for asset_name-based paths.
+
+        Args:
+            data_asset_name: name of data asset for which to construct the path
+            expectation_suite_name: name of expectation suite for which to construct the path
+            base_path: base path from which to construct the path. If None, uses the DataContext root directory
+            file_extension: the file extension to append to the path
+
+        Returns:
+            path (str): path for the requsted object.
+        """
+        if base_path is None:
+            base_path = os.path.join(self.root_directory, "expectations")
+
+        # We need to ensure data_asset_name is a valid filepath no matter its current state
+        if isinstance(data_asset_name, NormalizedDataAssetName):
+            name_parts = [name_part.replace("/", "__") for name_part in data_asset_name]
+            relative_path = "/".join(name_parts)
+
+        elif isinstance(data_asset_name, string_types):
+            # if our delimiter is not '/', we need to first replace any slashes that exist in the name
+            # to avoid extra layers of nesting (e.g. for dbt models)
+            relative_path = data_asset_name
+            if self.data_asset_name_delimiter != "/":
+                relative_path.replace("/", "__")
+                relative_path = relative_path.replace(self.data_asset_name_delimiter, "/")
+        else:
+            raise DataContextError("data_assset_name must be a NormalizedDataAssetName or string")
+
+        expectation_suite_name += file_extension
+
+        return os.path.join(
+            base_path,
+            relative_path,
+            expectation_suite_name
+        )
 
     def get_most_recent_run_id(self):
         run_id_list = os.listdir(self.full_base_directory)

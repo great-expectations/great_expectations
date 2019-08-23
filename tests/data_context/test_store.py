@@ -11,7 +11,8 @@ import pandas as pd
 
 from great_expectations.data_context.store import (
     # Store,
-    ContextAwareStore,
+    # ContextAwareStore,
+    NamespaceAwareStore,
     InMemoryStore,
     FilesystemStore,
     # ContextAwareInMemoryStore,
@@ -42,12 +43,12 @@ def test_InMemoryStore(empty_data_context):
 
     with pytest.raises(TypeError):
         my_store = InMemoryStore(
-            data_context=empty_data_context,
+            # data_context=empty_data_context,
             config=None,
         )
 
     my_store = InMemoryStore(
-        data_context=empty_data_context,
+        # data_context=empty_data_context,
         config={},
     )
 
@@ -63,7 +64,7 @@ def test_InMemoryStore(empty_data_context):
 
 def test_InMemoryStore_with_serialization(empty_data_context):
     my_store = InMemoryStore(
-        data_context=empty_data_context,
+        # data_context=empty_data_context,
         config={
             "serialization_type": "json"
         }
@@ -76,7 +77,7 @@ def test_InMemoryStore_with_serialization(empty_data_context):
         my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
 
     my_store = InMemoryStore(
-        data_context=empty_data_context,
+        # data_context=empty_data_context,
         config={}
     )
 
@@ -98,7 +99,8 @@ def test_FilesystemStore(tmp_path_factory, empty_data_context):
     project_path = str(tmp_path_factory.mktemp('my_dir'))
 
     my_store = FilesystemStore(
-        data_context=empty_data_context,
+        # data_context=empty_data_context,
+        root_directory=empty_data_context.root_directory,
         config={
             "base_directory": project_path,
             "file_extension" : ".txt",
@@ -151,14 +153,16 @@ def test_store_config(empty_data_context):
     )
 
     data_asset_snapshot_store = loaded_class(
-        data_context=empty_data_context,
+        # data_context=empty_data_context,
+        root_directory=empty_data_context.root_directory,
         config=typed_sub_config,
     )
 
 def test__get_namespaced_key(empty_data_context, tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('my_dir'))
     my_store = NameSpacedFilesystemStore(
-        data_context=empty_data_context,
+        # data_context=empty_data_context,
+        root_directory=empty_data_context.root_directory,
         config={
             "base_directory": project_path,
             "file_extension" : ".txt",
@@ -180,7 +184,8 @@ def test_NameSpacedFilesystemStore(empty_data_context, tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('my_dir'))
 
     my_store = NameSpacedFilesystemStore(
-        data_context=empty_data_context,
+        # data_context=empty_data_context,
+        root_directory=empty_data_context.root_directory,
         config={
             "base_directory": project_path,
             "file_extension" : ".txt",
@@ -220,7 +225,8 @@ def test_NameSpacedFilesystemStore_key_listing(empty_data_context, tmp_path_fact
     project_path = "some_dir/my_store"
 
     my_store = NameSpacedFilesystemStore(
-        data_context=empty_data_context,
+        # data_context=empty_data_context,
+        root_directory=empty_data_context.root_directory,
         config={
             "base_directory": project_path,
             "file_extension" : ".txt",
@@ -245,7 +251,8 @@ def test_NameSpacedFilesystemStore_pandas_csv_serialization(tmp_path_factory, em
     path = str(tmp_path_factory.mktemp('test_FilesystemStore_pandas_csv_serialization__dir'))
 
     my_store = NameSpacedFilesystemStore(
-        data_context=empty_data_context,
+        # data_context=empty_data_context,
+        root_directory=empty_data_context.root_directory,
         config={
             "serialization_type": "pandas_csv",
             "base_directory": path,
