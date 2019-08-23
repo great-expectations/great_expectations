@@ -49,7 +49,7 @@ class PandasDatasource(Datasource):
                                                generators=generators)
         self._build_generators()
 
-    def _get_generator_class(self, type_):
+    def _get_generator_class_from_type(self, type_):
         if type_ == "subdir_reader":
             return SubdirReaderGenerator
         elif type_ == "glob_reader":
@@ -82,6 +82,7 @@ class PandasDatasource(Datasource):
         if "path" in batch_kwargs:
             path = reader_options.pop("path")  # We need to remove from the reader
             reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
+            reader_options.pop("partition_id", "")
 
             reader_method = reader_options.pop("reader_method", None)
             if reader_method is None:
@@ -118,6 +119,7 @@ class PandasDatasource(Datasource):
                                batch_kwargs=batch_kwargs)
 
     def build_batch_kwargs(self, *args, **kwargs):
+        # FIXME: Can this return properly typed objects, and can it **use generators** to build kwargs
         if len(args) > 0:
             if isinstance(args[0], (pd.DataFrame, pd.Series)):
                 kwargs.update({
