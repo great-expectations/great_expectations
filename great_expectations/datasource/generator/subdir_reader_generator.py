@@ -132,6 +132,5 @@ class SubdirReaderGenerator(BatchGenerator):
         batch_kwargs.update(self.reader_options)
         return batch_kwargs
 
-    @staticmethod
-    def _partitioner(path):
+    def _partitioner(self, path):
         return os.path.basename(path).rpartition(".")[0]

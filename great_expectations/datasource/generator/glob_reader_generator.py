@@ -4,6 +4,9 @@ import glob
 import re
 import datetime
 import logging
+import warnings
+
+from six import string_types
 
 from great_expectations.datasource.generator.batch_generator import BatchGenerator
 from great_expectations.datasource.types import PathBatchKwargs
@@ -15,7 +18,7 @@ logger = logging.getLogger(__name__)
 class GlobReaderGenerator(BatchGenerator):
     """GlobReaderGenerator processes files in a directory according to glob patterns to produce batches of data.
 
-    A more interesting asset_glob might look like the folowing:
+    A more interesting asset_glob might look like the following:
 
     daily_logs:
       glob: daily_logs/*.csv
@@ -68,7 +71,14 @@ class GlobReaderGenerator(BatchGenerator):
         if not os.path.isdir(self.base_directory):
             return known_assets
         for generator_asset in self.asset_globs.keys():
-            batch_paths = glob.glob(os.path.join(self.base_directory, self.asset_globs[generator_asset]))
+            if isinstance(self.asset_globs[generator_asset], string_types):
+                warnings.warn("String-only glob configuration has been deprecated and will be removed in a future"
+                              "release. See GlobReaderGenerator docstring for more information on the new configuration"
+                              "format.", DeprecationWarning)
+                glob_ = self.asset_globs[generator_asset]
+            else:
+                glob_ = self.asset_globs[generator_asset]["glob"]
+            batch_paths = glob.glob(os.path.join(self.base_directory, glob_))
             if len(batch_paths) > 0:
                 known_assets.add(generator_asset)
 
@@ -82,15 +92,22 @@ class GlobReaderGenerator(BatchGenerator):
             batch_kwargs.update(kwargs)
             raise BatchKwargsError("Unknown asset_name %s" % generator_asset, batch_kwargs)
 
-        glob_ = self.asset_globs[generator_asset]
-        paths = glob.glob(os.path.join(self.base_directory, glob_["glob"]))
-        return self._build_batch_kwargs_path_iter(paths, glob_)
+        if isinstance(self.asset_globs[generator_asset], string_types):
+            warnings.warn("String-only glob configuration has been deprecated and will be removed in a future"
+                          "release. See GlobReaderGenerator docstring for more information on the new configuration"
+                          "format.", DeprecationWarning)
+            glob_config = {"glob": self.asset_globs[generator_asset]}
+        else:
+            glob_config = self.asset_globs[generator_asset]
 
-    def _build_batch_kwargs_path_iter(self, path_list, glob_):
+        paths = glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
+        return self._build_batch_kwargs_path_iter(paths, glob_config)
+
+    def _build_batch_kwargs_path_iter(self, path_list, glob_config):
         for path in path_list:
-            yield self._build_batch_kwargs(path, glob_)
+            yield self._build_batch_kwargs(path, glob_config)
 
-    def _build_batch_kwargs(self, path, glob_):
+    def _build_batch_kwargs(self, path, glob_config):
         # We could add MD5 (e.g. for smallish files)
         # but currently don't want to assume the extra read is worth it
         # unless it's configurable
@@ -100,18 +117,17 @@ class GlobReaderGenerator(BatchGenerator):
             "path": path,
             "timestamp": time.time()
         })
-        partition_id = self._partitioner(path, glob_)
+        partition_id = self._partitioner(path, glob_config)
         if partition_id is not None:
             batch_kwargs.update({"partition_id": partition_id})
 
         batch_kwargs.update(self.reader_options)
         return batch_kwargs
 
-    @staticmethod
-    def _partitioner(path, glob_):
-        if "partition_regex" in glob_:
-            match_group_id = glob_.get("match_group_id", 1)
-            matches = re.match(glob_["partition_regex"], path)
+    def _partitioner(self, path, glob_config):
+        if "partition_regex" in glob_config:
+            match_group_id = glob_config.get("match_group_id", 1)
+            matches = re.match(glob_config["partition_regex"], path)
             # In the case that there is a defined regex, the user *wanted* a partition. But it didn't match.
             # So, we'll add a sortable id
             if matches is None:
