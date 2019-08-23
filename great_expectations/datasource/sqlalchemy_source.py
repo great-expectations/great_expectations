@@ -103,7 +103,7 @@ class SqlAlchemyDatasource(Datasource):
 
         return options
 
-    def _get_generator_class(self, type_):
+    def _get_generator_class_from_type(self, type_):
         if type_ == "queries":
             return QueryGenerator
         else:

@@ -63,7 +63,7 @@ class SparkDFDatasource(Datasource):
 
         self._build_generators()
 
-    def _get_generator_class(self, type_):
+    def _get_generator_class_from_type(self, type_):
         if type_ == "subdir_reader":
             return SubdirReaderGenerator
         elif type_ == "databricks":

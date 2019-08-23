@@ -149,6 +149,17 @@ def test_glob_reader_generator_customize_partitioning():
         "2019-01-05",
     }
 
+    with mock.patch("glob.glob") as mock_glob:
+        mock_glob_match = [
+            "/data/project/asset/20190101__my_data.csv",
+            "/data/project/asset/20190102__my_data.csv",
+            "/data/project/asset/20190103__my_data.csv",
+            "/data/project/asset/20190104__my_data.csv",
+            "/data/project/asset/20190105__my_data.csv"
+        ]
+        mock_glob.return_value = mock_glob_match
+        default_asset_kwargs = [kwargs for kwargs in glob_generator.get_iterator("default")]
+
 
 def test_file_kwargs_generator_extensions(tmp_path_factory):
     """csv, xls, parquet, json should be recognized file extensions"""

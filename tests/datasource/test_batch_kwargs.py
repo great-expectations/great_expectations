@@ -22,18 +22,20 @@ def test_batch_kwargs_id():
         }
     )
 
+    #demonstrate *output* kwargs post-datasource/generator
+
     # When there is only a single "important" key used in batch_kwargs, the ID can prominently include it
     assert test_batch_kwargs.batch_id == "19551105T000000.000000Z::path:/data/test.csv"
 
     test_batch_kwargs = PathBatchKwargs(
         {
             "path": "/data/test.csv",
-            "partition_id": "1"
+            "partition_id": "20190101"
         }
     )
 
     # When partition_id is explicitly included, we can extract it and potentially still have a human readable id
-    assert test_batch_kwargs.batch_id == "1::path:/data/test.csv"
+    assert test_batch_kwargs.batch_id == "20190101::path:/data/test.csv"
 
     test_batch_kwargs = PathBatchKwargs(
         {

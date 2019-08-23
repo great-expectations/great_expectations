@@ -98,15 +98,17 @@ class RequiredKeysDotDict(DotDict):
                 if coerce_types:
                     # Update values if coerce_types==True
                     try:
+                        # If it already of the right type, we're done
+                        if isinstance(value, self._key_types[key]):
+                            continue
                         # If the given type is an instance of AllowedKeysDotDict, apply coerce_types recursively
-                        if isinstance(self._key_types[key], ListOf):
+                        elif isinstance(self._key_types[key], ListOf):
                             if inspect.isclass(self._key_types[key].type_) and issubclass(self._key_types[key].type_,
                                                                                           RequiredKeysDotDict):
                                 value = [self._key_types[key].type_(coerce_types=True, **v) for v in value]
                             else:
                                 value = [self._key_types[key].type_(
                                     v) for v in value]
-
                         else:
                             if inspect.isclass(self._key_types[key]) and issubclass(self._key_types[key],
                                                                                     RequiredKeysDotDict):
@@ -114,7 +116,7 @@ class RequiredKeysDotDict(DotDict):
                             else:
                                 value = self._key_types[key](value)
                     except TypeError as e:
-                        raise ("Unable to initialize " + self.__class__.__name__ + ": could not convert type. TypeError "
+                        raise TypeError("Unable to initialize " + self.__class__.__name__ + ": could not convert type. TypeError "
                                                                                    "raised: " + str(e))
                 # Validate types
                 self._validate_value_type(key, value, self._key_types[key])
@@ -162,8 +164,8 @@ class RequiredKeysDotDict(DotDict):
             if isinstance(type_, list):
                 any_match = False
                 for type_element in type_:
-                    if type_element == None:
-                        if value == None:
+                    if type_element is None:
+                        if value is None:
                             any_match = True
                     elif isinstance(value, type_element):
                         any_match = True
