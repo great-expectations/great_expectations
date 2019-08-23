@@ -203,8 +203,8 @@ class ConfigOnlyDataContext(object):
         )
 
         instantiated_store = loaded_class(
-            data_context=self,
             config=typed_sub_config,
+            root_directory=self.root_directory,
         )
 
         return instantiated_store
@@ -225,7 +225,6 @@ class ConfigOnlyDataContext(object):
     def root_directory(self):
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located."""
-        # return self._context_root_directory
         return self._context_root_directory
 
     @property
