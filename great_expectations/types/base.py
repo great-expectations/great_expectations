@@ -227,7 +227,7 @@ class AllowedKeysDotDict(RequiredKeysDotDict):
                 ))
 
     def __getattr__(self, item):
-        if item in self._allowed_keys:
+        if item in self._allowed_keys or callable(self.get(item)):
             return self.get(item)
         else:
             # We raise AttributeError in the event that someone tries to access a nonexistent property
