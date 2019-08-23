@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import copy
-from enum import Enum
 from six import string_types
 
 import logging
@@ -10,6 +9,7 @@ from ruamel.yaml import YAML
 
 from ..data_context.types import NormalizedDataAssetName
 from great_expectations.exceptions import BatchKwargsError
+from great_expectations.datasource.types import ReaderMethods
 from great_expectations.types import ClassConfig
 from great_expectations.exceptions import InvalidConfigError
 import warnings
@@ -18,18 +18,6 @@ from importlib import import_module
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.default_flow_style = False
-
-
-class ReaderMethods(Enum):
-    CSV = 1
-    csv = 1
-    parquet = 2
-    excel = 3
-    xls = 3
-    xlsx = 3
-    JSON = 4
-    json = 4
-    delta = 5
 
 
 class Datasource(object):

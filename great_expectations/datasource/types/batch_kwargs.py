@@ -1,14 +1,18 @@
+import logging
 from hashlib import md5
 import datetime
 
 import pandas as pd
 from six import string_types
 from great_expectations.types import RequiredKeysDotDict, ClassConfig
+from great_expectations.datasource.types.reader_methods import ReaderMethods
 
 try:
     import pyspark
 except ImportError:
     pyspark = None
+
+logger = logging.getLogger(__name__)
 
 
 class BatchKwargs(RequiredKeysDotDict):
@@ -26,7 +30,6 @@ class BatchKwargs(RequiredKeysDotDict):
 
     _partition_id_key = "partition_id"
     _batch_id_ignored_keys = {
-        _partition_id_key,
         "data_asset_type"
     }
     _key_types = {
@@ -37,19 +40,29 @@ class BatchKwargs(RequiredKeysDotDict):
 
     @property
     def batch_id(self):
-        partition_id_key = self.get(self._partition_id_key, None)
+        partition_id = self.get(self._partition_id_key, None)
         # We do not allow a "None" partition_id, even if it's explicitly present as such in batch_kwargs
-        if partition_id_key is None:
-            partition_id_key = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-        id_keys = set(self.keys()) - set(self._batch_id_ignored_keys)
+        if partition_id is None:
+            partition_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+        id_keys = set(self.keys()) - set(self._batch_id_ignored_keys) - {self._partition_id_key}
         if len(id_keys) == 1:
             key = list(id_keys)[0]
             hash_ = key + ":" + self[key]
         else:
-            hash_dict = {k: self[k] for k in set(self.keys()) - set(self._batch_id_ignored_keys)}
+            hash_dict = {k: self[k] for k in set(self.keys()) - set(self._batch_id_ignored_keys) - {self._partition_id_key}}
+            print(sorted(hash_dict))
+            print(str(sorted(hash_dict)))
             hash_ = md5(str(sorted(hash_dict.items())).encode("utf-8")).hexdigest()
 
-        return partition_id_key + self._partition_id_delimiter + hash_
+        return partition_id + self._partition_id_delimiter + hash_
+
+    @classmethod
+    def build_batch_id(cls, dict_):
+        try:
+            return BatchKwargs(dict_).batch_id
+        except (KeyError, TypeError):
+            logger.error("Unable to build BatchKwargs from provided dictionary.")
+            return None
 
 
 class PandasDatasourceBatchKwargs(BatchKwargs):
@@ -59,46 +72,59 @@ class PandasDatasourceBatchKwargs(BatchKwargs):
     pass
 
 
-class PandasDatasourcePathBatchKwargs(PandasDatasourceBatchKwargs):
-    """PandasPathBatchKwargs represents kwargs suitable for reading a file from a given path."""
+class SparkDFDatasourceBatchKwargs(BatchKwargs):
+    """This is an abstract class and should not be instantiated. It's relevant for testing whether
+    a subclass is allowed
+    """
+    pass
+
+
+class SqlAlchemyDatasourceBatchKwargs(BatchKwargs):
+    """This is an abstract class and should not be instantiated. It's relevant for testing whether
+    a subclass is allowed
+    """
+    pass
+
+
+class PathBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
+    """PathBatchKwargs represents kwargs suitable for reading a file from a given path."""
     _required_keys = {
         "path"
     }
     # NOTE: JPC - 20190821: Eventually, we will probably want to have some logic that decides to use, say,
-    # an md5 hash of a file instead of a path to decide when it's the same.
-    _batch_id_ignored_keys = {
-    }
+    # an md5 hash of a file instead of a path to decide when it's the same, or to differentiate paths
+    # from s3 from paths on a local filesystem
     _key_types = {
         "path": string_types,
-        "reader_method": string_types
+        "reader_method": ReaderMethods
     }
 
 
-class PandasDatasourceMemoryBatchKwargs(PandasDatasourceBatchKwargs):
+class MemoryBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
+    _required_keys = {
+        "df"
+    }
+
+
+class PandasDatasourceMemoryBatchKwargs(MemoryBatchKwargs):
     _required_keys = {
         "df"
     }
     _key_types = {
-        "path": pd.DataFrame
+        "df": pd.DataFrame
     }
 
 
-class SqlAlchemyDatasourceBatchKwargs(BatchKwargs):
-    pass
+class SparkDFDatasourceMemoryBatchKwargs(MemoryBatchKwargs):
+    _required_keys = {
+        "df"
+    }
+    _key_types = {
+        "df": pyspark.sql.DataFrame,
+    }
 
 
 class SqlAlchemyDatasourceTableBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
-    _required_keys = {
-        "query"
-        "timestamp"
-    }
-    _key_types = {
-        "query": string_types,
-        "timestamp": float
-    }
-
-
-class SqlAlchemyDatasourceQueryBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     _required_keys = {
         "table"
         "timestamp"
@@ -109,16 +135,14 @@ class SqlAlchemyDatasourceQueryBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     }
 
 
-class SparkDFDatasourceBatchKwargs(BatchKwargs):
-    pass
-
-
-class SparkDFDatasourceMemoryBatchKwargs(SparkDFDatasourceBatchKwargs):
+class SqlAlchemyDatasourceQueryBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     _required_keys = {
-        "df"
+        "query"
+        "timestamp"
     }
     _key_types = {
-        "df": pyspark.sql.DataFrame,
+        "query": string_types,
+        "timestamp": float
     }
 
 
@@ -130,15 +154,4 @@ class SparkDFDatasourceQueryBatchKwargs(SparkDFDatasourceBatchKwargs):
     _key_types = {
         "query": string_types,
         "timestamp": float
-    }
-
-
-class SparkDFDatasourcePathBatchKwargs(SparkDFDatasourceBatchKwargs):
-    _required_keys = {
-        "path",
-    }
-    # NOTE: JPC - 20190821: Eventually, we will probably want to have some logic that decides to use, say,
-    # an md5 hash of a file instead of a path to decide when it's the same.
-    _key_types = {
-        "path": string_types,
     }
