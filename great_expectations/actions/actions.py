@@ -6,6 +6,8 @@ from .types import (
     ActionInternalConfig,
 )
 
+# NOTE: Abe 2019/08/23 : This is first implementation of all these classes. Consider them UNSTABLE for now. 
+
 class BasicValidationAction(object):
     def __init__(self, config):
         #TODO: Add type checking
@@ -32,12 +34,13 @@ class NameSpaceAwareValidationAction(BasicValidationAction):
     def take_action(self, validation_result_suite, validation_result_suite_identifier):
         return NotImplementedError
 
-
+# FIXME: This class is only here temporarily. It should be moved either to tests or renderers
 class TemporaryNoOpSummarizer(object):
     @classmethod
     def render(cls, input):
         return input
-
+    
+# FIXME: This class is only here temporarily. It should be moved either to tests or renderers
 class DropAllVowelsSummarizer(object):
     @classmethod
     def render(cls, input):
