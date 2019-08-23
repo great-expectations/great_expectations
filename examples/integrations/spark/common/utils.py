@@ -1,10 +1,20 @@
+import json
+from datetime import datetime
+import tzlocal
+import uuid  # used to generate run_id
 from pathlib import Path
-from pyspark import keyword_only
-from pyspark.sql.types import StructType
+from pyspark import SparkContext
 from pyspark.sql import (
-    DataFrame,
-    SparkSession
+    SparkSession,
+    SQLContext,
+    DataFrame
 )
+from pyspark.sql.types import StructType
+import great_expectations as ge
+from great_expectations import DataContext
+# from great_expectations.dataset import SparkDFDataset
+from great_expectations.dataset import Dataset
+from typing import Dict
 
 
 def local_path_to_hdfs_path(local_path: str) -> str:
@@ -22,7 +32,7 @@ def load_csv_file_into_data_frame(
     delimiter=",",
     limit: int = -1,
     view: str = None
-):
+) -> DataFrame:
     if not path_to_csv:
         raise ValueError(f"path_to_csv is empty: {path_to_csv}")
 
@@ -53,3 +63,23 @@ def load_csv_file_into_data_frame(
     print(f'Finished Loading csv file from "{path_to_csv}".')
 
     return df
+
+
+def ge_tap(
+    data_asset_name: str,
+    df: DataFrame
+) -> Dict[str, str]:
+    ge_data_context: DataContext = ge.data_context.DataContext()
+    expectation_suite_name: str = f'expectation_suite-{data_asset_name}'
+    batch: Dataset = ge_data_context.get_batch(
+        data_asset_name=data_asset_name,
+        expectation_suite_name=expectation_suite_name,
+        batch_kwargs=df
+    )
+    run_id: str = datetime.utcnow().isoformat().replace(":", "") + "Z"
+    validation_result: Dict[str, str] = batch.validate(run_id=run_id)
+    # if validation_result["success"]:
+    #     print("This batch is valid for {0:s}".format(data_asset_name))
+    # else:
+    #     print("This batch is not valid for {0:s}".format(data_asset_name))
+    return validation_result

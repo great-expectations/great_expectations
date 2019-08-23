@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 import shutil
 import time
 from pathlib import Path
@@ -30,7 +30,7 @@ from common.utils import (
 from pipelines.titanic_csv_pipeline import TitanicCsvPipeline
 
 
-def test_can_run_pytest(
+def test_titanic_csv_pipeline(
         spark_session: SparkSession
 ):
     print(f"{time.strftime('%H:%M:%S')}  Starting test")
@@ -64,6 +64,13 @@ def test_can_run_pytest(
     df.collect()
     df.show(truncate=False)
 
-    print(f'DataFrame contains "{df.count()}" rows.')
+    print(f'The original "Titanic" DataFrame (obtained from "{raw_data_csv_file_path}") contains {df.count()} rows with {len(df.columns)} columns in each row.')
+
+    titanic_csv_pipeline: TitanicCsvPipeline = TitanicCsvPipeline(spark_session=spark_session)
+    df_res: DataFrame = titanic_csv_pipeline.run(df=df)
+
+    df_res.show(truncate=False)
+
+    print(f'The processed "Titanic" DataFrame contains {df_res.count()} rows with {len(df_res.columns)} columns in each row.')
 
     print(f"{time.strftime('%H:%M:%S')}  Finished test")
