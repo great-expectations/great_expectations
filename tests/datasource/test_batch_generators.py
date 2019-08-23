@@ -2,9 +2,14 @@ import pytest
 
 import os
 
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
 from great_expectations.exceptions import DataContextError
-from great_expectations.datasource import SubdirReaderGenerator, GlobReaderGenerator
-from great_expectations.datasource.generator import DatabricksTableGenerator
+from great_expectations.datasource.generator import SubdirReaderGenerator, GlobReaderGenerator, DatabricksTableGenerator
+
 
 def test_file_kwargs_generator(data_context, filesystem_csv):
     base_dir = filesystem_csv
@@ -79,12 +84,25 @@ def test_glob_reader_generator(tmp_path_factory):
         outfile.write("\n\n\n")
 
     g2 = GlobReaderGenerator(base_directory=basedir, asset_globs={
-        "blargs": "*.blarg",
-        "fs": "f*"
+        "blargs": {
+            "glob": "*.blarg"
+        },
+        "fs": {
+            "glob": "f*"
+        }
     })
 
     g2_assets = g2.get_available_data_asset_names()
     assert g2_assets == {"blargs", "fs"}
+
+    with pytest.warns(DeprecationWarning):
+        # This is an old style of asset_globs configuration that should raise a deprecationwarning
+        g2 = GlobReaderGenerator(base_directory=basedir, asset_globs={
+            "blargs": "*.blarg",
+            "fs": "f*"
+        })
+        g2_assets = g2.get_available_data_asset_names()
+        assert g2_assets == {"blargs", "fs"}
 
     blargs_kwargs = [x["path"] for x in g2.get_iterator("blargs")]
     real_blargs = [
@@ -96,7 +114,41 @@ def test_glob_reader_generator(tmp_path_factory):
     ]
     for kwargs in real_blargs:
         assert kwargs in blargs_kwargs
+
     assert len(blargs_kwargs) == len(real_blargs)
+
+
+def test_glob_reader_generator_customize_partitioning():
+    from dateutil.parser import parse as parse
+
+    # We can subclass the generator to change the way that it builds partitions
+    class DateutilPartitioningGlobReaderGenerator(GlobReaderGenerator):
+        def _partitioner(self, path, glob_):
+            return parse(path, fuzzy=True).strftime("%Y-%m-%d")
+
+    glob_generator = DateutilPartitioningGlobReaderGenerator("test_generator")  # default asset blob is ok
+
+    with mock.patch("glob.glob") as mock_glob:
+        mock_glob_match = [
+            "20190101__my_data.csv",
+            "20190102__my_data.csv",
+            "20190103__my_data.csv",
+            "20190104__my_data.csv",
+            "20190105__my_data.csv"
+        ]
+        mock_glob.return_value = mock_glob_match
+        default_asset_kwargs = [kwargs for kwargs in glob_generator.get_iterator("default")]
+
+    partitions = set([kwargs["partition_id"] for kwargs in default_asset_kwargs])
+
+    # Our custom partitioner will have used dateutil to parse. Note that it can then use any date format we chose
+    assert partitions == {
+        "2019-01-01",
+        "2019-01-02",
+        "2019-01-03",
+        "2019-01-04",
+        "2019-01-05",
+    }
 
 
 def test_file_kwargs_generator_extensions(tmp_path_factory):
