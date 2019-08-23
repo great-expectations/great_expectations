@@ -6,7 +6,7 @@ import datetime
 import logging
 
 from great_expectations.datasource.generator.batch_generator import BatchGenerator
-from great_expectations.datasource.types import PandasDatasourcePathBatchKwargs
+from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
@@ -96,7 +96,7 @@ class GlobReaderGenerator(BatchGenerator):
         # unless it's configurable
         # with open(path,'rb') as f:
         #     md5 = hashlib.md5(f.read()).hexdigest()
-        batch_kwargs = PandasDatasourcePathBatchKwargs({
+        batch_kwargs = PathBatchKwargs({
             "path": path,
             "timestamp": time.time()
         })
@@ -107,11 +107,11 @@ class GlobReaderGenerator(BatchGenerator):
         batch_kwargs.update(self.reader_options)
         return batch_kwargs
 
-    def _partitioner(self, path, glob_):
-        partition_id = None
+    @staticmethod
+    def _partitioner(path, glob_):
         if "partition_regex" in glob_:
             match_group_id = glob_.get("match_group_id", 1)
-            matches = re.fullmatch(glob_["partition_regex"], path)
+            matches = re.match(glob_["partition_regex"], path)
             # In the case that there is a defined regex, the user *wanted* a partition. But it didn't match.
             # So, we'll add a sortable id
             if matches is None:
