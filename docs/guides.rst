@@ -19,3 +19,4 @@ Guides
    /guides/conventions
    /guides/migrating_versions
    /guides/improving_library_documentation
+   /guides/spark_pipeline_integration
