@@ -152,7 +152,7 @@ class NamespaceAwareStore(Store):
         super(NamespaceAwareStore, self).set(key, value, serialization_type)
 
 
-class InMemoryStore(NamespaceAwareStore):
+class InMemoryStore(Store):
     """Uses an in-memory dictionary as a store.
     """
 
@@ -160,6 +160,25 @@ class InMemoryStore(NamespaceAwareStore):
 
     def _setup(self):
         self.store = {}
+
+    def _get(self, key):
+        return self.store[key]
+
+    def _set(self, key, value):
+        self.store[key] = value
+
+    def list_keys(self):
+        return self.store.keys()
+
+    def has_key(self, key):
+        return key in self.store
+
+class NamespacedInMemoryStore(NamespaceAwareStore, Store):
+    """
+    """
+
+    # TODO : This probably needs to change
+    config_class = InMemoryStoreConfig
 
     def _get(self, key):
         return self.store[key.to_string()]
