@@ -43,9 +43,11 @@ from .store.types import (
     StoreMetaConfig,
 )
 from .types import (
-    NameSpaceDotDict,
-    NormalizedDataAssetName,
+    # NameSpaceDotDict,
+    # NormalizedDataAssetName,
     DataContextConfig,
+    DataAssetIdentifier,
+    ValidationResultIdentifier,
 )
 from .templates import (
     PROJECT_TEMPLATE,
@@ -251,6 +253,7 @@ class ConfigOnlyDataContext(object):
         """A single holder for all Datasources in this context"""
         return self._datasources
 
+    # TODO: Decide whether this stays here or moves into NamespaceAwareStore
     @property
     def data_asset_name_delimiter(self):
         """Configurable delimiter character used to parse data asset name strings into \
@@ -280,7 +283,7 @@ class ConfigOnlyDataContext(object):
             None
         """
 
-        validation_result_identifier = NameSpaceDotDict(**{
+        validation_result_identifier = ValidationResultIdentifier(**{
             "normalized_data_asset_name": self._normalize_data_asset_name(data_asset_name),
             "expectation_suite_name": expectation_suite_name,
             "run_id": run_id,
@@ -902,7 +905,7 @@ class ConfigOnlyDataContext(object):
 
         if "local_validation_result_store" in self.stores:
             self.stores.local_validation_result_store.set(
-                key=NameSpaceDotDict(**{
+                key=ValidationResultIdentifier(**{
                     "normalized_data_asset_name" : normalized_data_asset_name,
                     "expectation_suite_name" : expectation_suite_name,
                     "run_id" : run_id,
@@ -920,7 +923,7 @@ class ConfigOnlyDataContext(object):
         if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
             logging.debug("Storing validation results to data_asset_snapshot_store")
             self.stores.data_asset_snapshot_store.set(
-                key=NameSpaceDotDict(**{
+                key=ValidationResultIdentifier(**{
                     "normalized_data_asset_name" : normalized_data_asset_name,
                     "expectation_suite_name" : expectation_suite_name,
                     "run_id" : run_id,
@@ -1256,7 +1259,7 @@ class ConfigOnlyDataContext(object):
         if run_id == None:
             run_id = selected_store.get_most_recent_run_id()
 
-        results_dict = selected_store.get(NameSpaceDotDict(**{
+        results_dict = selected_store.get(ValidationResultIdentifier(**{
             "normalized_data_asset_name" : self._normalize_data_asset_name(data_asset_name),
             "expectation_suite_name" : expectation_suite_name,
             "run_id" : run_id,

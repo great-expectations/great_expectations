@@ -83,8 +83,12 @@ class ValidationResultIdentifier(DataContextResourceIdentifier):
     _key_order = [
         "expectation_suite_identifier",
         "run_id",
-        "purpose"
+        # "purpose"
     ]
+    _key_types = {
+        "expectation_suite_identifier" : ExpectationSuiteIdentifier,
+        "run_id" : RunIdentifier,
+    }
     # NOTE: This pattern is kinda awkward. It would be nice to ONLY specify _key_order
     _required_keys = set(_key_order)
     _allowed_keys = set(_key_order)

@@ -6,6 +6,7 @@ import sys
 from great_expectations.data_context.types.resource_identifiers import (
     OrderedKeysDotDict,
     DataAssetIdentifier,
+    ValidationResultIdentifier,
 )
 
 def test_OrderedKeysDotDict_subclass():
@@ -43,3 +44,63 @@ def test_DataAssetIdentifier():
 
     DataAssetIdentifier("A", "B", "C")
 
+def test_ValidationResultIdentifier():
+    print("A")
+    ValidationResultIdentifier(
+        coerce_types=True,
+        **{
+            "expectation_suite_identifier" : {
+                "data_asset_identifier" : DataAssetIdentifier("a", "b", "c"),
+                "suite_name": "hello",
+                "purpose": "testing",
+            },
+            "purpose" : "default",
+            "run_id" : "100",
+        }
+    )
+
+    print("AA")
+    ValidationResultIdentifier(
+        coerce_types=True,
+        **{
+            "expectation_suite_identifier" : {
+                "data_asset_identifier" : {
+                    "datasource" : "a",
+                    "generator" : "b",
+                    "generator_asset" : "c",
+                },
+                "suite_name": "hello",
+                "purpose": "testing",
+            },
+            "purpose" : "default",
+            "run_id" : "100",
+        }
+    )
+
+    print("B")
+    ValidationResultIdentifier(
+        coerce_types=True,
+        **{
+            "expectation_suite_identifier" : {
+                "data_asset_identifier" : ("a", "b", "c"), #DataAssetIdentifier("a", "b", "c"),
+                "suite_name": "hello",
+                "purpose": "testing",
+            },
+            "purpose" : "default",
+            "run_id" : "100",
+        }
+    )
+
+    print("C")
+    ValidationResultIdentifier(
+        coerce_types=True,
+        **{
+            "expectation_suite_identifier" : {
+                "data_asset_identifier" : ("a", "b", "c"), #DataAssetIdentifier("a", "b", "c"),
+                "suite_name": "hello",
+                "purpose": "testing",
+            },
+            "purpose" : "default",
+            "run_id" : "100",
+        }
+    )
