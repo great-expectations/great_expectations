@@ -23,8 +23,10 @@ from great_expectations.data_context.store.types import (
     StoreMetaConfig,
 )
 from great_expectations.data_context.types import (
-    NameSpaceDotDict,
-    NormalizedDataAssetName,
+    # NameSpaceDotDict,
+    # NormalizedDataAssetName,
+    DataAssetIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.util import (
     gen_directory_tree_str,
@@ -170,11 +172,11 @@ def test__get_namespaced_key(empty_data_context, tmp_path_factory):
     )
 
     with pytest.raises(KeyError):
-        my_store._get_namespaced_key(NameSpaceDotDict(**{}))
+        my_store._get_namespaced_key(ValidationResultIdentifier(**{}))
     
-    ns_key = my_store._get_namespaced_key(NameSpaceDotDict(**{
+    ns_key = my_store._get_namespaced_key(ValidationResultIdentifier(**{
         "expectation_suite_name" : "AAA",
-        "normalized_data_asset_name" : NormalizedDataAssetName("B", "B", "B"),
+        "normalized_data_asset_name" : DataAssetIdentifier("B", "B", "B"),
         "run_id" : "CCC",
     }))
     print(ns_key)
@@ -193,22 +195,22 @@ def test_NameSpacedFilesystemStore(empty_data_context, tmp_path_factory):
     )
 
     with pytest.raises(TypeError):
-        my_store.get("not_a_NameSpaceDotDict")
+        my_store.get("not_a_ValidationResultIdentifier")
 
     with pytest.raises(KeyError):
-        my_store.get(NameSpaceDotDict(**{}))
+        my_store.get(ValidationResultIdentifier(**{}))
     
-    ns_1 = NameSpaceDotDict(**{
+    ns_1 = ValidationResultIdentifier(**{
         "expectation_suite_name" : "hello",
-        "normalized_data_asset_name" : NormalizedDataAssetName("a", "b", "c"),
+        "normalized_data_asset_name" : DataAssetIdentifier("a", "b", "c"),
         "run_id" : "100",
     })
     my_store.set(ns_1,"aaa")
     assert my_store.get(ns_1) == "aaa"
 
-    ns_2 = NameSpaceDotDict(**{
+    ns_2 = ValidationResultIdentifier(**{
         "expectation_suite_name" : "hello",
-        "normalized_data_asset_name" : NormalizedDataAssetName("a", "b", "c"),
+        "normalized_data_asset_name" : DataAssetIdentifier("a", "b", "c"),
         "run_id" : "200",
     })
     my_store.set(ns_2, "bbb")
@@ -233,9 +235,9 @@ def test_NameSpacedFilesystemStore_key_listing(empty_data_context, tmp_path_fact
         }
     )
 
-    ns_1 = NameSpaceDotDict(**{
+    ns_1 = ValidationResultIdentifier(**{
         "expectation_suite_name" : "hello",
-        "normalized_data_asset_name" : NormalizedDataAssetName("a", "b", "c"),
+        "normalized_data_asset_name" : DataAssetIdentifier("a", "b", "c"),
         "run_id" : "100",
     })
     my_store.set(ns_1,"aaa")
@@ -260,11 +262,18 @@ def test_NameSpacedFilesystemStore_pandas_csv_serialization(tmp_path_factory, em
         }
     )
 
-    key1 = NameSpaceDotDict(**{
-        "expectation_suite_name" : "hello",
-        "normalized_data_asset_name" : NormalizedDataAssetName("a", "b", "c"),
-        "run_id" : "100",
-    })
+    key1 = ValidationResultIdentifier(
+        coerce_types=True,
+        **{
+            "expectation_suite_identifier" : {
+                "data_asset_identifier" : ("a", "b", "c"), #DataAssetIdentifier("a", "b", "c"),
+                "suite_name": "hello",
+                "purpose": "testing",
+            },
+            "purpose" : "default",
+            "run_id" : "100",
+        }
+    )
     with pytest.raises(AssertionError):
         my_store.set(key1, "hi")
 

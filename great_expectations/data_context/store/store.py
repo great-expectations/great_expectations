@@ -1,6 +1,8 @@
 from ..types import (
-    NameSpaceDotDict,
-    NormalizedDataAssetName,
+    # NameSpaceDotDict,
+    # NormalizedDataAssetName,
+    DataAssetIdentifier,
+    ValidationResultIdentifier,
 )
 from ..types.resource_identifiers import (
     DataContextResourceIdentifier,
@@ -43,6 +45,13 @@ class NamespaceAwareStore(object):
         self._setup()
 
     def get(self, key, serialization_type=None):
+
+        if not isinstance(key, DataContextResourceIdentifier):
+            raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
+                key,
+                type(key),
+            ))
+
         namespaced_key = self._get_namespaced_key(key)
         value = self._get(namespaced_key)
 
@@ -56,6 +65,13 @@ class NamespaceAwareStore(object):
         return deserialized_value
 
     def set(self, key, value, serialization_type=None):
+
+        if not isinstance(key, DataContextResourceIdentifier):
+            raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
+                key,
+                type(key),
+            ))
+
         namespaced_key = self._get_namespaced_key(key)
 
         if serialization_type:
@@ -212,9 +228,9 @@ class NameSpacedFilesystemStore(FilesystemStore):
     # Or we might conceivably bring over the full logic from _get_normalized_data_asset_name_filepath.
 
     def _get_namespaced_key(self, key):
-        if not isinstance(key, NameSpaceDotDict):
+        if not isinstance(key, ValidationResultIdentifier):
             raise TypeError(
-                "key must be an instance of type NameSpaceDotDict, not {0}".format(type(key)))
+                "key must be an instance of type ValidationResultIdentifier, not {0}".format(type(key)))
 
         # filepath = "foo/bar/not_a_real_filepath"
         filepath = self._get_normalized_data_asset_name_filepath(
@@ -253,19 +269,19 @@ class NameSpacedFilesystemStore(FilesystemStore):
             base_path = os.path.join(self.root_directory, "expectations")
 
         # We need to ensure data_asset_name is a valid filepath no matter its current state
-        if isinstance(data_asset_name, NormalizedDataAssetName):
+        if isinstance(data_asset_name, DataAssetIdentifier):
             name_parts = [name_part.replace("/", "__") for name_part in data_asset_name]
             relative_path = "/".join(name_parts)
 
-        elif isinstance(data_asset_name, string_types):
-            # if our delimiter is not '/', we need to first replace any slashes that exist in the name
-            # to avoid extra layers of nesting (e.g. for dbt models)
-            relative_path = data_asset_name
-            if self.data_asset_name_delimiter != "/":
-                relative_path.replace("/", "__")
-                relative_path = relative_path.replace(self.data_asset_name_delimiter, "/")
+        # elif isinstance(data_asset_name, string_types):
+        #     # if our delimiter is not '/', we need to first replace any slashes that exist in the name
+        #     # to avoid extra layers of nesting (e.g. for dbt models)
+        #     relative_path = data_asset_name
+        #     if self.data_asset_name_delimiter != "/":
+        #         relative_path.replace("/", "__")
+        #         relative_path = relative_path.replace(self.data_asset_name_delimiter, "/")
         else:
-            raise DataContextError("data_assset_name must be a NormalizedDataAssetName or string")
+            raise DataContextError("data_assset_name must be a DataAssetIdentifier")
 
         expectation_suite_name += file_extension
 

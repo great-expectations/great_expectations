@@ -114,7 +114,7 @@ class RequiredKeysDotDict(DotDict):
                             else:
                                 value = self._key_types[key](value)
                     except TypeError as e:
-                        raise ("Unable to initialize " + self.__class__.__name__ + ": could not convert type. TypeError "
+                        raise TypeError("Unable to initialize " + self.__class__.__name__ + ": could not convert type. TypeError "
                                                                                    "raised: " + str(e))
                 # Validate types
                 self._validate_value_type(key, value, self._key_types[key])
