@@ -43,10 +43,10 @@ from .store.types import (
     StoreMetaConfig,
 )
 from .types import (
-    # NameSpaceDotDict,
+    NameSpaceDotDict,
     NormalizedDataAssetName,     # TODO : Replace with DataAssetIdentifier,
     DataContextConfig,
-    ValidationResultIdentifier,
+    # ValidationResultIdentifier,
 )
 from .templates import (
     PROJECT_TEMPLATE,
@@ -282,7 +282,7 @@ class ConfigOnlyDataContext(object):
             None
         """
 
-        validation_result_identifier = ValidationResultIdentifier(**{
+        validation_result_identifier = NameSpaceDotDict(**{
             "normalized_data_asset_name": self._normalize_data_asset_name(data_asset_name),
             "expectation_suite_name": expectation_suite_name,
             "run_id": run_id,
@@ -904,7 +904,7 @@ class ConfigOnlyDataContext(object):
 
         if "local_validation_result_store" in self.stores:
             self.stores.local_validation_result_store.set(
-                key=ValidationResultIdentifier(**{
+                key=NameSpaceDotDict(**{
                     "normalized_data_asset_name" : normalized_data_asset_name,
                     "expectation_suite_name" : expectation_suite_name,
                     "run_id" : run_id,
@@ -922,7 +922,7 @@ class ConfigOnlyDataContext(object):
         if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
             logging.debug("Storing validation results to data_asset_snapshot_store")
             self.stores.data_asset_snapshot_store.set(
-                key=ValidationResultIdentifier(**{
+                key=NameSpaceDotDict(**{
                     "normalized_data_asset_name" : normalized_data_asset_name,
                     "expectation_suite_name" : expectation_suite_name,
                     "run_id" : run_id,
@@ -1258,7 +1258,7 @@ class ConfigOnlyDataContext(object):
         if run_id == None:
             run_id = selected_store.get_most_recent_run_id()
 
-        results_dict = selected_store.get(ValidationResultIdentifier(**{
+        results_dict = selected_store.get(NameSpaceDotDict(**{
             "normalized_data_asset_name" : self._normalize_data_asset_name(data_asset_name),
             "expectation_suite_name" : expectation_suite_name,
             "run_id" : run_id,
