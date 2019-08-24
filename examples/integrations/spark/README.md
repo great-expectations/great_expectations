@@ -30,7 +30,7 @@ Note that it may be necessary to delete a Java installation from your machine if
 
 Download and unzip Scala 2.12.8 into your `~/Library/Local/SoftwareDevelopment/` directory (create the intermediate
 directories as necessary): <https://www.scala-lang.org/download/>
-(Click on "Download the Scala binaries for macos")
+(Click on "Download the Scala binaries for Mac Os".)
 
 Download and unzip Spark 2.4.3 into your `~/Library/Local/SoftwareDevelopment/` directory (create the intermediate
 directories as necessary): <https://spark.apache.org/downloads.html>
