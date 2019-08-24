@@ -20,6 +20,14 @@ import json
 import logging
 logger = logging.getLogger(__name__)
 
+from ..util import (
+    parse_string_to_data_context_resource_identifier
+)
+
+# NOTE: Abe 2019/08/24 : We may want to factor out a base Store class in the future.
+# class Store(object):
+#   pass
+
 class NamespaceAwareStore(object):
     def __init__(
         self,
@@ -52,8 +60,9 @@ class NamespaceAwareStore(object):
                 type(key),
             ))
 
-        namespaced_key = self._get_namespaced_key(key)
-        value = self._get(namespaced_key)
+        # namespaced_key = self._get_namespaced_key(key)
+        # value = self._get(namespaced_key)
+        value=self._get(key)
 
         if serialization_type:
             deserialization_method = self._get_deserialization_method(
@@ -72,7 +81,7 @@ class NamespaceAwareStore(object):
                 type(key),
             ))
 
-        namespaced_key = self._get_namespaced_key(key)
+        # namespaced_key = self._get_namespaced_key(key)
 
         if serialization_type:
             serialization_method = self._get_serialization_method(
@@ -82,15 +91,17 @@ class NamespaceAwareStore(object):
                 self.config.serialization_type)
 
         serialized_value = serialization_method(value)
-        self._set(namespaced_key, serialized_value)
+        # self._set(namespaced_key, serialized_value)
+        self._set(key, serialized_value)
 
     @classmethod
     def get_config_class(cls):
         return cls.config_class
 
-    def _get_namespaced_key(self, key):
-        # TODO: This method is a placeholder until we bring in _get_namespaced_key from NameSpacedFilesystemStore
-        return key
+    # def _get_namespaced_key(self, key):
+    #     # TODO: This method is a placeholder until we bring in _get_namespaced_key from NameSpacedFilesystemStore
+    #     logger.debug("NamespaceAwareStore._get_namespaced_key")
+    #     return key
 
     def _get_serialization_method(self, serialization_type):
         if serialization_type == None:
@@ -148,16 +159,20 @@ class InMemoryStore(NamespaceAwareStore):
         self.store = {}
 
     def _get(self, key):
-        return self.store[key]
+        return self.store[key.to_string()]
 
     def _set(self, key, value):
-        self.store[key] = value
+        self.store[key.to_string()] = value
 
     def list_keys(self):
-        return self.store.keys()
+        # FIXME : Convert strings back into the appropriate type of DataContextResourceIdentifier
+        # ??? Can strings be unambiguously converted into ResourceIdentifiers? -> The DataContext can probalby do this. It's a species of magic autocomplete. Or we can enforce it through stringifying conventions. I think conventions win.
+        # ??? How does a Store know what its "appropriate type" is? -> Subclassing could work, but then we end up in a matrix world
+        # ??? Can Stores mix types of ResourceIdentifiers? -> Again, easy to solve with subclassing, but will require lots of classes
+        return [parse_string_to_data_context_resource_identifier(key_string) for key_string in self.store.keys()]
 
     def has_key(self, key):
-        return key in self.store
+        return key.to_string() in self.store
 
 
 class FilesystemStore(NamespaceAwareStore):

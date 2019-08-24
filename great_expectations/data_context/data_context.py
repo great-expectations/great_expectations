@@ -44,9 +44,8 @@ from .store.types import (
 )
 from .types import (
     # NameSpaceDotDict,
-    # NormalizedDataAssetName,
+    NormalizedDataAssetName,     # TODO : Replace with DataAssetIdentifier,
     DataContextConfig,
-    DataAssetIdentifier,
     ValidationResultIdentifier,
 )
 from .templates import (

@@ -32,69 +32,107 @@ from great_expectations.util import (
     gen_directory_tree_str,
 )
 
-# def test_core_store_logic():
-#     pass
-
-def test_InMemoryStore(empty_data_context):
-    #TODO: Typechecking was causing circular imports. See the note in the Store class.
-    # with pytest.raises(TypeError):
-    #     my_store = InMemoryStore(
-    #         data_context=None,
-    #         config={},
-    #     )
+def test_InMemoryStore():#empty_data_context):
 
     with pytest.raises(TypeError):
         my_store = InMemoryStore(
-            # data_context=empty_data_context,
             config=None,
         )
 
     my_store = InMemoryStore(
-        # data_context=empty_data_context,
         config={},
     )
 
+    my_key = DataAssetIdentifier("a","b","c")
     with pytest.raises(KeyError):
-        my_store.get("AAA")
+        my_store.get(my_key)
     
-    my_store.set("AAA", "aaa")
-    assert my_store.get("AAA") == "aaa"
+    my_store.set(my_key, "aaa")
+    assert my_store.get(my_key) == "aaa"
 
-    #??? Should putting a non-string, non-byte object into a store trigger an error?    
+    #??? Should putting a non-string, non-byte object into a store trigger an error?
+    # NOTE : Abe 2019/08/24 : I think this is the same as asking, "Is serializability a core concern of stores?"
     # with pytest.raises(ValueError):
     #     my_store.set("BBB", {"x":1})
 
+    # TODO: Get these working
+    assert my_store.has_key(my_key) == True
+    assert my_store.has_key(DataAssetIdentifier("A","b","c")) == False
+    #Try the same thing twice in a row, just in case...
+    assert my_store.has_key(DataAssetIdentifier("A","b","c")) == False
+    #Try something similar with deeper nesting
+    assert my_store.has_key(DataAssetIdentifier("a","b","C")) == False
+    # Try the first object again, but newly instantiated
+    assert my_store.has_key(DataAssetIdentifier("a","b","c")) == True
+    assert my_store.list_keys() == [my_key]
+
+# NOTE : Abe 2019/08/24 : Freezing this code in carbonite,
+# in case it turns out to be useful in a future refactor to separate Store and NamespaceAwareStore
+# def test_InMemoryStore_with_serialization(empty_data_context):
+#     my_store = InMemoryStore(
+#         config={
+#             "serialization_type": "json"
+#         }
+#     )
+
+#     A_key = DataAssetIdentifier("A", "A", "A")
+    
+#     my_store.set("AAA", {"x":1})
+#     assert my_store.get("AAA") == {"x":1}
+
+#     with pytest.raises(TypeError):
+#         my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
+
+#     my_store = InMemoryStore(
+#         config={}
+#     )
+
+#     with pytest.raises(KeyError):
+#         assert my_store.get("AAA") == {"x":1}
+
+#     my_store.set("AAA", {"x":1}, serialization_type="json")
+    
+#     assert my_store.get("AAA") == "{\"x\": 1}"
+#     assert my_store.get("AAA", serialization_type="json") == {"x":1}
+
+#     with pytest.raises(TypeError):
+#         my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
+
+#     assert set(my_store.list_keys()) == set(["AAA"])
+
 def test_InMemoryStore_with_serialization(empty_data_context):
     my_store = InMemoryStore(
-        # data_context=empty_data_context,
         config={
             "serialization_type": "json"
         }
     )
+
+    A_key = DataAssetIdentifier("A", "A", "A")
+    B_key = DataAssetIdentifier("B", "B", "B")
     
-    my_store.set("AAA", {"x":1})
-    assert my_store.get("AAA") == {"x":1}
+    my_store.set(A_key, {"x":1})
+    assert my_store.get(A_key) == {"x":1}
 
     with pytest.raises(TypeError):
-        my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
+        my_store.set(B_key, set(["x", "y", "z"]), serialization_type="json")
 
     my_store = InMemoryStore(
-        # data_context=empty_data_context,
         config={}
     )
 
     with pytest.raises(KeyError):
-        assert my_store.get("AAA") == {"x":1}
+        assert my_store.get(A_key) == {"x":1}
 
-    my_store.set("AAA", {"x":1}, serialization_type="json")
+    my_store.set(A_key, {"x":1}, serialization_type="json")
     
-    assert my_store.get("AAA") == "{\"x\": 1}"
-    assert my_store.get("AAA", serialization_type="json") == {"x":1}
+    assert my_store.get(A_key) == "{\"x\": 1}"
+    assert my_store.get(A_key, serialization_type="json") == {"x":1}
 
     with pytest.raises(TypeError):
-        my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
+        my_store.set(B_key, set(["x", "y", "z"]), serialization_type="json")
 
-    assert set(my_store.list_keys()) == set(["AAA"])
+    # FIXME : This should return a list of keys, not strings.
+    assert set(my_store.list_keys()) == set(['DataAssetIdentifier.A.A.A'])
 
 
 def test_FilesystemStore(tmp_path_factory, empty_data_context):
@@ -270,8 +308,8 @@ def test_NameSpacedFilesystemStore_pandas_csv_serialization(tmp_path_factory, em
                 "suite_name": "hello",
                 "purpose": "testing",
             },
-            "purpose" : "default",
-            "run_id" : "100",
+            # "purpose" : "default",
+            "run_id" : ("goodbye", "100"),
         }
     )
     with pytest.raises(AssertionError):
