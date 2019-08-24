@@ -1,7 +1,7 @@
 This Spark integration is provided as an example. Using it will also introduce dependency on the requirements listed in
 the "requirements_spark.txt" file in the "great_expectations/examples/integrations/spark" directory.
 
-Please make sure that the file "great_expectations/examples/data/Titanic.csv" exists.
+Please make sure that the file "great_expectations/examples/data/Titanic.csv" exists.  This is the raw source data set.
 
 To run the example:
 
