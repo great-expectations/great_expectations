@@ -30,6 +30,21 @@ class InMemoryStoreConfig(AllowedKeysDotDict):
 
 class FilesystemStoreConfig(AllowedKeysDotDict):
     _allowed_keys = set([
+        "serialization_type",
+        "base_directory",
+        "file_prefix",
+        "file_extension",
+        "compression",
+    ])
+
+    _required_keys = set([
+        "base_directory",
+        "file_extension",
+    ])
+
+
+class NamespacedFilesystemStoreConfig(AllowedKeysDotDict):
+    _allowed_keys = set([
         "resource_identifier_class_name",
         "serialization_type",
         "base_directory",
