@@ -1,4 +1,7 @@
+from six import string_types
+
 from ...types import AllowedKeysDotDict
+from ..types.resource_identifiers import DataContextResourceIdentifier
 
 class StoreMetaConfig(AllowedKeysDotDict):
     """Top-level configs for stores look like this
@@ -27,13 +30,20 @@ class InMemoryStoreConfig(AllowedKeysDotDict):
 
 class FilesystemStoreConfig(AllowedKeysDotDict):
     _allowed_keys = set([
+        "resource_identifier_class_name",
         "serialization_type",
         "base_directory",
+        "file_prefix",
         "file_extension",
         "compression",
     ])
 
     _required_keys = set([
+        "resource_identifier_class_name",
         "base_directory",
-        "file_extension"
+        "file_extension",
     ])
+
+    _key_types = {
+        "resource_identifier_class_name" : string_types,
+    }

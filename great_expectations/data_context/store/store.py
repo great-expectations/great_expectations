@@ -19,6 +19,8 @@ import os
 import json
 import logging
 logger = logging.getLogger(__name__)
+import importlib
+import re
 
 from ..util import (
     parse_string_to_data_context_resource_identifier
@@ -35,8 +37,12 @@ class NamespaceAwareStore(object):
         root_directory=None,
     ):
         """
+
+        TODO : Describe the rationale for keeping root_directory out of config:
+            Because it's passed in separately. If we want the config to be serializable to yyml, we can't add extra arguments at runtime.
         """
 
+        print("HERE")
         if root_directory is not None and not os.path.isabs(root_directory):
             raise ValueError("root_directory must be an absolute path. Got {0} instead.".format(root_directory))
 
@@ -166,9 +172,13 @@ class InMemoryStore(NamespaceAwareStore):
 
     def list_keys(self):
         # FIXME : Convert strings back into the appropriate type of DataContextResourceIdentifier
-        # ??? Can strings be unambiguously converted into ResourceIdentifiers? -> The DataContext can probalby do this. It's a species of magic autocomplete. Or we can enforce it through stringifying conventions. I think conventions win.
+        # ??? Can strings be unambiguously converted into ResourceIdentifiers?
+        # -> The DataContext can probably do this. It's a species of magic autocomplete. Or we can enforce it through stringifying conventions. I think conventions win.
         # ??? How does a Store know what its "appropriate type" is? -> Subclassing could work, but then we end up in a matrix world
+        # -> Add a "resource_identifier_class_name". This may be replaced by 
         # ??? Can Stores mix types of ResourceIdentifiers? -> Again, easy to solve with subclassing, but will require lots of classes
+        # -> Currently, no.
+        # -> This is going to make fixtures/ tricky.
         return [parse_string_to_data_context_resource_identifier(key_string) for key_string in self.store.keys()]
 
     def has_key(self, key):
@@ -177,6 +187,8 @@ class InMemoryStore(NamespaceAwareStore):
 
 class FilesystemStore(NamespaceAwareStore):
     """Uses a local filepath as a store.
+
+    # FIXME : It's currently possible to break this Store by passing it a ResourceIdentifier that contains '/'.
     """
 
     config_class = FilesystemStoreConfig
@@ -186,16 +198,30 @@ class FilesystemStore(NamespaceAwareStore):
         safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
     def _get(self, key):
-        with open(os.path.join(self.full_base_directory, key)) as infile:
+        filepath = self._get_filepath_from_key(key)
+        with open(filepath) as infile:
             return infile.read()
 
+        # key_str = self.get_key_str(key)
+        # with open(os.path.join(self.full_base_directory, key_str)) as infile:
+        #     return infile.read()
+
     def _set(self, key, value):
-        filename = os.path.join(self.full_base_directory, key)
-        safe_mmkdir(str(os.path.split(filename)[0]))
-        with open(filename, "w") as outfile:
+        filepath = self._get_filepath_from_key(key)
+        path, filename = os.path.split(filepath)
+
+        safe_mmkdir(str(path))
+        with open(filepath, "w") as outfile:
             outfile.write(value)
 
+        # key_str = self.get_key_str(key)
+        # filename = os.path.join(self.full_base_directory, key_str)
+        # safe_mmkdir(str(os.path.split(filename)[0]))
+        # with open(filename, "w") as outfile:
+        #     outfile.write(value)
+
     def list_keys(self):
+        # TODO : Rename "keys" in this method to filepaths, for clarity
         key_list = []
         for root, dirs, files in os.walk(self.full_base_directory):
             for file_ in files:
@@ -211,10 +237,70 @@ class FilesystemStore(NamespaceAwareStore):
                         relative_path,
                         file_name
                     )
-                key_list.append(key)
+
+                
+                key_list.append(
+                    self._get_key_from_filepath(key)
+                )
 
         return key_list
 
+    def _get_filepath_from_key(self, key):
+        if isinstance(key, ValidationResultIdentifier):
+            # NOTE : This might be easier to parse as a Jinja template
+            middle_path = key.to_string(separator="/")
+
+            filename_core = "-".join([
+                key.expectation_suite_identifier.suite_name,
+                key.expectation_suite_identifier.purpose,
+            ])
+            file_prefix = self.config.get("file_prefix", "")
+            file_extension = self.config.get("file_extension", "")
+            filename = file_prefix + filename_core + file_extension
+
+            filepath = os.path.join(
+                self.full_base_directory,
+                key.run_id.to_string(include_class_prefix=False, separator="-"),
+                key.expectation_suite_identifier.data_asset_identifier.to_string(include_class_prefix=False, separator="/"),
+                filename
+            )
+            return filepath
+
+        else:
+            return os.path.join(
+                self.full_base_directory,
+                key.to_string(separator="/"),
+            ) + self.config.file_extension
+
+    def _get_key_from_filepath(self, filepath):
+        if self.config.resource_identifier_class_name == "ValidationResultIdentifier":
+            module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
+            class_ = getattr(module, self.config.resource_identifier_class_name)
+
+            file_prefix = self.config.get("file_prefix", "")
+            file_extension = self.config.get("file_extension", "")
+            matches = re.compile("(.*)-(.*)/(.*)/(.*)/(.*)/"+file_prefix+"(.*)-(.*)"+file_extension).match(filepath)
+
+            args = (
+                matches.groups()[2],
+                matches.groups()[3],
+                matches.groups()[4],
+
+                matches.groups()[5],
+                matches.groups()[6],
+
+                matches.groups()[0],
+                matches.groups()[1],
+            )
+            print(args)
+            return class_(*args)
+
+        else:
+            file_extension_length = len(self.config.file_extension)
+            filename_without_extension = filename[:-1*file_extension_length]
+
+            key = parse_string_to_data_context_resource_identifier(filename_without_extension, separator="/")
+            return key
 
 class NameSpacedFilesystemStore(FilesystemStore):
 
