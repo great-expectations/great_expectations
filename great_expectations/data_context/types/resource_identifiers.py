@@ -17,8 +17,9 @@ class OrderedKeysDotDict(AllowedKeysDotDict):
     def __init__(self, *args, **kwargs):
         logger.debug(self.__class__.__name__)
         assert set(self._key_order) == set(self._allowed_keys)
+        assert set(self._key_order) == set(self._required_keys)
 
-        coerce_types = coerce_types=kwargs.pop("coerce_types", True),
+        coerce_types = kwargs.pop("coerce_types", True),
         if args == ():
             super(OrderedKeysDotDict, self).__init__(
                 coerce_types=coerce_types,
@@ -85,11 +86,28 @@ class OrderedKeysDotDict(AllowedKeysDotDict):
         
         return key_length
 
-
 class DataContextResourceIdentifier(OrderedKeysDotDict):
+    """
 
-    def to_string(self):
-        return ".".join(self._get_string_elements())
+    """
+
+    def __init__(self, *args, **kwargs):
+        from_string = kwargs.pop("from_string", None)
+
+        if from_string == None:
+            super(DataContextResourceIdentifier, self).__init__(
+                *args, **kwargs
+            )
+
+        else:
+            super(DataContextResourceIdentifier, self).__init__(
+                *from_string.split(".")[1:],
+                **kwargs,
+            )
+
+
+    def to_string(self, include_class_prefix=True, separator="."):
+        return separator.join(self._get_string_elements(include_class_prefix))
 
     def _get_string_elements(self, include_class_prefix=True):
         string_elements = []
@@ -104,6 +122,13 @@ class DataContextResourceIdentifier(OrderedKeysDotDict):
                 string_elements.append(str(self[key]))
 
         return string_elements
+
+    #This is required to make DataContextResourceIdentifiers hashable
+    def __hash__(self):
+        return hash(self.to_string())
+
+    def __eq__(self, other):
+        return self.__hash__() == other.__hash__()
 
 class DataAssetIdentifier(DataContextResourceIdentifier):
     _key_order = [
