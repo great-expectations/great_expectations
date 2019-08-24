@@ -1,4 +1,6 @@
 import pytest
+import logging
+logger = logging.getLogger(__name__)
 
 from six import PY2, string_types
 import sys
@@ -44,22 +46,9 @@ def test_DataAssetIdentifier():
 
     DataAssetIdentifier("A", "B", "C")
 
-def test_ValidationResultIdentifier():
-    print("A")
-    ValidationResultIdentifier(
-        coerce_types=True,
-        **{
-            "expectation_suite_identifier" : {
-                "data_asset_identifier" : DataAssetIdentifier("a", "b", "c"),
-                "suite_name": "hello",
-                "purpose": "testing",
-            },
-            "purpose" : "default",
-            "run_id" : "100",
-        }
-    )
+# NOTE: The following tests are good tests of OrderedDotDict's ability to handle abbreviated input to __init__ when nested
 
-    print("AA")
+def test_ValidationResultIdentifier__init__totally_nested():
     ValidationResultIdentifier(
         coerce_types=True,
         **{
@@ -72,35 +61,94 @@ def test_ValidationResultIdentifier():
                 "suite_name": "hello",
                 "purpose": "testing",
             },
-            "purpose" : "default",
-            "run_id" : "100",
+            "run_id" : {
+                "execution_context": "testing",
+                "start_time_utc": 12345,
+            },
         }
     )
 
-    print("B")
+def test_ValidationResultIdentifier__init__mostly_nested():
     ValidationResultIdentifier(
         coerce_types=True,
         **{
             "expectation_suite_identifier" : {
-                "data_asset_identifier" : ("a", "b", "c"), #DataAssetIdentifier("a", "b", "c"),
+                "data_asset_identifier" : ("a", "b", "c"),
                 "suite_name": "hello",
                 "purpose": "testing",
             },
-            "purpose" : "default",
-            "run_id" : "100",
+            "run_id" : {
+                "execution_context": "testing",
+                "start_time_utc": 12345,
+            },
         }
     )
 
-    print("C")
+def test_ValidationResultIdentifier__init__mostly_nested_with_typed_child():
     ValidationResultIdentifier(
         coerce_types=True,
         **{
             "expectation_suite_identifier" : {
-                "data_asset_identifier" : ("a", "b", "c"), #DataAssetIdentifier("a", "b", "c"),
+                "data_asset_identifier" : DataAssetIdentifier("a", "b", "c"),
                 "suite_name": "hello",
                 "purpose": "testing",
             },
-            "purpose" : "default",
-            "run_id" : "100",
+            "run_id" : {
+                "execution_context": "testing",
+                "start_time_utc": 12345,
+            },
         }
     )
+
+def test_ValidationResultIdentifier__init__partially_flat():
+    ValidationResultIdentifier(
+        coerce_types=True,
+        **{
+            "expectation_suite_identifier" : {
+                "data_asset_identifier" : ("a", "b", "c"),
+                "suite_name": "hello",
+                "purpose": "testing",
+            },
+            "run_id" : ("testing", 12345)
+        }
+    )
+
+def test_ValidationResultIdentifier__init__mostly_flat():
+    ValidationResultIdentifier(
+        coerce_types=True,
+        **{
+            "expectation_suite_identifier" : (("a", "b", "c"), "hello", "testing"),
+            "run_id" : ("testing", 12345)
+        }
+    )
+
+def test_ValidationResultIdentifier__init__very_flat():
+    ValidationResultIdentifier(
+        (("a", "b", "c"), "hello", "testing"),("testing", 12345),
+        coerce_types=True,
+    )
+
+# TODO: This style of instantiation isn't currently supported, but could be with some work on OrderedKeyDotDict
+# def test_ValidationResultIdentifier__init__nested_except_the_top_layer():
+#     ValidationResultIdentifier(
+#         ({
+#             "data_asset_identifier" : {
+#                 "datasource" : "a",
+#                 "generator" : "b",
+#                 "generator_asset" : "c",
+#             },
+#             "suite_name": "hello",
+#             "purpose": "testing",
+#         },{
+#             "execution_context": "testing",
+#             "start_time_utc": 12345,
+#         }),
+#         coerce_types=True,
+#     )
+
+# TODO: This style of instantiation isn't currently supported, but could be with some work on OrderedKeyDotDict
+# def test_ValidationResultIdentifier__init__entirely_flat():
+#     ValidationResultIdentifier(
+#         ("a", "b", "c", "hello", "testing", "testing", 12345),
+#         coerce_types=True,
+#     )
