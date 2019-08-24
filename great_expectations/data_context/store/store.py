@@ -10,6 +10,7 @@ from ..types.resource_identifiers import (
 from .types import (
     InMemoryStoreConfig,
     FilesystemStoreConfig,
+    NamespacedFilesystemStoreConfig,
 )
 from ..util import safe_mmkdir
 import pandas as pd
@@ -27,10 +28,7 @@ from ..util import (
 )
 
 # NOTE: Abe 2019/08/24 : We may want to factor out a base Store class in the future.
-# class Store(object):
-#   pass
-
-class NamespaceAwareStore(object):
+class Store(object):
     def __init__(
         self,
         config,
@@ -42,7 +40,6 @@ class NamespaceAwareStore(object):
             Because it's passed in separately. If we want the config to be serializable to yyml, we can't add extra arguments at runtime.
         """
 
-        print("HERE")
         if root_directory is not None and not os.path.isabs(root_directory):
             raise ValueError("root_directory must be an absolute path. Got {0} instead.".format(root_directory))
 
@@ -58,16 +55,8 @@ class NamespaceAwareStore(object):
 
         self._setup()
 
+
     def get(self, key, serialization_type=None):
-
-        if not isinstance(key, DataContextResourceIdentifier):
-            raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
-                key,
-                type(key),
-            ))
-
-        # namespaced_key = self._get_namespaced_key(key)
-        # value = self._get(namespaced_key)
         value=self._get(key)
 
         if serialization_type:
@@ -80,15 +69,6 @@ class NamespaceAwareStore(object):
         return deserialized_value
 
     def set(self, key, value, serialization_type=None):
-
-        if not isinstance(key, DataContextResourceIdentifier):
-            raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
-                key,
-                type(key),
-            ))
-
-        # namespaced_key = self._get_namespaced_key(key)
-
         if serialization_type:
             serialization_method = self._get_serialization_method(
                 serialization_type)
@@ -97,8 +77,8 @@ class NamespaceAwareStore(object):
                 self.config.serialization_type)
 
         serialized_value = serialization_method(value)
-        # self._set(namespaced_key, serialized_value)
         self._set(key, serialized_value)
+
 
     @classmethod
     def get_config_class(cls):
@@ -155,6 +135,29 @@ class NamespaceAwareStore(object):
         raise NotImplementedError
 
 
+class NamespaceAwareStore(Store):
+
+    def get(self, key, serialization_type=None):
+
+        if not isinstance(key, DataContextResourceIdentifier):
+            raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
+                key,
+                type(key),
+            ))
+
+        return super(NamespaceAwareStore, self).get(key, serialization_type)
+
+    def set(self, key, value, serialization_type=None):
+
+        if not isinstance(key, DataContextResourceIdentifier):
+            raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
+                key,
+                type(key),
+            ))
+
+        super(NamespaceAwareStore, self).set(key, value, serialization_type)
+
+
 class InMemoryStore(NamespaceAwareStore):
     """Uses an in-memory dictionary as a store.
     """
@@ -185,7 +188,7 @@ class InMemoryStore(NamespaceAwareStore):
         return key.to_string() in self.store
 
 
-class FilesystemStore(NamespaceAwareStore):
+class FilesystemStore(Store):
     """Uses a local filepath as a store.
 
     # FIXME : It's currently possible to break this Store by passing it a ResourceIdentifier that contains '/'.
@@ -193,8 +196,23 @@ class FilesystemStore(NamespaceAwareStore):
 
     config_class = FilesystemStoreConfig
 
+    def __init__(
+        self,
+        config,
+        root_directory, #This argument is REQUIRED for this class
+    ):
+        super(FilesystemStore, self).__init__(config, root_directory)
+
+    # def _setup(self):
+    #     self.full_base_directory = self.config.base_directory
+    #     safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
+
     def _setup(self):
-        self.full_base_directory = self.config.base_directory
+        self.full_base_directory = os.path.join(
+            self.root_directory,
+            self.config.base_directory,
+        )
+
         safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
     def _get(self, key):
@@ -244,6 +262,27 @@ class FilesystemStore(NamespaceAwareStore):
                 )
 
         return key_list
+
+    def _get_filepath_from_key(self, key):
+        # NOTE : This method is trivial in this class, but child classes can get pretty complex
+        return os.path.join(self.full_base_directory, key)
+    
+    def _get_key_from_filepath(self, filepath):
+        # NOTE : This method is trivial in this class, but child classes can get pretty complex
+        return filepath
+
+class NameSpacedFilesystemStore(FilesystemStore, NamespaceAwareStore):
+
+    config_class = NamespacedFilesystemStoreConfig
+
+    # TODO : See if this method can be handled by FilesystemStore._setup.
+    # def _setup(self):
+    #     self.full_base_directory = os.path.join(
+    #         self.root_directory,
+    #         self.config.base_directory,
+    #     )
+
+    #     safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
     def _get_filepath_from_key(self, key):
         if isinstance(key, ValidationResultIdentifier):
@@ -302,23 +341,8 @@ class FilesystemStore(NamespaceAwareStore):
             key = parse_string_to_data_context_resource_identifier(filename_without_extension, separator="/")
             return key
 
-class NameSpacedFilesystemStore(FilesystemStore):
 
-    def __init__(
-        self,
-        config,
-        root_directory, #This argument is REQUIRED for this class
-    ):
-        super(NameSpacedFilesystemStore, self).__init__(config, root_directory)
-
-    def _setup(self):
-        self.full_base_directory = os.path.join(
-            self.root_directory,
-            self.config.base_directory,
-        )
-
-        safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
-
+    # TODO : This method is OBE. Remove entirely
     # TODO: This method should probably live in ContextAwareStore
     # For the moment, I'm leaving it here, because:
     #   1. This method and NameSpaceDotDict isn't yet general enough to handle all permutations of namespace objects
@@ -344,6 +368,8 @@ class NameSpacedFilesystemStore(FilesystemStore):
             file_extension=self.config.file_extension
         )
         return filepath
+
+    # TODO : This method is OBE. Remove entirely
 
     # FIXME : This method is duplicated in DataContext. That method should be deprecated soon, but that will require a larger refactor.
     # Specifically, get_, save_, and list_expectation_suite will need to be refactored into a store so that they don't rely on the method.
@@ -392,6 +418,7 @@ class NameSpacedFilesystemStore(FilesystemStore):
             expectation_suite_name
         )
 
+    # TODO: Not yet sure where this method should live
     def get_most_recent_run_id(self):
         run_id_list = os.listdir(self.full_base_directory)
 

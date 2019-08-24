@@ -47,7 +47,9 @@ def test_InMemoryStore():#empty_data_context):
     with pytest.raises(KeyError):
         my_store.get(my_key)
     
+    print(my_store.store)
     my_store.set(my_key, "aaa")
+    print(my_store.store)
     assert my_store.get(my_key) == "aaa"
 
     #??? Should putting a non-string, non-byte object into a store trigger an error?
@@ -143,7 +145,6 @@ def test_FilesystemStore(tmp_path_factory):
         config={
             "base_directory": project_path,
             "file_extension" : ".txt",
-            "resource_identifier_class_name" : "None",
         }
     )
 
