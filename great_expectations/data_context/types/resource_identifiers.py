@@ -1,7 +1,8 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from six import string_types
+from collections import Iterable
+from six import string_types, class_types
 
 from great_expectations.types import (
     RequiredKeysDotDict,
@@ -17,21 +18,92 @@ class OrderedKeysDotDict(AllowedKeysDotDict):
         logger.debug(self.__class__.__name__)
         assert set(self._key_order) == set(self._allowed_keys)
 
+        coerce_types = coerce_types=kwargs.pop("coerce_types", True),
         if args == ():
             super(OrderedKeysDotDict, self).__init__(
-                # coerce_types=kwargs.get("coerce_types", False),
+                coerce_types=coerce_types,
                 *args, **kwargs
             )
 
         else:
-            new_kwargs = dict(zip(self._key_order, args))
+            new_kwargs = self._zip_keys_and_args_to_dict(args)
             super(OrderedKeysDotDict, self).__init__(
-                coerce_types=kwargs.get("coerce_types", False),
+                coerce_types=coerce_types,
                 **new_kwargs
             )
 
+    @classmethod
+    def _zip_keys_and_args_to_dict(cls, args):
+        """This function does the keavy lifting of unpacking 
+        """
+
+        index = 0
+        new_dict = {}
+        for key in cls._key_order:
+            try:
+                if isinstance(args[index], dict):
+                    increment = 1
+                    new_dict[key] = args[index]
+
+                else:
+                    key_type = cls._key_types.get(key, None)
+                    if isinstance(key_type, class_types) and issubclass(key_type, DataContextResourceIdentifier):
+                        increment = key_type._recursively_get_key_length()
+                        new_dict[key] = args[index:index+increment]
+                    else:
+                        increment = 1
+                        new_dict[key] = args[index]
+
+            except IndexError as e:
+                raise IndexError("Not enough arguments in {0} to populate all fields in {1} : {2}".format(
+                    args,
+                    cls.__name__,
+                    cls._key_order,
+                ))
+
+            index += increment
+
+        if index < len(args):
+            raise IndexError("Too many arguments in {0} to populate the fields in {1} : {2}".format(
+                args,
+                cls.__name__,
+                cls._key_order,
+            ))
+
+        return new_dict
+
+    @classmethod
+    def _recursively_get_key_length(cls):
+        key_length = 0
+
+        for key in cls._key_order:
+            key_type = cls._key_types.get(key, None)
+            if isinstance(key_type, class_types) and issubclass(key_type, DataContextResourceIdentifier):
+                key_length += key_type._recursively_get_key_length()
+            else:
+                key_length += 1
+        
+        return key_length
+
+
 class DataContextResourceIdentifier(OrderedKeysDotDict):
-    pass
+
+    def to_string(self):
+        return ".".join(self._get_string_elements())
+
+    def _get_string_elements(self, include_class_prefix=True):
+        string_elements = []
+
+        if include_class_prefix:
+            string_elements.append(self.__class__.__name__)
+
+        for key in self._key_order:
+            if isinstance( self[key], DataContextResourceIdentifier ):
+                string_elements += self[key]._get_string_elements(include_class_prefix=False)
+            else:
+                string_elements.append(str(self[key]))
+
+        return string_elements
 
 class DataAssetIdentifier(DataContextResourceIdentifier):
     _key_order = [
@@ -68,6 +140,10 @@ class RunIdentifier(DataContextResourceIdentifier):
         "execution_context",
         "start_time_utc",
     ]
+    _key_types = {
+        "execution_context" : string_types,
+        "start_time_utc" : int,
+    }
     # NOTE: This pattern is kinda awkward. It would be nice to ONLY specify _key_order
     _required_keys = set(_key_order)
     _allowed_keys = set(_key_order)
