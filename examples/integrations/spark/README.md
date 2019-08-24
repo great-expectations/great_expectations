@@ -16,8 +16,6 @@ You also must have Apache Spark installed locally.
 
 ## Installation of Apache Spark
 
-Step 1) Prerequisites
-
 Download and install the appropriate Java 8 SDK for your operating system:
 <https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html>
 Run `java -version` to validate Java installation.
