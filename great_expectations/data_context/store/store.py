@@ -27,7 +27,6 @@ from ..util import (
     parse_string_to_data_context_resource_identifier
 )
 
-# NOTE: Abe 2019/08/24 : We may want to factor out a base Store class in the future.
 class Store(object):
     def __init__(
         self,
@@ -83,11 +82,6 @@ class Store(object):
     @classmethod
     def get_config_class(cls):
         return cls.config_class
-
-    # def _get_namespaced_key(self, key):
-    #     # TODO: This method is a placeholder until we bring in _get_namespaced_key from NameSpacedFilesystemStore
-    #     logger.debug("NamespaceAwareStore._get_namespaced_key")
-    #     return key
 
     def _get_serialization_method(self, serialization_type):
         if serialization_type == None:
@@ -203,10 +197,6 @@ class FilesystemStore(Store):
     ):
         super(FilesystemStore, self).__init__(config, root_directory)
 
-    # def _setup(self):
-    #     self.full_base_directory = self.config.base_directory
-    #     safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
-
     def _setup(self):
         self.full_base_directory = os.path.join(
             self.root_directory,
@@ -220,10 +210,6 @@ class FilesystemStore(Store):
         with open(filepath) as infile:
             return infile.read()
 
-        # key_str = self.get_key_str(key)
-        # with open(os.path.join(self.full_base_directory, key_str)) as infile:
-        #     return infile.read()
-
     def _set(self, key, value):
         filepath = self._get_filepath_from_key(key)
         path, filename = os.path.split(filepath)
@@ -231,12 +217,6 @@ class FilesystemStore(Store):
         safe_mmkdir(str(path))
         with open(filepath, "w") as outfile:
             outfile.write(value)
-
-        # key_str = self.get_key_str(key)
-        # filename = os.path.join(self.full_base_directory, key_str)
-        # safe_mmkdir(str(os.path.split(filename)[0]))
-        # with open(filename, "w") as outfile:
-        #     outfile.write(value)
 
     def list_keys(self):
         # TODO : Rename "keys" in this method to filepaths, for clarity
@@ -274,15 +254,6 @@ class FilesystemStore(Store):
 class NameSpacedFilesystemStore(FilesystemStore, NamespaceAwareStore):
 
     config_class = NamespacedFilesystemStoreConfig
-
-    # TODO : See if this method can be handled by FilesystemStore._setup.
-    # def _setup(self):
-    #     self.full_base_directory = os.path.join(
-    #         self.root_directory,
-    #         self.config.base_directory,
-    #     )
-
-    #     safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
     def _get_filepath_from_key(self, key):
         if isinstance(key, ValidationResultIdentifier):
@@ -331,7 +302,6 @@ class NameSpacedFilesystemStore(FilesystemStore, NamespaceAwareStore):
                 matches.groups()[0],
                 matches.groups()[1],
             )
-            print(args)
             return class_(*args)
 
         else:
