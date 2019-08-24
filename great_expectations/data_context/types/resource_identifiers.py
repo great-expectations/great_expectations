@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from six import string_types
 
 from great_expectations.types import (
@@ -11,14 +14,21 @@ class OrderedKeysDotDict(AllowedKeysDotDict):
     _key_order = []
 
     def __init__(self, *args, **kwargs):
+        logger.debug(self.__class__.__name__)
         assert set(self._key_order) == set(self._allowed_keys)
 
         if args == ():
-            super(OrderedKeysDotDict, self).__init__(*args, **kwargs)
+            super(OrderedKeysDotDict, self).__init__(
+                # coerce_types=kwargs.get("coerce_types", False),
+                *args, **kwargs
+            )
 
         else:
             new_kwargs = dict(zip(self._key_order, args))
-            super(OrderedKeysDotDict, self).__init__(**new_kwargs)
+            super(OrderedKeysDotDict, self).__init__(
+                coerce_types=kwargs.get("coerce_types", False),
+                **new_kwargs
+            )
 
 class DataContextResourceIdentifier(OrderedKeysDotDict):
     pass
@@ -39,7 +49,7 @@ class DataAssetIdentifier(DataContextResourceIdentifier):
     _allowed_keys = set(_key_order)
 
 
-class BatchIdentifier():
+class BatchIdentifier(DataContextResourceIdentifier):
     _key_order = [
         "data_asset_identifier",
         "batch_runtime_id",
