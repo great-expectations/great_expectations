@@ -923,6 +923,7 @@ class ConfigOnlyDataContext(object):
                 key.normalized_data_asset_name,
                 expectation_suite_name,
                 base_path=run_id,
+                file_extension="",
             )
             self.stores.local_validation_result_store.set(
                 key=filepath,
@@ -947,6 +948,7 @@ class ConfigOnlyDataContext(object):
                 key.normalized_data_asset_name,
                 expectation_suite_name,
                 base_path="",#run_id,
+                file_extension="",
             )
             self.stores.data_asset_snapshot_store.set(
                 key=filepath,
