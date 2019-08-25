@@ -143,12 +143,16 @@ class FilesystemStore(Store):
     def _get_key_from_filepath(self, filepath):
         # NOTE : This method is trivial in this class, but child classes can get pretty complex
         return filepath
+        # TODO : The one-line function above is almost certainly not the right long-term behavior for FilesystemStore.
+        # Instead, better logic is given below. See test_store.test_FilesystemStore for more info on steps to migrate.
         # file_extension_length = len(self.config.file_extension)
         # filepath_without_extension = filepath[:-1*file_extension_length]
         # return filepath_without_extension
 
     # TODO: This is definitely not the right long-term home for this method.
-    # Leaving it here temporarily, because factoring it out looks nasty.
+    # Leaving it here temporarily, because factoring it out will require switching
+    # DataContext to use NamespacedFilesystemStore for local_validation_result_store
+    # and possibly others.
     def get_most_recent_run_id(self):
         run_id_list = os.listdir(self.full_base_directory)
 
