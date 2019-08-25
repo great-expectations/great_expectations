@@ -26,6 +26,9 @@ from ..util import (
 )
 
 class Store(object):
+    """a key-value store, to abstract away reading and writing to disc (or elsewhere)
+    """
+
     def __init__(
         self,
         config,
@@ -33,8 +36,8 @@ class Store(object):
     ):
         """
 
-        TODO : Describe the rationale for keeping root_directory out of config:
-            Because it's passed in separately. If we want the config to be serializable to yyml, we can't add extra arguments at runtime.
+        Q: What is the rationale for keeping root_directory out of config?
+        A: Because it's passed in separately. If we want the config to be serializable to yaml, we can't add extra arguments at runtime.
         """
 
         if root_directory is not None and not os.path.isabs(root_directory):

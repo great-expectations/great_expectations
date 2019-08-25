@@ -36,8 +36,8 @@ class NamespacedStore(Store):
     """Extends the concept of Stores to be aware of DataContextResourceIdentifiers
 
     Working notes from 2019/08/24 :
-    Q : Can strings be unambiguously converted into ResourceIdentifiers?
-    A : Yes, see DataContextResourceIdentifier.to_string.
+    Q : Can strings be unambiguously converted into ResourceIdentifiers and vice versa, for use as keys?
+    A : Yes, see DataContextResourceIdentifier.to_string and great_expectations.util.parse_string_to_data_context_resource_identifier
 
     Q : How does a Store know what its "appropriate type" is? -> Subclassing could work, but then we end up in a matrix world
     A : self.config.resource_identifier_class_name is a required field. All config_classes should reflect this.
