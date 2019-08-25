@@ -43,15 +43,17 @@ from .store.types import (
     StoreMetaConfig,
 )
 from .types import (
-    NameSpaceDotDict,
-    NormalizedDataAssetName,     # TODO : Replace with DataAssetIdentifier,
+    NameSpaceDotDict,            # TODO : Replace with ValidationResultIdentifier
+    NormalizedDataAssetName,     # TODO : Replace with DataAssetIdentifier
     DataContextConfig,
-    # ValidationResultIdentifier,
 )
 from .templates import (
     PROJECT_TEMPLATE,
     PROFILE_COMMENT,
 )
+# from .store.namespaced import (
+#     convert_NamespaceDotDict_to_string,
+# )
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -116,7 +118,10 @@ class ConfigOnlyDataContext(object):
         Returns:
             None
         """
-        assert isinstance(project_config, DataContextConfig)
+        if not isinstance(project_config, DataContextConfig):
+            raise TypeError("project_config must be an instance of DataContextConfig, not {0}".format(
+                type(project_config)
+            ))
 
         self._project_config = project_config
         self._context_root_directory = os.path.abspath(context_root_dir)
@@ -286,12 +291,13 @@ class ConfigOnlyDataContext(object):
             "expectation_suite_name": expectation_suite_name,
             "run_id": run_id,
         })
+        # TODO: Change this to _get_normalized_data_asset_name_filepath
         validation_result_identifier_string = "/".join(
             "/".join(validation_result_identifier.normalized_data_asset_name),
             validation_result_identifier.expectation_suite_name,
             validation_result_identifier.run_id,
         )
-        print(validation_result_identifier_string)
+        # print(validation_result_identifier_string)
         validation_result = self.stores.local_validation_result_store.get(validation_result_identifier_string)
         self.stores.fixture_validation_results_store.set(
             validation_result_identifier_string,
@@ -913,8 +919,14 @@ class ConfigOnlyDataContext(object):
                 "expectation_suite_name" : expectation_suite_name,
                 "run_id" : run_id,
             })
+            filepath = self._get_normalized_data_asset_name_filepath(
+                key.normalized_data_asset_name,
+                expectation_suite_name,
+                base_path=run_id,
+            )
+            print(filepath)
             self.stores.local_validation_result_store.set(
-                key=key,
+                key=filepath,
                 value=validation_results
             )
 

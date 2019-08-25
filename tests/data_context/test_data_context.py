@@ -27,12 +27,15 @@ from great_expectations.dataset import PandasDataset
 from great_expectations.util import gen_directory_tree_str
 
 from great_expectations.data_context.types import (
+    NameSpaceDotDict,
     DataContextConfig,
 )
 from great_expectations.data_context.store import (
     InMemoryStore
 )
-
+from great_expectations.util import (
+    gen_directory_tree_str,
+)
 
 @pytest.fixture()
 def parameterized_expectation_suite():
@@ -48,18 +51,23 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
     # we should now be able to validate, and have validations saved.
     # assert not_so_empty_data_context._project_config["validations_store"]["local"]["base_directory"] == \
     #     "uncommitted/validations/"
-    print(empty_data_context.stores.keys())
+    validations_dir = os.path.join(empty_data_context.root_directory, "uncommitted/validations/")
+    assert gen_directory_tree_str(validations_dir) == "/\n"
+
+    # print(empty_data_context.stores.keys())
     assert "local_validation_result_store" in not_so_empty_data_context.stores.keys()
     assert not_so_empty_data_context.stores["local_validation_result_store"].config["base_directory"] == \
         "uncommitted/validations/"
 
     my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
-
     my_batch.expect_column_to_exist("a")
 
     with mock.patch("datetime.datetime") as mock_datetime:
         mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
         validation_result = my_batch.validate()
+
+    print(gen_directory_tree_str(validations_dir))
+
 
     with open(os.path.join(not_so_empty_data_context.root_directory, 
               "uncommitted/validations/1955-11-05T000000Z/my_datasource/default/f1/default.json")) as infile:
@@ -811,3 +819,15 @@ def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_conte
     context._normalize_absolute_or_relative_path("/yikes")
     assert "test__normalize_absolute_or_relative_path__dir" not in context._normalize_absolute_or_relative_path("/yikes") 
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes") 
+
+def test__get_normalized_data_asset_name_filepath(basic_data_context_config):
+    context = ConfigOnlyDataContext(
+        project_config=basic_data_context_config,
+        context_root_dir="testing/",
+    )
+    assert context._get_normalized_data_asset_name_filepath(
+        NormalizedDataAssetName("my_db", "default", "my_table"),
+        "default",
+        "my/base/path",
+        ".json"
+    ) == "my/base/path/my_db/default/my_table/default.json"
