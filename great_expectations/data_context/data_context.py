@@ -908,12 +908,13 @@ class ConfigOnlyDataContext(object):
         expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
 
         if "local_validation_result_store" in self.stores:
+            key = NameSpaceDotDict(**{
+                "normalized_data_asset_name" : normalized_data_asset_name,
+                "expectation_suite_name" : expectation_suite_name,
+                "run_id" : run_id,
+            })
             self.stores.local_validation_result_store.set(
-                key=NameSpaceDotDict(**{
-                    "normalized_data_asset_name" : normalized_data_asset_name,
-                    "expectation_suite_name" : expectation_suite_name,
-                    "run_id" : run_id,
-                }),
+                key=key,
                 value=validation_results
             )
 

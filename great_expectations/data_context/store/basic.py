@@ -97,7 +97,12 @@ class FilesystemStore(Store):
             outfile.write(value)
 
     def _validate_key(self, key):
-        assert isinstance(key, string_types)
+        if not isinstance(key, string_types):
+            raise TypeError("Keys in {0} must be instances of {1}, not {2}".format(
+                self.__class__.__name__,
+                string_types,
+                type(key),
+            ))
 
     def list_keys(self):
         # TODO : Rename "keys" in this method to filepaths, for clarity

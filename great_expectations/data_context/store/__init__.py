@@ -8,7 +8,7 @@ from .basic import (
 )
 
 from .namespaced import (
-    NamespaceAwareStore,
+    NamespacedStore,
     NamespacedInMemoryStore,
-    NameSpacedFilesystemStore,
+    NamespacedFilesystemStore,
 )

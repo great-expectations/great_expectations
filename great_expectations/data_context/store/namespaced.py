@@ -34,7 +34,7 @@ from .basic import (
     FilesystemStore,
 )
 
-class NamespaceAwareStore(Store):
+class NamespacedStore(Store):
 
     @property
     def resource_identifier_class(self):
@@ -50,7 +50,7 @@ class NamespaceAwareStore(Store):
             ))
 
 
-class NamespacedInMemoryStore(NamespaceAwareStore, InMemoryStore): 
+class NamespacedInMemoryStore(NamespacedStore, InMemoryStore): 
     """
     """
 
@@ -77,7 +77,7 @@ class NamespacedInMemoryStore(NamespaceAwareStore, InMemoryStore):
         return key.to_string() in self.store
 
 
-class NameSpacedFilesystemStore(NamespaceAwareStore, FilesystemStore):
+class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
 
     config_class = NamespacedFilesystemStoreConfig
 

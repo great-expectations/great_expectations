@@ -70,6 +70,8 @@ class Store(object):
         return deserialized_value
 
     def set(self, key, value, serialization_type=None):
+        self._validate_key(key)
+        
         if serialization_type:
             serialization_method = self._get_serialization_method(
                 serialization_type)

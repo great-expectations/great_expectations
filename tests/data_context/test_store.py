@@ -10,15 +10,11 @@ import pandas as pd
 
 
 from great_expectations.data_context.store import (
-    # Store,
-    # ContextAwareStore,
-    NamespaceAwareStore,
     InMemoryStore,
     FilesystemStore,
-    # ContextAwareInMemoryStore,
-    # ContextAwareFilesystemStore,
+    NamespacedStore,
     NamespacedInMemoryStore,
-    NameSpacedFilesystemStore,
+    NamespacedFilesystemStore,
 )
 from great_expectations.data_context.store.types import (
     StoreMetaConfig,
@@ -209,11 +205,11 @@ def test_store_config(tmp_path_factory):
 #     print(ns_key)
 #     assert ns_key[-25:] == "my_dir1/CCC/B/B/B/AAA.txt"
 
-def test_NameSpacedFilesystemStore(tmp_path_factory):
-    path = str(tmp_path_factory.mktemp('test_NameSpacedFilesystemStore__dir'))
+def test_NamespacedFilesystemStore(tmp_path_factory):
+    path = str(tmp_path_factory.mktemp('test_NamespacedFilesystemStore__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
 
-    my_store = NameSpacedFilesystemStore(
+    my_store = NamespacedFilesystemStore(
         # root_directory=empty_data_context.root_directory,
         root_directory=os.path.abspath(path),
         config={
@@ -250,11 +246,11 @@ def test_NameSpacedFilesystemStore(tmp_path_factory):
     # assert my_store.get_most_recent_run_id() == "200"
 
 
-def test_NameSpacedFilesystemStore__validate_key(tmp_path_factory):
-    path = str(tmp_path_factory.mktemp('test_NameSpacedFilesystemStore__dir'))
+def test_NamespacedFilesystemStore__validate_key(tmp_path_factory):
+    path = str(tmp_path_factory.mktemp('test_NamespacedFilesystemStore__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
  
-    my_store = NameSpacedFilesystemStore(
+    my_store = NamespacedFilesystemStore(
         root_directory=os.path.abspath(path),
         config={
             "resource_identifier_class_name": "ValidationResultIdentifier",
@@ -271,12 +267,11 @@ def test_NameSpacedFilesystemStore__validate_key(tmp_path_factory):
         my_store._validate_key("I am string like")
 
 
-def test_NameSpacedFilesystemStore_key_listing(tmp_path_factory):
-    path = str(tmp_path_factory.mktemp('test_NameSpacedFilesystemStore_key_listing__dir'))
+def test_NamespacedFilesystemStore_key_listing(tmp_path_factory):
+    path = str(tmp_path_factory.mktemp('test_NamespacedFilesystemStore_key_listing__dir'))
     project_path = "some_dir/my_store"
 
-    my_store = NameSpacedFilesystemStore(
-        # root_directory=empty_data_context.root_directory,
+    my_store = NamespacedFilesystemStore(
         root_directory=os.path.abspath(path),
         config={
             "resource_identifier_class_name": "ValidationResultIdentifier",
@@ -306,12 +301,11 @@ def test_NameSpacedFilesystemStore_key_listing(tmp_path_factory):
     # TODO : Reactivate this
     # assert my_store.get_most_recent_run_id() == "100"
 
-def test_NameSpacedFilesystemStore_pandas_csv_serialization(tmp_path_factory):#, empty_data_context):
+def test_NamespacedFilesystemStore_pandas_csv_serialization(tmp_path_factory):#, empty_data_context):
     #TODO: We should consider using this trick everywhere, as a way to avoid directory name collisions
     path = str(tmp_path_factory.mktemp('test_FilesystemStore_pandas_csv_serialization__dir'))
 
-    my_store = NameSpacedFilesystemStore(
-        # root_directory=empty_data_context.root_directory,
+    my_store = NamespacedFilesystemStore(
         root_directory=os.path.abspath(path),
         config={
             "resource_identifier_class_name": "ValidationResultIdentifier",
