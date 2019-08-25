@@ -146,6 +146,7 @@ def test_FilesystemStore(tmp_path_factory):
     my_store.set("subdir/my_file_CCC", "ccc")
     assert my_store.get("subdir/my_file_CCC") == "ccc"
 
+    print(my_store.list_keys())
     assert set(my_store.list_keys()) == set(["my_file_AAA", "subdir/my_file_BBB", "subdir/my_file_CCC"])
 
 def test_store_config(tmp_path_factory):
