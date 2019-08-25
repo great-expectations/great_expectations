@@ -2,7 +2,7 @@ import pytest
 
 from great_expectations.actions import (
     BasicValidationAction,
-    # SummarizeAndSendToStoreAction,
+    SummarizeAndStoreAction,
 )
 from great_expectations.actions.types import (
     ActionInternalConfig,
@@ -10,7 +10,10 @@ from great_expectations.actions.types import (
     ActionSetConfig,
 )
 from great_expectations.data_context.store import (
-    InMemoryStore
+    NamespacedInMemoryStore
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationResultIdentifier
 )
 
 
@@ -70,21 +73,34 @@ def test_subclass_of_BasicValidationAction():
     assert my_action._counter == 1
 
 
-# TODO: Re-activate and finish implementing after refactoring Stores from DataContestAware to NameSpaceAware
-# def test_SummarizeAndSendToStoreAction():
-#     action = SummarizeAndSendToStoreAction(
-#         ActionInternalConfig(**{
-#             "summarization_module_name" : "great_expectations.actions.actions",
-#             "summarization_class_name" : "TemporaryNoOpSummarizer",
-#             "target_store_name" : "fake_in_memory_store",
-#         }),
-#         stores = {
-#             # NOTE: Might need to replace this with an actual Store at some point.
-#             "fake_in_memory_store" : InMemoryStore({}, None)
-#         },
-#         services = {},
-#     )
-#     action.take_action(
-#         validation_result_suite={},
-#         validation_result_suite_identifier={}
-#     )
+def test_SummarizeAndStoreAction():
+    fake_in_memory_store = NamespacedInMemoryStore(config={
+        "resource_identifier_class_name": "ValidationResultIdentifier"
+    })
+    stores = {
+        "fake_in_memory_store" : fake_in_memory_store
+    }
+
+    action = SummarizeAndStoreAction(
+        ActionInternalConfig(**{
+            "summarization_module_name" : "great_expectations.actions.actions",
+            "summarization_class_name" : "TemporaryNoOpSummarizer",
+            "target_store_name" : "fake_in_memory_store",
+        }),
+        stores = stores,
+        services = {},
+    )
+    assert fake_in_memory_store.list_keys() == []
+
+    vr_id = "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.failure.prod.20190801"
+    action.take_action(
+        validation_result_suite={},
+        validation_result_suite_identifier=ValidationResultIdentifier(from_string=vr_id)
+    )
+    assert len(fake_in_memory_store.list_keys()) == 1
+    assert fake_in_memory_store.list_keys()[0].to_string() == "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.failure.prod.20190801"
+    assert fake_in_memory_store.get(ValidationResultIdentifier(
+        from_string="ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.failure.prod.20190801"
+    )) == {}
+
+
