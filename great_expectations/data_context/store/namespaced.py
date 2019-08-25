@@ -211,15 +211,3 @@ class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
             relative_path,
             expectation_suite_name
         )
-
-    # TODO: Not yet sure where this method should live
-    def get_most_recent_run_id(self):
-        run_id_list = os.listdir(self.full_base_directory)
-
-        run_ids = [
-            name for name in run_id_list if
-            os.path.isdir(os.path.join(self.full_base_directory, name))
-        ]
-        most_recent_run_id = sorted(run_ids)[-1]
-
-        return most_recent_run_id

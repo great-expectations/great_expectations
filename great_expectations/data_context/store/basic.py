@@ -142,10 +142,23 @@ class FilesystemStore(Store):
     
     def _get_key_from_filepath(self, filepath):
         # NOTE : This method is trivial in this class, but child classes can get pretty complex
-        file_extension_length = len(self.config.file_extension)
-        filepath_without_extension = filepath[:-1*file_extension_length]
-        return filepath_without_extension
+        return filepath
+        # file_extension_length = len(self.config.file_extension)
+        # filepath_without_extension = filepath[:-1*file_extension_length]
+        # return filepath_without_extension
 
+    # TODO: This is definitely not the right long-term home for this method.
+    # Leaving it here temporarily, because factoring it out looks nasty.
+    def get_most_recent_run_id(self):
+        run_id_list = os.listdir(self.full_base_directory)
+
+        run_ids = [
+            name for name in run_id_list if
+            os.path.isdir(os.path.join(self.full_base_directory, name))
+        ]
+        most_recent_run_id = sorted(run_ids)[-1]
+
+        return most_recent_run_id
 
 # class S3Store(ContextAwareStore):
 #     """Uses an S3 bucket+prefix as a store
