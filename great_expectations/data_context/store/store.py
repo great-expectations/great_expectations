@@ -56,6 +56,8 @@ class Store(object):
 
 
     def get(self, key, serialization_type=None):
+        self._validate_key(key)
+
         value=self._get(key)
 
         if serialization_type:
@@ -115,6 +117,9 @@ class Store(object):
             raise NotImplementedError
 
         # TODO: Add more serialization methods as needed
+
+    def _validate_key(self, key):
+        raise NotImplementedError
 
     def _get(self, key):
         raise NotImplementedError

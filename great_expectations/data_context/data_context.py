@@ -277,7 +277,6 @@ class ConfigOnlyDataContext(object):
             run_id: run_id of validation to get. If no run_id is specified, fetch the latest run_id according to \
             alphanumeric sort (by default, the latest run_id if using ISO 8601 formatted timestamps for run_id
 
-
         Returns:
             None
         """
@@ -287,9 +286,15 @@ class ConfigOnlyDataContext(object):
             "expectation_suite_name": expectation_suite_name,
             "run_id": run_id,
         })
-        validation_result = self.stores.local_validation_result_store.get(validation_result_identifier)
+        validation_result_identifier_string = "/".join(
+            "/".join(validation_result_identifier.normalized_data_asset_name),
+            validation_result_identifier.expectation_suite_name,
+            validation_result_identifier.run_id,
+        )
+        print(validation_result_identifier_string)
+        validation_result = self.stores.local_validation_result_store.get(validation_result_identifier_string)
         self.stores.fixture_validation_results_store.set(
-            validation_result_identifier,
+            validation_result_identifier_string,
             json.dumps(validation_result, indent=2)
         )
 

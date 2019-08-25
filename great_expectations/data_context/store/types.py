@@ -27,6 +27,15 @@ class InMemoryStoreConfig(AllowedKeysDotDict):
         "serialization_type"
     ])
 
+class NamespacedInMemoryStoreConfig(AllowedKeysDotDict):
+    _allowed_keys = set([
+        "serialization_type",
+        "resource_identifier_class_name",
+    ])
+    _required_keys = set([
+        "resource_identifier_class_name"
+    ])
+
 
 class FilesystemStoreConfig(AllowedKeysDotDict):
     _allowed_keys = set([

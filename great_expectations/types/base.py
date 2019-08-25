@@ -292,7 +292,10 @@ class AllowedKeysDotDict(RequiredKeysDotDict):
             # We raise AttributeError in the event that someone tries to access a nonexistent property
             # to be more consistent with usual type semantics without losing dictionary access patterns.
             # Note that a dictionary would usually raise KeyError
-            raise AttributeError
+            raise AttributeError("key: {0} does not exist in this instance of {1}".format(
+                item,
+                self.__class__.__name__,
+            ))
 
     def __setitem__(self, key, val):
         if key not in self._allowed_keys:
