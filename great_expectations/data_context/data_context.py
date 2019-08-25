@@ -947,7 +947,7 @@ class ConfigOnlyDataContext(object):
             filepath = self._get_normalized_data_asset_name_filepath(
                 key.normalized_data_asset_name,
                 expectation_suite_name,
-                base_path="",#run_id,
+                base_path=run_id,
                 file_extension="",
             )
             self.stores.data_asset_snapshot_store.set(
