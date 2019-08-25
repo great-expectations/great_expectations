@@ -252,7 +252,7 @@ def test_register_validation_results_saves_data_assset_snapshot(data_context):
         "data_asset_snapshot_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "NamespacedFilesystemStore",
+            "class_name": "FilesystemStore",
             "store_config" : {
                 "base_directory" : "uncommitted/snapshots",
                 "serialization_type" : "pandas_csv",
@@ -261,10 +261,12 @@ def test_register_validation_results_saves_data_assset_snapshot(data_context):
             }
         }
     )
-    print(json.dumps(data_context._project_config, indent=2))
+    # print(json.dumps(data_context._project_config, indent=2))
     
     #The snapshot directory shouldn't contain any files
-    assert len(glob(snapshot_dir+"/*/*/*/*/*.csv.gz")) == 0
+    # assert len(glob(snapshot_dir+"/*/*/*/*/*.csv.gz")) == 0
+    print(gen_directory_tree_str(snapshot_dir))
+    assert gen_directory_tree_str(snapshot_dir) == ""
 
     res = data_context.register_validation_results(
         run_id,
@@ -276,6 +278,7 @@ def test_register_validation_results_saves_data_assset_snapshot(data_context):
     assert os.path.isdir(snapshot_dir)
 
     #we should have one file created as a side effect
+    print(gen_directory_tree_str(snapshot_dir))
     glob_results = glob(snapshot_dir+"/*/*/*/*/*.csv.gz")
     print(glob_results)
     assert len(glob_results) == 1

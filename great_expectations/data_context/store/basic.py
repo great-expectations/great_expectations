@@ -122,7 +122,6 @@ class FilesystemStore(Store):
                         file_name
                     )
 
-                
                 key_list.append(
                     self._get_key_from_filepath(key)
                 )
@@ -138,7 +137,8 @@ class FilesystemStore(Store):
 
     def _get_filepath_from_key(self, key):
         # NOTE : This method is trivial in this class, but child classes can get pretty complex
-        return os.path.join(self.full_base_directory, key)
+        file_extension = self.config.get("file_extension", "")
+        return os.path.join(self.full_base_directory, key)+file_extension
     
     def _get_key_from_filepath(self, filepath):
         # NOTE : This method is trivial in this class, but child classes can get pretty complex
