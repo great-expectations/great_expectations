@@ -1,6 +1,4 @@
 from ..types import (
-    # NameSpaceDotDict,
-    # NormalizedDataAssetName,
     DataAssetIdentifier,
     ValidationResultIdentifier,
 )
@@ -35,6 +33,18 @@ from .basic import (
 )
 
 class NamespacedStore(Store):
+    """Extends the concept of Stores to be aware of DataContextResourceIdentifiers
+
+    Working notes from 2019/08/24 :
+    Q : Can strings be unambiguously converted into ResourceIdentifiers?
+    A : Yes, see DataContextResourceIdentifier.to_string.
+
+    Q : How does a Store know what its "appropriate type" is? -> Subclassing could work, but then we end up in a matrix world
+    A : self.config.resource_identifier_class_name is a required field. All config_classes should reflect this.
+
+    Q : Can NamespacedStores mix types of ResourceIdentifiers?
+    A : Currently, no. But Stores can.
+    """
 
     @property
     def resource_identifier_class(self):
@@ -51,8 +61,6 @@ class NamespacedStore(Store):
 
 
 class NamespacedInMemoryStore(NamespacedStore, InMemoryStore): 
-    """
-    """
 
     config_class = NamespacedInMemoryStoreConfig
 
@@ -63,14 +71,6 @@ class NamespacedInMemoryStore(NamespacedStore, InMemoryStore):
         self.store[key.to_string()] = value
 
     def list_keys(self):
-        # FIXME : Convert strings back into the appropriate type of DataContextResourceIdentifier
-        # ??? Can strings be unambiguously converted into ResourceIdentifiers?
-        # -> The DataContext can probably do this. It's a species of magic autocomplete. Or we can enforce it through stringifying conventions. I think conventions win.
-        # ??? How does a Store know what its "appropriate type" is? -> Subclassing could work, but then we end up in a matrix world
-        # -> Add a "resource_identifier_class_name". This may be replaced by 
-        # ??? Can Stores mix types of ResourceIdentifiers? -> Again, easy to solve with subclassing, but will require lots of classes
-        # -> Currently, no.
-        # -> This is going to make fixtures/ tricky.
         return [parse_string_to_data_context_resource_identifier(key_string) for key_string in self.store.keys()]
 
     def has_key(self, key):
@@ -102,6 +102,8 @@ class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
             )
             return filepath
 
+        # TODO: Extend with logic to handle other kinds of resource_identifier_class_names
+
         else:
             return os.path.join(
                 self.full_base_directory,
@@ -128,6 +130,8 @@ class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
             )
             return self.resource_identifier_class(*args)
 
+        # TODO: Extend with logic to handle other kinds of resource_identifier_class_names
+
         else:
             file_extension_length = len(self.config.file_extension)
             filename_without_extension = filename[:-1*file_extension_length]
@@ -136,78 +140,72 @@ class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
             return key
 
 
-    # TODO : This method is OBE. Remove entirely
-    # TODO: This method should probably live in ContextAwareStore
-    # For the moment, I'm leaving it here, because:
-    #   1. This method and NameSpaceDotDict isn't yet general enough to handle all permutations of namespace objects
-    #   2. Rewriting all the tests in test_store is more work than I can take on right now.
-    #   3. Probably the best thing to do is to test BOTH classes that take simple strings as keys, and classes that take full NameSpaceDotDicts. But that relies on (1).
-    #
-    # DataContext.write_resource has some good inspiration for this...
-    # Or we might conceivably bring over the full logic from _get_normalized_data_asset_name_filepath.
+    # TODO: This method is OBE. Remove entirely
+    # Retaining for a while just in case the contents turn out to be important for the next refactor.
+    # def _get_namespaced_key(self, key):
+    #     if not isinstance(key, ValidationResultIdentifier):
+    #         raise TypeError(
+    #             "key must be an instance of type ValidationResultIdentifier, not {0}".format(type(key)))
 
-    def _get_namespaced_key(self, key):
-        if not isinstance(key, ValidationResultIdentifier):
-            raise TypeError(
-                "key must be an instance of type ValidationResultIdentifier, not {0}".format(type(key)))
+    #     # filepath = "foo/bar/not_a_real_filepath"
+    #     filepath = self._get_normalized_data_asset_name_filepath(
+    #         key.normalized_data_asset_name,
+    #         key.expectation_suite_name,
+    #         base_path=os.path.join(
+    #             self.full_base_directory,
+    #             key.run_id
+    #         ),
+    #         file_extension=self.config.file_extension
+    #     )
+    #     return filepath
 
-        # filepath = "foo/bar/not_a_real_filepath"
-        filepath = self._get_normalized_data_asset_name_filepath(
-            key.normalized_data_asset_name,
-            key.expectation_suite_name,
-            base_path=os.path.join(
-                self.full_base_directory,
-                key.run_id
-            ),
-            file_extension=self.config.file_extension
-        )
-        return filepath
 
-    # TODO : This method is OBE. Remove entirely
+    # TODO : This method is OBE. Remove entirely.
+    # Retaining for a while just in case the contents turn out to be important for the next refactor.
 
     # FIXME : This method is duplicated in DataContext. That method should be deprecated soon, but that will require a larger refactor.
     # Specifically, get_, save_, and list_expectation_suite will need to be refactored into a store so that they don't rely on the method.
     # The same goes for write_resource.
-    def _get_normalized_data_asset_name_filepath(self,
-        data_asset_name,
-        expectation_suite_name,
-        base_path=None,
-        file_extension=".json"
-    ):
-        """Get the path where the project-normalized data_asset_name expectations are stored. This method is used
-        internally for constructing all absolute and relative paths for asset_name-based paths.
+    # def _get_normalized_data_asset_name_filepath(self,
+    #     data_asset_name,
+    #     expectation_suite_name,
+    #     base_path=None,
+    #     file_extension=".json"
+    # ):
+    #     """Get the path where the project-normalized data_asset_name expectations are stored. This method is used
+    #     internally for constructing all absolute and relative paths for asset_name-based paths.
 
-        Args:
-            data_asset_name: name of data asset for which to construct the path
-            expectation_suite_name: name of expectation suite for which to construct the path
-            base_path: base path from which to construct the path. If None, uses the DataContext root directory
-            file_extension: the file extension to append to the path
+    #     Args:
+    #         data_asset_name: name of data asset for which to construct the path
+    #         expectation_suite_name: name of expectation suite for which to construct the path
+    #         base_path: base path from which to construct the path. If None, uses the DataContext root directory
+    #         file_extension: the file extension to append to the path
 
-        Returns:
-            path (str): path for the requsted object.
-        """
-        if base_path is None:
-            base_path = os.path.join(self.root_directory, "expectations")
+    #     Returns:
+    #         path (str): path for the requsted object.
+    #     """
+    #     if base_path is None:
+    #         base_path = os.path.join(self.root_directory, "expectations")
 
-        # We need to ensure data_asset_name is a valid filepath no matter its current state
-        if isinstance(data_asset_name, DataAssetIdentifier):
-            name_parts = [name_part.replace("/", "__") for name_part in data_asset_name]
-            relative_path = "/".join(name_parts)
+    #     # We need to ensure data_asset_name is a valid filepath no matter its current state
+    #     if isinstance(data_asset_name, DataAssetIdentifier):
+    #         name_parts = [name_part.replace("/", "__") for name_part in data_asset_name]
+    #         relative_path = "/".join(name_parts)
 
-        # elif isinstance(data_asset_name, string_types):
-        #     # if our delimiter is not '/', we need to first replace any slashes that exist in the name
-        #     # to avoid extra layers of nesting (e.g. for dbt models)
-        #     relative_path = data_asset_name
-        #     if self.data_asset_name_delimiter != "/":
-        #         relative_path.replace("/", "__")
-        #         relative_path = relative_path.replace(self.data_asset_name_delimiter, "/")
-        else:
-            raise DataContextError("data_assset_name must be a DataAssetIdentifier")
+    #     # elif isinstance(data_asset_name, string_types):
+    #     #     # if our delimiter is not '/', we need to first replace any slashes that exist in the name
+    #     #     # to avoid extra layers of nesting (e.g. for dbt models)
+    #     #     relative_path = data_asset_name
+    #     #     if self.data_asset_name_delimiter != "/":
+    #     #         relative_path.replace("/", "__")
+    #     #         relative_path = relative_path.replace(self.data_asset_name_delimiter, "/")
+    #     else:
+    #         raise DataContextError("data_assset_name must be a DataAssetIdentifier")
 
-        expectation_suite_name += file_extension
+    #     expectation_suite_name += file_extension
 
-        return os.path.join(
-            base_path,
-            relative_path,
-            expectation_suite_name
-        )
+    #     return os.path.join(
+    #         base_path,
+    #         relative_path,
+    #         expectation_suite_name
+    #     )

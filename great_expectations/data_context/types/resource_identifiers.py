@@ -102,7 +102,7 @@ class DataContextResourceIdentifier(OrderedKeysDotDict):
         else:
             super(DataContextResourceIdentifier, self).__init__(
                 *from_string.split(".")[1:],
-                **kwargs,
+                **kwargs
             )
 
 

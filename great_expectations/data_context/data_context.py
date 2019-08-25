@@ -51,9 +51,6 @@ from .templates import (
     PROJECT_TEMPLATE,
     PROFILE_COMMENT,
 )
-# from .store.namespaced import (
-#     convert_NamespaceDotDict_to_string,
-# )
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -257,7 +254,7 @@ class ConfigOnlyDataContext(object):
         """A single holder for all Datasources in this context"""
         return self._datasources
 
-    # TODO: Decide whether this stays here or moves into NamespaceAwareStore
+    # TODO: Decide whether this stays here or moves into NamespacedStore
     @property
     def data_asset_name_delimiter(self):
         """Configurable delimiter character used to parse data asset name strings into \
@@ -286,17 +283,12 @@ class ConfigOnlyDataContext(object):
             None
         """
 
+        # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedFilesystemStore
         validation_result_identifier = NameSpaceDotDict(**{
             "normalized_data_asset_name": self._normalize_data_asset_name(data_asset_name),
             "expectation_suite_name": expectation_suite_name,
             "run_id": run_id,
         })
-        # TODO: Change this to _get_normalized_data_asset_name_filepath
-        # validation_result_identifier_string = "/".join(
-        #     "/".join(validation_result_identifier.normalized_data_asset_name),
-        #     validation_result_identifier.expectation_suite_name,
-        #     validation_result_identifier.run_id,
-        # )
         filepath = self._get_normalized_data_asset_name_filepath(
             validation_result_identifier.normalized_data_asset_name,
             validation_result_identifier.expectation_suite_name,
@@ -919,6 +911,7 @@ class ConfigOnlyDataContext(object):
         expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
 
         if "local_validation_result_store" in self.stores:
+            # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedFilesystemStore
             key = NameSpaceDotDict(**{
                 "normalized_data_asset_name" : normalized_data_asset_name,
                 "expectation_suite_name" : expectation_suite_name,
@@ -944,6 +937,8 @@ class ConfigOnlyDataContext(object):
 
         if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
             logging.debug("Storing validation results to data_asset_snapshot_store")
+            
+            # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedFilesystemStore
             key = NameSpaceDotDict(**{
                 "normalized_data_asset_name" : normalized_data_asset_name,
                 "expectation_suite_name" : expectation_suite_name,

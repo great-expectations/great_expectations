@@ -1,6 +1,4 @@
 from ..types import (
-    # NameSpaceDotDict,
-    # NormalizedDataAssetName,
     DataAssetIdentifier,
     ValidationResultIdentifier,
 )
