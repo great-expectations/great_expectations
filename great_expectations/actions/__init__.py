@@ -1,5 +1,5 @@
 from .actions import (
     BasicValidationAction,
-    NameSpaceAwareValidationAction,
+    NamespacedValidationAction,
     SummarizeAndStoreAction,
 )

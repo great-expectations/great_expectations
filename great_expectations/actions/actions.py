@@ -24,7 +24,7 @@ class BasicValidationAction(object):
     def take_action(self, validation_result_suite):
         return NotImplementedError
 
-class NameSpaceAwareValidationAction(BasicValidationAction):
+class NamespacedValidationAction(BasicValidationAction):
 
     def __init__(self, config, stores, services):
         #Uses config to instantiate itself
@@ -52,7 +52,7 @@ class DropAllVowelsSummarizer(object):
     def render(cls, input):
         return input
 
-class SummarizeAndStoreAction(NameSpaceAwareValidationAction):
+class SummarizeAndStoreAction(NamespacedValidationAction):
 
     # NOTE : Abe 2019/08/22 : This pattern feels heavy to me.
     # Maybe we can just have `config_required_keys`, and dynamically create the Config class in __init__...
