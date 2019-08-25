@@ -142,7 +142,9 @@ class FilesystemStore(Store):
     
     def _get_key_from_filepath(self, filepath):
         # NOTE : This method is trivial in this class, but child classes can get pretty complex
-        return filepath
+        file_extension_length = len(self.config.file_extension)
+        filepath_without_extension = filepath[:-1*file_extension_length]
+        return filepath_without_extension
 
 
 # class S3Store(ContextAwareStore):
