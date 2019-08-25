@@ -3,3 +3,7 @@ from .actions import (
     NamespacedValidationAction,
     SummarizeAndStoreAction,
 )
+
+from .validation_operators import (
+    DefaultActionAwareValidationOperator
+)
