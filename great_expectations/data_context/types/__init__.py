@@ -5,6 +5,14 @@ from six import string_types
 from .configurations import (
     DataContextConfig
 )
+from .resource_identifiers import (
+    DataContextResourceIdentifier,
+    DataAssetIdentifier,
+    BatchIdentifier,
+    RunIdentifier,
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 
 NormalizedDataAssetName = namedtuple("NormalizedDataAssetName", [
     "datasource",

@@ -7,6 +7,7 @@ import json
 import errno
 from collections import namedtuple
 import six
+import importlib
 
 logger = logging.getLogger(__name__)
 
@@ -128,3 +129,13 @@ def safe_mmkdir(directory, exist_ok=True):
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
+
+def parse_string_to_data_context_resource_identifier(string, separator="."):
+    string_elements = string.split(separator)
+
+    loaded_module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
+    class_ = getattr(loaded_module, string_elements[0])
+
+    class_instance = class_(*(string_elements[1:]))
+
+    return class_instance

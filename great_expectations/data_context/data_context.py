@@ -43,8 +43,8 @@ from .store.types import (
     StoreMetaConfig,
 )
 from .types import (
-    NameSpaceDotDict,
-    NormalizedDataAssetName,
+    NameSpaceDotDict,            # TODO : Replace with ValidationResultIdentifier
+    NormalizedDataAssetName,     # TODO : Replace with DataAssetIdentifier
     DataContextConfig,
 )
 from .templates import (
@@ -115,7 +115,10 @@ class ConfigOnlyDataContext(object):
         Returns:
             None
         """
-        assert isinstance(project_config, DataContextConfig)
+        if not isinstance(project_config, DataContextConfig):
+            raise TypeError("project_config must be an instance of DataContextConfig, not {0}".format(
+                type(project_config)
+            ))
 
         self._project_config = project_config
         self._context_root_directory = os.path.abspath(context_root_dir)
@@ -204,8 +207,8 @@ class ConfigOnlyDataContext(object):
         )
 
         instantiated_store = loaded_class(
-            data_context=self,
             config=typed_sub_config,
+            root_directory=self.root_directory,
         )
 
         return instantiated_store
@@ -226,7 +229,6 @@ class ConfigOnlyDataContext(object):
     def root_directory(self):
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located."""
-        # return self._context_root_directory
         return self._context_root_directory
 
     @property
@@ -253,6 +255,7 @@ class ConfigOnlyDataContext(object):
         """A single holder for all Datasources in this context"""
         return self._datasources
 
+    # TODO: Decide whether this stays here or moves into NamespacedStore
     @property
     def data_asset_name_delimiter(self):
         """Configurable delimiter character used to parse data asset name strings into \
@@ -277,19 +280,25 @@ class ConfigOnlyDataContext(object):
             run_id: run_id of validation to get. If no run_id is specified, fetch the latest run_id according to \
             alphanumeric sort (by default, the latest run_id if using ISO 8601 formatted timestamps for run_id
 
-
         Returns:
             None
         """
 
+        # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedFilesystemStore
         validation_result_identifier = NameSpaceDotDict(**{
             "normalized_data_asset_name": self._normalize_data_asset_name(data_asset_name),
             "expectation_suite_name": expectation_suite_name,
             "run_id": run_id,
         })
-        validation_result = self.stores.local_validation_result_store.get(validation_result_identifier)
+        filepath = self._get_normalized_data_asset_name_filepath(
+            validation_result_identifier.normalized_data_asset_name,
+            validation_result_identifier.expectation_suite_name,
+            base_path=run_id,
+            file_extension="",
+        )
+        validation_result = self.stores.local_validation_result_store.get(filepath)
         self.stores.fixture_validation_results_store.set(
-            validation_result_identifier,
+            filepath,
             json.dumps(validation_result, indent=2)
         )
 
@@ -903,12 +912,20 @@ class ConfigOnlyDataContext(object):
         expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
 
         if "local_validation_result_store" in self.stores:
+            # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedFilesystemStore
+            key = NameSpaceDotDict(**{
+                "normalized_data_asset_name" : normalized_data_asset_name,
+                "expectation_suite_name" : expectation_suite_name,
+                "run_id" : run_id,
+            })
+            filepath = self._get_normalized_data_asset_name_filepath(
+                key.normalized_data_asset_name,
+                expectation_suite_name,
+                base_path=run_id,
+                file_extension="",
+            )
             self.stores.local_validation_result_store.set(
-                key=NameSpaceDotDict(**{
-                    "normalized_data_asset_name" : normalized_data_asset_name,
-                    "expectation_suite_name" : expectation_suite_name,
-                    "run_id" : run_id,
-                }),
+                key=filepath,
                 value=validation_results
             )
 
@@ -921,12 +938,21 @@ class ConfigOnlyDataContext(object):
 
         if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
             logging.debug("Storing validation results to data_asset_snapshot_store")
+            
+            # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedFilesystemStore
+            key = NameSpaceDotDict(**{
+                "normalized_data_asset_name" : normalized_data_asset_name,
+                "expectation_suite_name" : expectation_suite_name,
+                "run_id" : run_id,
+            })
+            filepath = self._get_normalized_data_asset_name_filepath(
+                key.normalized_data_asset_name,
+                expectation_suite_name,
+                base_path=run_id,
+                file_extension="",
+            )
             self.stores.data_asset_snapshot_store.set(
-                key=NameSpaceDotDict(**{
-                    "normalized_data_asset_name" : normalized_data_asset_name,
-                    "expectation_suite_name" : expectation_suite_name,
-                    "run_id" : run_id,
-                }),
+                key=filepath,
                 value=data_asset
             )
 
@@ -1258,11 +1284,18 @@ class ConfigOnlyDataContext(object):
         if run_id == None:
             run_id = selected_store.get_most_recent_run_id()
 
-        results_dict = selected_store.get(NameSpaceDotDict(**{
+        key = NameSpaceDotDict(**{
             "normalized_data_asset_name" : self._normalize_data_asset_name(data_asset_name),
             "expectation_suite_name" : expectation_suite_name,
             "run_id" : run_id,
-        }))
+        })
+        filepath = self._get_normalized_data_asset_name_filepath(
+            key.normalized_data_asset_name,
+            expectation_suite_name,
+            base_path=run_id,
+            file_extension="",
+        )
+        results_dict = selected_store.get(filepath)
 
         #TODO: This should be a convenience method of ValidationResultSuite
         if failed_only:

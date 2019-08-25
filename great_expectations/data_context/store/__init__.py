@@ -1,6 +1,14 @@
 from .store import (
-    ContextAwareStore,
-    InMemoryStore,
+    Store,
+)
+
+from .basic import (
     FilesystemStore,
-    NameSpacedFilesystemStore,
+    InMemoryStore,
+)
+
+from .namespaced import (
+    NamespacedStore,
+    NamespacedInMemoryStore,
+    NamespacedFilesystemStore,
 )
