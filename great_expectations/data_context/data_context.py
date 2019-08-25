@@ -924,7 +924,6 @@ class ConfigOnlyDataContext(object):
                 expectation_suite_name,
                 base_path=run_id,
             )
-            print(filepath)
             self.stores.local_validation_result_store.set(
                 key=filepath,
                 value=validation_results
@@ -939,12 +938,18 @@ class ConfigOnlyDataContext(object):
 
         if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
             logging.debug("Storing validation results to data_asset_snapshot_store")
+            key = NameSpaceDotDict(**{
+                "normalized_data_asset_name" : normalized_data_asset_name,
+                "expectation_suite_name" : expectation_suite_name,
+                "run_id" : run_id,
+            })
+            filepath = self._get_normalized_data_asset_name_filepath(
+                key.normalized_data_asset_name,
+                expectation_suite_name,
+                base_path="",#run_id,
+            )
             self.stores.data_asset_snapshot_store.set(
-                key=NameSpaceDotDict(**{
-                    "normalized_data_asset_name" : normalized_data_asset_name,
-                    "expectation_suite_name" : expectation_suite_name,
-                    "run_id" : run_id,
-                }),
+                key=filepath,
                 value=data_asset
             )
 
