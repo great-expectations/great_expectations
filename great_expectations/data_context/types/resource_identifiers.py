@@ -12,6 +12,22 @@ from great_expectations.types import (
 # NOTE: Abe 2019/08/23 : The basics work reasonably well, but this class probably still needs to be hardened quite a bit
 # TODO: Move this to great_expectations.types.base.py
 class OrderedKeysDotDict(AllowedKeysDotDict):
+    """extends AllowedKeysDotDict with a strict ordering of parameters.
+    This make OrderedKeysDotDict behave somehwat like collections.namedtuples.
+
+    OrderedKeysDotDicts...
+        have an exactly-defined number of elements
+        can parse from tuples
+        coerce types by default
+        raise an IndexError if args don't line up with keys
+
+    See tests for examples.
+
+    Lining up args with keys can be complex when key_types allow nesting.
+    This logic is built into _zip_keys_and_args_to_dict.
+    Again, see tests for examples.
+    """
+
     _key_order = []
 
     def __init__(self, *args, **kwargs):
@@ -35,8 +51,6 @@ class OrderedKeysDotDict(AllowedKeysDotDict):
 
     @classmethod
     def _zip_keys_and_args_to_dict(cls, args):
-        """This function does the keavy lifting of unpacking 
-        """
 
         index = 0
         new_dict = {}
@@ -87,8 +101,21 @@ class OrderedKeysDotDict(AllowedKeysDotDict):
         return key_length
 
 class DataContextResourceIdentifier(OrderedKeysDotDict):
-    """
+    """is used to uniquely identify resources used by the DataContext.
 
+    DataContextResourceIdentifier is based OrderedKeysDotDict.
+    It extends the base class with a to_string method that converts
+    the full, nested structure of the identifier into a string.
+
+    For example:
+
+        "DataAssetIdentifier.my_db.default_generator.my_table"
+        "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.warnings.prod.20190801"
+
+    These strings are also used for hashing, so that DataContextResourceIdentifiers can be used in sets, etc.
+
+    The parse_string_to_data_context_resource_identifier convenience method great_expectations.util
+    can instantiate a valid identifier from any full identifier string.
     """
 
     def __init__(self, *args, **kwargs):

@@ -186,34 +186,6 @@ def test_store_config(tmp_path_factory):
         config=typed_sub_config,
     )
 
-# TODO : This test is dead beacuse it points to a dead method
-# def test__get_namespaced_key(tmp_path_factory):
-#     path = str(tmp_path_factory.mktemp('test__get_namespaced_key__dir'))
-#     project_path = str(tmp_path_factory.mktemp('my_dir'))
-
-#     my_store = NameSpacedFilesystemStore(
-#         root_directory=os.path.abspath(path),
-#         config={
-#             "resource_identifier_class_name": "ValidationResultIdentifier",
-#             "base_directory": project_path,
-#             "file_extension" : ".txt",
-#         }
-#     )
-
-#     with pytest.raises(KeyError):
-#         my_store._get_namespaced_key(ValidationResultIdentifier(**{}))
-    
-#     ns_key = my_store._get_namespaced_key(
-#         ValidationResultIdentifier(from_string="ValidationResultIdentifier.a.b.c.default.quarantine.prod.20190801")
-#     )
-#     # ns_key = my_store._get_namespaced_key(ValidationResultIdentifier(**{
-#     #     "expectation_suite_name" : "AAA",
-#     #     "normalized_data_asset_name" : DataAssetIdentifier("B", "B", "B"),
-#     #     "run_id" : "CCC",
-#     # }))
-#     print(ns_key)
-#     assert ns_key[-25:] == "my_dir1/CCC/B/B/B/AAA.txt"
-
 def test_NamespacedFilesystemStore(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_NamespacedFilesystemStore__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
