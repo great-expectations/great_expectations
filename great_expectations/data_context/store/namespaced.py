@@ -8,8 +8,7 @@ from ..types.resource_identifiers import (
     DataContextResourceIdentifier,
 )
 from .types import (
-    InMemoryStoreConfig,
-    FilesystemStoreConfig,
+    NamespacedInMemoryStoreConfig,
     NamespacedFilesystemStoreConfig,
 )
 from ..util import safe_mmkdir
@@ -37,33 +36,25 @@ from .basic import (
 
 class NamespaceAwareStore(Store):
 
-    def get(self, key, serialization_type=None):
+    @property
+    def resource_identifier_class(self):
+        module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
+        class_ = getattr(module, self.config.resource_identifier_class_name)
+        return class_
 
-        if not isinstance(key, DataContextResourceIdentifier):
+    def _validate_key(self, key):
+        if not isinstance(key, self.resource_identifier_class):
             raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
                 key,
                 type(key),
             ))
 
-        return super(NamespaceAwareStore, self).get(key, serialization_type)
 
-    def set(self, key, value, serialization_type=None):
-
-        if not isinstance(key, DataContextResourceIdentifier):
-            raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
-                key,
-                type(key),
-            ))
-
-        super(NamespaceAwareStore, self).set(key, value, serialization_type)
-
-
-class NamespacedInMemoryStore(NamespaceAwareStore, Store):
+class NamespacedInMemoryStore(NamespaceAwareStore, InMemoryStore): 
     """
     """
 
-    # TODO : This probably needs to change
-    config_class = InMemoryStoreConfig
+    config_class = NamespacedInMemoryStoreConfig
 
     def _get(self, key):
         return self.store[key.to_string()]
@@ -86,7 +77,7 @@ class NamespacedInMemoryStore(NamespaceAwareStore, Store):
         return key.to_string() in self.store
 
 
-class NameSpacedFilesystemStore(FilesystemStore, NamespaceAwareStore):
+class NameSpacedFilesystemStore(NamespaceAwareStore, FilesystemStore):
 
     config_class = NamespacedFilesystemStoreConfig
 
@@ -119,8 +110,6 @@ class NameSpacedFilesystemStore(FilesystemStore, NamespaceAwareStore):
 
     def _get_key_from_filepath(self, filepath):
         if self.config.resource_identifier_class_name == "ValidationResultIdentifier":
-            module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
-            class_ = getattr(module, self.config.resource_identifier_class_name)
 
             file_prefix = self.config.get("file_prefix", "")
             file_extension = self.config.get("file_extension", "")
@@ -137,7 +126,7 @@ class NameSpacedFilesystemStore(FilesystemStore, NamespaceAwareStore):
                 matches.groups()[0],
                 matches.groups()[1],
             )
-            return class_(*args)
+            return self.resource_identifier_class(*args)
 
         else:
             file_extension_length = len(self.config.file_extension)

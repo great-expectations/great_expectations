@@ -20,6 +20,7 @@ import logging
 logger = logging.getLogger(__name__)
 import importlib
 import re
+from six import string_types
 
 from ..util import (
     parse_string_to_data_context_resource_identifier
@@ -44,8 +45,16 @@ class InMemoryStore(Store):
     def _set(self, key, value):
         self.store[key] = value
 
+    def _validate_key(self, key):
+        if not isinstance(key, string_types):
+            raise TypeError("Keys in {0} must be instances of {1}, not {2}".format(
+                self.__class__.__name__,
+                string_types,
+                type(key),
+            ))
+
     def list_keys(self):
-        return self.store.keys()
+        return list(self.store.keys())
 
     def has_key(self, key):
         return key in self.store
@@ -87,6 +96,9 @@ class FilesystemStore(Store):
         with open(filepath, "w") as outfile:
             outfile.write(value)
 
+    def _validate_key(self, key):
+        assert isinstance(key, string_types)
+
     def list_keys(self):
         # TODO : Rename "keys" in this method to filepaths, for clarity
         key_list = []
@@ -111,6 +123,13 @@ class FilesystemStore(Store):
                 )
 
         return key_list
+
+    # TODO : Write tests for this method
+    def has_key(self, key):
+        assert isinstance(key, string_types)
+
+        all_keys = self.list_keys()
+        return key in all_keys
 
     def _get_filepath_from_key(self, key):
         # NOTE : This method is trivial in this class, but child classes can get pretty complex

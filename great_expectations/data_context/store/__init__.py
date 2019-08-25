@@ -4,11 +4,11 @@ from .store import (
 
 from .basic import (
     FilesystemStore,
+    InMemoryStore,
 )
 
 from .namespaced import (
     NamespaceAwareStore,
-    InMemoryStore,
+    NamespacedInMemoryStore,
     NameSpacedFilesystemStore,
-
 )

@@ -17,6 +17,7 @@ from great_expectations.data_context.store import (
     FilesystemStore,
     # ContextAwareInMemoryStore,
     # ContextAwareFilesystemStore,
+    NamespacedInMemoryStore,
     NameSpacedFilesystemStore,
 )
 from great_expectations.data_context.store.types import (
@@ -32,7 +33,7 @@ from great_expectations.util import (
     gen_directory_tree_str,
 )
 
-def test_InMemoryStore():#empty_data_context):
+def test_InMemoryStore():
 
     with pytest.raises(TypeError):
         my_store = InMemoryStore(
@@ -43,7 +44,7 @@ def test_InMemoryStore():#empty_data_context):
         config={},
     )
 
-    my_key = DataAssetIdentifier("a","b","c")
+    my_key = "AAA"
     with pytest.raises(KeyError):
         my_store.get(my_key)
     
@@ -59,52 +60,48 @@ def test_InMemoryStore():#empty_data_context):
 
     # TODO: Get these working
     assert my_store.has_key(my_key) == True
-    assert my_store.has_key(DataAssetIdentifier("A","b","c")) == False
-    #Try the same thing twice in a row, just in case...
-    assert my_store.has_key(DataAssetIdentifier("A","b","c")) == False
-    #Try something similar with deeper nesting
-    assert my_store.has_key(DataAssetIdentifier("a","b","C")) == False
-    # Try the first object again, but newly instantiated
-    assert my_store.has_key(DataAssetIdentifier("a","b","c")) == True
-    assert my_store.list_keys() == [my_key]
+    assert my_store.has_key("AAB") == False
+    assert my_store.has_key("AAA") == True
+    assert my_store.list_keys() == ["AAA"]
 
 # NOTE : Abe 2019/08/24 : Freezing this code in carbonite,
 # in case it turns out to be useful in a future refactor to separate Store and NamespaceAwareStore
-# def test_InMemoryStore_with_serialization(empty_data_context):
-#     my_store = InMemoryStore(
-#         config={
-#             "serialization_type": "json"
-#         }
-#     )
-
-#     A_key = DataAssetIdentifier("A", "A", "A")
-    
-#     my_store.set("AAA", {"x":1})
-#     assert my_store.get("AAA") == {"x":1}
-
-#     with pytest.raises(TypeError):
-#         my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
-
-#     my_store = InMemoryStore(
-#         config={}
-#     )
-
-#     with pytest.raises(KeyError):
-#         assert my_store.get("AAA") == {"x":1}
-
-#     my_store.set("AAA", {"x":1}, serialization_type="json")
-    
-#     assert my_store.get("AAA") == "{\"x\": 1}"
-#     assert my_store.get("AAA", serialization_type="json") == {"x":1}
-
-#     with pytest.raises(TypeError):
-#         my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
-
-#     assert set(my_store.list_keys()) == set(["AAA"])
-
 def test_InMemoryStore_with_serialization():
     my_store = InMemoryStore(
         config={
+            "serialization_type": "json"
+        }
+    )
+
+    A_key = DataAssetIdentifier("A", "A", "A")
+    
+    my_store.set("AAA", {"x":1})
+    assert my_store.get("AAA") == {"x":1}
+
+    with pytest.raises(TypeError):
+        my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
+
+    my_store = InMemoryStore(
+        config={}
+    )
+
+    with pytest.raises(KeyError):
+        assert my_store.get("AAA") == {"x":1}
+
+    my_store.set("AAA", {"x":1}, serialization_type="json")
+    
+    assert my_store.get("AAA") == "{\"x\": 1}"
+    assert my_store.get("AAA", serialization_type="json") == {"x":1}
+
+    with pytest.raises(TypeError):
+        my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
+
+    assert set(my_store.list_keys()) == set(["AAA"])
+
+def test_NamespacedInMemoryStore_with_serialization():
+    my_store = NamespacedInMemoryStore(
+        config={
+            "resource_identifier_class_name": "DataAssetIdentifier",
             "serialization_type": "json"
         }
     )
@@ -114,21 +111,6 @@ def test_InMemoryStore_with_serialization():
     
     my_store.set(A_key, {"x":1})
     assert my_store.get(A_key) == {"x":1}
-
-    with pytest.raises(TypeError):
-        my_store.set(B_key, set(["x", "y", "z"]), serialization_type="json")
-
-    my_store = InMemoryStore(
-        config={}
-    )
-
-    with pytest.raises(KeyError):
-        assert my_store.get(A_key) == {"x":1}
-
-    my_store.set(A_key, {"x":1}, serialization_type="json")
-    
-    assert my_store.get(A_key) == "{\"x\": 1}"
-    assert my_store.get(A_key, serialization_type="json") == {"x":1}
 
     with pytest.raises(TypeError):
         my_store.set(B_key, set(["x", "y", "z"]), serialization_type="json")
@@ -267,6 +249,28 @@ def test_NameSpacedFilesystemStore(tmp_path_factory):
     # TODO : Reactivate this
     # assert my_store.get_most_recent_run_id() == "200"
 
+
+def test_NameSpacedFilesystemStore__validate_key(tmp_path_factory):
+    path = str(tmp_path_factory.mktemp('test_NameSpacedFilesystemStore__dir'))
+    project_path = str(tmp_path_factory.mktemp('my_dir'))
+ 
+    my_store = NameSpacedFilesystemStore(
+        root_directory=os.path.abspath(path),
+        config={
+            "resource_identifier_class_name": "ValidationResultIdentifier",
+            "base_directory": project_path,
+            "file_extension" : ".txt",
+        }
+    )
+
+    my_store._validate_key(ValidationResultIdentifier(
+        from_string="ValidationResultIdentifier.a.b.c.hello.quarantine.prod.100"
+    ))
+
+    with pytest.raises(TypeError):
+        my_store._validate_key("I am string like")
+
+
 def test_NameSpacedFilesystemStore_key_listing(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_NameSpacedFilesystemStore_key_listing__dir'))
     project_path = "some_dir/my_store"
@@ -320,16 +324,6 @@ def test_NameSpacedFilesystemStore_pandas_csv_serialization(tmp_path_factory):#,
 
     key1 = ValidationResultIdentifier(
         from_string="ValidationResultIdentifier.a.b.c.default.quarantine.prod.20190801"
-        # coerce_types=True,
-        # **{
-        #     "expectation_suite_identifier" : {
-        #         "data_asset_identifier" : ("a", "b", "c"), #DataAssetIdentifier("a", "b", "c"),
-        #         "suite_name": "hello",
-        #         "purpose": "testing",
-        #     },
-        #     # "purpose" : "default",
-        #     "run_id" : ("goodbye", "100"),
-        # }
     )
     with pytest.raises(AssertionError):
         my_store.set(key1, "hi")
