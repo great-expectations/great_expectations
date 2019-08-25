@@ -292,15 +292,20 @@ class ConfigOnlyDataContext(object):
             "run_id": run_id,
         })
         # TODO: Change this to _get_normalized_data_asset_name_filepath
-        validation_result_identifier_string = "/".join(
-            "/".join(validation_result_identifier.normalized_data_asset_name),
+        # validation_result_identifier_string = "/".join(
+        #     "/".join(validation_result_identifier.normalized_data_asset_name),
+        #     validation_result_identifier.expectation_suite_name,
+        #     validation_result_identifier.run_id,
+        # )
+        filepath = self._get_normalized_data_asset_name_filepath(
+            validation_result_identifier.normalized_data_asset_name,
             validation_result_identifier.expectation_suite_name,
-            validation_result_identifier.run_id,
+            base_path=run_id,
+            file_extension="",
         )
-        # print(validation_result_identifier_string)
-        validation_result = self.stores.local_validation_result_store.get(validation_result_identifier_string)
+        validation_result = self.stores.local_validation_result_store.get(filepath)
         self.stores.fixture_validation_results_store.set(
-            validation_result_identifier_string,
+            filepath,
             json.dumps(validation_result, indent=2)
         )
 
@@ -1283,11 +1288,18 @@ class ConfigOnlyDataContext(object):
         if run_id == None:
             run_id = selected_store.get_most_recent_run_id()
 
-        results_dict = selected_store.get(NameSpaceDotDict(**{
+        key = NameSpaceDotDict(**{
             "normalized_data_asset_name" : self._normalize_data_asset_name(data_asset_name),
             "expectation_suite_name" : expectation_suite_name,
             "run_id" : run_id,
-        }))
+        })
+        filepath = self._get_normalized_data_asset_name_filepath(
+            key.normalized_data_asset_name,
+            expectation_suite_name,
+            base_path=run_id,
+            file_extension="",
+        )
+        results_dict = selected_store.get(filepath)
 
         #TODO: This should be a convenience method of ValidationResultSuite
         if failed_only:
