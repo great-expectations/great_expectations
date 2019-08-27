@@ -90,6 +90,74 @@ class NamespaceAwareValidationMetric(Metric):
         urn = "urn:great_expectations:" + DATA_ASSET_NAME_DELIMITER.join(self.data_asset_name) + ":" + \
             self.batch_fingerprint + ":" + self.metric_name + ":" + \
             urlencode(OrderedDict(sorted(self.metric_kwargs.items())))
-        if hasattr(self, "metric_value") and self.metric_value is not None:
-            urn += ":" + str(self.metric_value)
+
+        # NOTE: Eugene 2019-08-26: I don't think urns should include values, but we need to look
+        # up the URN docs/spec to make sure
+        # if hasattr(self, "metric_value") and self.metric_value is not None:
+        #     urn += ":" + str(self.metric_value)
+        return urn
+
+    @property
+    def key(self):
+        urn = "urn:great_expectations:" + DATA_ASSET_NAME_DELIMITER.join(self.data_asset_name) + ":" + \
+            self.metric_name + ":" + \
+            urlencode(OrderedDict(sorted(self.metric_kwargs.items())))
+        return urn
+
+
+class MultiBatchNamespaceAwareValidationMetric(Metric):
+    """Holds values of a metric captured from validation results of multiple batches."""
+
+    _allowed_keys = {
+        "data_asset_name",
+        "metric_name",
+        "metric_kwargs",
+        "batch_fingerprints",
+        "batch_metric_values"
+    }
+    _required_keys = {
+        "data_asset_name",
+        "metric_name",
+        "metric_kwargs",
+        "batch_fingerprints",
+        "batch_metric_values"
+    }
+    _key_types = {
+        "data_asset_name": NormalizedDataAssetName,
+        "metric_name": string_types,
+        "metric_kwargs": dict,
+        "batch_fingerprints": list,
+        "batch_metric_values": list
+    }
+
+    @classmethod
+    def from_urn(cls, urn):
+        # TODO: Triage importance of dealing with case where : is in a component of the URN (e.g. batch_fingerprint)
+        urn_parts = urn.split(":")
+
+        if 5 != len(urn_parts):
+            raise ValueError("Unrecognized URN format for MultiBatchNamespaceAwareValidationMetric. There must be 5 "
+                             "components.")
+
+        if not urn_parts[1] == "great_expectations":
+            raise ValueError("Unrecognized URN format for MultiBatchNamespaceAwareValidationMetric. URN must begin with "
+                             "urn:great_expectations and no urn component may use ':'")
+
+        # Type coercion can only happen on instantiation
+        metric = cls(
+            data_asset_name=NormalizedDataAssetName(
+                *urn_parts[2].split(DATA_ASSET_NAME_DELIMITER)
+            ),
+            metric_name=urn_parts[3],
+            metric_kwargs=dict(parse_qsl(urn_parts[4])),
+            batch_fingerprints = [],
+            batch_metric_values = [],
+            coerce_types=True
+        )
+        return metric
+
+    @property
+    def urn(self):
+        urn = "urn:great_expectations:" + DATA_ASSET_NAME_DELIMITER.join(self.data_asset_name) + ":" + \
+            self.metric_name + ":" + urlencode(OrderedDict(sorted(self.metric_kwargs.items())))
         return urn
