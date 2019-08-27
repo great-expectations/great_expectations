@@ -8,6 +8,8 @@ from six import string_types
 
 import great_expectations.dataset as dataset
 from great_expectations.data_context import DataContext
+from great_expectations.data_context.types.metrics import NamespaceAwareValidationMetric
+
 
 logger = logging.getLogger(__name__)
 
@@ -252,3 +254,128 @@ def get_data_context(path=None):
     """Given a path, try to guess where the DataContext is located.
     """
     pass
+
+def acts_as_a_number(var):
+    try:
+        0 + var
+    except TypeError:
+        return False
+    else:
+        return True
+
+
+def result_contains_numeric_observed_value(result):
+    """
+
+    :param result:
+    :return:
+    """
+    return ('observed_value' in result['result'] \
+            and acts_as_a_number(result['result'].get('observed_value'))) \
+           and set(result['result'].keys()) <= set(
+        ['observed_value', 'element_count', 'missing_count', 'missing_percent'])
+
+
+def result_contains_unexpected_pct(result):
+    """
+
+    :param result:
+    :return:
+    """
+    return 'unexpected_percent' in result['result'] \
+           and result['expectation_config']['expectation_type'] != 'expect_column_values_to_be_in_set'
+
+
+def get_metrics_for_expectation(result, data_asset_name, batch_fingerprint):
+    """
+    Extract metrics from a validation result of one expectation.
+    Depending on the type of the expectation, this method chooses the key
+    in the result dictionary that should be returned as a metric
+    (e.g., "observed_value" or "unexpected_percent").
+
+    :param result: a validation result dictionary of one expectation
+    :param data_asset_name:
+    :param batch_fingerprint:
+    :return: a dict {metric_name -> metric_value}
+    """
+    expectation_metrics = {
+        # 'expect_column_distinct_values_to_be_in_set'
+        # 'expect_column_kl_divergence_to_be_less_than',
+        'expect_column_max_to_be_between': {
+            'observed_value': 'column_max'
+        },
+        'expect_column_mean_to_be_between': {
+            'observed_value': 'column_mean'
+        },
+        'expect_column_median_to_be_between': {
+            'observed_value': 'column_median'
+        },
+        'expect_column_min_to_be_between': {
+            'observed_value': 'column_min'
+        },
+        'expect_column_proportion_of_unique_values_to_be_between': {
+            'observed_value': 'column_proportion_of_unique_values'
+        },
+        # 'expect_column_quantile_values_to_be_between',
+        'expect_column_stdev_to_be_between': {
+            'observed_value': 'column_stdev'
+        },
+        'expect_column_unique_value_count_to_be_between': {
+            'observed_value': 'column_unique_count'
+        },
+        # 'expect_column_values_to_be_between',
+        # 'expect_column_values_to_be_in_set',
+        # 'expect_column_values_to_be_in_type_list',
+        'expect_column_values_to_be_unique': {
+
+        },
+        # 'expect_table_columns_to_match_ordered_list',
+        'expect_table_row_count_to_be_between': {
+            'observed_value': 'row_count'
+        }
+
+    }
+
+
+    metrics = []
+    if result.get('result'):
+        entry = expectation_metrics.get(result['expectation_config']['expectation_type'])
+        if entry:
+            for key in result['result'].keys():
+                metric_name = entry.get(key)
+                if metric_name:
+                    metric_kwargs = {"column": result['expectation_config']['kwargs']['column']} if result['expectation_config'][
+                'kwargs'].get('column') else {}
+
+                    new_metric = NamespaceAwareValidationMetric(
+                        data_asset_name=data_asset_name,
+                        batch_fingerprint=batch_fingerprint,
+                        metric_name=metric_name,
+                        metric_kwargs=metric_kwargs,
+                        metric_value=result['result'][key])
+                    metrics.append(new_metric)
+
+        elif result_contains_numeric_observed_value(result):
+            metric_kwargs = {"column": result['expectation_config']['kwargs']['column']} if \
+            result['expectation_config']['kwargs'].get('column') else {}
+
+            new_metric = NamespaceAwareValidationMetric(
+                data_asset_name=data_asset_name,
+                batch_fingerprint=batch_fingerprint,
+                metric_name=result['expectation_config']['expectation_type'] + "__obsval",
+                metric_kwargs=metric_kwargs,
+                metric_value=result.get('result').get('observed_value'))
+            metrics.append(new_metric)
+        elif result_contains_unexpected_pct(result):
+            metric_kwargs = {"column": result['expectation_config']['kwargs']['column']} if result['expectation_config'][
+                'kwargs'].get('column') else {}
+
+            new_metric = NamespaceAwareValidationMetric(
+                data_asset_name=data_asset_name,
+                batch_fingerprint=batch_fingerprint,
+                metric_name=result['expectation_config']['expectation_type'] + "__unexp_pct",
+                metric_kwargs=metric_kwargs,
+                metric_value=result.get('result').get('unexpected_percent'))
+            metrics.append(new_metric)
+
+    return metrics
