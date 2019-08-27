@@ -24,15 +24,25 @@ class ActionAwareValidationOperator(ValidationOperator):
         raise NotImplementedError
 
 class DefaultActionAwareValidationOperator(ActionAwareValidationOperator):
+    pass
+
+class DataContextAwareValidationOperator(ActionAwareValidationOperator):
     def __init__(self, config, context):
         self.config = config
+        self.context = context
 
-    def validate_and_take_action(
+    def process_batch(self, 
         batch,
-        purpose="default"
+        data_asset_identifier=None,
+        run_identifier=None,
+        action_set_name="default"
     ):
-        data_asset_identifier = batch.batch_identifier.data_asset_identifier
+        # Get batch_identifier.
+        # TODO : We should be using typed batch
+        if data_asset_identifier is None:
+            data_asset_identifier = batch.batch_identifier.data_asset_identifier
 
+        # TODO : This is a substantive revision to the way ExpectationSuites are used in 
         failure_expectations = self._get_expectation_suite(data_asset_identifier, purpose, "failure")
         warning_expectations = self._get_expectation_suite(data_asset_identifier, purpose, "warning")
         quarantine_expectations = self._get_expectation_suite(data_asset_identifier, purpose, "quarantine")
@@ -68,22 +78,6 @@ class DefaultActionAwareValidationOperator(ActionAwareValidationOperator):
         print("Validation successful")
         return result_evrs, quarantine_df
     
-    def _get_expectation_suite(
-        data_asset_identifier,
-        purpose,
-        level,
-    ):
-        raise NotImplementedError
-
-
-class DataContextAwareValidationOperator(ActionAwareValidationOperator):
-    def __init__(self, config, context):
-        self.config = config
-        self.context = context
-
-    def validate_and_take_action(self, batch, expectation_purpose="default"):
-        raise NotImplementedError
-
     def _get_expectation_suite(
         data_asset_identifier,
         purpose,
