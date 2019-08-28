@@ -99,8 +99,8 @@ def test_ValidationResultIdentifier__init__totally_nested():
                     "generator" : "b",
                     "generator_asset" : "c",
                 },
-                "suite_name": "hello",
-                "purpose": "testing",
+                "suite_purpose": "hello",
+                "level": "testing",
             },
             "run_id" : {
                 "execution_context": "testing",
@@ -117,8 +117,8 @@ def test_ValidationResultIdentifier__init__mostly_nested():
         **{
             "expectation_suite_identifier" : {
                 "data_asset_identifier" : ("a", "b", "c"),
-                "suite_name": "hello",
-                "purpose": "testing",
+                "suite_purpose": "default",
+                "level": "failure",
             },
             "run_id" : {
                 "execution_context": "testing",
@@ -133,8 +133,8 @@ def test_ValidationResultIdentifier__init__mostly_nested_with_typed_child():
         **{
             "expectation_suite_identifier" : {
                 "data_asset_identifier" : DataAssetIdentifier("a", "b", "c"),
-                "suite_name": "hello",
-                "purpose": "testing",
+                "suite_purpose": "hello",
+                "level": "quarantine",
             },
             "run_id" : {
                 "execution_context": "testing",
@@ -149,8 +149,8 @@ def test_ValidationResultIdentifier__init__partially_flat():
         **{
             "expectation_suite_identifier" : {
                 "data_asset_identifier" : ("a", "b", "c"),
-                "suite_name": "hello",
-                "purpose": "testing",
+                "suite_purpose": "default",
+                "level": "warning",
             },
             "run_id" : ("testing", 12345)
         }
@@ -181,8 +181,8 @@ def test_ValidationResultIdentifier__init__nested_except_the_top_layer():
                 "generator" : "b",
                 "generator_asset" : "c",
             },
-            "suite_name": "hello",
-            "purpose": "testing",
+            "suite_purpose": "hello",
+            "level": "warning",
         },{
             "execution_context": "testing",
             "start_time_utc": 12345,
@@ -205,11 +205,11 @@ def test_OrderedKeysDotDict__zip_keys_and_args_to_dict():
     }
 
     assert ExpectationSuiteIdentifier._zip_keys_and_args_to_dict(
-        ["a", "b", "c", "hello", "testing"]
+        ["a", "b", "c", "hello", "warning"]
     ) == {
         "data_asset_identifier" : ["a", "b", "c"],
-        "suite_name" : "hello",
-        "purpose" : "testing",
+        "suite_purpose" : "hello",
+        "level" : "warning",
     }
 
     assert ValidationResultIdentifier._zip_keys_and_args_to_dict(
@@ -225,7 +225,7 @@ def test_parse_string_to_data_context_resource_identifier():
     assert parse_string_to_data_context_resource_identifier("DataAssetIdentifier.A.B.C") == DataAssetIdentifier("A", "B", "C")
 
     assert parse_string_to_data_context_resource_identifier(
-        "ValidationResultIdentifier.a.b.c.hello.testing.testing.12345"
+        "ValidationResultIdentifier.a.b.c.default.failure.testing.12345"
     ) == ValidationResultIdentifier(
         coerce_types=True,
         **{
@@ -235,8 +235,8 @@ def test_parse_string_to_data_context_resource_identifier():
                     "generator" : "b",
                     "generator_asset" : "c",
                 },
-                "suite_name": "hello",
-                "purpose": "testing",
+                "suite_purpose": "default",
+                "level": "failure",
             },
             "run_id" : {
                 "execution_context": "testing",
