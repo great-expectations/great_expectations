@@ -1,6 +1,8 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import pandas as pd
+import great_expectations as ge
 from ..util import (
     get_class_from_module_name_and_class_name,
 )
@@ -9,7 +11,8 @@ from .types import (
     ActionInternalConfig,
 )
 from ..data_context.types import (
-    ValidationResultIdentifier
+    ValidationResultIdentifier,
+    ExpectationSuiteIdentifier,
 )
 
 # NOTE: Abe 2019/08/24 : This is first implementation of all these classes. Consider them UNSTABLE for now. 
@@ -34,15 +37,16 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
     def process_batch(self, 
         batch,
         data_asset_identifier=None,
+        purpose="default",
         run_identifier=None,
-        action_set_name="default"
+        action_set_name="default",
+        process_warnings_and_quarantine_rows_on_error=False,
     ):
         # Get batch_identifier.
         # TODO : We should be using typed batch
         if data_asset_identifier is None:
             data_asset_identifier = batch.batch_identifier.data_asset_identifier
 
-        # TODO : This is a substantive revision to the way ExpectationSuites are used in 
         failure_expectations = self._get_expectation_suite(data_asset_identifier, purpose, "failure")
         warning_expectations = self._get_expectation_suite(data_asset_identifier, purpose, "warning")
         quarantine_expectations = self._get_expectation_suite(data_asset_identifier, purpose, "quarantine")
@@ -53,41 +57,62 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
             "quarantine" : None,
         }
 
-        validation_result_dict["failure"] = batch.validate(halting_expectations)
+        validation_result_dict["failure"] = batch.validate(failure_expectations)
         #TODO: Add checking for exceptions in Expectations
 
         if validation_result_dict["failure"]["success"] == False:
-            if process_warnings_and_quarantine_rows_if_halted != False:
+            if process_warnings_and_quarantine_rows_on_error == False:
 
                 #Process actions here
                 
-                return result_evrs, None
+                return {
+                    "validation_results" : validation_result_dict,
+                }
 
         validation_result_dict["warning"] = batch.validate(warning_expectations)
         validation_result_dict["quarantine"] = batch.validate(quarantine_expectations, result_format="COMPLETE")
         #TODO: Add checking for exceptions in Expectations
 
         unexpected_index_set = set()
-        for evr in result_evrs["quarantine"]["results"]:
-            if evr["success"] == False:
+        for validation_result_suite in validation_result_dict["quarantine"]["results"]:
+            if validation_result_suite["success"] == False:
                 # print(evr["result"].keys())
                 unexpected_index_set = unexpected_index_set.union(evr["result"]["unexpected_index_list"])
 
-        quarantine_df = batch.ix[unexpected_index_set]
+        quarantine_df = batch.loc[unexpected_index_set]
+        # Pull non-quarantine batch here
 
         print("Validation successful")
-        return result_evrs, quarantine_df
+        
+        #Process actions here
+
+        return {
+            "validation_results" : validation_result_dict,
+            # "non_quarantine_dataframe" : 
+            "quarantine_data_frame": quarantine_df,
+        }
     
     def _get_expectation_suite(
+        self,
         data_asset_identifier,
         purpose,
         level,
     ):
-        return self.context.get_expectation_suite(ExpectationSuiteIdentifier(**{
-            "data_asset_identifier" : data_asset_identifier,
-            "purpose" : purpose,
-            "level" : "failure",
-        }))
+        df = pd.DataFrame({"x": range(10)})
+        ge_df = ge.from_pandas(df)
+        ge_df.expect_column_to_exist("x")
+        ge_df.expect_column_values_to_be_in_set("x", [1,2,3,4])
+        dummy_expectation_suite = ge_df.get_expectation_suite(discard_failed_expectations=False)
+        return dummy_expectation_suite
+
+        # TODO: Here's the REAL method.
+        # return self.context.get_expectation_suite(
+        #     ExpectationSuiteIdentifier(**{
+        #         "data_asset_identifier" : data_asset_identifier,
+        #         "suite_purpose" : purpose,
+        #         "level" : level,
+        #     })
+        # )
 
 class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperator, DefaultActionAwareValidationOperator):
     pass
