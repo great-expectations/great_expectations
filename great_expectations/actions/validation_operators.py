@@ -1,6 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import importlib
 import pandas as pd
 import great_expectations as ge
 from ..util import (
@@ -34,6 +35,7 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
         self.config = config
         self.context = context
 
+    # TODO: Move this to DefaultDataContextAwareValidationOperator
     def process_batch(self, 
         batch,
         data_asset_identifier=None,
@@ -64,6 +66,8 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
             if process_warnings_and_quarantine_rows_on_error == False:
 
                 #Process actions here
+                # TODO: This should include the whole return object, not just validation_results.
+                self._process_actions(validation_result_dict, self.config[action_set_name])
                 
                 return {
                     "validation_results" : validation_result_dict,
@@ -85,6 +89,8 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
         print("Validation successful")
         
         #Process actions here
+        # TODO: This should include the whole return object, not just validation_results.
+        self._process_actions(validation_result_dict, self.config[action_set_name])
 
         return {
             "validation_results" : validation_result_dict,
@@ -113,6 +119,25 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
         #         "level" : level,
         #     })
         # )
+    
+    def _process_actions(self, validation_results, action_set_config):
+        for k,v in action_set_config.items():
+            print(k,v)
+            loaded_module = importlib.import_module(v.pop("module_name"))
+            action_class = getattr(loaded_module, v.pop("class_name"))
+
+            action = action_class(
+                ActionInternalConfig(**v["kwargs"]
+                    #!!! Where does this comes from?
+                ),
+                stores = self.context.stores,
+                services = {},
+            )
+            action.take_action()
+
+
+            print(k,v)
+
 
 class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperator, DefaultActionAwareValidationOperator):
     pass
