@@ -86,10 +86,7 @@ class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
             # NOTE : This might be easier to parse as a Jinja template
             middle_path = key.to_string(separator="/")
 
-            filename_core = "-".join([
-                key.expectation_suite_identifier.suite_name,
-                key.expectation_suite_identifier.purpose,
-            ])
+            filename_core = key.expectation_suite_identifier.expectation_suite_name
             file_prefix = self.config.get("file_prefix", "")
             file_extension = self.config.get("file_extension", "")
             filename = file_prefix + filename_core + file_extension
@@ -97,7 +94,7 @@ class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
             filepath = os.path.join(
                 self.full_base_directory,
                 key.run_id.to_string(include_class_prefix=False, separator="-"),
-                key.expectation_suite_identifier.data_asset_identifier.to_string(include_class_prefix=False, separator="/"),
+                key.expectation_suite_identifier.data_asset_name.to_string(include_class_prefix=False, separator="/"),
                 filename
             )
             return filepath
@@ -115,7 +112,7 @@ class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
 
             file_prefix = self.config.get("file_prefix", "")
             file_extension = self.config.get("file_extension", "")
-            matches = re.compile("(.*)-(.*)/(.*)/(.*)/(.*)/"+file_prefix+"(.*)-(.*)"+file_extension).match(filepath)
+            matches = re.compile("(.*)-(.*)/(.*)/(.*)/(.*)/"+file_prefix+"(.*)"+file_extension).match(filepath)
 
             args = (
                 matches.groups()[2],
@@ -123,7 +120,7 @@ class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
                 matches.groups()[4],
 
                 matches.groups()[5],
-                matches.groups()[6],
+                # matches.groups()[6],
 
                 matches.groups()[0],
                 matches.groups()[1],
