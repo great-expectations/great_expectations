@@ -113,6 +113,7 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
         return dummy_expectation_suite
 
         # TODO: Here's the REAL method.
+        # This method depends on implementation.
         # return self.context.get_expectation_suite(
         #     ExpectationSuiteIdentifier(**{
         #         "data_asset_identifier" : data_asset_identifier,
