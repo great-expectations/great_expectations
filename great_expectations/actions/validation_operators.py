@@ -128,9 +128,7 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
             action_class = getattr(loaded_module, v.pop("class_name"))
 
             action = action_class(
-                ActionInternalConfig(**v["kwargs"]
-                    #!!! Where does this comes from?
-                ),
+                ActionInternalConfig(**v["kwargs"]),
                 stores = self.context.stores,
                 services = {},
             )
@@ -138,10 +136,6 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
                 validation_result_suite=validation_results,
                 validation_result_suite_identifier=ValidationResultIdentifier(from_string="ValidationResultIdentifier.a.b.c.hello.quarantine.prod.100")
             )
-
-
-            print(k,v)
-
 
 class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperator, DefaultActionAwareValidationOperator):
     pass
