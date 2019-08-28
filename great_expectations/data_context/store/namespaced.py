@@ -87,8 +87,8 @@ class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
             middle_path = key.to_string(separator="/")
 
             filename_core = "-".join([
-                key.expectation_suite_identifier.suite_name,
-                key.expectation_suite_identifier.purpose,
+                key.expectation_suite_identifier.suite_purpose,
+                key.expectation_suite_identifier.level,
             ])
             file_prefix = self.config.get("file_prefix", "")
             file_extension = self.config.get("file_extension", "")

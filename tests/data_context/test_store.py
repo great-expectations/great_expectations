@@ -264,8 +264,8 @@ def test_NamespacedFilesystemStore_key_listing(tmp_path_factory):
     ns_1 = ValidationResultIdentifier(**{
         "expectation_suite_identifier" : {
             "data_asset_identifier" : DataAssetIdentifier("a", "b", "c"),
-            "suite_name" : "hello",
-            "purpose" : "quarantine",
+            "suite_purpose" : "hello",
+            "level" : "quarantine",
         },
         "run_id" : {
             "execution_context" : "prod",
