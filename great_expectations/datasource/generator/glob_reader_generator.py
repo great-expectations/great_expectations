@@ -86,6 +86,24 @@ class GlobReaderGenerator(BatchGenerator):
         ])
         return partition_ids
 
+    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+        """Build batch kwargs from a partition id."""
+        glob_config = self._get_generator_asset_config(generator_asset)
+        batch_paths = self._get_generator_asset_paths(generator_asset)
+        path = [path for path in batch_paths if self._partitioner(path, glob_config) == partition_id]
+        if len(path) != 1:
+            raise BatchKwargsError("Unable to identify partition %s for asset %s" % (partition_id, generator_asset),
+                                   {
+                                        generator_asset: generator_asset,
+                                        partition_id: partition_id
+                                    })
+        kwargs = self._build_batch_kwargs_from_path(path[0], glob_config)
+        if batch_kwargs is not None:
+            kwargs.update(batch_kwargs)
+        if kwargs is not None:
+            kwargs.update(kwargs)
+        return kwargs
+
     def _get_generator_asset_paths(self, generator_asset):
         """
         Returns a list of filepaths associated with the given generator_asset
@@ -123,24 +141,6 @@ class GlobReaderGenerator(BatchGenerator):
     def _build_batch_kwargs_path_iter(self, path_list, glob_config):
         for path in path_list:
             yield self._build_batch_kwargs_from_path(path, glob_config)
-
-    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
-        """Build batch kwargs from a partition id."""
-        glob_config = self._get_generator_asset_config(generator_asset)
-        batch_paths = self._get_generator_asset_paths(generator_asset)
-        path = [path for path in batch_paths if self._partitioner(path, glob_config) == partition_id]
-        if len(path) != 1:
-            raise BatchKwargsError("Unable to identify partition %s for asset %s" % (partition_id, generator_asset),
-                                   {
-                                        generator_asset: generator_asset,
-                                        partition_id: partition_id
-                                    })
-        kwargs = self._build_batch_kwargs_from_path(path[0], glob_config)
-        if batch_kwargs is not None:
-            kwargs.update(batch_kwargs)
-        if kwargs is not None:
-            kwargs.update(kwargs)
-        return kwargs
 
     def _build_batch_kwargs_from_path(self, path, glob_config):
         # We could add MD5 (e.g. for smallish files)

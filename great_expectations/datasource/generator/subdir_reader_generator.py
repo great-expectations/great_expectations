@@ -4,6 +4,7 @@ import logging
 
 from great_expectations.datasource.generator.batch_generator import BatchGenerator
 from great_expectations.datasource.types import PathBatchKwargs
+from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
 
@@ -51,10 +52,45 @@ class SubdirReaderGenerator(BatchGenerator):
     def get_available_data_asset_names(self):
         if not os.path.isdir(self.base_directory):
             return set()
-        known_assets = self._get_valid_file_options(valid_options=set(), base_directory=self.base_directory)
+        known_assets = self._get_valid_file_options(base_directory=self.base_directory)
         return known_assets
 
-    def _get_valid_file_options(self, valid_options=set(), base_directory=None):
+    def get_available_partition_ids(self, generator_asset):
+        # If the generator asset names a single known *file*, return ONLY that
+        for extension in KNOWN_EXTENSIONS:
+            if os.path.isfile(os.path.join(self.base_directory, generator_asset + "." + extension)):
+                return {generator_asset}
+        if os.path.isfile(os.path.join(self.base_directory, generator_asset)):
+            return {generator_asset}
+
+        # Otherwise, subdir files are partition ids
+        return self._get_valid_file_options(base_directory=os.path.join(self.base_directory, generator_asset))
+
+    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+        path = None
+        for extension in KNOWN_EXTENSIONS:
+            if os.path.isfile(os.path.join(self.base_directory, generator_asset + "." + extension)):
+                path = os.path.join(self.base_directory, generator_asset, partition_id + "." + extension)
+
+        if path is None:
+            # Fall through to this case in the event that there is not a subdir available, so partition_id is
+            # the same as the generator asset
+            if os.path.isfile(os.path.join(self.base_directory, generator_asset)):
+                path = os.path.join(self.base_directory, generator_asset)
+
+            for extension in KNOWN_EXTENSIONS:
+                if os.path.isfile(os.path.join(self.base_directory, generator_asset + "." + extension)):
+                    path = os.path.join(self.base_directory, generator_asset + "." + extension)
+
+        if path is None:
+            raise BatchKwargsError("Unable to build batch kwargs from partition_id for asset '%s'" % generator_asset, {
+                "partition_id": partition_id
+            })
+
+        return self._build_batch_kwargs_from_path(path)
+
+    def _get_valid_file_options(self, base_directory=None):
+        valid_options = set()
         if base_directory is None:
             base_directory = self.base_directory
         file_options = os.listdir(base_directory)
@@ -63,8 +99,7 @@ class SubdirReaderGenerator(BatchGenerator):
                 if file_option.endswith(extension) and not file_option.startswith("."):
                     valid_options.add(file_option[:-len(extension)])
                 elif os.path.isdir(os.path.join(self.base_directory, file_option)):
-                    subdir_options = self._get_valid_file_options(valid_options=set(),
-                                                                  base_directory=os.path.join(base_directory,
+                    subdir_options = self._get_valid_file_options(base_directory=os.path.join(base_directory,
                                                                                               file_option))
                     if len(subdir_options) > 0:
                         valid_options.add(file_option)
@@ -92,13 +127,13 @@ class SubdirReaderGenerator(BatchGenerator):
         # elif os.path.isfile(os.path.join(self.base_directory, generator_asset)):
         #     path = os.path.join(self.base_directory, generator_asset)
 
-        #     return iter([self._build_batch_kwargs(path)])
+        #     return iter([self._build_batch_kwargs_from_path(path)])
         else:
             for extension in KNOWN_EXTENSIONS:
                 path = os.path.join(self.base_directory, generator_asset + extension)
                 if os.path.isfile(path):
                     return iter([
-                        self._build_batch_kwargs(path)
+                        self._build_batch_kwargs_from_path(path)
                     ])
         # If we haven't returned yet, raise
         raise IOError(os.path.join(self.base_directory, generator_asset))
@@ -106,7 +141,7 @@ class SubdirReaderGenerator(BatchGenerator):
     # def _build_batch_kwargs_path_iter(self, path_iter):
     def _build_batch_kwargs_path_iter(self, path_list):
         for path in path_list:
-            yield self._build_batch_kwargs(path)
+            yield self._build_batch_kwargs_from_path(path)
         # Use below if we have an iterator (e.g. from scandir)
         # try:
         #     while True:
@@ -116,7 +151,7 @@ class SubdirReaderGenerator(BatchGenerator):
         # except StopIteration:
         #     return
 
-    def _build_batch_kwargs(self, path):
+    def _build_batch_kwargs_from_path(self, path):
         # We could add MD5 (e.g. for smallish files)
         # but currently don't want to assume the extra read is worth it
         # unless it's configurable

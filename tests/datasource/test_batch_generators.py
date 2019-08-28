@@ -29,6 +29,7 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
     del f1_batches[0]["timestamp"]
     assert f1_batches[0] == {
             "path": os.path.join(base_dir, "f1.csv"),
+            "partition_id": "f1",
             "sep": None,
             "engine": "python"
         }

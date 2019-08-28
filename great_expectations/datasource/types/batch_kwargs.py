@@ -40,28 +40,26 @@ class BatchKwargs(RequiredKeysDotDict):
         "data_asset_type": ClassConfig
     }
 
-    _partition_id_delimiter = "__"
-
     @property
-    def batch_id(self):
+    def batch_fingerprint(self):
         partition_id = self.get(self._partition_id_key, None)
         # We do not allow a "None" partition_id, even if it's explicitly present as such in batch_kwargs
         if partition_id is None:
             partition_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-        id_keys = set(self.keys()) - set(self._batch_id_ignored_keys) - {self._partition_id_key}
+        id_keys = (set(self.keys()) - set(self._batch_id_ignored_keys)) - {self._partition_id_key}
         if len(id_keys) == 1:
             key = list(id_keys)[0]
             hash_ = key + ":" + self[key]
         else:
-            hash_dict = {k: self[k] for k in set(self.keys()) - set(self._batch_id_ignored_keys) - {self._partition_id_key}}
+            hash_dict = {k: self[k] for k in id_keys}
             hash_ = md5(str(sorted(hash_dict.items())).encode("utf-8")).hexdigest()
 
-        return partition_id + self._partition_id_delimiter + hash_
+        return (partition_id, hash_)
 
     @classmethod
-    def build_batch_id(cls, dict_):
+    def build_batch_fingerprint(cls, dict_):
         try:
-            return BatchKwargs(dict_).batch_id
+            return BatchKwargs(dict_).batch_fingerprint
         except (KeyError, TypeError):
             logger.error("Unable to build BatchKwargs from provided dictionary.")
             return None
