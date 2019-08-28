@@ -60,12 +60,11 @@ def test_hello_world(basic_data_context_config_for_validation_operator):
                     "class_name" : "SummarizeAndStoreAction",
                     "kwargs" : {
                         "result_key": "warnings",
-                        "target_store_name": "warning_validation_result_store",
                         "summarization_module_name": "great_expectations.actions.actions",
                         "summarization_class_name": "TemporaryNoOpSummarizer",
+                        "target_store_name": "warning_validation_result_store",
                     }
                 },
-                # "send_quarantined_values_to_store" : {},
             }
         },
         context=context,

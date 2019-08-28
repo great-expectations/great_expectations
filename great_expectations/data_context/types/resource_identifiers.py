@@ -187,6 +187,8 @@ class BatchIdentifier(DataContextResourceIdentifier):
     _allowed_keys = set(_key_order)
 
 
+# TODO: Deprecate this class entirely, at least for now.
+# NOTE: We need to figure out how to handle sortability of run_ids.
 class RunIdentifier(DataContextResourceIdentifier):
     _key_order = [
         "execution_context",
@@ -200,14 +202,19 @@ class RunIdentifier(DataContextResourceIdentifier):
     _required_keys = set(_key_order)
     _allowed_keys = set(_key_order)
 
-
 class ExpectationSuiteIdentifier(DataContextResourceIdentifier):
     _key_order = [
+        # TODO: Switch to this.
+        # "data_asset_name",
+        # "expectation_suite_name",
         "data_asset_identifier",
         "suite_purpose",
         "level"
     ]
     _key_types = {
+        # TODO: Switch to this.
+        # "data_asset_name" : DataAssetIdentifier,
+        # "expectation_suite_name" : string_types,
         "data_asset_identifier" : DataAssetIdentifier,
         "suite_purpose" : string_types,
         "level" : string_types
