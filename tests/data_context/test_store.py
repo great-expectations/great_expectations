@@ -207,13 +207,13 @@ def test_NamespacedFilesystemStore(tmp_path_factory):
         my_store.get(ValidationResultIdentifier(**{}))
     
     ns_1 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.hello.quarantine.prod.100"
+        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod.100"
     )
     my_store.set(ns_1,"aaa")
     assert my_store.get(ns_1) == "aaa"
 
     ns_2 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.hello.quarantine.prod.200"
+        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod.200"
     )
     my_store.set(ns_2, "bbb")
     assert my_store.get(ns_2) == "bbb"
@@ -241,7 +241,7 @@ def test_NamespacedFilesystemStore__validate_key(tmp_path_factory):
     )
 
     my_store._validate_key(ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.hello.quarantine.prod.100"
+        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod.100"
     ))
 
     with pytest.raises(TypeError):
@@ -263,9 +263,8 @@ def test_NamespacedFilesystemStore_key_listing(tmp_path_factory):
 
     ns_1 = ValidationResultIdentifier(**{
         "expectation_suite_identifier" : {
-            "data_asset_identifier" : DataAssetIdentifier("a", "b", "c"),
-            "suite_name" : "hello",
-            "purpose" : "quarantine",
+            "data_asset_name" : DataAssetIdentifier("a", "b", "c"),
+            "expectation_suite_name" : "quarantine",
         },
         "run_id" : {
             "execution_context" : "prod",
@@ -276,7 +275,7 @@ def test_NamespacedFilesystemStore_key_listing(tmp_path_factory):
 
     print(my_store.list_keys())
     assert set(my_store.list_keys()) == set([
-        ValidationResultIdentifier(from_string="ValidationResultIdentifier.a.b.c.hello.quarantine.prod.100")
+        ValidationResultIdentifier(from_string="ValidationResultIdentifier.a.b.c.quarantine.prod.100")
     ])
 
     # TODO : Reactivate this
@@ -298,7 +297,7 @@ def test_NamespacedFilesystemStore_pandas_csv_serialization(tmp_path_factory):#,
     )
 
     key1 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.default.quarantine.prod.20190801"
+        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod.20190801"
     )
     with pytest.raises(AssertionError):
         my_store.set(key1, "hi")
@@ -313,10 +312,10 @@ test_FilesystemStore_pandas_csv_serialization__dir0/
         a/
             b/
                 c/
-                    quarantined-rows-default-quarantine.csv
+                    quarantined-rows-quarantine.csv
 """
 
-    with open(os.path.join(path, "prod-20190801/a/b/c/quarantined-rows-default-quarantine.csv")) as f_:
+    with open(os.path.join(path, "prod-20190801/a/b/c/quarantined-rows-quarantine.csv")) as f_:
         assert f_.read() == """\
 x,y
 1,a
