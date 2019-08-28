@@ -2,7 +2,8 @@ import time
 import logging
 from string import Template
 
-from .datasource import Datasource
+from great_expectations.datasource import Datasource
+from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
 from .generator.query_generator import QueryGenerator
 from great_expectations.exceptions import DatasourceInitializationError
@@ -156,11 +157,11 @@ class SqlAlchemyDatasource(Datasource):
         else:
             raise ValueError("Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified")
 
-    def build_batch_kwargs(self, *args, **kwargs):
+    def build_batch_kwargs(self, data_asset_name, *args, **kwargs):
         """Magically build batch_kwargs by guessing that the first non-keyword argument is a table name"""
         if len(args) > 0:
             kwargs.update({
                 "table": args[0],
                 "timestamp": time.time()
             })
-        return kwargs
+        return SqlAlchemyDatasourceTableBatchKwargs(kwargs)

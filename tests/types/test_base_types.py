@@ -219,6 +219,7 @@ def test_allowed_keys_dot_dict_subclass_key_types():
             }
         )
 
+
 def test_allowed_keys_dot_dict_ListOf_typing():
     class MyAllowedKeysDotDict(AllowedKeysDotDict):
         _allowed_keys = {"a", "b", "c" }

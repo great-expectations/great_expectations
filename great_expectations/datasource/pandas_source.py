@@ -122,7 +122,6 @@ class PandasDatasource(Datasource):
                                batch_kwargs=batch_kwargs)
 
     def build_batch_kwargs(self, data_asset_name, *args, **kwargs):
-        # FIXME: Can this return properly typed objects, and can it **use generators** to build kwargs
         if len(args) > 0:
             if isinstance(args[0], (pd.DataFrame, pd.Series)):
                 kwargs.update({

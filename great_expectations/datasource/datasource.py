@@ -192,7 +192,7 @@ class Datasource(object):
         # with open(config_filepath, "w") as data_file:
         #     yaml.safe_dump(self._datasource_config, data_file)
 
-    def add_generator(self, name, type_, **kwargs):
+    def add_generator(self, name, generator_config, **kwargs):
         """Add a generator to the datasource.
 
         The generator type\_ must be one of the recognized types for the datasource.
@@ -205,15 +205,16 @@ class Datasource(object):
         Returns:
              generator (Generator)
         """
-        data_asset_generator_class = self._get_generator_class(type_)
-        generator = data_asset_generator_class(name=name, datasource=self, **kwargs)
-        self._generators[name] = generator
-        if "generators" not in self._datasource_config:
-            self._datasource_config["generators"] = {}
-        self._datasource_config["generators"][name] = generator.get_config()
+        if isinstance(generator_config, string_types):
+            warnings.warn("Configuring generators with a type name is no longer supported. Please update to new-style "
+                          "configuration.")
+            generator_config = {
+                "type": generator_config
+            }
+        self._datasource_config["generators"][name] = generator_config
         if self._data_context is not None:
             self.save_config()
-        return generator
+        return self.get_generator(name)
 
     def get_generator(self, generator_name="default"):
         """Get the (named) generator from a datasource)
@@ -286,6 +287,7 @@ class Datasource(object):
             A data_asset consisting of the specified batch of data with the named expectation suite connected.
 
         """
+        # expectation_suite = None
         if isinstance(data_asset_name, NormalizedDataAssetName):  # this richer type can include more metadata
             generator_name = data_asset_name.generator
             generator_asset = data_asset_name.generator_asset
@@ -316,7 +318,7 @@ class Datasource(object):
                 raise BatchKwargsError(
                     "No generator name provided or guessable, but no batch_kwargs were provided.", None
                 )
-            self.get_data_asset(data_asset_name, generator_name, batch_kwargs, **kwargs)
+            return self.get_data_asset(data_asset_name, generator_name, batch_kwargs, **kwargs)
 
         if batch_kwargs is None:
             # noinspection PyUnboundLocalVariable
