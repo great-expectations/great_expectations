@@ -93,7 +93,7 @@ class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
 
             filepath = os.path.join(
                 self.full_base_directory,
-                key.run_id.to_string(include_class_prefix=False, separator="-"),
+                key.run_id,#.to_string(include_class_prefix=False, separator="-"),
                 key.expectation_suite_identifier.data_asset_name.to_string(include_class_prefix=False, separator="/"),
                 filename
             )
@@ -112,18 +112,16 @@ class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
 
             file_prefix = self.config.get("file_prefix", "")
             file_extension = self.config.get("file_extension", "")
-            matches = re.compile("(.*)-(.*)/(.*)/(.*)/(.*)/"+file_prefix+"(.*)"+file_extension).match(filepath)
+            matches = re.compile("(.*)/(.*)/(.*)/(.*)/"+file_prefix+"(.*)"+file_extension).match(filepath)
 
             args = (
+                matches.groups()[1],
                 matches.groups()[2],
                 matches.groups()[3],
+
                 matches.groups()[4],
 
-                matches.groups()[5],
-                # matches.groups()[6],
-
                 matches.groups()[0],
-                matches.groups()[1],
             )
             return self.resource_identifier_class(*args)
 

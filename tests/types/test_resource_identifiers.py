@@ -73,7 +73,7 @@ def test_OrderedKeysDotDict__recursively_get_key_length():
 
     assert MyOKDD._recursively_get_key_length() == 3
     assert DataAssetIdentifier._recursively_get_key_length() == 3
-    assert ValidationResultIdentifier._recursively_get_key_length() == 6
+    assert ValidationResultIdentifier._recursively_get_key_length() == 5
 
 
 def test_DataAssetIdentifier():
@@ -101,14 +101,11 @@ def test_ValidationResultIdentifier__init__totally_nested():
                 },
                 "expectation_suite_name": "failure",
             },
-            "run_id" : {
-                "execution_context": "testing",
-                "start_time_utc": 12345,
-            },
+            "run_id" : "testing-12345",
         }
     )
 
-    assert my_id.to_string() == "ValidationResultIdentifier.a.b.c.failure.testing.12345"
+    assert my_id.to_string() == "ValidationResultIdentifier.a.b.c.failure.testing-12345"
 
 def test_ValidationResultIdentifier__init__mostly_nested():
     ValidationResultIdentifier(
@@ -187,16 +184,16 @@ def test_ValidationResultIdentifier__init__nested_except_the_top_layer():
 
 def test_ValidationResultIdentifier__init__entirely_flat():
     ValidationResultIdentifier(
-        "a", "b", "c", "warning", "testing", 12345,
+        "a", "b", "c", "warning", "testing-12345",
         coerce_types=True,
     )
 
 def test_OrderedKeysDotDict__zip_keys_and_args_to_dict():
     assert ValidationResultIdentifier._zip_keys_and_args_to_dict(
-        ["a", "b", "c", "warning", "testing", 12345],
+        ["a", "b", "c", "warning", "testing-12345"],
     ) == {
         "expectation_suite_identifier" : ["a", "b", "c", "warning"],
-        "run_id" : ["testing", 12345],
+        "run_id" : "testing-12345",
     }
 
     assert ExpectationSuiteIdentifier._zip_keys_and_args_to_dict(
@@ -207,10 +204,10 @@ def test_OrderedKeysDotDict__zip_keys_and_args_to_dict():
     }
 
     assert ValidationResultIdentifier._zip_keys_and_args_to_dict(
-        ["a", "b", "c", "hello", "testing", 12345],
+        ["a", "b", "c", "hello", "testing-12345"]
     ) == {
         "expectation_suite_identifier" : ["a", "b", "c", "hello",],
-        "run_id" : ["testing", 12345],
+        "run_id" : "testing-12345",
     }
 
 # TODO: Put this with the other tests for utils.
@@ -219,7 +216,7 @@ def test_parse_string_to_data_context_resource_identifier():
     assert parse_string_to_data_context_resource_identifier("DataAssetIdentifier.A.B.C") == DataAssetIdentifier("A", "B", "C")
 
     assert parse_string_to_data_context_resource_identifier(
-        "ValidationResultIdentifier.a.b.c.hello.testing.12345"
+        "ValidationResultIdentifier.a.b.c.hello.testing-12345"
     ) == ValidationResultIdentifier(
         coerce_types=True,
         **{
@@ -231,9 +228,6 @@ def test_parse_string_to_data_context_resource_identifier():
                 },
                 "expectation_suite_name": "hello",
             },
-            "run_id" : {
-                "execution_context": "testing",
-                "start_time_utc": 12345,
-            },
+            "run_id" : "testing-12345",
         }
     )
