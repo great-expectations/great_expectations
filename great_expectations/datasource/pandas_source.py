@@ -5,6 +5,7 @@ import pandas as pd
 
 from .datasource import Datasource, ReaderMethods
 from great_expectations.datasource.generator import InMemoryGenerator, SubdirReaderGenerator, GlobReaderGenerator
+from great_expectations.datasource.types import PandasDatasourceBatchKwargs
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.types import ClassConfig
 from great_expectations.exceptions import BatchKwargsError
@@ -15,6 +16,8 @@ class PandasDatasource(Datasource):
     interacting with the local filesystem (the default subdir_reader generator), and from
     existing in-memory dataframes.
     """
+
+    _batch_kwarg_types = (PandasDatasourceBatchKwargs, )
 
     def __init__(self, name="pandas", data_context=None, data_asset_type=None, generators=None, **kwargs):
         if generators is None:
@@ -118,7 +121,7 @@ class PandasDatasource(Datasource):
                                data_context=self._data_context,
                                batch_kwargs=batch_kwargs)
 
-    def build_batch_kwargs(self, *args, **kwargs):
+    def build_batch_kwargs(self, data_asset_name, *args, **kwargs):
         # FIXME: Can this return properly typed objects, and can it **use generators** to build kwargs
         if len(args) > 0:
             if isinstance(args[0], (pd.DataFrame, pd.Series)):

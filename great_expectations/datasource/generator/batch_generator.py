@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import os
-import copy
 import logging
+
+from great_expectations.datasource.types import BatchKwargs
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +28,8 @@ class BatchGenerator(object):
     external data version control system. 
     """
 
+    _batch_kwargs_type = BatchKwargs
+
     def __init__(self, name, type_, datasource=None):
         self._name = name
         self._generator_config = {
@@ -40,6 +42,9 @@ class BatchGenerator(object):
         raise NotImplementedError
 
     def get_available_data_asset_names(self):
+        raise NotImplementedError
+
+    def get_available_partition_ids(self, generator_asset):
         raise NotImplementedError
 
     def get_config(self):
@@ -60,6 +65,21 @@ class BatchGenerator(object):
         else:
             self.reset_iterator(data_asset_name)
             return self._data_asset_iterators[data_asset_name]
+
+    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+        """
+        Build batch kwargs for the named generator_asset based on partition_id and optionally existing batch_kwargs.
+        Args:
+            generator_asset: the generator_asset for which to build batch_kwargs
+            partition_id: the partition id
+            batch_kwargs: any existing batch_kwargs object to use. Will be supplemented with configured information.
+            **kwargs: any addition kwargs to use. Will be added to returned batch_kwargs
+
+        Returns: BatchKwargs object
+
+        """
+        raise NotImplementedError
+
 
     def yield_batch_kwargs(self, data_asset_name):
         if data_asset_name not in self._data_asset_iterators:

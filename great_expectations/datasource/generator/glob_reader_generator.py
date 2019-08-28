@@ -71,25 +71,39 @@ class GlobReaderGenerator(BatchGenerator):
         if not os.path.isdir(self.base_directory):
             return known_assets
         for generator_asset in self.asset_globs.keys():
-            if isinstance(self.asset_globs[generator_asset], string_types):
-                warnings.warn("String-only glob configuration has been deprecated and will be removed in a future"
-                              "release. See GlobReaderGenerator docstring for more information on the new configuration"
-                              "format.", DeprecationWarning)
-                glob_ = self.asset_globs[generator_asset]
-            else:
-                glob_ = self.asset_globs[generator_asset]["glob"]
-            batch_paths = glob.glob(os.path.join(self.base_directory, glob_))
+            batch_paths = self._get_generator_asset_paths(generator_asset)
             if len(batch_paths) > 0:
                 known_assets.add(generator_asset)
 
         return known_assets
 
-    def _get_iterator(self, generator_asset, **kwargs):
+    def get_available_partition_ids(self, generator_asset):
+        glob_config = self._get_generator_asset_config(generator_asset)
+        batch_paths = self._get_generator_asset_paths(generator_asset)
+        partition_ids = set([
+            self._partitioner(path, glob_config) for path in batch_paths
+            if self._partitioner(path, glob_config) is not None
+        ])
+        return partition_ids
+
+    def _get_generator_asset_paths(self, generator_asset):
+        """
+        Returns a list of filepaths associated with the given generator_asset
+
+        Args:
+            generator_asset:
+
+        Returns:
+            paths (list)
+        """
+        glob_config = self._get_generator_asset_config(generator_asset)
+        return glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
+
+    def _get_generator_asset_config(self, generator_asset):
         if generator_asset not in self._asset_globs:
             batch_kwargs = {
                 "generator_asset": generator_asset,
             }
-            batch_kwargs.update(kwargs)
             raise BatchKwargsError("Unknown asset_name %s" % generator_asset, batch_kwargs)
 
         if isinstance(self.asset_globs[generator_asset], string_types):
@@ -99,15 +113,36 @@ class GlobReaderGenerator(BatchGenerator):
             glob_config = {"glob": self.asset_globs[generator_asset]}
         else:
             glob_config = self.asset_globs[generator_asset]
+        return glob_config
 
+    def _get_iterator(self, generator_asset, **kwargs):
+        glob_config = self._get_generator_asset_config(generator_asset)
         paths = glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
         return self._build_batch_kwargs_path_iter(paths, glob_config)
 
     def _build_batch_kwargs_path_iter(self, path_list, glob_config):
         for path in path_list:
-            yield self._build_batch_kwargs(path, glob_config)
+            yield self._build_batch_kwargs_from_path(path, glob_config)
 
-    def _build_batch_kwargs(self, path, glob_config):
+    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+        """Build batch kwargs from a partition id."""
+        glob_config = self._get_generator_asset_config(generator_asset)
+        batch_paths = self._get_generator_asset_paths(generator_asset)
+        path = [path for path in batch_paths if self._partitioner(path, glob_config) == partition_id]
+        if len(path) != 1:
+            raise BatchKwargsError("Unable to identify partition %s for asset %s" % (partition_id, generator_asset),
+                                   {
+                                        generator_asset: generator_asset,
+                                        partition_id: partition_id
+                                    })
+        kwargs = self._build_batch_kwargs_from_path(path[0], glob_config)
+        if batch_kwargs is not None:
+            kwargs.update(batch_kwargs)
+        if kwargs is not None:
+            kwargs.update(kwargs)
+        return kwargs
+
+    def _build_batch_kwargs_from_path(self, path, glob_config):
         # We could add MD5 (e.g. for smallish files)
         # but currently don't want to assume the extra read is worth it
         # unless it's configurable
@@ -129,7 +164,7 @@ class GlobReaderGenerator(BatchGenerator):
             match_group_id = glob_config.get("match_group_id", 1)
             matches = re.match(glob_config["partition_regex"], path)
             # In the case that there is a defined regex, the user *wanted* a partition. But it didn't match.
-            # So, we'll add a sortable id
+            # So, we'll add a *sortable* id
             if matches is None:
                 logger.warning("No match found for path: %s" % path)
                 return datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ") + "__unmatched"
@@ -139,5 +174,13 @@ class GlobReaderGenerator(BatchGenerator):
                 except IndexError:
                     logger.warning("No match group %d in path %s" % (match_group_id, path))
                     return datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ") + "__no_match_group"
-        # There is no partitioner defined; do not add a partition_id
-        return None
+
+        # If there is no partitioner defined, fall back on using the path as a partition_id
+        else:
+            if path.startswith(self.base_directory):
+                path = path[len(self.base_directory):]
+                # In case os.join had to add a "/"
+                if path.startswith("/"):
+                    path = path[1:]
+            return path
+
