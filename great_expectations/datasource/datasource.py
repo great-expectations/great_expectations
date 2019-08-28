@@ -43,6 +43,8 @@ class Datasource(object):
     to configure the datasource to load and return DataAssets of the custom type.
     """
 
+    _batch_kwarg_types = tuple()
+
     @classmethod
     def from_configuration(cls, **kwargs):
         """
@@ -301,6 +303,10 @@ class Datasource(object):
                     "using '/' as a default delimiter."
                 )
         else:
+            warnings.warn("datasources will require NormalizedDataAssetName to use get_batch in a future release."
+                          "Use get_data_asset instead.", DeprecationWarning)
+            # TODO: Upon deprecation of support as noted above, raise an exception in this codepath
+            # raise BatchKwargsError("get_batch requires a NormalizedDataAssetName. Use get_data_asset instead.")
             generators = [generator["name"] for generator in self.list_generators()]
             if len(generators) == 1:
                 generator_name = generators[0]
@@ -310,13 +316,7 @@ class Datasource(object):
                 raise BatchKwargsError(
                     "No generator name provided or guessable, but no batch_kwargs were provided.", None
                 )
-
-            generator_asset = data_asset_name
-            expectation_suite = None
-            if self._data_context is not None:
-                logger.warning(
-                    "Requesting a data_asset without a normalized data_asset_name; expectation_suite will not be set"
-                )
+            self.get_data_asset(data_asset_name, generator_name, batch_kwargs, **kwargs)
 
         if batch_kwargs is None:
             # noinspection PyUnboundLocalVariable
@@ -326,7 +326,34 @@ class Datasource(object):
             else:
                 raise ValueError("No generator or batch_kwargs available to provide a dataset.")
         elif not isinstance(batch_kwargs, dict):
-            batch_kwargs = self.build_batch_kwargs(batch_kwargs)
+            batch_kwargs = self.build_batch_kwargs(data_asset_name, batch_kwargs)
+
+        return self._get_data_asset(batch_kwargs, expectation_suite, **kwargs)
+
+    def get_data_asset(self,
+                       generator_asset,
+                       generator_name="default",
+                       expectation_suite=None,
+                       batch_kwargs=None,
+                       **kwargs):
+        """
+        Get a DataAsset using a datasource. generator_asset and generator_name are required.
+
+        Args:
+            generator_asset: The name of the asset as identified by the generator to return.
+            generator_name: The name of the configured generator to use.
+            expectation_suite: The expectation suite to attach to the data_asset
+            batch_kwargs: Additional batch_kwargs that can
+            **kwargs: Additional kwargs that can be used to supplement batch_kwargs
+
+        Returns:
+            DataAsset
+        """
+        if batch_kwargs is None:
+            # noinspection PyUnboundLocalVariable
+            generator = self.get_generator(generator_name)
+            if generator is not None:
+                batch_kwargs = generator.yield_batch_kwargs(generator_asset)
 
         return self._get_data_asset(batch_kwargs, expectation_suite, **kwargs)
 
@@ -335,7 +362,7 @@ class Datasource(object):
         Internal implementation of batch fetch logic. Note that this must be overridden by datasource implementations.
 
         Args:
-            batch_kwargs: the identifing information to use to fetch the batch.
+            batch_kwargs: the identifying information to use to fetch the batch.
             expectation_suite: the expectation suite to attach to the batch.
             **kwargs: additional key-value pairs to use when fetching the batch of data
 
@@ -374,7 +401,7 @@ class Datasource(object):
             available_data_asset_names[generator_name] = generator.get_available_data_asset_names()
         return available_data_asset_names
 
-    def build_batch_kwargs(self, *args, **kwargs):
+    def build_batch_kwargs(self, data_asset_name, *args, **kwargs):
         """
         Datasource-specific logic that can handle translation of in-line batch identification information to
         batch_kwargs understandable by the provided datasource.
@@ -383,11 +410,12 @@ class Datasource(object):
         an easy way of specifying the batch needed by the user.
 
         Args:
+            data_asset_name (NormalizedDataAssetName): the data_asset_name for which to build batch_kwargs
             *args: positional arguments used by the datasource
             **kwargs: key-value pairs used by the datasource
 
         Returns:
-            a batch_kwargs dictionary understandable by the datasource
+            a batch_kwargs object understandable by the datasource
         """
         raise NotImplementedError
 
