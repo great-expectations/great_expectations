@@ -104,6 +104,7 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
         purpose,
         level,
     ):
+        # FIXME: THis is a dummy method to quickly generate some ExpectationSuites
         df = pd.DataFrame({"x": range(10)})
         ge_df = ge.from_pandas(df)
         ge_df.expect_column_to_exist("x")
@@ -133,7 +134,10 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
                 stores = self.context.stores,
                 services = {},
             )
-            action.take_action()
+            action.take_action(
+                validation_result_suite=validation_results,
+                validation_result_suite_identifier=ValidationResultIdentifier(from_string="ValidationResultIdentifier.a.b.c.hello.quarantine.prod.100")
+            )
 
 
             print(k,v)

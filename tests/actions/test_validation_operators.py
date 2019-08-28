@@ -33,7 +33,10 @@ def basic_data_context_config_for_validation_operator():
             },
             "warning_validation_result_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "InMemoryStore",
+                "class_name": "NamespacedInMemoryStore",
+                "store_config" : {
+                    "resource_identifier_class_name" : "ValidationResultIdentifier",
+                },
             }
         },
         "data_docs": {
@@ -48,6 +51,7 @@ def test_hello_world(basic_data_context_config_for_validation_operator):
     )
 
     vo = DataContextAwareValidationOperator(
+        # TODO: Turn this into a typed object.
         config={
             "default" : {
                 "add_warnings_to_store" : {
@@ -79,7 +83,11 @@ def test_hello_world(basic_data_context_config_for_validation_operator):
     )
     # print(json.dumps(results["validation_results"], indent=2))
 
-    print(context.stores["warning_validation_result_store"].list_keys())
+    warning_validation_result_store_keys = context.stores["warning_validation_result_store"].list_keys() 
+    print(warning_validation_result_store_keys)
+    assert len(warning_validation_result_store_keys) == 1
 
-    assert len(context.stores["warning_validation_result_store"].list_keys()) == 1
-    # assert False
+    first_validation_result = context.stores["warning_validation_result_store"].get(warning_validation_result_store_keys[0])
+    print(json.dumps(first_validation_result, indent=2))
+    # assert context.stores["warning_validation_result_store"].get(warning_validation_result_store_keys[0]) == 1
+    
