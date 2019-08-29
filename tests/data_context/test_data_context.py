@@ -1,6 +1,8 @@
 import pytest
 
 from datetime import datetime
+import sys
+from freezegun import freeze_time
 try:
     from unittest import mock
 except ImportError:
@@ -703,7 +705,7 @@ def test_move_validation_to_fixtures(titanic_data_context):
 def test_add_store(empty_data_context):
     assert "my_new_store" not in empty_data_context.stores.keys()
     assert "my_new_store" not in empty_data_context.get_config()["stores"]
-    empty_data_context.add_store(
+    new_store = empty_data_context.add_store(
         "my_new_store",
         {
             "module_name": "great_expectations.data_context.store",
@@ -713,6 +715,8 @@ def test_add_store(empty_data_context):
     )
     assert "my_new_store" in empty_data_context.stores.keys()
     assert "my_new_store" in empty_data_context.get_config()["stores"]
+
+    assert isinstance(new_store, InMemoryStore)
 
 @pytest.fixture()
 def basic_data_context_config():
@@ -732,12 +736,26 @@ def basic_data_context_config():
         }
     })
 
-def test_ExplorerDataContext(basic_data_context_config):
-    print(type(basic_data_context_config))
-    ExplorerDataContext(
-        basic_data_context_config,
-        "testing/"
-    )
+
+def test_ExplorerDataContext(titanic_data_context):
+    context_root_directory = titanic_data_context.root_directory
+    explorer_data_context = ExplorerDataContext(context_root_directory)
+    assert explorer_data_context._expectation_explorer_manager
+    
+
+@freeze_time("2012-01-14")
+def test_ExplorerDataContext_expectation_widget(titanic_data_context):
+    context_root_directory = titanic_data_context.root_directory
+    explorer_data_context = ExplorerDataContext(context_root_directory)
+    data_asset = explorer_data_context.get_batch('Titanic', expectation_suite_name='my_suite')
+    widget_output = data_asset.expect_column_to_exist('test')
+    print(widget_output)
+    if sys.version[0:3] == '2.7':
+        expected_widget_output = "Accordion(children=(VBox(children=(HBox(children=(VBox(children=(HTML(value=u'<div><strong>Data Asset Name: </strong>mydatasource/mygenerator/Titanic</div>'), HTML(value=u'<div><strong>Column: </strong>test</div>'), HTML(value=u'<span><strong>Expectation Type: </strong>expect_column_to_exist</span>'), HTML(value=u'<span><strong>Success: </strong>False</span>'), HTML(value=u'<div><strong>Date/Time Validated (UTC): </strong>2012-01-14 00:00</div>')), layout=Layout(margin=u'10px', width=u'40%')), VBox(children=(Text(value=u'', description=u'<strong>column_index: </strong>', description_tooltip=u'', layout=Layout(width=u'400px'), placeholder=u'press enter to confirm...', style=DescriptionStyle(description_width=u'150px')),), layout=Layout(margin=u'10px', width=u'60%')))), Accordion(children=(Output(),), _titles={u'0': 'Exceptions/Warnings'}), Accordion(children=(VBox(),), selected_index=None, _titles={u'0': 'Validation Result Details'}), Button(button_style=u'danger', description=u'Remove Expectation', icon=u'trash', layout=Layout(width=u'auto'), style=ButtonStyle(), tooltip=u'click to remove expectation'))),), layout=Layout(border=u'2px solid red', margin=u'5px'), _titles={u'0': 'test | expect_column_to_exist'})"
+    else:
+        expected_widget_output = "Accordion(children=(VBox(children=(HBox(children=(VBox(children=(HTML(value='<div><strong>Data Asset Name: </strong>mydatasource/mygenerator/Titanic</div>'), HTML(value='<div><strong>Column: </strong>test</div>'), HTML(value='<span><strong>Expectation Type: </strong>expect_column_to_exist</span>'), HTML(value='<span><strong>Success: </strong>False</span>'), HTML(value='<div><strong>Date/Time Validated (UTC): </strong>2012-01-14 00:00</div>')), layout=Layout(margin='10px', width='40%')), VBox(children=(Text(value='', description='<strong>column_index: </strong>', description_tooltip='', layout=Layout(width='400px'), placeholder='press enter to confirm...', style=DescriptionStyle(description_width='150px')),), layout=Layout(margin='10px', width='60%')))), Accordion(children=(Output(),), _titles={'0': 'Exceptions/Warnings'}), Accordion(children=(VBox(),), selected_index=None, _titles={'0': 'Validation Result Details'}), Button(button_style='danger', description='Remove Expectation', icon='trash', layout=Layout(width='auto'), style=ButtonStyle(), tooltip='click to remove expectation'))),), layout=Layout(border='2px solid red', margin='5px'), _titles={'0': 'test | expect_column_to_exist'})"
+    assert str(widget_output) == expected_widget_output
+
 
 def test_ConfigOnlyDataContext__initialization(tmp_path_factory, basic_data_context_config):
     config_path = str(tmp_path_factory.mktemp('test_ConfigOnlyDataContext__initialization__dir'))
@@ -792,4 +810,3 @@ def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_conte
     context._normalize_absolute_or_relative_path("/yikes")
     assert "test__normalize_absolute_or_relative_path__dir" not in context._normalize_absolute_or_relative_path("/yikes") 
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes") 
-

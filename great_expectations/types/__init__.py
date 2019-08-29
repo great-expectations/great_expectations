@@ -1,5 +1,6 @@
 from .base import (
     ListOf,
+    DictOf,
     DotDict,
     RequiredKeysDotDict,
     AllowedKeysDotDict,
