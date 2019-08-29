@@ -12,3 +12,8 @@ from .namespaced import (
     NamespacedInMemoryStore,
     NamespacedFilesystemStore,
 )
+
+from .store_backend import (
+    StoreBackend,
+    InMemoryStoreBackend,
+)
