@@ -9,7 +9,7 @@ get_nested_value_from_dict
 
 class MetricsStore(object):
     EXPECTATION_DEFINED_METRICS_LOOKUP_TABLE = {
-        ('expect_column_values_to_not_be_null', 'unexpected_percent'): ('column'),
+        ('expect_column_values_to_not_be_null', 'unexpected_percent'): ('column',), # note: "," is important - it makes it a tuple!
         ('expect_column_quantile_values_to_be_between', ('observed_value', 'values')): (
             'column', ('quantile_ranges', 'quantiles')),
 
@@ -29,6 +29,8 @@ class MetricsStore(object):
                     for metric_kwarg_name in metric_kwargs_names:
                         if isinstance(metric_kwarg_name, tuple):
                             set_nested_value_in_dict(metric_kwargs, metric_kwarg_name, get_nested_value_from_dict(result['expectation_config']['kwargs'], metric_kwarg_name))
+                        else:
+                            metric_kwargs[metric_kwarg_name] = result['expectation_config']['kwargs'][metric_kwarg_name]
 
                     new_metric = NamespaceAwareExpectationDefinedValidationMetric(
                         data_asset_name=data_asset_name,
