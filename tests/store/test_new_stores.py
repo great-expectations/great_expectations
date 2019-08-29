@@ -6,6 +6,8 @@ import pandas as pd
 from great_expectations.data_context.store import (
     NamespacedReadWriteStore,
     NamespacedReadWriteStoreConfig,
+    BasicInMemoryStore,
+    BasicInMemoryStoreConfig,
 )
 from great_expectations.data_context.types import (
     DataAssetIdentifier,
@@ -265,4 +267,24 @@ x,y
 
     with pytest.raises(NotImplementedError):
         my_store.get(key1)
+
+
+def test_BasicInMemoryStore():
+    my_store = BasicInMemoryStore()
+
+    my_key = "A"
+    with pytest.raises(KeyError):
+        my_store.get(my_key)
     
+    my_store.set(my_key, "aaa")
+    assert my_store.get(my_key) == "aaa"
+
+    #??? Putting a non-string object into a store triggers an error.
+    # TODO: Allow bytes as well.
+    with pytest.raises(TypeError):
+        my_store.set("B", {"x":1})
+
+    assert my_store.has_key(my_key) == True
+    assert my_store.has_key("B") == False
+    assert my_store.has_key("A") == True
+    assert my_store.list_keys() == ["A"]

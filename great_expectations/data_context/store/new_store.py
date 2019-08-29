@@ -2,6 +2,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import importlib
+from six import string_types
 
 import pandas as pd
 
@@ -25,6 +26,7 @@ class WriteOnlyStore(object):
 
     # config_class = None
 
+    # TODO : Refactor __init__s among this class and its children.
     def __init__(self, config, root_directory=None):
         assert hasattr(self, 'config_class')
 
@@ -32,7 +34,7 @@ class WriteOnlyStore(object):
         self.config = config
 
         self.root_directory = root_directory
-        self.store_backend = self._configure_store_backend(self.config.store_backend)
+        # self.store_backend = self._configure_store_backend(self.config.store_backend)
 
         self._setup()
 
@@ -145,9 +147,67 @@ class ReadWriteStore(WriteOnlyStore):
         # TODO: Add more serialization methods as needed
 
 
+class BasicInMemoryStoreConfig(ReadWriteStoreConfig):
+    _allowed_keys = ReadWriteStoreConfig._allowed_keys
+    _required_keys = ReadWriteStoreConfig._required_keys
+
+class BasicInMemoryStore(ReadWriteStore):
+    """Like a dict, but much harder to write.
+    
+    This class uses an InMemoryStoreBackend, but I question whether it's worth it.
+    It would be easier just to wrap a dict.
+    """
+
+    config_class = BasicInMemoryStoreConfig
+
+    def __init__(self, config=None):
+        assert hasattr(self, 'config_class')
+
+        if config == None:
+            config = BasicInMemoryStoreConfig(**{
+                "serialization_type": None,
+            })
+
+        assert isinstance(config, self.config_class)
+        self.config = config
+
+        self.root_directory = None
+
+        self._setup()
+
+    def _setup(self):
+        self.store_backend = self._configure_store_backend({
+            "module_name" : "great_expectations.data_context.store",
+            "class_name" : "InMemoryStoreBackend",
+            "separator" : ".",
+        })
+
+        print(self.store_backend)
+        print(self.store_backend.store)
+
+    def _validate_key(self, key):
+        assert isinstance(key, string_types)
+
+    def _get(self, key):
+        return self.store_backend.get((key,))
+    
+    def _set(self, key, value):
+        self.store_backend.set((key,), value)
+
+    def has_key(self, key):
+        return self.store_backend.has_key((key,))
+
+    def list_keys(self):
+        return [key for key, in self.store_backend.list_keys()]
+
+
 class NamespacedReadWriteStoreConfig(ReadWriteStoreConfig):
     _allowed_keys = set({
         "serialization_type",
+        "resource_identifier_class_name",
+        "store_backend",
+    })
+    _required_keys = set({
         "resource_identifier_class_name",
         "store_backend",
     })

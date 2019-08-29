@@ -22,6 +22,8 @@ from .store_backend import (
 from .new_store import (
     WriteOnlyStore,
     ReadWriteStore,
+    BasicInMemoryStore,
+    BasicInMemoryStoreConfig,
     NamespacedReadWriteStore,
     NamespacedReadWriteStoreConfig,
 )
