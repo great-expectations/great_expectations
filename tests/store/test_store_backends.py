@@ -153,48 +153,59 @@ def test_FilesystemStoreBackend_verify_that_key_to_filepath_operation_is_reversi
         my_store.verify_that_key_to_filepath_operation_is_reversible()
 
 
-# def test_FilesystemStoreBackend(tmp_path_factory):
-#     path = str(tmp_path_factory.mktemp('test_FilesystemStore__dir'))
-#     project_path = str(tmp_path_factory.mktemp('my_dir'))
+def test_FilesystemStoreBackend(tmp_path_factory):
+    path = "dummy_str"#str(tmp_path_factory.mktemp('test_FilesystemStoreBackend__dir'))
+    project_path = str(tmp_path_factory.mktemp('test_FilesystemStoreBackend__dir'))#str(tmp_path_factory.mktemp('my_dir'))
 
-#     my_store = FilesystemStoreBackend(
-#         root_directory=os.path.abspath(path),
-#         config={
-#             "base_directory": project_path,
-#             "file_extension" : ".txt",
-#         }
-#     )
+    my_store = FilesystemStoreBackend(
+        root_directory=os.path.abspath(path),
+        config={
+            "base_directory": project_path,
+            "key_length" : 1,
+            "filepath_template" : "my_file_{0}",
+            "replaced_substring" : "/",
+            "replacement_string" : "__",
+        }
+    )
 
-#     #??? Should we standardize on KeyValue, or allow each Store to raise its own error types?
-#     with pytest.raises(FileNotFoundError):
-#         my_store.get("my_file_AAA")
+    #??? Should we standardize on KeyValue, or allow each BackendStore to raise its own error types?
+    with pytest.raises(FileNotFoundError):
+        my_store.get(("AAA",))
     
-#     my_store.set("my_file_AAA", "aaa")
-#     assert my_store.get("my_file_AAA") == "aaa"
+    my_store.set(("AAA",), "aaa")
+    assert my_store.get(("AAA",)) == "aaa"
 
-#     my_store.set("subdir/my_file_BBB", "bbb")
-#     assert my_store.get("subdir/my_file_BBB") == "bbb"
+    my_store.set(("BBB",), "bbb")
+    assert my_store.get(("BBB",)) == "bbb"
 
-#     my_store.set("subdir/my_file_BBB", "BBB")
-#     assert my_store.get("subdir/my_file_BBB") == "BBB"
+    # NOTE: variable key lengths are not yet supported
+    # I suspect the best option is to differentiate between stores meant for reading AND writing,
+    # vs Stores that only need to support writing. If a store only needs to support writing,
+    # we don't need to guarantee reversibility of keys, which makes the internals **much** simpler.
 
-#     with pytest.raises(TypeError):
-#         my_store.set("subdir/my_file_CCC", 123)
-#         assert my_store.get("subdir/my_file_CCC") == 123
+    # my_store.set("subdir/my_file_BBB", "bbb")
+    # assert my_store.get("subdir/my_file_BBB") == "bbb"
 
-#     my_store.set("subdir/my_file_CCC", "ccc")
-#     assert my_store.get("subdir/my_file_CCC") == "ccc"
+    # my_store.set("subdir/my_file_BBB", "BBB")
+    # assert my_store.get("subdir/my_file_BBB") == "BBB"
 
-#     print(my_store.list_keys())
-#     # FIXME: Abe 2019/08/24 :
-#     # Note that list_keys returns different keys than get and set.
-#     # This is almost certainly not the right long-term behavior for FilesystemStore.
-#     # However, it works with current methods in DataContext.
-#     # I recommend
-#     # 1. Overwriting this behavior with the correct behavior in NamespacedFilesystemStore
-#     # 2. Migrating most/all of the Stores in DataContext to this new pattern.
-#     # 3. Finally refactoring this behavior in FilesystemStore.
-#     assert set(my_store.list_keys()) == set(["my_file_AAA.txt", "subdir/my_file_BBB.txt", "subdir/my_file_CCC.txt"])
+    # with pytest.raises(TypeError):
+    #     my_store.set("subdir/my_file_CCC", 123)
+    #     assert my_store.get("subdir/my_file_CCC") == 123
+
+    # my_store.set("subdir/my_file_CCC", "ccc")
+    # assert my_store.get("subdir/my_file_CCC") == "ccc"
+
+    print(my_store.list_keys())
+    assert set(my_store.list_keys()) == set([("AAA",), ("BBB",)])
+
+    print(gen_directory_tree_str(project_path))
+    assert gen_directory_tree_str(project_path) == """\
+test_FilesystemStoreBackend__dir0/
+    my_file_AAA
+    my_file_BBB
+"""
+
 
 # def test_store_config(tmp_path_factory):
 #     path = str(tmp_path_factory.mktemp('test_store_config__dir'))
