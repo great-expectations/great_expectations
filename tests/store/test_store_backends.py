@@ -45,7 +45,9 @@ def test_InMemoryStoreBackend():
         )
 
     my_store = InMemoryStoreBackend(
-        config={},
+        config={
+            "separator" : "."
+        },
     )
 
     my_key = ("A",)
@@ -76,20 +78,26 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
         "file_extension" : "txt",
         "key_length" : 3,
         "filepath_template" : "{0}/{1}/{2}/foo-{2}-expectations.{file_extension}",
+        "replaced_substring" : "/",
+        "replacement_string" : "__",
     }
     my_store = FilesystemStoreBackend(
         root_directory=os.path.abspath(path),
         config=config,
     )
 
-    tuple_ = ("A", "B", "C")
+    tuple_ = ("A/a", "B-b", "C")
     converted_string = my_store._convert_key_to_filepath(tuple_)
     print(converted_string)
-    assert converted_string == "A/B/C/foo-C-expectations.txt"
+    assert converted_string == "A__a/B-b/C/foo-C-expectations.txt"
 
-    recovered_key = my_store._convert_filepath_to_key("A/B/C/foo-C-expectations.txt")
+    recovered_key = my_store._convert_filepath_to_key("A__a/B-b/C/foo-C-expectations.txt")
     print(recovered_key)
     assert recovered_key == tuple_
+
+    with pytest.raises(ValueError):
+        tuple_ = ("A/a", "B-b", "C__c")
+        converted_string = my_store._convert_key_to_filepath(tuple_)
 
 
 def test_FilesystemStoreBackend_verify_that_key_to_filepath_operation_is_reversible(tmp_path_factory):
@@ -100,7 +108,9 @@ def test_FilesystemStoreBackend_verify_that_key_to_filepath_operation_is_reversi
         "base_directory": project_path,
         "file_extension" : "txt",
         "key_length" : 3,
-        "filepath_template" : "{0}/{1}/foo-{2}-expectations.{file_extension}",
+        "filepath_template" : "{0}/{1}/{2}/foo-{2}-expectations.{file_extension}",
+        "replaced_substring" : "/",
+        "replacement_string" : "__",
     }
     my_store = FilesystemStoreBackend(
         root_directory=os.path.abspath(path),
@@ -115,6 +125,8 @@ def test_FilesystemStoreBackend_verify_that_key_to_filepath_operation_is_reversi
         "file_extension" : "txt",
         "key_length" : 3,
         "filepath_template" : "{0}/{1}/foo-{2}-expectations.{file_extension}",
+        "replaced_substring" : "/",
+        "replacement_string" : "__",
     }
     my_store = FilesystemStoreBackend(
         root_directory=os.path.abspath(path),
@@ -129,6 +141,8 @@ def test_FilesystemStoreBackend_verify_that_key_to_filepath_operation_is_reversi
         "file_extension" : "txt",
         "key_length" : 3,
         "filepath_template" : "{0}/{1}/foo-expectations.{file_extension}",
+        "replaced_substring" : "/",
+        "replacement_string" : "__",
     }
     my_store = FilesystemStoreBackend(
         root_directory=os.path.abspath(path),
