@@ -2,6 +2,7 @@ import pytest
 import json
 import importlib
 import os
+import re
 
 import six
 if six.PY2: FileNotFoundError = IOError
@@ -12,6 +13,7 @@ import pandas as pd
 from great_expectations.data_context.store import (
     StoreBackend,
     InMemoryStoreBackend,
+    FilesystemStoreBackend,
 )
 from great_expectations.util import (
     gen_directory_tree_str,
@@ -65,12 +67,83 @@ def test_InMemoryStoreBackend():
     assert my_store.has_key(("A",)) == True
     assert my_store.list_keys() == [("A",)]
 
+def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
+    path = str(tmp_path_factory.mktemp('test_FilesystemStore__dir'))
+    project_path = str(tmp_path_factory.mktemp('my_dir'))
 
-# def test_FilesystemStore(tmp_path_factory):
+    config = {
+        "base_directory": project_path,
+        "file_extension" : "txt",
+        "key_length" : 3,
+        "filepath_template" : "{0}/{1}/{2}/foo-{2}-expectations.{file_extension}",
+    }
+    my_store = FilesystemStoreBackend(
+        root_directory=os.path.abspath(path),
+        config=config,
+    )
+
+    tuple_ = ("A", "B", "C")
+    converted_string = my_store._convert_key_to_filepath(tuple_)
+    print(converted_string)
+    assert converted_string == "A/B/C/foo-C-expectations.txt"
+
+    recovered_key = my_store._convert_filepath_to_key("A/B/C/foo-C-expectations.txt")
+    print(recovered_key)
+    assert recovered_key == tuple_
+
+
+def test_FilesystemStoreBackend_verify_that_key_to_filepath_operation_is_reversible(tmp_path_factory):
+    path = str(tmp_path_factory.mktemp('test_FilesystemStore__dir'))
+    project_path = str(tmp_path_factory.mktemp('my_dir'))
+
+    config = {
+        "base_directory": project_path,
+        "file_extension" : "txt",
+        "key_length" : 3,
+        "filepath_template" : "{0}/{1}/foo-{2}-expectations.{file_extension}",
+    }
+    my_store = FilesystemStoreBackend(
+        root_directory=os.path.abspath(path),
+        config=config,
+    )
+    #This should pass silently
+    my_store.verify_that_key_to_filepath_operation_is_reversible()
+
+
+    config = {
+        "base_directory": project_path,
+        "file_extension" : "txt",
+        "key_length" : 3,
+        "filepath_template" : "{0}/{1}/foo-{2}-expectations.{file_extension}",
+    }
+    my_store = FilesystemStoreBackend(
+        root_directory=os.path.abspath(path),
+        config=config,
+    )
+    #This also should pass silently
+    my_store.verify_that_key_to_filepath_operation_is_reversible()
+
+
+    config = {
+        "base_directory": project_path,
+        "file_extension" : "txt",
+        "key_length" : 3,
+        "filepath_template" : "{0}/{1}/foo-expectations.{file_extension}",
+    }
+    my_store = FilesystemStoreBackend(
+        root_directory=os.path.abspath(path),
+        config=config,
+    )
+    with pytest.raises(AssertionError):
+        #This should fail
+        my_store.verify_that_key_to_filepath_operation_is_reversible()
+
+
+# def test_FilesystemStoreBackend(tmp_path_factory):
 #     path = str(tmp_path_factory.mktemp('test_FilesystemStore__dir'))
 #     project_path = str(tmp_path_factory.mktemp('my_dir'))
 
-#     my_store = FilesystemStore(
+#     my_store = FilesystemStoreBackend(
 #         root_directory=os.path.abspath(path),
 #         config={
 #             "base_directory": project_path,
