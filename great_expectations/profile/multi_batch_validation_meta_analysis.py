@@ -72,7 +72,6 @@ class MultiBatchValidationMetaAnalysis(object):
         batch_index = list(metrics_dict.keys())
 
         for batch_id, batch_metrics in metrics_dict.items():
-            value_list = []
             # fill in the metrics that are present in the batch
             for metric_name, metric_value in batch_metrics.items():
                 metrics_dict_of_lists[metric_name].append(metric_value)
@@ -95,6 +94,16 @@ class MultiBatchValidationMetaAnalysis(object):
 
     @classmethod
     def make_multi_batch_metric_from_list_of_single_batch_metrics(cls, single_batch_metric_name, single_batch_metric_list, batch_index):
+        """
+        Utility method that gets a list of single batch metrics with the same multi-batch key (meaning that they are the same
+        metric with the same kwargs, but obtained by validating different batches of the same data asset) and
+        constructs a multi-batch metric for that key.
+
+        :param single_batch_metric_name:
+        :param single_batch_metric_list:
+        :param batch_index:
+        :return:
+        """
         first_non_null_single_batch_metric = [item for item in single_batch_metric_list if item is not None][0]
 
         if 'NamespaceAwareValidationMetric' == single_batch_metric_name:
