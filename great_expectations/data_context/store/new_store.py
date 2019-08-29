@@ -1,4 +1,9 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import importlib
+
+import pandas as pd
 
 from ...types import (
     ListOf,
@@ -7,6 +12,7 @@ from ...types import (
 from ..types.resource_identifiers import (
     DataContextResourceIdentifier,
 )
+
 
 class WriteOnlyStoreConfig(AllowedKeysDotDict):
     _required_keys = set([
@@ -19,13 +25,15 @@ class WriteOnlyStore(object):
 
     # config_class = None
 
-    def __init__(self, config):
+    def __init__(self, config, root_directory=None):
         assert hasattr(self, 'config_class')
 
         assert isinstance(config, self.config_class)
         self.config = config
 
+        self.root_directory = root_directory
         self.store_backend = self._configure_store_backend(self.config.store_backend)
+
         self._setup()
 
     def set(self, key, value, serialization_type=None):
@@ -87,7 +95,7 @@ class WriteOnlyStore(object):
         module = importlib.import_module(module_name)
         store_backend_class = getattr(module, class_name)
 
-        self.store_backend = store_backend_class(store_backend_config)
+        self.store_backend = store_backend_class(store_backend_config, self.root_directory)
 
         #For conveninece when testing
         return self.store_backend
@@ -96,6 +104,7 @@ class WriteOnlyStore(object):
 
 class ReadWriteStoreConfig(WriteOnlyStoreConfig):
     pass
+
 
 class ReadWriteStore(WriteOnlyStore):
 
@@ -135,6 +144,7 @@ class ReadWriteStore(WriteOnlyStore):
 
         # TODO: Add more serialization methods as needed
 
+
 class NamespacedReadWriteStoreConfig(ReadWriteStoreConfig):
     _allowed_keys = set({
         "serialization_type",
@@ -142,9 +152,38 @@ class NamespacedReadWriteStoreConfig(ReadWriteStoreConfig):
         "store_backend",
     })
 
+
 class NamespacedReadWriteStore(ReadWriteStore):
     
     config_class = NamespacedReadWriteStoreConfig
+
+    def __init__(self, config, root_directory):
+        # super(NamespacedReadWriteStore, self).__init__(config, root_directory)
+
+        # TODO: This method was copied and modified from the base class. 
+        # We need to refactor later to inherit sensibly.
+        assert hasattr(self, 'config_class')
+
+        assert isinstance(config, self.config_class)
+        self.config = config
+
+        self.root_directory = root_directory
+
+        # NOTE: hm. This is tricky.
+        # At this point, we need to add some keys to the store_backend config.
+        # The config from THIS class should be typed by this point.
+        # But if we insist that it's recursively typed, it will have failed before arriving at this point.
+        if self.config["store_backend"]["class_name"] == "FilesystemStoreBackend":
+            self.config["store_backend"]["key_length"] = self.resource_identifier_class._recursively_get_key_length()+1
+            self.store_backend = self._configure_store_backend(self.config["store_backend"])
+            self.store_backend.verify_that_key_to_filepath_operation_is_reversible()
+
+        else:
+            self.store_backend = self._configure_store_backend(self.config["store_backend"])
+    
+
+        self._setup()
+
 
     def _get(self, key):
         key_tuple = self._convert_resource_identifier_to_tuple(key)

@@ -48,6 +48,7 @@ class StoreBackend(object):
     def __init__(
         self,
         config,
+        root_directory=None,
     ):
         # NOTE: Implmentation of configs overall is pretty soft.
         # Suggested TODO: Implement a base Configurable class that knows how to
