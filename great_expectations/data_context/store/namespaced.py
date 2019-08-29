@@ -32,6 +32,7 @@ from .basic import (
     FilesystemStore,
 )
 
+# TODO: Deprecated. Remove.
 class NamespacedStore(Store):
     """Extends the concept of Stores to be aware of DataContextResourceIdentifiers
 
@@ -59,7 +60,7 @@ class NamespacedStore(Store):
                 type(key),
             ))
 
-
+# TODO: Deprecated. Remove.
 class NamespacedInMemoryStore(NamespacedStore, InMemoryStore): 
 
     config_class = NamespacedInMemoryStoreConfig
@@ -77,6 +78,7 @@ class NamespacedInMemoryStore(NamespacedStore, InMemoryStore):
         return key.to_string() in self.store
 
 
+# TODO: Deprecated. Remove.
 class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
 
     config_class = NamespacedFilesystemStoreConfig

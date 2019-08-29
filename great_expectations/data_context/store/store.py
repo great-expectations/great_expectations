@@ -25,6 +25,7 @@ from ..util import (
     parse_string_to_data_context_resource_identifier
 )
 
+# TODO: Deprecated. Remove.
 class Store(object):
     """a key-value store, to abstract away reading and writing to disc (or elsewhere)
     """
