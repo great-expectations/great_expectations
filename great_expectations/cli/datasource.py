@@ -354,10 +354,11 @@ msg_unknown_data_source = """
 We are looking for more types of data types to support.
 Please create a GitHub issue here:
 https://github.com/great-expectations/great_expectations/issues/new
-In the meantime you can see what Great Expectations can do on CSV files.
-To create expectations for your CSV files start Jupyter and open notebook
-great_expectations/notebooks/using_great_expectations_with_pandas.ipynb -
-it will walk you through configuring the database connection and next steps.
+
+In the meantime, consider reviewing the following notebook for an example of 
+creating and saving an expectation suite for validation:
+
+    <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
 """
 
 msg_go_to_notebook = """
