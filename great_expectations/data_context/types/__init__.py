@@ -9,7 +9,6 @@ from .resource_identifiers import (
     DataContextResourceIdentifier,
     DataAssetIdentifier,
     BatchIdentifier,
-    RunIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )

@@ -73,7 +73,7 @@ def test_OrderedKeysDotDict__recursively_get_key_length():
 
     assert MyOKDD._recursively_get_key_length() == 3
     assert DataAssetIdentifier._recursively_get_key_length() == 3
-    assert ValidationResultIdentifier._recursively_get_key_length() == 7
+    assert ValidationResultIdentifier._recursively_get_key_length() == 5
 
 
 def test_DataAssetIdentifier():
@@ -94,31 +94,26 @@ def test_ValidationResultIdentifier__init__totally_nested():
         coerce_types=True,
         **{
             "expectation_suite_identifier" : {
-                "data_asset_identifier" : {
+                "data_asset_name" : {
                     "datasource" : "a",
                     "generator" : "b",
                     "generator_asset" : "c",
                 },
-                "suite_name": "hello",
-                "purpose": "testing",
+                "expectation_suite_name": "failure",
             },
-            "run_id" : {
-                "execution_context": "testing",
-                "start_time_utc": 12345,
-            },
+            "run_id" : "testing-12345",
         }
     )
 
-    assert my_id.to_string() == "ValidationResultIdentifier.a.b.c.hello.testing.testing.12345"
+    assert my_id.to_string() == "ValidationResultIdentifier.a.b.c.failure.testing-12345"
 
 def test_ValidationResultIdentifier__init__mostly_nested():
     ValidationResultIdentifier(
         coerce_types=True,
         **{
             "expectation_suite_identifier" : {
-                "data_asset_identifier" : ("a", "b", "c"),
-                "suite_name": "hello",
-                "purpose": "testing",
+                "data_asset_name" : ("a", "b", "c"),
+                "expectation_suite_name": "warning",
             },
             "run_id" : {
                 "execution_context": "testing",
@@ -132,9 +127,8 @@ def test_ValidationResultIdentifier__init__mostly_nested_with_typed_child():
         coerce_types=True,
         **{
             "expectation_suite_identifier" : {
-                "data_asset_identifier" : DataAssetIdentifier("a", "b", "c"),
-                "suite_name": "hello",
-                "purpose": "testing",
+                "data_asset_name" : DataAssetIdentifier("a", "b", "c"),
+                "expectation_suite_name": "quarantine",
             },
             "run_id" : {
                 "execution_context": "testing",
@@ -148,9 +142,8 @@ def test_ValidationResultIdentifier__init__partially_flat():
         coerce_types=True,
         **{
             "expectation_suite_identifier" : {
-                "data_asset_identifier" : ("a", "b", "c"),
-                "suite_name": "hello",
-                "purpose": "testing",
+                "data_asset_name" : ("a", "b", "c"),
+                "expectation_suite_name": "hello",
             },
             "run_id" : ("testing", 12345)
         }
@@ -176,13 +169,12 @@ def test_ValidationResultIdentifier__init__partially_flat():
 def test_ValidationResultIdentifier__init__nested_except_the_top_layer():
     ValidationResultIdentifier(
         {
-            "data_asset_identifier" : {
+            "data_asset_name" : {
                 "datasource" : "a",
                 "generator" : "b",
                 "generator_asset" : "c",
             },
-            "suite_name": "hello",
-            "purpose": "testing",
+            "expectation_suite_name": "hello",
         },{
             "execution_context": "testing",
             "start_time_utc": 12345,
@@ -192,31 +184,30 @@ def test_ValidationResultIdentifier__init__nested_except_the_top_layer():
 
 def test_ValidationResultIdentifier__init__entirely_flat():
     ValidationResultIdentifier(
-        "a", "b", "c", "hello", "testing", "testing", 12345,
+        "a", "b", "c", "warning", "testing-12345",
         coerce_types=True,
     )
 
 def test_OrderedKeysDotDict__zip_keys_and_args_to_dict():
     assert ValidationResultIdentifier._zip_keys_and_args_to_dict(
-        ["a", "b", "c", "hello", "testing", "testing", 12345],
+        ["a", "b", "c", "warning", "testing-12345"],
     ) == {
-        "expectation_suite_identifier" : ["a", "b", "c", "hello", "testing"],
-        "run_id" : ["testing", 12345],
+        "expectation_suite_identifier" : ["a", "b", "c", "warning"],
+        "run_id" : "testing-12345",
     }
 
     assert ExpectationSuiteIdentifier._zip_keys_and_args_to_dict(
-        ["a", "b", "c", "hello", "testing"]
+        ["a", "b", "c", "warning"]
     ) == {
-        "data_asset_identifier" : ["a", "b", "c"],
-        "suite_name" : "hello",
-        "purpose" : "testing",
+        "data_asset_name" : ["a", "b", "c"],
+        "expectation_suite_name" : "warning",
     }
 
     assert ValidationResultIdentifier._zip_keys_and_args_to_dict(
-        ["a", "b", "c", "hello", "testing", "testing", 12345],
+        ["a", "b", "c", "hello", "testing-12345"]
     ) == {
-        "expectation_suite_identifier" : ["a", "b", "c", "hello", "testing"],
-        "run_id" : ["testing", 12345],
+        "expectation_suite_identifier" : ["a", "b", "c", "hello",],
+        "run_id" : "testing-12345",
     }
 
 # TODO: Put this with the other tests for utils.
@@ -225,22 +216,18 @@ def test_parse_string_to_data_context_resource_identifier():
     assert parse_string_to_data_context_resource_identifier("DataAssetIdentifier.A.B.C") == DataAssetIdentifier("A", "B", "C")
 
     assert parse_string_to_data_context_resource_identifier(
-        "ValidationResultIdentifier.a.b.c.hello.testing.testing.12345"
+        "ValidationResultIdentifier.a.b.c.hello.testing-12345"
     ) == ValidationResultIdentifier(
         coerce_types=True,
         **{
             "expectation_suite_identifier" : {
-                "data_asset_identifier" : {
+                "data_asset_name" : {
                     "datasource" : "a",
                     "generator" : "b",
                     "generator_asset" : "c",
                 },
-                "suite_name": "hello",
-                "purpose": "testing",
+                "expectation_suite_name": "hello",
             },
-            "run_id" : {
-                "execution_context": "testing",
-                "start_time_utc": 12345,
-            },
+            "run_id" : "testing-12345",
         }
     )
