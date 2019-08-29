@@ -80,7 +80,7 @@ stores:
 
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
-    class_name: InMemoryStore
+    class_name: EvaluationParameterStore
 
 # Uncomment the lines below to enable a result callback.
 
