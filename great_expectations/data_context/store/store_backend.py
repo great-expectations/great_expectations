@@ -198,7 +198,6 @@ class FilesystemStoreBackendConfig(AllowedKeysDotDict):
     # NOTE: Abe 2019/08/29: For now, I'm defaulting to rigid typing. We can always back off later.
     _required_keys = set([
         "base_directory",
-        "file_extension",
         "key_length",
         "replaced_substring",
         "replacement_string",
@@ -251,15 +250,22 @@ class FilesystemStoreBackend(StoreBackend):
             self.config.base_directory,
         )
 
-        safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
+        print(self.full_base_directory)
+        # safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
     def _get(self, key):
-        filepath = self._get_filepath_from_key(key)
+        filepath = os.path.join(
+            self.full_base_directory,
+            self._convert_key_to_filepath(key)
+        )
         with open(filepath) as infile:
             return infile.read()
 
     def _set(self, key, value):
-        filepath = self._get_filepath_from_key(key)
+        filepath = os.path.join(
+            self.full_base_directory,
+            self._convert_key_to_filepath(key)
+        )
         path, filename = os.path.split(filepath)
 
         safe_mmkdir(str(path))
@@ -296,7 +302,7 @@ class FilesystemStoreBackend(StoreBackend):
                     )
 
                 key_list.append(
-                    self._get_key_from_filepath(key)
+                    self._convert_filepath_to_key(key)
                 )
 
         return key_list
