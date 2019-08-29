@@ -136,6 +136,8 @@ class DataContextResourceIdentifier(OrderedKeysDotDict):
     def to_string(self, include_class_prefix=True, separator="."):
         return separator.join(self._get_string_elements(include_class_prefix))
 
+    # NOTE: This logic has been pulled into NamespacedReadWriteStore.
+    # I'm not sure if we should keep a copy here.
     def _get_string_elements(self, include_class_prefix=True):
         string_elements = []
 

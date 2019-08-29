@@ -18,3 +18,10 @@ from .store_backend import (
     InMemoryStoreBackend,
     FilesystemStoreBackend,
 )
+
+from .new_store import (
+    WriteOnlyStore,
+    ReadWriteStore,
+    NamespacedReadWriteStore,
+    NamespacedReadWriteStoreConfig,
+)
