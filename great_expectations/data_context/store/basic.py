@@ -30,34 +30,34 @@ from .store import (
 )
 
 
-class InMemoryStore(Store):
-    """Uses an in-memory dictionary as a store.
-    """
+# class InMemoryStore(Store):
+#     """Uses an in-memory dictionary as a store.
+#     """
 
-    config_class = InMemoryStoreConfig
+#     config_class = InMemoryStoreConfig
 
-    def _setup(self):
-        self.store = {}
+#     def _setup(self):
+#         self.store = {}
 
-    def _get(self, key):
-        return self.store[key]
+#     def _get(self, key):
+#         return self.store[key]
 
-    def _set(self, key, value):
-        self.store[key] = value
+#     def _set(self, key, value):
+#         self.store[key] = value
 
-    def _validate_key(self, key):
-        if not isinstance(key, string_types):
-            raise TypeError("Keys in {0} must be instances of {1}, not {2}".format(
-                self.__class__.__name__,
-                string_types,
-                type(key),
-            ))
+#     def _validate_key(self, key):
+#         if not isinstance(key, string_types):
+#             raise TypeError("Keys in {0} must be instances of {1}, not {2}".format(
+#                 self.__class__.__name__,
+#                 string_types,
+#                 type(key),
+#             ))
 
-    def list_keys(self):
-        return list(self.store.keys())
+#     def list_keys(self):
+#         return list(self.store.keys())
 
-    def has_key(self, key):
-        return key in self.store
+#     def has_key(self, key):
+#         return key in self.store
 
 
 class FilesystemStore(Store):

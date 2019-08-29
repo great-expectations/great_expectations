@@ -28,7 +28,7 @@ from .store import (
     Store
 )
 from .basic import (
-    InMemoryStore,
+    # InMemoryStore,
     FilesystemStore,
 )
 
@@ -61,21 +61,21 @@ class NamespacedStore(Store):
             ))
 
 # TODO: Deprecated. Remove.
-class NamespacedInMemoryStore(NamespacedStore, InMemoryStore): 
+# class NamespacedInMemoryStore(NamespacedStore, InMemoryStore): 
 
-    config_class = NamespacedInMemoryStoreConfig
+#     config_class = NamespacedInMemoryStoreConfig
 
-    def _get(self, key):
-        return self.store[key.to_string()]
+#     def _get(self, key):
+#         return self.store[key.to_string()]
 
-    def _set(self, key, value):
-        self.store[key.to_string()] = value
+#     def _set(self, key, value):
+#         self.store[key.to_string()] = value
 
-    def list_keys(self):
-        return [parse_string_to_data_context_resource_identifier(key_string) for key_string in self.store.keys()]
+#     def list_keys(self):
+#         return [parse_string_to_data_context_resource_identifier(key_string) for key_string in self.store.keys()]
 
-    def has_key(self, key):
-        return key.to_string() in self.store
+#     def has_key(self, key):
+#         return key.to_string() in self.store
 
 
 # TODO: Deprecated. Remove.
