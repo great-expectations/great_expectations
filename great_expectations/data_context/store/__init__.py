@@ -26,4 +26,5 @@ from .new_store import (
     BasicInMemoryStoreConfig,
     NamespacedReadWriteStore,
     NamespacedReadWriteStoreConfig,
+    EvaluationParameterStore,
 )

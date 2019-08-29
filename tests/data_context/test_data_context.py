@@ -31,7 +31,8 @@ from great_expectations.data_context.types import (
     DataContextConfig,
 )
 from great_expectations.data_context.store import (
-    BasicInMemoryStore
+    BasicInMemoryStore,
+    EvaluationParameterStore,
 )
 from great_expectations.util import (
     gen_directory_tree_str,
@@ -720,14 +721,14 @@ def test_add_store(empty_data_context):
         "my_new_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "InMemoryStore",
+            "class_name": "BasicInMemoryStore",
             "store_config" : {}
         }
     )
     assert "my_new_store" in empty_data_context.stores.keys()
     assert "my_new_store" in empty_data_context.get_config()["stores"]
 
-    assert isinstance(new_store, InMemoryStore)
+    assert isinstance(new_store, BasicInMemoryStore)
 
 @pytest.fixture()
 def basic_data_context_config():
@@ -739,7 +740,7 @@ def basic_data_context_config():
         "stores": {
             "evaluation_parameter_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "InMemoryStore",
+                "class_name": "EvaluationParameterStore",
             }
         },
         "data_docs": {
@@ -785,7 +786,7 @@ def test_evaluation_parameter_store_methods(basic_data_context_config):
         "testing",
     )
 
-    assert isinstance(context.evaluation_parameter_store, InMemoryStore)
+    assert isinstance(context.evaluation_parameter_store, EvaluationParameterStore)
 
     assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {}
     context.set_parameters_in_evaluation_parameter_store_by_run_id_and_key("foo", "bar", "baz")

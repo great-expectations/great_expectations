@@ -8,6 +8,7 @@ import pandas as pd
 
 from ...types import (
     ListOf,
+    DotDict,
     AllowedKeysDotDict,
 )
 from ..types.resource_identifiers import (
@@ -294,3 +295,36 @@ class NamespacedReadWriteStore(ReadWriteStore):
                 key,
                 type(key),
             ))
+
+
+class EmptyConfig(DotDict):
+    pass
+
+class EvaluationParameterStore(object):
+    """Fine. You want to be a dict. You get to be a dict.
+    
+    TODO: Refactor this into a true Store later.
+
+    It would be easy to replace all instances of EvaluationParameterStore, except that Stores currently insist on having string_typed values,
+    and the the DataContext rudely sends dictionaries.
+
+    On reflection, there's no reason for all Stores to insist on serializability.
+    """
+
+    config_class = EmptyConfig
+
+    def __init__(self, config=None, root_directory=None):
+        self.store = {}
+
+    @classmethod
+    def get_config_class(cls):
+        return cls.config_class
+
+    def get(self, key):
+        return self.store[key]
+
+    def set(self, key, value):
+        self.store[key] = value
+
+    def has_key(self, key):
+        return key in self.store
