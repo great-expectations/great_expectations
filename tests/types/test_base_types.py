@@ -8,6 +8,7 @@ from great_expectations.types import (
     AllowedKeysDotDict,
     RequiredKeysDotDict,
     ListOf,
+    DictOf,
 )
 
 from ruamel.yaml import YAML, yaml_object
@@ -251,14 +252,65 @@ def test_allowed_keys_dot_dict_ListOf_typing():
             }
         )
 
+def test_allowed_keys_dot_dict_DictOf_typing():
+    class MyAllowedKeysDotDict(AllowedKeysDotDict):
+        _allowed_keys = {"a", "b", "c" }
+        _key_types = {
+            "a": int,
+            "b": DictOf(int),
+        }
+    
+    d = MyAllowedKeysDotDict(
+        **{
+            "a": 10,
+            "b": {
+                "x" : 10,
+                "y" : 20,
+                "z" : 30
+            }
+        }
+    )
+
+    d = MyAllowedKeysDotDict(
+        coerce_types=True,
+        **{
+            "a": 10,
+            "b": {
+                "x" : "10",
+                "y" : "20",
+                "z" : "30"
+            }
+        }
+    )
+
+    with pytest.raises(TypeError):
+        d = MyAllowedKeysDotDict(
+            **{
+                "a": 10,
+                "b": {
+                    "x" : 10,
+                    "y" : 20,
+                    "z" : "duck"
+                }
+            }
+        )
+
+    with pytest.raises(TypeError):
+        d = MyAllowedKeysDotDict(
+            **{
+                "a": 10,
+                "b": [10, 20, 30],
+            }
+        )
 
 def test_allowed_keys_dot_dict_recursive_coercion():
     class MyNestedDotDict(AllowedKeysDotDict):
-        _allowed_keys = {"a", "b", "c"}
+        _allowed_keys = {"a", "b", "c", "d"}
         _required_keys = {"a"}
         _key_types = {
             "a": int,
             "b": str,
+            "d": string_types,
         }
 
     class MyAllowedKeysDotDict(AllowedKeysDotDict):
@@ -275,7 +327,8 @@ def test_allowed_keys_dot_dict_recursive_coercion():
             "x": "hello",
             "y": {
                 "a": 1,
-                "b": "hello"
+                "b": "hello",
+                "d": "hi"
             },
         }
     )
@@ -283,7 +336,8 @@ def test_allowed_keys_dot_dict_recursive_coercion():
         "x": "hello",
         "y": {
             "a": 1,
-            "b": "hello"
+            "b": "hello",
+            "d": "hi",
         },
     }
 
@@ -358,6 +412,64 @@ def test_allowed_keys_dot_dict_recursive_coercion_with_ListOf():
             }
         )
 
+def test_allowed_keys_dot_dict_recursive_coercion_with_DictOf():
+    class MyNestedDotDict(AllowedKeysDotDict):
+        _allowed_keys = {"a"}
+        _required_keys = {"a"}
+        _key_types = {
+            "a": int,
+        }
+
+    class MyAllowedKeysDotDict(AllowedKeysDotDict):
+        _allowed_keys = {"x", "y", "z"}
+        _required_keys = {"x"}
+        _key_types = {
+            "x": str,
+            "y": DictOf(MyNestedDotDict),
+        }
+
+    d = MyAllowedKeysDotDict(
+        coerce_types=True,
+        **{
+            "x": "hello",
+            "y": {
+                "who" : {"a": 1},
+                "what" : {"a": 2},
+                "when" : {"a": 3},
+            }
+        }
+    )
+    assert d == {
+        "x": "hello",
+        "y": {
+            "who" : {"a": 1},
+            "what" : {"a": 2},
+            "when" : {"a": 3},
+        }
+    }
+
+    with pytest.raises(TypeError):
+        d = MyAllowedKeysDotDict(
+            coerce_types=True,
+            **{
+                "x": "hello",
+                "y": {
+                    "a": [1, 2, 3, 4],
+                },
+            }
+        )
+
+    with pytest.raises(ValueError):
+        d = MyAllowedKeysDotDict(
+            coerce_types=True,
+            **{
+                "x": "hello",
+                "y": {
+                    "who" : {"a": 1},
+                    "what" : {"a": "not an int"},
+                },
+            }
+        )
 
 def test_allowed_keys_dot_dict_unicode_issues():
     class MyLTDD(AllowedKeysDotDict):

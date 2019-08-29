@@ -10,7 +10,10 @@ import great_expectations as ge
 
 @pytest.fixture(scope="function")
 def totally_empty_data_context(tmp_path_factory):
-    #TODO: This is such a weird workaround for initializing a DataContext. See https://github.com/great-expectations/great_expectations/issues/617
+    # NOTE: This sets up a DataContext with a real path and a config saved to that path.
+    # Now that ConfigOnlyDataContext exists, it's possible to test most DataContext methods without touching the file system.
+    # However, as of 2019/08/22, most tests still use filesystem-based fixtures.
+    # TODO: Where appropriate, switch DataContext tests to the new method.
     project_root_dir = str(tmp_path_factory.mktemp('totally_empty_data_context'))
     os.mkdir(os.path.join(project_root_dir, 'great_expectations'))
 
@@ -41,15 +44,6 @@ def test_create(tmp_path_factory):
 
     assert isinstance(context, ge.data_context.DataContext)
 
-
-def test_init(tmp_path_factory):
-    #TODO: Deprecating this for now. See https://github.com/great-expectations/great_expectations/issues/617
-
-    # project_path = str(tmp_path_factory.mktemp('path_002'))
-    # context = ge.data_context.DataContext(context_root_dir=project_path)
-
-    # assert isinstance(context, ge.data_context.DataContext)
-    pass
 
 def test_add_store(totally_empty_data_context):
     assert len(totally_empty_data_context.stores.keys()) == 0

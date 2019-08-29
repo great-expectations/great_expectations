@@ -1,12 +1,20 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from collections import Iterable
 import inspect
 import copy
+from six import string_types
 
 from ruamel.yaml import YAML, yaml_object
 yaml = YAML()
 
 
 class ListOf(object):
+    def __init__(self, type_):
+        self.type_ = type_
+
+class DictOf(object):
     def __init__(self, type_):
         self.type_ = type_
 
@@ -96,28 +104,7 @@ class RequiredKeysDotDict(DotDict):
         for key, value in self.items():
             if key in self._key_types:
                 if coerce_types:
-                    # Update values if coerce_types==True
-                    try:
-                        # If it already of the right type, we're done
-                        if isinstance(value, self._key_types[key]):
-                            continue
-                        # If the given type is an instance of AllowedKeysDotDict, apply coerce_types recursively
-                        elif isinstance(self._key_types[key], ListOf):
-                            if inspect.isclass(self._key_types[key].type_) and issubclass(self._key_types[key].type_,
-                                                                                          RequiredKeysDotDict):
-                                value = [self._key_types[key].type_(coerce_types=True, **v) for v in value]
-                            else:
-                                value = [self._key_types[key].type_(
-                                    v) for v in value]
-                        else:
-                            if inspect.isclass(self._key_types[key]) and issubclass(self._key_types[key],
-                                                                                    RequiredKeysDotDict):
-                                value = self._key_types[key](coerce_types=True, **value)
-                            else:
-                                value = self._key_types[key](value)
-                    except TypeError as e:
-                        raise TypeError("Unable to initialize " + self.__class__.__name__ + ": could not convert type. TypeError "
-                                                                                   "raised: " + str(e))
+                    value = self._coerce_complex_value_to_type(value, self._key_types[key])
                 # Validate types
                 self._validate_value_type(key, value, self._key_types[key])
 
@@ -160,6 +147,22 @@ class RequiredKeysDotDict(DotDict):
                         type(v),
                     ))
 
+        elif isinstance(type_, DictOf):
+            if not isinstance(value, dict):
+                raise TypeError("key: {!r} must be a mapping, not {!r}".format(
+                    key,
+                    type(value),
+                ))
+
+            for k, v in value.items():
+                if not isinstance(v, type_.type_):
+                    raise TypeError("values in key: {!r} must be of type: {!r}, not {!r} {!r}".format(
+                        key,
+                        type_.type_,
+                        v,
+                        type(v),
+                    ))
+
         else:
             if isinstance(type_, list):
                 any_match = False
@@ -184,6 +187,55 @@ class RequiredKeysDotDict(DotDict):
                         type_,
                         type(value),
                     ))
+    
+    def _coerce_complex_value_to_type(self, value, type_):
+        logger.debug("RequiredKeysDotDict._coerce_complex_value_to_type")
+
+        try:
+            # If it already of the right type, we're done
+            if isinstance(value, type_):
+                return value
+
+            # If the given type is an instance of AllowedKeysDotDict, apply coerce_types recursively
+            if isinstance(type_, ListOf):
+                if inspect.isclass(type_.type_) and issubclass(type_.type_, RequiredKeysDotDict):
+                    value = [type_.type_(coerce_types=True, **v) for v in value]
+                else:
+                    value = [
+                        self._coerce_simple_value_to_type(v, type_.type_)
+                        for v in value
+                    ]
+
+            elif isinstance(type_, DictOf):
+                if inspect.isclass(type_.type_) and issubclass(type_.type_, RequiredKeysDotDict):
+                    value = dict([(k, type_.type_(coerce_types=True, **v)) for k, v in value.items()])
+                else:
+                    value = dict([
+                        (k, self._coerce_simple_value_to_type(v, type_.type_))
+                        for k, v in value.items()
+                    ])
+
+            else:
+                if inspect.isclass(type_) and issubclass(type_, RequiredKeysDotDict):
+                    value = type_(coerce_types=True, **value)
+                else:
+                    value = self._coerce_simple_value_to_type(value, type_)
+
+        except TypeError as e:
+            raise TypeError("Unable to initialize " + self.__class__.__name__ + ". TypeError raised: " + str(e))
+
+        return value
+
+    def _coerce_simple_value_to_type(self, value, type_):
+        """Convenience method to handle the case where type_ == string type, and any other similarly weird things in the future
+        """
+        logger.debug("RequiredKeysDotDict._coerce_simple_value_to_type")
+
+        if type_ == string_types:
+            return str(value)
+
+        else:
+            return type_(value)
 
 
 @yaml_object(yaml)

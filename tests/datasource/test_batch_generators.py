@@ -16,8 +16,7 @@ from great_expectations.exceptions import BatchKwargsError
 def test_file_kwargs_generator(data_context, filesystem_csv):
     base_dir = filesystem_csv
 
-    data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
-    datasource = data_context.datasources["default"]
+    datasource = data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
     generator = datasource.get_generator("default")
     known_data_asset_names = datasource.get_available_data_asset_names()
 

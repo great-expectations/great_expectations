@@ -60,16 +60,21 @@ yaml.default_flow_style = False
 ALLOWED_DELIMITERS = ['.', '/']
 
 
-#TODO: Maybe find a better name for this guy?
 class ConfigOnlyDataContext(object):
-    """This class implements most of the functionality of DataContext, but does *NOT* 
+    """This class implements most of the functionality of DataContext, with a few exceptions.
 
-    That makes this class useful for testing.
+    1. ConfigOnlyDataContext does not attempt to keep its project_config in sync with a file on disc.
+    2. ConfigOnlyDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed into DataContext class.
+
+    Together, these changes make ConfigOnlyDataContext class more testable.
+    
+    DataContext itself inherits from ConfigOnlyDataContext. It behaves essentially the same as the v0.7.* implementation of DataContext.
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
 
+    # TODO: Consider moving this to DataContext, instead of ConfigOnlyDataContext, since it writes to disc.
     @classmethod
     def create(cls, project_root_dir=None):
         """Build a new great_expectations directory and DataContext object in the provided project_root_dir.
@@ -144,16 +149,19 @@ class ConfigOnlyDataContext(object):
     def _init_stores(self, store_configs):
         """Initialize all Stores for this DataContext.
 
-        In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
-        However, some files remain the responsiblity of the DataContext:
-            great_expectations.yml
-            plugins
-            credentials
-            DataSource configs
+        Stores are a good fit for reading/writing objects that:
+            1. follow a clear key-value pattern, and 
+            2. are usually edited programmatically, using the Context
 
-        These files are not good fits to be turned into Stores, because
-            1. they do not follow a clear key-value pattern, and 
-            2. they are not usually written programmatically.
+        In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
+        As of 9/21/2019, the following Stores had not yet been implemented
+            * great_expectations.yml
+            * expectations
+            * data documentation
+            * credentials
+            * anything accessed via write_resource
+
+        Note that stores do NOT manage plugins.
         """
         
         for store_name, store_config in store_configs.items():
@@ -163,8 +171,20 @@ class ConfigOnlyDataContext(object):
             )
 
     def add_store(self, store_name, store_config):
+        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
+
+        Args:
+            store_name (str): a key for the new Store in in self.stores
+            store_config (dict or StoreMetaConfig): a config for the Store to add
+
+        Returns:
+            store (Store)
+        """
+
         self._project_config["stores"][store_name] = store_config
-        self._stores[store_name] = self._init_store_from_config(store_config)
+        new_store = self._init_store_from_config(store_config)
+        self._stores[store_name] = new_store
+        return new_store
 
     def _init_store_from_config(self, config):
         typed_config = StoreMetaConfig(
@@ -225,13 +245,11 @@ class ConfigOnlyDataContext(object):
     @property
     def stores(self):
         """A single holder for all Stores in this context"""
-        # TODO: support multiple stores choices and/or ensure abs paths when appropriate
         return self._stores
 
     @property
     def datasources(self):
         """A single holder for all Datasources in this context"""
-        # TODO: support multiple stores choices and/or ensure abs paths when appropriate
         return self._datasources
 
     @property
@@ -463,6 +481,8 @@ class ConfigOnlyDataContext(object):
                                           **kwargs)
         return data_asset
 
+    # NOTE: Abe 2019//08/22 : I think we want to change this to the new standard class_name, module_name syntax.
+    # Doing this while maintaining backward compatibility to type_s (assuming we choose to do so) will require care.
     def add_datasource(self, name, type_, **kwargs):
         """Add a new datasource to the data context.
 
@@ -480,18 +500,11 @@ class ConfigOnlyDataContext(object):
         datasource_class = self._get_datasource_class(type_)
         datasource = datasource_class(name=name, data_context=self, **kwargs)
         self._datasources[name] = datasource
-        # This check shouldn't be necessary
-        # if not "datasources" in self._project_config:
-        #     self._project_config["datasources"] = {}
         self._project_config["datasources"][name] = datasource.get_config()
 
-        #!!! This return value isn't used anywhere in the live codebase, and only once in tests.
-        #Deprecating for now. Will remove fully later.
-        # return datasource
+        return datasource
 
     def get_config(self):
-        #!!! Deprecating this for now, but leaving the code in case there are unanticipated side effect.
-        # self._save_project_config()
         return self._project_config
 
     def _get_datasource_class(self, datasource_type):
@@ -1018,7 +1031,8 @@ class ConfigOnlyDataContext(object):
         else:
             return {}
 
-    #TODO: Can we raname this to _compile_all_evaluation_parameters_from_expectation_suites or something similar?
+    #NOTE: Abe 2019/08/22 : Can we rename this to _compile_all_evaluation_parameters_from_expectation_suites, or something similar?
+    # A more descriptive name would have helped me grok this faster when I first encountered it
     def _compile(self):
         """Compiles all current expectation configurations in this context to be ready for result registration.
         
@@ -1230,7 +1244,7 @@ class ConfigOnlyDataContext(object):
             data_asset_name: name of data asset for which to get validation result
             expectation_suite_name: expectation_suite name for which to get validation result (default: "default")
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
-            # validations_store: the store from which to get validation results
+            validations_store_name: the name of the store from which to get validation results
             failed_only: if True, filter the result to return only failed expectations
 
         Returns:
@@ -1300,7 +1314,7 @@ class ConfigOnlyDataContext(object):
 
     def build_data_documentation(self, site_names=None, data_asset_name=None):
         """
-        TODO!!!!
+        TODO: Documentation needed
 
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
@@ -1537,17 +1551,7 @@ class DataContext(ConfigOnlyDataContext):
         # #TODO: Factor this out into a helper function in GE. It doesn't belong inside this method.
         # # determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
-            if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
-                context_root_dir = "../"
-            elif os.path.isdir("./great_expectations") and \
-                    os.path.isfile("./great_expectations/great_expectations.yml"):
-                context_root_dir = "./great_expectations"
-            elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
-                context_root_dir = "./"
-            else:
-                raise DataContextError(
-                    "Unable to locate context root directory. Please provide a directory name."
-                )
+            context_root_dir = self.find_context_root_dir()
         context_root_directory = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_directory
 
@@ -1586,26 +1590,42 @@ class DataContext(ConfigOnlyDataContext):
     def add_store(self, store_name, store_config):
         logger.debug("Starting DataContext.add_store")
         
-        super(DataContext, self).add_store(store_name, store_config)
+        new_store = super(DataContext, self).add_store(store_name, store_config)
         self._save_project_config()
+        return new_store
+
 
     def add_datasource(self, name, type_, **kwargs):
         logger.debug("Starting DataContext.add_datasource")
 
-        super(DataContext, self).add_datasource(name, type_, **kwargs)
+        new_datasource = super(DataContext, self).add_datasource(name, type_, **kwargs)
         self._save_project_config()
 
+        return new_datasource
+      
+    def find_context_root_dir(self):
+        if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
+            return "../"
+        elif os.path.isdir("./great_expectations") and \
+                os.path.isfile("./great_expectations/great_expectations.yml"):
+            return "./great_expectations"
+        elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
+            return "./"
+        else:
+            raise DataContextError(
+                "Unable to locate context root directory. Please provide a directory name."
+            )
 
-class ExplorerDataContext(ConfigOnlyDataContext):
+class ExplorerDataContext(DataContext):
 
-    def __init__(self, config, expectation_explorer=False, data_asset_name_delimiter='/'):
+    def __init__(self, context_root_dir=None, expectation_explorer=True, data_asset_name_delimiter='/'):
         """
             expectation_explorer: If True, load the expectation explorer manager, which will modify GE return objects \
             to include ipython notebook widgets.
         """
 
         super(ExplorerDataContext, self).__init__(
-            config,
+            context_root_dir,
             data_asset_name_delimiter,
         )
 
@@ -1624,7 +1644,6 @@ class ExplorerDataContext(ConfigOnlyDataContext):
         Returns:
             return_obj: the return object, potentially changed into a widget by the configured expectation explorer
         """
-        return return_obj
         if self._expectation_explorer:
             return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
         else:
