@@ -30,33 +30,17 @@ from ..util import (
 from .store import (
     Store
 )
-from ..types import (
-    AllowedKeysDotDict
+from ...types import (
+    ListOf,
+    AllowedKeysDotDict,
 )
 
 class StoreBackendConfig(AllowedKeysDotDict):
     _allowed_keys = set()
 
 
-class InMemoryStoreBackendConfig(AllowedKeysDotDict):
-    _allowed_keys = set([
-        "separator",
-    ])
-
-class FilesystemStoreBackendConfig(AllowedKeysDotDict):
-    # TODO: Some of these should be in _required_keys
-    _allowed_keys = set([
-        "separator",
-        "base_directory",
-        "file_extension",
-        "key_length",
-        "filepath_template",
-        "filepath_regex_template",
-    ])
-
-
 class StoreBackend(object):
-    """a key-value store, to abstract away reading and writing to disc (or elsewhere)
+    """a key-value store, to abstract away reading and writing to a persistence layer
     """
 
     config_class = StoreBackendConfig
@@ -144,6 +128,17 @@ class StoreBackend(object):
         raise NotImplementedError
 
 
+class InMemoryStoreBackendConfig(AllowedKeysDotDict):
+    _allowed_keys = set([
+        "separator",
+    ])
+
+    # NOTE: Abe 2019/08/29: For now, I'm defaulting to rigid typing. We can always back off later.
+    _required_keys = set([
+        "separator",
+    ])
+
+
 class InMemoryStoreBackend(StoreBackend):
     """Uses an in-memory dictionary as a store backend.
 
@@ -188,6 +183,38 @@ class InMemoryStoreBackend(StoreBackend):
         return self._convert_tuple_to_string(key) in self.store
 
 
+class FilesystemStoreBackendConfig(AllowedKeysDotDict):
+    # TODO: Some of these should be in _required_keys
+    # NOTE: What would be REALLY useful is to make them required with defaults. ex: separator : "."
+    _allowed_keys = set([
+        "base_directory",
+        "file_extension",
+        "key_length",
+        "replaced_substring",
+        "replacement_string",
+        "filepath_template",
+    ])
+
+    # NOTE: Abe 2019/08/29: For now, I'm defaulting to rigid typing. We can always back off later.
+    _required_keys = set([
+        "base_directory",
+        "file_extension",
+        "key_length",
+        "replaced_substring",
+        "replacement_string",
+        "filepath_template",
+    ])
+
+    _key_types = {
+        "base_directory" : string_types,
+        "file_extension" : string_types,
+        "key_length" : int,
+        "replaced_substring" : string_types, #NOTE: It would be nice to make this a ListOf(string_types), but if we did that, the string replacement wouldn't be reversible.
+        "replacement_string" : string_types,
+        "filepath_template" : string_types,
+    }
+
+
 class FilesystemStoreBackend(StoreBackend):
     """Uses a local filepath as a store.
 
@@ -207,14 +234,14 @@ class FilesystemStoreBackend(StoreBackend):
 
         HOWEVER, passing in root_directory as a separate parameter breaks the normal pattern we've been using for configurability.
 
-        TODO : Figure this out. It might require adding root_directory to the data_context config...?
+        TODO: Figure this out. It might require adding root_directory to the data_context config...?
         """
 
         if not os.path.isabs(root_directory):
             raise ValueError("root_directory must be an absolute path. Got {0} instead.".format(root_directory))
             
         self.root_directory = root_directory
-
+        
         super(FilesystemStoreBackend, self).__init__(config)
 
 
@@ -238,6 +265,17 @@ class FilesystemStoreBackend(StoreBackend):
         safe_mmkdir(str(path))
         with open(filepath, "w") as outfile:
             outfile.write(value)
+
+    def _validate_key(self, key):
+        super(FilesystemStoreBackend, self)._validate_key(key)
+        
+        for key_element in key:
+            if self.config.replacement_string in key_element:
+                raise ValueError("Keys in {0} must not contain the replacement_string {1} : {2}".format(
+                    self.__class__.__name__,
+                    self.config.replacement_string,
+                    key,
+                ))
 
     def list_keys(self):
         # TODO : Rename "keys" in this method to filepaths, for clarity
@@ -271,55 +309,50 @@ class FilesystemStoreBackend(StoreBackend):
         return key in all_keys
 
     def _convert_key_to_filepath(self, key):
-        # TODO: I was thinking of using this as the method of converting to a filepath.
-        # But it might be better to use os.path.join...?
+        # NOTE: At some point in the future, it might be better to replace this logic with os.path.join.
         # That seems more correct, but the configs will be a lot less intuitive.
-        converted_string = self.config["filepath_template"].format(*key, **self.config)
+        # In the meantime, there is some chance that configs will not be cross-OS compatible.
 
         # NOTE : These methods support fixed-length keys, but not variable.
         # TODO : Figure out how to handle variable-length keys
+        self._validate_key(key)
 
-        # TODO : This is old code. Remove it once we're confident this isn't the direction we're going.
-        # file_extension = self.config.get("file_extension", "")
-        # return os.path.join(self.full_base_directory, key)+file_extension
+        replaced_key = [
+            re.sub(
+                self.config["replaced_substring"],
+                self.config["replacement_string"],
+                key_element
+            ) for key_element in key
+        ]
+
+        converted_string = self.config["filepath_template"].format(*replaced_key, **self.config)
 
         return converted_string
 
 
     def _convert_filepath_to_key(self, filepath):
-        # NOTE : This method is trivial in this class, but child classes can get pretty complex
-        # return filepath
-        # TODO : The one-line function above is almost certainly not the right long-term behavior for FilesystemStore.
-        # Instead, better logic is given below. See test_store.test_FilesystemStore for more info on steps to migrate.
-        # file_extension_length = len(self.config.file_extension)
-        # filepath_without_extension = filepath[:-1*file_extension_length]
-        # return filepath_without_extension
-    
+
         # Convert the template to a regex
         indexed_string_substitutions = re.findall("\{\d+\}", self.config["filepath_template"])
-        # print(indexed_string_substitutions)
         tuple_index_list = ["(?P<tuple_index_{0}>.*)".format(i,) for i in range(len(indexed_string_substitutions))]
-        # print(tuple_index_list)
         intermediate_filepath_regex = re.sub(
             "\{\d+\}",
             lambda m, r=iter(tuple_index_list): next(r),
             self.config["filepath_template"]
         )
-        # print(intermediate_filepath_regex)
         filepath_regex = intermediate_filepath_regex.format(*tuple_index_list, **self.config)
-        # print(filepath_regex)
 
         #Apply the regex to the filepath
         matches = re.compile(filepath_regex).match(filepath)
-        # print(matches.groups())
-        new_key = list(range(self.config.key_length))
+
+        #Map key elements into the apprpriate parts of the tuple
+        new_key = list([None for element in range(self.config.key_length)])
         for i in range(len(tuple_index_list)):
-            # Get the tuple index of the 
             tuple_index = int(re.search('\d+', indexed_string_substitutions[i]).group(0))
-            # print(matches.group('tuple_index_'+str(i)))
-            # print(i, indexed_string_substitutions[i])
-            # print(int(re.search('\d+', indexed_string_substitutions[i]).group(0)))
-            new_key[tuple_index] = matches.group('tuple_index_'+str(i))
+            key_element = matches.group('tuple_index_'+str(i))
+            replaced_key_element = re.sub(self.config["replacement_string"], self.config["replaced_substring"], key_element)
+
+            new_key[tuple_index] = replaced_key_element
 
         new_key = tuple(new_key)
         return new_key
