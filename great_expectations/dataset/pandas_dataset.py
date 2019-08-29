@@ -461,7 +461,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         numpy 'string_' (bytes)); consequently, it is not possible to test for string columns using aggregate semantics.
         """
         # Short-circuit if the dtype tells us; in that case use column-aggregate (vs map) semantics
-        if self[column].dtype != "object" or type_ is None:
+        if self[column].dtype != "object" or type_ is None or type_ in ["object", "object_", "O"]:
             res = self._expect_column_values_to_be_of_type__aggregate(
                 column, type_, **kwargs
             )
