@@ -1855,7 +1855,7 @@ PROJECT_HELP_COMMENT = """# Welcome to great expectations.
 # make it easier to use Great Expectations.
 
 # For more help configuring great expectations, 
-# see the documentation at: https://greatexpectations.io/config_file.html
+# see the documentation at: https://docs.greatexpectations.io/en/latest/core_concepts/data_context.html#configuration
 
 # NOTE: GE uses the names of configured datasources and generators to manage
 # how expectations and other configuration artifacts are stored in the 

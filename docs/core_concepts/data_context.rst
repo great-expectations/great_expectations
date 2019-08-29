@@ -35,3 +35,41 @@ In many simple projects, the datasource or generator name may be omitted and the
 the correct name when there is no ambiguity.
 
 Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
+
+Configuration
+---------------
+
+The DataContext configuration file provides fine-grained control over several core features available to the
+DataContext to assist in managing resources used by Great Expectations. Key configuration areas include specifying
+datasources, data documentation, and "stores" used to manage access to resources such as expectation suites,
+validation results, profiling results, evaluation parameters and plugins.
+
+Datasources
+_____________
+
+The `datasources` section declares which :ref:`datasource` objects should be available in the DataContext.
+Each datasource definition should include the `class_name` of the datasource, generators, and any other relevant
+configuration information. For example, the following simple configuration supports a Pandas-based pipeline:
+
+.. code-block:: yaml
+
+  datasources:
+    pipeline:
+      class_name: PandasDatasource
+      generators:
+        default:
+          class_name: InMemoryBatchGenerator
+
+
+Note that the datasources section *includes* all defined generators as well as specifying their names.
+
+Data Documentation
+____________________
+
+The :ref:`data_documentation` section defines how individual sites should be built and deployed. See the detailed
+documentation for more information.
+
+Stores
+_______
+
+Stores are undergoing a significant redesign. Please reach out on slack for more information on configuring stores!
