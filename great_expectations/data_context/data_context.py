@@ -1502,14 +1502,18 @@ class DataContext(object):
 
     def list_validation_results(self, validations_store=None):
         """
-        {
-          "run_id":
-            "datasource": {
-                "generator": {
-                    "generator_asset": [expectation_suite_1, expectation_suite_1, ...]
+        Returns:
+             A dictionary describing validation results in the following format::
+
+                {
+                  "run_id":
+                    "datasource": {
+                        "generator": {
+                            "generator_asset": [expectation_suite_1, expectation_suite_1, ...]
+                        }
+                    }
                 }
-            }
-        }
+
         """
         if validations_store is None:
             validations_store = self.validations_store
