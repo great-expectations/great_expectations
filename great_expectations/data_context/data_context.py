@@ -197,6 +197,8 @@ class ConfigOnlyDataContext(object):
         if "store_config" not in typed_config:
             typed_config.store_config = {}
 
+        # NOTE : This should pop module_name and class_name, thereby removing the need for a layer of nesting in this config
+        # TODO : Remove the extra layer of nesting from store_config
         loaded_module = importlib.import_module(typed_config.module_name)
         loaded_class = getattr(loaded_module, typed_config.class_name)
 

@@ -148,8 +148,10 @@ class ReadWriteStore(WriteOnlyStore):
 
 
 class BasicInMemoryStoreConfig(ReadWriteStoreConfig):
-    _allowed_keys = ReadWriteStoreConfig._allowed_keys
-    _required_keys = ReadWriteStoreConfig._required_keys
+    _allowed_keys = set([
+        "serialization_type"
+    ]) #ReadWriteStoreConfig._allowed_keys
+    _required_keys = set([]) #ReadWriteStoreConfig._required_keys
 
 class BasicInMemoryStore(ReadWriteStore):
     """Like a dict, but much harder to write.
@@ -160,7 +162,7 @@ class BasicInMemoryStore(ReadWriteStore):
 
     config_class = BasicInMemoryStoreConfig
 
-    def __init__(self, config=None):
+    def __init__(self, config=None, root_directory=None):
         assert hasattr(self, 'config_class')
 
         if config == None:
@@ -171,7 +173,7 @@ class BasicInMemoryStore(ReadWriteStore):
         assert isinstance(config, self.config_class)
         self.config = config
 
-        self.root_directory = None
+        self.root_directory = root_directory
 
         self._setup()
 

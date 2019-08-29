@@ -31,7 +31,7 @@ from great_expectations.data_context.types import (
     DataContextConfig,
 )
 from great_expectations.data_context.store import (
-    InMemoryStore
+    BasicInMemoryStore
 )
 from great_expectations.util import (
     gen_directory_tree_str,
