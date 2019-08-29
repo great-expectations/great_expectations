@@ -16,4 +16,5 @@ from .namespaced import (
 from .store_backend import (
     StoreBackend,
     InMemoryStoreBackend,
+    FilesystemStoreBackend,
 )
