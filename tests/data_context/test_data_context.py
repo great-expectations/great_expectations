@@ -27,7 +27,7 @@ from great_expectations.dataset import PandasDataset
 from great_expectations.util import gen_directory_tree_str
 
 from great_expectations.data_context.types import (
-    NameSpaceDotDict,
+    # NameSpaceDotDict,
     DataContextConfig,
 )
 from great_expectations.data_context.store import (
