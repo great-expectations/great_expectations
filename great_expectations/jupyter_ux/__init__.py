@@ -129,7 +129,7 @@ def list_available_data_asset_names(context, data_source_name=None):
         for generator_info in generators:
             print('  generator_name: {0:s} ({1:s})'.format(generator_info['name'], generator_info['type']))
             generator = ds.get_generator(generator_info['name'])
-            data_asset_names = generator.get_available_data_asset_names()
+            data_asset_names = sorted(generator.get_available_data_asset_names())
             if len(data_asset_names) > 0:
                 for data_asset_name in data_asset_names:
                     # print('    data asset: {0:s}. Full name: {1:s}/{2:s}/{0:s}'. \
