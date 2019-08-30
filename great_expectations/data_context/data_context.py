@@ -285,7 +285,7 @@ class ConfigOnlyDataContext(object):
             None
         """
 
-        # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedFilesystemStore
+        # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedReadWriteStore
         validation_result_identifier = NameSpaceDotDict(**{
             "normalized_data_asset_name": self._normalize_data_asset_name(data_asset_name),
             "expectation_suite_name": expectation_suite_name,
@@ -913,7 +913,7 @@ class ConfigOnlyDataContext(object):
         expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
 
         if "local_validation_result_store" in self.stores:
-            # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedFilesystemStore
+            # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedReadWriteStore
             key = NameSpaceDotDict(**{
                 "normalized_data_asset_name" : normalized_data_asset_name,
                 "expectation_suite_name" : expectation_suite_name,
@@ -940,7 +940,7 @@ class ConfigOnlyDataContext(object):
         if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
             logging.debug("Storing validation results to data_asset_snapshot_store")
             
-            # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedFilesystemStore
+            # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedReadWriteStore
             key = NameSpaceDotDict(**{
                 "normalized_data_asset_name" : normalized_data_asset_name,
                 "expectation_suite_name" : expectation_suite_name,
