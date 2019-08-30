@@ -55,6 +55,17 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
                                base_directory=os.path.join("..", path))
 
     elif data_source_selection == "2":  # sqlalchemy
+        try:
+            import sqlalchemy
+            from sqlalchemy import create_engine, MetaData
+        except ImportError:
+            cli_message(
+"""
+ERROR: Unable to import sqlalchemy - exiting.
+Please install the module before trying again.
+""")
+            return None
+
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default="mydb", show_default=True)
 
@@ -356,10 +367,11 @@ msg_unknown_data_source = """
 We are looking for more types of data types to support.
 Please create a GitHub issue here:
 https://github.com/great-expectations/great_expectations/issues/new
-In the meantime you can see what Great Expectations can do on CSV files.
-To create expectations for your CSV files start Jupyter and open notebook
-great_expectations/notebooks/using_great_expectations_with_pandas.ipynb -
-it will walk you through configuring the database connection and next steps.
+
+In the meantime, consider reviewing the following notebook for an example of 
+creating and saving an expectation suite for validation:
+
+    <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
 """
 
 msg_go_to_notebook = """
