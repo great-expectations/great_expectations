@@ -3,6 +3,8 @@ logger = logging.getLogger(__name__)
 
 import importlib
 from six import string_types
+import copy
+import json
 
 import pandas as pd
 
@@ -92,15 +94,20 @@ class WriteOnlyStore(object):
         raise NotImplementedError
 
     def _configure_store_backend(self, store_backend_config):
-        module_name = store_backend_config.pop("module_name")
-        class_name = store_backend_config.pop("class_name")
+        modified_store_backend_config = copy.deepcopy(store_backend_config)
+
+        module_name = modified_store_backend_config.pop("module_name")
+        class_name = modified_store_backend_config.pop("class_name")
 
         module = importlib.import_module(module_name)
         store_backend_class = getattr(module, class_name)
 
-        self.store_backend = store_backend_class(store_backend_config, self.root_directory)
+        self.store_backend = store_backend_class(
+            modified_store_backend_config,
+            self.root_directory
+        )
 
-        #For conveninece when testing
+        #For convenience when testing
         return self.store_backend
 
 
