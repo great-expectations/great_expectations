@@ -20,6 +20,7 @@ from great_expectations.exceptions import DataContextError, ConfigNotFoundError
 from great_expectations import __version__, read_csv
 from pyfiglet import figlet_format
 import click
+click.disable_unicode_literals_warning = True
 import six
 import os
 import json
