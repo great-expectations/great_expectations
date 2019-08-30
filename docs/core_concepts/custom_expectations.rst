@@ -191,7 +191,7 @@ Using custom expectations with a DataSource
 To use custom expectations in a datasource or DataContext, you need to define the custom DataAsset in the datasource
 configuration or batch_kwargs for a specific batch. Following the same example above, let's suppose you've defined
 `CustomPandasDataset` in a module called `custom_dataset.py`. You can configure your datasource to return instances
-of your custom DataAsset type by passing in a :ref:`ClassConfig` that describes your source.
+of your custom DataAsset type by passing in a :class:`ClassConfig <great_expectations.types.ClassConfig>` that describes your source.
 
 If you are working a DataContext, simply placing `custom_dataset.py` in your configured plugin directory will make it
 accessible, otherwise, you need to ensure the module is on the import path.
