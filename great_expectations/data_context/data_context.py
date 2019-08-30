@@ -46,6 +46,7 @@ from .types import (
     NameSpaceDotDict,            # TODO : Replace with ValidationResultIdentifier
     NormalizedDataAssetName,     # TODO : Replace with DataAssetIdentifier
     DataContextConfig,
+    ValidationResultIdentifier,
 )
 from .templates import (
     PROJECT_TEMPLATE,
@@ -286,20 +287,27 @@ class ConfigOnlyDataContext(object):
         """
 
         # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedReadWriteStore
-        validation_result_identifier = NameSpaceDotDict(**{
-            "normalized_data_asset_name": self._normalize_data_asset_name(data_asset_name),
-            "expectation_suite_name": expectation_suite_name,
-            "run_id": run_id,
-        })
+        # NOTE: ABe 2019/08/29 : So much work to pack and unpack obsolete types. Barf.
+        normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
         filepath = self._get_normalized_data_asset_name_filepath(
-            validation_result_identifier.normalized_data_asset_name,
-            validation_result_identifier.expectation_suite_name,
+            normalized_data_asset_name,
+            expectation_suite_name,
             base_path=run_id,
             file_extension="",
         )
         validation_result = self.stores.local_validation_result_store.get(filepath)
+
+        validation_result_identifier = ValidationResultIdentifier(
+            coerce_types=True,
+            **{
+                "expectation_suite_identifier": {
+                    "data_asset_name": tuple(normalized_data_asset_name),
+                    "expectation_suite_name" : expectation_suite_name,
+                },
+                "run_id": run_id,
+            })
         self.stores.fixture_validation_results_store.set(
-            filepath,
+            validation_result_identifier,
             json.dumps(validation_result, indent=2)
         )
 
