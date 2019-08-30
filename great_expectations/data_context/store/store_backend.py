@@ -22,9 +22,6 @@ from six import string_types
 from ..util import (
     parse_string_to_data_context_resource_identifier
 )
-from .store import (
-    Store
-)
 from ...types import (
     ListOf,
     AllowedKeysDotDict,

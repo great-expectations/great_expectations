@@ -34,14 +34,6 @@ evaluation_parameter_store_name: evaluation_parameter_store
 
 stores:
 
-  # local_validation_result_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: uncommitted/validations/
-  #     serialization_type: json
-  #     file_extension: .json
-
   local_validation_result_store:
     module_name: great_expectations.data_context.store
     class_name: NamespacedReadWriteStore

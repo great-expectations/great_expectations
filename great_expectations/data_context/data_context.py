@@ -922,6 +922,16 @@ class ConfigOnlyDataContext(object):
 
         expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
 
+        key = ValidationResultIdentifier(
+            coerce_types=True,
+            **{
+                "expectation_suite_identifier": {
+                    "data_asset_name": tuple(normalized_data_asset_name),
+                    "expectation_suite_name" : expectation_suite_name,
+                },
+                "run_id": run_id,
+            })
+
         if "local_validation_result_store" in self.stores:
             # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedReadWriteStore
             # key = NameSpaceDotDict(**{
@@ -939,15 +949,6 @@ class ConfigOnlyDataContext(object):
             #     key=filepath,
             #     value=validation_results
             # )
-            key = ValidationResultIdentifier(
-                coerce_types=True,
-                **{
-                    "expectation_suite_identifier": {
-                        "data_asset_name": tuple(normalized_data_asset_name),
-                        "expectation_suite_name" : expectation_suite_name,
-                    },
-                    "run_id": run_id,
-                })
             self.stores.local_validation_result_store.set(
                 key=key,
                 value=validation_results
@@ -964,19 +965,19 @@ class ConfigOnlyDataContext(object):
             logging.debug("Storing validation results to data_asset_snapshot_store")
             
             # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedReadWriteStore
-            key = NameSpaceDotDict(**{
-                "normalized_data_asset_name" : normalized_data_asset_name,
-                "expectation_suite_name" : expectation_suite_name,
-                "run_id" : run_id,
-            })
-            filepath = self._get_normalized_data_asset_name_filepath(
-                key.normalized_data_asset_name,
-                expectation_suite_name,
-                base_path=run_id,
-                file_extension="",
-            )
+            # key = NameSpaceDotDict(**{
+            #     "normalized_data_asset_name" : normalized_data_asset_name,
+            #     "expectation_suite_name" : expectation_suite_name,
+            #     "run_id" : run_id,
+            # })
+            # filepath = self._get_normalized_data_asset_name_filepath(
+            #     key.normalized_data_asset_name,
+            #     expectation_suite_name,
+            #     base_path=run_id,
+            #     file_extension="",
+            # )
             self.stores.data_asset_snapshot_store.set(
-                key=filepath,
+                key=key,
                 value=data_asset
             )
 

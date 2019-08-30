@@ -248,16 +248,40 @@ def test_register_validation_results_saves_data_assset_snapshot(data_context):
     #The snapshot directory shouldn't exist yet
     assert not os.path.isfile(snapshot_dir)
 
+
+#   local_validation_result_store:
+#     module_name: great_expectations.data_context.store
+#     class_name: NamespacedReadWriteStore
+#     store_config:
+#       resource_identifier_class_name: ValidationResultIdentifier
+#       serialization_type: json
+#       store_backend:
+#         module_name: great_expectations.data_context.store
+#         class_name: FilesystemStoreBackend
+#         base_directory: uncommitted/validations/
+#         file_extension: json
+#         filepath_template: "{4}/{0}/{1}/{2}/validation-results-{2}-{3}-{4}.{file_extension}"
+#         replaced_substring: /
+#         replacement_string: ___
+
     data_context.add_store(
         "data_asset_snapshot_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "FilesystemStore",
+            "class_name": "NamespacedReadWriteStore",
             "store_config" : {
-                "base_directory" : "uncommitted/snapshots",
                 "serialization_type" : "pandas_csv",
-                "file_extension" : ".csv.gz",
-                "compression" : "gzip",
+                "resource_identifier_class_name": "ValidationResultIdentifier",
+                "store_backend" : {
+                    "module_name": "great_expectations.data_context.store",
+                    "class_name": "FilesystemStoreBackend",
+                    "base_directory" : "uncommitted/snapshots",
+                    "filepath_template": "{4}/{0}/{1}/{2}/validation-results-{2}-{3}-{4}.{file_extension}",
+                    "file_extension" : "csv.gz",
+                    # "compression" : "gzip",
+                    "replaced_substring": "/",
+                    "replacement_string": "___",
+                }
             }
         }
     )
