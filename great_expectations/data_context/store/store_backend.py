@@ -373,7 +373,6 @@ class FilesystemStoreBackend(StoreBackend):
         key = tuple([get_random_hex() for j in range(self.config.key_length)])
         filepath = self._convert_key_to_filepath(key)
         new_key = self._convert_filepath_to_key(filepath)
-        print(key, new_key)
         if key != new_key:
             raise AssertionError("Cannot reverse key conversion in {}\nThis is most likely a problem with your filepath_template:\n\t{}".format(
                 self.__class__.__name__,
@@ -384,16 +383,17 @@ class FilesystemStoreBackend(StoreBackend):
     # Leaving it here temporarily, because factoring it out will require switching
     # DataContext to use NamespacedFilesystemStore for local_validation_result_store
     # and possibly others.
-    def get_most_recent_run_id(self):
-        run_id_list = os.listdir(self.full_base_directory)
+    # NOTE: This doesn't even work any more.
+    # def get_most_recent_run_id(self):
+    #     run_id_list = os.listdir(self.full_base_directory)
 
-        run_ids = [
-            name for name in run_id_list if
-            os.path.isdir(os.path.join(self.full_base_directory, name))
-        ]
-        most_recent_run_id = sorted(run_ids)[-1]
+    #     run_ids = [
+    #         name for name in run_id_list if
+    #         os.path.isdir(os.path.join(self.full_base_directory, name))
+    #     ]
+    #     most_recent_run_id = sorted(run_ids)[-1]
 
-        return most_recent_run_id
+    #     return most_recent_run_id
 
 # # class S3Store(ContextAwareStore):
 # #     """Uses an S3 bucket+prefix as a store

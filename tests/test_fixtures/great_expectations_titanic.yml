@@ -18,11 +18,18 @@ stores:
 
   local_validation_result_store:
     module_name: great_expectations.data_context.store
-    class_name: FilesystemStore
+    class_name: NamespacedReadWriteStore
     store_config:
-      base_directory: uncommitted/validations/
+      resource_identifier_class_name: ValidationResultIdentifier
       serialization_type: json
-      file_extension: .json
+      store_backend:
+        module_name: great_expectations.data_context.store
+        class_name: FilesystemStoreBackend
+        base_directory: uncommitted/validations
+        file_extension: json
+        filepath_template: "{4}/{0}/{1}/{2}/validation-results-{2}-{3}.{file_extension}"
+        replaced_substring: /
+        replacement_string: ___
 
   # These next three blocks are never used in tests.
 
@@ -57,11 +64,11 @@ stores:
       store_backend:
         module_name: great_expectations.data_context.store
         class_name: FilesystemStoreBackend
-        base_directory: fixtures/validations/craziness
+        base_directory: fixtures/validations
         file_extension: json
-        filepath_template: "{5}/{0}/{1}/{2}/{3}/{4}/validation-results-{3}-{4}.{file_extension}"
+        filepath_template: "{4}/{0}/{1}/{2}/validation-results-{2}-{3}.{file_extension}"
         replaced_substring: /
-        replacement_string: __
+        replacement_string: ___
 
   evaluation_parameter_store:
       module_name: great_expectations.data_context.store

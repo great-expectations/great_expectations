@@ -289,14 +289,6 @@ class ConfigOnlyDataContext(object):
         # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedReadWriteStore
         # NOTE: ABe 2019/08/29 : So much work to pack and unpack obsolete types. Barf.
         normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        filepath = self._get_normalized_data_asset_name_filepath(
-            normalized_data_asset_name,
-            expectation_suite_name,
-            base_path=run_id,
-            file_extension="",
-        )
-        validation_result = self.stores.local_validation_result_store.get(filepath)
-
         validation_result_identifier = ValidationResultIdentifier(
             coerce_types=True,
             **{
@@ -306,6 +298,16 @@ class ConfigOnlyDataContext(object):
                 },
                 "run_id": run_id,
             })
+
+        # filepath = self._get_normalized_data_asset_name_filepath(
+        #     normalized_data_asset_name,
+        #     expectation_suite_name,
+        #     base_path=run_id,
+        #     file_extension="",
+        # )
+        # validation_result = self.stores.local_validation_result_store.get(filepath)
+        validation_result = self.stores.local_validation_result_store.get(validation_result_identifier)
+
         self.stores.fixture_validation_results_store.set(
             validation_result_identifier,
             json.dumps(validation_result, indent=2)
@@ -922,19 +924,32 @@ class ConfigOnlyDataContext(object):
 
         if "local_validation_result_store" in self.stores:
             # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedReadWriteStore
-            key = NameSpaceDotDict(**{
-                "normalized_data_asset_name" : normalized_data_asset_name,
-                "expectation_suite_name" : expectation_suite_name,
-                "run_id" : run_id,
-            })
-            filepath = self._get_normalized_data_asset_name_filepath(
-                key.normalized_data_asset_name,
-                expectation_suite_name,
-                base_path=run_id,
-                file_extension="",
-            )
+            # key = NameSpaceDotDict(**{
+            #     "normalized_data_asset_name" : normalized_data_asset_name,
+            #     "expectation_suite_name" : expectation_suite_name,
+            #     "run_id" : run_id,
+            # })
+            # filepath = self._get_normalized_data_asset_name_filepath(
+            #     key.normalized_data_asset_name,
+            #     expectation_suite_name,
+            #     base_path=run_id,
+            #     file_extension="",
+            # )
+            # self.stores.local_validation_result_store.set(
+            #     key=filepath,
+            #     value=validation_results
+            # )
+            key = ValidationResultIdentifier(
+                coerce_types=True,
+                **{
+                    "expectation_suite_identifier": {
+                        "data_asset_name": tuple(normalized_data_asset_name),
+                        "expectation_suite_name" : expectation_suite_name,
+                    },
+                    "run_id": run_id,
+                })
             self.stores.local_validation_result_store.set(
-                key=filepath,
+                key=key,
                 value=validation_results
             )
 
@@ -1291,20 +1306,33 @@ class ConfigOnlyDataContext(object):
         selected_store = self.stores[validations_store_name]
 
         if run_id == None:
-            run_id = selected_store.get_most_recent_run_id()
+            #Get most recent run id 
+            key_list = selected_store.list_keys()
+            run_id_set = set([key.run_id for key in key_list])
+            run_id = max(run_id_set)
 
-        key = NameSpaceDotDict(**{
-            "normalized_data_asset_name" : self._normalize_data_asset_name(data_asset_name),
-            "expectation_suite_name" : expectation_suite_name,
-            "run_id" : run_id,
-        })
-        filepath = self._get_normalized_data_asset_name_filepath(
-            key.normalized_data_asset_name,
-            expectation_suite_name,
-            base_path=run_id,
-            file_extension="",
-        )
-        results_dict = selected_store.get(filepath)
+        # key = NameSpaceDotDict(**{
+        #     "normalized_data_asset_name" : self._normalize_data_asset_name(data_asset_name),
+        #     "expectation_suite_name" : expectation_suite_name,
+        #     "run_id" : run_id,
+        # })
+        # filepath = self._get_normalized_data_asset_name_filepath(
+        #     key.normalized_data_asset_name,
+        #     expectation_suite_name,
+        #     base_path=run_id,
+        #     file_extension="",
+        # )
+        # results_dict = selected_store.get(filepath)
+        key = ValidationResultIdentifier(
+            coerce_types=True,
+            **{
+                "expectation_suite_identifier": {
+                    "data_asset_name": tuple(self._normalize_data_asset_name(data_asset_name)),
+                    "expectation_suite_name" : expectation_suite_name,
+                },
+                "run_id": run_id,
+            })
+        results_dict = selected_store.get(key)
 
         #TODO: This should be a convenience method of ValidationResultSuite
         if failed_only:
@@ -1374,7 +1402,7 @@ class ConfigOnlyDataContext(object):
             logger.debug("Found data_docs_config. Building sites...")
             sites = data_docs_config.get('sites', [])
             for site_name, site_config in sites.items():
-                logger.debug("Building site ", site_name)
+                logger.debug("Building site %s" % site_name,)
                 if (site_names and site_name in site_names) or not site_names or len(site_names) == 0:
                     #TODO: get the builder class
                     #TODO: build the site config by using defaults if needed
