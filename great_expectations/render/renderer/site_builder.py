@@ -11,6 +11,9 @@ from great_expectations.render.renderer import (
 from great_expectations.render.view import (
     DefaultJinjaIndexPageView,
 )
+from great_expectations.data_context.types import (
+    ValidationResultIdentifier,
+)
 
 class SiteBuilder():
     """SiteBuilder builds a data documentation website for the project defined by a DataContext.
@@ -359,18 +362,17 @@ class SiteBuilder():
         }
         """
 
+        # NOTE : Future versions of Stores might allow fetching of nested objects.
+        # In that case, this logic would almost certainly live there instead.
+
         validation_results = {}
 
         relative_paths = validation_result_list
 
         for result in relative_paths:
-            #FIXME: This assumes that validation_result object strings will always be delimited by slashes
-            components = result.split("/")
+            assert isinstance(result, ValidationResultIdentifier)
 
-            if len(components) != 5:
-                logger.error("Unrecognized validation result path: %s" % result)
-                continue
-            run_id = components[0]
+            run_id = result.run_id
 
             # run_id_filter attribute in the config of validation store allows to filter run ids
             if run_id_filter:
@@ -381,12 +383,11 @@ class SiteBuilder():
                     if run_id_filter.get("ne") == run_id:
                         continue
 
-            datasource_name = components[1]
-            generator_name = components[2]
-            generator_asset = components[3]
+            datasource_name = result.expectation_suite_identifier.data_asset_name.datasource
+            generator_name = result.expectation_suite_identifier.data_asset_name.generator
+            generator_asset = result.expectation_suite_identifier.data_asset_name.generator_asset
 
-            #FIXME: Dropping the last 5 characters is an EXTREMELY brittle way to drop the file suffix
-            expectation_suite = components[4][:-5]
+            expectation_suite = result.expectation_suite_identifier.expectation_suite_name
 
             if run_id not in validation_results:
                 validation_results[run_id] = {}

@@ -52,7 +52,7 @@ def test_add_store(totally_empty_data_context):
         "my_inmemory_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "InMemoryStore"
+            "class_name": "BasicInMemoryStore"
         }
     )
     assert "my_inmemory_store" in totally_empty_data_context.stores.keys()
@@ -63,11 +63,12 @@ def test_config_from_absolute_zero(totally_empty_data_context):
 
     assert len(totally_empty_data_context.stores.keys()) == 0
 
+    # TODO : Remove the extra layer of nesting from store_config
     totally_empty_data_context.add_store(
         "my_inmemory_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "InMemoryStore",
+            "class_name": "BasicInMemoryStore",
             "store_config": {
                 "serialization_type": "json"
             },
@@ -82,23 +83,24 @@ def test_config_with_default_yml(tmp_path_factory):
     context = ge.data_context.DataContext.create(project_path)
 
     print(context.stores.keys())
-    assert len(context.stores.keys()) == 6
+    assert len(context.stores.keys()) == 3
     assert set(context.stores.keys()) == set([
         'local_validation_result_store',
-        'local_profiling_store',
-        'local_workbench_site_store',
+        # 'local_profiling_store',
+        # 'local_workbench_site_store',
         'evaluation_parameter_store',
         'fixture_validation_results_store',
-        'shared_team_site_store',
+        # 'shared_team_site_store',
     ])
     assert "my_inmemory_store" not in context.stores.keys()
 
 
+    # TODO : Remove the extra layer of nesting from store_config
     context.add_store(
         "my_inmemory_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "InMemoryStore",
+            "class_name": "BasicInMemoryStore",
             "store_config": {
                 "serialization_type": "json"
             },
@@ -106,6 +108,6 @@ def test_config_with_default_yml(tmp_path_factory):
     )
 
     print(context.stores.keys())
-    assert len(context.stores.keys()) == 7
+    assert len(context.stores.keys()) == 4
     assert "my_inmemory_store" in context.stores.keys()
     
