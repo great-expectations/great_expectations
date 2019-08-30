@@ -55,6 +55,17 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
                                base_directory=os.path.join("..", path))
 
     elif data_source_selection == "2":  # sqlalchemy
+        try:
+            import sqlalchemy
+            from sqlalchemy import create_engine, MetaData
+        except ImportError:
+            cli_message(
+"""
+ERROR: Unable to import sqlalchemy - exiting.
+Please install the module before trying again.
+""")
+            return None
+
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default="mydb", show_default=True)
 
