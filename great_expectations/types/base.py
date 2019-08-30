@@ -187,7 +187,7 @@ class RequiredKeysDotDict(DotDict):
                         type_,
                         type(value),
                     ))
-    
+
     def _coerce_complex_value_to_type(self, value, type_):
         logger.debug("RequiredKeysDotDict._coerce_complex_value_to_type")
 
