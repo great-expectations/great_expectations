@@ -1700,7 +1700,8 @@ class DataContext(object):
                            max_data_assets=20,
                            profile_all_data_assets=True,
                            profiler=BasicDatasetProfiler,
-                           dry_run=False):
+                           dry_run=False,
+                           additional_batch_kwargs=None):
         """Profile the named datasource using the named profiler.
 
         Args:
@@ -1712,7 +1713,7 @@ class DataContext(object):
             profile_all_data_assets: when True, all data assets are profiled, regardless of their number
             profiler: the profiler class to use
             dry_run: when true, the method checks arguments and reports if can profile or specifies the arguments that are missing
-
+            additional_batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
         Returns:
             A dictionary::
 
@@ -1791,9 +1792,13 @@ class DataContext(object):
                     start_time = datetime.datetime.now()
 
                     # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
+                    if additional_batch_kwargs is None:
+                        additional_batch_kwargs = {}
+                        
                     batch = self.get_batch(
                         data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
-                        expectation_suite_name=profiler.__name__
+                        expectation_suite_name=profiler.__name__,
+                        **additional_batch_kwargs
                     )
 
                     if not profiler.validate(batch):
