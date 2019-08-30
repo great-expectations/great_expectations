@@ -95,11 +95,6 @@ Great Expectations does not store data itself. Instead, it deals in metadata abo
 Great Expectations is python-based. You can invoke it from the command line without using a python programming environment, but if you're working in another ecosystem, other tools might be a better choice. If you're running in a pure R environment, you might consider [assertR](https://github.com/ropensci/assertr) as an alternative. Within the Tensorflow ecosystem, [TFDV](https://www.tensorflow.org/tfx/guide/tfdv) fulfills a similar function as Great Expectations.
 
 
-Can I contribute?
---------------------------------------------------------------------------------
-Absolutely. Yes, please. Start [here](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING.md), and don't be shy with questions!
-
-
 How do I learn more?
 --------------------------------------------------------------------------------
 
