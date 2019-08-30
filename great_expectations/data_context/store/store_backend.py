@@ -7,11 +7,6 @@ from ..types import (
 from ..types.resource_identifiers import (
     DataContextResourceIdentifier,
 )
-from .types import (
-    InMemoryStoreConfig,
-    FilesystemStoreConfig,
-    NamespacedFilesystemStoreConfig,
-)
 from ..util import safe_mmkdir
 import pandas as pd
 import six

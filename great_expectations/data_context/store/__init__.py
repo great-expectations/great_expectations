@@ -7,11 +7,11 @@ from .basic import (
     # InMemoryStore,
 )
 
-from .namespaced import (
-    NamespacedStore,
-    # NamespacedInMemoryStore,
-    NamespacedFilesystemStore,
-)
+# from .namespaced import (
+#     # NamespacedStore,
+#     # NamespacedInMemoryStore,
+#     # NamespacedFilesystemStore,
+# )
 
 from .store_backend import (
     StoreBackend,

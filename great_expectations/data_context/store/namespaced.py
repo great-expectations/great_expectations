@@ -1,64 +1,64 @@
-from ..types import (
-    DataAssetIdentifier,
-    ValidationResultIdentifier,
-)
-from ..types.resource_identifiers import (
-    DataContextResourceIdentifier,
-)
-from .types import (
-    NamespacedInMemoryStoreConfig,
-    NamespacedFilesystemStoreConfig,
-)
-from ..util import safe_mmkdir
-import pandas as pd
-import six
-import io
-import os
-import json
-import logging
-logger = logging.getLogger(__name__)
-import importlib
-import re
+# from ..types import (
+#     DataAssetIdentifier,
+#     ValidationResultIdentifier,
+# )
+# from ..types.resource_identifiers import (
+#     DataContextResourceIdentifier,
+# )
+# from .types import (
+#     NamespacedInMemoryStoreConfig,
+#     NamespacedFilesystemStoreConfig,
+# )
+# from ..util import safe_mmkdir
+# import pandas as pd
+# import six
+# import io
+# import os
+# import json
+# import logging
+# logger = logging.getLogger(__name__)
+# import importlib
+# import re
 
-from ..util import (
-    parse_string_to_data_context_resource_identifier
-)
+# from ..util import (
+#     parse_string_to_data_context_resource_identifier
+# )
 
-from .store import (
-    Store
-)
-from .basic import (
-    # InMemoryStore,
-    FilesystemStore,
-)
+# from .store import (
+#     Store
+# )
+# from .basic import (
+#     # InMemoryStore,
+#     FilesystemStore,
+# )
 
 # TODO: Deprecated. Remove.
-class NamespacedStore(Store):
-    """Extends the concept of Stores to be aware of DataContextResourceIdentifiers
+# class NamespacedStore(Store):
+#     """Extends the concept of Stores to be aware of DataContextResourceIdentifiers
 
-    Working notes from 2019/08/24 :
-    Q : Can strings be unambiguously converted into ResourceIdentifiers and vice versa, for use as keys?
-    A : Yes, see DataContextResourceIdentifier.to_string and great_expectations.util.parse_string_to_data_context_resource_identifier
+#     Working notes from 2019/08/24 :
+#     Q : Can strings be unambiguously converted into ResourceIdentifiers and vice versa, for use as keys?
+#     A : Yes, see DataContextResourceIdentifier.to_string and great_expectations.util.parse_string_to_data_context_resource_identifier
 
-    Q : How does a Store know what its "appropriate type" is? -> Subclassing could work, but then we end up in a matrix world
-    A : self.config.resource_identifier_class_name is a required field. All config_classes should reflect this.
+#     Q : How does a Store know what its "appropriate type" is? -> Subclassing could work, but then we end up in a matrix world
+#     A : self.config.resource_identifier_class_name is a required field. All config_classes should reflect this.
 
-    Q : Can NamespacedStores mix types of ResourceIdentifiers?
-    A : Currently, no. But Stores can.
-    """
+#     Q : Can NamespacedStores mix types of ResourceIdentifiers?
+#     A : Currently, no. But Stores can.
+#     """
 
-    @property
-    def resource_identifier_class(self):
-        module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
-        class_ = getattr(module, self.config.resource_identifier_class_name)
-        return class_
+#     @property
+#     def resource_identifier_class(self):
+#         module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
+#         class_ = getattr(module, self.config.resource_identifier_class_name)
+#         return class_
 
-    def _validate_key(self, key):
-        if not isinstance(key, self.resource_identifier_class):
-            raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
-                key,
-                type(key),
-            ))
+#     def _validate_key(self, key):
+#         if not isinstance(key, self.resource_identifier_class):
+#             raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
+#                 key,
+#                 type(key),
+#             ))
 
 # TODO: Deprecated. Remove.
 # class NamespacedInMemoryStore(NamespacedStore, InMemoryStore): 
@@ -79,62 +79,62 @@ class NamespacedStore(Store):
 
 
 # TODO: Deprecated. Remove.
-class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
+# class NamespacedFilesystemStore(NamespacedStore, FilesystemStore):
 
-    config_class = NamespacedFilesystemStoreConfig
+#     config_class = NamespacedFilesystemStoreConfig
 
-    def _get_filepath_from_key(self, key):
-        if isinstance(key, ValidationResultIdentifier):
-            # NOTE : This might be easier to parse as a Jinja template
-            middle_path = key.to_string(separator="/")
+#     def _get_filepath_from_key(self, key):
+#         if isinstance(key, ValidationResultIdentifier):
+#             # NOTE : This might be easier to parse as a Jinja template
+#             middle_path = key.to_string(separator="/")
 
-            filename_core = key.expectation_suite_identifier.expectation_suite_name
-            file_prefix = self.config.get("file_prefix", "")
-            file_extension = self.config.get("file_extension", "")
-            filename = file_prefix + filename_core + file_extension
+#             filename_core = key.expectation_suite_identifier.expectation_suite_name
+#             file_prefix = self.config.get("file_prefix", "")
+#             file_extension = self.config.get("file_extension", "")
+#             filename = file_prefix + filename_core + file_extension
 
-            filepath = os.path.join(
-                self.full_base_directory,
-                key.run_id,#.to_string(include_class_prefix=False, separator="-"),
-                key.expectation_suite_identifier.data_asset_name.to_string(include_class_prefix=False, separator="/"),
-                filename
-            )
-            return filepath
+#             filepath = os.path.join(
+#                 self.full_base_directory,
+#                 key.run_id,#.to_string(include_class_prefix=False, separator="-"),
+#                 key.expectation_suite_identifier.data_asset_name.to_string(include_class_prefix=False, separator="/"),
+#                 filename
+#             )
+#             return filepath
 
-        # TODO: Extend with logic to handle other kinds of resource_identifier_class_names
+#         # TODO: Extend with logic to handle other kinds of resource_identifier_class_names
 
-        else:
-            return os.path.join(
-                self.full_base_directory,
-                key.to_string(separator="/"),
-            ) + self.config.file_extension
+#         else:
+#             return os.path.join(
+#                 self.full_base_directory,
+#                 key.to_string(separator="/"),
+#             ) + self.config.file_extension
 
-    def _get_key_from_filepath(self, filepath):
-        if self.config.resource_identifier_class_name == "ValidationResultIdentifier":
+#     def _get_key_from_filepath(self, filepath):
+#         if self.config.resource_identifier_class_name == "ValidationResultIdentifier":
 
-            file_prefix = self.config.get("file_prefix", "")
-            file_extension = self.config.get("file_extension", "")
-            matches = re.compile("(.*)/(.*)/(.*)/(.*)/"+file_prefix+"(.*)"+file_extension).match(filepath)
+#             file_prefix = self.config.get("file_prefix", "")
+#             file_extension = self.config.get("file_extension", "")
+#             matches = re.compile("(.*)/(.*)/(.*)/(.*)/"+file_prefix+"(.*)"+file_extension).match(filepath)
 
-            args = (
-                matches.groups()[1],
-                matches.groups()[2],
-                matches.groups()[3],
+#             args = (
+#                 matches.groups()[1],
+#                 matches.groups()[2],
+#                 matches.groups()[3],
 
-                matches.groups()[4],
+#                 matches.groups()[4],
 
-                matches.groups()[0],
-            )
-            return self.resource_identifier_class(*args)
+#                 matches.groups()[0],
+#             )
+#             return self.resource_identifier_class(*args)
 
-        # TODO: Extend with logic to handle other kinds of resource_identifier_class_names
+#         # TODO: Extend with logic to handle other kinds of resource_identifier_class_names
 
-        else:
-            file_extension_length = len(self.config.file_extension)
-            filename_without_extension = filename[:-1*file_extension_length]
+#         else:
+#             file_extension_length = len(self.config.file_extension)
+#             filename_without_extension = filename[:-1*file_extension_length]
 
-            key = parse_string_to_data_context_resource_identifier(filename_without_extension, separator="/")
-            return key
+#             key = parse_string_to_data_context_resource_identifier(filename_without_extension, separator="/")
+#             return key
 
 
     # TODO: This method is OBE. Remove entirely
