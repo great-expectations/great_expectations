@@ -55,10 +55,10 @@ configuration information. For example, the following simple configuration suppo
 
   datasources:
     pipeline:
-      class_name: PandasDatasource
+      type: pandas
       generators:
         default:
-          class_name: InMemoryBatchGenerator
+          type: memory
 
 
 Note that the datasources section *includes* all defined generators as well as specifying their names.
