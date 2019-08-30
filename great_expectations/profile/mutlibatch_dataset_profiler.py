@@ -1,4 +1,7 @@
 import logging
+
+import scipy.stats as stats
+
 from great_expectations.exceptions import GreatExpectationsError
 
 logger = logging.getLogger(__name__)
@@ -22,4 +25,4 @@ class BasicMultiBatchValidationMetaAnalysisProfiler(object):
             raise GreatExpectationsError("Invalid meta_analysis_metrics; aborting;")
 
 
-        return expectation_suite, None
+        # return expectation_suite, None
