@@ -260,7 +260,6 @@ great_expectations/
                         default/
                             Titanic/
                                 BasicDatasetProfiler.html
-        profiling/
         samples/
         validations/
             profiling/

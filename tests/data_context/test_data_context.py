@@ -570,6 +570,7 @@ project_path/
     )
     
     context.profile_datasource("titanic")
+    print(gen_directory_tree_str(project_dir))
     assert gen_directory_tree_str(project_dir) == """\
 project_path/
     data/
@@ -595,7 +596,6 @@ project_path/
         uncommitted/
             credentials/
             documentation/
-            profiling/
             samples/
             validations/
                 profiling/
