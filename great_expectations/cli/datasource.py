@@ -55,6 +55,17 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
                                base_directory=os.path.join("..", path))
 
     elif data_source_selection == "2":  # sqlalchemy
+        try:
+            import sqlalchemy
+            from sqlalchemy import create_engine, MetaData
+        except ImportError:
+            cli_message(
+"""
+ERROR: Unable to import sqlalchemy - exiting.
+Please install the module before trying again.
+""")
+            return None
+
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default="mydb", show_default=True)
 
@@ -159,7 +170,7 @@ You can add a datasource later by editing the great_expectations.yml file.
     return data_source_name
 
 
-def profile_datasource(context, data_source_name, data_assets=None, profile_all_data_assets=False, max_data_assets=20):
+def profile_datasource(context, data_source_name, data_assets=None, profile_all_data_assets=False, max_data_assets=20,additional_batch_kwargs=None):
     """"Profile a named datasource using the specified context"""
 
     msg_intro = """
@@ -218,7 +229,8 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
         data_assets=data_assets,
         profile_all_data_assets=profile_all_data_assets,
         max_data_assets=max_data_assets,
-        dry_run=True
+        dry_run=True,
+        additional_batch_kwargs=additional_batch_kwargs
     )
 
     if profiling_results['success']: # data context is ready to profile - run profiling
@@ -228,7 +240,8 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
             data_assets=data_assets,
             profile_all_data_assets=profile_all_data_assets,
             max_data_assets=max_data_assets,
-            dry_run=False
+            dry_run=False,
+            additional_batch_kwargs=additional_batch_kwargs
         )
         else:
             cli_message(msg_skipping)
