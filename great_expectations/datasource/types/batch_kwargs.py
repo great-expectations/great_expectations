@@ -119,9 +119,14 @@ class SparkDFDatasourceMemoryBatchKwargs(MemoryBatchKwargs):
     _required_keys = {
         "df"
     }
-    _key_types = {
-        "df": pyspark.sql.DataFrame,
-    }
+    try:
+        _key_types = {
+            "df": pyspark.sql.DataFrame
+        }
+    except AttributeError:
+        _key_types = {
+            "df": None  # If we were unable to import pyspark, these are invalid
+        }
 
 
 class SqlAlchemyDatasourceTableBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
