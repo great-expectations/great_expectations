@@ -1,5 +1,5 @@
 import time
-from six import string_types
+from six import PY2, string_types
 
 import pandas as pd
 
@@ -62,6 +62,10 @@ class PandasDatasource(Datasource):
 
     def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
         batch_kwargs.update(kwargs)
+        # pandas cannot take unicode as a delimiter, which can happen in py2. Handle this case explicitly.
+        # We handle it here so that the updated value will be in the batch_kwargs for transparency to the user.
+        if PY2 and "sep" in batch_kwargs and batch_kwargs["sep"] is not None:
+            batch_kwargs["sep"] = str(batch_kwargs["sep"])
         reader_options = batch_kwargs.copy()
 
         if "data_asset_type" in reader_options:
@@ -83,7 +87,6 @@ class PandasDatasource(Datasource):
         if "path" in batch_kwargs:
             path = reader_options.pop("path")  # We need to remove from the reader
             reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
-
             reader_method = reader_options.pop("reader_method", None)
             if reader_method is None:
                 reader_method = self._guess_reader_method_from_path(path)

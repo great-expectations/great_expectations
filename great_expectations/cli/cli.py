@@ -20,6 +20,7 @@ from great_expectations.exceptions import DataContextError, ConfigNotFoundError
 from great_expectations import __version__, read_csv
 from pyfiglet import figlet_format
 import click
+click.disable_unicode_literals_warning = True
 import six
 import os
 import json
@@ -234,7 +235,9 @@ def add_datasource(directory):
                    'If True, this will override --max_data_assets.')
 @click.option('--directory', '-d', default="./great_expectations",
               help='The root of a project directory containing a great_expectations/ config.')
-def profile(datasource_name, data_assets, profile_all_data_assets, directory):
+@click.option('--batch_kwargs', default=None,
+              help='Additional keyword arguments to be provided to get_batch when loading the data asset.')
+def profile(datasource_name, data_assets, profile_all_data_assets, directory, batch_kwargs):
     """
     Profile datasources from the specified context.
 
@@ -247,6 +250,7 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory):
     :param data_assets: if this comma-separated list of data asset names is provided, only the specified data assets will be profiled
     :param profile_all_data_assets: if provided, all data assets will be profiled
     :param directory:
+    :param batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
     :return:
     """
 
@@ -256,15 +260,18 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory):
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
 
+    if batch_kwargs is not None:
+        batch_kwargs = json.loads(batch_kwargs)
+
     if datasource_name is None:
         datasources = [datasource["name"] for datasource in context.list_datasources()]
         if len(datasources) > 1:
             cli_message("Error: please specify the datasource to profile. Available datasources: " + ", ".join(datasources))
             return
         else:
-            profile_datasource(context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets)
+            profile_datasource(context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets, additional_batch_kwargs=batch_kwargs)
     else:
-        profile_datasource(context, datasource_name, data_assets=data_assets, profile_all_data_assets=profile_all_data_assets)
+        profile_datasource(context, datasource_name, data_assets=data_assets, profile_all_data_assets=profile_all_data_assets, additional_batch_kwargs=batch_kwargs)
 
 
 @cli.command()
