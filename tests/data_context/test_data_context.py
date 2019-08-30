@@ -27,7 +27,6 @@ from great_expectations.dataset import PandasDataset
 from great_expectations.util import gen_directory_tree_str
 
 from great_expectations.data_context.types import (
-    # NameSpaceDotDict,
     DataContextConfig,
 )
 from great_expectations.data_context.store import (
@@ -235,34 +234,11 @@ def test_register_validation_results_saves_data_assset_snapshot(data_context):
     }
     data_asset = PandasDataset({"x": [1,2,3,4]})
 
-    #2018/0814: Hijack the project config, since there doesn't appear to be another method to update it
-    # data_context._project_config["data_asset_snapshot_store"] = {
-    #     "filesystem" : {
-    #         "base_directory" : "uncommitted/snapshots"
-    #     }
-    # }
-
     snapshot_dir = os.path.join(data_context.root_directory, "uncommitted/snapshots")
     print(snapshot_dir)
 
     #The snapshot directory shouldn't exist yet
     assert not os.path.isfile(snapshot_dir)
-
-
-#   local_validation_result_store:
-#     module_name: great_expectations.data_context.store
-#     class_name: NamespacedReadWriteStore
-#     store_config:
-#       resource_identifier_class_name: ValidationResultIdentifier
-#       serialization_type: json
-#       store_backend:
-#         module_name: great_expectations.data_context.store
-#         class_name: FilesystemStoreBackend
-#         base_directory: uncommitted/validations/
-#         file_extension: json
-#         filepath_template: "{4}/{0}/{1}/{2}/validation-results-{2}-{3}-{4}.{file_extension}"
-#         replaced_substring: /
-#         replacement_string: ___
 
     data_context.add_store(
         "data_asset_snapshot_store",
@@ -637,11 +613,6 @@ project_path/
 
     # Titanic
 
-    # assert os.path.exists(os.path.join(
-    #     ge_directory,
-    #     "uncommitted/validations/profiling/titanic/default/Titanic/BasicDatasetProfiler.json"
-    # ))
-
     print(gen_directory_tree_str(os.path.join(project_dir, "great_expectations/uncommitted/documentation")))
     assert gen_directory_tree_str(os.path.join(project_dir, "great_expectations/uncommitted/documentation")) == """\
 documentation/
@@ -683,60 +654,6 @@ documentation/
                     Titanic/
                         BasicDatasetProfiler.html
 """
-
-    # assert os.path.exists(os.path.join( # profiling results HTML
-    #     ge_directory,
-    #     "uncommitted/documentation/local_site/profiling/titanic/default/Titanic/BasicDatasetProfiler.html"
-    # ))
-    
-    # assert os.path.exists(os.path.join( # profiling expectations HTML
-    #     ge_directory,
-    #     "uncommitted/documentation/local_site/expectations/titanic/default/Titanic/BasicDatasetProfiler.html"
-    # ))
-
-    # # f1
-
-    # assert os.path.exists(os.path.join(
-    #     ge_directory,
-    #     "uncommitted/validations/profiling/random/default/f1/BasicDatasetProfiler.json"
-    # ))
-    # assert os.path.exists(os.path.join( # profiling results HTML
-    #     ge_directory,
-    #     "uncommitted/documentation/local_site/profiling/random/default/f1/BasicDatasetProfiler.html"
-    # ))
-    
-    # assert os.path.exists(os.path.join( # profiling expectations HTML
-    #     ge_directory,
-    #     "uncommitted/documentation/local_site/profiling/random/default/f1/BasicDatasetProfiler.html"
-    # ))
-
-    # # f2
-
-    # assert os.path.exists(os.path.join(
-    #     ge_directory,
-    #     "uncommitted/validations/profiling/random/default/f2/BasicDatasetProfiler.json"
-    # ))
-    # assert os.path.exists(os.path.join(
-    #     ge_directory,
-    #     "uncommitted/documentation/local_site/profiling/random/default/f2/BasicDatasetProfiler.html"
-    # ))
-
-    # assert os.path.exists(os.path.join(
-    #     ge_directory,
-    #     "uncommitted/documentation/local_site/expectations/random/default/f2/BasicDatasetProfiler.html"
-    # ))
-
-    # # local_site index.html
-    # assert os.path.exists(os.path.join(
-    #     ge_directory,
-    #     "uncommitted/documentation/local_site/index.html"
-    # ))
-
-    # # team_site index.html
-    # assert os.path.exists(os.path.join(
-    #     ge_directory,
-    #     "uncommitted/documentation/team_site/index.html"
-    # ))
 
     # save documentation locally
     safe_mmkdir("./tests/data_context/output")
