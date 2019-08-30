@@ -34,13 +34,28 @@ evaluation_parameter_store_name: evaluation_parameter_store
 
 stores:
 
+  # local_validation_result_store:
+  #   module_name: great_expectations.data_context.store
+  #   class_name: FilesystemStore
+  #   store_config:
+  #     base_directory: uncommitted/validations/
+  #     serialization_type: json
+  #     file_extension: .json
+
   local_validation_result_store:
     module_name: great_expectations.data_context.store
-    class_name: FilesystemStore
+    class_name: NamespacedReadWriteStore
     store_config:
-      base_directory: uncommitted/validations/
+      resource_identifier_class_name: ValidationResultIdentifier
       serialization_type: json
-      file_extension: .json
+      store_backend:
+        module_name: great_expectations.data_context.store
+        class_name: FilesystemStoreBackend
+        base_directory: uncommitted/validations/
+        file_extension: json
+        filepath_template: "{4}/{0}/{1}/{2}/validation-results-{2}-{3}-{4}.{file_extension}"
+        replaced_substring: /
+        replacement_string: ___
 
   local_profiling_store:
     module_name: great_expectations.data_context.store
@@ -64,13 +79,28 @@ stores:
       base_directory: uncommitted/documentation/team_site
       file_extension: .html
 
+  # fixture_validation_results_store:
+  #   module_name: great_expectations.data_context.store
+  #   class_name: FilesystemStore
+  #   store_config:
+  #     base_directory: fixtures/validations
+  #     file_extension: .zzz
+  
   fixture_validation_results_store:
     module_name: great_expectations.data_context.store
-    class_name: FilesystemStore
+    class_name: NamespacedReadWriteStore
     store_config:
-      base_directory: fixtures/validations
-      file_extension: .zzz
-      
+      resource_identifier_class_name: ValidationResultIdentifier
+      serialization_type: json
+      store_backend:
+        module_name: great_expectations.data_context.store
+        class_name: FilesystemStoreBackend
+        base_directory: fixtures/validations
+        file_extension: json
+        filepath_template: "{4}/{0}/{1}/{2}/validation-results-{2}-{3}-{4}.{file_extension}"
+        replaced_substring: /
+        replacement_string: ___
+
 #  data_asset_snapshot_store:
 #    module_name: great_expectations.data_context.store
 #    class_name: S3Store

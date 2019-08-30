@@ -244,7 +244,7 @@ class NamespacedReadWriteStore(ReadWriteStore):
         # The config from THIS class should be typed by this point.
         # But if we insist that it's recursively typed, it will have failed before arriving at this point.
         if self.config["store_backend"]["class_name"] == "FilesystemStoreBackend":
-            self.config["store_backend"]["key_length"] = self.resource_identifier_class._recursively_get_key_length()+1
+            self.config["store_backend"]["key_length"] = self.resource_identifier_class._recursively_get_key_length()#+1 #Only add one if we prepend the identifier type
             self.store_backend = self._configure_store_backend(self.config["store_backend"])
             self.store_backend.verify_that_key_to_filepath_operation_is_reversible()
 
@@ -267,8 +267,12 @@ class NamespacedReadWriteStore(ReadWriteStore):
         return [self._convert_tuple_to_resource_identifier(key) for key in self.store_backend.list_keys()]
 
     def _convert_resource_identifier_to_tuple(self, key):
-        # TODO : Append a source_id to the head of the tuple.
-        list_ = [self.config.resource_identifier_class_name]
+        # TODO : Optionally prepend a source_id (the frontend Store name) to the tuple.
+
+        # TODO : Optionally prepend a resource_identifier_type to the tuple.
+        # list_ = [self.config.resource_identifier_class_name]
+
+        list_ = []
         list_ += self._convert_resource_identifier_to_list(key)
 
         return tuple(list_)
@@ -287,7 +291,7 @@ class NamespacedReadWriteStore(ReadWriteStore):
         return list_
 
     def _convert_tuple_to_resource_identifier(self, tuple_):
-        new_identifier = self.resource_identifier_class(*tuple_[1:])
+        new_identifier = self.resource_identifier_class(*tuple_)#[1:]) #Only truncate one if we prepended the identifier type
         return new_identifier
 
     @property

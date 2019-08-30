@@ -81,8 +81,8 @@ def test_NamespacedReadWriteStore_with_InMemoryStoreBackend():
 
     # Verify that internals are working as expected
     assert my_store.store_backend.store == {
-        'ValidationResultIdentifier.a.b.c.quarantine.prod-100': 'aaa',
-        'ValidationResultIdentifier.a.b.c.quarantine.prod-200': 'bbb',
+        'a.b.c.quarantine.prod-100': 'aaa',
+        'a.b.c.quarantine.prod-200': 'bbb',
     }
 
     print(my_store.list_keys())
@@ -90,9 +90,6 @@ def test_NamespacedReadWriteStore_with_InMemoryStoreBackend():
         ns_1,
         ns_2,
     ])
-
-    # TODO : Reactivate this
-    # assert my_store.get_most_recent_run_id() == "200"
 
 def test_NamespacedReadWriteStore_with_FileSystemStoreBackend(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_test_NamespacedReadWriteStore_with_FileSystemStoreBackend__dir'))
@@ -107,7 +104,7 @@ def test_NamespacedReadWriteStore_with_FileSystemStoreBackend(tmp_path_factory):
                 "class_name" : "FilesystemStoreBackend",
                 "base_directory" : "my_store/",
                 "file_extension" : "txt",
-                "filepath_template" : "{5}/{0}/{1}/{2}/{3}/{4}/validation-results-{3}-{4}.{file_extension}",
+                "filepath_template" : "{4}/{0}/{1}/{2}/validation-results-{2}-{3}.{file_extension}",
                 "replaced_substring" : "/",
                 "replacement_string" : "__",
             }
@@ -144,19 +141,15 @@ def test_NamespacedReadWriteStore_with_FileSystemStoreBackend(tmp_path_factory):
 test_test_NamespacedReadWriteStore_with_FileSystemStoreBackend__dir0/
     my_store/
         prod-100/
-            ValidationResultIdentifier/
-                a/
-                    b/
-                        c/
-                            quarantine/
-                                validation-results-c-quarantine.txt
+            a/
+                b/
+                    c/
+                        validation-results-c-quarantine.txt
         prod-200/
-            ValidationResultIdentifier/
-                a/
-                    b/
-                        c/
-                            quarantine/
-                                validation-results-c-quarantine.txt
+            a/
+                b/
+                    c/
+                        validation-results-c-quarantine.txt
 """
 
 #     # TODO : Reactivate this
@@ -176,7 +169,7 @@ def test_NamespacedReadWriteStore_pandas_csv_serialization(tmp_path_factory):#, 
                 "class_name" : "FilesystemStoreBackend",
                 "base_directory" : "my_store/",
                 "file_extension" : "csv",
-                "filepath_template" : "{5}/{0}/{1}/{2}/{3}/quarantined-rows-{3}-{4}.{file_extension}",
+                "filepath_template" : "{4}/{0}/{1}/{2}/quarantined-rows-{2}-{3}.{file_extension}",
                 "replaced_substring" : "/",
                 "replacement_string" : "__",
             }
@@ -198,14 +191,13 @@ def test_NamespacedReadWriteStore_pandas_csv_serialization(tmp_path_factory):#, 
 test_test_NamespacedReadWriteStore_pandas_csv_serialization__dir0/
     my_store/
         prod-20190801/
-            ValidationResultIdentifier/
-                a/
-                    b/
-                        c/
-                            quarantined-rows-c-quarantine.csv
+            a/
+                b/
+                    c/
+                        quarantined-rows-c-quarantine.csv
 """
 
-    with open(os.path.join(path, "my_store/prod-20190801/ValidationResultIdentifier/a/b/c/quarantined-rows-c-quarantine.csv")) as f_:
+    with open(os.path.join(path, "my_store/prod-20190801/a/b/c/quarantined-rows-c-quarantine.csv")) as f_:
         assert f_.read() == """\
 x,y
 1,a
