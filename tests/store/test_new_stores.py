@@ -17,6 +17,7 @@ from great_expectations.util import (
     gen_directory_tree_str,
 )
 
+# NOTE : Abe 2019/08/30 : Keeping this for now, since we'll likely do some work on standardizing config-init patterns soon.
 # def test_store_config(tmp_path_factory):
 #     path = str(tmp_path_factory.mktemp('test_store_config__dir'))
 
@@ -152,13 +153,9 @@ test_test_NamespacedReadWriteStore_with_FileSystemStoreBackend__dir0/
                         validation-results-c-quarantine.txt
 """
 
-#     # TODO : Reactivate this
-#     # assert my_store.get_most_recent_run_id() == "200"
-
-def test_NamespacedReadWriteStore_pandas_csv_serialization(tmp_path_factory):#, empty_data_context):
+def test_NamespacedReadWriteStore_pandas_csv_serialization(tmp_path_factory):
     #TODO: We should consider using this trick everywhere, as a way to avoid directory name collisions
     path = str(tmp_path_factory.mktemp('test_test_NamespacedReadWriteStore_pandas_csv_serialization__dir'))
-    # project_path = str(tmp_path_factory.mktemp('my_dir'))
 
     my_store = NamespacedReadWriteStore(
         config=NamespacedReadWriteStoreConfig(**{
