@@ -1502,14 +1502,18 @@ class DataContext(object):
 
     def list_validation_results(self, validations_store=None):
         """
-        {
-          "run_id":
-            "datasource": {
-                "generator": {
-                    "generator_asset": [expectation_suite_1, expectation_suite_1, ...]
+        Returns:
+             A dictionary describing validation results in the following format::
+
+                {
+                  "run_id":
+                    "datasource": {
+                        "generator": {
+                            "generator_asset": [expectation_suite_1, expectation_suite_1, ...]
+                        }
+                    }
                 }
-            }
-        }
+
         """
         if validations_store is None:
             validations_store = self.validations_store
@@ -1860,7 +1864,7 @@ PROJECT_HELP_COMMENT = """# Welcome to great expectations.
 # make it easier to use Great Expectations.
 
 # For more help configuring great expectations, 
-# see the documentation at: https://greatexpectations.io/config_file.html
+# see the documentation at: https://docs.greatexpectations.io/en/latest/core_concepts/data_context.html#configuration
 
 # NOTE: GE uses the names of configured datasources and generators to manage
 # how expectations and other configuration artifacts are stored in the 
