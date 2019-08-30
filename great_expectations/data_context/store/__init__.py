@@ -1,6 +1,15 @@
+from .store_backend import (
+    StoreBackend,
+    InMemoryStoreBackend,
+    FilesystemStoreBackend,
+)
+
 from .store import (
-    ContextAwareStore,
-    InMemoryStore,
-    FilesystemStore,
-    NameSpacedFilesystemStore,
+    WriteOnlyStore,
+    ReadWriteStore,
+    BasicInMemoryStore,
+    BasicInMemoryStoreConfig,
+    NamespacedReadWriteStore,
+    NamespacedReadWriteStoreConfig,
+    EvaluationParameterStore,
 )

@@ -220,6 +220,55 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
             open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
         assert config["datasources"]["data__dir"]["type"] == "pandas"
 
+
+        print(gen_directory_tree_str(os.path.join(basedir, "great_expectations")))
+        # FIXME: This is plain wrong.
+        assert gen_directory_tree_str(os.path.join(basedir, "great_expectations")) == """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    datasources/
+    expectations/
+        data__dir/
+            default/
+                Titanic/
+                    BasicDatasetProfiler.json
+    fixtures/
+    notebooks/
+        create_expectations.ipynb
+        integrate_validation_into_pipeline.ipynb
+    plugins/
+    uncommitted/
+        credentials/
+        documentation/
+            local_site/
+                index.html
+                expectations/
+                    data__dir/
+                        default/
+                            Titanic/
+                                BasicDatasetProfiler.html
+                profiling/
+                    data__dir/
+                        default/
+                            Titanic/
+                                BasicDatasetProfiler.html
+            team_site/
+                index.html
+                expectations/
+                    data__dir/
+                        default/
+                            Titanic/
+                                BasicDatasetProfiler.html
+        samples/
+        validations/
+            profiling/
+                data__dir/
+                    default/
+                        Titanic/
+                            validation-results-Titanic-BasicDatasetProfiler-profiling.json
+"""
+
         assert os.path.isfile(
             os.path.join(
                 basedir,
@@ -230,7 +279,7 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
         assert os.path.isfile(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.json")
+                "great_expectations/uncommitted/validations/profiling/data__dir/default/Titanic/validation-results-Titanic-BasicDatasetProfiler-profiling.json")
         )
 
         assert os.path.isfile(
