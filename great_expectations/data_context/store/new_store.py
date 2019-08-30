@@ -17,6 +17,8 @@ from ..types.resource_identifiers import (
     DataContextResourceIdentifier,
 )
 
+# TODO : Add docstrings to these classes.
+# TODO : Add a ConfigReadWriteStore. 
 
 class WriteOnlyStoreConfig(AllowedKeysDotDict):
     _required_keys = set([
