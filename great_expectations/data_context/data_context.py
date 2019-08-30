@@ -43,7 +43,7 @@ from .store.types import (
     StoreMetaConfig,
 )
 from .types import (
-    NormalizedDataAssetName,     # TODO : Replace with DataAssetIdentifier
+    NormalizedDataAssetName,     # TODO : Consider replacing this with DataAssetIdentifier. In either case, the class should inherit from DataContextResourceIdentifier.
     DataContextConfig,
     ValidationResultIdentifier,
 )
@@ -285,7 +285,7 @@ class ConfigOnlyDataContext(object):
             None
         """
 
-        # NOTE : Once we start consistently generating ResourceIdentifiers at the source, all this packing/unpakcing nonsense will vanish like a dream.
+        # NOTE : Once we start consistently generating ResourceIdentifiers at the source, all this packing/unpacking nonsense will vanish like a dream.
         normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
         validation_result_identifier = ValidationResultIdentifier(
             coerce_types=True,

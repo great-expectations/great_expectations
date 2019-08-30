@@ -27,6 +27,15 @@ from ...types import (
     AllowedKeysDotDict,
 )
 
+# TODO : Add docstrings to these classes.
+# TODO : Implement S3StoreBackend with mocks and tests
+
+# NOTE : Abe 2019/08/30 : Currently, these classes behave as key-value stores.
+# We almost certainly want to extend that functionality to allow other operations
+
+# FIXME : Abe 2019/08/30 : The current config structure has not been vetted for
+# full consistency with the intended v0.8.0 spec.
+
 class StoreBackendConfig(AllowedKeysDotDict):
     _allowed_keys = set()
 
@@ -210,7 +219,16 @@ class FilesystemStoreBackendConfig(AllowedKeysDotDict):
 class FilesystemStoreBackend(StoreBackend):
     """Uses a local filepath as a store.
 
-    # FIXME : It's currently possible to break this Store by passing it a ResourceIdentifier that contains '/'.
+    # FIXME : Abe 2019/08/30 : I'm unhappy with the current method of string standardization.
+    Currently, users (must) specify a replaced_substring (ex: "/") and a replacement_string (ex: "__").
+    Then any instances of replaced_substring in key will be replaced by replacement_string:
+        "oh/no" -> "oh__no"
+    The problem comes because this behavior must be reversible via _convert_filepath_to_key:
+        "oh__no" -> "oh/no"
+    In order to guarantee reversibility, we have to forbid the replacement_string in the key:
+    A key containing "I__am__dunderscored" -> raises a ValueError.
+    I think it would be better to simply have a list of restricted characters or substrings in StoreBackend keys.
+    Then we can propagate that same list back to ResourceIdentifier keys themselves, and handle string substitution at that point.
     """
 
     config_class = FilesystemStoreBackendConfig
@@ -227,6 +245,8 @@ class FilesystemStoreBackend(StoreBackend):
         HOWEVER, passing in root_directory as a separate parameter breaks the normal pattern we've been using for configurability.
 
         TODO: Figure this out. It might require adding root_directory to the data_context config...?
+        NOTE: One possibility is to add a `runtime_config` parallel to the existing `config` in all our configurable classes.
+        Then root_directory can be an element within the runtime_config.
         """
 
         if not os.path.isabs(root_directory):
@@ -243,7 +263,7 @@ class FilesystemStoreBackend(StoreBackend):
             self.config.base_directory,
         )
 
-        print(self.full_base_directory)
+        # TODO : Consider re-implementing this:
         # safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
     def _get(self, key):
@@ -375,60 +395,3 @@ class FilesystemStoreBackend(StoreBackend):
                 self.__class__.__name__,
                 self.config.filepath_template
             ))
-
-    # TODO: This is definitely not the right long-term home for this method.
-    # Leaving it here temporarily, because factoring it out will require switching
-    # DataContext to use NamespacedFilesystemStore for local_validation_result_store
-    # and possibly others.
-    # NOTE: This doesn't even work any more.
-    # def get_most_recent_run_id(self):
-    #     run_id_list = os.listdir(self.full_base_directory)
-
-    #     run_ids = [
-    #         name for name in run_id_list if
-    #         os.path.isdir(os.path.join(self.full_base_directory, name))
-    #     ]
-    #     most_recent_run_id = sorted(run_ids)[-1]
-
-    #     return most_recent_run_id
-
-# # class S3Store(ContextAwareStore):
-# #     """Uses an S3 bucket+prefix as a store
-# #     """
-
-# #     def _get(self, key):
-# #         raise NotImplementedError
-
-# #     def _set(self, key, value):
-# #         raise NotImplementedError
-
-# # This code is from an earlier (untested) implementation of DataContext.register_validation_results
-# # Storing it here in case it can be salvaged
-# # if isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
-# #     bucket = data_asset_snapshot_store["s3"]["bucket"]
-# #     key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
-# #     key = os.path.join(
-# #         key_prefix,
-# #         "validations/{run_id}/{data_asset_name}.csv.gz".format(
-# #             run_id=run_id,
-# #             data_asset_name=self._get_normalized_data_asset_name_filepath(
-# #                 normalized_data_asset_name,
-# #                 expectation_suite_name,
-# #                 base_path="",
-# #                 file_extension=".csv.gz"
-# #             )
-# #         )
-# #     )
-# #     validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(
-# #         bucket=bucket,
-# #         key=key)
-# #
-# #     try:
-# #         import boto3
-# #         s3 = boto3.resource('s3')
-# #         result_s3 = s3.Object(bucket, key)
-# #         result_s3.put(Body=data_asset.to_csv(compression="gzip").encode('utf-8'))
-# #     except ImportError:
-# #         logger.error("Error importing boto3 for AWS support. Unable to save to result store.")
-# #     except Exception:
-# #         raise
