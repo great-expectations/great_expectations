@@ -130,6 +130,8 @@ def safe_mmkdir(directory, exist_ok=True):
         if e.errno != errno.EEXIST:
             raise
 
+# TODO : Consider moving this into types.resource_identifiers.DataContextResourceIdentifier.
+# NOTE : We **don't** want to encourage stringification of keys, other than in tests, etc.
 def parse_string_to_data_context_resource_identifier(string, separator="."):
     string_elements = string.split(separator)
 

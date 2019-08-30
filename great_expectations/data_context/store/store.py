@@ -18,7 +18,8 @@ from ..types.resource_identifiers import (
 )
 
 # TODO : Add docstrings to these classes.
-# TODO : Add a ConfigReadWriteStore. 
+# TODO : Add a ConfigReadWriteStore.
+# NOTE : Abe 2019/08/30 : inheritance among __init__ methods is currently messy. We should clean it up.
 
 class WriteOnlyStoreConfig(AllowedKeysDotDict):
     _required_keys = set([
@@ -193,9 +194,6 @@ class BasicInMemoryStore(ReadWriteStore):
             "class_name" : "InMemoryStoreBackend",
             "separator" : ".",
         })
-
-        print(self.store_backend)
-        print(self.store_backend.store)
 
     def _validate_key(self, key):
         assert isinstance(key, string_types)

@@ -9,7 +9,6 @@ from great_expectations.types import (
     AllowedKeysDotDict,
 )
 
-# NOTE: Abe 2019/08/23 : The basics work reasonably well, but this class probably still needs to be hardened quite a bit
 # TODO: Move this to great_expectations.types.base.py
 class OrderedKeysDotDict(AllowedKeysDotDict):
     """extends AllowedKeysDotDict with a strict ordering of parameters.
@@ -119,6 +118,7 @@ class DataContextResourceIdentifier(OrderedKeysDotDict):
     """
 
     def __init__(self, *args, **kwargs):
+        # TODO : Pull out all of this logic into a `from_string` classmethod:
         from_string = kwargs.pop("from_string", None)
 
         if from_string == None:
@@ -127,12 +127,13 @@ class DataContextResourceIdentifier(OrderedKeysDotDict):
             )
 
         else:
+        # /END TODO
             super(DataContextResourceIdentifier, self).__init__(
                 *from_string.split(".")[1:],
                 **kwargs
             )
 
-
+    # TODO : Change this to __str__
     def to_string(self, include_class_prefix=True, separator="."):
         return separator.join(self._get_string_elements(include_class_prefix))
 
