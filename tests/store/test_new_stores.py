@@ -95,7 +95,7 @@ def test_NamespacedReadWriteStore_with_InMemoryStoreBackend():
     # assert my_store.get_most_recent_run_id() == "200"
 
 def test_NamespacedReadWriteStore_with_FileSystemStoreBackend(tmp_path_factory):
-    path = str(tmp_path_factory.mktemp('test_NamespacedFilesystemStore__dir'))
+    path = str(tmp_path_factory.mktemp('test_test_NamespacedReadWriteStore_with_FileSystemStoreBackend__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
 
     my_store = NamespacedReadWriteStore(
@@ -141,7 +141,7 @@ def test_NamespacedReadWriteStore_with_FileSystemStoreBackend(tmp_path_factory):
 
     print(gen_directory_tree_str(path))
     assert gen_directory_tree_str(path) == """\
-test_NamespacedFilesystemStore__dir0/
+test_test_NamespacedReadWriteStore_with_FileSystemStoreBackend__dir0/
     my_store/
         prod-100/
             ValidationResultIdentifier/
@@ -162,61 +162,9 @@ test_NamespacedFilesystemStore__dir0/
 #     # TODO : Reactivate this
 #     # assert my_store.get_most_recent_run_id() == "200"
 
-# NOTE: Abe 2019/08/29 : AFIACT, this test doesn't add anything new after refactoring.
-# def test_NamespacedFilesystemStore__validate_key(tmp_path_factory):
-#     path = str(tmp_path_factory.mktemp('test_NamespacedFilesystemStore__dir'))
-#     project_path = str(tmp_path_factory.mktemp('my_dir'))
- 
-#     my_store = NamespacedFilesystemStore(
-#         root_directory=os.path.abspath(path),
-#         config={
-#             "resource_identifier_class_name": "ValidationResultIdentifier",
-#             "base_directory": project_path,
-#             "file_extension" : ".txt",
-#         }
-#     )
-
-#     my_store._validate_key(ValidationResultIdentifier(
-#         from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100"
-#     ))
-
-#     with pytest.raises(TypeError):
-#         my_store._validate_key("I am string like")
-
-# NOTE: Abe 2019/08/29 : AFIACT, this test doesn't add anything new after refactoring.
-# def test_NamespacedFilesystemStore_key_listing(tmp_path_factory):
-#     path = str(tmp_path_factory.mktemp('test_NamespacedFilesystemStore_key_listing__dir'))
-#     project_path = "some_dir/my_store"
-
-#     my_store = NamespacedFilesystemStore(
-#         root_directory=os.path.abspath(path),
-#         config={
-#             "resource_identifier_class_name": "ValidationResultIdentifier",
-#             "base_directory": project_path,
-#             "file_extension" : ".txt",
-#         }
-#     )
-
-#     ns_1 = ValidationResultIdentifier(**{
-#         "expectation_suite_identifier" : {
-#             "data_asset_name" : DataAssetIdentifier("a", "b", "c"),
-#             "expectation_suite_name" : "quarantine",
-#         },
-#         "run_id" : "prod-100",
-#     })
-#     my_store.set(ns_1,"aaa")
-
-#     print(my_store.list_keys())
-#     assert set(my_store.list_keys()) == set([
-#         ValidationResultIdentifier(from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100")
-#     ])
-
-#     # TODO : Reactivate this
-#     # assert my_store.get_most_recent_run_id() == "100"
-
-def test_NamespacedFilesystemStore_pandas_csv_serialization(tmp_path_factory):#, empty_data_context):
+def test_NamespacedReadWriteStore_pandas_csv_serialization(tmp_path_factory):#, empty_data_context):
     #TODO: We should consider using this trick everywhere, as a way to avoid directory name collisions
-    path = str(tmp_path_factory.mktemp('test_test_NamespacedFilesystemStore_pandas_csv_serialization__dir'))
+    path = str(tmp_path_factory.mktemp('test_test_NamespacedReadWriteStore_pandas_csv_serialization__dir'))
     # project_path = str(tmp_path_factory.mktemp('my_dir'))
 
     my_store = NamespacedReadWriteStore(
@@ -247,7 +195,7 @@ def test_NamespacedFilesystemStore_pandas_csv_serialization(tmp_path_factory):#,
 
     print(gen_directory_tree_str(path))
     assert gen_directory_tree_str(path) == """\
-test_test_NamespacedFilesystemStore_pandas_csv_serialization__dir0/
+test_test_NamespacedReadWriteStore_pandas_csv_serialization__dir0/
     my_store/
         prod-20190801/
             ValidationResultIdentifier/
