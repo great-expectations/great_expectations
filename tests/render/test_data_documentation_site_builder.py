@@ -2,7 +2,9 @@ import os
 import pytest
 from great_expectations.render.renderer.site_builder import SiteBuilder
 
-
+from great_expectations.data_context.types import (
+    ValidationResultIdentifier
+)
 
 def test_configuration_driven_site_builder(titanic_data_context, filesystem_csv_2):
 
@@ -109,20 +111,29 @@ def test_configuration_driven_site_builder(titanic_data_context, filesystem_csv_
 
 def test_pack_validation_result_list_into_nested_dict():
     assert SiteBuilder.pack_validation_result_list_into_nested_dict([
-        "AAA/b/c/d/e.json",
-        "AAA/b/c/d/f.json",
-        "AAA/b/g/d/f.json",
-        "BBB/b/c/d/e.json",
+        ValidationResultIdentifier(from_string="ValidationResultIdentifier.AAA.b.c.d.e"),
+        ValidationResultIdentifier(from_string="ValidationResultIdentifier.AAA.b.c.d.f"),
+        ValidationResultIdentifier(from_string="ValidationResultIdentifier.AAA.b.g.d.f"),
+        ValidationResultIdentifier(from_string="ValidationResultIdentifier.BBB.b.c.d.e"),
     ]) == {
-        "AAA" : {
-            "b" : {
-                "c" : {"d" : ["e", "f"]},
-                "g" : {"d" : ["f"]},
+        "e" : {
+            "AAA" : {
+                "b" : {
+                    "c" : ["d"],
+                }
+            },
+            "BBB" : {
+                "b" : {
+                    "c" : ["d"],
+                }
             }
         },
-        "BBB" : {
-            "b" : {
-                "c" : {"d" : ["e"]},
-            }
+        "f" : {
+            "AAA" : {
+                "b" : {
+                    "g" : ["d"],
+                    "c" : ["d"],
+                }
+            },
         }
     }

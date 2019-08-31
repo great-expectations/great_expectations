@@ -1,60 +1,52 @@
-from ..types import (
-    NameSpaceDotDict,
-)
-from .types import (
-    InMemoryStoreConfig,
-    FilesystemStoreConfig,
-)
-from ..util import safe_mmkdir
-import pandas as pd
-import six
-import io
-import os
-import json
 import logging
 logger = logging.getLogger(__name__)
 
-# TODO: Rename this to NamespaceAwareStore
-class ContextAwareStore(object):
-    def __init__(
-        self,
-        data_context,
-        config,
-    ):
-        # Note: Eek. We want to do type chcecking, but this would cause circular imports. What to do?
-        # TODO: remove the dependency. Stores should be based on namespaceIdentifier objects, but not Context itself.
-        # if not isinstance(data_context, DataContext):
-        #     raise TypeError("data_context must be an instance of type DataContext")
+import importlib
+from six import string_types
+import copy
+import json
 
-        self.data_context = data_context
+import pandas as pd
 
-        if not isinstance(config, self.get_config_class()):
-            # Attempt to coerce config to a typed config
-            config = self.get_config_class()(
-                coerce_types=True,
-                **config
-            )
+from ...types import (
+    ListOf,
+    DotDict,
+    AllowedKeysDotDict,
+)
+from ..types.resource_identifiers import (
+    DataContextResourceIdentifier,
+)
 
+# TODO : Add docstrings to these classes.
+# TODO : Add a ConfigReadWriteStore.
+# NOTE : Abe 2019/08/30 : inheritance among __init__ methods is currently messy. We should clean it up.
+
+class WriteOnlyStoreConfig(AllowedKeysDotDict):
+    _required_keys = set([
+        "serialization_type"
+    ])
+    _allowed_keys = _required_keys
+
+
+class WriteOnlyStore(object):
+
+    # config_class = None
+
+    # TODO : Refactor __init__s among this class and its children.
+    def __init__(self, config, root_directory=None):
+        assert hasattr(self, 'config_class')
+
+        assert isinstance(config, self.config_class)
         self.config = config
+
+        self.root_directory = root_directory
+        # self.store_backend = self._configure_store_backend(self.config.store_backend)
 
         self._setup()
 
-    def get(self, key, serialization_type=None):
-        namespaced_key = self._get_namespaced_key(key)
-        value = self._get(namespaced_key)
-
-        if serialization_type:
-            deserialization_method = self._get_deserialization_method(
-                serialization_type)
-        else:
-            deserialization_method = self._get_deserialization_method(
-                self.config.serialization_type)
-        deserialized_value = deserialization_method(value)
-        return deserialized_value
-
     def set(self, key, value, serialization_type=None):
-        namespaced_key = self._get_namespaced_key(key)
-
+        self._validate_key(key)
+        
         if serialization_type:
             serialization_method = self._get_serialization_method(
                 serialization_type)
@@ -63,15 +55,12 @@ class ContextAwareStore(object):
                 self.config.serialization_type)
 
         serialized_value = serialization_method(value)
-        self._set(namespaced_key, serialized_value)
+        self._set(key, serialized_value)
+
 
     @classmethod
     def get_config_class(cls):
         return cls.config_class
-
-    def _get_namespaced_key(self, key):
-        # TODO: This method is a placeholder until we bring in _get_namespaced_key from NameSpacedFilesystemStore
-        return key
 
     def _get_serialization_method(self, serialization_type):
         if serialization_type == None:
@@ -93,6 +82,68 @@ class ContextAwareStore(object):
 
         # TODO: Add more serialization methods as needed
 
+    def _validate_key(self, key):
+        raise NotImplementedError
+
+    def _validate_value(self, value):
+        # NOTE : This is probably mainly a check of serializability using the chosen serialization_type.
+        # Might be redundant.
+        raise NotImplementedError
+
+    def _setup(self):
+        pass
+
+    def _set(self, key, value):
+        raise NotImplementedError
+
+    def _configure_store_backend(self, store_backend_config):
+        modified_store_backend_config = copy.deepcopy(store_backend_config)
+
+        module_name = modified_store_backend_config.pop("module_name")
+        class_name = modified_store_backend_config.pop("class_name")
+
+        module = importlib.import_module(module_name)
+        store_backend_class = getattr(module, class_name)
+
+        self.store_backend = store_backend_class(
+            modified_store_backend_config,
+            self.root_directory
+        )
+
+        #For convenience when testing
+        return self.store_backend
+
+
+
+class ReadWriteStoreConfig(WriteOnlyStoreConfig):
+    pass
+
+
+class ReadWriteStore(WriteOnlyStore):
+
+    def get(self, key, serialization_type=None):
+        self._validate_key(key)
+
+        value=self._get(key)
+
+        if serialization_type:
+            deserialization_method = self._get_deserialization_method(
+                serialization_type)
+        else:
+            deserialization_method = self._get_deserialization_method(
+                self.config.serialization_type)
+        deserialized_value = deserialization_method(value)
+        return deserialized_value
+
+    def _get(self, key):
+        raise NotImplementedError
+
+    def list_keys(self):
+        raise NotImplementedError
+
+    def has_key(self, key):
+        raise NotImplementedError
+
     def _get_deserialization_method(self, serialization_type):
         if serialization_type == None:
             return lambda x: x
@@ -106,166 +157,185 @@ class ContextAwareStore(object):
 
         # TODO: Add more serialization methods as needed
 
-    def _get(self, key):
-        raise NotImplementedError
 
-    def _set(self, key, value):
-        raise NotImplementedError
+class BasicInMemoryStoreConfig(ReadWriteStoreConfig):
+    _allowed_keys = set([
+        "serialization_type"
+    ]) #ReadWriteStoreConfig._allowed_keys
+    _required_keys = set([]) #ReadWriteStoreConfig._required_keys
 
-    def list_keys(self):
-        raise NotImplementedError
-
-    def has_key(self, key):
-        raise NotImplementedError
-
-
-class InMemoryStore(ContextAwareStore):
-    """Uses an in-memory dictionary as a store.
+class BasicInMemoryStore(ReadWriteStore):
+    """Like a dict, but much harder to write.
+    
+    This class uses an InMemoryStoreBackend, but I question whether it's worth it.
+    It would be easier just to wrap a dict.
     """
 
-    config_class = InMemoryStoreConfig
+    config_class = BasicInMemoryStoreConfig
+
+    def __init__(self, config=None, root_directory=None):
+        assert hasattr(self, 'config_class')
+
+        if config == None:
+            config = BasicInMemoryStoreConfig(**{
+                "serialization_type": None,
+            })
+
+        assert isinstance(config, self.config_class)
+        self.config = config
+
+        self.root_directory = root_directory
+
+        self._setup()
 
     def _setup(self):
-        self.store = {}
+        self.store_backend = self._configure_store_backend({
+            "module_name" : "great_expectations.data_context.store",
+            "class_name" : "InMemoryStoreBackend",
+            "separator" : ".",
+        })
+
+    def _validate_key(self, key):
+        assert isinstance(key, string_types)
 
     def _get(self, key):
-        return self.store[key]
-
+        return self.store_backend.get((key,))
+    
     def _set(self, key, value):
-        self.store[key] = value
+        self.store_backend.set((key,), value)
+
+    def has_key(self, key):
+        return self.store_backend.has_key((key,))
 
     def list_keys(self):
-        return self.store.keys()
+        return [key for key, in self.store_backend.list_keys()]
+
+
+class NamespacedReadWriteStoreConfig(ReadWriteStoreConfig):
+    _allowed_keys = set({
+        "serialization_type",
+        "resource_identifier_class_name",
+        "store_backend",
+    })
+    _required_keys = set({
+        "resource_identifier_class_name",
+        "store_backend",
+    })
+
+
+class NamespacedReadWriteStore(ReadWriteStore):
+    
+    config_class = NamespacedReadWriteStoreConfig
+
+    def __init__(self, config, root_directory):
+        # super(NamespacedReadWriteStore, self).__init__(config, root_directory)
+
+        # TODO: This method was copied and modified from the base class. 
+        # We need to refactor later to inherit sensibly.
+        assert hasattr(self, 'config_class')
+
+        assert isinstance(config, self.config_class)
+        self.config = config
+
+        self.root_directory = root_directory
+
+        # NOTE: hm. This is tricky.
+        # At this point, we need to add some keys to the store_backend config.
+        # The config from THIS class should be typed by this point.
+        # But if we insist that it's recursively typed, it will have failed before arriving at this point.
+        if self.config["store_backend"]["class_name"] == "FilesystemStoreBackend":
+            self.config["store_backend"]["key_length"] = self.resource_identifier_class._recursively_get_key_length()#+1 #Only add one if we prepend the identifier type
+            self.store_backend = self._configure_store_backend(self.config["store_backend"])
+            self.store_backend.verify_that_key_to_filepath_operation_is_reversible()
+
+        else:
+            self.store_backend = self._configure_store_backend(self.config["store_backend"])
+    
+
+        self._setup()
+
+
+    def _get(self, key):
+        key_tuple = self._convert_resource_identifier_to_tuple(key)
+        return self.store_backend.get(key_tuple)
+
+    def _set(self, key, serialized_value):
+        key_tuple = self._convert_resource_identifier_to_tuple(key)
+        return self.store_backend.set(key_tuple, serialized_value)
+
+    def list_keys(self):
+        return [self._convert_tuple_to_resource_identifier(key) for key in self.store_backend.list_keys()]
+
+    def _convert_resource_identifier_to_tuple(self, key):
+        # TODO : Optionally prepend a source_id (the frontend Store name) to the tuple.
+
+        # TODO : Optionally prepend a resource_identifier_type to the tuple.
+        # list_ = [self.config.resource_identifier_class_name]
+
+        list_ = []
+        list_ += self._convert_resource_identifier_to_list(key)
+
+        return tuple(list_)
+
+    def _convert_resource_identifier_to_list(self, key):
+        # The logic in this function is recursive, so it can't return a tuple
+
+        list_ = []
+
+        for _, key_element in key.items():
+            if isinstance( key_element, DataContextResourceIdentifier ):
+                list_ += self._convert_resource_identifier_to_list(key_element)
+            else:
+                list_.append(key_element)
+
+        return list_
+
+    def _convert_tuple_to_resource_identifier(self, tuple_):
+        new_identifier = self.resource_identifier_class(*tuple_)#[1:]) #Only truncate one if we prepended the identifier type
+        return new_identifier
+
+    @property
+    def resource_identifier_class(self):
+        module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
+        class_ = getattr(module, self.config.resource_identifier_class_name)
+        return class_
+
+    def _validate_key(self, key):
+        if not isinstance(key, self.resource_identifier_class):
+            raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
+                key,
+                type(key),
+            ))
+
+
+class EmptyConfig(DotDict):
+    pass
+
+class EvaluationParameterStore(object):
+    """Fine. You want to be a dict. You get to be a dict.
+    
+    TODO: Refactor this into a true Store later.
+
+    It would be easy to replace all instances of EvaluationParameterStore, except that Stores currently insist on having string_typed values,
+    and the the DataContext rudely sends dictionaries.
+
+    On reflection, there's no reason for all Stores to insist on serializability.
+    """
+
+    config_class = EmptyConfig
+
+    def __init__(self, config=None, root_directory=None):
+        self.store = {}
+
+    @classmethod
+    def get_config_class(cls):
+        return cls.config_class
+
+    def get(self, key):
+        return self.store[key]
+
+    def set(self, key, value):
+        self.store[key] = value
 
     def has_key(self, key):
         return key in self.store
-
-
-class FilesystemStore(ContextAwareStore):
-    """Uses a local filepath as a store.
-    """
-
-    config_class = FilesystemStoreConfig
-
-    def _setup(self):
-        self.full_base_directory = self.config.base_directory
-        safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
-
-    def _get(self, key):
-        with open(os.path.join(self.full_base_directory, key)) as infile:
-            return infile.read()
-
-    def _set(self, key, value):
-        filename = os.path.join(self.full_base_directory, key)
-        safe_mmkdir(str(os.path.split(filename)[0]))
-        with open(filename, "w") as outfile:
-            outfile.write(value)
-
-    def list_keys(self):
-        key_list = []
-        for root, dirs, files in os.walk(self.full_base_directory):
-            for file_ in files:
-                full_path, file_name = os.path.split(os.path.join(root, file_))
-                relative_path = os.path.relpath(
-                    full_path,
-                    self.full_base_directory,
-                )
-                if relative_path == ".":
-                    key = file_name
-                else:
-                    key = os.path.join(
-                        relative_path,
-                        file_name
-                    )
-                key_list.append(key)
-
-        return key_list
-
-
-class NameSpacedFilesystemStore(FilesystemStore):
-
-    def _setup(self):
-        self.full_base_directory = os.path.join(
-            self.data_context.root_directory,
-            self.config.base_directory,
-        )
-
-        safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
-
-    # TODO: This method should probably live in ContextAwareStore
-    # For the moment, I'm leaving it here, because:
-    #   1. This method and NameSpaceDotDict isn't yet general enough to handle all permutations of namespace objects
-    #   2. Rewriting all the tests in test_store is more work than I can take on right now.
-    #   3. Probably the best thing to do is to test BOTH classes that take simple strings as keys, and classes that take full NameSpaceDotDicts. But that relies on (1).
-    #
-    # DataContext.write_resource has some good inspiration for this...
-    # Or we might conceivably bring over the full logic from _get_normalized_data_asset_name_filepath.
-
-    def _get_namespaced_key(self, key):
-        if not isinstance(key, NameSpaceDotDict):
-            raise TypeError(
-                "key must be an instance of type NameSpaceDotDict, not {0}".format(type(key)))
-
-        filepath = self.data_context._get_normalized_data_asset_name_filepath(
-            key.normalized_data_asset_name,
-            key.expectation_suite_name,
-            base_path=os.path.join(
-                self.full_base_directory,
-                key.run_id
-            ),
-            file_extension=self.config.file_extension
-        )
-        return filepath
-
-    def get_most_recent_run_id(self):
-        run_id_list = os.listdir(self.full_base_directory)
-
-        run_ids = [
-            name for name in run_id_list if
-            os.path.isdir(os.path.join(self.full_base_directory, name))
-        ]
-        most_recent_run_id = sorted(run_ids)[-1]
-
-        return most_recent_run_id
-
-
-# class S3Store(ContextAwareStore):
-#     """Uses an S3 bucket+prefix as a store
-#     """
-
-#     def _get(self, key):
-#         raise NotImplementedError
-
-#     def _set(self, key, value):
-#         raise NotImplementedError
-
-# This code is from an earlier (untested) implementation of DataContext.register_validation_results
-# Storing it here in case it can be salvaged
-# if isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
-#     bucket = data_asset_snapshot_store["s3"]["bucket"]
-#     key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
-#     key = os.path.join(
-#         key_prefix,
-#         "validations/{run_id}/{data_asset_name}.csv.gz".format(
-#             run_id=run_id,
-#             data_asset_name=self._get_normalized_data_asset_name_filepath(
-#                 normalized_data_asset_name,
-#                 expectation_suite_name,
-#                 base_path="",
-#                 file_extension=".csv.gz"
-#             )
-#         )
-#     )
-#     validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(
-#         bucket=bucket,
-#         key=key)
-#
-#     try:
-#         import boto3
-#         s3 = boto3.resource('s3')
-#         result_s3 = s3.Object(bucket, key)
-#         result_s3.put(Body=data_asset.to_csv(compression="gzip").encode('utf-8'))
-#     except ImportError:
-#         logger.error("Error importing boto3 for AWS support. Unable to save to result store.")
-#     except Exception:
-#         raise

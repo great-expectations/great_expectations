@@ -36,41 +36,65 @@ stores:
 
   local_validation_result_store:
     module_name: great_expectations.data_context.store
-    class_name: NameSpacedFilesystemStore
+    class_name: NamespacedReadWriteStore
     store_config:
-      base_directory: uncommitted/validations/
+      resource_identifier_class_name: ValidationResultIdentifier
       serialization_type: json
-      file_extension: .json
+      store_backend:
+        module_name: great_expectations.data_context.store
+        class_name: FilesystemStoreBackend
+        base_directory: uncommitted/validations/
+        file_extension: json
+        filepath_template: '{4}/{0}/{1}/{2}/{5}/{3}.{file_extension}'
+        replaced_substring: /
+        replacement_string: ___
 
-  local_profiling_store:
-    module_name: great_expectations.data_context.store
-    class_name: NameSpacedFilesystemStore
-    store_config:
-      base_directory: uncommitted/profiling/
-      serialization_type: json
-      file_extension: .json
+  # FIXME: These configs are temporarily commented out to facititate refactoring Stores.
 
-  local_workbench_site_store:
-    module_name: great_expectations.data_context.store
-    class_name: NameSpacedFilesystemStore
-    store_config:
-      base_directory: uncommitted/documentation/local_site
-      file_extension: .html
+  # local_profiling_store:
+  #   module_name: great_expectations.data_context.store
+  #   class_name: FilesystemStore
+  #   store_config:
+  #     base_directory: uncommitted/profiling/
+  #     serialization_type: json
+  #     file_extension: .json
 
-  shared_team_site_store:
-    module_name: great_expectations.data_context.store
-    class_name: NameSpacedFilesystemStore
-    store_config:
-      base_directory: uncommitted/documentation/team_site
-      file_extension: .html
+  # local_workbench_site_store:
+  #   module_name: great_expectations.data_context.store
+  #   class_name: FilesystemStore
+  #   store_config:
+  #     base_directory: uncommitted/documentation/local_site
+  #     file_extension: .html
 
+  # shared_team_site_store:
+  #   module_name: great_expectations.data_context.store
+  #   class_name: FilesystemStore
+  #   store_config:
+  #     base_directory: uncommitted/documentation/team_site
+  #     file_extension: .html
+
+  # fixture_validation_results_store:
+  #   module_name: great_expectations.data_context.store
+  #   class_name: FilesystemStore
+  #   store_config:
+  #     base_directory: fixtures/validations
+  #     file_extension: .zzz
+  
   fixture_validation_results_store:
     module_name: great_expectations.data_context.store
-    class_name: NameSpacedFilesystemStore
+    class_name: NamespacedReadWriteStore
     store_config:
-      base_directory: fixtures/validations
-      file_extension: .zzz
-      
+      resource_identifier_class_name: ValidationResultIdentifier
+      serialization_type: json
+      store_backend:
+        module_name: great_expectations.data_context.store
+        class_name: FilesystemStoreBackend
+        base_directory: fixtures/validations
+        file_extension: json
+        filepath_template: '{4}/{0}/{1}/{2}/{5}/{3}.{file_extension}'
+        replaced_substring: /
+        replacement_string: ___
+
 #  data_asset_snapshot_store:
 #    module_name: great_expectations.data_context.store
 #    class_name: S3Store
@@ -80,7 +104,7 @@ stores:
 
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
-    class_name: InMemoryStore
+    class_name: EvaluationParameterStore
 
 # Uncomment the lines below to enable a result callback.
 

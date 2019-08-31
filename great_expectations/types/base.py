@@ -104,28 +104,8 @@ class RequiredKeysDotDict(DotDict):
         for key, value in self.items():
             if key in self._key_types:
                 if coerce_types:
-                    # Update values if coerce_types==True
-                    try:
-                        # If it already of the right type, we're done
-                        if isinstance(value, self._key_types[key]):
-                            continue
-                        # If the given type is an instance of AllowedKeysDotDict, apply coerce_types recursively
-                        elif isinstance(self._key_types[key], ListOf):
-                            if inspect.isclass(self._key_types[key].type_) and issubclass(self._key_types[key].type_,
-                                                                                          RequiredKeysDotDict):
-                                value = [self._key_types[key].type_(coerce_types=True, **v) for v in value]
-                            else:
-                                value = [self._key_types[key].type_(
-                                    v) for v in value]
-                        else:
-                            if inspect.isclass(self._key_types[key]) and issubclass(self._key_types[key],
-                                                                                    RequiredKeysDotDict):
-                                value = self._key_types[key](coerce_types=True, **value)
-                            else:
-                                value = self._key_types[key](value)
-                    except TypeError as e:
-                        raise TypeError("Unable to initialize " + self.__class__.__name__ + ": could not convert type. TypeError "
-                                                                                   "raised: " + str(e))
+                    value = self._coerce_complex_value_to_type(value, self._key_types[key])
+
                 # Validate types
                 self._validate_value_type(key, value, self._key_types[key])
 
@@ -188,8 +168,8 @@ class RequiredKeysDotDict(DotDict):
             if isinstance(type_, list):
                 any_match = False
                 for type_element in type_:
-                    if type_element is None:
-                        if value is None:
+                    if type_element == None:
+                        if value == None:
                             any_match = True
                     elif isinstance(value, type_element):
                         any_match = True
@@ -208,12 +188,12 @@ class RequiredKeysDotDict(DotDict):
                         type_,
                         type(value),
                     ))
-
+    
     def _coerce_complex_value_to_type(self, value, type_):
-        logger.debug("RequiredKeysDotDict._coerce_complex_value_to_type")
+        # logger.debug("RequiredKeysDotDict._coerce_complex_value_to_type")
 
+        # If the given type is an instance of RequiredKeysDotDict, apply coerce_types recursively
         try:
-            # If the given type is an instance of AllowedKeysDotDict, apply coerce_types recursively
             if isinstance(type_, ListOf):
                 if inspect.isclass(type_.type_) and issubclass(type_.type_,
                                                                                 RequiredKeysDotDict):
@@ -235,21 +215,26 @@ class RequiredKeysDotDict(DotDict):
                     ])
 
             else:
-                if inspect.isclass(type_) and issubclass(type_,
-                                                                        RequiredKeysDotDict):
-                    value = type_(coerce_types=True, **value)
+                if inspect.isclass(type_) and issubclass(type_, RequiredKeysDotDict):
+                    if type(value) == tuple:
+                        value = type_(coerce_types=True, *value)
+                    else:
+                        try:
+                            value = type_(coerce_types=True, **value)
+                        except TypeError as e:
+                            raise TypeError(type_.__name__ + " cannot accept " + str(value) + " as input.")
                 else:
                     value = self._coerce_simple_value_to_type(value, type_)
 
         except TypeError as e:
-            raise TypeError("Unable to initialize " + self.__class__.__name__ + ". TypeError raised: " + str(e))
+            raise TypeError("Unable to initialize " + self.__class__.__name__ + ".\n\tTypeError raised: " + str(e))
 
         return value
 
     def _coerce_simple_value_to_type(self, value, type_):
         """Convenience method to handle the case where type_ == string type, and any other similarly weird things in the future
         """
-        logger.debug("RequiredKeysDotDict._coerce_simple_value_to_type")
+        # logger.debug("RequiredKeysDotDict._coerce_simple_value_to_type")
 
         if type_ == string_types:
             return str(value)
@@ -301,13 +286,16 @@ class AllowedKeysDotDict(RequiredKeysDotDict):
                 ))
 
     def __getattr__(self, item):
-        if item in self._allowed_keys or callable(self.get(item)):
+        if item in self._allowed_keys:
             return self.get(item)
         else:
             # We raise AttributeError in the event that someone tries to access a nonexistent property
             # to be more consistent with usual type semantics without losing dictionary access patterns.
             # Note that a dictionary would usually raise KeyError
-            raise AttributeError
+            raise AttributeError("key: {0} does not exist in this instance of {1}".format(
+                item,
+                self.__class__.__name__,
+            ))
 
     def __setitem__(self, key, val):
         if key not in self._allowed_keys:
