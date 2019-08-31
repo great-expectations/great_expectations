@@ -36,9 +36,9 @@ stores:
 
   local_validation_result_store:
     module_name: great_expectations.data_context.store
-    class_name: NameSpacedFilesystemStore
+    class_name: NamespacedReadWriteStore
     store_config:
-      base_directory: uncommitted/validations/
+      resource_identifier_class_name: ValidationResultIdentifier
       serialization_type: json
       store_backend:
         module_name: great_expectations.data_context.store
@@ -51,23 +51,38 @@ stores:
 
   # FIXME: These configs are temporarily commented out to facititate refactoring Stores.
 
-  local_workbench_site_store:
-    module_name: great_expectations.data_context.store
-    class_name: NameSpacedFilesystemStore
-    store_config:
-      base_directory: uncommitted/documentation/local_site
-      file_extension: .html
+  # local_profiling_store:
+  #   module_name: great_expectations.data_context.store
+  #   class_name: FilesystemStore
+  #   store_config:
+  #     base_directory: uncommitted/profiling/
+  #     serialization_type: json
+  #     file_extension: .json
 
-  shared_team_site_store:
-    module_name: great_expectations.data_context.store
-    class_name: NameSpacedFilesystemStore
-    store_config:
-      base_directory: uncommitted/documentation/team_site
-      file_extension: .html
+  # local_workbench_site_store:
+  #   module_name: great_expectations.data_context.store
+  #   class_name: FilesystemStore
+  #   store_config:
+  #     base_directory: uncommitted/documentation/local_site
+  #     file_extension: .html
+
+  # shared_team_site_store:
+  #   module_name: great_expectations.data_context.store
+  #   class_name: FilesystemStore
+  #   store_config:
+  #     base_directory: uncommitted/documentation/team_site
+  #     file_extension: .html
+
+  # fixture_validation_results_store:
+  #   module_name: great_expectations.data_context.store
+  #   class_name: FilesystemStore
+  #   store_config:
+  #     base_directory: fixtures/validations
+  #     file_extension: .zzz
 
   fixture_validation_results_store:
     module_name: great_expectations.data_context.store
-    class_name: NameSpacedFilesystemStore
+    class_name: NamespacedReadWriteStore
     store_config:
       resource_identifier_class_name: ValidationResultIdentifier
       serialization_type: json
@@ -89,7 +104,7 @@ stores:
 
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
-    class_name: InMemoryStore
+    class_name: EvaluationParameterStore
 
 # Uncomment the lines below to enable a result callback.
 
@@ -145,7 +160,7 @@ data_docs:
           view:
             module: great_expectations.render.view
             class: DefaultJinjaPageView
-            
+
     team_site:
       # "team_site" is meant to support the "shared source of truth for a team" use case. 
       # By default only the expectations section is enabled.
