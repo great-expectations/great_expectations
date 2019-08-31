@@ -25,7 +25,6 @@ from great_expectations.exceptions import DataContextError, ConfigNotFoundError,
 
 from great_expectations.render.renderer.site_builder import SiteBuilder
 
-
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -844,7 +843,7 @@ class ConfigOnlyDataContext(object):
                 expectation_suite_name
             )
 
-    # TODO: This method should be changed to use a Store. The DataContext itself shouldn't need to know about writing to disc. 
+    # TODO: This method should be changed to use a Store. The DataContext itself shouldn't need to know about writing to disc.
     def save_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
         """Save the provided expectation suite into the DataContext.
 
@@ -1280,7 +1279,7 @@ class ConfigOnlyDataContext(object):
         selected_store = self.stores[validations_store_name]
 
         if run_id == None:
-            #Get most recent run id 
+            #Get most recent run id
             # NOTE : This method requires a (potentially very inefficient) list_keys call.
             # It should probably move to live in an appropriate Store class,
             # but when we do so, that Store will need to function as more than just a key-value Store.

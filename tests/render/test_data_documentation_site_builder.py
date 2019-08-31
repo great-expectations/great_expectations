@@ -6,7 +6,6 @@ from great_expectations.data_context.types import (
     ValidationResultIdentifier
 )
 
-
 def test_configuration_driven_site_builder(titanic_data_context, filesystem_csv_2):
 
     # profiling the Titanic datasource will generate one expectation suite and one validation
