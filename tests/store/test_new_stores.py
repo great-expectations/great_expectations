@@ -92,6 +92,26 @@ def test_NamespacedReadWriteStore_with_InMemoryStoreBackend():
         ns_2,
     ])
 
+def test_NamespacedReadWriteStore__convert_resource_identifier_to_list():
+
+    my_store = NamespacedReadWriteStore(
+        config=NamespacedReadWriteStoreConfig(**{
+            "resource_identifier_class_name": "ValidationResultIdentifier",
+            "serialization_type" : None,
+            "store_backend" : {
+                "module_name" : "great_expectations.data_context.store",
+                "class_name" : "InMemoryStoreBackend",
+                "separator" : ".",
+            }
+        }),
+        root_directory=None,#"dummy/path/",
+    )
+
+    ns_1 = ValidationResultIdentifier(
+        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100"
+    )
+    assert my_store._convert_resource_identifier_to_tuple(ns_1) == ('a', 'b', 'c', 'quarantine', 'prod-100')
+    
 def test_NamespacedReadWriteStore_with_FileSystemStoreBackend(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_test_NamespacedReadWriteStore_with_FileSystemStoreBackend__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
