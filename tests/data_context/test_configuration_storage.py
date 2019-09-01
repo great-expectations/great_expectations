@@ -55,7 +55,7 @@ expectations_directory: expectations/
 stores:
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
-    class_name: InMemoryStore
+    class_name: EvaluationParameterStore
 datasources:
   # For example, this one.
   mydatasource:
