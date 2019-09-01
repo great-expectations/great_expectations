@@ -20,9 +20,9 @@ from .resource_identifiers import (
     ValidationResultIdentifier,
 )
 
-# TODO: Deprecate this in favor of DataAssetIdentifier
-NormalizedDataAssetName = namedtuple("NormalizedDataAssetName", [
-    "datasource",
-    "generator",
-    "generator_asset"
-])
+# # TODO: Deprecate this in favor of DataAssetIdentifier
+# NormalizedDataAssetName = namedtuple("NormalizedDataAssetName", [
+#     "datasource",
+#     "generator",
+#     "generator_asset"
+# ])
