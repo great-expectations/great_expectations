@@ -231,3 +231,21 @@ def test_parse_string_to_data_context_resource_identifier():
             "run_id" : "testing-12345",
         }
     )
+
+
+def test_resource_identifier_to_string():
+
+    assert ValidationResultIdentifier(
+        coerce_types=True,
+        **{
+            "expectation_suite_identifier" : {
+                "data_asset_name" : {
+                    "datasource" : "a",
+                    "generator" : "b",
+                    "generator_asset" : "c",
+                },
+                "expectation_suite_name": "hello",
+            },
+            "run_id" : "testing-12345",
+        }
+    ).to_string() == "ValidationResultIdentifier.a.b.c.hello.testing-12345"
