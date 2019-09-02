@@ -132,17 +132,11 @@ class ConfigOnlyDataContext(object):
         for datasource in self._project_config["datasources"].keys():
             self.get_datasource(datasource)
 
-
+        # Init stores
         self._stores = DotDict()
         self._init_stores(self._project_config["stores"])
 
-
-        # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
-        self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
-
         self._compiled = False
-        # /End store stuff
-
 
         if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
             raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
