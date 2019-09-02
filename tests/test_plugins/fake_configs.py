@@ -90,7 +90,7 @@ class FakeConfigurableWrapperClass(Configurable):
     def __init__(self, config, runtime_config):
         super(FakeConfigurableWrapperClass, self).__init__(config, runtime_config)
 
-        # This code allows us to specify 
+        # This code allows us to specify defaults
         fake_configurable_class_config = copy.deepcopy(config.fake_configurable_class_config)
         self.fake_configurable_object = instantiate_class_from_config(
             fake_configurable_class_config,
