@@ -281,8 +281,9 @@ class NamespacedReadWriteStore(ReadWriteStore):
         # The logic in this function is recursive, so it can't return a tuple
 
         list_ = []
-
-        for _, key_element in key.items():
+        #Fetch keys in _key_order to guarantee tuple ordering in both python 2 and 3
+        for key_name in key._key_order:
+            key_element = key[key_name]
             if isinstance( key_element, DataContextResourceIdentifier ):
                 list_ += self._convert_resource_identifier_to_list(key_element)
             else:
