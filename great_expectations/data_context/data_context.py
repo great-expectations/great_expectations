@@ -921,8 +921,8 @@ class ConfigOnlyDataContext(object):
         try:
             batch_fingerprint = BatchKwargs.build_batch_fingerprint(validation_results["meta"]["batch_kwargs"])
         except KeyError:
-            # If there are no batch_kwargs, use such a fingerprint
-            batch_fingerprint = BatchFingerprint(partition_id="NA", fingerprint="_no_kwargs")
+            # If there are no batch_kwargs, that's ok
+            batch_fingerprint = None
 
         # NOTE : Once we have consistent type generation at the source, this repacking logic will be unnecessary.
         key = ValidationResultIdentifier(
