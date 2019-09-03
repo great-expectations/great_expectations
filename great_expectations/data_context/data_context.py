@@ -1903,11 +1903,6 @@ validations_store:
 #     key_prefix: <your key prefix>
 #   
 
-# Uncomment the lines below to enable a result callback.
-
-# result_callback:
-#   slack: https://slack.com/replace_with_your_webhook
-
 # Uncomment the lines below to save snapshots of data assets that fail validation.
 
 # data_asset_snapshot_store:
@@ -2026,5 +2021,9 @@ A profile can optionally have a single parameter called
 
 Otherwise, all credential options specified here for a 
 given profile will be passed to sqlalchemy's create URL function.
+
+# Uncomment the lines below to enable a Slack webhook result callback.
+# result_callback:
+#   slack: https://slack.com/replace_with_your_webhook
 
 """
