@@ -211,7 +211,7 @@ The corresponding config would be:
                     type: queries
             profile: my_db
 
-Note: the CLI will also create a ``uncommitted/credentials/profiles.yml`` files to contain SQL credentials. Note that this file goes in the ``uncommitted/`` directory, which should *NOT* be committed to source control.
+Note: the CLI will also create a ``uncommitted/credentials/profiles.yml`` files to contain SQL credentials. Note that this file goes in the ``uncommitted/`` directory, which should *NOT* be committed to source control. It may also contain a Slack webhook url for notifications.
 
 Strictly speaking, a Great Expectations Datasource is not the data itself, but part of a *pointer* to a data compute environment where Expectations can be evaluated, called a `DataAsset.` Fully describing the pointer requires a 3-ple:
 
