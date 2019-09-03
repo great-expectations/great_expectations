@@ -1,6 +1,7 @@
 from six import string_types
 
 from great_expectations.data_context.types import NormalizedDataAssetName
+from great_expectations.datasource.types import BatchFingerprint
 from great_expectations.types import AllowedKeysDotDict
 from great_expectations.profile.metrics_utils import make_dictionary_key
 
@@ -43,7 +44,7 @@ class NamespaceAwareValidationMetric(Metric):
     }
     _key_types = {
         "data_asset_name": NormalizedDataAssetName,
-        "batch_fingerprint": string_types,
+        "batch_fingerprint": BatchFingerprint,
         "metric_name": string_types,
         "metric_kwargs": dict
     }
@@ -52,7 +53,7 @@ class NamespaceAwareValidationMetric(Metric):
     def key(self):
         return ('NamespaceAwareValidationMetric',
                 self.data_asset_name,
-                self.batch_fingerprint,
+                str(self.batch_fingerprint),
                 self.metric_name,
                 make_dictionary_key(self.metric_kwargs))
 
@@ -62,6 +63,7 @@ class NamespaceAwareValidationMetric(Metric):
                 self.data_asset_name,
                 self.metric_name,
                 make_dictionary_key(self.metric_kwargs))
+
 
 class NamespaceAwareExpectationDefinedValidationMetric(Metric):
     """Captures information from a validation result in a fully namespace aware way suitable to be accessed
@@ -83,7 +85,7 @@ class NamespaceAwareExpectationDefinedValidationMetric(Metric):
     }
     _key_types = {
         "data_asset_name": NormalizedDataAssetName,
-        "batch_fingerprint": string_types,
+        "batch_fingerprint": BatchFingerprint,
         "expectation_type": string_types,
         "result_key": string_types,
         "metric_kwargs": dict
@@ -105,6 +107,7 @@ class NamespaceAwareExpectationDefinedValidationMetric(Metric):
                 self.expectation_type,
                 self.result_key,
                 make_dictionary_key(self.metric_kwargs))
+
 
 class MultiBatchNamespaceAwareValidationMetric(Metric):
     """Holds values of a metric captured from validation results of multiple batches."""
@@ -137,6 +140,7 @@ class MultiBatchNamespaceAwareValidationMetric(Metric):
                 self.data_asset_name,
                 self.metric_name,
                 make_dictionary_key(self.metric_kwargs))
+
 
 class MultiBatchNamespaceAwareExpectationDefinedValidationMetric(Metric):
     """Holds values of a metric captured from validation results of multiple batches."""
