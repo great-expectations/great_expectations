@@ -26,7 +26,8 @@ class BatchFingerprint(AllowedKeysDotDict):
         "partition_id",
         "fingerprint"
     }
-    _key_types = copy.copy(AllowedKeysDotDict._key_types).update({
+    _key_types = copy.copy(AllowedKeysDotDict._key_types)
+    _key_types = _key_types.update({
         "partition_id": string_types,
         "fingerprint": string_types
     })
@@ -113,7 +114,7 @@ class BatchKwargs(RequiredKeysDotDict):
         try:
             return BatchKwargs(dict_).batch_fingerprint
         except (KeyError, TypeError):
-            logger.error("Unable to build BatchKwargs from provided dictionary.")
+            logger.warning("Unable to build BatchKwargs from provided dictionary.")
             return None
 
 
