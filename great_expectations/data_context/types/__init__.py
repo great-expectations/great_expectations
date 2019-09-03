@@ -1,7 +1,6 @@
 from collections import namedtuple
 from .base import (
     NormalizedDataAssetName,
-    NameSpaceDotDict
 )
 
 from .metrics import (
