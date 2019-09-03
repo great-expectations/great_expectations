@@ -102,11 +102,10 @@ def test_ValidationResultIdentifier__init__totally_nested():
                 "expectation_suite_name": "failure",
             },
             "run_id" : "testing-12345",
-            "batch_fingerprint": "test-batch-fingerprint"
         }
     )
 
-    assert my_id.to_string() == "ValidationResultIdentifier.a.b.c.failure.testing-12345.test-batch-fingerprint"
+    assert my_id.to_string() == "ValidationResultIdentifier.a.b.c.failure.testing-12345"
 
 def test_ValidationResultIdentifier__init__mostly_nested():
     ValidationResultIdentifier(
@@ -119,9 +118,6 @@ def test_ValidationResultIdentifier__init__mostly_nested():
             "run_id" : {
                 "execution_context": "testing",
                 "start_time_utc": 12345,
-            },
-            "batch_fingerprint": {
-                "test-batch-fingerprint"
             }
 
         }
@@ -138,9 +134,6 @@ def test_ValidationResultIdentifier__init__mostly_nested_with_typed_child():
             "run_id" : {
                 "execution_context": "testing",
                 "start_time_utc": 12345,
-            },
-            "batch_fingerprint": {
-                "test-batch-fingerprint"
             }
         }
     )
@@ -153,10 +146,7 @@ def test_ValidationResultIdentifier__init__partially_flat():
                 "data_asset_name" : ("a", "b", "c"),
                 "expectation_suite_name": "hello",
             },
-            "run_id" : ("testing", 12345),
-            "batch_fingerprint": {
-                "test-batch-fingerprint"
-            }
+            "run_id" : ("testing", 12345)
         }
     )
 
@@ -189,10 +179,8 @@ def test_ValidationResultIdentifier__init__nested_except_the_top_layer():
         },{
             "execution_context": "testing",
             "start_time_utc": 12345,
-        },{
-            "batch_fingerprint": "test-batch-fingerprint"
         },
-        coerce_types=True,
+        coerce_types=True
     )
 
 def test_ValidationResultIdentifier__init__entirely_flat():
@@ -206,8 +194,7 @@ def test_OrderedKeysDotDict__zip_keys_and_args_to_dict():
         ["a", "b", "c", "warning", "testing-12345", "test-batch-fingerprint"],
     ) == {
         "expectation_suite_identifier" : ["a", "b", "c", "warning"],
-        "run_id" : "testing-12345",
-        "batch_fingerprint": "test-batch-fingerprint",
+        "run_id" : "testing-12345"
     }
 
     assert ExpectationSuiteIdentifier._zip_keys_and_args_to_dict(
@@ -221,8 +208,7 @@ def test_OrderedKeysDotDict__zip_keys_and_args_to_dict():
         ["a", "b", "c", "hello", "testing-12345", "test-batch-fingerprint"]
     ) == {
         "expectation_suite_identifier" : ["a", "b", "c", "hello",],
-        "run_id" : "testing-12345",
-        "batch_fingerprint": "test-batch-fingerprint",
+        "run_id" : "testing-12345"
     }
 
 # TODO: Put this with the other tests for utils.
@@ -243,7 +229,6 @@ def test_parse_string_to_data_context_resource_identifier():
                 },
                 "expectation_suite_name": "hello",
             },
-            "run_id" : "testing-12345",
-            "batch_fingerprint": "test-batch-fingerprint",
+            "run_id" : "testing-12345"
         }
     )

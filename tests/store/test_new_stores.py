@@ -105,7 +105,7 @@ def test_NamespacedReadWriteStore_with_FileSystemStoreBackend(tmp_path_factory):
                 "class_name" : "FilesystemStoreBackend",
                 "base_directory" : "my_store/",
                 "file_extension" : "txt",
-                "filepath_template" : "{4}/{0}/{1}/{2}/{5}/{3}.{file_extension}",
+                "filepath_template" : "{4}/{0}/{1}/{2}/{3}.{file_extension}",
                 "replaced_substring" : "/",
                 "replacement_string" : "__",
             }
@@ -168,7 +168,7 @@ def test_NamespacedReadWriteStore_pandas_csv_serialization(tmp_path_factory):
                 "class_name" : "FilesystemStoreBackend",
                 "base_directory" : "my_store/",
                 "file_extension" : "csv",
-                "filepath_template" : "{4}/{0}/{1}/{2}/{5}/{3}.{file_extension}",
+                "filepath_template" : "{4}/{0}/{1}/{2}/{3}.{file_extension}",
                 "replaced_substring" : "/",
                 "replacement_string" : "__",
             }
@@ -193,10 +193,9 @@ def test_NamespacedReadWriteStore_pandas_csv_serialization(tmp_path_factory):
             a/
                 b/
                     c/
-                        test-batch-fingerprint0/
-                            quarantine.csv
+                        quarantine.csv
 """
-    with open(os.path.join(path, "my_store/prod-20190801/a/b/c/test-batch-fingerprint0/quarantine.csv")) as f_:
+    with open(os.path.join(path, "my_store/prod-20190801/a/b/c/quarantine.csv")) as f_:
         assert f_.read() == """\
 x,y
 1,a
