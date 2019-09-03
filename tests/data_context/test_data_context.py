@@ -68,7 +68,7 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
     print(gen_directory_tree_str(validations_dir))
 
     with open(os.path.join(not_so_empty_data_context.root_directory, 
-            "uncommitted/validations/1955-11-05T000000Z/my_datasource/default/f1/validation-results-f1-default-1955-11-05T000000Z.json")) as infile:
+            "uncommitted/validations/1955-11-05T000000Z/my_datasource/default/f1/default.json")) as infile:
         saved_validation_result = json.load(infile)
     
     assert validation_result == saved_validation_result
