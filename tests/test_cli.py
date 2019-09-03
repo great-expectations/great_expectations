@@ -222,8 +222,7 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
 
 
         print(gen_directory_tree_str(os.path.join(basedir, "great_expectations")))
-        # FIXME: This is plain wrong.
-        assert gen_directory_tree_str(os.path.join(basedir, "great_expectations")).startswith("""\
+        assert gen_directory_tree_str(os.path.join(basedir, "great_expectations")) == """\
 great_expectations/
     .gitignore
     great_expectations.yml
@@ -266,7 +265,8 @@ great_expectations/
                 data__dir/
                     default/
                         Titanic/
-                            Titanic""")
+                            BasicDatasetProfiler.json
+"""
 
         assert os.path.isfile(
             os.path.join(
