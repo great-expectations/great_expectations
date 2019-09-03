@@ -194,10 +194,6 @@ class RequiredKeysDotDict(DotDict):
 
         # If the given type is an instance of RequiredKeysDotDict, apply coerce_types recursively
         try:
-            # If it already of the right type, we're done
-            if isinstance(value, type_):
-                return value
-
             # If the given type is an instance of AllowedKeysDotDict, apply coerce_types recursively
             if isinstance(type_, ListOf):
                 if inspect.isclass(type_.type_) and issubclass(type_.type_, RequiredKeysDotDict):
@@ -216,6 +212,10 @@ class RequiredKeysDotDict(DotDict):
                         (k, self._coerce_simple_value_to_type(v, type_.type_))
                         for k, v in value.items()
                     ])
+
+            # If it already of the right type, we're done
+            elif isinstance(value, type_):
+                return value
 
             else:
                 if inspect.isclass(type_) and issubclass(type_, RequiredKeysDotDict):
