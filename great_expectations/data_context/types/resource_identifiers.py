@@ -79,7 +79,6 @@ class ValidationResultIdentifier(DataContextResourceIdentifier):
     _key_order = [
         "expectation_suite_identifier",
         "run_id",
-        "batch_fingerprint"
         # "purpose"
     ]
     _key_types = {
