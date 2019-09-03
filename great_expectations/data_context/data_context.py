@@ -49,6 +49,11 @@ from .types import (
     DataContextConfig,
     ValidationResultIdentifier,
 )
+from great_expectations.data_context.types.resource_identifiers import (
+    DataAssetIdentifier,
+    ExpectationSuiteIdentifier
+)
+
 from .templates import (
     PROJECT_TEMPLATE,
     PROFILE_COMMENT,
@@ -1274,6 +1279,16 @@ class ConfigOnlyDataContext(object):
         """
 
         selected_store = self.stores[validations_store_name]
+        if not isinstance(data_asset_name, NormalizedDataAssetName):
+            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+
+        if not isinstance(data_asset_name, DataAssetIdentifier):
+            data_asset_name = DataAssetIdentifier(
+                datasource=data_asset_name.datasource,
+                generator=data_asset_name.generator,
+                generator_asset=data_asset_name.generator_asset
+            )
+
 
         if run_id == None:
             #Get most recent run id
@@ -1285,16 +1300,12 @@ class ConfigOnlyDataContext(object):
             run_id = max(run_id_set)
 
         key = ValidationResultIdentifier(
-            coerce_types=True,
-            **{
-                "expectation_suite_identifier": {
-                    #NOTE: Eugene 2019-08-30: is it safe to assume that a valid data asset name object is expected here?
-                    # "data_asset_name": tuple(self._normalize_data_asset_name(data_asset_name)),
-                    "data_asset_name": data_asset_name,
-                    "expectation_suite_name" : expectation_suite_name,
-                },
-                "run_id": run_id,
-            })
+                expectation_suite_identifier=ExpectationSuiteIdentifier(
+                    data_asset_name=data_asset_name,
+                    expectation_suite_name=expectation_suite_name
+                ),
+                run_id=run_id
+            )
         results_dict = selected_store.get(key)
 
         #TODO: This should be a convenience method of ValidationResultSuite

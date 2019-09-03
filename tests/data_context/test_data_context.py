@@ -601,7 +601,7 @@ project_path/
                     titanic/
                         default/
                             Titanic/
-                                validation-results-Titanic-BasicDatasetProfiler-profiling.json
+                                BasicDatasetProfiler.json
 """
 
     context.profile_datasource("random")
