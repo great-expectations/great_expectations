@@ -42,10 +42,12 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from .store.types import (
     StoreMetaConfig,
 )
+from great_expectations.datasource.types import BatchKwargs
+
 from .types import (
-    NameSpaceDotDict,
-    NormalizedDataAssetName,
+    NormalizedDataAssetName,     # TODO : Consider replacing this with DataAssetIdentifier. In either case, the class should inherit from DataContextResourceIdentifier.
     DataContextConfig,
+    ValidationResultIdentifier,
 )
 from .templates import (
     PROJECT_TEMPLATE,
@@ -115,7 +117,10 @@ class ConfigOnlyDataContext(object):
         Returns:
             None
         """
-        assert isinstance(project_config, DataContextConfig)
+        if not isinstance(project_config, DataContextConfig):
+            raise TypeError("project_config must be an instance of DataContextConfig, not {0}".format(
+                type(project_config)
+            ))
 
         self._project_config = project_config
         self._context_root_directory = os.path.abspath(context_root_dir)
@@ -194,6 +199,8 @@ class ConfigOnlyDataContext(object):
         if "store_config" not in typed_config:
             typed_config.store_config = {}
 
+        # NOTE : This should pop module_name and class_name, thereby removing the need for a layer of nesting in this config
+        # TODO : Remove the extra layer of nesting from store_config
         loaded_module = importlib.import_module(typed_config.module_name)
         loaded_class = getattr(loaded_module, typed_config.class_name)
 
@@ -203,8 +210,8 @@ class ConfigOnlyDataContext(object):
         )
 
         instantiated_store = loaded_class(
-            data_context=self,
             config=typed_sub_config,
+            root_directory=self.root_directory,
         )
 
         return instantiated_store
@@ -225,7 +232,6 @@ class ConfigOnlyDataContext(object):
     def root_directory(self):
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located."""
-        # return self._context_root_directory
         return self._context_root_directory
 
     @property
@@ -252,6 +258,7 @@ class ConfigOnlyDataContext(object):
         """A single holder for all Datasources in this context"""
         return self._datasources
 
+    # TODO: Decide whether this stays here or moves into NamespacedStore
     @property
     def data_asset_name_delimiter(self):
         """Configurable delimiter character used to parse data asset name strings into \
@@ -276,17 +283,23 @@ class ConfigOnlyDataContext(object):
             run_id: run_id of validation to get. If no run_id is specified, fetch the latest run_id according to \
             alphanumeric sort (by default, the latest run_id if using ISO 8601 formatted timestamps for run_id
 
-
         Returns:
             None
         """
 
-        validation_result_identifier = NameSpaceDotDict(**{
-            "normalized_data_asset_name": self._normalize_data_asset_name(data_asset_name),
-            "expectation_suite_name": expectation_suite_name,
-            "run_id": run_id,
-        })
+        # NOTE : Once we start consistently generating ResourceIdentifiers at the source, all this packing/unpacking nonsense will vanish like a dream.
+        normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+        validation_result_identifier = ValidationResultIdentifier(
+            coerce_types=True,
+            **{
+                "expectation_suite_identifier": {
+                    "data_asset_name": tuple(normalized_data_asset_name),
+                    "expectation_suite_name" : expectation_suite_name,
+                },
+                "run_id": run_id,
+            })
         validation_result = self.stores.local_validation_result_store.get(validation_result_identifier)
+
         self.stores.fixture_validation_results_store.set(
             validation_result_identifier,
             json.dumps(validation_result, indent=2)
@@ -298,6 +311,7 @@ class ConfigOnlyDataContext(object):
     #
     #####
 
+    # TODO : This method should be deprecated in favor of NamespaceReadWriteStore.
     def _get_normalized_data_asset_name_filepath(self, data_asset_name,
                                                  expectation_suite_name,
                                                  base_path=None,
@@ -802,6 +816,7 @@ class ConfigOnlyDataContext(object):
                 .format(datasource_name=split_name[0], generator_name=split_name[1])
             )
 
+    # TODO: This method should be changed to use a Store. The DataContext itself shouldn't need to know about reading from disc
     def get_expectation_suite(self, data_asset_name, expectation_suite_name="default"):
         """Get or create a named expectation suite for the provided data_asset_name.
 
@@ -828,6 +843,7 @@ class ConfigOnlyDataContext(object):
                 expectation_suite_name
             )
 
+    # TODO: This method should be changed to use a Store. The DataContext itself shouldn't need to know about writing to disc.
     def save_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
         """Save the provided expectation suite into the DataContext.
 
@@ -861,6 +877,7 @@ class ConfigOnlyDataContext(object):
             json.dump(expectation_suite, outfile, indent=2)
         self._compiled = False
 
+    # TODO: This method will be replaced by DataContextAwareValidationActions.
     def register_validation_results(self, run_id, validation_results, data_asset=None):
         """Process results of a validation run. This method is called by data_asset objects that are connected to
          a DataContext during validation. It performs several actions:
@@ -901,13 +918,22 @@ class ConfigOnlyDataContext(object):
 
         expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
 
+        batch_fingerprint = BatchKwargs.build_batch_id(validation_results["meta"]["batch_kwargs"])
+        # NOTE : Once we have consistent type generation at the source, this repacking logic will be unnecessary.
+        key = ValidationResultIdentifier(
+            coerce_types=True,
+            **{
+                "expectation_suite_identifier": {
+                    "data_asset_name": tuple(normalized_data_asset_name),
+                    "expectation_suite_name" : expectation_suite_name,
+                },
+                "run_id": run_id,
+                "batch_fingerprint": batch_fingerprint
+            })
+
         if "local_validation_result_store" in self.stores:
             self.stores.local_validation_result_store.set(
-                key=NameSpaceDotDict(**{
-                    "normalized_data_asset_name" : normalized_data_asset_name,
-                    "expectation_suite_name" : expectation_suite_name,
-                    "run_id" : run_id,
-                }),
+                key=key,
                 value=validation_results
             )
 
@@ -921,11 +947,7 @@ class ConfigOnlyDataContext(object):
         if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
             logging.debug("Storing validation results to data_asset_snapshot_store")
             self.stores.data_asset_snapshot_store.set(
-                key=NameSpaceDotDict(**{
-                    "normalized_data_asset_name" : normalized_data_asset_name,
-                    "expectation_suite_name" : expectation_suite_name,
-                    "run_id" : run_id,
-                }),
+                key=key,
                 value=data_asset
             )
 
@@ -1154,6 +1176,7 @@ class ConfigOnlyDataContext(object):
 
         self._compiled = True
 
+    # TDOD : Deprecate this method in favor of Stores.
     def write_resource(
             self,
             resource,  # bytes
@@ -1235,6 +1258,7 @@ class ConfigOnlyDataContext(object):
         data_asset_name,
         expectation_suite_name="default",
         run_id=None,
+        batch_fingerprint=None, # NOTE: Eugene 2019-08-30: I don't think this is an optional arg
         validations_store_name="local_validation_result_store",
         failed_only=False,
     ):
@@ -1255,13 +1279,27 @@ class ConfigOnlyDataContext(object):
         selected_store = self.stores[validations_store_name]
 
         if run_id == None:
-            run_id = selected_store.get_most_recent_run_id()
+            #Get most recent run id
+            # NOTE : This method requires a (potentially very inefficient) list_keys call.
+            # It should probably move to live in an appropriate Store class,
+            # but when we do so, that Store will need to function as more than just a key-value Store.
+            key_list = selected_store.list_keys()
+            run_id_set = set([key.run_id for key in key_list])
+            run_id = max(run_id_set)
 
-        results_dict = selected_store.get(NameSpaceDotDict(**{
-            "normalized_data_asset_name" : self._normalize_data_asset_name(data_asset_name),
-            "expectation_suite_name" : expectation_suite_name,
-            "run_id" : run_id,
-        }))
+        key = ValidationResultIdentifier(
+            coerce_types=True,
+            **{
+                "expectation_suite_identifier": {
+                    #NOTE: Eugene 2019-08-30: is it safe to assume that a valid data asset name object is expected here?
+                    # "data_asset_name": tuple(self._normalize_data_asset_name(data_asset_name)),
+                    "data_asset_name": data_asset_name,
+                    "expectation_suite_name" : expectation_suite_name,
+                },
+                "run_id": run_id,
+                "batch_fingerprint": batch_fingerprint
+            })
+        results_dict = selected_store.get(key)
 
         #TODO: This should be a convenience method of ValidationResultSuite
         if failed_only:
@@ -1331,7 +1369,7 @@ class ConfigOnlyDataContext(object):
             logger.debug("Found data_docs_config. Building sites...")
             sites = data_docs_config.get('sites', [])
             for site_name, site_config in sites.items():
-                logger.debug("Building site ", site_name)
+                logger.debug("Building site %s" % site_name,)
                 if (site_names and site_name in site_names) or not site_names or len(site_names) == 0:
                     #TODO: get the builder class
                     #TODO: build the site config by using defaults if needed
@@ -1548,8 +1586,7 @@ class DataContext(ConfigOnlyDataContext):
     # def __init__(self, config, filepath, data_asset_name_delimiter='/'):
     def __init__(self, context_root_dir=None, data_asset_name_delimiter='/'):
 
-        # #TODO: Factor this out into a helper function in GE. It doesn't belong inside this method.
-        # # determine the "context root directory" - this is the parent of "great_expectations" dir
+        # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
             context_root_dir = self.find_context_root_dir()
         context_root_directory = os.path.abspath(context_root_dir)
@@ -1563,6 +1600,7 @@ class DataContext(ConfigOnlyDataContext):
             data_asset_name_delimiter,
         )
 
+    # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
     def _load_project_config(self):
         """Loads the project configuration file."""
         try:
@@ -1577,6 +1615,7 @@ class DataContext(ConfigOnlyDataContext):
         except IOError:
             raise ConfigNotFoundError(self.root_directory)
 
+    # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
     def _save_project_config(self):
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")

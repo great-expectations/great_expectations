@@ -9,6 +9,7 @@ from six import string_types
 import great_expectations.dataset as dataset
 from great_expectations.data_context import DataContext
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -252,3 +253,5 @@ def get_data_context(path=None):
     """Given a path, try to guess where the DataContext is located.
     """
     pass
+
+
