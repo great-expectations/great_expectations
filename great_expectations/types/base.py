@@ -168,8 +168,8 @@ class RequiredKeysDotDict(DotDict):
             if isinstance(type_, list):
                 any_match = False
                 for type_element in type_:
-                    if type_element == None:
-                        if value == None:
+                    if type_element is None:
+                        if value is None:
                             any_match = True
                     elif isinstance(value, type_element):
                         any_match = True
@@ -188,9 +188,9 @@ class RequiredKeysDotDict(DotDict):
                         type_,
                         type(value),
                     ))
-    
+
     def _coerce_complex_value_to_type(self, value, type_):
-        # logger.debug("RequiredKeysDotDict._coerce_complex_value_to_type")
+        logger.debug("RequiredKeysDotDict._coerce_complex_value_to_type")
 
         # If the given type is an instance of RequiredKeysDotDict, apply coerce_types recursively
         try:
@@ -237,7 +237,7 @@ class RequiredKeysDotDict(DotDict):
     def _coerce_simple_value_to_type(self, value, type_):
         """Convenience method to handle the case where type_ == string type, and any other similarly weird things in the future
         """
-        # logger.debug("RequiredKeysDotDict._coerce_simple_value_to_type")
+        logger.debug("RequiredKeysDotDict._coerce_simple_value_to_type")
 
         if type_ == string_types:
             return str(value)

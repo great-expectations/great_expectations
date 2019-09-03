@@ -29,7 +29,7 @@ class MultiBatchValidationMetaAnalysis(object):
 
         for j, one_batch_validation_results in enumerate(validation_results_list):
             #             print(json.dumps(one_batch_validation_results['meta'], indent=2))
-            batch_id = cls.get_batch_id(one_batch_validation_results['meta']['batch_kwargs'])
+            batch_fingerprint = cls.get_batch_fingerprint(one_batch_validation_results['meta']['batch_kwargs'])
 
             # NOTE: Eugene 2019-08-25: when validation results be a typed object,
             # that object will have data_asset_name property method that will
@@ -37,13 +37,13 @@ class MultiBatchValidationMetaAnalysis(object):
             # a NormalizedDataAssetName from the string that we fetch from the dictionary
             normalized_data_asset_name = data_context._normalize_data_asset_name(
                 one_batch_validation_results['meta']['data_asset_name'])
-            metrics_dict[batch_id] = {}
+            metrics_dict[batch_fingerprint] = {}
             for i, result in enumerate(one_batch_validation_results['results']):
                 cur_exp_metrics = MetricsStore.get_metrics_for_expectation(result,
                                                               normalized_data_asset_name,
-                                                              batch_id)
+                                                              batch_fingerprint)
                 for metric in cur_exp_metrics:
-                    metrics_dict[batch_id][metric.multi_batch_key] = metric
+                    metrics_dict[batch_fingerprint][metric.multi_batch_key] = metric
 
         return metrics_dict
 
@@ -89,8 +89,8 @@ class MultiBatchValidationMetaAnalysis(object):
         return mb_metrics
 
     @classmethod
-    def get_batch_id(cls, batch_kwargs):
-        return BatchKwargs.build_batch_id(batch_kwargs)
+    def get_batch_fingerprint(cls, batch_kwargs):
+        return BatchKwargs.build_batch_fingerprint(batch_kwargs)
 
     @classmethod
     def make_multi_batch_metric_from_list_of_single_batch_metrics(cls, single_batch_metric_name, single_batch_metric_list, batch_index):

@@ -1,11 +1,13 @@
 import logging
+import copy
 from hashlib import md5
 import datetime
 
 import pandas as pd
 from six import string_types
-from great_expectations.types import RequiredKeysDotDict, ClassConfig
+from great_expectations.types import RequiredKeysDotDict, AllowedKeysDotDict, ClassConfig
 from great_expectations.datasource.types.reader_methods import ReaderMethods
+# from great_expectations.exceptions import GreatExpectationsError
 
 try:
     import pyspark
@@ -13,6 +15,56 @@ except ImportError:
     pyspark = None
 
 logger = logging.getLogger(__name__)
+
+
+class BatchFingerprint(AllowedKeysDotDict):
+    _allowed_keys = AllowedKeysDotDict._allowed_keys | {
+        "partition_id",
+        "fingerprint"
+    }
+    _required_keys = AllowedKeysDotDict._required_keys | {
+        "partition_id",
+        "fingerprint"
+    }
+    _key_types = copy.copy(AllowedKeysDotDict._key_types).update({
+        "partition_id": string_types,
+        "fingerprint": string_types
+    })
+
+# class BatchFingerprint(object):
+#     def __init__(self, partition_id, fingerprint, separator="__"):
+#         self.__partition_id = partition_id
+#         self.__fingerprint = fingerprint
+#         self.__separator = separator
+#
+#     def __str__(self):
+#         return self.__partition_id + self.separator + self.__fingerprint
+#
+#     # Act like a string when trying to concatenate
+#     def __add__(self, other):
+#         return str(self) + other
+#
+#     def __radd__(self, other):
+#         return other + str(self)
+#
+#     # Return properties even though they are name mangled.
+#     @property
+#     def partition_id(self):
+#         return self.__partition_id
+#
+#     @property
+#     def fingerprint(self):
+#         return self.__fingerprint
+#
+#     @property
+#     def separator(self):
+#         return self.__separator
+#
+#     @separator.setter
+#     def separator(self, separator):
+#         if separator not in ["::", ":", "_", "__"]:
+#             raise GreatExpectationsError("Invalid separator: %s")
+#         self.separator = separator
 
 
 class BatchKwargs(RequiredKeysDotDict):
@@ -54,7 +106,7 @@ class BatchKwargs(RequiredKeysDotDict):
             hash_dict = {k: self[k] for k in id_keys}
             hash_ = md5(str(sorted(hash_dict.items())).encode("utf-8")).hexdigest()
 
-        return (partition_id, hash_)
+        return BatchFingerprint(partition_id=partition_id, fingerprint=hash_)
 
     @classmethod
     def build_batch_fingerprint(cls, dict_):
