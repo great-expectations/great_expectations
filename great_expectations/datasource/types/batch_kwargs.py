@@ -114,7 +114,7 @@ class BatchKwargs(RequiredKeysDotDict):
         try:
             return BatchKwargs(dict_).batch_fingerprint
         except (KeyError, TypeError):
-            logger.error("Unable to build BatchKwargs from provided dictionary.")
+            logger.warning("Unable to build BatchKwargs from provided dictionary.")
             return None
 
 
