@@ -31,7 +31,7 @@ except ImportError:
     from urlparse import urlparse
 
 from great_expectations.data_asset.util import get_empty_expectation_suite
-from great_expectations.dataset import Dataset, PandasDataset
+from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     PandasDatasource,
     SqlAlchemyDatasource,
@@ -42,7 +42,7 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from .store.types import (
     StoreMetaConfig,
 )
-from great_expectations.datasource.types import BatchKwargs
+from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
 
 from .types import (
     NormalizedDataAssetName,     # TODO : Consider replacing this with DataAssetIdentifier. In either case, the class should inherit from DataContextResourceIdentifier.
@@ -918,14 +918,19 @@ class ConfigOnlyDataContext(object):
 
         expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
 
-        batch_fingerprint = BatchKwargs.build_batch_id(validation_results["meta"]["batch_kwargs"])
+        try:
+            batch_fingerprint = BatchKwargs.build_batch_fingerprint(validation_results["meta"]["batch_kwargs"])
+        except KeyError:
+            # If there are no batch_kwargs, use such a fingerprint
+            batch_fingerprint = BatchFingerprint(partition_id="NA", fingerprint="_no_kwargs")
+
         # NOTE : Once we have consistent type generation at the source, this repacking logic will be unnecessary.
         key = ValidationResultIdentifier(
             coerce_types=True,
             **{
                 "expectation_suite_identifier": {
                     "data_asset_name": tuple(normalized_data_asset_name),
-                    "expectation_suite_name" : expectation_suite_name,
+                    "expectation_suite_name": expectation_suite_name,
                 },
                 "run_id": run_id,
                 "batch_fingerprint": batch_fingerprint
