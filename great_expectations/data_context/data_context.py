@@ -39,6 +39,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 ALLOWED_DELIMITERS = ['.', '/']
+PROFILE_PATH = "uncommitted/credentials/profiles.yml"
 
 
 class DataContext(object):
@@ -432,8 +433,7 @@ class DataContext(object):
 
         # TODO: support parameterized additional store locations
         try:
-            with open(os.path.join(self.root_directory,
-                                   "uncommitted/credentials/profiles.yml"), "r") as profiles_file:
+            with open(os.path.join(self.root_directory, PROFILE_PATH), "r") as profiles_file:
                 return yaml.load(profiles_file) or {}
         except IOError as e:
             if e.errno != errno.ENOENT:
@@ -473,7 +473,7 @@ class DataContext(object):
         """
         profiles = self._get_all_profile_credentials()
         profiles[profile_name] = dict(**kwargs)
-        profiles_filepath = os.path.join(self.root_directory, "uncommitted/credentials/profiles.yml")
+        profiles_filepath = os.path.join(self.root_directory, PROFILE_PATH)
         safe_mmkdir(os.path.dirname(profiles_filepath), exist_ok=True)
         if not os.path.isfile(profiles_filepath):
             logger.info("Creating new profiles store at {profiles_filepath}".format(
@@ -1162,12 +1162,17 @@ class DataContext(object):
                 except Exception:
                     raise
 
-        if "result_callback" in self._project_config:
-            result_callback = self._project_config["result_callback"]
+        # try:
+        # except KeyError:
+        # profile = self._datasource_config["profile"]
+        # credentials = self.data_context.get_profile_credentials(profile)
+        profile = self._get_all_profile_credentials()
+        if "result_callback" in profile:
+            result_callback = profile["result_callback"]
             if isinstance(result_callback, dict) and "slack" in result_callback:
                 get_slack_callback(result_callback["slack"])(validation_results)
             else:
-                logger.warning("Unrecognized result_callback configuration.")
+                logger.warning("Unrecognized result_callback configuration. Please verify this in your profiles.yml file: {}".format(PROFILE_PATH))
 
         if "data_asset_snapshot_store" in self._project_config and validation_results["success"] is False:
             data_asset_snapshot_store = self._project_config["data_asset_snapshot_store"]
