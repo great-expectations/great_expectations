@@ -918,12 +918,6 @@ class ConfigOnlyDataContext(object):
 
         expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
 
-        try:
-            batch_fingerprint = BatchKwargs.build_batch_fingerprint(validation_results["meta"]["batch_kwargs"])
-        except KeyError:
-            # If there are no batch_kwargs, that's ok
-            batch_fingerprint = None
-
         # NOTE : Once we have consistent type generation at the source, this repacking logic will be unnecessary.
         key = ValidationResultIdentifier(
             coerce_types=True,
@@ -932,8 +926,7 @@ class ConfigOnlyDataContext(object):
                     "data_asset_name": tuple(normalized_data_asset_name),
                     "expectation_suite_name": expectation_suite_name,
                 },
-                "run_id": run_id,
-                "batch_fingerprint": batch_fingerprint
+                "run_id": run_id
             })
 
         if "local_validation_result_store" in self.stores:
@@ -1263,7 +1256,6 @@ class ConfigOnlyDataContext(object):
         data_asset_name,
         expectation_suite_name="default",
         run_id=None,
-        batch_fingerprint=None, # NOTE: Eugene 2019-08-30: I don't think this is an optional arg
         validations_store_name="local_validation_result_store",
         failed_only=False,
     ):
@@ -1302,7 +1294,6 @@ class ConfigOnlyDataContext(object):
                     "expectation_suite_name" : expectation_suite_name,
                 },
                 "run_id": run_id,
-                "batch_fingerprint": batch_fingerprint
             })
         results_dict = selected_store.get(key)
 
