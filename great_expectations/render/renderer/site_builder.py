@@ -154,13 +154,10 @@ class SiteBuilder():
 
                 expectation_suite_name = validation_result_key.expectation_suite_identifier.expectation_suite_name
 
-                batch_fingerprint = validation_result_key.batch_fingerprint
-
                 validation = data_context.get_validation_result(data_asset_name,
                                                                 expectation_suite_name=expectation_suite_name,
                                                                 validations_store_name=site_config['validations_store']['name'],
-                                                                run_id=run_id,
-                                                                batch_fingerprint=batch_fingerprint)
+                                                                run_id=run_id)
                 logger.info("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id,
                                                                                                           expectation_suite_name,
                                                                                                           data_asset_name))
@@ -295,13 +292,10 @@ class SiteBuilder():
 
             expectation_suite_name = validation_result_key.expectation_suite_identifier.expectation_suite_name
 
-            batch_fingerprint = validation_result_key.batch_fingerprint
-
             validation = data_context.get_validation_result(data_asset_name,
                                                             expectation_suite_name=expectation_suite_name,
                                                             validations_store_name=validations_store_name,
-                                                            run_id=run_id,
-                                                            batch_fingerprint=batch_fingerprint)
+                                                            run_id=run_id)
             logger.info("        Rendering profiling for data asset {}".format(data_asset_name))
             data_asset_name = validation['meta']['data_asset_name']
             expectation_suite_name = validation['meta']['expectation_suite_name']
