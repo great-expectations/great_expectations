@@ -73,7 +73,7 @@ def test_OrderedKeysDotDict__recursively_get_key_length():
 
     assert MyOKDD._recursively_get_key_length() == 3
     assert DataAssetIdentifier._recursively_get_key_length() == 3
-    assert ValidationResultIdentifier._recursively_get_key_length() == 6
+    assert ValidationResultIdentifier._recursively_get_key_length() == 5
 
 
 def test_DataAssetIdentifier():
@@ -104,6 +104,8 @@ def test_ValidationResultIdentifier__init__totally_nested():
             "run_id" : "testing-12345",
         }
     )
+
+    print("boo")
 
     assert my_id.to_string() == "ValidationResultIdentifier.a.b.c.failure.testing-12345"
 
@@ -185,13 +187,13 @@ def test_ValidationResultIdentifier__init__nested_except_the_top_layer():
 
 def test_ValidationResultIdentifier__init__entirely_flat():
     ValidationResultIdentifier(
-        "a", "b", "c", "warning", "testing-12345", "test-batch-fingerprint",
+        "a", "b", "c", "warning", "testing-12345",
         coerce_types=True,
     )
 
 def test_OrderedKeysDotDict__zip_keys_and_args_to_dict():
     assert ValidationResultIdentifier._zip_keys_and_args_to_dict(
-        ["a", "b", "c", "warning", "testing-12345", "test-batch-fingerprint"],
+        ["a", "b", "c", "warning", "testing-12345"],
     ) == {
         "expectation_suite_identifier" : ["a", "b", "c", "warning"],
         "run_id" : "testing-12345"
@@ -205,7 +207,7 @@ def test_OrderedKeysDotDict__zip_keys_and_args_to_dict():
     }
 
     assert ValidationResultIdentifier._zip_keys_and_args_to_dict(
-        ["a", "b", "c", "hello", "testing-12345", "test-batch-fingerprint"]
+        ["a", "b", "c", "hello", "testing-12345"]
     ) == {
         "expectation_suite_identifier" : ["a", "b", "c", "hello",],
         "run_id" : "testing-12345"
@@ -217,7 +219,7 @@ def test_parse_string_to_data_context_resource_identifier():
     assert parse_string_to_data_context_resource_identifier("DataAssetIdentifier.A.B.C") == DataAssetIdentifier("A", "B", "C")
 
     assert parse_string_to_data_context_resource_identifier(
-        "ValidationResultIdentifier.a.b.c.hello.testing-12345.test-batch-fingerprint"
+        "ValidationResultIdentifier.a.b.c.hello.testing-12345"
     ) == ValidationResultIdentifier(
         coerce_types=True,
         **{
