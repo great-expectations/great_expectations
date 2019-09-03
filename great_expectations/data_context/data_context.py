@@ -1162,17 +1162,16 @@ class DataContext(object):
                 except Exception:
                     raise
 
-        # try:
-        # except KeyError:
-        # profile = self._datasource_config["profile"]
-        # credentials = self.data_context.get_profile_credentials(profile)
         profile = self._get_all_profile_credentials()
         if "result_callback" in profile:
             result_callback = profile["result_callback"]
-            if isinstance(result_callback, dict) and "slack" in result_callback:
-                get_slack_callback(result_callback["slack"])(validation_results)
-            else:
-                logger.warning("Unrecognized result_callback configuration. Please verify this in your profiles.yml file: {}".format(PROFILE_PATH))
+            try:
+                slack_webhook_url = result_callback["slack"]
+                # TODO move type checking to profile/environment loaders
+                assert isinstance(slack_webhook_url, str), TypeError
+                get_slack_callback(slack_webhook_url)(validation_results)
+            except (KeyError, TypeError):
+                logger.warning("Unrecognized result_slack callback configuration. Please verify this in your profiles.yml file: {}".format(PROFILE_PATH))
 
         if "data_asset_snapshot_store" in self._project_config and validation_results["success"] is False:
             data_asset_snapshot_store = self._project_config["data_asset_snapshot_store"]
