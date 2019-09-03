@@ -69,21 +69,21 @@ def test_NamespacedReadWriteStore_with_InMemoryStoreBackend():
         my_store.get(ValidationResultIdentifier(**{}))
     
     ns_1 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100.test-batch-fingerprint"
+        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100"
     )
     my_store.set(ns_1,"aaa")
     assert my_store.get(ns_1) == "aaa"
 
     ns_2 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-200.test-batch-fingerprint"
+        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-200"
     )
     my_store.set(ns_2, "bbb")
     assert my_store.get(ns_2) == "bbb"
 
     # Verify that internals are working as expected
     assert my_store.store_backend.store == {
-        'a.b.c.quarantine.prod-100.test-batch-fingerprint': 'aaa',
-        'a.b.c.quarantine.prod-200.test-batch-fingerprint': 'bbb',
+        'a.b.c.quarantine.prod-100': 'aaa',
+        'a.b.c.quarantine.prod-200': 'bbb',
     }
 
     print(my_store.list_keys())
@@ -120,13 +120,13 @@ def test_NamespacedReadWriteStore_with_FileSystemStoreBackend(tmp_path_factory):
         my_store.get(ValidationResultIdentifier(**{}))
     
     ns_1 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100.test-batch-fingerprint"
+        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100"
     )
     my_store.set(ns_1,"aaa")
     assert my_store.get(ns_1) == "aaa"
 
     ns_2 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-20.test-batch-fingerprint0"
+        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-20"
     )
     my_store.set(ns_2, "bbb")
     assert my_store.get(ns_2) == "bbb"
@@ -145,14 +145,12 @@ test_test_NamespacedReadWriteStore_with_FileSystemStoreBackend__dir0/
             a/
                 b/
                     c/
-                        test-batch-fingerprint/
-                            quarantine.txt
+                        quarantine.txt
         prod-20/
             a/
                 b/
                     c/
-                        test-batch-fingerprint0/
-                            quarantine.txt
+                        quarantine.txt
 """
 
 def test_NamespacedReadWriteStore_pandas_csv_serialization(tmp_path_factory):
@@ -177,7 +175,7 @@ def test_NamespacedReadWriteStore_pandas_csv_serialization(tmp_path_factory):
     )
 
     key1 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-20190801.test-batch-fingerprint0"
+        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-20190801"
     )
     with pytest.raises(AssertionError):
         my_store.set(key1, "hi")
