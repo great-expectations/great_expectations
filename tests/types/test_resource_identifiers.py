@@ -105,8 +105,6 @@ def test_ValidationResultIdentifier__init__totally_nested():
         }
     )
 
-    print("boo")
-
     assert my_id.to_string() == "ValidationResultIdentifier.a.b.c.failure.testing-12345"
 
 def test_ValidationResultIdentifier__init__mostly_nested():
