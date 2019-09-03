@@ -273,6 +273,7 @@ class AllowedKeysDotDict(RequiredKeysDotDict):
         }
     """
     _allowed_keys = set()
+    _required_keys = RequiredKeysDotDict._required_keys  # No new required keys by default
 
     def __init__(self, *args, **kwargs):
         if not self._required_keys.issubset(self._allowed_keys):
