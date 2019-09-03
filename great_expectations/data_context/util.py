@@ -51,16 +51,6 @@ def build_slack_notification_request(validation_json=None):
 
         query["blocks"][0]["text"]["text"] = "*Validated batch from data asset:* `{}`\n*Status: {}*\n{}".format(
             data_asset_name, status, check_details_text)
-        if "batch_kwargs" in validation_json["meta"]:
-            batch_kwargs = {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "Batch kwargs: {}".format(
-                json.dumps(validation_json["meta"]["batch_kwargs"], indent=2))
-                }
-            }
-            query["blocks"].append(batch_kwargs)
 
         if "result_reference" in validation_json["meta"]:
             report_element = {
