@@ -53,7 +53,7 @@ class NamespaceAwareValidationMetric(Metric):
     def key(self):
         return ('NamespaceAwareValidationMetric',
                 self.data_asset_name,
-                str(self.batch_fingerprint),
+                self.batch_fingerprint,
                 self.metric_name,
                 make_dictionary_key(self.metric_kwargs))
 
