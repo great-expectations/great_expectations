@@ -18,10 +18,3 @@ from .resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-
-# # TODO: Deprecate this in favor of DataAssetIdentifier
-# NormalizedDataAssetName = namedtuple("NormalizedDataAssetName", [
-#     "datasource",
-#     "generator",
-#     "generator_asset"
-# ])
