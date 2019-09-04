@@ -1,12 +1,11 @@
 import json
-from string import Template
+from builtins import str
 import re
 
 import altair as alt
 import pandas as pd
 
 from .renderer import Renderer
-from .content_block import ValueListContentBlockRenderer
 from .content_block import TableContentBlockRenderer
 from .content_block import (ExpectationSuiteBulletListContentBlockRenderer)
 from great_expectations.render.renderer.content_block import ValidationResultsTableContentBlockRenderer
@@ -18,8 +17,10 @@ from ..types import (
     RenderedComponentContent,
 )
 
+
 def convert_to_string_and_escape(var):
-    return re.sub("\$", "$$", str(var))
+    return re.sub(r"\$", r"$$", str(var))
+
 
 class ColumnSectionRenderer(Renderer):
     @classmethod
