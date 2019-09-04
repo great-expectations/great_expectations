@@ -1,6 +1,10 @@
 .. _changelog:
 
 
+v0.7.9__develop
+-----------------
+
+
 v0.7.8
 -----------------
 * BREAKING: slack webhook URL now must be in the profiles.yml file (treat as a secret)
