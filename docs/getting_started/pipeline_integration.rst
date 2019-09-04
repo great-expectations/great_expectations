@@ -198,7 +198,7 @@ Send Notifications
 
 The DataContext can also send notifications using a user-provided callback function based on the validation result. GE
 includes a slack-based notification in the base package. To enable a slack notification for results, simply specify
-the slack webhook in the ???PROFILES??? configuration:
+the slack webhook in the profiles.yml file in uncommitted/credentials/:
 
 .. code-block:: bash
 
