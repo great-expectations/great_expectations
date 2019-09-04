@@ -6,6 +6,7 @@ from collections import OrderedDict
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ProfilingResultsColumnSectionRenderer,
+    ProfilingResultsOverviewSectionRenderer,
     ValidationResultsColumnSectionRenderer
 )
 from great_expectations.render.renderer.content_block import (
@@ -397,8 +398,9 @@ def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_n
             }
         }
     ]
-    
-    
+
+
+# noinspection PyPep8Naming
 def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_name_column_evrs):
     remaining_evrs, content_blocks = ValidationResultsColumnSectionRenderer._render_table(
         validation_results=titanic_profiled_name_column_evrs,
@@ -422,7 +424,8 @@ def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_na
     assert "values must not match this regular expression: $regex." in content_block_stringified
     assert "\\n\\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows." in content_block_stringified
     
-    
+
+# noinspection PyPep8Naming
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path():
     evr = {
         'success': True,
@@ -520,3 +523,36 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         ]
     }
 
+
+# noinspection PyPep8Naming
+def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
+    # This rather specific test is a reaction to the error documented in #679
+    validation = {
+        "results": [
+            {
+                'success': True,
+                'result': {
+                    'observed_value': "VARIANT",  # Note this is NOT a recognized type
+                },
+                'exception_info': {
+                    'raised_exception': False, 'exception_message': None, 'exception_traceback': None
+                },
+                'expectation_config': {
+                    'expectation_type': 'expect_column_values_to_be_in_type_list',
+                    'kwargs': {
+                        'column': 'live', 'type_list': None, 'result_format': 'SUMMARY'
+                    },
+                    'meta': {'BasicDatasetProfiler': {'confidence': 'very low'}}
+                }
+            }
+        ]
+    }
+
+    result = ProfilingResultsOverviewSectionRenderer.render(validation)
+
+    # Find the variable types content block:
+    types_table = [
+        block["table"] for block in result["content_blocks"]
+        if block["content_block_type"] == "table" and block["header"] == "Variable types"
+    ][0]
+    assert ["unknown", "1"] in types_table

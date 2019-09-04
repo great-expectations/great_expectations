@@ -5,6 +5,7 @@ yaml = YAML()
 
 @yaml_object(yaml)
 class ClassConfig(LooselyTypedDotDict):
+    """Defines information sufficient to identify a class to be (dynamically) loaded for a DataContext."""
     _allowed_keys = {
         "module_name",
         "class_name"
