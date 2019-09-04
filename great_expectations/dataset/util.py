@@ -68,7 +68,7 @@ def categorical_partition_data(data):
         A new partition object::
 
             {
-                "partition": (list) The categorical values present in the data
+                "values": (list) The categorical values present in the data
                 "weights": (list) The weights of the values in the partition.
             }
     """
@@ -99,7 +99,7 @@ def kde_partition_data(data, estimate_tails=True):
         A new partition_object::
 
         {
-            "partition": (list) The endpoints of the partial partition of reals,
+            "bins": (list) The endpoints of the partial partition of reals,
             "weights": (list) The densities of the bins implied by the partition.
         }
     """
