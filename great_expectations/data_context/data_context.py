@@ -39,6 +39,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 ALLOWED_DELIMITERS = ['.', '/']
+PROFILE_PATH = "uncommitted/credentials/profiles.yml"
 
 
 class DataContext(object):
@@ -432,8 +433,7 @@ class DataContext(object):
 
         # TODO: support parameterized additional store locations
         try:
-            with open(os.path.join(self.root_directory,
-                                   "uncommitted/credentials/profiles.yml"), "r") as profiles_file:
+            with open(os.path.join(self.root_directory, PROFILE_PATH), "r") as profiles_file:
                 return yaml.load(profiles_file) or {}
         except IOError as e:
             if e.errno != errno.ENOENT:
@@ -473,7 +473,7 @@ class DataContext(object):
         """
         profiles = self._get_all_profile_credentials()
         profiles[profile_name] = dict(**kwargs)
-        profiles_filepath = os.path.join(self.root_directory, "uncommitted/credentials/profiles.yml")
+        profiles_filepath = os.path.join(self.root_directory, PROFILE_PATH)
         safe_mmkdir(os.path.dirname(profiles_filepath), exist_ok=True)
         if not os.path.isfile(profiles_filepath):
             logger.info("Creating new profiles store at {profiles_filepath}".format(
@@ -1162,12 +1162,16 @@ class DataContext(object):
                 except Exception:
                     raise
 
-        if "result_callback" in self._project_config:
-            result_callback = self._project_config["result_callback"]
-            if isinstance(result_callback, dict) and "slack" in result_callback:
-                get_slack_callback(result_callback["slack"])(validation_results)
-            else:
-                logger.warning("Unrecognized result_callback configuration.")
+        profile = self._get_all_profile_credentials()
+        if "result_callback" in profile:
+            result_callback = profile["result_callback"]
+            try:
+                slack_webhook_url = result_callback["slack"]
+                # TODO move type checking to profile/environment loaders
+                assert isinstance(slack_webhook_url, str), TypeError
+                get_slack_callback(slack_webhook_url)(validation_results)
+            except (KeyError, TypeError):
+                logger.warning("Unrecognized result_slack callback configuration. Please verify this in your profiles.yml file: {}".format(PROFILE_PATH))
 
         if "data_asset_snapshot_store" in self._project_config and validation_results["success"] is False:
             data_asset_snapshot_store = self._project_config["data_asset_snapshot_store"]
@@ -1899,11 +1903,6 @@ validations_store:
 #     key_prefix: <your key prefix>
 #   
 
-# Uncomment the lines below to enable a result callback.
-
-# result_callback:
-#   slack: https://slack.com/replace_with_your_webhook
-
 # Uncomment the lines below to save snapshots of data assets that fail validation.
 
 # data_asset_snapshot_store:
@@ -2022,5 +2021,9 @@ A profile can optionally have a single parameter called
 
 Otherwise, all credential options specified here for a 
 given profile will be passed to sqlalchemy's create URL function.
+
+# Uncomment the lines below to enable a Slack webhook result callback.
+# result_callback:
+#   slack: https://slack.com/replace_with_your_webhook
 
 """
