@@ -10,9 +10,6 @@ try:
 except ImportError:
     from urllib import urlencode
 
-# TODO: data_asset_name_delimiter is not taken from a namespace yet
-DATA_ASSET_NAME_DELIMITER = "/"
-
 
 class Metric(AllowedKeysDotDict):
     """Stores a named metric."""
