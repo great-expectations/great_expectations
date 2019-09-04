@@ -768,20 +768,28 @@ class Dataset(MetaDataset):
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect each column entry to be a specified data type.
+        """Expect a column to contain values of a specified data type.
 
-        expect_column_values_to_be_of_type is a \
-        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>` for \
-        pandas because rows can have different types. It is a \
-        :func:`column_aggregate_expectation \
-        <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>` for typed-column backends.
+        expect_column_values_to_be_of_type is a :func:`column_aggregate_expectation \
+        <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>` for typed-column backends,
+        and also for PandasDataset where the column dtype and provided type_ are unambiguous constraints (any dtype
+        except 'object' or dtype of 'object' with type_ specified as 'object').
+
+        For PandasDataset columns with dtype of 'object' expect_column_values_to_be_of_type is a
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>` and will
+        independently check each row's type.
 
         Args:
             column (str): \
                 The column name.
             type\_ (str): \
-                A string representing the data type that each column should have as entries.
-                For example, "double integer" refers to an integer with double precision.
+                A string representing the data type that each column should have as entries. Valid types are defined
+                by the current backend implementation and are dynamically loaded. For example, valid types for
+                PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'),
+                whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER'
+                in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include
+                'StringType', 'BooleanType' and other pyspark-defined type names.
+
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
@@ -807,10 +815,6 @@ class Dataset(MetaDataset):
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-        Warning:
-            expect_column_values_to_be_in_type_list is slated for further changes in future versions of \
-            great_expectations. In particular, this expectation is compute-engine dependent.
 
         See also:
             :func:`expect_column_values_to_be_in_type_list \
@@ -826,20 +830,25 @@ class Dataset(MetaDataset):
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect each column entry to match a list of specified data types.
+        """Expect a column to contain values from a specified type list.
 
-        expect_column_values_to_be_of_type is a \
-        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>` for \
-        pandas because rows can have different types. It is a \
-        :func:`column_aggregate_expectation \
-        <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>` for typed-column backends.
+        expect_column_values_to_be_in_type_list is a :func:`column_aggregate_expectation \
+        <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>` for typed-column backends,
+        and also for PandasDataset where the column dtype provides an unambiguous constraints (any dtype except
+        'object'). For PandasDataset columns with dtype of 'object' expect_column_values_to_be_of_type is a
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>` and will
+        independently check each row's type.
 
         Args:
             column (str): \
                 The column name.
-            type_list (list of str): \
-                A list of strings representing the data type that each column should have as entries.
-                For example, "double integer" refers to an integer with double precision.
+            type_list (str): \
+                A list of strings representing the data type that each column should have as entries. Valid types are
+                defined by the current backend implementation and are dynamically loaded. For example, valid types for
+                PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'),
+                whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER'
+                in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include
+                'StringType', 'BooleanType' and other pyspark-defined type names.
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
@@ -865,10 +874,6 @@ class Dataset(MetaDataset):
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-        Warning:
-            expect_column_values_to_be_in_type_list is slated for further changes in future versions of \
-            great_expectations. In particular, this expectation is compute-engine dependent.
 
         See also:
             :func:`expect_column_values_to_be_of_type \
