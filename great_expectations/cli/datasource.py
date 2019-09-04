@@ -55,6 +55,17 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
                                base_directory=os.path.join("..", path))
 
     elif data_source_selection == "2":  # sqlalchemy
+        try:
+            import sqlalchemy
+            from sqlalchemy import create_engine, MetaData
+        except ImportError:
+            cli_message(
+"""
+ERROR: Unable to import sqlalchemy - exiting.
+Please install the module before trying again.
+""")
+            return None
+
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default="mydb", show_default=True)
 
@@ -159,7 +170,7 @@ You can add a datasource later by editing the great_expectations.yml file.
     return data_source_name
 
 
-def profile_datasource(context, data_source_name, data_assets=None, profile_all_data_assets=False, max_data_assets=20):
+def profile_datasource(context, data_source_name, data_assets=None, profile_all_data_assets=False, max_data_assets=20,additional_batch_kwargs=None):
     """"Profile a named datasource using the specified context"""
 
     msg_intro = """
@@ -201,10 +212,7 @@ later by running `great_expectations profile`.
     msg_data_doc_intro = """
 ========== Data Documentation ==========
 
-To generate documentation from the data you just profiled, the profiling results should be moved from 
-great_expectations/uncommitted (ignored by git) to great_expectations/fixtures.
-
-Before committing, please make sure that this data does not contain sensitive information!
+Great Expectations can create data documentation from the data you just profiled.
 
 To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_documentation.html\
 ?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
@@ -221,7 +229,8 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
         data_assets=data_assets,
         profile_all_data_assets=profile_all_data_assets,
         max_data_assets=max_data_assets,
-        dry_run=True
+        dry_run=True,
+        additional_batch_kwargs=additional_batch_kwargs
     )
 
     if profiling_results['success']: # data context is ready to profile - run profiling
@@ -231,7 +240,8 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
             data_assets=data_assets,
             profile_all_data_assets=profile_all_data_assets,
             max_data_assets=max_data_assets,
-            dry_run=False
+            dry_run=False,
+            additional_batch_kwargs=additional_batch_kwargs
         )
         else:
             cli_message(msg_skipping)
@@ -283,17 +293,6 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 
 
     cli_message(msg_data_doc_intro.format(__version__.replace(".", "_")))
-    # if click.confirm("Move the profiled data and build HTML documentation?",
-    #                  default=True
-    #                  ):
-    #     cli_message("\nMoving files...")
-    #
-    #     for profiling_result in profiling_results['results']:
-    #         data_asset_name = profiling_result[1]['meta']['data_asset_name']
-    #         expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
-    #         run_id = profiling_result[1]['meta']['run_id']
-    #         context.move_validation_to_fixtures(
-    #             data_asset_name, expectation_suite_name, run_id)
 
     if click.confirm("Build HTML documentation?",
                      default=True
@@ -368,10 +367,11 @@ msg_unknown_data_source = """
 We are looking for more types of data types to support.
 Please create a GitHub issue here:
 https://github.com/great-expectations/great_expectations/issues/new
-In the meantime you can see what Great Expectations can do on CSV files.
-To create expectations for your CSV files start Jupyter and open notebook
-great_expectations/notebooks/using_great_expectations_with_pandas.ipynb -
-it will walk you through configuring the database connection and next steps.
+
+In the meantime, consider reviewing the following notebook for an example of 
+creating and saving an expectation suite for validation:
+
+    <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
 """
 
 msg_go_to_notebook = """

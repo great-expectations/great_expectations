@@ -1,44 +1,58 @@
 .. _changelog:
 
 
+v0.7.8
+-----------------
+* BREAKING: slack webhook URL now must be in the profiles.yml file (treat as a secret)
+* Profiler improvements:
+  - Display candidate profiling data assets in alphabetical order
+  - Add columns to the expectation_suite meta during profiling to support human-readable description information
+* Improve handling of optional dependencies during CLI init
+* Improve documentation for create_expectations notebook
+* Fix several anachronistic documentation and docstring phrases (#659, #660, #668, #681; #thanks @StevenMMortimer)
+* Fix data docs rendering issues:
+  - documentation rendering failure from unrecognized profiled column type (#679; thanks @dinedal))
+  - PY2 failure on encountering unicode (#676)
+
+
 v.0.7.7
 -----------------
 * Standardize the way that plugin module loading works. DataContext will begin to use the new-style class and plugin
-identification moving forward; yml configs should specify class_name and module_name (with module_name optional for
-GE types). For now, it is possible to use the "type" parameter in configuration (as before).
+  identification moving forward; yml configs should specify class_name and module_name (with module_name optional for
+  GE types). For now, it is possible to use the "type" parameter in configuration (as before).
 * Add support for custom data_asset_type to all datasources
 * Add support for strict_min and strict_max to inequality-based expectations to allow strict inequality checks
-(thanks @RoyalTS!)
+  (thanks @RoyalTS!)
 * Add support for reader_method = "delta" to SparkDFDatasource
 * Fix databricks generator (thanks @sspitz3!)
 * Improve performance of DataContext loading by moving optional import
 * Fix several memory and performance issues in SparkDFDataset.
- - Use only distinct value count instead of bringing values to driver
- - Migrate away from UDF for set membership, nullity, and regex expectations
+  - Use only distinct value count instead of bringing values to driver
+  - Migrate away from UDF for set membership, nullity, and regex expectations
 * Fix several UI issues in the data_documentation
- - Move prescriptive dataset expectations to Overview section
- - Fix broken link on Home breadcrumb
- - Scroll follows navigation properly
- - Improved flow for long items in value_set
- - Improved testing for ValidationRenderer
- - Clarify dependencies introduced in documentation sites
- - Improve testing and documentation for site_builder, including run_id filter
- - Fix missing header in Index page and cut-off tooltip
- - Add run_id to path for validation files
+  - Move prescriptive dataset expectations to Overview section
+  - Fix broken link on Home breadcrumb
+  - Scroll follows navigation properly
+  - Improved flow for long items in value_set
+  - Improved testing for ValidationRenderer
+  - Clarify dependencies introduced in documentation sites
+  - Improve testing and documentation for site_builder, including run_id filter
+  - Fix missing header in Index page and cut-off tooltip
+  - Add run_id to path for validation files
 
 
 v.0.7.6
 -----------------
-* New Validation Renderer! Supports turning validation results into HTML and displays differences between the expected \
- and the observed attributes of a dataset.
-* Data Documentation sites are now fully configurable; a data context can be configured to generate multiple \
- sites built with different GE objects to support a variety of data documentation use cases. See data documentation \
- guide for more detail.
+* New Validation Renderer! Supports turning validation results into HTML and displays differences between the expected
+  and the observed attributes of a dataset.
+* Data Documentation sites are now fully configurable; a data context can be configured to generate multiple
+  sites built with different GE objects to support a variety of data documentation use cases. See data documentation
+  guide for more detail.
 * CLI now has a new top-level command, `build-documentation` that can support rendering documentation for specified
- sites and even named data assets in a specific site.
+  sites and even named data assets in a specific site.
 * Introduced DotDict and LooselyTypedDotDict classes that allow to enforce typing of dictionaries.
-* Bug fixes: improved internal logic of rendering data documentation, slack notification, and CLI profile command when \
- datasource argument was not provided.
+* Bug fixes: improved internal logic of rendering data documentation, slack notification, and CLI profile command when
+  datasource argument was not provided.
 
 v.0.7.5
 -----------------

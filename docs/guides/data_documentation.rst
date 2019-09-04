@@ -122,10 +122,10 @@ By default, GE creates two data documentation sites for a new project:
 Users have full control over configuring Data Documentation for their project - they can modify the two pre-configured sites (or remove them altogether) and add new sites with a configuration that meets the project's needs. The easiest way to add a new site to the configuration is to copy the "local_site" configuration block in great_expectations.yml, give the copy a new name and modify the details as needed.
 
 How to build documentation
-----------------------------
+===========================
 
 Using the CLI
-~~~~~~~~~~~~~~~
+---------------
 
 The great_expectations CLI can build comprehensive documentation from expectation suites available to the configured
 context and validations available in the ``great_expectations/fixtures`` directory.
@@ -151,7 +151,7 @@ To render just one data asset (this might be useful for debugging), call
 
 
 Using the raw API
-~~~~~~~~~~~~~~~~~~
+------------------
 
 The underlying python API for rendering documentation is still new and evolving. Use the following snippet as a guide
 for how to profile a single batch of data and build documentation from the validation_result.
@@ -185,7 +185,7 @@ for how to profile a single batch of data and build documentation from the valid
 
 
 Dependencies
-~~~~~~~~~~~~
+---------------
 * Font Awesome 5.10.1
 * Bootstrap 4.3.1
 * jQuery 3.2.1
