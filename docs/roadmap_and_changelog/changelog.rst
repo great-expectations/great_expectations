@@ -1,8 +1,18 @@
 .. _changelog:
 
 
-v0.7.8__develop
+v0.7.8
 -----------------
+* BREAKING: slack webhook URL now must be in the profiles.yml file (treat as a secret)
+* Profiler improvements:
+  - Display candidate profiling data assets in alphabetical order
+  - Add columns to the expectation_suite meta during profiling to support human-readable description information
+* Improve handling of optional dependencies during CLI init
+* Improve documentation for create_expectations notebook
+* Fix several anachronistic documentation and docstring phrases (#659, #660, #668, #681; #thanks @StevenMMortimer)
+* Fix data docs rendering issues:
+  - documentation rendering failure from unrecognized profiled column type (#679; thanks @dinedal))
+  - PY2 failure on encountering unicode (#676)
 
 
 v.0.7.7
