@@ -107,6 +107,26 @@ def test_ValidationResultIdentifier__init__totally_nested():
 
     assert my_id.to_string() == "ValidationResultIdentifier.a.b.c.failure.testing-12345"
 
+    # FIXME : This should throw an error. coerce_types is too permissive.
+    # my_id = ValidationResultIdentifier(
+    #     coerce_types=True,
+    #     **{
+    #         "expectation_suite_identifier" : {
+    #             "data_asset_name" : {
+    #                 "datasource" : "a",
+    #                 "generator" : "b",
+    #                 "generator_asset" : "c",
+    #             },
+    #             "expectation_suite_name": "failure",
+    #         },
+    #         "run_id" : {
+    #             "bogus_key_A" : "I should not be",
+    #             "bogus_key_A" : "nested",
+    #         }
+    #     }
+    # )
+
+
 def test_ValidationResultIdentifier__init__mostly_nested():
     ValidationResultIdentifier(
         coerce_types=True,
@@ -115,11 +135,7 @@ def test_ValidationResultIdentifier__init__mostly_nested():
                 "data_asset_name" : ("a", "b", "c"),
                 "expectation_suite_name": "warning",
             },
-            "run_id" : {
-                "execution_context": "testing",
-                "start_time_utc": 12345,
-            }
-
+            "run_id" : "testing-12345",
         }
     )
 
@@ -131,10 +147,7 @@ def test_ValidationResultIdentifier__init__mostly_nested_with_typed_child():
                 "data_asset_name" : DataAssetIdentifier("a", "b", "c"),
                 "expectation_suite_name": "quarantine",
             },
-            "run_id" : {
-                "execution_context": "testing",
-                "start_time_utc": 12345,
-            }
+            "run_id" : "testing-12345",
         }
     )
 
@@ -146,7 +159,7 @@ def test_ValidationResultIdentifier__init__partially_flat():
                 "data_asset_name" : ("a", "b", "c"),
                 "expectation_suite_name": "hello",
             },
-            "run_id" : ("testing", 12345)
+            "run_id" : "testing-12345",
         }
     )
 
