@@ -33,7 +33,8 @@ def is_valid_categorical_partition_object(partition_object):
 
 
 def is_valid_continuous_partition_object(partition_object):
-    """Tests whether a given object is a valid continuous partition object.
+    """Tests whether a given object is a valid continuous partition object. See :ref:`partition_object`.
+
     :param partition_object: The partition_object to evaluate
     :return: Boolean
     """
@@ -68,9 +69,11 @@ def categorical_partition_data(data):
         A new partition object::
 
             {
-                "partition": (list) The categorical values present in the data
+                "values": (list) The categorical values present in the data
                 "weights": (list) The weights of the values in the partition.
             }
+
+        See :ref:`partition_object`.
     """
 
     # Make dropna explicit (even though it defaults to true)
@@ -99,9 +102,11 @@ def kde_partition_data(data, estimate_tails=True):
         A new partition_object::
 
         {
-            "partition": (list) The endpoints of the partial partition of reals,
+            "bins": (list) The endpoints of the partial partition of reals,
             "weights": (list) The densities of the bins implied by the partition.
         }
+
+        See :ref:`partition_object`.
     """
     kde = stats.kde.gaussian_kde(data)
     evaluation_bins = np.linspace(start=np.min(data) - (kde.covariance_factor() / 2),
@@ -133,13 +138,14 @@ def partition_data(data, bins='auto', n_bins=10):
     return continuous_partition_data(data, bins, n_bins)
 
 
-def continuous_partition_data(data, bins='auto', n_bins=10):
+def continuous_partition_data(data, bins='auto', n_bins=1, **kwargs):
     """Convenience method for building a partition object on continuous data
 
     Args:
         data (list-like): The data from which to construct the estimate.
         bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto' (for automatically spaced bins)
         n_bins (int): Ignored if bins is auto.
+        kwargs (mapping): Additional keyword arguments to be passed to numpy histogram
 
     Returns:
         A new partition_object::
@@ -148,6 +154,7 @@ def continuous_partition_data(data, bins='auto', n_bins=10):
             "bins": (list) The endpoints of the partial partition of reals,
             "weights": (list) The densities of the bins implied by the partition.
         }
+        See :ref:`partition_object`.
     """
     if bins == 'uniform':
         bins = np.linspace(start=np.min(data), stop=np.max(data), num=n_bins+1)
@@ -157,7 +164,13 @@ def continuous_partition_data(data, bins='auto', n_bins=10):
     elif bins != 'auto':
         raise ValueError("Invalid parameter for bins argument")
 
-    hist, bin_edges = np.histogram(data, bins, density=False)
+    try:
+        hist, bin_edges = np.histogram(data, bins, density=False, **kwargs)
+    except ValueError as e:
+        raise ValueError("Unable to compute histogram. Did you know you can pass additional kwargs to numpy histogram,"
+                         "such as a range? Numpy error was: " + str(e))
+    except TypeError as e:
+        raise TypeError("Unable to compute histogram. numpy histogram raised error: " + str(e))
 
     return {
         "bins": bin_edges,

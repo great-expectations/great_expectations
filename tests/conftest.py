@@ -16,6 +16,13 @@ from .test_utils import get_dataset
 
 CONTEXTS = ['PandasDataset', 'sqlite']
 
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "smoketest: mark test as smoketest--it does not have useful assertions but may produce side effects that"
+                     "require manual inspection."
+    )
+
 #####
 #
 # Spark Context
