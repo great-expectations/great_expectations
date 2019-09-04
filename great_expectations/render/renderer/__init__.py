@@ -3,6 +3,11 @@ from .column_section_renderer import (
     ValidationResultsColumnSectionRenderer,
     ExpectationSuiteColumnSectionRenderer,
 )
+
+from .other_section_renderer import (
+    ProfilingResultsOverviewSectionRenderer
+)
+
 from .page_renderer import (
     ProfilingResultsPageRenderer,
     ExpectationSuitePageRenderer,

@@ -101,7 +101,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         column_types = cls._get_column_types(evrs)
         #TODO: check if we have the information to make this statement. Do all columns have type expectations?
         column_type_counter = Counter(column_types.values())
-        table_rows = [[type, str(column_type_counter[type])] for type in ["int", "float", "string", "--"]]
+        table_rows = [[type, str(column_type_counter[type])] for type in ["int", "float", "string", "unknown"]]
 
         content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "table",
@@ -265,13 +265,14 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         column_types = {}
         for column in columns:
-            column_types[column] = "--"
+            column_types[column] = "unknown"
 
         for evr in type_evrs:
             column = evr["expectation_config"]["kwargs"]["column"]
             if evr["expectation_config"]["expectation_type"] == "expect_column_values_to_be_in_type_list":
                 if evr["expectation_config"]["kwargs"]["type_list"] is None:
-                    expected_types = set()
+                    column_types[column] = "unknown"
+                    continue
                 else:
                     expected_types = set(evr["expectation_config"]["kwargs"]["type_list"])
             else:  # assuming expect_column_values_to_be_of_type
@@ -289,6 +290,6 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 column_types[column] = "bool"
             else:
                 warnings.warn("The expected type list is not a subset of any of the profiler type sets: {0:s}".format(str(expected_types)))
-                column_types[column] = "--"
+                column_types[column] = "unknown"
 
         return column_types
