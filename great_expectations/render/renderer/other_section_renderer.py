@@ -271,7 +271,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             column = evr["expectation_config"]["kwargs"]["column"]
             if evr["expectation_config"]["expectation_type"] == "expect_column_values_to_be_in_type_list":
                 if evr["expectation_config"]["kwargs"]["type_list"] is None:
-                    expected_types = {}
+                    expected_types = set()
                 else:
                     expected_types = set(evr["expectation_config"]["kwargs"]["type_list"])
             else:  # assuming expect_column_values_to_be_of_type
