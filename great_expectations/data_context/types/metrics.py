@@ -6,9 +6,9 @@ from great_expectations.types import AllowedKeysDotDict
 from great_expectations.profile.metrics_utils import make_dictionary_key
 
 try:
-    from urllib.parse import urlencode, parse_qsl
+    from urllib.parse import urlencode
 except ImportError:
-    from urllib import urlencode, parse_qsl
+    from urllib import urlencode
 
 # TODO: data_asset_name_delimiter is not taken from a namespace yet
 DATA_ASSET_NAME_DELIMITER = "/"
