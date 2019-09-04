@@ -517,6 +517,7 @@ def test_data_context_result_store(titanic_data_context):
     )
     assert len(failed_validation_result["results"]) == 8
 
+
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
     # assert False #for speed

@@ -647,6 +647,12 @@ class ConfigOnlyDataContext(object):
 
         if isinstance(data_asset_name, NormalizedDataAssetName):
             return data_asset_name
+        elif isinstance(data_asset_name, DataAssetIdentifier):
+            return NormalizedDataAssetName(
+                datasource=data_asset_name.datasource,
+                generator=data_asset_name.generator,
+                generator_asset=data_asset_name.generator_asset
+            )
 
         split_name = data_asset_name.split(self.data_asset_name_delimiter)
         existing_expectation_suites = self.list_expectation_suites()
