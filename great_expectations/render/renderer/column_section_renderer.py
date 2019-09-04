@@ -1,5 +1,5 @@
 import json
-from builtins import str
+from builtins import str  # PY2 compatibility
 import re
 
 import altair as alt
