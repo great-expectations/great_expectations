@@ -10,7 +10,7 @@ try:
 except ImportError:
     from urllib import urlencode
 
-# TODO : separate out a MetricIdentifier class, subclassed from DataContextResourceIdentifier,
+# TODO : separate out a MetricIdentifier class, subclassed from DataContextKey,
 # so that we can support operations like isinstance(foo, MetricIdentifier)
 class Metric(AllowedKeysDotDict):
     """Stores a named metric."""
@@ -23,7 +23,7 @@ class Metric(AllowedKeysDotDict):
         "metric_value"
     }
 
-# TODO : separate out a NamespaceAwareValidationMetricIdentifier class, subclassed from DataContextResourceIdentifier
+# TODO : separate out a NamespaceAwareValidationMetricIdentifier class, subclassed from DataContextKey
 class NamespaceAwareValidationMetric(Metric):
     """Captures information from a validation result in a fully namespace aware way suitable to be accessed
     in evaluation parameters, multi-batch validation meta analysis or multi batch validation."""
@@ -62,7 +62,7 @@ class NamespaceAwareValidationMetric(Metric):
                 self.metric_name,
                 make_dictionary_key(self.metric_kwargs))
 
-# TODO : separate out a NamespaceAwareExpectationDefinedValidationMetricIdentifier class, subclassed from DataContextResourceIdentifier
+# TODO : separate out a NamespaceAwareExpectationDefinedValidationMetricIdentifier class, subclassed from DataContextKey
 class NamespaceAwareExpectationDefinedValidationMetric(Metric):
     """Captures information from a validation result in a fully namespace aware way suitable to be accessed
     in evaluation parameters, multi-batch validation meta analysis or multi batch validation."""
@@ -106,7 +106,7 @@ class NamespaceAwareExpectationDefinedValidationMetric(Metric):
                 self.result_key,
                 make_dictionary_key(self.metric_kwargs))
 
-# TODO : separate out a MultiBatchNamespaceAwareValidationMetricIdentifier class, subclassed from DataContextResourceIdentifier
+# TODO : separate out a MultiBatchNamespaceAwareValidationMetricIdentifier class, subclassed from DataContextKey
 class MultiBatchNamespaceAwareValidationMetric(Metric):
     """Holds values of a metric captured from validation results of multiple batches."""
 
@@ -140,7 +140,7 @@ class MultiBatchNamespaceAwareValidationMetric(Metric):
                 make_dictionary_key(self.metric_kwargs))
 
 
-# TODO : separate out a MultiBatchNamespaceAwareExpectationDefinedValidationMetricIdentifier class, subclassed from DataContextResourceIdentifier
+# TODO : separate out a MultiBatchNamespaceAwareExpectationDefinedValidationMetricIdentifier class, subclassed from DataContextKey
 class MultiBatchNamespaceAwareExpectationDefinedValidationMetric(Metric):
     """Holds values of a metric captured from validation results of multiple batches."""
 

@@ -10,14 +10,13 @@ from great_expectations.types import (
 )
 
 from .base_resource_identifiers import (
-OrderedKeysDotDict,
-DataContextResourceIdentifier,
+    OrderedDataContextKey,
 )
 
 from great_expectations.datasource.types.batch_kwargs import BatchFingerprint
 
-
-class DataAssetIdentifier(DataContextResourceIdentifier):
+# TODO: Rename to DataAssetKey, for consistency
+class DataAssetIdentifier(OrderedDataContextKey):
     _key_order = [
         "datasource",
         "generator",
@@ -32,8 +31,8 @@ class DataAssetIdentifier(DataContextResourceIdentifier):
     _required_keys = set(_key_order)
     _allowed_keys = set(_key_order)
 
-
-class ExpectationSuiteIdentifier(DataContextResourceIdentifier):
+# TODO: Rename to ExpectationSuiteKey, for consistency
+class ExpectationSuiteIdentifier(OrderedDataContextKey):
     _key_order = [
         "data_asset_name",
         "expectation_suite_name",
@@ -46,8 +45,8 @@ class ExpectationSuiteIdentifier(DataContextResourceIdentifier):
     _required_keys = set(_key_order)
     _allowed_keys = set(_key_order)
 
-
-class ValidationResultIdentifier(DataContextResourceIdentifier):
+# TODO: Rename to ValidatioResultKey, for consistency
+class ValidationResultIdentifier(OrderedDataContextKey):
     _key_order = [
         "expectation_suite_identifier",
         "run_id",
