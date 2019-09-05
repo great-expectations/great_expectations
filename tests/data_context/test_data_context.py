@@ -55,7 +55,7 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
 
     # print(empty_data_context.stores.keys())
     assert "local_validation_result_store" in not_so_empty_data_context.stores.keys()
-    assert not_so_empty_data_context.stores["local_validation_result_store"].config.store_backend["base_directory"] == \
+    assert not_so_empty_data_context.stores["local_validation_result_store"].store_backend.base_directory == \
         "uncommitted/validations/"
 
     my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
@@ -201,86 +201,82 @@ def test_register_validation_results(data_context):
 
     #TODO: Add a test that specifies a data_asset_name
 
+# FIXME : Temporarily deprecating this test, so we can develop DataSnapshotStore in a new branch.
+# def test_register_validation_results_saves_data_assset_snapshot(data_context):
+#     run_id = "460d61be-7266-11e9-8848-1681be663d3e"
+#     source_patient_data_results = {
+#         "meta": {
+#             "data_asset_name": "mydatasource/mygenerator/source_patient_data",
+#             "expectation_suite_name": "default"
+#         },
+#         "results": [
+#             {
+#                 "expectation_config": {
+#                     "expectation_type": "expect_table_row_count_to_equal",
+#                     "kwargs": {
+#                         "value": 1024,
+#                     }
+#                 },
+#                 "success": True,
+#                 "exception_info": {"exception_message": None,
+#                     "exception_traceback": None,
+#                     "raised_exception": False},
+#                 "result": {
+#                     "observed_value": 1024,
+#                     "element_count": 1024,
+#                     "missing_percent": 0.0,
+#                     "missing_count": 0
+#                 }
+#             }
+#         ],
+#         "success": False
+#     }
+#     data_asset = PandasDataset({"x": [1,2,3,4]})
 
-def test_register_validation_results_saves_data_assset_snapshot(data_context):
-    run_id = "460d61be-7266-11e9-8848-1681be663d3e"
-    source_patient_data_results = {
-        "meta": {
-            "data_asset_name": "mydatasource/mygenerator/source_patient_data",
-            "expectation_suite_name": "default"
-        },
-        "results": [
-            {
-                "expectation_config": {
-                    "expectation_type": "expect_table_row_count_to_equal",
-                    "kwargs": {
-                        "value": 1024,
-                    }
-                },
-                "success": True,
-                "exception_info": {"exception_message": None,
-                    "exception_traceback": None,
-                    "raised_exception": False},
-                "result": {
-                    "observed_value": 1024,
-                    "element_count": 1024,
-                    "missing_percent": 0.0,
-                    "missing_count": 0
-                }
-            }
-        ],
-        "success": False
-    }
-    data_asset = PandasDataset({"x": [1,2,3,4]})
+#     snapshot_dir = os.path.join(data_context.root_directory, "uncommitted/snapshots")
+#     print(snapshot_dir)
 
-    snapshot_dir = os.path.join(data_context.root_directory, "uncommitted/snapshots")
-    print(snapshot_dir)
+#     #The snapshot directory shouldn't exist yet
+#     assert not os.path.isfile(snapshot_dir)
 
-    #The snapshot directory shouldn't exist yet
-    assert not os.path.isfile(snapshot_dir)
-
-    data_context.add_store(
-        "data_asset_snapshot_store",
-        {
-            "module_name": "great_expectations.data_context.store",
-            "class_name": "NamespacedReadWriteStore",
-            "store_config" : {
-                "serialization_type" : "pandas_csv",
-                "resource_identifier_class_name": "ValidationResultIdentifier",
-                "store_backend" : {
-                    "module_name": "great_expectations.data_context.store",
-                    "class_name": "FilesystemStoreBackend",
-                    "base_directory" : "uncommitted/snapshots",
-                    "filepath_template": "{4}/{0}/{1}/{2}/validation-results-{2}-{3}-{4}.{file_extension}",
-                    "file_extension" : "csv.gz",
-                    # "compression" : "gzip",
-                    "replaced_substring": "/",
-                    "replacement_string": "___",
-                }
-            }
-        }
-    )
-    # print(json.dumps(data_context._project_config, indent=2))
+#     data_context.add_store(
+#         "data_asset_snapshot_store",
+#         {
+#             "module_name": "great_expectations.data_context.store",
+#             "class_name": "NamespacedReadWriteStore",
+#             "serialization_type" : "pandas_csv",
+#             "resource_identifier_class_name": "ValidationResultIdentifier",
+#             "store_backend" : {
+#                 "module_name": "great_expectations.data_context.store",
+#                 "class_name": "FixedLengthTupleFilesystemStoreBackend",
+#                 "base_directory" : "uncommitted/snapshots",
+#                 "filepath_template": "{4}/{0}/{1}/{2}/validation-results-{2}-{3}-{4}.{file_extension}",
+#                 "file_extension" : "csv.gz",
+#                 # "compression" : "gzip",
+#             }
+#         }
+#     )
+#     # print(json.dumps(data_context._project_config, indent=2))
     
-    #The snapshot directory shouldn't contain any files
-    # assert len(glob(snapshot_dir+"/*/*/*/*/*.csv.gz")) == 0
-    print(gen_directory_tree_str(snapshot_dir))
-    assert gen_directory_tree_str(snapshot_dir) == ""
+#     #The snapshot directory shouldn't contain any files
+#     # assert len(glob(snapshot_dir+"/*/*/*/*/*.csv.gz")) == 0
+#     print(gen_directory_tree_str(snapshot_dir))
+#     assert gen_directory_tree_str(snapshot_dir) == ""
 
-    res = data_context.register_validation_results(
-        run_id,
-        source_patient_data_results,
-        data_asset=data_asset
-    )
+#     res = data_context.register_validation_results(
+#         run_id,
+#         source_patient_data_results,
+#         data_asset=data_asset
+#     )
     
-    #This snapshot directory should now exist
-    assert os.path.isdir(snapshot_dir)
+#     #This snapshot directory should now exist
+#     assert os.path.isdir(snapshot_dir)
 
-    #we should have one file created as a side effect
-    print(gen_directory_tree_str(snapshot_dir))
-    glob_results = glob(snapshot_dir+"/*/*/*/*/*.csv.gz")
-    print(glob_results)
-    assert len(glob_results) == 1
+#     #we should have one file created as a side effect
+#     print(gen_directory_tree_str(snapshot_dir))
+#     glob_results = glob(snapshot_dir+"/*/*/*/*/*.csv.gz")
+#     print(glob_results)
+#     assert len(glob_results) == 1
 
 
 def test_compile(data_context):
@@ -704,7 +700,6 @@ def test_add_store(empty_data_context):
         {
             "module_name": "great_expectations.data_context.store",
             "class_name": "BasicInMemoryStore",
-            "store_config" : {}
         }
     )
     assert "my_new_store" in empty_data_context.stores.keys()

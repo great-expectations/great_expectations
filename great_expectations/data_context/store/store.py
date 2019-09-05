@@ -16,6 +16,9 @@ from ...types import (
 from ..types.resource_identifiers import (
     DataContextResourceIdentifier,
 )
+from great_expectations.data_context.util import (
+    instantiate_class_from_config
+)
 
 # TODO : Add docstrings to these classes.
 # TODO : Add a ConfigReadWriteStore.
@@ -33,12 +36,13 @@ class WriteOnlyStore(object):
     # config_class = None
 
     # TODO : Refactor __init__s among this class and its children.
-    def __init__(self, config, root_directory=None):
-        assert hasattr(self, 'config_class')
+    def __init__(self, serialization_type=None, root_directory=None):
+        # assert hasattr(self, 'config_class')
 
-        assert isinstance(config, self.config_class)
-        self.config = config
+        # assert isinstance(config, self.config_class)
+        # self.config = config
 
+        self.serialization_type = serialization_type
         self.root_directory = root_directory
         # self.store_backend = self._configure_store_backend(self.config.store_backend)
 
@@ -52,15 +56,15 @@ class WriteOnlyStore(object):
                 serialization_type)
         else:
             serialization_method = self._get_serialization_method(
-                self.config.serialization_type)
+                self.serialization_type)
 
         serialized_value = serialization_method(value)
         self._set(key, serialized_value)
 
 
-    @classmethod
-    def get_config_class(cls):
-        return cls.config_class
+    # @classmethod
+    # def get_config_class(cls):
+    #     return cls.config_class
 
     def _get_serialization_method(self, serialization_type):
         if serialization_type == None:
@@ -96,22 +100,22 @@ class WriteOnlyStore(object):
     def _set(self, key, value):
         raise NotImplementedError
 
-    def _configure_store_backend(self, store_backend_config):
-        modified_store_backend_config = copy.deepcopy(store_backend_config)
+    # def _configure_store_backend(self, store_backend_config):
+    #     modified_store_backend_config = copy.deepcopy(store_backend_config)
 
-        module_name = modified_store_backend_config.pop("module_name")
-        class_name = modified_store_backend_config.pop("class_name")
+    #     module_name = modified_store_backend_config.pop("module_name")
+    #     class_name = modified_store_backend_config.pop("class_name")
 
-        module = importlib.import_module(module_name)
-        store_backend_class = getattr(module, class_name)
+    #     module = importlib.import_module(module_name)
+    #     store_backend_class = getattr(module, class_name)
 
-        self.store_backend = store_backend_class(
-            modified_store_backend_config,
-            self.root_directory
-        )
+    #     self.store_backend = store_backend_class(
+    #         modified_store_backend_config,
+    #         self.root_directory
+    #     )
 
-        #For convenience when testing
-        return self.store_backend
+    #     #For convenience when testing
+    #     return self.store_backend
 
 
 
@@ -131,7 +135,8 @@ class ReadWriteStore(WriteOnlyStore):
                 serialization_type)
         else:
             deserialization_method = self._get_deserialization_method(
-                self.config.serialization_type)
+                self.serialization_type)
+
         deserialized_value = deserialization_method(value)
         return deserialized_value
 
@@ -157,12 +162,12 @@ class ReadWriteStore(WriteOnlyStore):
 
         # TODO: Add more serialization methods as needed
 
-
-class BasicInMemoryStoreConfig(ReadWriteStoreConfig):
-    _allowed_keys = set([
-        "serialization_type"
-    ]) #ReadWriteStoreConfig._allowed_keys
-    _required_keys = set([]) #ReadWriteStoreConfig._required_keys
+# FIXME: This config class is deprecated
+# class BasicInMemoryStoreConfig(ReadWriteStoreConfig):
+#     _allowed_keys = set([
+#         "serialization_type"
+#     ]) #ReadWriteStoreConfig._allowed_keys
+#     _required_keys = set([]) #ReadWriteStoreConfig._required_keys
 
 class BasicInMemoryStore(ReadWriteStore):
     """Like a dict, but much harder to write.
@@ -171,29 +176,23 @@ class BasicInMemoryStore(ReadWriteStore):
     It would be easier just to wrap a dict.
     """
 
-    config_class = BasicInMemoryStoreConfig
+    # config_class = BasicInMemoryStoreConfig
 
-    def __init__(self, config=None, root_directory=None):
-        assert hasattr(self, 'config_class')
-
-        if config == None:
-            config = BasicInMemoryStoreConfig(**{
-                "serialization_type": None,
-            })
-
-        assert isinstance(config, self.config_class)
-        self.config = config
-
+    def __init__(self, serialization_type=None, root_directory=None):
+        self.serialization_type = serialization_type
         self.root_directory = root_directory
 
-        self._setup()
-
-    def _setup(self):
-        self.store_backend = self._configure_store_backend({
-            "module_name" : "great_expectations.data_context.store",
-            "class_name" : "InMemoryStoreBackend",
-            "separator" : ".",
-        })
+        self.store_backend = instantiate_class_from_config(
+            config={
+                "module_name" : "great_expectations.data_context.store",
+                "class_name" : "InMemoryStoreBackend",
+                "separator" : ".",
+            },
+            runtime_config={
+                "root_directory": root_directory,
+            },
+            config_defaults={},
+        )
 
     def _validate_key(self, key):
         assert isinstance(key, string_types)
@@ -211,103 +210,102 @@ class BasicInMemoryStore(ReadWriteStore):
         return [key for key, in self.store_backend.list_keys()]
 
 
-class NamespacedReadWriteStoreConfig(ReadWriteStoreConfig):
-    _allowed_keys = set({
-        "serialization_type",
-        "resource_identifier_class_name",
-        "store_backend",
-    })
-    _required_keys = set({
-        "resource_identifier_class_name",
-        "store_backend",
-    })
+# class NamespacedReadWriteStoreConfig(ReadWriteStoreConfig):
+#     _allowed_keys = set({
+#         "serialization_type",
+#         "resource_identifier_class_name",
+#         "store_backend",
+#     })
+#     _required_keys = set({
+#         "resource_identifier_class_name",
+#         "store_backend",
+#     })
 
 
-class NamespacedReadWriteStore(ReadWriteStore):
+# class NamespacedReadWriteStore(ReadWriteStore):
     
-    config_class = NamespacedReadWriteStoreConfig
+#     config_class = NamespacedReadWriteStoreConfig
 
-    def __init__(self, config, root_directory):
-        # super(NamespacedReadWriteStore, self).__init__(config, root_directory)
+#     def __init__(self, config, root_directory):
+#         # super(NamespacedReadWriteStore, self).__init__(config, root_directory)
 
-        # TODO: This method was copied and modified from the base class. 
-        # We need to refactor later to inherit sensibly.
-        assert hasattr(self, 'config_class')
+#         # TODO: This method was copied and modified from the base class. 
+#         # We need to refactor later to inherit sensibly.
+#         assert hasattr(self, 'config_class')
 
-        assert isinstance(config, self.config_class)
-        self.config = config
+#         assert isinstance(config, self.config_class)
+#         self.config = config
 
-        self.root_directory = root_directory
+#         self.root_directory = root_directory
 
-        # NOTE: hm. This is tricky.
-        # At this point, we need to add some keys to the store_backend config.
-        # The config from THIS class should be typed by this point.
-        # But if we insist that it's recursively typed, it will have failed before arriving at this point.
-        if self.config["store_backend"]["class_name"] == "FilesystemStoreBackend":
-            self.config["store_backend"]["key_length"] = self.resource_identifier_class._recursively_get_key_length()#+1 #Only add one if we prepend the identifier type
-            self.store_backend = self._configure_store_backend(self.config["store_backend"])
-            self.store_backend.verify_that_key_to_filepath_operation_is_reversible()
+#         # NOTE: hm. This is tricky.
+#         # At this point, we need to add some keys to the store_backend config.
+#         # The config from THIS class should be typed by this point.
+#         # But if we insist that it's recursively typed, it will have failed before arriving at this point.
+#         if self.config["store_backend"]["class_name"] == "FilesystemStoreBackend":
+#             self.config["store_backend"]["key_length"] = self.resource_identifier_class._recursively_get_key_length()#+1 #Only add one if we prepend the identifier type
+#             self.store_backend = self._configure_store_backend(self.config["store_backend"])
+#             self.store_backend.verify_that_key_to_filepath_operation_is_reversible()
 
-        else:
-            self.store_backend = self._configure_store_backend(self.config["store_backend"])
+#         else:
+#             self.store_backend = self._configure_store_backend(self.config["store_backend"])
     
 
-        self._setup()
+#         self._setup()
 
 
-    def _get(self, key):
-        key_tuple = self._convert_resource_identifier_to_tuple(key)
-        return self.store_backend.get(key_tuple)
+#     def _get(self, key):
+#         key_tuple = self._convert_resource_identifier_to_tuple(key)
+#         return self.store_backend.get(key_tuple)
 
-    def _set(self, key, serialized_value):
-        key_tuple = self._convert_resource_identifier_to_tuple(key)
-        return self.store_backend.set(key_tuple, serialized_value)
+#     def _set(self, key, serialized_value):
+#         key_tuple = self._convert_resource_identifier_to_tuple(key)
+#         return self.store_backend.set(key_tuple, serialized_value)
 
-    def list_keys(self):
-        return [self._convert_tuple_to_resource_identifier(key) for key in self.store_backend.list_keys()]
+#     def list_keys(self):
+#         return [self._convert_tuple_to_resource_identifier(key) for key in self.store_backend.list_keys()]
 
-    def _convert_resource_identifier_to_tuple(self, key):
-        # TODO : Optionally prepend a source_id (the frontend Store name) to the tuple.
+#     def _convert_resource_identifier_to_tuple(self, key):
+#         # TODO : Optionally prepend a source_id (the frontend Store name) to the tuple.
 
-        # TODO : Optionally prepend a resource_identifier_type to the tuple.
-        # list_ = [self.config.resource_identifier_class_name]
+#         # TODO : Optionally prepend a resource_identifier_type to the tuple.
+#         # list_ = [self.config.resource_identifier_class_name]
 
-        list_ = []
-        list_ += self._convert_resource_identifier_to_list(key)
+#         list_ = []
+#         list_ += self._convert_resource_identifier_to_list(key)
 
-        return tuple(list_)
+#         return tuple(list_)
 
-    def _convert_resource_identifier_to_list(self, key):
-        # The logic in this function is recursive, so it can't return a tuple
+#     def _convert_resource_identifier_to_list(self, key):
+#         # The logic in this function is recursive, so it can't return a tuple
 
-        list_ = []
-        #Fetch keys in _key_order to guarantee tuple ordering in both python 2 and 3
-        for key_name in key._key_order:
-            key_element = key[key_name]
-            if isinstance( key_element, DataContextResourceIdentifier ):
-                list_ += self._convert_resource_identifier_to_list(key_element)
-            else:
-                list_.append(key_element)
+#         list_ = []
+#         #Fetch keys in _key_order to guarantee tuple ordering in both python 2 and 3
+#         for key_name in key._key_order:
+#             key_element = key[key_name]
+#             if isinstance( key_element, DataContextResourceIdentifier ):
+#                 list_ += self._convert_resource_identifier_to_list(key_element)
+#             else:
+#                 list_.append(key_element)
 
-        return list_
+#         return list_
 
-    def _convert_tuple_to_resource_identifier(self, tuple_):
-        new_identifier = self.resource_identifier_class(*tuple_)#[1:]) #Only truncate one if we prepended the identifier type
-        return new_identifier
+#     def _convert_tuple_to_resource_identifier(self, tuple_):
+#         new_identifier = self.resource_identifier_class(*tuple_)#[1:]) #Only truncate one if we prepended the identifier type
+#         return new_identifier
 
-    @property
-    def resource_identifier_class(self):
-        module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
-        class_ = getattr(module, self.config.resource_identifier_class_name)
-        return class_
+#     @property
+#     def resource_identifier_class(self):
+#         module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
+#         class_ = getattr(module, self.config.resource_identifier_class_name)
+#         return class_
 
-    def _validate_key(self, key):
-        if not isinstance(key, self.resource_identifier_class):
-            raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
-                key,
-                type(key),
-            ))
-
+#     def _validate_key(self, key):
+#         if not isinstance(key, self.resource_identifier_class):
+#             raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
+#                 key,
+#                 type(key),
+#             ))
 
 class EmptyConfig(DotDict):
     pass
