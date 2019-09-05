@@ -30,10 +30,10 @@ class MultiBatchValidationMetaAnalysis(object):
     }
 
     @classmethod
-    def add_expectation_defined_metric_for_result_key(cls, d, result, data_asset_name, batch_fingerprint, metrics_store, t=()):
+    def add_expectation_defined_metric_for_result_key(cls, d, result, data_asset_name, batch_kwargs, metrics_store, t=()):
         for key, value in d.items():
             if isinstance(value, collections.Mapping):
-                cls.add_expectation_defined_metric_for_result_key(value, result, data_asset_name, batch_fingerprint, metrics_store, t + (key,))
+                cls.add_expectation_defined_metric_for_result_key(value, result, data_asset_name, batch_kwargs, metrics_store, t + (key,))
             else:
                 result_key_lookup_key = key if t==() else (t + (key,))
                 full_lookup_key = (result['expectation_config']['expectation_type'], result_key_lookup_key)
@@ -48,14 +48,14 @@ class MultiBatchValidationMetaAnalysis(object):
 
                     metrics_store.add_single_batch_expectation_defined_metric(
                             data_asset_name,
-                            batch_fingerprint,
+                            batch_kwargs.batch_fingerprint,
                             result['expectation_config']['expectation_type'],
                             result_key_lookup_key,
                             metric_kwargs,
                             value)
 
     @classmethod
-    def add_metrics_from_single_expectation_validation_result(cls, result, data_asset_name, batch_fingerprint, metrics_store):
+    def add_metrics_from_single_expectation_validation_result(cls, result, data_asset_name, batch_kwargs, metrics_store):
         """
         Extract metrics from a validation result of one expectation and store them.
         Depending on the type of the expectation, this method chooses the key
@@ -64,7 +64,8 @@ class MultiBatchValidationMetaAnalysis(object):
 
         :param result: a validation result dictionary of one expectation
         :param data_asset_name:
-        :param batch_fingerprint:
+        :param batch_kwargs: BatchKwargs of the batch that was validated
+        :param metrics_store
         """
         expectation_metrics = {
             # 'expect_column_distinct_values_to_be_in_set'
@@ -116,14 +117,14 @@ class MultiBatchValidationMetaAnalysis(object):
 
                         metrics_store.add_single_batch_metric(
                             data_asset_name,
-                            batch_fingerprint,
+                            batch_kwargs.batch_fingerprint,
                             metric_name,
                             metric_kwargs,
                             result['result'][key])
 
             else:
                 cls.add_expectation_defined_metric_for_result_key(result['result'], result,
-                                        data_asset_name, batch_fingerprint, metrics_store)
+                                        data_asset_name, batch_kwargs, metrics_store)
 
     @classmethod
     def get_metrics(cls, validation_results_list, data_context):
@@ -139,11 +140,11 @@ class MultiBatchValidationMetaAnalysis(object):
         # but it probably should be some singleton obtained from a factory/manager.
         metrics_store = MetricsStore()
 
-        batch_fingerprints = []
+        batch_kwargs_list = []
         for j, one_batch_validation_results in enumerate(validation_results_list):
             #             print(json.dumps(one_batch_validation_results['meta'], indent=2))
-            batch_fingerprint = cls.get_batch_fingerprint(one_batch_validation_results['meta']['batch_kwargs'])
-            batch_fingerprints.append(batch_fingerprint)
+            batch_kwargs = BatchKwargs(one_batch_validation_results['meta']['batch_kwargs'])
+            batch_kwargs_list.append(batch_kwargs)
 
             # NOTE: Eugene 2019-08-25: when validation results be a typed object,
             # that object will have data_asset_name property method that will
@@ -153,14 +154,10 @@ class MultiBatchValidationMetaAnalysis(object):
                 one_batch_validation_results['meta']['data_asset_name'])
             for i, result in enumerate(one_batch_validation_results['results']):
                 cls.add_metrics_from_single_expectation_validation_result(result,
-                                              normalized_data_asset_name,
-                                              batch_fingerprint, metrics_store)
+                                                                          normalized_data_asset_name,
+                                                                          batch_kwargs,
+                                                                          metrics_store)
 
-        mb_metrics = metrics_store.get_multi_batch_metrics(batch_fingerprints)
+        mb_metrics = metrics_store.get_multi_batch_metrics(batch_kwargs_list)
 
         return mb_metrics
-
-    @classmethod
-    def get_batch_fingerprint(cls, batch_kwargs):
-        return BatchKwargs.build_batch_fingerprint(batch_kwargs)
-

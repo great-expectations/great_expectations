@@ -341,6 +341,28 @@ def titanic_data_context(tmp_path_factory):
                 str(os.path.join(context_path, "../data/Titanic.csv")))
     return ge.data_context.DataContext(context_path)
 
+@pytest.fixture(scope="function")
+def titanic_multibatch_data_context(tmp_path_factory):
+    """
+    Based on titanic_data_context, but with 2 identical batches of
+    data asset "titanic"
+    :param tmp_path_factory:
+    :return:
+    """
+    project_path = str(tmp_path_factory.mktemp('titanic_data_context'))
+    context_path = os.path.join(project_path, "great_expectations")
+    safe_mmkdir(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path = os.path.join(context_path, "../data/titanic")
+    safe_mmkdir(os.path.join(data_path), exist_ok=True)
+    shutil.copy("./tests/test_fixtures/great_expectations_titanic.yml",
+                str(os.path.join(context_path, "great_expectations.yml")))
+    shutil.copy("./tests/test_sets/Titanic.csv",
+                str(os.path.join(context_path, "../data/titanic/Titanic_1911.csv")))
+    shutil.copy("./tests/test_sets/Titanic.csv",
+                str(os.path.join(context_path, "../data/titanic/Titanic_1912.csv")))
+    return ge.data_context.DataContext(context_path)
+
+
 
 @pytest.fixture()
 def data_context(tmp_path_factory):
