@@ -129,7 +129,7 @@ class StoreBackend(object):
     def _has_key(self, key):
         raise NotImplementedError
 
-
+# FIXME : Deprecated
 class InMemoryStoreBackendConfig(AllowedKeysDotDict):
     _allowed_keys = set([
         "separator",
@@ -148,11 +148,13 @@ class InMemoryStoreBackend(StoreBackend):
     This works, but it's blunt.
     """
 
-    config_class = InMemoryStoreBackendConfig
+    # config_class = InMemoryStoreBackendConfig
 
-    # FIXME: separator should be pased in as part of the config, not an arg.
-    # Or maybe __init__ should receive it as a config and propagate it here as an arg...
-    def _setup(self, separator="."):
+    def __init__(
+        self,
+        separator=".",
+        root_directory=None
+    ):
         self.store = {}
         self.separator = separator
 
@@ -184,7 +186,7 @@ class InMemoryStoreBackend(StoreBackend):
     def _has_key(self, key):
         return self._convert_tuple_to_string(key) in self.store
 
-
+# FIXME : Deprecated
 class FilesystemStoreBackendConfig(AllowedKeysDotDict):
     # TODO: Some of these should be in _required_keys
     # NOTE: What would be REALLY useful is to make them required with defaults. ex: separator : "."
@@ -215,7 +217,7 @@ class FilesystemStoreBackendConfig(AllowedKeysDotDict):
         "filepath_template" : string_types,
     }
 
-
+# FIXME : Deprecated
 class FilesystemStoreBackend(StoreBackend):
     """Uses a local filepath as a store.
 
@@ -372,6 +374,158 @@ class FilesystemStoreBackend(StoreBackend):
             replaced_key_element = re.sub(self.config["replacement_string"], self.config["replaced_substring"], key_element)
 
             new_key[tuple_index] = replaced_key_element
+
+        new_key = tuple(new_key)
+        return new_key
+
+
+    def verify_that_key_to_filepath_operation_is_reversible(self):
+        # NOTE: There's actually a fairly complicated problem here, similar to magic autocomplete for dataAssetNames.
+        # "Under what conditions does an incomplete key tuple fully specify an object within the GE namespace?"
+        # This doesn't just depend on the structure of keys.
+        # It also depends on uniqueness of combinations of named elements within the namespace tree.
+        # For now, I do the blunt thing and force filepaths to fully specify keys.
+
+        def get_random_hex(len=4):
+            return "".join([random.choice(list("ABCDEF0123456789")) for i in range(len)])
+
+        key = tuple([get_random_hex() for j in range(self.config.key_length)])
+        filepath = self._convert_key_to_filepath(key)
+        new_key = self._convert_filepath_to_key(filepath)
+        if key != new_key:
+            raise AssertionError("Cannot reverse key conversion in {}\nThis is most likely a problem with your filepath_template:\n\t{}".format(
+                self.__class__.__name__,
+                self.config.filepath_template
+            ))
+
+class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
+    """Uses a local filepath as a store.
+    """
+
+    def __init__(
+        self,
+        base_directory,
+        filepath_template,
+        key_length,
+        root_directory,
+        file_extension=None,
+        file_prefix=None,
+    ):
+        self.base_directory = base_directory
+        self.filepath_template = filepath_template
+        self.key_length = key_length
+
+        if not os.path.isabs(root_directory):
+            raise ValueError("root_directory must be an absolute path. Got {0} instead.".format(root_directory))    
+        
+        self.root_directory = root_directory
+
+        self.file_extension = file_extension
+        self.file_prefix = file_prefix
+
+        self.full_base_directory = os.path.join(
+            self.root_directory,
+            self.base_directory,
+        )
+
+        # TODO : Consider re-implementing this:
+        safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
+
+    def _get(self, key):
+        filepath = os.path.join(
+            self.full_base_directory,
+            self._convert_key_to_filepath(key)
+        )
+        with open(filepath) as infile:
+            return infile.read()
+
+    def _set(self, key, value):
+        filepath = os.path.join(
+            self.full_base_directory,
+            self._convert_key_to_filepath(key)
+        )
+        path, filename = os.path.split(filepath)
+
+        safe_mmkdir(str(path))
+        with open(filepath, "w") as outfile:
+            outfile.write(value)
+
+    def _validate_key(self, key):
+        super(FixedLengthTupleFilesystemStoreBackend, self)._validate_key(key)
+        
+        
+    def list_keys(self):
+        # TODO : Rename "keys" in this method to filepaths, for clarity
+        key_list = []
+        for root, dirs, files in os.walk(self.full_base_directory):
+            for file_ in files:
+                full_path, file_name = os.path.split(os.path.join(root, file_))
+                relative_path = os.path.relpath(
+                    full_path,
+                    self.full_base_directory,
+                )
+                if relative_path == ".":
+                    key = file_name
+                else:
+                    key = os.path.join(
+                        relative_path,
+                        file_name
+                    )
+
+                key_list.append(
+                    self._convert_filepath_to_key(key)
+                )
+
+        return key_list
+
+    # TODO : Write tests for this method
+    def has_key(self, key):
+        assert isinstance(key, string_types)
+
+        all_keys = self.list_keys()
+        return key in all_keys
+
+    def _convert_key_to_filepath(self, key):
+        # NOTE: At some point in the future, it might be better to replace this logic with os.path.join.
+        # That seems more correct, but the configs will be a lot less intuitive.
+        # In the meantime, there is some chance that configs will not be cross-OS compatible.
+
+        # NOTE : These methods support fixed-length keys, but not variable.
+        # TODO : Figure out how to handle variable-length keys
+        self._validate_key(key)
+
+        converted_string = self.filepath_template.format(*list(key), **{
+            "file_extension" : self.file_extension,
+            "file_prefix" : self.file_prefix,
+        })
+
+        return converted_string
+
+
+    def _convert_filepath_to_key(self, filepath):
+
+        # Convert the template to a regex
+        indexed_string_substitutions = re.findall("\{\d+\}", self.filepath_template)
+        tuple_index_list = ["(?P<tuple_index_{0}>.*)".format(i,) for i in range(len(indexed_string_substitutions))]
+        intermediate_filepath_regex = re.sub(
+            "\{\d+\}",
+            lambda m, r=iter(tuple_index_list): next(r),
+            self.filepath_template
+        )
+        filepath_regex = intermediate_filepath_regex.format(*tuple_index_list, **{
+            "file_extension" : self.file_extension,
+            "file_prefix" : self.file_prefix,            
+        })
+
+        #Apply the regex to the filepath
+        matches = re.compile(filepath_regex).match(filepath)
+
+        #Map key elements into the apprpriate parts of the tuple
+        new_key = list([None for element in range(self.key_length)])
+        for i in range(len(tuple_index_list)):
+            tuple_index = int(re.search('\d+', indexed_string_substitutions[i]).group(0))
+            key_element = matches.group('tuple_index_'+str(i))
+            new_key[tuple_index] = key_element
 
         new_key = tuple(new_key)
         return new_key

@@ -63,15 +63,12 @@ def test_config_from_absolute_zero(totally_empty_data_context):
 
     assert len(totally_empty_data_context.stores.keys()) == 0
 
-    # TODO : Remove the extra layer of nesting from store_config
     totally_empty_data_context.add_store(
         "my_inmemory_store",
         {
             "module_name": "great_expectations.data_context.store",
             "class_name": "BasicInMemoryStore",
-            "store_config": {
-                "serialization_type": "json"
-            },
+            "serialization_type": "json"
         }
     )
     assert "my_inmemory_store" in totally_empty_data_context.stores.keys()
@@ -94,16 +91,12 @@ def test_config_with_default_yml(tmp_path_factory):
     ])
     assert "my_inmemory_store" not in context.stores.keys()
 
-
-    # TODO : Remove the extra layer of nesting from store_config
     context.add_store(
         "my_inmemory_store",
         {
             "module_name": "great_expectations.data_context.store",
             "class_name": "BasicInMemoryStore",
-            "store_config": {
-                "serialization_type": "json"
-            },
+            "serialization_type": "json",
         }
     )
 

@@ -39,16 +39,7 @@ def test_StoreBackendValidation():
 
 def test_InMemoryStoreBackend():
 
-    with pytest.raises(TypeError):
-        my_store = InMemoryStoreBackend(
-            config=None,
-        )
-
-    my_store = InMemoryStoreBackend(
-        config={
-            "separator" : "."
-        },
-    )
+    my_store = InMemoryStoreBackend()
 
     my_key = ("A",)
     with pytest.raises(KeyError):
