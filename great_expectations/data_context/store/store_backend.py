@@ -129,17 +129,6 @@ class StoreBackend(object):
     def _has_key(self, key):
         raise NotImplementedError
 
-# FIXME : Deprecated
-class InMemoryStoreBackendConfig(AllowedKeysDotDict):
-    _allowed_keys = set([
-        "separator",
-    ])
-
-    # NOTE: Abe 2019/08/29: For now, I'm defaulting to rigid typing. We can always back off later.
-    _required_keys = set([
-        "separator",
-    ])
-
 
 class InMemoryStoreBackend(StoreBackend):
     """Uses an in-memory dictionary as a store backend.
@@ -147,8 +136,6 @@ class InMemoryStoreBackend(StoreBackend):
     Note: currently, this class turns the whole key into a single key_string.
     This works, but it's blunt.
     """
-
-    # config_class = InMemoryStoreBackendConfig
 
     def __init__(
         self,

@@ -33,14 +33,8 @@ class WriteOnlyStoreConfig(AllowedKeysDotDict):
 
 class WriteOnlyStore(object):
 
-    # config_class = None
-
     # TODO : Refactor __init__s among this class and its children.
     def __init__(self, serialization_type=None, root_directory=None):
-        # assert hasattr(self, 'config_class')
-
-        # assert isinstance(config, self.config_class)
-        # self.config = config
 
         self.serialization_type = serialization_type
         self.root_directory = root_directory
@@ -61,10 +55,6 @@ class WriteOnlyStore(object):
         serialized_value = serialization_method(value)
         self._set(key, serialized_value)
 
-
-    # @classmethod
-    # def get_config_class(cls):
-    #     return cls.config_class
 
     def _get_serialization_method(self, serialization_type):
         if serialization_type == None:
@@ -99,24 +89,6 @@ class WriteOnlyStore(object):
 
     def _set(self, key, value):
         raise NotImplementedError
-
-    # def _configure_store_backend(self, store_backend_config):
-    #     modified_store_backend_config = copy.deepcopy(store_backend_config)
-
-    #     module_name = modified_store_backend_config.pop("module_name")
-    #     class_name = modified_store_backend_config.pop("class_name")
-
-    #     module = importlib.import_module(module_name)
-    #     store_backend_class = getattr(module, class_name)
-
-    #     self.store_backend = store_backend_class(
-    #         modified_store_backend_config,
-    #         self.root_directory
-    #     )
-
-    #     #For convenience when testing
-    #     return self.store_backend
-
 
 
 class ReadWriteStoreConfig(WriteOnlyStoreConfig):
@@ -161,13 +133,6 @@ class ReadWriteStore(WriteOnlyStore):
             raise NotImplementedError
 
         # TODO: Add more serialization methods as needed
-
-# FIXME: This config class is deprecated
-# class BasicInMemoryStoreConfig(ReadWriteStoreConfig):
-#     _allowed_keys = set([
-#         "serialization_type"
-#     ]) #ReadWriteStoreConfig._allowed_keys
-#     _required_keys = set([]) #ReadWriteStoreConfig._required_keys
 
 class BasicInMemoryStore(ReadWriteStore):
     """Like a dict, but much harder to write.
@@ -307,9 +272,6 @@ class BasicInMemoryStore(ReadWriteStore):
 #                 type(key),
 #             ))
 
-class EmptyConfig(DotDict):
-    pass
-
 class EvaluationParameterStore(object):
     """Fine. You want to be a dict. You get to be a dict.
     
@@ -321,14 +283,8 @@ class EvaluationParameterStore(object):
     On reflection, there's no reason for all Stores to insist on serializability.
     """
 
-    config_class = EmptyConfig
-
-    def __init__(self, config=None, root_directory=None):
+    def __init__(self, root_directory=None):
         self.store = {}
-
-    @classmethod
-    def get_config_class(cls):
-        return cls.config_class
 
     def get(self, key):
         return self.store[key]
