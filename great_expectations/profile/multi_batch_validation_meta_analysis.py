@@ -14,8 +14,10 @@ logger = logging.getLogger(__name__)
 
 
 class MultiBatchValidationMetaAnalysis(object):
-    """MultiBatchDatasetProfiler
-    TODO: content
+    """MultiBatchValidationMetaAnalysis takes a list of validation results
+    (same expectation suite evaluated against multiple batches)
+    and returns multi-batch metrics from these results.
+
     """
 
     # (expectation type, result key) -> (expectation kwargs that should become metric kwargs)
@@ -67,6 +69,7 @@ class MultiBatchValidationMetaAnalysis(object):
         :param batch_kwargs: BatchKwargs of the batch that was validated
         :param metrics_store
         """
+        # NOTE: Eugene: 2019-09-04: Add more entries
         expectation_metrics = {
             # 'expect_column_distinct_values_to_be_in_set'
             # 'expect_column_kl_divergence_to_be_less_than',
