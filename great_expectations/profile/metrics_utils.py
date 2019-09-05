@@ -62,6 +62,7 @@ def get_nested_value_from_dict(d, key_path):
     return reduce(operator.getitem, key_path, d)
 
 def set_nested_value_in_dict(d, key_path, value):
-    get_nested_value_from_dict(d, key_path[:-1])[key_path[-1]] = value
-
+    for key in key_path[:-1]:
+        d = d.setdefault(key, {})
+    d[key_path[-1]] = value
 
