@@ -143,8 +143,6 @@ def parse_string_to_data_context_resource_identifier(string, separator="."):
 
     return class_instance
 
-# NOTE : Should runtime_config be optional?
-# TODO : Should this method be attached to the Configurable class?
 def instantiate_class_from_config(config, runtime_config, config_defaults={}):
     module_name = config.pop("module_name", None)
     if module_name == None:
@@ -168,18 +166,14 @@ def instantiate_class_from_config(config, runtime_config, config_defaults={}):
 
     config_with_defaults = copy.deepcopy(config_defaults)
     config_with_defaults.update(config)
+    config_with_defaults.update(runtime_config)
 
-    # NOTE: This configuration pattern requires all configurable classes to keep a handle to their config type.
-    if isinstance(config_with_defaults, class_.config_class):
-        typed_config = config_with_defaults
-    else:
-        typed_config = class_.config_class(**config_with_defaults)
-
-    if isinstance(runtime_config, class_.runtime_config_class):
-        typed_runtime_config = runtime_config
-    else:
-        typed_runtime_config = class_.runtime_config_class(**runtime_config)
-
-    class_instance = class_(typed_config, typed_runtime_config)
+    try:
+        class_instance = class_(**config_with_defaults)
+    except TypeError as e:
+        raise TypeError("Couldn't instantiate class : {} with config : {}. \n".format(
+            class_name,
+            config_with_defaults,
+        ) + str(e))
 
     return class_instance
