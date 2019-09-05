@@ -116,6 +116,28 @@ class DataContextResourceIdentifier(OrderedKeysDotDict):
 
     The parse_string_to_data_context_resource_identifier convenience method great_expectations.util
     can instantiate a valid identifier from any full identifier string.
+
+
+    Notes on usage and convention:
+    * DataContextResourceIdentifiers define the "namespace" of the DataContext.
+    * In an import dependency sense, these DCRIs exist prior to the DataContext class: DataContext imports and makes use of many Ids.
+    * That said, DCRIs exist primarily to make possible the work of the DataContext, so it's hard to separate the concepts cleanly.
+
+    * DCRIs the internal typing system for DataContexts.
+    * Within the DataContext (and related classes, like DataSources, Actions, Stores, etc.), concepts that can be typed as existing DCRIs should always be cast to DCRI format---never strings or dictionaries.
+    * Methods that expect a DCRI should check types using IsInstance at the entry point when they receive the input.
+    * In particular, most ReadWriteStores are usually bound tightly to DCRIs. (WriteOnlyStores
+    * If you're reading something from a Store and it's not keyed on a DCRI, it probably should be.
+
+    Note on typing in python in general:
+    We sometimes joke that adding types is turning the Great Expectations codebase into Java.
+    This may feel un-pythonic, but for the core classes and abstractions of the library, 
+    we judge that the purpose of the code is closer to software engineering than data manipulation and analysis.
+    In that context, typing is far more helpful than harmful.
+
+    Note on transition plans:
+    * The OrderedKeysDotDict class is a homegrown typing system that we regard as a transitionary state.
+    * When we deprecate python 2 (and possibly sooner), this class will be replaced by a more 
     """
 
     def __init__(self, *args, **kwargs):
