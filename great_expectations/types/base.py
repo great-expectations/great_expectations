@@ -91,6 +91,7 @@ class RequiredKeysDotDict(DotDict):
                 required by the _key_types dictionary.
             **kwargs: Additional key-value pairs to be included in the RequiredKeysDotDict
         """
+        # TODO: Deprecate coerce_types
         # Support PY2 by leaving coerce_types out of explicit params list
         coerce_types = kwargs.pop("coerce_types", False)
         super(RequiredKeysDotDict, self).__init__(*args, **kwargs)
