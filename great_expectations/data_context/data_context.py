@@ -178,7 +178,6 @@ class ConfigOnlyDataContext(object):
         """
         
         for store_name, store_config in store_configs.items():
-            print(store_name, store_config)
             self.add_store(
                 store_name,
                 store_config
@@ -196,34 +195,8 @@ class ConfigOnlyDataContext(object):
         """
 
         self._project_config["stores"][store_name] = store_config
-        new_store = self._init_store_from_config(store_config)
-        self._stores[store_name] = new_store
-        return new_store
-
-    def _init_store_from_config(self, config):
-        # typed_config = StoreMetaConfig(
-        #     coerce_types=True,
-        #     **config
-        # )
-        # if "store_config" not in typed_config:
-        #     typed_config.store_config = {}
-
-        # # NOTE : This should pop module_name and class_name, thereby removing the need for a layer of nesting in this config
-        # # TODO : Remove the extra layer of nesting from store_config
-        # loaded_module = importlib.import_module(typed_config.module_name)
-        # loaded_class = getattr(loaded_module, typed_config.class_name)
-
-        # typed_sub_config = loaded_class.get_config_class()(
-        #     coerce_types=True,
-        #     **typed_config.store_config
-        # )
-
-        # instantiated_store = loaded_class(
-        #     config=typed_sub_config,
-        #     root_directory=self.root_directory,
-        # )
         new_store = instantiate_class_from_config(
-            config=config,
+            config=store_config,
             runtime_config={
                 "root_directory" : self.root_directory,
             },
@@ -231,7 +204,7 @@ class ConfigOnlyDataContext(object):
                 "module_name" : "great_expectations.data_context.store"
             }
         )
-
+        self._stores[store_name] = new_store
         return new_store
 
     def _normalize_absolute_or_relative_path(self, path):
