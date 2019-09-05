@@ -84,7 +84,7 @@ class NamespaceAwareExpectationDefinedValidationMetric(Metric):
         "data_asset_name": NormalizedDataAssetName,
         "batch_fingerprint": BatchFingerprint,
         "expectation_type": string_types,
-        "result_key": string_types,
+        # "result_key": tuple, # NOTE: Eugene: 2019-09-04: can we allow it to be a string or a tuple?
         "metric_kwargs": dict
     }
 
@@ -160,7 +160,7 @@ class MultiBatchNamespaceAwareExpectationDefinedValidationMetric(Metric):
     }
     _key_types = {
         "data_asset_name": NormalizedDataAssetName,
-        "result_key": string_types,
+        # "result_key": string_types, # NOTE: Eugene: 2019-09-04: can we allow it to be a string or a tuple?
         "metric_kwargs": dict,
         "expectation_type": string_types,
         "batch_fingerprints": list,
