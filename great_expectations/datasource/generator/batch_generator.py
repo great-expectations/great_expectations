@@ -45,6 +45,16 @@ class BatchGenerator(object):
         raise NotImplementedError
 
     def get_available_partition_ids(self, generator_asset):
+        """
+        Applies the current _partitioner to the batches available on generator_asset and returns a list of valid
+        partition_id strings that can be used to identify batches of data.
+
+        Args:
+            generator_asset: the generator asset whose partitions should be returned.
+
+        Returns:
+            A set of partition_id strings
+        """
         raise NotImplementedError
 
     def get_config(self):
@@ -79,7 +89,6 @@ class BatchGenerator(object):
 
         """
         raise NotImplementedError
-
 
     def yield_batch_kwargs(self, data_asset_name):
         if data_asset_name not in self._data_asset_iterators:
