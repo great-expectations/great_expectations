@@ -28,7 +28,7 @@ def test_instantiate_class_from_config_with_overriden_defaults():
             "module_name" : "tests.test_plugins.fake_configs",
             "class_name" : "FakeConfigurableWrapperClass",
             "foo" : 100,
-            "fake_configurable_class_config" : {
+            "fake_configurable" : {
                 "module_name" : "tests.test_plugins.fake_configs",
                 "class_name" : "FakeConfigurableClass",
             },
@@ -37,14 +37,14 @@ def test_instantiate_class_from_config_with_overriden_defaults():
             "x" : 1
         }
     )
-    assert fake_configurable_wrapper_object.fake_configurable_object.config.a == "default_value_for_a"
+    assert fake_configurable_wrapper_object.fake_configurable_object.a == "default_value_for_a"
 
     fake_configurable_wrapper_object = instantiate_class_from_config(
         config = {
             "module_name" : "tests.test_plugins.fake_configs",
             "class_name" : "FakeConfigurableWrapperClass",
             "foo" : 100,
-            "fake_configurable_class_config" : {
+            "fake_configurable" : {
                 "module_name" : "tests.test_plugins.fake_configs",
                 "class_name" : "FakeConfigurableClass",
                 "a" : "not_the_default_value",
@@ -54,7 +54,7 @@ def test_instantiate_class_from_config_with_overriden_defaults():
             "x" : 1
         }
     )
-    assert fake_configurable_wrapper_object.fake_configurable_object.config.a == "not_the_default_value"
+    assert fake_configurable_wrapper_object.fake_configurable_object.a == "not_the_default_value"
 
 def test_instantiate_class_from_config_with_config_defaults():
     my_runtime_config = {
@@ -71,7 +71,7 @@ def test_instantiate_class_from_config_with_config_defaults():
         runtime_config = my_runtime_config,
         config_defaults = {}
     )
-    assert fake_configurable_object.config.a == "value_from_the_config"
+    assert fake_configurable_object.a == "value_from_the_config"
 
     # Default only. No config
     fake_configurable_object = instantiate_class_from_config(
@@ -84,7 +84,7 @@ def test_instantiate_class_from_config_with_config_defaults():
             "a" : "value_from_the_defaults",
         }
     )
-    assert fake_configurable_object.config.a == "value_from_the_defaults"
+    assert fake_configurable_object.a == "value_from_the_defaults"
 
     # Both.
     fake_configurable_object = instantiate_class_from_config(
@@ -98,10 +98,10 @@ def test_instantiate_class_from_config_with_config_defaults():
             "a" : "value_from_the_defaults",
         }
     )
-    assert fake_configurable_object.config.a == "value_from_the_config"
+    assert fake_configurable_object.a == "value_from_the_config"
 
     # Neither
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         fake_configurable_object = instantiate_class_from_config(
             config = {
                 "class_name" : "FakeConfigurableClass",
