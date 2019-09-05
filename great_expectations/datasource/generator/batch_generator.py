@@ -25,7 +25,48 @@ class BatchGenerator(object):
     Batches include metadata that identifies how they were constructed--the same “batch_kwargs”
     assembled by the generator, While not every datasource will enable re-fetching a
     specific batch of data, GE can store snapshots of batches or store metadata from an
-    external data version control system. 
+    external data version control system.
+
+    Example Generator Configurations follow::
+
+        my_datasource_1:
+          class_name: PandasDatasource
+          generators:
+            # This generator will provide two data assets, corresponding to the globs defined under the "file_logs"
+            # and "data_asset_2" keys. The file_logs asset will be partitioned according to the match group
+            # defined in partition_regex
+            default:
+              class_name: GlobReaderGenerator
+              base_directory: /var/logs
+              reader_options:
+                sep: "
+              globs:
+                file_logs:
+                  glob: logs/*.gz
+                  partition_regex: logs/file_(\d{0,4})_\.log\.gz
+                data_asset_2:
+                  glob: data/*.csv
+
+        my_datasource_2:
+          class_name: PandasDatasource
+          generators:
+            # This generator will create one data asset per subdirectory in /data
+            # Each asset will have partitions corresponding to the filenames in that subdirectory
+            default:
+              class_name: SubdirReaderGenerator
+              reader_options:
+                sep: "
+              base_directory: /data
+
+        my_datasource_3:
+          class_name: SqlalchemyDatasource
+          generators:
+            # This generator will search for a file named with the name of the requested generator asset and the
+            # .sql suffix to open with a query to use to generate data
+             default:
+                class_name: QueryGenerator
+
+
     """
 
     _batch_kwargs_type = BatchKwargs
