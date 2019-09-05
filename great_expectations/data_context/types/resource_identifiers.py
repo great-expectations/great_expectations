@@ -33,34 +33,6 @@ class DataAssetIdentifier(DataContextResourceIdentifier):
     _allowed_keys = set(_key_order)
 
 
-class BatchIdentifier(DataContextResourceIdentifier):
-    _key_order = [
-        "data_asset_identifier",
-        "batch_runtime_id",
-    ]
-    _key_types = {
-        "data_asset_identifier" : DataAssetIdentifier,
-        "batch_runtime_id" : string_types,
-    }
-    # NOTE: This pattern is kinda awkward. It would be nice to ONLY specify _key_order
-    _required_keys = set(_key_order)
-    _allowed_keys = set(_key_order)
-
-
-# class RunIdentifier(DataContextResourceIdentifier):
-#     _key_order = [
-#         "execution_context",
-#         "start_time_utc",
-#     ]
-#     _key_types = {
-#         "execution_context" : string_types,
-#         "start_time_utc" : int,
-#     }
-#     # NOTE: This pattern is kinda awkward. It would be nice to ONLY specify _key_order
-#     _required_keys = set(_key_order)
-#     _allowed_keys = set(_key_order)
-
-
 class ExpectationSuiteIdentifier(DataContextResourceIdentifier):
     _key_order = [
         "data_asset_name",
