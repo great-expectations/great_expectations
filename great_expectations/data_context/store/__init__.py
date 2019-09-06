@@ -13,5 +13,5 @@ from .store import (
 )
 
 from .validation_store import (
-    ValidationStore
+    ValidationResultStore
 )

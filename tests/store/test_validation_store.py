@@ -4,7 +4,7 @@ import os
 import pandas as pd
 
 from great_expectations.data_context.store import (
-    ValidationStore,
+    ValidationResultStore,
 )
 from great_expectations.data_context.types import (
     DataAssetIdentifier,
@@ -14,11 +14,9 @@ from great_expectations.util import (
     gen_directory_tree_str,
 )
 
-def test_ValidationStore_with_InMemoryStoreBackend():
+def test_ValidationResultStore_with_InMemoryStoreBackend():
 
-    my_store = ValidationStore(
-        # resource_identifier_class_name = "ValidationResultIdentifier",
-        # serialization_type = None,
+    my_store = ValidationResultStore(
         store_backend = {
             "module_name" : "great_expectations.data_context.store",
             "class_name" : "InMemoryStoreBackend",
@@ -57,17 +55,14 @@ def test_ValidationStore_with_InMemoryStoreBackend():
         ns_2,
     ])
 
-def test_ValidationStoreStore__convert_resource_identifier_to_list():
+def test_ValidationResultStore__convert_resource_identifier_to_list():
 
-    my_store = ValidationStore(
-        # resource_identifier_class_name = "ValidationResultIdentifier",
-        # serialization_type = None,
+    my_store = ValidationResultStore(
         store_backend = {
             "module_name" : "great_expectations.data_context.store",
             "class_name" : "InMemoryStoreBackend",
-            # "separator" : ".",
         },
-        root_directory=None,#"dummy/path/",
+        root_directory=None,
     )
 
     ns_1 = ValidationResultIdentifier(
@@ -75,13 +70,11 @@ def test_ValidationStoreStore__convert_resource_identifier_to_list():
     )
     assert my_store._convert_resource_identifier_to_tuple(ns_1) == ('a', 'b', 'c', 'quarantine', 'prod-100')
     
-def test_ValidationStore_with_FixedLengthTupleFileSystemStoreBackend(tmp_path_factory):
-    path = str(tmp_path_factory.mktemp('test_ValidationStore_with_FixedLengthTupleFileSystemStoreBackend__dir'))
+def test_ValidationResultStore_with_FixedLengthTupleFileSystemStoreBackend(tmp_path_factory):
+    path = str(tmp_path_factory.mktemp('test_ValidationResultStore_with_FixedLengthTupleFileSystemStoreBackend__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
 
-    my_store = ValidationStore(
-        # resource_identifier_class_name = "ValidationResultIdentifier",
-        # serialization_type = None,
+    my_store = ValidationResultStore(
         store_backend = {
             "module_name" : "great_expectations.data_context.store",
             "class_name" : "FixedLengthTupleFilesystemStoreBackend",
@@ -118,7 +111,7 @@ def test_ValidationStore_with_FixedLengthTupleFileSystemStoreBackend(tmp_path_fa
 
     print(gen_directory_tree_str(path))
     assert gen_directory_tree_str(path) == """\
-test_ValidationStore_with_FixedLengthTupleFileSystemStoreBackend__dir0/
+test_ValidationResultStore_with_FixedLengthTupleFileSystemStoreBackend__dir0/
     my_store/
         prod-100/
             a/

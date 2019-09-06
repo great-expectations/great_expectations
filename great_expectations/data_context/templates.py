@@ -35,7 +35,7 @@ evaluation_parameter_store_name: evaluation_parameter_store
 stores:
 
   local_validation_result_store:
-    class_name: ValidationStore
+    class_name: ValidationResultStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
@@ -74,7 +74,7 @@ stores:
   #     file_extension: .zzz
 
   fixture_validation_results_store:
-    class_name: ValidationStore
+    class_name: ValidationResultStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: fixtures/validations
