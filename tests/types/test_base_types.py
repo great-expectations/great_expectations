@@ -7,8 +7,13 @@ from great_expectations.types import (
     DotDict,
     AllowedKeysDotDict,
     RequiredKeysDotDict,
+    OrderedKeysDotDict,
     ListOf,
     DictOf,
+)
+from great_expectations.data_context.types import (
+    ValidationResultIdentifier,
+    DataAssetIdentifier,
 )
 
 from ruamel.yaml import YAML, yaml_object
@@ -596,3 +601,62 @@ def test_required_keys_dotdict():
     # Note that since there is not a concept of allowed_keys, we do not raise attributeerror here, picking
     # up dictionary semantics instead
     assert d.doesnotexist is None
+
+def test_OrderedKeysDotDict_subclass():
+
+    class MyOKDD(OrderedKeysDotDict):
+        _key_order = ["A", "B", "C"]
+        _key_types = {
+            "A" : string_types,
+            "B" : int,
+        }
+
+        # NOTE: This pattern is kinda awkward.
+        # It would be nice to ONLY specify _key_order
+        # Instead, we need to add these two lines at the end of every OrderedKeysDotDict class definition
+        # ... There's probably a way to do this with decorators...
+        _allowed_keys = set(_key_order)
+        _required_keys = set(_key_order)
+
+    MyOKDD(**{
+        "A" : "A",
+        "B" : 10,
+        "C" : "C",
+    })
+
+    #OrderedKeysDotDicts can parse from tuples
+    MyOKDD("a", 10, "c")
+
+    #OrderedKeysDotDicts coerce to _key_types by default
+    assert MyOKDD("10", "10", "20") == {
+        "A" : "10",
+        "B" : 10, # <- Not a string anymore!
+        "C" : "20",
+    }
+
+    with pytest.raises(ValueError):
+        assert MyOKDD("a", "10.5", 20)
+
+    #OrderedKeysDotDicts raise an IndexError if args don't line up with keys
+    with pytest.raises(IndexError):
+        MyOKDD("a")
+
+    with pytest.raises(IndexError):
+        MyOKDD("a", 10, "c", "d")
+
+
+def test_OrderedKeysDotDict__recursively_get_key_length():
+
+    class MyOKDD(OrderedKeysDotDict):
+        _key_order = ["A", "B", "C"]
+        _key_types = {
+            "A" : string_types,
+            "B" : int,
+        }
+        _allowed_keys = set(_key_order)
+        _required_keys = set(_key_order)
+
+    assert MyOKDD._recursively_get_key_length() == 3
+    assert DataAssetIdentifier._recursively_get_key_length() == 3
+    assert ValidationResultIdentifier._recursively_get_key_length() == 5
+
