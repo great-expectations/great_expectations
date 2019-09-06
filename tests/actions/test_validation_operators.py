@@ -7,16 +7,16 @@ import great_expectations as ge
 from great_expectations.actions.validation_operators import (
     DataContextAwareValidationOperator,
 )
-from great_expectations.data_context.store import (
-    NamespacedInMemoryStore
-)
+# from great_expectations.data_context.store import (
+#     NamespacedInMemoryStore
+# )
 from great_expectations.data_context import (
     ConfigOnlyDataContext,
 )
 from great_expectations.data_context.types import (
     DataContextConfig,
     DataAssetIdentifier,
-    RunIdentifier
+    # RunIdentifier
 )
 
 @pytest.fixture()
