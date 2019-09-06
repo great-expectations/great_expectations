@@ -12,7 +12,6 @@ import os
 import shutil
 import json
 from glob import glob
-import pandas as pd
 
 from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import (
@@ -69,7 +68,7 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
     print(gen_directory_tree_str(validations_dir))
 
     with open(os.path.join(not_so_empty_data_context.root_directory, 
-            "uncommitted/validations/1955-11-05T000000Z/my_datasource/default/f1/validation-results-f1-default-1955-11-05T000000Z.json")) as infile:
+            "uncommitted/validations/1955-11-05T000000Z/my_datasource/default/f1/default.json")) as infile:
         saved_validation_result = json.load(infile)
     
     assert validation_result == saved_validation_result
@@ -518,6 +517,7 @@ def test_data_context_result_store(titanic_data_context):
     )
     assert len(failed_validation_result["results"]) == 8
 
+
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
     # assert False #for speed
@@ -602,7 +602,7 @@ project_path/
                     titanic/
                         default/
                             Titanic/
-                                validation-results-Titanic-BasicDatasetProfiler-profiling.json
+                                BasicDatasetProfiler.json
 """
 
     context.profile_datasource("random")

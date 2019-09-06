@@ -125,7 +125,7 @@ def test_NamespacedReadWriteStore_with_FileSystemStoreBackend(tmp_path_factory):
                 "class_name" : "FilesystemStoreBackend",
                 "base_directory" : "my_store/",
                 "file_extension" : "txt",
-                "filepath_template" : "{4}/{0}/{1}/{2}/validation-results-{2}-{3}.{file_extension}",
+                "filepath_template" : "{4}/{0}/{1}/{2}/{3}.{file_extension}",
                 "replaced_substring" : "/",
                 "replacement_string" : "__",
             }
@@ -146,7 +146,7 @@ def test_NamespacedReadWriteStore_with_FileSystemStoreBackend(tmp_path_factory):
     assert my_store.get(ns_1) == "aaa"
 
     ns_2 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-200"
+        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-20"
     )
     my_store.set(ns_2, "bbb")
     assert my_store.get(ns_2) == "bbb"
@@ -165,12 +165,12 @@ test_test_NamespacedReadWriteStore_with_FileSystemStoreBackend__dir0/
             a/
                 b/
                     c/
-                        validation-results-c-quarantine.txt
-        prod-200/
+                        quarantine.txt
+        prod-20/
             a/
                 b/
                     c/
-                        validation-results-c-quarantine.txt
+                        quarantine.txt
 """
 
 def test_NamespacedReadWriteStore_pandas_csv_serialization(tmp_path_factory):
@@ -186,7 +186,7 @@ def test_NamespacedReadWriteStore_pandas_csv_serialization(tmp_path_factory):
                 "class_name" : "FilesystemStoreBackend",
                 "base_directory" : "my_store/",
                 "file_extension" : "csv",
-                "filepath_template" : "{4}/{0}/{1}/{2}/quarantined-rows-{2}-{3}.{file_extension}",
+                "filepath_template" : "{4}/{0}/{1}/{2}/{3}.{file_extension}",
                 "replaced_substring" : "/",
                 "replacement_string" : "__",
             }
@@ -204,17 +204,16 @@ def test_NamespacedReadWriteStore_pandas_csv_serialization(tmp_path_factory):
     my_store.set(key1, my_df)
 
     print(gen_directory_tree_str(path))
-    assert gen_directory_tree_str(path) == """\
-test_test_NamespacedReadWriteStore_pandas_csv_serialization__dir0/
+    assert gen_directory_tree_str(path) == \
+"""test_test_NamespacedReadWriteStore_pandas_csv_serialization__dir0/
     my_store/
         prod-20190801/
             a/
                 b/
                     c/
-                        quarantined-rows-c-quarantine.csv
+                        quarantine.csv
 """
-
-    with open(os.path.join(path, "my_store/prod-20190801/a/b/c/quarantined-rows-c-quarantine.csv")) as f_:
+    with open(os.path.join(path, "my_store/prod-20190801/a/b/c/quarantine.csv")) as f_:
         assert f_.read() == """\
 x,y
 1,a
