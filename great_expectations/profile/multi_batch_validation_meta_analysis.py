@@ -1,51 +1,134 @@
 import logging
 from collections import defaultdict
+import collections
 
 import warnings
 from great_expectations.datasource.types import BatchKwargs
-from great_expectations.data_context.types.metrics import NamespaceAwareValidationMetric, \
-    MultiBatchNamespaceAwareValidationMetric, NamespaceAwareExpectationDefinedValidationMetric, MultiBatchNamespaceAwareExpectationDefinedValidationMetric
 from great_expectations.profile.metrics_store import MetricsStore
+from great_expectations.profile.metrics_utils import (
+set_nested_value_in_dict,
+get_nested_value_from_dict
+)
 
 logger = logging.getLogger(__name__)
 
 
 class MultiBatchValidationMetaAnalysis(object):
-    """MultiBatchDatasetProfiler
-    TODO: content
+    """MultiBatchValidationMetaAnalysis takes a list of validation results
+    (same expectation suite evaluated against multiple batches)
+    and returns multi-batch metrics from these results.
+
     """
 
+    # (expectation type, result key) -> (expectation kwargs that should become metric kwargs)
+    # result key is a string or a tuple if the key is nested. same for the expectation kwargs
+
+    # NOTE: Eugene: 2019-09-04: Add more entries
+    EXPECTATION_DEFINED_METRICS_LOOKUP_TABLE = {
+        ('expect_column_values_to_not_be_null', ('unexpected_percent',)): ('column',), # note: "," is important - it makes it a tuple!
+        ('expect_column_quantile_values_to_be_between', ('observed_value', 'values')): (
+            'column', ('quantile_ranges', 'quantiles')),
+
+    }
+
     @classmethod
-    def _get_metrics_dict_by_batch_id(cls, validation_results_list, data_context):
+    def add_expectation_defined_metric_for_result_key(cls, d, result, data_asset_name, batch_kwargs, metrics_store, t=()):
+        for key, value in d.items():
+            if isinstance(value, collections.Mapping):
+                cls.add_expectation_defined_metric_for_result_key(value, result, data_asset_name, batch_kwargs, metrics_store, t + (key,))
+            else:
+                # result_key_lookup_key = key if t==() else (t + (key,))
+                result_key_lookup_key = (t + (key,))
+                full_lookup_key = (result['expectation_config']['expectation_type'], result_key_lookup_key)
+                metric_kwargs_names = cls.EXPECTATION_DEFINED_METRICS_LOOKUP_TABLE.get(full_lookup_key)
+                if metric_kwargs_names:
+                    metric_kwargs = {}
+                    for metric_kwarg_name in metric_kwargs_names:
+                        if isinstance(metric_kwarg_name, tuple):
+                            set_nested_value_in_dict(metric_kwargs, metric_kwarg_name, get_nested_value_from_dict(result['expectation_config']['kwargs'], metric_kwarg_name))
+                        else:
+                            metric_kwargs[metric_kwarg_name] = result['expectation_config']['kwargs'][metric_kwarg_name]
+
+                    metrics_store.add_single_batch_expectation_defined_metric(
+                            data_asset_name,
+                            batch_kwargs.batch_fingerprint,
+                            result['expectation_config']['expectation_type'],
+                            result_key_lookup_key,
+                            metric_kwargs,
+                            value)
+
+    @classmethod
+    def add_metrics_from_single_expectation_validation_result(cls, result, data_asset_name, batch_kwargs, metrics_store):
         """
-        An auxiliary method that gets a list of validation results and returns
-        a dictionary of metrics
+        Extract metrics from a validation result of one expectation and store them.
+        Depending on the type of the expectation, this method chooses the key
+        in the result dictionary that should be returned as a metric
+        (e.g., "observed_value" or "unexpected_percent").
 
-        :param validation_results_list: a list validation results where each item is a
-                result of validating a batch against the same expectation suite
-        :return: a dict: {batch_id -> {metric multi-batch key -> metric object}}
+        :param result: a validation result dictionary of one expectation
+        :param data_asset_name:
+        :param batch_kwargs: BatchKwargs of the batch that was validated
+        :param metrics_store
         """
-        metrics_dict = {}
+        # NOTE: Eugene: 2019-09-04: Add more entries
+        expectation_metrics = {
+            # 'expect_column_distinct_values_to_be_in_set'
+            # 'expect_column_kl_divergence_to_be_less_than',
+            'expect_column_max_to_be_between': {
+                'observed_value': 'column_max'
+            },
+            'expect_column_mean_to_be_between': {
+                'observed_value': 'column_mean'
+            },
+            'expect_column_median_to_be_between': {
+                'observed_value': 'column_median'
+            },
+            'expect_column_min_to_be_between': {
+                'observed_value': 'column_min'
+            },
+            'expect_column_proportion_of_unique_values_to_be_between': {
+                'observed_value': 'column_proportion_of_unique_values'
+            },
+            # 'expect_column_quantile_values_to_be_between',
+            'expect_column_stdev_to_be_between': {
+                'observed_value': 'column_stdev'
+            },
+            'expect_column_unique_value_count_to_be_between': {
+                'observed_value': 'column_unique_count'
+            },
+            # 'expect_column_values_to_be_between',
+            # 'expect_column_values_to_be_in_set',
+            # 'expect_column_values_to_be_in_type_list',
+            'expect_column_values_to_be_unique': {
 
-        for j, one_batch_validation_results in enumerate(validation_results_list):
-            #             print(json.dumps(one_batch_validation_results['meta'], indent=2))
-            batch_fingerprint = cls.get_batch_fingerprint(one_batch_validation_results['meta']['batch_kwargs'])
+            },
+            # 'expect_table_columns_to_match_ordered_list',
+            'expect_table_row_count_to_be_between': {
+                'observed_value': 'row_count'
+            }
 
-            # NOTE: Eugene 2019-08-25: when validation results be a typed object,
-            # that object will have data_asset_name property method that will
-            # return a NormalizedDataAssetName. Until then we are constructing
-            # a NormalizedDataAssetName from the string that we fetch from the dictionary
-            normalized_data_asset_name = data_context._normalize_data_asset_name(
-                one_batch_validation_results['meta']['data_asset_name'])
-            metrics_dict[batch_fingerprint] = {}
-            for i, result in enumerate(one_batch_validation_results['results']):
-                cur_exp_metrics = MetricsStore.get_metrics_for_expectation(result,
-                                                              normalized_data_asset_name,
-                                                              batch_fingerprint)
-                for metric in cur_exp_metrics:
-                    metrics_dict[batch_fingerprint][metric.multi_batch_key] = metric
+        }
 
-        return metrics_dict
+        metrics = []
+        if result.get('result'):
+            entry = expectation_metrics.get(result['expectation_config']['expectation_type'])
+            if entry:
+                for key in result['result'].keys():
+                    metric_name = entry.get(key)
+                    if metric_name:
+                        metric_kwargs = {"column": result['expectation_config']['kwargs']['column']} if result['expectation_config'][
+                    'kwargs'].get('column') else {}
+
+                        metrics_store.add_single_batch_metric(
+                            data_asset_name,
+                            batch_kwargs.batch_fingerprint,
+                            metric_name,
+                            metric_kwargs,
+                            result['result'][key])
+
+            else:
+                cls.add_expectation_defined_metric_for_result_key(result['result'], result,
+                                        data_asset_name, batch_kwargs, metrics_store)
 
     @classmethod
     def get_metrics(cls, validation_results_list, data_context):
@@ -56,73 +139,29 @@ class MultiBatchValidationMetaAnalysis(object):
                 result of validating a batch against the same expectation suite
         :return: a dict: {multi-batch metric urn -> multi-batch metric}
         """
-        metrics_dict = cls._get_metrics_dict_by_batch_id(validation_results_list, data_context)
 
-        # let's compute the union of all metrics names that come from all the batches.
-        # this will help us fill with nulls if a particular metric is missing from a batch
-        # (e.g., due to the column missing)
-        # Not performing this steps would result in non-uniform lengths of lists and we would
-        # not be able to convert this dict of lists into a dataframe.
-        metric_names_union = set()
-        for batch_id, batch_metrics in metrics_dict.items():
-            metric_names_union = metric_names_union.union(batch_metrics.keys())
+        # NOTE: Eugene: 2019-09-04: For now we are creating an instance of metrics store here
+        # but it probably should be some singleton obtained from a factory/manager.
+        metrics_store = MetricsStore()
 
-        metrics_dict_of_lists = defaultdict(list)
+        batch_kwargs_list = []
+        for j, one_batch_validation_results in enumerate(validation_results_list):
+            #             print(json.dumps(one_batch_validation_results['meta'], indent=2))
+            batch_kwargs = BatchKwargs(one_batch_validation_results['meta']['batch_kwargs'])
+            batch_kwargs_list.append(batch_kwargs)
 
-        batch_index = list(metrics_dict.keys())
+            # NOTE: Eugene 2019-08-25: when validation results be a typed object,
+            # that object will have data_asset_name property method that will
+            # return a NormalizedDataAssetName. Until then we are constructing
+            # a NormalizedDataAssetName from the string that we fetch from the dictionary
+            normalized_data_asset_name = data_context._normalize_data_asset_name(
+                one_batch_validation_results['meta']['data_asset_name'])
+            for i, result in enumerate(one_batch_validation_results['results']):
+                cls.add_metrics_from_single_expectation_validation_result(result,
+                                                                          normalized_data_asset_name,
+                                                                          batch_kwargs,
+                                                                          metrics_store)
 
-        for batch_id, batch_metrics in metrics_dict.items():
-            # fill in the metrics that are present in the batch
-            for metric_name, metric_value in batch_metrics.items():
-                metrics_dict_of_lists[metric_name].append(metric_value)
-
-            # fill in the metrics that are missing in the batch
-            metrics_missing_in_batch = metric_names_union - set(batch_metrics.keys())
-            for metric_name in metrics_missing_in_batch:
-                metrics_dict_of_lists[metric_name].append(None)
-
-        mb_metrics = {}
-        for metric_key, single_batch_metric_list in metrics_dict_of_lists.items():
-            mb_metric = cls.make_multi_batch_metric_from_list_of_single_batch_metrics(metric_key[0], single_batch_metric_list, batch_index)
-            mb_metrics[mb_metric.key] = mb_metric
+        mb_metrics = metrics_store.get_multi_batch_metrics(batch_kwargs_list)
 
         return mb_metrics
-
-    @classmethod
-    def get_batch_fingerprint(cls, batch_kwargs):
-        return BatchKwargs.build_batch_fingerprint(batch_kwargs)
-
-    @classmethod
-    def make_multi_batch_metric_from_list_of_single_batch_metrics(cls, single_batch_metric_name, single_batch_metric_list, batch_index):
-        """
-        Utility method that gets a list of single batch metrics with the same multi-batch key (meaning that they are the same
-        metric with the same kwargs, but obtained by validating different batches of the same data asset) and
-        constructs a multi-batch metric for that key.
-
-        :param single_batch_metric_name:
-        :param single_batch_metric_list:
-        :param batch_index:
-        :return:
-        """
-        first_non_null_single_batch_metric = [item for item in single_batch_metric_list if item is not None][0]
-
-        if 'NamespaceAwareValidationMetric' == single_batch_metric_name:
-                mb_metric = MultiBatchNamespaceAwareValidationMetric(
-                    data_asset_name=first_non_null_single_batch_metric.data_asset_name,
-                    metric_name=first_non_null_single_batch_metric.metric_name,
-                    metric_kwargs=first_non_null_single_batch_metric.metric_kwargs,
-                    batch_fingerprints=batch_index,
-                    batch_metric_values=[None if metric is None else metric.metric_value for metric in
-                                         single_batch_metric_list]
-                )
-        elif 'NamespaceAwareExpectationDefinedValidationMetric' == single_batch_metric_name:
-                mb_metric = MultiBatchNamespaceAwareExpectationDefinedValidationMetric(
-                    data_asset_name = first_non_null_single_batch_metric.data_asset_name,
-                    result_key = first_non_null_single_batch_metric.result_key,
-                    expectation_type = first_non_null_single_batch_metric.expectation_type,
-                    metric_kwargs = first_non_null_single_batch_metric.metric_kwargs,
-                    batch_fingerprints = batch_index,
-                    batch_metric_values = [None if metric is None else metric.metric_value for metric in single_batch_metric_list]
-                )
-
-        return mb_metric
