@@ -145,6 +145,8 @@ def parse_string_to_data_context_resource_identifier(string, separator="."):
     return class_instance
 
 def instantiate_class_from_config(config, runtime_config, config_defaults={}):
+    config = copy.deepcopy(config)
+
     module_name = config.pop("module_name", None)
     if module_name == None:
         # TODO : Trap this error and throw an informative message
@@ -156,14 +158,25 @@ def instantiate_class_from_config(config, runtime_config, config_defaults={}):
     class_name = config.pop("class_name", None)
     if class_name == None:
         # TODO : Trap this error and throw an informative message
-        class_name = config_defaults.pop("class_name")
+        try:
+            class_name = config_defaults.pop("class_name")
+        except KeyError as e:
+            raise KeyError("Neither config : {} nor config_defaults : {} contains a class_name key.".format(
+                config, config_defaults,
+            ))
     else:
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
         config_defaults.pop("class_name", None)
 
     # Get the class object itself from strings.
     loaded_module = importlib.import_module(module_name)
-    class_ = getattr(loaded_module, class_name)
+    try:
+        class_ = getattr(loaded_module, class_name)
+    except AttributeError as e:
+        raise AttributeError("Module : {} has no class named : {}".format(
+            module_name,
+            class_name,
+        ))
 
     config_with_defaults = copy.deepcopy(config_defaults)
     config_with_defaults.update(config)
@@ -172,9 +185,14 @@ def instantiate_class_from_config(config, runtime_config, config_defaults={}):
     try:
         class_instance = class_(**config_with_defaults)
     except TypeError as e:
-        raise TypeError("Couldn't instantiate class : {} with config : {}. \n".format(
+        raise TypeError("Couldn't instantiate class : {} with config : \n\t{}\n \n".format(
             class_name,
-            config_with_defaults,
+            format_dict_for_error_message(config_with_defaults)
         ) + str(e))
 
     return class_instance
+
+def format_dict_for_error_message(dict_):
+    # TODO : Tidy this up a bit. Indentation isn't fully consistent.
+
+    return '\n\t'.join('\t\t'.join((str(key), str(dict_[key]))) for key in dict_)

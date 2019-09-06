@@ -39,9 +39,6 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from .store.types import (
-    StoreMetaConfig,
-)
 from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
 
 from .types import (
@@ -57,6 +54,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 from .templates import (
     PROJECT_TEMPLATE,
     PROFILE_COMMENT,
+)
+from .util import (
+    instantiate_class_from_config
 )
 
 logger = logging.getLogger(__name__)
@@ -179,41 +179,24 @@ class ConfigOnlyDataContext(object):
 
         Args:
             store_name (str): a key for the new Store in in self.stores
-            store_config (dict or StoreMetaConfig): a config for the Store to add
+            store_config (dict): a config for the Store to add
 
         Returns:
             store (Store)
         """
 
         self._project_config["stores"][store_name] = store_config
-        new_store = self._init_store_from_config(store_config)
+        new_store = instantiate_class_from_config(
+            config=store_config,
+            runtime_config={
+                "root_directory" : self.root_directory,
+            },
+            config_defaults={
+                "module_name" : "great_expectations.data_context.store"
+            }
+        )
         self._stores[store_name] = new_store
         return new_store
-
-    def _init_store_from_config(self, config):
-        typed_config = StoreMetaConfig(
-            coerce_types=True,
-            **config
-        )
-        if "store_config" not in typed_config:
-            typed_config.store_config = {}
-
-        # NOTE : This should pop module_name and class_name, thereby removing the need for a layer of nesting in this config
-        # TODO : Remove the extra layer of nesting from store_config
-        loaded_module = importlib.import_module(typed_config.module_name)
-        loaded_class = getattr(loaded_module, typed_config.class_name)
-
-        typed_sub_config = loaded_class.get_config_class()(
-            coerce_types=True,
-            **typed_config.store_config
-        )
-
-        instantiated_store = loaded_class(
-            config=typed_sub_config,
-            root_directory=self.root_directory,
-        )
-
-        return instantiated_store
 
     def _normalize_absolute_or_relative_path(self, path):
         if os.path.isabs(path):
@@ -286,7 +269,7 @@ class ConfigOnlyDataContext(object):
             None
         """
 
-        # NOTE : Once we start consistently generating ResourceIdentifiers at the source, all this packing/unpacking nonsense will vanish like a dream.
+        # NOTE : Once we start consistently generating DataContextKeys at the source, all this packing/unpacking nonsense will vanish like a dream.
         normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
         validation_result_identifier = ValidationResultIdentifier(
             coerce_types=True,
