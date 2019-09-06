@@ -25,7 +25,7 @@ class MultiBatchValidationMetaAnalysis(object):
 
     # NOTE: Eugene: 2019-09-04: Add more entries
     EXPECTATION_DEFINED_METRICS_LOOKUP_TABLE = {
-        ('expect_column_values_to_not_be_null', 'unexpected_percent'): ('column',), # note: "," is important - it makes it a tuple!
+        ('expect_column_values_to_not_be_null', ('unexpected_percent',)): ('column',), # note: "," is important - it makes it a tuple!
         ('expect_column_quantile_values_to_be_between', ('observed_value', 'values')): (
             'column', ('quantile_ranges', 'quantiles')),
 
@@ -37,7 +37,8 @@ class MultiBatchValidationMetaAnalysis(object):
             if isinstance(value, collections.Mapping):
                 cls.add_expectation_defined_metric_for_result_key(value, result, data_asset_name, batch_kwargs, metrics_store, t + (key,))
             else:
-                result_key_lookup_key = key if t==() else (t + (key,))
+                # result_key_lookup_key = key if t==() else (t + (key,))
+                result_key_lookup_key = (t + (key,))
                 full_lookup_key = (result['expectation_config']['expectation_type'], result_key_lookup_key)
                 metric_kwargs_names = cls.EXPECTATION_DEFINED_METRICS_LOOKUP_TABLE.get(full_lookup_key)
                 if metric_kwargs_names:
