@@ -9,9 +9,9 @@ from great_expectations.actions.types import (
     ActionConfig,
     ActionSetConfig,
 )
-from great_expectations.data_context.store import (
-    NamespacedInMemoryStore
-)
+# from great_expectations.data_context.store import (
+#     NamespacedInMemoryStore
+# )
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier
 )
