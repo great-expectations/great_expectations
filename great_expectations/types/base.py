@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 from collections import Iterable
 import inspect
 import copy
-from six import string_types
+from six import string_types, class_types
 
 from ruamel.yaml import YAML, yaml_object
 yaml = YAML()
@@ -312,3 +312,93 @@ class AllowedKeysDotDict(RequiredKeysDotDict):
         super(AllowedKeysDotDict, self).__setattr__(key, val)
 
     __setattr__ = __setitem__
+
+class OrderedKeysDotDict(AllowedKeysDotDict):
+    """extends AllowedKeysDotDict with a strict ordering of parameters.
+    This make OrderedKeysDotDict behave somehwat like collections.namedtuples.
+
+    OrderedKeysDotDicts...
+        have an exactly-defined number of elements
+        can parse from tuples
+        coerce types by default
+        raise an IndexError if args don't line up with keys
+
+    See tests for examples.
+
+    Lining up args with keys can be complex when key_types allow nesting.
+    This logic is built into _zip_keys_and_args_to_dict.
+    Again, see tests for examples.
+    """
+
+    _key_order = []
+
+    def __init__(self, *args, **kwargs):
+        logger.debug(self.__class__.__name__)
+        assert set(self._key_order) == set(self._allowed_keys)
+        assert set(self._key_order) == set(self._required_keys)
+
+        coerce_types = kwargs.pop("coerce_types", True),
+        if args == ():
+            super(OrderedKeysDotDict, self).__init__(
+                coerce_types=coerce_types,
+                *args, **kwargs
+            )
+
+        else:
+            new_kwargs = self._zip_keys_and_args_to_dict(args)
+            super(OrderedKeysDotDict, self).__init__(
+                coerce_types=coerce_types,
+                **new_kwargs
+            )
+
+    @classmethod
+    def _zip_keys_and_args_to_dict(cls, args):
+
+        index = 0
+        new_dict = {}
+        for key in cls._key_order:
+            try:
+                if isinstance(args[index], dict):
+                    increment = 1
+                    new_dict[key] = args[index]
+
+                else:
+                    key_type = cls._key_types.get(key, None)
+                    if isinstance(key_type, class_types) and issubclass(key_type, OrderedKeysDotDict):
+                        increment = key_type._recursively_get_key_length()
+                        new_dict[key] = args[index:index + increment]
+                    else:
+                        increment = 1
+                        new_dict[key] = args[index]
+
+            except IndexError as e:
+                raise IndexError("Not enough arguments in {0} to populate all fields in {1} : {2}".format(
+                    args,
+                    cls.__name__,
+                    cls._key_order,
+                ))
+
+            index += increment
+
+        if index < len(args):
+            raise IndexError("Too many arguments in {0} to populate the fields in {1} : {2}".format(
+                args,
+                cls.__name__,
+                cls._key_order,
+            ))
+
+        return new_dict
+
+    @classmethod
+    def _recursively_get_key_length(cls):
+        key_length = 0
+
+        for key in cls._key_order:
+            key_type = cls._key_types.get(key, None)
+            if isinstance(key_type, class_types) and issubclass(key_type, OrderedKeysDotDict):
+                key_length += key_type._recursively_get_key_length()
+            else:
+                key_length += 1
+
+        return key_length
+

@@ -45,7 +45,7 @@ from .store.types import (
 from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
 
 from .types import (
-    NormalizedDataAssetName,     # TODO : Consider replacing this with DataAssetIdentifier. In either case, the class should inherit from DataContextResourceIdentifier.
+    NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
     DataContextConfig,
     ValidationResultIdentifier,
 )

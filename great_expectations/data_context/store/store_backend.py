@@ -4,8 +4,8 @@ from ..types import (
     DataAssetIdentifier,
     ValidationResultIdentifier,
 )
-from ..types.resource_identifiers import (
-    DataContextResourceIdentifier,
+from ..types.base_resource_identifiers import (
+    DataContextKey,
 )
 from ..util import safe_mmkdir
 import pandas as pd
