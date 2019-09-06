@@ -13,8 +13,10 @@ from ...types import (
     DotDict,
     AllowedKeysDotDict,
 )
+from ..types.base_resource_identifiers import (
+    DataContextKey,
+)
 from ..types.resource_identifiers import (
-    DataContextResourceIdentifier,
     ValidationResultIdentifier,
 )
 from .store import (
@@ -90,7 +92,7 @@ class ValidationStore(ReadWriteStore):
         #Fetch keys in _key_order to guarantee tuple ordering in both python 2 and 3
         for key_name in key._key_order:
             key_element = key[key_name]
-            if isinstance( key_element, DataContextResourceIdentifier ):
+            if isinstance( key_element, DataContextKey ):
                 list_ += self._convert_resource_identifier_to_list(key_element)
             else:
                 list_.append(key_element)
