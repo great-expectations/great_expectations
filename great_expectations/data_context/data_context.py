@@ -39,9 +39,6 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-# from .store.types import (
-#     StoreMetaConfig,
-# )
 from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
 
 from .types import (
@@ -182,7 +179,7 @@ class ConfigOnlyDataContext(object):
 
         Args:
             store_name (str): a key for the new Store in in self.stores
-            store_config (dict or StoreMetaConfig): a config for the Store to add
+            store_config (dict): a config for the Store to add
 
         Returns:
             store (Store)
