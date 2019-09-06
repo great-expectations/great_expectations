@@ -14,7 +14,7 @@ class DataAssetProfiler(object):
         return isinstance(data_asset, DataAsset)
 
 
-class DatasetProfiler(object):
+class DatasetProfiler(DataAssetProfiler):
 
     @classmethod
     def validate(cls, dataset):

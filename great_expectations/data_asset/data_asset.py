@@ -54,6 +54,8 @@ class DataAsset(object):
         expectation_suite_name = kwargs.pop("expectation_suite_name", None)
         data_context = kwargs.pop("data_context", None)
         batch_kwargs = kwargs.pop("batch_kwargs", None)
+        batch_id = kwargs.pop("batch_id", None)
+
         if "autoinspect_func" in kwargs:
             warnings.warn("Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).",
                           category=DeprecationWarning)
@@ -68,6 +70,7 @@ class DataAsset(object):
         )
         self._data_context = data_context
         self._batch_kwargs = batch_kwargs
+        self._batch_id = batch_id
 
         if profiler is not None:
             profiler.profile(self)

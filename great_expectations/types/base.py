@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 from collections import Iterable
 import inspect
 import copy
-from six import string_types
+from six import string_types, class_types
 
 from ruamel.yaml import YAML, yaml_object
 yaml = YAML()
@@ -91,6 +91,7 @@ class RequiredKeysDotDict(DotDict):
                 required by the _key_types dictionary.
             **kwargs: Additional key-value pairs to be included in the RequiredKeysDotDict
         """
+        # TODO: Deprecate coerce_types
         # Support PY2 by leaving coerce_types out of explicit params list
         coerce_types = kwargs.pop("coerce_types", False)
         super(RequiredKeysDotDict, self).__init__(*args, **kwargs)
@@ -168,8 +169,8 @@ class RequiredKeysDotDict(DotDict):
             if isinstance(type_, list):
                 any_match = False
                 for type_element in type_:
-                    if type_element == None:
-                        if value == None:
+                    if type_element is None:
+                        if value is None:
                             any_match = True
                     elif isinstance(value, type_element):
                         any_match = True
@@ -188,15 +189,15 @@ class RequiredKeysDotDict(DotDict):
                         type_,
                         type(value),
                     ))
-    
+
     def _coerce_complex_value_to_type(self, value, type_):
-        # logger.debug("RequiredKeysDotDict._coerce_complex_value_to_type")
+        logger.debug("RequiredKeysDotDict._coerce_complex_value_to_type")
 
         # If the given type is an instance of RequiredKeysDotDict, apply coerce_types recursively
         try:
+            # If the given type is an instance of AllowedKeysDotDict, apply coerce_types recursively
             if isinstance(type_, ListOf):
-                if inspect.isclass(type_.type_) and issubclass(type_.type_,
-                                                                                RequiredKeysDotDict):
+                if inspect.isclass(type_.type_) and issubclass(type_.type_, RequiredKeysDotDict):
                     value = [type_.type_(coerce_types=True, **v) for v in value]
                 else:
                     value = [
@@ -205,14 +206,17 @@ class RequiredKeysDotDict(DotDict):
                     ]
 
             elif isinstance(type_, DictOf):
-                if inspect.isclass(type_.type_) and issubclass(type_.type_,
-                                                                                RequiredKeysDotDict):
+                if inspect.isclass(type_.type_) and issubclass(type_.type_, RequiredKeysDotDict):
                     value = dict([(k, type_.type_(coerce_types=True, **v)) for k, v in value.items()])
                 else:
                     value = dict([
                         (k, self._coerce_simple_value_to_type(v, type_.type_))
                         for k, v in value.items()
                     ])
+
+            # If it already of the right type, we're done
+            elif isinstance(value, type_):
+                return value
 
             else:
                 if inspect.isclass(type_) and issubclass(type_, RequiredKeysDotDict):
@@ -234,7 +238,7 @@ class RequiredKeysDotDict(DotDict):
     def _coerce_simple_value_to_type(self, value, type_):
         """Convenience method to handle the case where type_ == string type, and any other similarly weird things in the future
         """
-        # logger.debug("RequiredKeysDotDict._coerce_simple_value_to_type")
+        logger.debug("RequiredKeysDotDict._coerce_simple_value_to_type")
 
         if type_ == string_types:
             return str(value)
@@ -270,6 +274,7 @@ class AllowedKeysDotDict(RequiredKeysDotDict):
         }
     """
     _allowed_keys = set()
+    _required_keys = RequiredKeysDotDict._required_keys  # No new required keys by default
 
     def __init__(self, *args, **kwargs):
         if not self._required_keys.issubset(self._allowed_keys):
@@ -307,3 +312,93 @@ class AllowedKeysDotDict(RequiredKeysDotDict):
         super(AllowedKeysDotDict, self).__setattr__(key, val)
 
     __setattr__ = __setitem__
+
+class OrderedKeysDotDict(AllowedKeysDotDict):
+    """extends AllowedKeysDotDict with a strict ordering of parameters.
+    This make OrderedKeysDotDict behave somehwat like collections.namedtuples.
+
+    OrderedKeysDotDicts...
+        have an exactly-defined number of elements
+        can parse from tuples
+        coerce types by default
+        raise an IndexError if args don't line up with keys
+
+    See tests for examples.
+
+    Lining up args with keys can be complex when key_types allow nesting.
+    This logic is built into _zip_keys_and_args_to_dict.
+    Again, see tests for examples.
+    """
+
+    _key_order = []
+
+    def __init__(self, *args, **kwargs):
+        logger.debug(self.__class__.__name__)
+        assert set(self._key_order) == set(self._allowed_keys)
+        assert set(self._key_order) == set(self._required_keys)
+
+        coerce_types = kwargs.pop("coerce_types", True),
+        if args == ():
+            super(OrderedKeysDotDict, self).__init__(
+                coerce_types=coerce_types,
+                *args, **kwargs
+            )
+
+        else:
+            new_kwargs = self._zip_keys_and_args_to_dict(args)
+            super(OrderedKeysDotDict, self).__init__(
+                coerce_types=coerce_types,
+                **new_kwargs
+            )
+
+    @classmethod
+    def _zip_keys_and_args_to_dict(cls, args):
+
+        index = 0
+        new_dict = {}
+        for key in cls._key_order:
+            try:
+                if isinstance(args[index], dict):
+                    increment = 1
+                    new_dict[key] = args[index]
+
+                else:
+                    key_type = cls._key_types.get(key, None)
+                    if isinstance(key_type, class_types) and issubclass(key_type, OrderedKeysDotDict):
+                        increment = key_type._recursively_get_key_length()
+                        new_dict[key] = args[index:index + increment]
+                    else:
+                        increment = 1
+                        new_dict[key] = args[index]
+
+            except IndexError as e:
+                raise IndexError("Not enough arguments in {0} to populate all fields in {1} : {2}".format(
+                    args,
+                    cls.__name__,
+                    cls._key_order,
+                ))
+
+            index += increment
+
+        if index < len(args):
+            raise IndexError("Too many arguments in {0} to populate the fields in {1} : {2}".format(
+                args,
+                cls.__name__,
+                cls._key_order,
+            ))
+
+        return new_dict
+
+    @classmethod
+    def _recursively_get_key_length(cls):
+        key_length = 0
+
+        for key in cls._key_order:
+            key_type = cls._key_types.get(key, None)
+            if isinstance(key_type, class_types) and issubclass(key_type, OrderedKeysDotDict):
+                key_length += key_type._recursively_get_key_length()
+            else:
+                key_length += 1
+
+        return key_length
+

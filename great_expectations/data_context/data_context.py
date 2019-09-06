@@ -31,7 +31,7 @@ except ImportError:
     from urlparse import urlparse
 
 from great_expectations.data_asset.util import get_empty_expectation_suite
-from great_expectations.dataset import Dataset, PandasDataset
+from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     PandasDatasource,
     SqlAlchemyDatasource,
@@ -42,11 +42,18 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from .store.types import (
     StoreMetaConfig,
 )
+from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
+
 from .types import (
-    NameSpaceDotDict,            # TODO : Replace with ValidationResultIdentifier
-    NormalizedDataAssetName,     # TODO : Replace with DataAssetIdentifier
+    NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
     DataContextConfig,
+    ValidationResultIdentifier,
 )
+from great_expectations.data_context.types.resource_identifiers import (
+    DataAssetIdentifier,
+    ExpectationSuiteIdentifier
+)
+
 from .templates import (
     PROJECT_TEMPLATE,
     PROFILE_COMMENT,
@@ -132,17 +139,11 @@ class ConfigOnlyDataContext(object):
         for datasource in self._project_config["datasources"].keys():
             self.get_datasource(datasource)
 
-
+        # Init stores
         self._stores = DotDict()
         self._init_stores(self._project_config["stores"])
 
-
-        # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
-        self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
-
         self._compiled = False
-        # /End store stuff
-
 
         if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
             raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
@@ -284,21 +285,21 @@ class ConfigOnlyDataContext(object):
             None
         """
 
-        # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedFilesystemStore
-        validation_result_identifier = NameSpaceDotDict(**{
-            "normalized_data_asset_name": self._normalize_data_asset_name(data_asset_name),
-            "expectation_suite_name": expectation_suite_name,
-            "run_id": run_id,
-        })
-        filepath = self._get_normalized_data_asset_name_filepath(
-            validation_result_identifier.normalized_data_asset_name,
-            validation_result_identifier.expectation_suite_name,
-            base_path=run_id,
-            file_extension="",
-        )
-        validation_result = self.stores.local_validation_result_store.get(filepath)
+        # NOTE : Once we start consistently generating ResourceIdentifiers at the source, all this packing/unpacking nonsense will vanish like a dream.
+        normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+        validation_result_identifier = ValidationResultIdentifier(
+            coerce_types=True,
+            **{
+                "expectation_suite_identifier": {
+                    "data_asset_name": tuple(normalized_data_asset_name),
+                    "expectation_suite_name" : expectation_suite_name,
+                },
+                "run_id": run_id,
+            })
+        validation_result = self.stores.local_validation_result_store.get(validation_result_identifier)
+
         self.stores.fixture_validation_results_store.set(
-            filepath,
+            validation_result_identifier,
             json.dumps(validation_result, indent=2)
         )
 
@@ -308,6 +309,7 @@ class ConfigOnlyDataContext(object):
     #
     #####
 
+    # TODO : This method should be deprecated in favor of NamespaceReadWriteStore.
     def _get_normalized_data_asset_name_filepath(self, data_asset_name,
                                                  expectation_suite_name,
                                                  base_path=None,
@@ -638,6 +640,12 @@ class ConfigOnlyDataContext(object):
 
         if isinstance(data_asset_name, NormalizedDataAssetName):
             return data_asset_name
+        elif isinstance(data_asset_name, DataAssetIdentifier):
+            return NormalizedDataAssetName(
+                datasource=data_asset_name.datasource,
+                generator=data_asset_name.generator,
+                generator_asset=data_asset_name.generator_asset
+            )
 
         split_name = data_asset_name.split(self.data_asset_name_delimiter)
         existing_expectation_suites = self.list_expectation_suites()
@@ -812,6 +820,7 @@ class ConfigOnlyDataContext(object):
                 .format(datasource_name=split_name[0], generator_name=split_name[1])
             )
 
+    # TODO: This method should be changed to use a Store. The DataContext itself shouldn't need to know about reading from disc
     def get_expectation_suite(self, data_asset_name, expectation_suite_name="default"):
         """Get or create a named expectation suite for the provided data_asset_name.
 
@@ -838,6 +847,7 @@ class ConfigOnlyDataContext(object):
                 expectation_suite_name
             )
 
+    # TODO: This method should be changed to use a Store. The DataContext itself shouldn't need to know about writing to disc.
     def save_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
         """Save the provided expectation suite into the DataContext.
 
@@ -871,6 +881,7 @@ class ConfigOnlyDataContext(object):
             json.dump(expectation_suite, outfile, indent=2)
         self._compiled = False
 
+    # TODO: This method will be replaced by DataContextAwareValidationActions.
     def register_validation_results(self, run_id, validation_results, data_asset=None):
         """Process results of a validation run. This method is called by data_asset objects that are connected to
          a DataContext during validation. It performs several actions:
@@ -911,21 +922,20 @@ class ConfigOnlyDataContext(object):
 
         expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
 
-        if "local_validation_result_store" in self.stores:
-            # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedFilesystemStore
-            key = NameSpaceDotDict(**{
-                "normalized_data_asset_name" : normalized_data_asset_name,
-                "expectation_suite_name" : expectation_suite_name,
-                "run_id" : run_id,
+        # NOTE : Once we have consistent type generation at the source, this repacking logic will be unnecessary.
+        key = ValidationResultIdentifier(
+            coerce_types=True,
+            **{
+                "expectation_suite_identifier": {
+                    "data_asset_name": tuple(normalized_data_asset_name),
+                    "expectation_suite_name": expectation_suite_name,
+                },
+                "run_id": run_id
             })
-            filepath = self._get_normalized_data_asset_name_filepath(
-                key.normalized_data_asset_name,
-                expectation_suite_name,
-                base_path=run_id,
-                file_extension="",
-            )
+
+        if "local_validation_result_store" in self.stores:
             self.stores.local_validation_result_store.set(
-                key=filepath,
+                key=key,
                 value=validation_results
             )
 
@@ -938,21 +948,8 @@ class ConfigOnlyDataContext(object):
 
         if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
             logging.debug("Storing validation results to data_asset_snapshot_store")
-            
-            # TODO: This block should be refactored to use a ValidationResultIdentifier with a NamespacedFilesystemStore
-            key = NameSpaceDotDict(**{
-                "normalized_data_asset_name" : normalized_data_asset_name,
-                "expectation_suite_name" : expectation_suite_name,
-                "run_id" : run_id,
-            })
-            filepath = self._get_normalized_data_asset_name_filepath(
-                key.normalized_data_asset_name,
-                expectation_suite_name,
-                base_path=run_id,
-                file_extension="",
-            )
             self.stores.data_asset_snapshot_store.set(
-                key=filepath,
+                key=key,
                 value=data_asset
             )
 
@@ -1181,6 +1178,7 @@ class ConfigOnlyDataContext(object):
 
         self._compiled = True
 
+    # TDOD : Deprecate this method in favor of Stores.
     def write_resource(
             self,
             resource,  # bytes
@@ -1280,22 +1278,34 @@ class ConfigOnlyDataContext(object):
         """
 
         selected_store = self.stores[validations_store_name]
+        if not isinstance(data_asset_name, NormalizedDataAssetName):
+            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+
+        if not isinstance(data_asset_name, DataAssetIdentifier):
+            data_asset_name = DataAssetIdentifier(
+                datasource=data_asset_name.datasource,
+                generator=data_asset_name.generator,
+                generator_asset=data_asset_name.generator_asset
+            )
+
 
         if run_id == None:
-            run_id = selected_store.get_most_recent_run_id()
+            #Get most recent run id
+            # NOTE : This method requires a (potentially very inefficient) list_keys call.
+            # It should probably move to live in an appropriate Store class,
+            # but when we do so, that Store will need to function as more than just a key-value Store.
+            key_list = selected_store.list_keys()
+            run_id_set = set([key.run_id for key in key_list])
+            run_id = max(run_id_set)
 
-        key = NameSpaceDotDict(**{
-            "normalized_data_asset_name" : self._normalize_data_asset_name(data_asset_name),
-            "expectation_suite_name" : expectation_suite_name,
-            "run_id" : run_id,
-        })
-        filepath = self._get_normalized_data_asset_name_filepath(
-            key.normalized_data_asset_name,
-            expectation_suite_name,
-            base_path=run_id,
-            file_extension="",
-        )
-        results_dict = selected_store.get(filepath)
+        key = ValidationResultIdentifier(
+                expectation_suite_identifier=ExpectationSuiteIdentifier(
+                    data_asset_name=data_asset_name,
+                    expectation_suite_name=expectation_suite_name
+                ),
+                run_id=run_id
+            )
+        results_dict = selected_store.get(key)
 
         #TODO: This should be a convenience method of ValidationResultSuite
         if failed_only:
@@ -1304,35 +1314,6 @@ class ConfigOnlyDataContext(object):
             return results_dict
         else:
             return results_dict
-
-    # TODO: refactor this into a snapshot getter based on project_config
-    # def get_failed_dataset(self, validation_result, **kwargs):
-    #     try:
-    #         reference_url = validation_result["meta"]["dataset_reference"]
-    #     except KeyError:
-    #         raise ValueError("Validation result must have a dataset_reference in the meta object to fetch")
-        
-    #     if reference_url.startswith("s3://"):
-    #         try:
-    #             import boto3
-    #             s3 = boto3.client('s3')
-    #         except ImportError:
-    #             raise ImportError("boto3 is required for retrieving a dataset from s3")
-        
-    #         parsed_url = urlparse(reference_url)
-    #         bucket = parsed_url.netloc
-    #         key = parsed_url.path[1:]
-            
-    #         s3_response_object = s3.get_object(Bucket=bucket, Key=key)
-    #         if key.endswith(".csv"):
-    #             # Materialize as dataset
-    #             # TODO: check the associated config for the correct data_asset_type to use
-    #             return read_csv(s3_response_object['Body'], **kwargs)
-    #         else:
-    #             return s3_response_object['Body']
-
-    #     else:
-    #         raise ValueError("Only s3 urls are supported.")
 
     def update_return_obj(self, data_asset, return_obj):
         """Helper called by data_asset.
@@ -1365,7 +1346,7 @@ class ConfigOnlyDataContext(object):
             logger.debug("Found data_docs_config. Building sites...")
             sites = data_docs_config.get('sites', [])
             for site_name, site_config in sites.items():
-                logger.debug("Building site ", site_name)
+                logger.debug("Building site %s" % site_name,)
                 if (site_names and site_name in site_names) or not site_names or len(site_names) == 0:
                     #TODO: get the builder class
                     #TODO: build the site config by using defaults if needed
@@ -1582,8 +1563,7 @@ class DataContext(ConfigOnlyDataContext):
     # def __init__(self, config, filepath, data_asset_name_delimiter='/'):
     def __init__(self, context_root_dir=None, data_asset_name_delimiter='/'):
 
-        # #TODO: Factor this out into a helper function in GE. It doesn't belong inside this method.
-        # # determine the "context root directory" - this is the parent of "great_expectations" dir
+        # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
             context_root_dir = self.find_context_root_dir()
         context_root_directory = os.path.abspath(context_root_dir)
@@ -1597,6 +1577,7 @@ class DataContext(ConfigOnlyDataContext):
             data_asset_name_delimiter,
         )
 
+    # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
     def _load_project_config(self):
         """Loads the project configuration file."""
         try:
@@ -1611,6 +1592,7 @@ class DataContext(ConfigOnlyDataContext):
         except IOError:
             raise ConfigNotFoundError(self.root_directory)
 
+    # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
     def _save_project_config(self):
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")

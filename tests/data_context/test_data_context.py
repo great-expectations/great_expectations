@@ -12,7 +12,6 @@ import os
 import shutil
 import json
 from glob import glob
-import pandas as pd
 
 from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import (
@@ -27,11 +26,11 @@ from great_expectations.dataset import PandasDataset
 from great_expectations.util import gen_directory_tree_str
 
 from great_expectations.data_context.types import (
-    NameSpaceDotDict,
     DataContextConfig,
 )
 from great_expectations.data_context.store import (
-    InMemoryStore
+    BasicInMemoryStore,
+    EvaluationParameterStore,
 )
 from great_expectations.util import (
     gen_directory_tree_str,
@@ -52,11 +51,11 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
     # assert not_so_empty_data_context._project_config["validations_store"]["local"]["base_directory"] == \
     #     "uncommitted/validations/"
     validations_dir = os.path.join(empty_data_context.root_directory, "uncommitted/validations/")
-    assert gen_directory_tree_str(validations_dir) == "/\n"
+    # assert gen_directory_tree_str(validations_dir) == "/\n"
 
     # print(empty_data_context.stores.keys())
     assert "local_validation_result_store" in not_so_empty_data_context.stores.keys()
-    assert not_so_empty_data_context.stores["local_validation_result_store"].config["base_directory"] == \
+    assert not_so_empty_data_context.stores["local_validation_result_store"].config.store_backend["base_directory"] == \
         "uncommitted/validations/"
 
     my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
@@ -69,7 +68,7 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
     print(gen_directory_tree_str(validations_dir))
 
     with open(os.path.join(not_so_empty_data_context.root_directory, 
-              "uncommitted/validations/1955-11-05T000000Z/my_datasource/default/f1/default.json")) as infile:
+            "uncommitted/validations/1955-11-05T000000Z/my_datasource/default/f1/default.json")) as infile:
         saved_validation_result = json.load(infile)
     
     assert validation_result == saved_validation_result
@@ -234,13 +233,6 @@ def test_register_validation_results_saves_data_assset_snapshot(data_context):
     }
     data_asset = PandasDataset({"x": [1,2,3,4]})
 
-    #2018/0814: Hijack the project config, since there doesn't appear to be another method to update it
-    # data_context._project_config["data_asset_snapshot_store"] = {
-    #     "filesystem" : {
-    #         "base_directory" : "uncommitted/snapshots"
-    #     }
-    # }
-
     snapshot_dir = os.path.join(data_context.root_directory, "uncommitted/snapshots")
     print(snapshot_dir)
 
@@ -251,12 +243,20 @@ def test_register_validation_results_saves_data_assset_snapshot(data_context):
         "data_asset_snapshot_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "FilesystemStore",
+            "class_name": "NamespacedReadWriteStore",
             "store_config" : {
-                "base_directory" : "uncommitted/snapshots",
                 "serialization_type" : "pandas_csv",
-                "file_extension" : ".csv.gz",
-                "compression" : "gzip",
+                "resource_identifier_class_name": "ValidationResultIdentifier",
+                "store_backend" : {
+                    "module_name": "great_expectations.data_context.store",
+                    "class_name": "FilesystemStoreBackend",
+                    "base_directory" : "uncommitted/snapshots",
+                    "filepath_template": "{4}/{0}/{1}/{2}/validation-results-{2}-{3}-{4}.{file_extension}",
+                    "file_extension" : "csv.gz",
+                    # "compression" : "gzip",
+                    "replaced_substring": "/",
+                    "replacement_string": "___",
+                }
             }
         }
     )
@@ -504,7 +504,6 @@ def test_data_context_result_store(titanic_data_context):
         validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
         assert data_asset_name in validation_result["meta"]["data_asset_name"]
 
-
     all_validation_result = titanic_data_context.get_validation_result(
         "mydatasource/mygenerator/Titanic",
         "BasicDatasetProfiler",
@@ -517,6 +516,7 @@ def test_data_context_result_store(titanic_data_context):
         failed_only=True,
     )
     assert len(failed_validation_result["results"]) == 8
+
 
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
@@ -570,6 +570,7 @@ project_path/
     )
     
     context.profile_datasource("titanic")
+    print(gen_directory_tree_str(project_dir))
     assert gen_directory_tree_str(project_dir) == """\
 project_path/
     data/
@@ -595,7 +596,6 @@ project_path/
         uncommitted/
             credentials/
             documentation/
-            profiling/
             samples/
             validations/
                 profiling/
@@ -613,64 +613,47 @@ project_path/
 
     # Titanic
 
-    assert os.path.exists(os.path.join(
-        ge_directory,
-        "uncommitted/validations/profiling/titanic/default/Titanic/BasicDatasetProfiler.json"
-    ))
-
-    assert os.path.exists(os.path.join( # profiling results HTML
-        ge_directory,
-        "uncommitted/documentation/local_site/profiling/titanic/default/Titanic/BasicDatasetProfiler.html"
-    ))
-    
-    assert os.path.exists(os.path.join( # profiling expectations HTML
-        ge_directory,
-        "uncommitted/documentation/local_site/expectations/titanic/default/Titanic/BasicDatasetProfiler.html"
-    ))
-
-    # f1
-
-    assert os.path.exists(os.path.join(
-        ge_directory,
-        "uncommitted/validations/profiling/random/default/f1/BasicDatasetProfiler.json"
-    ))
-    assert os.path.exists(os.path.join( # profiling results HTML
-        ge_directory,
-        "uncommitted/documentation/local_site/profiling/random/default/f1/BasicDatasetProfiler.html"
-    ))
-    
-    assert os.path.exists(os.path.join( # profiling expectations HTML
-        ge_directory,
-        "uncommitted/documentation/local_site/profiling/random/default/f1/BasicDatasetProfiler.html"
-    ))
-
-    # f2
-
-    assert os.path.exists(os.path.join(
-        ge_directory,
-        "uncommitted/validations/profiling/random/default/f2/BasicDatasetProfiler.json"
-    ))
-    assert os.path.exists(os.path.join(
-        ge_directory,
-        "uncommitted/documentation/local_site/profiling/random/default/f2/BasicDatasetProfiler.html"
-    ))
-
-    assert os.path.exists(os.path.join(
-        ge_directory,
-        "uncommitted/documentation/local_site/expectations/random/default/f2/BasicDatasetProfiler.html"
-    ))
-
-    # local_site index.html
-    assert os.path.exists(os.path.join(
-        ge_directory,
-        "uncommitted/documentation/local_site/index.html"
-    ))
-
-    # team_site index.html
-    assert os.path.exists(os.path.join(
-        ge_directory,
-        "uncommitted/documentation/team_site/index.html"
-    ))
+    print(gen_directory_tree_str(os.path.join(project_dir, "great_expectations/uncommitted/documentation")))
+    assert gen_directory_tree_str(os.path.join(project_dir, "great_expectations/uncommitted/documentation")) == """\
+documentation/
+    local_site/
+        index.html
+        expectations/
+            random/
+                default/
+                    f1/
+                        BasicDatasetProfiler.html
+                    f2/
+                        BasicDatasetProfiler.html
+            titanic/
+                default/
+                    Titanic/
+                        BasicDatasetProfiler.html
+        profiling/
+            random/
+                default/
+                    f1/
+                        BasicDatasetProfiler.html
+                    f2/
+                        BasicDatasetProfiler.html
+            titanic/
+                default/
+                    Titanic/
+                        BasicDatasetProfiler.html
+    team_site/
+        index.html
+        expectations/
+            random/
+                default/
+                    f1/
+                        BasicDatasetProfiler.html
+                    f2/
+                        BasicDatasetProfiler.html
+            titanic/
+                default/
+                    Titanic/
+                        BasicDatasetProfiler.html
+"""
 
     # save documentation locally
     safe_mmkdir("./tests/data_context/output")
@@ -720,14 +703,14 @@ def test_add_store(empty_data_context):
         "my_new_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "InMemoryStore",
+            "class_name": "BasicInMemoryStore",
             "store_config" : {}
         }
     )
     assert "my_new_store" in empty_data_context.stores.keys()
     assert "my_new_store" in empty_data_context.get_config()["stores"]
 
-    assert isinstance(new_store, InMemoryStore)
+    assert isinstance(new_store, BasicInMemoryStore)
 
 @pytest.fixture()
 def basic_data_context_config():
@@ -739,7 +722,7 @@ def basic_data_context_config():
         "stores": {
             "evaluation_parameter_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "InMemoryStore",
+                "class_name": "EvaluationParameterStore",
             }
         },
         "data_docs": {
@@ -785,7 +768,7 @@ def test_evaluation_parameter_store_methods(basic_data_context_config):
         "testing",
     )
 
-    assert isinstance(context.evaluation_parameter_store, InMemoryStore)
+    assert isinstance(context.evaluation_parameter_store, EvaluationParameterStore)
 
     assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {}
     context.set_parameters_in_evaluation_parameter_store_by_run_id_and_key("foo", "bar", "baz")
