@@ -1,7 +1,7 @@
 from .store_backend import (
     StoreBackend,
     InMemoryStoreBackend,
-    FilesystemStoreBackend,
+    # FilesystemStoreBackend,
     FixedLengthTupleFilesystemStoreBackend,
 )
 

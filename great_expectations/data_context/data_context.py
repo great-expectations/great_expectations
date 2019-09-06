@@ -39,9 +39,9 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from .store.types import (
-    StoreMetaConfig,
-)
+# from .store.types import (
+#     StoreMetaConfig,
+# )
 from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
 
 from .types import (
@@ -272,7 +272,7 @@ class ConfigOnlyDataContext(object):
             None
         """
 
-        # NOTE : Once we start consistently generating ResourceIdentifiers at the source, all this packing/unpacking nonsense will vanish like a dream.
+        # NOTE : Once we start consistently generating DataContextKeys at the source, all this packing/unpacking nonsense will vanish like a dream.
         normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
         validation_result_identifier = ValidationResultIdentifier(
             coerce_types=True,

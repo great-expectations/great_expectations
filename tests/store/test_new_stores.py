@@ -18,35 +18,7 @@ from great_expectations.util import (
     gen_directory_tree_str,
 )
 
-# NOTE : Abe 2019/08/30 : Keeping this for now, since we'll likely do some work on standardizing config-init patterns soon.
-# def test_store_config(tmp_path_factory):
-#     path = str(tmp_path_factory.mktemp('test_store_config__dir'))
-
-#     config = {
-#         "module_name": "great_expectations.data_context.store",
-#         "class_name": "InMemoryStore",
-#         "store_config": {
-#             "serialization_type": "json"
-#         },
-#     }
-#     typed_config = StoreMetaConfig(
-#         coerce_types=True,
-#         **config
-#     )
-#     print(typed_config)
-
-#     loaded_module = importlib.import_module(typed_config.module_name)
-#     loaded_class = getattr(loaded_module, typed_config.class_name)
-
-#     typed_sub_config = loaded_class.get_config_class()(
-#         coerce_types=True,
-#         **typed_config.store_config
-#     )
-
-#     data_asset_snapshot_store = loaded_class(
-#         root_directory=os.path.abspath(path),
-#         config=typed_sub_config,
-#     )
+# TODO : Re-implement `NameSpaceValidationReadWriteStore` as `DataSnapshotStore`, including tests
 
 # def test_NamespacedReadWriteStore_with_InMemoryStoreBackend():
 
