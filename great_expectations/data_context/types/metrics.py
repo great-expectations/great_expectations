@@ -70,6 +70,10 @@ class NamespaceAwareExpectationDefinedValidationMetric(Metric):
         "data_asset_name",
         "batch_fingerprint",
         "expectation_type",
+        # the path to the key in the result dictionary that holds the metric, encoded as a tuple
+        # examples:
+        # for {'foo': 1} result_key will be ('foo',),
+        # for {'foo': {'bar': 1}} result_key will be ('foo','bar')
         "result_key",
         "metric_kwargs",
         "metric_value"
@@ -85,7 +89,7 @@ class NamespaceAwareExpectationDefinedValidationMetric(Metric):
         "data_asset_name": NormalizedDataAssetName,
         "batch_fingerprint": BatchFingerprint,
         "expectation_type": string_types,
-        "result_key": string_types,
+        "result_key": tuple,
         "metric_kwargs": dict
     }
 
@@ -146,6 +150,10 @@ class MultiBatchNamespaceAwareExpectationDefinedValidationMetric(Metric):
 
     _allowed_keys = {
         "data_asset_name",
+        # the path to the key in the result dictionary that holds the metric, encoded as a tuple
+        # examples:
+        # for {'foo': 1} result_key will be ('foo',),
+        # for {'foo': {'bar': 1}} result_key will be ('foo','bar')
         "result_key",
         "metric_kwargs",
         "expectation_type",
@@ -162,7 +170,7 @@ class MultiBatchNamespaceAwareExpectationDefinedValidationMetric(Metric):
     }
     _key_types = {
         "data_asset_name": NormalizedDataAssetName,
-        "result_key": string_types,
+        "result_key": tuple,
         "metric_kwargs": dict,
         "expectation_type": string_types,
         "batch_fingerprints": list,

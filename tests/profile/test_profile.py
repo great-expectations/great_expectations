@@ -8,7 +8,7 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.profile.columns_exist import ColumnsExistProfiler
 from great_expectations.dataset.pandas_dataset import PandasDataset
 import great_expectations as ge
-from .test_utils import assertDeepAlmostEqual
+from ..test_utils import assertDeepAlmostEqual
 from six import PY2
 
 # Tests to write:
