@@ -10,7 +10,8 @@ try:
 except ImportError:
     from urllib import urlencode
 
-
+# TODO : separate out a MetricIdentifier class, subclassed from DataContextKey,
+# so that we can support operations like isinstance(foo, MetricIdentifier)
 class Metric(AllowedKeysDotDict):
     """Stores a named metric."""
     _allowed_keys = {
@@ -22,7 +23,7 @@ class Metric(AllowedKeysDotDict):
         "metric_value"
     }
 
-
+# TODO : separate out a NamespaceAwareValidationMetricIdentifier class, subclassed from DataContextKey
 class NamespaceAwareValidationMetric(Metric):
     """Captures information from a validation result in a fully namespace aware way suitable to be accessed
     in evaluation parameters, multi-batch validation meta analysis or multi batch validation."""
@@ -61,7 +62,7 @@ class NamespaceAwareValidationMetric(Metric):
                 self.metric_name,
                 make_dictionary_key(self.metric_kwargs))
 
-
+# TODO : separate out a NamespaceAwareExpectationDefinedValidationMetricIdentifier class, subclassed from DataContextKey
 class NamespaceAwareExpectationDefinedValidationMetric(Metric):
     """Captures information from a validation result in a fully namespace aware way suitable to be accessed
     in evaluation parameters, multi-batch validation meta analysis or multi batch validation."""
@@ -69,6 +70,10 @@ class NamespaceAwareExpectationDefinedValidationMetric(Metric):
         "data_asset_name",
         "batch_fingerprint",
         "expectation_type",
+        # the path to the key in the result dictionary that holds the metric, encoded as a tuple
+        # examples:
+        # for {'foo': 1} result_key will be ('foo',),
+        # for {'foo': {'bar': 1}} result_key will be ('foo','bar')
         "result_key",
         "metric_kwargs",
         "metric_value"
@@ -84,7 +89,7 @@ class NamespaceAwareExpectationDefinedValidationMetric(Metric):
         "data_asset_name": NormalizedDataAssetName,
         "batch_fingerprint": BatchFingerprint,
         "expectation_type": string_types,
-        "result_key": string_types,
+        "result_key": tuple,
         "metric_kwargs": dict
     }
 
@@ -105,7 +110,7 @@ class NamespaceAwareExpectationDefinedValidationMetric(Metric):
                 self.result_key,
                 make_dictionary_key(self.metric_kwargs))
 
-
+# TODO : separate out a MultiBatchNamespaceAwareValidationMetricIdentifier class, subclassed from DataContextKey
 class MultiBatchNamespaceAwareValidationMetric(Metric):
     """Holds values of a metric captured from validation results of multiple batches."""
 
@@ -139,11 +144,16 @@ class MultiBatchNamespaceAwareValidationMetric(Metric):
                 make_dictionary_key(self.metric_kwargs))
 
 
+# TODO : separate out a MultiBatchNamespaceAwareExpectationDefinedValidationMetricIdentifier class, subclassed from DataContextKey
 class MultiBatchNamespaceAwareExpectationDefinedValidationMetric(Metric):
     """Holds values of a metric captured from validation results of multiple batches."""
 
     _allowed_keys = {
         "data_asset_name",
+        # the path to the key in the result dictionary that holds the metric, encoded as a tuple
+        # examples:
+        # for {'foo': 1} result_key will be ('foo',),
+        # for {'foo': {'bar': 1}} result_key will be ('foo','bar')
         "result_key",
         "metric_kwargs",
         "expectation_type",
@@ -160,7 +170,7 @@ class MultiBatchNamespaceAwareExpectationDefinedValidationMetric(Metric):
     }
     _key_types = {
         "data_asset_name": NormalizedDataAssetName,
-        "result_key": string_types,
+        "result_key": tuple,
         "metric_kwargs": dict,
         "expectation_type": string_types,
         "batch_fingerprints": list,

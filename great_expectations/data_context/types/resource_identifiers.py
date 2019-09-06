@@ -1,23 +1,16 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from collections import Iterable
-from six import string_types, class_types
-
-from great_expectations.types import (
-    RequiredKeysDotDict,
-    AllowedKeysDotDict,
-)
+from six import string_types
 
 from .base_resource_identifiers import (
-OrderedKeysDotDict,
-DataContextResourceIdentifier,
+    OrderedDataContextKey,
 )
 
 from great_expectations.datasource.types.batch_kwargs import BatchFingerprint
 
-
-class DataAssetIdentifier(DataContextResourceIdentifier):
+# TODO: Rename to DataAssetKey, for consistency
+class DataAssetIdentifier(OrderedDataContextKey):
     _key_order = [
         "datasource",
         "generator",
@@ -32,36 +25,8 @@ class DataAssetIdentifier(DataContextResourceIdentifier):
     _required_keys = set(_key_order)
     _allowed_keys = set(_key_order)
 
-
-class BatchIdentifier(DataContextResourceIdentifier):
-    _key_order = [
-        "data_asset_identifier",
-        "batch_runtime_id",
-    ]
-    _key_types = {
-        "data_asset_identifier" : DataAssetIdentifier,
-        "batch_runtime_id" : string_types,
-    }
-    # NOTE: This pattern is kinda awkward. It would be nice to ONLY specify _key_order
-    _required_keys = set(_key_order)
-    _allowed_keys = set(_key_order)
-
-
-# class RunIdentifier(DataContextResourceIdentifier):
-#     _key_order = [
-#         "execution_context",
-#         "start_time_utc",
-#     ]
-#     _key_types = {
-#         "execution_context" : string_types,
-#         "start_time_utc" : int,
-#     }
-#     # NOTE: This pattern is kinda awkward. It would be nice to ONLY specify _key_order
-#     _required_keys = set(_key_order)
-#     _allowed_keys = set(_key_order)
-
-
-class ExpectationSuiteIdentifier(DataContextResourceIdentifier):
+# TODO: Rename to ExpectationSuiteKey, for consistency
+class ExpectationSuiteIdentifier(OrderedDataContextKey):
     _key_order = [
         "data_asset_name",
         "expectation_suite_name",
@@ -74,8 +39,8 @@ class ExpectationSuiteIdentifier(DataContextResourceIdentifier):
     _required_keys = set(_key_order)
     _allowed_keys = set(_key_order)
 
-
-class ValidationResultIdentifier(DataContextResourceIdentifier):
+# TODO: Rename to ValidatioResultKey, for consistency
+class ValidationResultIdentifier(OrderedDataContextKey):
     _key_order = [
         "expectation_suite_identifier",
         "run_id",

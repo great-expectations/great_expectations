@@ -1,14 +1,28 @@
 import time
+import hashlib
+import logging
+
+# from builtins import str
 from six import string_types
 
 import pandas as pd
 
 from .datasource import Datasource, ReaderMethods
 from great_expectations.datasource.generator import InMemoryGenerator, SubdirReaderGenerator, GlobReaderGenerator
-from great_expectations.datasource.types import PandasDatasourceBatchKwargs
+from great_expectations.datasource.types import (
+    PandasDatasourceBatchKwargs,
+    PandasDatasourceMemoryBatchKwargs,
+    PathBatchKwargs
+)
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.types import ClassConfig
 from great_expectations.exceptions import BatchKwargsError
+from great_expectations.data_context.types.resource_identifiers import DataAssetIdentifier
+from great_expectations.data_context.types.base import NormalizedDataAssetName
+
+logger = logging.getLogger(__name__)
+
+HASH_THRESHOLD = 1e9
 
 
 class PandasDatasource(Datasource):
@@ -65,8 +79,13 @@ class PandasDatasource(Datasource):
     def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
         batch_kwargs.update(kwargs)
         reader_options = batch_kwargs.copy()
+        # We will use and manipulate batch_kwargs along the way
+        # We need to build a batch_id to be used in the dataframe
+        batch_id = batch_kwargs.copy().update({
+            "timestamp": time.time()
+        })
 
-        if "data_asset_type" in reader_options:
+        if "data_asset_type" in batch_kwargs:
             data_asset_type_config = reader_options.pop("data_asset_type")  # Get and remove the config
             try:
                 data_asset_type_config = ClassConfig(**data_asset_type_config)
@@ -111,30 +130,80 @@ class PandasDatasource(Datasource):
 
         elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (pd.DataFrame, pd.Series)):
             df = batch_kwargs.pop("df")  # We don't want to store the actual dataframe in kwargs
-            batch_kwargs["PandasInMemoryDF"] = True
+            batch_id["PandasInMemoryDF"] = True
+            if df.memory_usage().sum() < HASH_THRESHOLD:
+                batch_id["fingerprint"] = hashlib.md5(pd.util.hash_pandas_object(df, index=True).values).hexdigest()
         else:
             raise BatchKwargsError("Invalid batch_kwargs: path or df is required for a PandasDatasource",
                                    batch_kwargs)
 
+        # FIXME: currently, batch_id and batch_kwargs are overlapping and are both included completely
         return data_asset_type(df,
                                expectation_suite=expectation_suite,
                                data_context=self._data_context,
-                               batch_kwargs=batch_kwargs)
+                               batch_kwargs=batch_kwargs,
+                               batch_id=batch_id)
 
     def build_batch_kwargs(self, data_asset_name, *args, **kwargs):
-        if len(args) > 0:
-            if isinstance(args[0], (pd.DataFrame, pd.Series)):
-                kwargs.update({
-                    "df": args[0],
-                    "timestamp": time.time()
-                })
-            elif isinstance(args[0], string_types):
-                kwargs.update({
-                    "path": args[0],
-                    "timestamp": time.time()
-                })
+        """
+        Build batch kwargs for a requested data_asset. Try to use a generator where possible to support partitioning,
+        but fall back to datasource-default behavior if the generator cannot be identified.
+
+        Args:
+            data_asset_name: the data asset for which to build batch_kwargs; if a normalized name is provided,
+                use the named generator.
+            *args: at most exactly one positional argument can be provided from which to build kwargs
+            **kwargs: additional keyword arguments to be used to build the batch_kwargs
+
+        Returns:
+            A PandasDatasourceBatchKwargs object suitable for building a batch of data from this datasource
+
+        """
+        generator = None
+        if isinstance(data_asset_name, (NormalizedDataAssetName, DataAssetIdentifier)):
+            generator = self.get_generator(data_asset_name.generator)
+        elif len(self._datasource_config["generators"]) == 1:
+            logger.info("Using only configured generator to build batch_kwargs.")
+            generator_name = list(self._datasource_config["generators"].keys())[0]
+            generator = self.get_generator(generator_name)
+
+        # Now that we know whether we can use a generator, build the kwargs
+        if generator is not None:
+            if len(args) == 1:  # We interpret a single argument as a partition_id
+                batch_kwargs = generator.build_batch_kwargs_from_partition(args[0], batch_kwargs=kwargs)
+            elif len(args) > 0:
+                raise BatchKwargsError("Multiple positional arguments were provided to build_batch_kwargs, but only"
+                                       "one is supported. Please provide named arguments to build_batch_kwargs.")
+            elif "partition_id" in kwargs:
+                batch_kwargs = generator.build_batch_kwargs_from_partition(kwargs["partition_id"], batch_kwargs=kwargs)
+            else:
+                batch_kwargs = generator.yield_batch_kwargs(data_asset_name, kwargs)
         else:
-            kwargs.update({
-                "timestamp": time.time()
-            })
-        return kwargs
+            logger.warning("Unable to determine generator; building batch_kwargs using datasource default logic."
+                           "Partitions will not be available. Consider using a typed data_asset_name to specify the "
+                           "generator to use.")
+
+            if len(args) == 1:
+                if isinstance(args[0], (pd.DataFrame, pd.Series)):
+                    kwargs.update({
+                        "df": args[0]
+                    })
+                    batch_kwargs = PandasDatasourceMemoryBatchKwargs(**kwargs)
+                elif isinstance(args[0], string_types):
+                    kwargs.update({
+                        "path": args[0],
+                    })
+                    batch_kwargs = PathBatchKwargs(**kwargs)
+            elif len(args) > 1:
+                raise BatchKwargsError("Multiple positional arguments were provided to build_batch_kwargs, but only"
+                                       "one is supported. Please provide named arguments to build_batch_kwargs.")
+            else:
+                # Only kwargs were specified
+                if "path" in kwargs and isinstance(kwargs["path"], string_types):
+                    batch_kwargs = PathBatchKwargs(**kwargs)
+                elif "df" in kwargs and isinstance(kwargs["df"], (pd.DataFrame, pd.Series)):
+                    batch_kwargs = PandasDatasourceMemoryBatchKwargs(**kwargs)
+                else:
+                    raise BatchKwargsError("Invalid kwargs provided to build_batch_kwargs: either a valid df or path"
+                                           "key must be provided.")
+        return batch_kwargs
