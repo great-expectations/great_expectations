@@ -1,7 +1,6 @@
 from six import string_types
 
 from ...types import AllowedKeysDotDict
-from ..types.resource_identifiers import DataContextResourceIdentifier
 
 class StoreMetaConfig(AllowedKeysDotDict):
     """Top-level configs for stores look like this

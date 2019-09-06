@@ -166,7 +166,9 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
     datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
 
     assert datasource.get_available_data_asset_names() == {"default": {"test"}}
-    manual_batch_kwargs = datasource.build_batch_kwargs(os.path.join(str(test_folder_connection_path), "test.csv"))
+    manual_batch_kwargs = datasource.build_batch_kwargs(
+        "default",
+        os.path.join(str(test_folder_connection_path), "test.csv"))
 
     # Get the default (subdir_path) generator
     generator = datasource.get_generator()
@@ -175,7 +177,10 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
     assert manual_batch_kwargs["path"] == auto_batch_kwargs["path"]
 
     # Include some extra kwargs...
-    dataset = datasource.get_batch("test", batch_kwargs=auto_batch_kwargs, sep=",", header=0, index_col=0)
+    # Note that we are using get_data_asset NOT get_batch here, since we are standalone (no batch concept)
+    dataset = datasource.get_data_asset("test",
+                                        generator_name="default", batch_kwargs=auto_batch_kwargs,
+                                        sep=",", header=0, index_col=0)
     assert isinstance(dataset, PandasDataset)
     assert (dataset["col_1"] == [1, 2, 3, 4, 5]).all()
 
@@ -185,8 +190,8 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
         'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
 
     assert datasource.get_available_data_asset_names() == {"default": {"main.table_1", "main.table_2"}}
-    dataset1 = datasource.get_batch("main.table_1")
-    dataset2 = datasource.get_batch("main.table_2")
+    dataset1 = datasource.get_data_asset("main.table_1")
+    dataset2 = datasource.get_data_asset("main.table_2")
     assert isinstance(dataset1, SqlAlchemyDataset)
     assert isinstance(dataset2, SqlAlchemyDataset)
 
@@ -373,24 +378,24 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
         newfile.write("a,b\n1,2\n3,4\n")
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
+        datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         })
         assert "Unable to determine reader for path" in exc.message
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
+        datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         }, reader_method="blarg")
         assert "Unknown reader method: blarg" in exc.message
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
+        datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         }, reader_method="excel")
         assert "Unsupported reader: excel" in exc.message
 
-    dataset = datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
+    dataset = datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         },
         reader_method="csv", header=True)
@@ -405,18 +410,18 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
         newfile.write("a,b\n1,2\n3,4\n")
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
+        datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         })
         assert "Unable to determine reader for path" in exc.message
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
+        datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         }, reader_method="blarg")
         assert "Unknown reader method: blarg" in exc.message
 
-    dataset = datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
+    dataset = datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         }, reader_method="csv", header=0)
     assert dataset["a"][0] == 1

@@ -3,6 +3,10 @@
 
 v0.8.0__develop
 -----------------
+* MAJOR CHANGE: Generators should now be configured using the new module_name and class_name syntax to support easier
+ plugin use. "type" parameter is still supported but expect it to be removed in a future release
+* GlobReaderGenerator now supports additional configuration options for identifying partitions via regex. The old
+ method is still supported but is deprecated. See :ref:`GlobReaderGenerator` for details.
 * INTERNAL: rename LooselyTypedDotDict to AllowedKeysDotDict and add RequiredKeysDotDict as parent
 
 
