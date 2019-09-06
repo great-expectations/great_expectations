@@ -14,7 +14,7 @@ from .configurations import (
 from .resource_identifiers import (
     DataContextResourceIdentifier,
     DataAssetIdentifier,
-    BatchIdentifier,
+    # BatchIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
