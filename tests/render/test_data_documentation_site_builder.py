@@ -92,7 +92,7 @@ def test_configuration_driven_site_builder(titanic_data_context, filesystem_csv_
         """`unused_datasource` must not appear in this documentation, 
         because `datasources` config option specifies only `mydatasource`"""
 
-    assert index_page_locator_info['path'] == titanic_data_context.data_doc_directory + '/local_site/index.html'
+    assert index_page_locator_info['path'] == titanic_data_context.root_directory + '/uncommitted/documentation/local_site/index.html'
 
     assert len(index_links_dict['mydatasource']['mygenerator']['Titanic']['expectations_links']) == 1, \
     """

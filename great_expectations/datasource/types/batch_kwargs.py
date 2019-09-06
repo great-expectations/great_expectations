@@ -7,7 +7,10 @@ import pandas as pd
 from six import string_types
 from great_expectations.types import RequiredKeysDotDict, AllowedKeysDotDict, ClassConfig
 from great_expectations.datasource.types.reader_methods import ReaderMethods
-from great_expectations.data_context.types.base_resource_identifiers import DataContextResourceIdentifier
+from great_expectations.data_context.types.base_resource_identifiers import (
+    OrderedDataContextKey,
+    DataContextKey,
+)
 # from great_expectations.exceptions import GreatExpectationsError
 
 try:
@@ -18,7 +21,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class BatchFingerprint(DataContextResourceIdentifier):
+class BatchFingerprint(OrderedDataContextKey):
     _allowed_keys = AllowedKeysDotDict._allowed_keys | {
         "partition_id",
         "fingerprint"
@@ -32,11 +35,13 @@ class BatchFingerprint(DataContextResourceIdentifier):
         "partition_id": string_types,
         "fingerprint": string_types
     })
-    _key_order = copy.copy(DataContextResourceIdentifier._key_order)
+    _key_order = copy.copy(OrderedDataContextKey._key_order)
     _key_order.extend(["partition_id", "fingerprint"])
 
 # class BatchFingerprint(object):
 #     def __init__(self, partition_id, fingerprint, separator="__"):
+#         if separator in partition_id:
+#             raise ValueError("Unable to ")
 #         self.__partition_id = partition_id
 #         self.__fingerprint = fingerprint
 #         self.__separator = separator
@@ -156,25 +161,48 @@ class PathBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs)
     }
 
 
+class PathBatchId(PathBatchKwargs):
+    """The BatchId requires a timestamp. It could also include additional idetnifying information such as an
+    md5 hash of the file."""
+    _required_keys = PathBatchKwargs._required_keys | {
+        "timestamp"
+    }
+    _key_types = {
+        "timestamp": float
+    }
+
+
 class MemoryBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
     _required_keys = {
         "df"
     }
 
 
+class MemoryBatchId(MemoryBatchKwargs):
+    # NOTE: JPC 20190904: A BatchId for MemoryBatchKwargs could include additional information such as a hash of
+    # contents of a pandas dataframe if it is reasonably sized, a timestamp, a name of a file, context/state, etc.
+    # However, there are no *required* elements as of this release.
+    pass
+
+
 class PandasDatasourceMemoryBatchKwargs(MemoryBatchKwargs):
-    _required_keys = {
-        "df"
-    }
     _key_types = {
         "df": pd.DataFrame
     }
 
 
-class SparkDFDatasourceMemoryBatchKwargs(MemoryBatchKwargs):
-    _required_keys = {
-        "df"
+class PandasDatasourceMemoryBatchId(PandasDatasourceMemoryBatchKwargs):
+    # NOTE: JPC 20190904: It would be useful here to be able to specify optional keys one of which is required
+    _required_keys = PandasDatasourceMemoryBatchKwargs._required_keys | {
+        "timestamp"
     }
+    _key_types = copy.copy(PandasDatasourceMemoryBatchKwargs._key_types)
+    _key_types.update({
+        "timestamp": float
+    })
+
+
+class SparkDFDatasourceMemoryBatchKwargs(MemoryBatchKwargs):
     try:
         _key_types = {
             "df": pyspark.sql.DataFrame
@@ -185,34 +213,68 @@ class SparkDFDatasourceMemoryBatchKwargs(MemoryBatchKwargs):
         }
 
 
+class SparkDFDatasourceMemoryBatchId(SparkDFDatasourceMemoryBatchKwargs):
+    _required_keys = MemoryBatchKwargs._required_keys | {
+        "timestamp"
+    }
+    _key_types = copy.copy(SparkDFDatasourceMemoryBatchKwargs._key_types)
+    _key_types.update({
+        "timestamp": float
+    })
+
+
 class SqlAlchemyDatasourceTableBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     _required_keys = {
         "table"
-        "timestamp"
     }
     _key_types = {
-        "table": string_types,
-        "timestamp": float
+        "table": string_types
     }
+
+
+class SqlAlchemyDatasourceTableBatchId(SqlAlchemyDatasourceTableBatchKwargs):
+    _required_keys = SqlAlchemyDatasourceBatchKwargs._required_keys | {
+        "timestamp"
+    }
+    _key_types = copy.copy(SqlAlchemyDatasourceTableBatchKwargs._key_types)
+    _key_types.update({
+        "timestamp": float
+    })
 
 
 class SqlAlchemyDatasourceQueryBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     _required_keys = {
         "query"
-        "timestamp"
     }
     _key_types = {
-        "query": string_types,
-        "timestamp": float
+        "query": string_types
     }
+
+
+class SqlAlchemyDatasourceQueryBatchId(SqlAlchemyDatasourceQueryBatchKwargs):
+    _required_keys = SqlAlchemyDatasourceQueryBatchKwargs._required_keys | {
+        "timestamp"
+    }
+    _key_types = copy.copy(SqlAlchemyDatasourceQueryBatchKwargs._key_types)
+    _key_types.update({
+        "timestamp": float
+    })
 
 
 class SparkDFDatasourceQueryBatchKwargs(SparkDFDatasourceBatchKwargs):
     _required_keys = {
-        "query",
-        "timestamp"
+        "query"
     }
     _key_types = {
-        "query": string_types,
-        "timestamp": float
+        "query": string_types
     }
+
+
+class SparkDFDatasourceQueryBatchId(SparkDFDatasourceQueryBatchKwargs):
+    _required_keys = SparkDFDatasourceQueryBatchKwargs._required_keys | {
+        "timestamp"
+    }
+    _key_types = copy.copy(SparkDFDatasourceQueryBatchKwargs._key_types)
+    _key_types.update({
+        "timestamp": float
+    })

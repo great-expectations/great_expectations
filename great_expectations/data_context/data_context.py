@@ -45,7 +45,7 @@ from .store.types import (
 from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
 
 from .types import (
-    NormalizedDataAssetName,     # TODO : Consider replacing this with DataAssetIdentifier. In either case, the class should inherit from DataContextResourceIdentifier.
+    NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
     DataContextConfig,
     ValidationResultIdentifier,
 )
@@ -142,17 +142,11 @@ class ConfigOnlyDataContext(object):
         for datasource in self._project_config["datasources"].keys():
             self.get_datasource(datasource)
 
-
+        # Init stores
         self._stores = DotDict()
         self._init_stores(self._project_config["stores"])
 
-
-        # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
-        self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
-
         self._compiled = False
-        # /End store stuff
-
 
         if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
             raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
@@ -1307,35 +1301,6 @@ class ConfigOnlyDataContext(object):
             return results_dict
         else:
             return results_dict
-
-    # TODO: refactor this into a snapshot getter based on project_config
-    # def get_failed_dataset(self, validation_result, **kwargs):
-    #     try:
-    #         reference_url = validation_result["meta"]["dataset_reference"]
-    #     except KeyError:
-    #         raise ValueError("Validation result must have a dataset_reference in the meta object to fetch")
-        
-    #     if reference_url.startswith("s3://"):
-    #         try:
-    #             import boto3
-    #             s3 = boto3.client('s3')
-    #         except ImportError:
-    #             raise ImportError("boto3 is required for retrieving a dataset from s3")
-        
-    #         parsed_url = urlparse(reference_url)
-    #         bucket = parsed_url.netloc
-    #         key = parsed_url.path[1:]
-            
-    #         s3_response_object = s3.get_object(Bucket=bucket, Key=key)
-    #         if key.endswith(".csv"):
-    #             # Materialize as dataset
-    #             # TODO: check the associated config for the correct data_asset_type to use
-    #             return read_csv(s3_response_object['Body'], **kwargs)
-    #         else:
-    #             return s3_response_object['Body']
-
-    #     else:
-    #         raise ValueError("Only s3 urls are supported.")
 
     def update_return_obj(self, data_asset, return_obj):
         """Helper called by data_asset.
