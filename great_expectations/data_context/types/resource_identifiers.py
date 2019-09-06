@@ -1,13 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from collections import Iterable
-from six import string_types, class_types
-
-from great_expectations.types import (
-    RequiredKeysDotDict,
-    AllowedKeysDotDict,
-)
+from six import string_types
 
 from .base_resource_identifiers import (
     OrderedDataContextKey,
