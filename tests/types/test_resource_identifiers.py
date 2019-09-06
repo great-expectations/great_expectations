@@ -5,8 +5,14 @@ logger = logging.getLogger(__name__)
 from six import PY2, string_types
 import sys
 
-from great_expectations.data_context.types.resource_identifiers import (
+from great_expectations.data_context.types.base_resource_identifiers import (
     OrderedKeysDotDict,
+    # DataAssetIdentifier,
+    # ExpectationSuiteIdentifier,
+    # ValidationResultIdentifier,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    # OrderedKeysDotDict,
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
