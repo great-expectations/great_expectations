@@ -222,7 +222,6 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
 
 
         print(gen_directory_tree_str(os.path.join(basedir, "great_expectations")))
-        # FIXME: This is plain wrong.
         assert gen_directory_tree_str(os.path.join(basedir, "great_expectations")) == """\
 great_expectations/
     .gitignore
@@ -266,7 +265,7 @@ great_expectations/
                 data__dir/
                     default/
                         Titanic/
-                            validation-results-Titanic-BasicDatasetProfiler-profiling.json
+                            BasicDatasetProfiler.json
 """
 
         assert os.path.isfile(
@@ -276,11 +275,12 @@ great_expectations/
             )
         )
 
-        assert os.path.isfile(
-            os.path.join(
-                basedir,
-                "great_expectations/uncommitted/validations/profiling/data__dir/default/Titanic/validation-results-Titanic-BasicDatasetProfiler-profiling.json")
-        )
+        fnames = []
+        path = os.path.join(basedir, "great_expectations/uncommitted/validations/profiling/data__dir/default/Titanic")
+        for (dirpath, dirnames, filenames) in os.walk(path):
+            for filename in filenames:
+                fnames.append(filename)
+        assert fnames == ["BasicDatasetProfiler.json"]
 
         assert os.path.isfile(
             os.path.join(

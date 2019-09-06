@@ -31,7 +31,7 @@ except ImportError:
     from urlparse import urlparse
 
 from great_expectations.data_asset.util import get_empty_expectation_suite
-from great_expectations.dataset import Dataset, PandasDataset
+from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     PandasDatasource,
     SqlAlchemyDatasource,
@@ -42,11 +42,18 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from .store.types import (
     StoreMetaConfig,
 )
+from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
+
 from .types import (
-    NormalizedDataAssetName,     # TODO : Consider replacing this with DataAssetIdentifier. In either case, the class should inherit from DataContextResourceIdentifier.
+    NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
     DataContextConfig,
     ValidationResultIdentifier,
 )
+from great_expectations.data_context.types.resource_identifiers import (
+    DataAssetIdentifier,
+    ExpectationSuiteIdentifier
+)
+
 from .templates import (
     PROJECT_TEMPLATE,
     PROFILE_COMMENT,
@@ -634,6 +641,12 @@ class ConfigOnlyDataContext(object):
 
         if isinstance(data_asset_name, NormalizedDataAssetName):
             return data_asset_name
+        elif isinstance(data_asset_name, DataAssetIdentifier):
+            return NormalizedDataAssetName(
+                datasource=data_asset_name.datasource,
+                generator=data_asset_name.generator,
+                generator_asset=data_asset_name.generator_asset
+            )
 
         split_name = data_asset_name.split(self.data_asset_name_delimiter)
         existing_expectation_suites = self.list_expectation_suites()
@@ -835,7 +848,7 @@ class ConfigOnlyDataContext(object):
                 expectation_suite_name
             )
 
-    # TODO: This method should be changed to use a Store. The DataContext itself shouldn't need to know about writing to disc. 
+    # TODO: This method should be changed to use a Store. The DataContext itself shouldn't need to know about writing to disc.
     def save_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
         """Save the provided expectation suite into the DataContext.
 
@@ -916,9 +929,9 @@ class ConfigOnlyDataContext(object):
             **{
                 "expectation_suite_identifier": {
                     "data_asset_name": tuple(normalized_data_asset_name),
-                    "expectation_suite_name" : expectation_suite_name,
+                    "expectation_suite_name": expectation_suite_name,
                 },
-                "run_id": run_id,
+                "run_id": run_id
             })
 
         if "local_validation_result_store" in self.stores:
@@ -1266,9 +1279,19 @@ class ConfigOnlyDataContext(object):
         """
 
         selected_store = self.stores[validations_store_name]
+        if not isinstance(data_asset_name, NormalizedDataAssetName):
+            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+
+        if not isinstance(data_asset_name, DataAssetIdentifier):
+            data_asset_name = DataAssetIdentifier(
+                datasource=data_asset_name.datasource,
+                generator=data_asset_name.generator,
+                generator_asset=data_asset_name.generator_asset
+            )
+
 
         if run_id == None:
-            #Get most recent run id 
+            #Get most recent run id
             # NOTE : This method requires a (potentially very inefficient) list_keys call.
             # It should probably move to live in an appropriate Store class,
             # but when we do so, that Store will need to function as more than just a key-value Store.
@@ -1277,14 +1300,12 @@ class ConfigOnlyDataContext(object):
             run_id = max(run_id_set)
 
         key = ValidationResultIdentifier(
-            coerce_types=True,
-            **{
-                "expectation_suite_identifier": {
-                    "data_asset_name": tuple(self._normalize_data_asset_name(data_asset_name)),
-                    "expectation_suite_name" : expectation_suite_name,
-                },
-                "run_id": run_id,
-            })
+                expectation_suite_identifier=ExpectationSuiteIdentifier(
+                    data_asset_name=data_asset_name,
+                    expectation_suite_name=expectation_suite_name
+                ),
+                run_id=run_id
+            )
         results_dict = selected_store.get(key)
 
         #TODO: This should be a convenience method of ValidationResultSuite

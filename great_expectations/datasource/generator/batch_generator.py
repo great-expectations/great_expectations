@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import os
-import copy
 import logging
+
+from great_expectations.datasource.types import BatchKwargs
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +25,51 @@ class BatchGenerator(object):
     Batches include metadata that identifies how they were constructed--the same “batch_kwargs”
     assembled by the generator, While not every datasource will enable re-fetching a
     specific batch of data, GE can store snapshots of batches or store metadata from an
-    external data version control system. 
+    external data version control system.
+
+    Example Generator Configurations follow::
+
+        my_datasource_1:
+          class_name: PandasDatasource
+          generators:
+            # This generator will provide two data assets, corresponding to the globs defined under the "file_logs"
+            # and "data_asset_2" keys. The file_logs asset will be partitioned according to the match group
+            # defined in partition_regex
+            default:
+              class_name: GlobReaderGenerator
+              base_directory: /var/logs
+              reader_options:
+                sep: "
+              globs:
+                file_logs:
+                  glob: logs/*.gz
+                  partition_regex: logs/file_(\d{0,4})_\.log\.gz
+                data_asset_2:
+                  glob: data/*.csv
+
+        my_datasource_2:
+          class_name: PandasDatasource
+          generators:
+            # This generator will create one data asset per subdirectory in /data
+            # Each asset will have partitions corresponding to the filenames in that subdirectory
+            default:
+              class_name: SubdirReaderGenerator
+              reader_options:
+                sep: "
+              base_directory: /data
+
+        my_datasource_3:
+          class_name: SqlalchemyDatasource
+          generators:
+            # This generator will search for a file named with the name of the requested generator asset and the
+            # .sql suffix to open with a query to use to generate data
+             default:
+                class_name: QueryGenerator
+
+
     """
+
+    _batch_kwargs_type = BatchKwargs
 
     def __init__(self, name, type_, datasource=None):
         self._name = name
@@ -40,6 +83,19 @@ class BatchGenerator(object):
         raise NotImplementedError
 
     def get_available_data_asset_names(self):
+        raise NotImplementedError
+
+    def get_available_partition_ids(self, generator_asset):
+        """
+        Applies the current _partitioner to the batches available on generator_asset and returns a list of valid
+        partition_id strings that can be used to identify batches of data.
+
+        Args:
+            generator_asset: the generator asset whose partitions should be returned.
+
+        Returns:
+            A set of partition_id strings
+        """
         raise NotImplementedError
 
     def get_config(self):
@@ -60,6 +116,20 @@ class BatchGenerator(object):
         else:
             self.reset_iterator(data_asset_name)
             return self._data_asset_iterators[data_asset_name]
+
+    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+        """
+        Build batch kwargs for the named generator_asset based on partition_id and optionally existing batch_kwargs.
+        Args:
+            generator_asset: the generator_asset for which to build batch_kwargs
+            partition_id: the partition id
+            batch_kwargs: any existing batch_kwargs object to use. Will be supplemented with configured information.
+            **kwargs: any addition kwargs to use. Will be added to returned batch_kwargs
+
+        Returns: BatchKwargs object
+
+        """
+        raise NotImplementedError
 
     def yield_batch_kwargs(self, data_asset_name):
         if data_asset_name not in self._data_asset_iterators:

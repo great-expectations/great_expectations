@@ -45,7 +45,7 @@ stores:
         class_name: FilesystemStoreBackend
         base_directory: uncommitted/validations/
         file_extension: json
-        filepath_template: "{4}/{0}/{1}/{2}/validation-results-{2}-{3}-{4}.{file_extension}"
+        filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
         replaced_substring: /
         replacement_string: ___
 
@@ -79,7 +79,7 @@ stores:
   #   store_config:
   #     base_directory: fixtures/validations
   #     file_extension: .zzz
-  
+
   fixture_validation_results_store:
     module_name: great_expectations.data_context.store
     class_name: NamespacedReadWriteStore
@@ -91,7 +91,7 @@ stores:
         class_name: FilesystemStoreBackend
         base_directory: fixtures/validations
         file_extension: json
-        filepath_template: "{4}/{0}/{1}/{2}/validation-results-{2}-{3}-{4}.{file_extension}"
+        filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
         replaced_substring: /
         replacement_string: ___
 
@@ -160,7 +160,7 @@ data_docs:
           view:
             module: great_expectations.render.view
             class: DefaultJinjaPageView
-            
+
     team_site:
       # "team_site" is meant to support the "shared source of truth for a team" use case. 
       # By default only the expectations section is enabled.
