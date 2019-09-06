@@ -217,7 +217,7 @@ class FilesystemStoreBackend(StoreBackend):
     In order to guarantee reversibility, we have to forbid the replacement_string in the key:
     A key containing "I__am__dunderscored" -> raises a ValueError.
     I think it would be better to simply have a list of restricted characters or substrings in StoreBackend keys.
-    Then we can propagate that same list back to ResourceIdentifier keys themselves, and handle string substitution at that point.
+    Then we can propagate that same list back to DataContextKeys themselves, and handle string substitution at that point.
     """
 
     config_class = FilesystemStoreBackendConfig
