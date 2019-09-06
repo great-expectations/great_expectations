@@ -26,7 +26,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config
 )
 
-class ValidationStore(ReadWriteStore):
+class ValidationResultStore(ReadWriteStore):
     
     def __init__(self,
         store_backend,
