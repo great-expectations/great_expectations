@@ -46,6 +46,9 @@ class WriteOnlyStore(object):
         self._set(key, serialized_value)
 
 
+    # NOTE : Abe 2019/09/06 : It's unclear whether this serialization logic belongs here,
+    # or should be factored out to individual classes on a case-by-case basis.
+
     def _get_serialization_method(self, serialization_type):
         if serialization_type == None:
             return lambda x: x
