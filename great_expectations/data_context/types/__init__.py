@@ -11,10 +11,12 @@ from .metrics import (
 from .configurations import (
     DataContextConfig
 )
+from .base_resource_identifiers import (
+    DataContextKey,
+    OrderedDataContextKey,
+)
 from .resource_identifiers import (
-    DataContextResourceIdentifier,
     DataAssetIdentifier,
-    # BatchIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )

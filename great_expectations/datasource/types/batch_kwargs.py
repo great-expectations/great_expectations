@@ -7,7 +7,10 @@ import pandas as pd
 from six import string_types
 from great_expectations.types import RequiredKeysDotDict, AllowedKeysDotDict, ClassConfig
 from great_expectations.datasource.types.reader_methods import ReaderMethods
-from great_expectations.data_context.types.base_resource_identifiers import DataContextResourceIdentifier
+from great_expectations.data_context.types.base_resource_identifiers import (
+    OrderedDataContextKey,
+    DataContextKey,
+)
 # from great_expectations.exceptions import GreatExpectationsError
 
 try:
@@ -18,7 +21,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class BatchFingerprint(DataContextResourceIdentifier):
+class BatchFingerprint(OrderedDataContextKey):
     _allowed_keys = AllowedKeysDotDict._allowed_keys | {
         "partition_id",
         "fingerprint"
@@ -32,7 +35,7 @@ class BatchFingerprint(DataContextResourceIdentifier):
         "partition_id": string_types,
         "fingerprint": string_types
     })
-    _key_order = copy.copy(DataContextResourceIdentifier._key_order)
+    _key_order = copy.copy(OrderedDataContextKey._key_order)
     _key_order.extend(["partition_id", "fingerprint"])
 
 # class BatchFingerprint(object):
