@@ -13,8 +13,8 @@ from ...types import (
     DotDict,
     AllowedKeysDotDict,
 )
-from ..types.resource_identifiers import (
-    DataContextResourceIdentifier,
+from ..types.base_resource_identifiers import (
+    DataContextKey,
 )
 
 # TODO : Add docstrings to these classes.
@@ -284,7 +284,7 @@ class NamespacedReadWriteStore(ReadWriteStore):
         #Fetch keys in _key_order to guarantee tuple ordering in both python 2 and 3
         for key_name in key._key_order:
             key_element = key[key_name]
-            if isinstance( key_element, DataContextResourceIdentifier ):
+            if isinstance( key_element, DataContextKey ):
                 list_ += self._convert_resource_identifier_to_list(key_element)
             else:
                 list_.append(key_element)
@@ -303,7 +303,7 @@ class NamespacedReadWriteStore(ReadWriteStore):
 
     def _validate_key(self, key):
         if not isinstance(key, self.resource_identifier_class):
-            raise TypeError("key: {!r} must be a DataContextResourceIdentifier, not {!r}".format(
+            raise TypeError("key: {!r} must be a DataContextKey, not {!r}".format(
                 key,
                 type(key),
             ))
