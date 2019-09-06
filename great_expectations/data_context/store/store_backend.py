@@ -396,12 +396,14 @@ class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
         filepath_template,
         key_length,
         root_directory,
+        forbidden_substrings=["/", "\\"],
         file_extension=None,
         file_prefix=None,
     ):
         self.base_directory = base_directory
         self.filepath_template = filepath_template
         self.key_length = key_length
+        self.forbidden_substrings = forbidden_substrings
 
         if not os.path.isabs(root_directory):
             raise ValueError("root_directory must be an absolute path. Got {0} instead.".format(root_directory))    
@@ -440,7 +442,16 @@ class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
 
     def _validate_key(self, key):
         super(FixedLengthTupleFilesystemStoreBackend, self)._validate_key(key)
-        
+
+        for key_element in key:
+            for substring in self.forbidden_substrings:
+                if substring in key_element:
+                    raise ValueError("Keys in {0} must not contain substrings in {1} : {2}".format(
+                        self.__class__.__name__,
+                        self.forbidden_substrings,
+                        key,
+                    ))
+
         
     def list_keys(self):
         # TODO : Rename "keys" in this method to filepaths, for clarity
@@ -479,7 +490,6 @@ class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
         # In the meantime, there is some chance that configs will not be cross-OS compatible.
 
         # NOTE : These methods support fixed-length keys, but not variable.
-        # TODO : Figure out how to handle variable-length keys
         self._validate_key(key)
 
         converted_string = self.filepath_template.format(*list(key), **{

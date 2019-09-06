@@ -72,8 +72,7 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
         filepath_template= "{0}/{1}/{2}/foo-{2}-expectations.{file_extension}",
     )
 
-    # TODO: This should raise an error: A/a.
-    tuple_ = ("A/a", "B-b", "C")
+    tuple_ = ("A__a", "B-b", "C")
     converted_string = my_store._convert_key_to_filepath(tuple_)
     print(converted_string)
     assert converted_string == "A__a/B-b/C/foo-C-expectations.txt"
@@ -81,10 +80,11 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
     recovered_key = my_store._convert_filepath_to_key("A__a/B-b/C/foo-C-expectations.txt")
     print(recovered_key)
     assert recovered_key == tuple_
-
+    
     with pytest.raises(ValueError):
-        tuple_ = ("A/a", "B-b", "C__c")
+        tuple_ = ("A/a", "B-b", "C")
         converted_string = my_store._convert_key_to_filepath(tuple_)
+        print(converted_string)
 
 
 def test_FixedLengthTupleFilesystemStoreBackend_verify_that_key_to_filepath_operation_is_reversible(tmp_path_factory):
