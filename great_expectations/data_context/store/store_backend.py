@@ -33,41 +33,15 @@ from ...types import (
 # NOTE : Abe 2019/08/30 : Currently, these classes behave as key-value stores.
 # We almost certainly want to extend that functionality to allow other operations
 
-# FIXME : Abe 2019/08/30 : The current config structure has not been vetted for
-# full consistency with the intended v0.8.0 spec.
-
-class StoreBackendConfig(AllowedKeysDotDict):
-    _allowed_keys = set()
-
-
 class StoreBackend(object):
     """a key-value store, to abstract away reading and writing to a persistence layer
     """
 
-    config_class = StoreBackendConfig
-
     def __init__(
         self,
-        config,
         root_directory=None,
     ):
-        # NOTE: Implmentation of configs overall is pretty soft.
-        # Suggested TODO: Implement a base Configurable class that knows how to
-        #   * Ensure that an associated config class exists (for each subclass)
-        #   * Validate configs
-        #   * Initialize itself from a config
-        # TONS of things could inherit from this: Stores, StoreBackends, Actions, DataSources, Generators, the DataContext itself, ...
-        if not isinstance(config, self.get_config_class()):
-            # Attempt to coerce config to a typed config
-            config = self.get_config_class()(
-                coerce_types=True,
-                **config
-            )
-
-        self.config = config
-
-        self._setup()
-
+        self.root_directory = root_directory
 
     def get(self, key):
         self._validate_key(key)
@@ -82,11 +56,6 @@ class StoreBackend(object):
     def has_key(self, key):
         self._validate_key(key)
         return self._has_key(key)
-
-
-    @classmethod
-    def get_config_class(cls):
-        return cls.config_class
 
     def _validate_key(self, key):
         if not isinstance(key, tuple):
@@ -105,17 +74,6 @@ class StoreBackend(object):
                 ))
 
     def _validate_value(self, value):
-        # TODO: Allow bytes as well.
-        # TODO: This is too opinionated overall. Leave this function as a pass and push the logic down to the appropriate child classes.
-
-        if not isinstance(value, string_types):
-            raise TypeError("Values in {0} must be instances of {1}, not {2}".format(
-                self.__class__.__name__,
-                string_types,
-                type(value),
-            ))
-
-    def _setup(self):
         pass
 
     def _get(self, key):
@@ -388,6 +346,11 @@ class InMemoryStoreBackend(StoreBackend):
 
 class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
     """Uses a local filepath as a store.
+    
+    The key to this StoreBackend must be a tuple with fixed length equal to key_length.
+    The filepath_template is a string template used to convert the key to a filepath.
+    There's a bit of regex magic in _convert_filepath_to_key that reverses this process,
+    so that we can write AND read using filenames as keys.
     """
 
     def __init__(
@@ -401,24 +364,24 @@ class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
         file_prefix=None,
     ):
         self.base_directory = base_directory
-        self.filepath_template = filepath_template
         self.key_length = key_length
         self.forbidden_substrings = forbidden_substrings
-
-        if not os.path.isabs(root_directory):
-            raise ValueError("root_directory must be an absolute path. Got {0} instead.".format(root_directory))    
-        
-        self.root_directory = root_directory
-
         self.file_extension = file_extension
         self.file_prefix = file_prefix
+
+        self.filepath_template = filepath_template
+        self.verify_that_key_to_filepath_operation_is_reversible()
+
+        if not os.path.isabs(root_directory):
+            raise ValueError("root_directory must be an absolute path. Got {0} instead.".format(root_directory))
+        
+        self.root_directory = root_directory
 
         self.full_base_directory = os.path.join(
             self.root_directory,
             self.base_directory,
         )
 
-        # TODO : Consider re-implementing this:
         safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
     def _get(self, key):
@@ -452,9 +415,18 @@ class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
                         key,
                     ))
 
+    def _validate_value(self, value):
+        # NOTE: We may want to allow bytes here as well.
+
+        if not isinstance(value, string_types):
+            raise TypeError("Values in {0} must be instances of {1}, not {2}".format(
+                self.__class__.__name__,
+                string_types,
+                type(value),
+            ))
+
         
     def list_keys(self):
-        # TODO : Rename "keys" in this method to filepaths, for clarity
         key_list = []
         for root, dirs, files in os.walk(self.full_base_directory):
             for file_ in files:
@@ -464,20 +436,19 @@ class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
                     self.full_base_directory,
                 )
                 if relative_path == ".":
-                    key = file_name
+                    filepath = file_name
                 else:
-                    key = os.path.join(
+                    filepath = os.path.join(
                         relative_path,
                         file_name
                     )
 
                 key_list.append(
-                    self._convert_filepath_to_key(key)
+                    self._convert_filepath_to_key(filepath)
                 )
 
         return key_list
 
-    # TODO : Write tests for this method
     def has_key(self, key):
         assert isinstance(key, string_types)
 
@@ -543,7 +514,12 @@ class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
         filepath = self._convert_key_to_filepath(key)
         new_key = self._convert_filepath_to_key(filepath)
         if key != new_key:
-            raise AssertionError("Cannot reverse key conversion in {}\nThis is most likely a problem with your filepath_template:\n\t{}".format(
+            raise ValueError("filepath template {0} for class {1} is not reversible for a tuple of length {2}. Have you included all elements in the key tuple?".format(
+                self.filepath_template,
                 self.__class__.__name__,
-                self.filepath_template
+                self.key_length,
             ))
+            # raise AssertionError("Cannot reverse key conversion in {}\nThis is most likely a problem with your filepath_template:\n\t{}".format(
+            #     self.__class__.__name__,
+            #     self.filepath_template
+            # ))
