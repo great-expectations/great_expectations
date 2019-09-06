@@ -50,15 +50,13 @@ def test_InMemoryStoreBackend():
     print(my_store.store)
     assert my_store.get(my_key) == "aaa"
 
-    #??? Putting a non-string object into a store triggers an error.
-    # TODO: Allow bytes as well.
-    with pytest.raises(TypeError):
-        my_store.set(("B",), {"x":1})
+    my_store.set(("B",), {"x":1})
 
     assert my_store.has_key(my_key) == True
-    assert my_store.has_key(("B",)) == False
+    assert my_store.has_key(("B",)) == True
     assert my_store.has_key(("A",)) == True
-    assert my_store.list_keys() == [("A",)]
+    assert my_store.has_key(("C",)) == False
+    assert my_store.list_keys() == [("A",), ("B",)]
 
 def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_FilesystemStoreBackend_two_way_string_conversion__dir'))
@@ -86,7 +84,6 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
         converted_string = my_store._convert_key_to_filepath(tuple_)
         print(converted_string)
 
-
 def test_FixedLengthTupleFilesystemStoreBackend_verify_that_key_to_filepath_operation_is_reversible(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_FixedLengthTupleFilesystemStoreBackend_verify_that_key_to_filepath_operation_is_reversible__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
@@ -111,16 +108,15 @@ def test_FixedLengthTupleFilesystemStoreBackend_verify_that_key_to_filepath_oper
     #This also should pass silently
     my_store.verify_that_key_to_filepath_operation_is_reversible()
 
-    my_store = FixedLengthTupleFilesystemStoreBackend(
-        root_directory=os.path.abspath(path),
-        base_directory=project_path,
-        file_extension= "txt",
-        key_length=3,
-        filepath_template= "{0}/{1}/foo-expectations.{file_extension}",
-    )
-    with pytest.raises(AssertionError):
-        #This should fail
-        my_store.verify_that_key_to_filepath_operation_is_reversible()
+
+    with pytest.raises(ValueError):
+        my_store = FixedLengthTupleFilesystemStoreBackend(
+            root_directory=os.path.abspath(path),
+            base_directory=project_path,
+            file_extension= "txt",
+            key_length=3,
+            filepath_template= "{0}/{1}/foo-expectations.{file_extension}",
+        )
 
 
 def test_FixedLengthTupleFilesystemStoreBackend(tmp_path_factory):

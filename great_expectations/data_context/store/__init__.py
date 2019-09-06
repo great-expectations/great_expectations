@@ -9,9 +9,6 @@ from .store import (
     WriteOnlyStore,
     ReadWriteStore,
     BasicInMemoryStore,
-    # BasicInMemoryStoreConfig,
-    # NamespacedReadWriteStore,
-    # NamespacedReadWriteStoreConfig,
     EvaluationParameterStore,
 )
 
