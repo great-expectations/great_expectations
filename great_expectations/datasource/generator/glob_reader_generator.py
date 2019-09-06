@@ -22,7 +22,29 @@ class GlobReaderGenerator(BatchGenerator):
 
     daily_logs:
       glob: daily_logs/*.csv
-      partition_regex: daily_logs/(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])_(.*)\.csv
+      partition_regex: daily_logs/((19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01]))_(.*)\.csv
+
+
+    The "glob" key ensures that every csv file in the daily_logs directory is considered a batch for this data asset.
+    The "partition_regex" key ensures that files whose basename begins with a date (with components hyphen, space,
+    forward slash, period, or null separated) will be identified by a partition_id equal to just the date portion of
+    their name.
+
+    A fully configured GlobReaderGenerator in yml might look like the following::
+
+        my_datasource:
+          class_name: PandasDatasource
+          generators:
+            my_generator:
+              class_name: GlobReaderGenerator
+              base_directory: /var/log
+              reader_options:
+                sep: %
+                header: 0
+              asset_globs:
+                wifi_logs:
+                  glob: wifi*.log
+                  partition_regex: wifi-((0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])-20\d\d).*\.log
 
     """
 
@@ -40,7 +62,7 @@ class GlobReaderGenerator(BatchGenerator):
             asset_globs = {
                 "default": {
                     "glob": "*",
-                    "partition_regex": r"^(19|20)\d\d[- /.]?(0[1-9]|1[012])[- /.]?(0[1-9]|[12][0-9]|3[01])_(.*)\.csv",
+                    "partition_regex": r"^((19|20)\d\d[- /.]?(0[1-9]|1[012])[- /.]?(0[1-9]|[12][0-9]|3[01])_(.*))\.csv",
                     "match_group_id": 1
                 }
             }
