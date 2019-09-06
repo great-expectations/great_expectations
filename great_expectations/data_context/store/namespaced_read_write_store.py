@@ -8,15 +8,11 @@ import json
 
 import pandas as pd
 
-from ...types import (
-    ListOf,
-    DotDict,
-    AllowedKeysDotDict,
-)
 from ..types.base_resource_identifiers import (
     DataContextKey,
 )
 from ..types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
 from .store import (
@@ -26,7 +22,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config
 )
 
-class ValidationResultStore(ReadWriteStore):
+class NamespacedReadWriteStore(ReadWriteStore):
     
     def __init__(self,
         store_backend,
@@ -43,21 +39,7 @@ class ValidationResultStore(ReadWriteStore):
         self.serialization_type = serialization_type
 
     def _init_store_backend(self, store_backend_config, runtime_config):
-        if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
-            config_defaults = {
-                "key_length" : 5,
-                "module_name" : "great_expectations.data_context.store",
-            }
-        else:
-            config_defaults = {
-                "module_name" : "great_expectations.data_context.store",
-            }
-
-        return instantiate_class_from_config(
-            config=store_backend_config,
-            runtime_config=runtime_config,
-            config_defaults=config_defaults,
-        )
+        raise NotImplementedError
 
     def _get(self, key):
         self._validate_key(key)
@@ -76,9 +58,6 @@ class ValidationResultStore(ReadWriteStore):
 
     def _convert_resource_identifier_to_tuple(self, key):
         # TODO : Optionally prepend a source_id (the frontend Store name) to the tuple.
-
-        # TODO : Optionally prepend a resource_identifier_type to the tuple.
-        # list_ = [self.config.resource_identifier_class_name]
 
         list_ = []
         list_ += self._convert_resource_identifier_to_list(key)
@@ -100,12 +79,57 @@ class ValidationResultStore(ReadWriteStore):
         return list_
 
     def _convert_tuple_to_resource_identifier(self, tuple_):
-        new_identifier = ValidationResultIdentifier(*tuple_, coerce_type=True)#[1:]) #Only truncate one if we prepended the identifier type
+        new_identifier = self.key_class(*tuple_)
         return new_identifier
 
     def _validate_key(self, key):
-        if not isinstance(key, ValidationResultIdentifier):
-            raise TypeError("key: {!r} must be a ValidationResultIdentifier, not {!r}".format(
+        if not isinstance(key, self.key_class):
+            raise TypeError("key: {!r} must be a {}, not {!r}".format(
                 key,
+                self.key_class,
                 type(key),
             ))
+
+
+class ExpectationStore(NamespacedReadWriteStore):
+    
+    def _init_store_backend(self, store_backend_config, runtime_config):
+        self.key_class = ExpectationResultIdentifier
+
+        if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
+            config_defaults = {
+                "key_length" : 4,
+                "module_name" : "great_expectations.data_context.store",
+            }
+        else:
+            config_defaults = {
+                "module_name" : "great_expectations.data_context.store",
+            }
+
+        return instantiate_class_from_config(
+            config=store_backend_config,
+            runtime_config=runtime_config,
+            config_defaults=config_defaults,
+        )
+
+class ValidationResultStore(NamespacedReadWriteStore):
+    
+    def _init_store_backend(self, store_backend_config, runtime_config):
+        self.key_class = ValidationResultIdentifier
+
+        if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
+            config_defaults = {
+                "key_length" : 5,
+                "module_name" : "great_expectations.data_context.store",
+            }
+        else:
+            config_defaults = {
+                "module_name" : "great_expectations.data_context.store",
+            }
+
+        return instantiate_class_from_config(
+            config=store_backend_config,
+            runtime_config=runtime_config,
+            config_defaults=config_defaults,
+        )
+
