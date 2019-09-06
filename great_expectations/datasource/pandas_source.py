@@ -2,7 +2,8 @@ import time
 import hashlib
 import logging
 
-from builtins import str
+# from builtins import str
+from six import string_types
 
 import pandas as pd
 
@@ -188,7 +189,7 @@ class PandasDatasource(Datasource):
                         "df": args[0]
                     })
                     batch_kwargs = PandasDatasourceMemoryBatchKwargs(**kwargs)
-                elif isinstance(args[0], str):
+                elif isinstance(args[0], string_types):
                     kwargs.update({
                         "path": args[0],
                     })
@@ -198,7 +199,7 @@ class PandasDatasource(Datasource):
                                        "one is supported. Please provide named arguments to build_batch_kwargs.")
             else:
                 # Only kwargs were specified
-                if "path" in kwargs and isinstance(kwargs["path"], str):
+                if "path" in kwargs and isinstance(kwargs["path"], string_types):
                     batch_kwargs = PathBatchKwargs(**kwargs)
                 elif "df" in kwargs and isinstance(kwargs["df"], (pd.DataFrame, pd.Series)):
                     batch_kwargs = PandasDatasourceMemoryBatchKwargs(**kwargs)
