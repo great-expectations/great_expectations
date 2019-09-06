@@ -20,27 +20,17 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config
 )
 
-# TODO : Add docstrings to these classes.
 # TODO : Add a ConfigReadWriteStore.
-# NOTE : Abe 2019/08/30 : inheritance among __init__ methods is currently messy. We should clean it up.
-
-class WriteOnlyStoreConfig(AllowedKeysDotDict):
-    _required_keys = set([
-        "serialization_type"
-    ])
-    _allowed_keys = _required_keys
-
 
 class WriteOnlyStore(object):
+    """This base class supports writing, but not reading.
 
-    # TODO : Refactor __init__s among this class and its children.
+    It's suitable for things like HTML files that are information sinks.
+    """
+
     def __init__(self, serialization_type=None, root_directory=None):
-
         self.serialization_type = serialization_type
         self.root_directory = root_directory
-        # self.store_backend = self._configure_store_backend(self.config.store_backend)
-
-        self._setup()
 
     def set(self, key, value, serialization_type=None):
         self._validate_key(key)
@@ -91,11 +81,11 @@ class WriteOnlyStore(object):
         raise NotImplementedError
 
 
-class ReadWriteStoreConfig(WriteOnlyStoreConfig):
-    pass
-
-
 class ReadWriteStore(WriteOnlyStore):
+    """This base class supports both reading and writing.
+
+    Most of the core objects in DataContext are handled by subclasses of ReadWriteStore.
+    """
 
     def get(self, key, serialization_type=None):
         self._validate_key(key)
@@ -139,9 +129,9 @@ class BasicInMemoryStore(ReadWriteStore):
     
     This class uses an InMemoryStoreBackend, but I question whether it's worth it.
     It would be easier just to wrap a dict.
-    """
 
-    # config_class = BasicInMemoryStoreConfig
+    This class is used for testing and not much else.
+    """
 
     def __init__(self, serialization_type=None, root_directory=None):
         self.serialization_type = serialization_type
@@ -174,7 +164,7 @@ class BasicInMemoryStore(ReadWriteStore):
     def list_keys(self):
         return [key for key, in self.store_backend.list_keys()]
 
-
+# NOTE: Deprecated. Retain until DataSnapshotStore is implemented
 # class NamespacedReadWriteStoreConfig(ReadWriteStoreConfig):
 #     _allowed_keys = set({
 #         "serialization_type",
@@ -186,7 +176,7 @@ class BasicInMemoryStore(ReadWriteStore):
 #         "store_backend",
 #     })
 
-
+# TODO : Re-implement this class as DataSnapshotStore
 # class NamespacedReadWriteStore(ReadWriteStore):
     
 #     config_class = NamespacedReadWriteStoreConfig
@@ -273,16 +263,9 @@ class BasicInMemoryStore(ReadWriteStore):
 #             ))
 
 class EvaluationParameterStore(object):
-    """Fine. You want to be a dict. You get to be a dict.
+# class BasicInMemoryStore(object):
+    """You want to be a dict. You get to be a dict. But we call you a Store."""
     
-    TODO: Refactor this into a true Store later.
-
-    It would be easy to replace all instances of EvaluationParameterStore, except that Stores currently insist on having string_typed values,
-    and the the DataContext rudely sends dictionaries.
-
-    On reflection, there's no reason for all Stores to insist on serializability.
-    """
-
     def __init__(self, root_directory=None):
         self.store = {}
 
@@ -294,3 +277,6 @@ class EvaluationParameterStore(object):
 
     def has_key(self, key):
         return key in self.store
+
+    def list_keys(self):
+        return list(self.store.keys())

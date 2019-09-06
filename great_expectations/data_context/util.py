@@ -173,7 +173,7 @@ def instantiate_class_from_config(config, runtime_config, config_defaults={}):
     try:
         class_ = getattr(loaded_module, class_name)
     except AttributeError as e:
-        raise AttributeError("Module : {} has not class named : {}".format(
+        raise AttributeError("Module : {} has no class named : {}".format(
             module_name,
             class_name,
         ))
