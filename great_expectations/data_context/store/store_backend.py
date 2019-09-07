@@ -465,7 +465,7 @@ class FixedLengthTupleStoreBackend(StoreBackend):
             #     self.filepath_template
             # ))
 
-class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
+class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
     """Uses a local filepath as a store.
 
     The key to this StoreBackend must be a tuple with fixed length equal to key_length.
@@ -484,14 +484,14 @@ class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
             file_extension=None,
             file_prefix=None,
     ):
-        self.base_directory = base_directory
-        self.key_length = key_length
-        self.forbidden_substrings = forbidden_substrings
-        self.file_extension = file_extension
-        self.file_prefix = file_prefix
+        super().__init__(root_directory,
+                        filepath_template,
+                        key_length,
+                        forbidden_substrings=forbidden_substrings,
+                        file_extension=file_extension,
+                        file_prefix=file_prefix)
 
-        self.filepath_template = filepath_template
-        self.verify_that_key_to_filepath_operation_is_reversible()
+        self.base_directory = base_directory
 
         if not os.path.isabs(root_directory):
             raise ValueError("root_directory must be an absolute path. Got {0} instead.".format(root_directory))
@@ -524,28 +524,6 @@ class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
         with open(filepath, "w") as outfile:
             outfile.write(value)
 
-    def _validate_key(self, key):
-        super(FixedLengthTupleFilesystemStoreBackend, self)._validate_key(key)
-
-        for key_element in key:
-            for substring in self.forbidden_substrings:
-                if substring in key_element:
-                    raise ValueError("Keys in {0} must not contain substrings in {1} : {2}".format(
-                        self.__class__.__name__,
-                        self.forbidden_substrings,
-                        key,
-                    ))
-
-    def _validate_value(self, value):
-        # NOTE: We may want to allow bytes here as well.
-
-        if not isinstance(value, string_types):
-            raise TypeError("Values in {0} must be instances of {1}, not {2}".format(
-                self.__class__.__name__,
-                string_types,
-                type(value),
-            ))
-
     def list_keys(self):
         key_list = []
         for root, dirs, files in os.walk(self.full_base_directory):
@@ -574,74 +552,6 @@ class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
 
         all_keys = self.list_keys()
         return key in all_keys
-
-    def _convert_key_to_filepath(self, key):
-        # NOTE: At some point in the future, it might be better to replace this logic with os.path.join.
-        # That seems more correct, but the configs will be a lot less intuitive.
-        # In the meantime, there is some chance that configs will not be cross-OS compatible.
-
-        # NOTE : These methods support fixed-length keys, but not variable.
-        self._validate_key(key)
-
-        converted_string = self.filepath_template.format(*list(key), **{
-            "file_extension": self.file_extension,
-            "file_prefix": self.file_prefix,
-        })
-
-        return converted_string
-
-    def _convert_filepath_to_key(self, filepath):
-
-        # Convert the template to a regex
-        indexed_string_substitutions = re.findall("\{\d+\}", self.filepath_template)
-        tuple_index_list = ["(?P<tuple_index_{0}>.*)".format(i, ) for i in range(len(indexed_string_substitutions))]
-        intermediate_filepath_regex = re.sub(
-            "\{\d+\}",
-            lambda m, r=iter(tuple_index_list): next(r),
-            self.filepath_template
-        )
-        filepath_regex = intermediate_filepath_regex.format(*tuple_index_list, **{
-            "file_extension": self.file_extension,
-            "file_prefix": self.file_prefix,
-        })
-
-        # Apply the regex to the filepath
-        matches = re.compile(filepath_regex).match(filepath)
-
-        # Map key elements into the apprpriate parts of the tuple
-        new_key = list([None for element in range(self.key_length)])
-        for i in range(len(tuple_index_list)):
-            tuple_index = int(re.search('\d+', indexed_string_substitutions[i]).group(0))
-            key_element = matches.group('tuple_index_' + str(i))
-            new_key[tuple_index] = key_element
-
-        new_key = tuple(new_key)
-        return new_key
-
-    def verify_that_key_to_filepath_operation_is_reversible(self):
-        # NOTE: There's actually a fairly complicated problem here, similar to magic autocomplete for dataAssetNames.
-        # "Under what conditions does an incomplete key tuple fully specify an object within the GE namespace?"
-        # This doesn't just depend on the structure of keys.
-        # It also depends on uniqueness of combinations of named elements within the namespace tree.
-        # For now, I do the blunt thing and force filepaths to fully specify keys.
-
-        def get_random_hex(len=4):
-            return "".join([random.choice(list("ABCDEF0123456789")) for i in range(len)])
-
-        key = tuple([get_random_hex() for j in range(self.key_length)])
-        filepath = self._convert_key_to_filepath(key)
-        new_key = self._convert_filepath_to_key(filepath)
-        if key != new_key:
-            raise ValueError(
-                "filepath template {0} for class {1} is not reversible for a tuple of length {2}. Have you included all elements in the key tuple?".format(
-                    self.filepath_template,
-                    self.__class__.__name__,
-                    self.key_length,
-                ))
-            # raise AssertionError("Cannot reverse key conversion in {}\nThis is most likely a problem with your filepath_template:\n\t{}".format(
-            #     self.__class__.__name__,
-            #     self.filepath_template
-            # ))
 
 
 class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
