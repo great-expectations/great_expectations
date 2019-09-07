@@ -88,8 +88,8 @@ def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
     }
 
 
-def test_list_expectation_suites(data_context):
-    assert data_context.list_expectation_suites() == [
+def test_list_expectation_suite_keys(data_context):
+    assert data_context.list_expectation_suite_keys() == [
         ExpectationSuiteIdentifier(
             data_asset_name=(
                 "mydatasource",
@@ -125,7 +125,7 @@ def test_save_data_asset_config(data_context):
                 "value": 10
             }
         })
-    data_context.save_expectation_suite(data_asset_config)
+    data_context.set_expectation_suite(data_asset_config)
     data_asset_config_saved = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
     assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
 
@@ -449,7 +449,7 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
 
     # However, if we add a data_asset that would cause that name to be ambiguous, it will then fail:
     suite = data_context.get_expectation_suite("my_datasource/in_memory_generator/f1")
-    data_context.save_expectation_suite(suite)
+    data_context.set_expectation_suite(suite)
 
     with pytest.raises(DataContextError) as exc:
         name = data_context._normalize_data_asset_name("f1")
