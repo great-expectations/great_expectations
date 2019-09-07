@@ -37,12 +37,6 @@ class StoreBackend(object):
     """a key-value store, to abstract away reading and writing to a persistence layer
     """
 
-    def __init__(
-        self,
-        root_directory=None, # NOTE: Eugene: 2019-09-06: I think this should be moved into filesystem-specific children classes
-    ):
-        self.root_directory = root_directory
-
     def get(self, key):
         self._validate_key(key)
         value = self._get(key)
@@ -99,7 +93,6 @@ class InMemoryStoreBackend(StoreBackend):
     def __init__(
         self,
         separator=".",
-        root_directory=None
     ):
         self.store = {}
         self.separator = separator
@@ -357,7 +350,6 @@ class FixedLengthTupleStoreBackend(StoreBackend):
 
     def __init__(
             self,
-            root_directory,
             filepath_template,
             key_length,
             forbidden_substrings=["/", "\\"],
@@ -484,13 +476,14 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
             file_extension=None,
             file_prefix=None,
     ):
-        super(FixedLengthTupleFilesystemStoreBackend, self).__init__(root_directory,
+        super(FixedLengthTupleFilesystemStoreBackend, self).__init__(
                         filepath_template,
                         key_length,
                         forbidden_substrings=forbidden_substrings,
                         file_extension=file_extension,
                         file_prefix=file_prefix)
 
+        self.root_directory = root_directory
         self.base_directory = base_directory
 
         if not os.path.isabs(root_directory):
@@ -565,7 +558,6 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
     """
     def __init__(
             self,
-            root_directory,
             filepath_template,
             key_length,
             bucket,
@@ -574,7 +566,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
             file_extension=None,
             file_prefix=None,
     ):
-        super(FixedLengthTupleS3StoreBackend, self).__init__(root_directory,
+        super(FixedLengthTupleS3StoreBackend, self).__init__(
                         filepath_template,
                         key_length,
                         forbidden_substrings=forbidden_substrings,
