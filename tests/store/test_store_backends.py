@@ -23,7 +23,7 @@ from great_expectations.util import (
 )
 
 def test_StoreBackendValidation():
-    backend = StoreBackend({})
+    backend = StoreBackend()
 
     backend._validate_key( ("I", "am", "a", "string", "tuple") )
 
@@ -181,7 +181,6 @@ def test_FixedLengthTupleS3StoreBackend():
     conn.create_bucket(Bucket=bucket)
 
     my_store = FixedLengthTupleS3StoreBackend(
-        root_directory=os.path.abspath(path), # NOTE: Eugene: 2019-09-06: root_directory should be removed from the base class
         key_length=1,
         filepath_template= "my_file_{0}",
         bucket=bucket,
