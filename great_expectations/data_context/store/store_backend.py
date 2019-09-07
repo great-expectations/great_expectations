@@ -484,7 +484,7 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
             file_extension=None,
             file_prefix=None,
     ):
-        super().__init__(root_directory,
+        super(FixedLengthTupleFilesystemStoreBackend, self).__init__(root_directory,
                         filepath_template,
                         key_length,
                         forbidden_substrings=forbidden_substrings,
@@ -574,7 +574,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
             file_extension=None,
             file_prefix=None,
     ):
-        super().__init__(root_directory,
+        super(FixedLengthTupleS3StoreBackend, self).__init__(root_directory,
                         filepath_template,
                         key_length,
                         forbidden_substrings=forbidden_substrings,
