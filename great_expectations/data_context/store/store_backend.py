@@ -149,14 +149,10 @@ class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
         key_length,
         root_directory,
         forbidden_substrings=["/", "\\"],
-        file_extension=None,
-        file_prefix=None,
     ):
         self.base_directory = base_directory
         self.key_length = key_length
         self.forbidden_substrings = forbidden_substrings
-        self.file_extension = file_extension
-        self.file_prefix = file_prefix
 
         self.filepath_template = filepath_template
         self.verify_that_key_to_filepath_operation_is_reversible()
@@ -252,10 +248,7 @@ class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
         # NOTE : These methods support fixed-length keys, but not variable.
         self._validate_key(key)
 
-        converted_string = self.filepath_template.format(*list(key), **{
-            "file_extension" : self.file_extension,
-            "file_prefix" : self.file_prefix,
-        })
+        converted_string = self.filepath_template.format(*list(key))
 
         return converted_string
 
@@ -270,10 +263,7 @@ class FixedLengthTupleFilesystemStoreBackend(StoreBackend):
             lambda m, r=iter(tuple_index_list): next(r),
             self.filepath_template
         )
-        filepath_regex = intermediate_filepath_regex.format(*tuple_index_list, **{
-            "file_extension" : self.file_extension,
-            "file_prefix" : self.file_prefix,            
-        })
+        filepath_regex = intermediate_filepath_regex.format(*tuple_index_list)
 
         #Apply the regex to the filepath
         matches = re.compile(filepath_regex).match(filepath)

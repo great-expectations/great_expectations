@@ -45,8 +45,7 @@ stores:
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
-      file_extension: json
-      filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
+      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
   # FIXME: These configs are temporarily commented out to facititate refactoring Stores.
 
@@ -84,8 +83,7 @@ stores:
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: fixtures/validations
-      file_extension: json
-      filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
+      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
 #  data_asset_snapshot_store:
 #    module_name: great_expectations.data_context.store
