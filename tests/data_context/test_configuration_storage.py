@@ -51,11 +51,17 @@ def test_preserve_comments(data_context):
         if PY2:
             assert content == """\
 plugins_directory: plugins/
-expectations_directory: expectations/
 stores:
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore
+
+expectations_store:
+  class_name: ExpectationStore
+  store_backend:
+    class_name: FixedLengthTupleFilesystemStoreBackend
+    base_directory: expectations/
+
 datasources:
   # For example, this one.
   mydatasource:

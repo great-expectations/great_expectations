@@ -11,7 +11,7 @@ import pandas as pd
 from ..types.base_resource_identifiers import (
     DataContextKey,
 )
-from ..types.resource_identifiers import (
+from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
@@ -30,7 +30,7 @@ class NamespacedReadWriteStore(ReadWriteStore):
         serialization_type="json"
     ):
         self.store_backend = self._init_store_backend(
-            store_backend,
+            copy.deepcopy(store_backend),
             runtime_config={
                 "root_directory": root_directory
             }
@@ -55,6 +55,10 @@ class NamespacedReadWriteStore(ReadWriteStore):
 
     def list_keys(self):
         return [self._convert_tuple_to_resource_identifier(key) for key in self.store_backend.list_keys()]
+
+    def has_key(self, key):
+        # NOTE: This is not efficient
+        return key in self.list_keys()
 
     def _convert_resource_identifier_to_tuple(self, key):
         # TODO : Optionally prepend a source_id (the frontend Store name) to the tuple.
@@ -92,14 +96,17 @@ class NamespacedReadWriteStore(ReadWriteStore):
 
 
 class ExpectationStore(NamespacedReadWriteStore):
-    
+    # Note : As of 2019/09/06, this method is untested.
+    # It shares virtually all of its business logic with ValidationStore, which is under test.
+
     def _init_store_backend(self, store_backend_config, runtime_config):
-        self.key_class = ExpectationResultIdentifier
+        self.key_class = ExpectationSuiteIdentifier
 
         if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
             config_defaults = {
                 "key_length" : 4,
                 "module_name" : "great_expectations.data_context.store",
+                "filepath_template": '{0}/{1}/{2}/{3}.json',
             }
         else:
             config_defaults = {

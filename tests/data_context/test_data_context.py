@@ -20,7 +20,10 @@ from great_expectations.data_context import (
     ExplorerDataContext,
 )
 from great_expectations.data_context.util import safe_mmkdir
-from great_expectations.data_context.types import NormalizedDataAssetName
+from great_expectations.data_context.types import (
+    NormalizedDataAssetName,
+    ExpectationSuiteIdentifier,
+)
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 from great_expectations.dataset import PandasDataset
 from great_expectations.util import gen_directory_tree_str
@@ -86,14 +89,16 @@ def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
 
 
 def test_list_expectation_suites(data_context):
-    assert data_context.list_expectation_suites() == {
-        "mydatasource": {
-            "mygenerator": {
-                "my_dag_node": ["default"]
-            }
-        }
-    }
-
+    assert data_context.list_expectation_suites() == [
+        ExpectationSuiteIdentifier(
+            data_asset_name=(
+                "mydatasource",
+                "mygenerator",
+                "my_dag_node",
+            ),
+            expectation_suite_name="default"
+        )
+    ]
 
 def test_get_existing_data_asset_config(data_context):
     data_asset_config = data_context.get_expectation_suite('mydatasource/mygenerator/my_dag_node', 'default')
@@ -311,7 +316,6 @@ def test_compile(data_context):
             }
         }
     }
-
 
 def test_normalize_data_asset_names_error(data_context):
     with pytest.raises(DataContextError) as exc:
@@ -711,7 +715,14 @@ def test_add_store(empty_data_context):
 def basic_data_context_config():
     return DataContextConfig(**{
         "plugins_directory": "plugins/",
-        "expectations_directory": "expectations/",
+        # "expectations_directory": "expectations/",
+        "expectations_store": {
+            "class_name": "ExpectationStore",
+            "store_backend": {
+                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "base_directory": "expectations/",
+            },
+        },
         "evaluation_parameter_store_name" : "evaluation_parameter_store",
         "datasources": {},
         "stores": {

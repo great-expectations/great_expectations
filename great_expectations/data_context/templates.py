@@ -21,7 +21,13 @@ PROJECT_OPTIONAL_CONFIG_COMMENT = """
 # and any configured evaluation parameter store
 
 plugins_directory: plugins/
-expectations_directory: expectations/
+
+expectations_store:
+  class_name: ExpectationStore
+  store_backend:
+    class_name: FixedLengthTupleFilesystemStoreBackend
+    base_directory: expectations/
+
 evaluation_parameter_store_name: evaluation_parameter_store
 
 # Configure additional data context options here.
