@@ -13,6 +13,9 @@ from great_expectations.render.view import (
 )
 from great_expectations.data_context.types import (
     ValidationResultIdentifier,
+    ExpectationSuiteIdentifier,
+    DataAssetIdentifier,
+    NormalizedDataAssetName,
 )
 
 class SiteBuilder():
@@ -192,28 +195,34 @@ class SiteBuilder():
 
             expectations_renderer_class, expectations_view_class = cls.get_renderer_and_view_classes(expectations_section_config)
 
-            for datasource, v1 in data_context.list_expectation_suites().items():
+            for expectation_suite_key in data_context.stores['expectations_store'].list_keys():
 
-                if datasource not in datasources_to_document:
-                    continue
+            # for datasource, v1 in data_context.list_expectation_suites().items():
 
-                for generator, v2 in v1.items():
-                    for generator_asset, expectation_suite_names in v2.items():
-                        data_asset_name = data_context.data_asset_name_delimiter.join(
-                            [datasource, generator, generator_asset])
-                        if specified_data_asset_name:
-                               if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
-                                   continue
-                        for expectation_suite_name in expectation_suite_names:
-                            expectation_suite = data_context.get_expectation_suite(
-                                data_asset_name,
-                                expectation_suite_name=expectation_suite_name)
+            #     if datasource not in datasources_to_document:
+            #         continue
+
+            #     for generator, v2 in v1.items():
+            #         for generator_asset, expectation_suite_names in v2.items():
+            #             data_asset_name = data_context.data_asset_name_delimiter.join(
+            #                 [datasource, generator, generator_asset])
+            #             if specified_data_asset_name:
+            #                    if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
+            #                        continue
+            #             for expectation_suite_name in expectation_suite_names:
+            #                 expectation_suite = data_context.get_expectation_suite(
+            #                     data_asset_name,
+            #                     expectation_suite_name=expectation_suite_name)
+
+                            expectation_suite = data_context.stores['expectations_store'].get(expectation_suite_key)
+                            data_asset_name = expectation_suite["data_asset_name"]
+                            expectation_suite_name = expectation_suite_key.expectation_suite_name
 
                             logger.info(
                                 "        Rendering expectation suite {} for data asset {}".format(
-                                    expectation_suite_name, data_asset_name))
-                            data_asset_name = expectation_suite['data_asset_name']
-                            expectation_suite_name = expectation_suite['expectation_suite_name']
+                                    expectation_suite_name,
+                                    data_asset_name
+                                ))
                             model = expectations_renderer_class.render(expectation_suite)
 
                             data_context.write_resource(
@@ -228,7 +237,11 @@ class SiteBuilder():
                                 data_context,
                                 index_links_dict,
                                 data_asset_name,
-                                datasource, generator, generator_asset, expectation_suite_name, "expectations"
+                                expectation_suite_key.data_asset_name.datasource,
+                                expectation_suite_key.data_asset_name.generator,
+                                expectation_suite_key.data_asset_name.generator_asset,
+                                expectation_suite_key.expectation_suite_name,
+                                "expectations",
                             )
 
 
@@ -347,6 +360,7 @@ class SiteBuilder():
             base_path = section_name + "/" + run_id
         else:
             base_path = section_name
+        
         index_links_dict[datasource][generator][generator_asset][section_name + "_links"].append(
             {
                 "full_data_asset_name": data_asset_name,
