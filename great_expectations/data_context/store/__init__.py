@@ -3,6 +3,7 @@ from .store_backend import (
     InMemoryStoreBackend,
     # FilesystemStoreBackend,
     FixedLengthTupleFilesystemStoreBackend,
+    FixedLengthTupleS3StoreBackend,
 )
 
 from .store import (
