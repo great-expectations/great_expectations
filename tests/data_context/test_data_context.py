@@ -715,7 +715,6 @@ def test_add_store(empty_data_context):
 def basic_data_context_config():
     return DataContextConfig(**{
         "plugins_directory": "plugins/",
-        # "expectations_directory": "expectations/",
         "expectations_store": {
             "class_name": "ExpectationStore",
             "store_backend": {
