@@ -43,9 +43,7 @@ from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
 
 from .types import (
     NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
-
     DataContextConfig,
-
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -226,14 +224,6 @@ class ConfigOnlyDataContext(object):
         return self._normalize_absolute_or_relative_path(
             self._project_config.plugins_directory
         )
-
-    # NOTE : Deprecated in favor of a store.         
-    # @property
-    # def expectations_directory(self):
-    #     """The directory in which custom plugin modules should be placed."""
-    #     return self._normalize_absolute_or_relative_path(
-    #         self._project_config.expectations_directory
-    #     )
 
     @property
     def stores(self):
@@ -550,49 +540,9 @@ class ConfigOnlyDataContext(object):
         self._datasources[datasource_name] = datasource
         return datasource
             
-    def list_expectation_suites(self):
-        """Returns currently-defined expectation suites available in a nested dictionary structure
-        reflecting the namespace provided by this DataContext.
-
-        Returns:
-            Dictionary of currently-defined expectation suites::
-
-            {
-              datasource: {
-                generator: {
-                  generator_asset: [list_of_expectation_suites]
-                }
-              }
-              ...
-            }
-
+    def list_expectation_suite_keys(self):
+        """Returns a list of available expectation suite keys
         """
-
-        # expectation_suites_dict = {}
-
-        # self.expectations_directory = self.root_directory+"/"+self.stores["expectations_store"].store_backend.base_directory
-        # # First, we construct the *actual* defined expectation suites
-        # for datasource in os.listdir(self.expectations_directory):
-        #     datasource_path = os.path.join(self.expectations_directory, datasource)
-        #     if not os.path.isdir(datasource_path):
-        #         continue
-        #     if datasource not in expectation_suites_dict:
-        #         expectation_suites_dict[datasource] = {}
-        #     for generator in os.listdir(datasource_path):
-        #         generator_path = os.path.join(datasource_path, generator)
-        #         if not os.path.isdir(generator_path):
-        #             continue
-        #         if generator not in expectation_suites_dict[datasource]:
-        #             expectation_suites_dict[datasource][generator] = {}
-        #         for generator_asset in os.listdir(generator_path):
-        #             generator_asset_path = os.path.join(generator_path, generator_asset)
-        #             if os.path.isdir(generator_asset_path):
-        #                 candidate_suites = os.listdir(generator_asset_path)
-        #                 expectation_suites_dict[datasource][generator][generator_asset] = [
-        #                     suite_name[:-5] for suite_name in candidate_suites if suite_name.endswith(".json")
-        #                 ]
-
-        # return expectation_suites_dict
 
         keys = self.stores["expectations_store"].list_keys()
         return keys
@@ -642,7 +592,7 @@ class ConfigOnlyDataContext(object):
 
         split_name = data_asset_name.split(self.data_asset_name_delimiter)
         
-        existing_expectation_suite_keys = self.list_expectation_suites()
+        existing_expectation_suite_keys = self.list_expectation_suite_keys()
         existing_namespaces = []
         for key in existing_expectation_suite_keys:
             existing_namespaces.append(
@@ -652,17 +602,6 @@ class ConfigOnlyDataContext(object):
                     key.data_asset_name.generator_asset,
                 )
             )
-
-        # for datasource in existing_expectation_suites.keys():
-        #     for generator in existing_expectation_suites[datasource].keys():
-        #         for generator_asset in existing_expectation_suites[datasource][generator]:
-        #             existing_namespaces.append(
-        #                 NormalizedDataAssetName(
-        #                     datasource,
-        #                     generator,
-        #                     generator_asset
-        #                 )
-        #             )
 
         if len(split_name) > 3:
             raise DataContextError(
@@ -852,20 +791,8 @@ class ConfigOnlyDataContext(object):
 
         return expectation_suite
 
-        # config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name, expectation_suite_name)
-        # if os.path.isfile(config_file_path):
-        #     with open(config_file_path, 'r') as json_file:
-        #         read_config = json.load(json_file)
-        #     # update the data_asset_name to correspond to the current name (in case the config has been moved/renamed)
-        #     read_config["data_asset_name"] = self.data_asset_name_delimiter.join(data_asset_name)
-        #     return read_config
-        # else:
-        #     return get_empty_expectation_suite(
-        #         self.data_asset_name_delimiter.join(data_asset_name),
-        #         expectation_suite_name
-        #     )
 
-    def save_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
+    def set_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
         """Save the provided expectation suite into the DataContext.
 
         Args:
@@ -894,11 +821,6 @@ class ConfigOnlyDataContext(object):
 
         if not isinstance(data_asset_name, NormalizedDataAssetName):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
-
-        # config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name, expectation_suite_name)
-        # safe_mmkdir(os.path.dirname(config_file_path), exist_ok=True)
-        # with open(config_file_path, 'w') as outfile:
-        #     json.dump(expectation_suite, outfile, indent=2)
 
         self.stores["expectations_store"].set(ExpectationSuiteIdentifier(
             data_asset_name=DataAssetIdentifier(*data_asset_name),
@@ -1133,24 +1055,6 @@ class ConfigOnlyDataContext(object):
             "data_assets": {}
         }
 
-        # NOTE : Abe 2019/09/06 : This logic becomes redundant once we start using a store for the source of truth for Expectations
-        # known_asset_dict = self.list_expectation_suites()
-        # # Convert known assets to the normalized name system
-        # flat_assets_dict = {}
-        # for datasource in known_asset_dict.keys():
-        #     for generator in known_asset_dict[datasource].keys():
-        #         for data_asset_name in known_asset_dict[datasource][generator].keys():
-        #             flat_assets_dict[
-        #                 datasource + self._data_asset_name_delimiter +
-        #                 generator + self._data_asset_name_delimiter +
-        #                 data_asset_name
-        #             ] = known_asset_dict[datasource][generator][data_asset_name]
-
-        # TODO : Replace this with self.expectations_store.list_keys()
-        # config_paths = [y for x in os.walk(self.expectations_directory) for y in glob(os.path.join(x[0], '*.json'))]
-
-        # for config_file in config_paths:
-        #     config = json.load(open(config_file, 'r'))
         for key in self.stores["expectations_store"].list_keys():
             config = self.stores["expectations_store"].get(key)
             for expectation in config["expectations"]:
@@ -1176,10 +1080,6 @@ class ConfigOnlyDataContext(object):
                             except IndexError:
                                 logger.warning("Invalid parameter urn (not enough parts): %s" % parameter)
                                 continue
-
-                            # if (data_asset_name not in flat_assets_dict or
-                            #         expectation_suite_name not in flat_assets_dict[data_asset_name]):
-                            #     logger.warning("Adding parameter %s for unknown data asset config" % parameter)
 
                             if data_asset_name not in self._compiled_parameters["data_assets"]:
                                 self._compiled_parameters["data_assets"][data_asset_name] = {}
@@ -1517,7 +1417,7 @@ class ConfigOnlyDataContext(object):
                     new_expectation_count = len(expectation_suite["expectations"])
                     total_expectations += new_expectation_count
 
-                    self.save_expectation_suite(expectation_suite)
+                    self.set_expectation_suite(expectation_suite)
                     duration = (datetime.datetime.now() - start_time).total_seconds()
                     logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
                                 (new_column_count, row_count, name, duration))

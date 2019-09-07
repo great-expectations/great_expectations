@@ -197,52 +197,37 @@ class SiteBuilder():
 
             for expectation_suite_key in data_context.stores['expectations_store'].list_keys():
 
-            # for datasource, v1 in data_context.list_expectation_suites().items():
+                # NOTE : There's a bunch of redundant packing/unpacking logic here.
 
-            #     if datasource not in datasources_to_document:
-            #         continue
+                expectation_suite = data_context.stores['expectations_store'].get(expectation_suite_key)
+                data_asset_name = expectation_suite["data_asset_name"]
+                expectation_suite_name = expectation_suite_key.expectation_suite_name
 
-            #     for generator, v2 in v1.items():
-            #         for generator_asset, expectation_suite_names in v2.items():
-            #             data_asset_name = data_context.data_asset_name_delimiter.join(
-            #                 [datasource, generator, generator_asset])
-            #             if specified_data_asset_name:
-            #                    if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
-            #                        continue
-            #             for expectation_suite_name in expectation_suite_names:
-            #                 expectation_suite = data_context.get_expectation_suite(
-            #                     data_asset_name,
-            #                     expectation_suite_name=expectation_suite_name)
+                logger.info(
+                    "        Rendering expectation suite {} for data asset {}".format(
+                        expectation_suite_name,
+                        data_asset_name
+                    ))
+                model = expectations_renderer_class.render(expectation_suite)
 
-                            expectation_suite = data_context.stores['expectations_store'].get(expectation_suite_key)
-                            data_asset_name = expectation_suite["data_asset_name"]
-                            expectation_suite_name = expectation_suite_key.expectation_suite_name
+                data_context.write_resource(
+                    expectations_view_class.render(model),  # bytes
+                    expectation_suite_name + '.html',  # name to be used inside namespace
+                    resource_store=site_config['site_store'],
+                    resource_namespace='expectations',
+                    data_asset_name=data_asset_name
+                )
 
-                            logger.info(
-                                "        Rendering expectation suite {} for data asset {}".format(
-                                    expectation_suite_name,
-                                    data_asset_name
-                                ))
-                            model = expectations_renderer_class.render(expectation_suite)
-
-                            data_context.write_resource(
-                                expectations_view_class.render(model),  # bytes
-                                expectation_suite_name + '.html',  # name to be used inside namespace
-                                resource_store=site_config['site_store'],
-                                resource_namespace='expectations',
-                                data_asset_name=data_asset_name
-                            )
-
-                            index_links_dict = cls.add_resource_info_to_index_links_dict(
-                                data_context,
-                                index_links_dict,
-                                data_asset_name,
-                                expectation_suite_key.data_asset_name.datasource,
-                                expectation_suite_key.data_asset_name.generator,
-                                expectation_suite_key.data_asset_name.generator_asset,
-                                expectation_suite_key.expectation_suite_name,
-                                "expectations",
-                            )
+                index_links_dict = cls.add_resource_info_to_index_links_dict(
+                    data_context,
+                    index_links_dict,
+                    data_asset_name,
+                    expectation_suite_key.data_asset_name.datasource,
+                    expectation_suite_key.data_asset_name.generator,
+                    expectation_suite_key.data_asset_name.generator_asset,
+                    expectation_suite_key.expectation_suite_name,
+                    "expectations",
+                )
 
 
         # TODO: load dynamically

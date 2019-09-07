@@ -194,10 +194,10 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
-    assert not_so_empty_data_context.list_expectation_suites() == []
+    assert not_so_empty_data_context.list_expectation_suite_keys() == []
     not_so_empty_data_context.profile_datasource("my_datasource", profiler=BasicDatasetProfiler)
 
-    assert len(not_so_empty_data_context.list_expectation_suites()) == 1
+    assert len(not_so_empty_data_context.list_expectation_suite_keys()) == 1
 
     profiled_expectations = not_so_empty_data_context.get_expectation_suite('f1', "BasicDatasetProfiler")
 
