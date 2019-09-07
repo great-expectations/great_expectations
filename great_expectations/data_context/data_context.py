@@ -894,6 +894,9 @@ class ConfigOnlyDataContext(object):
             else:
                 logger.warning("Unrecognized result_callback configuration.")
 
+
+        # Proposed TODO : Snapshotting shouldn't be a top-level concern in teh DataContext.
+        # Instead, it should be available as a pluggable Action. 
         if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
             logging.debug("Storing validation results to data_asset_snapshot_store")
             self.stores.data_asset_snapshot_store.set(
