@@ -10,13 +10,11 @@ datasources:
         type: subdir_reader
         base_directory: ../data
 
-# expectations_directory: expectations/
 expectations_store:
   class_name: ExpectationStore
   store_backend:
     class_name: FixedLengthTupleFilesystemStoreBackend
     base_directory: expectations/
-  # base_directory: expectations/
 
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
