@@ -173,8 +173,18 @@ test_FixedLengthTupleFilesystemStoreBackend__dir0/
 
 @mock_s3
 def test_FixedLengthTupleS3StoreBackend():
+    """
+    What does this test test and why?
+
+    We will exercise the store backend's set method twice and then verify
+    that the we calling get and list methods will return the expected keys.
+
+    We will also check that the objects are stored on S3 at the expected location.
+
+    """
     path = "dummy_str"
     bucket = "leakybucket"
+    prefix = "this_is_a_test_prefix"
 
     # create a bucket in Moto's mock AWS environment
     conn = boto3.resource('s3', region_name='us-east-1')
@@ -185,7 +195,7 @@ def test_FixedLengthTupleS3StoreBackend():
         key_length=1,
         filepath_template= "my_file_{0}",
         bucket=bucket,
-        prefix="this_is_a_test_prefix",
+        prefix=prefix,
     )
 
     my_store.set(("AAA",), "aaa")
@@ -196,3 +206,6 @@ def test_FixedLengthTupleS3StoreBackend():
 
     print(my_store.list_keys())
     assert set(my_store.list_keys()) == set([("AAA",), ("BBB",)])
+
+    assert set([s3_object_info['Key'] for s3_object_info in boto3.client('s3').list_objects(Bucket=bucket, Prefix=prefix)['Contents']])\
+           == set(['this_is_a_test_prefix/my_file_AAA', 'this_is_a_test_prefix/my_file_BBB'])
