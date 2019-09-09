@@ -72,4 +72,6 @@ class SiteSectionIdentifier(DataContextKey):
         return hash(self.site_section_name+"::"+self.resource_identifier.to_string())
 
     def __eq__(self, other):
+        print(self)
+        print(other)
         return self.__hash__() == other.__hash__()

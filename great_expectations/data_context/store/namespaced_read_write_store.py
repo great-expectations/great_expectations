@@ -232,9 +232,3 @@ class HtmlSiteStore(NamespacedReadWriteStore):
 
     def list_keys(self):
         return list(self.keys)
-
-        keys = []
-        for resource_identifier_type, store_backend in self.store_backends.items():
-            keys += [resource_identifier_type(*key_resource_identifier) for key_resource_identifier in store_backend.list_keys()]
-
-        return keys
