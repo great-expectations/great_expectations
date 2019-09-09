@@ -9,9 +9,10 @@ from great_expectations.actions.types import (
     ActionConfig,
     ActionSetConfig,
 )
-# from great_expectations.data_context.store import (
-#     NamespacedInMemoryStore
-# )
+from great_expectations.data_context.store import (
+    # NamespacedInMemoryStore
+    ValidationResultStore,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier
 )
@@ -74,9 +75,17 @@ def test_subclass_of_BasicValidationAction():
 
 
 def test_SummarizeAndStoreAction():
-    fake_in_memory_store = NamespacedInMemoryStore(config={
-        "resource_identifier_class_name": "ValidationResultIdentifier"
-    })
+    fake_in_memory_store = ValidationResultStore(
+        root_directory = None,
+        store_backend = {
+            "class_name": "InMemoryStoreBackend",
+            # base_directory: uncommitted/validations/
+            # filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
+        }
+    )
+    # config={
+    #     "resource_identifier_class_name": "ValidationResultIdentifier"
+    # })
     stores = {
         "fake_in_memory_store" : fake_in_memory_store
     }
@@ -92,15 +101,15 @@ def test_SummarizeAndStoreAction():
     )
     assert fake_in_memory_store.list_keys() == []
 
-    vr_id = "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.failure.prod.20190801"
+    vr_id = "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
     action.take_action(
         validation_result_suite={},
         validation_result_suite_identifier=ValidationResultIdentifier(from_string=vr_id)
     )
     assert len(fake_in_memory_store.list_keys()) == 1
-    assert fake_in_memory_store.list_keys()[0].to_string() == "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.failure.prod.20190801"
+    assert fake_in_memory_store.list_keys()[0].to_string() == "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
     assert fake_in_memory_store.get(ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.failure.prod.20190801"
+        from_string="ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
     )) == {}
 
 
