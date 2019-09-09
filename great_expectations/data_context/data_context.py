@@ -23,6 +23,8 @@ from ..types.base import DotDict
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
 
+# FIXME : fully deprecate site_builder, by replacing it with new_site_builder.
+# FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers. 
 # from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.render.renderer.new_site_builder import SiteBuilder
 
