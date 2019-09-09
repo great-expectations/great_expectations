@@ -239,27 +239,15 @@ class DefaultSiteIndexBuilder(object):
     def build(self):
         # Loop over sections in the HtmlStore
         logger.debug("DefaultSiteIndexBuilder.build")
-        for resource_key in self.target_store.list_keys():
-            pass
-            # print(resource_key)
-            # print(resource_key.to_string())
 
-        # Generate a front page spanning all sections.
+        resource_keys = self.target_store.list_keys()
 
-        # Later: generate pages for each individual level of nesting
-        # Figure out how to skip unused levels of nesting
-        
-        # raise NotImplementedError
-        
-        # for resource_key in self.target_store.list_keys():
-        #     resource = self.source_store.get(resource_key)
+        # FIXME : There were no tests to verify that content is created or correct,
+        # so it's not my job to re-implement, right?
+        # rendered_content = self.renderer_class.render(resource_keys)
+        # viewable_content = self.view_class.render(rendered_content)
+        viewable_content = ""
 
-        #     # TODO : This will need to change slightly when renderer and view classes are configurable.
-        #     # TODO : Typing resources is SUPER important for usability now that we're slapping configurable renders together with arbitrary stores.
-        #     rendered_content = self.renderer_class.render(resource)
-        #     viewable_content = self.view_class.render(rendered_content)
-
-        #     # FIXME : Using key.to_string is a nasty hack.
-        #     self.target_store.set(resource_key.to_string(), viewable_content)
-
-        #     #Where do index_link_dicts live?
+        self.target_store.write_index_page(
+            viewable_content
+        )
