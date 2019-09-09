@@ -135,7 +135,10 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
             )
             action.take_action(
                 validation_result_suite=validation_results,
-                validation_result_suite_identifier=ValidationResultIdentifier(from_string="ValidationResultIdentifier.a.b.c.hello.quarantine.prod.100")
+                # FIXME : Shouldn't be hardcoded
+                validation_result_suite_identifier=ValidationResultIdentifier(
+                    from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100"
+                )
             )
 
 class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperator, DefaultActionAwareValidationOperator):

@@ -23,21 +23,31 @@ from great_expectations.data_context.types import (
 def basic_data_context_config_for_validation_operator():
     return DataContextConfig(**{
         "plugins_directory": "plugins/",
-        "expectations_directory": "expectations/",
+        # "expectations_directory": "expectations/",
         "evaluation_parameter_store_name" : "evaluation_parameter_store",
+        "expectations_store" : {
+            "class_name": "ExpectationStore",
+            "store_backend": {
+                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "base_directory": "expectations/",
+            }
+        },
         "datasources": {},
         "stores": {
             # This isn't currently used for Validation Actions, but it's required for DataContext to work.
             "evaluation_parameter_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "InMemoryStore",
+                "class_name": "InMemoryStoreBackend",
             },
             "warning_validation_result_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "NamespacedInMemoryStore",
-                "store_config" : {
-                    "resource_identifier_class_name" : "ValidationResultIdentifier",
-                },
+                "class_name": "ValidationResultStore",#NamespacedInMemoryStore",
+                "store_backend": {
+                    "class_name": "InMemoryStoreBackend",
+                }
+                # "store_config" : {
+                #     "resource_identifier_class_name" : "ValidationResultIdentifier",
+                # },
             }
         },
         "data_docs": {
@@ -78,7 +88,7 @@ def test_hello_world(basic_data_context_config_for_validation_operator):
     results = vo.process_batch(
         batch=my_ge_df,
         data_asset_identifier=DataAssetIdentifier("a", "b", "c"),
-        run_identifier=RunIdentifier("test", 100),
+        run_identifier="test-100",
         # action_set_name="default",
     )
     # print(json.dumps(results["validation_results"], indent=2))

@@ -87,5 +87,7 @@ class SummarizeAndStoreAction(NamespacedValidationAction):
             ))
 
         rendered_summary = self.summarization_class.render(validation_result_suite)
+
+        # FIXME: Don't use to_string
         self.target_store.set(validation_result_suite_identifier, rendered_summary)
     
