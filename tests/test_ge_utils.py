@@ -49,6 +49,7 @@ def test_validate_using_data_context(dataset, data_context):
 
 
 def test_validate_using_data_context_path(dataset, data_context):
+    print(data_context._project_config)
     data_context_path = data_context.root_directory
     res = ge.validate(dataset, data_asset_name="mydatasource/mygenerator/my_dag_node", data_context=data_context_path)
 

@@ -128,7 +128,7 @@ Python in a Jupyter notebook:
     expectation_suite, validation_result = BasicDatasetProfiler.profile(batch)
 
     # save the resulting expectation suite with a custom name
-    context.save_expectation_suite(expectation_suite, "ratings", "my_profiled_expectations")
+    context.set_expectation_suite(expectation_suite, "ratings", "my_profiled_expectations")
 
 
 
