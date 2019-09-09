@@ -598,6 +598,7 @@ project_path/
             credentials/
             documentation/
                 local_site/
+                team_site/
             samples/
             validations/
                 profiling/

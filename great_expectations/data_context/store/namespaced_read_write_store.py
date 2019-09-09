@@ -181,7 +181,7 @@ class HtmlSiteStore(NamespacedReadWriteStore):
                     "class_name" : "FixedLengthTupleFilesystemStoreBackend",
                     "key_length" : 4,
                     "base_directory" : base_directory,
-                    "filepath_template" : '{0}/{1}/{2}/{3}.html',
+                    "filepath_template" : 'expectations/{0}/{1}/{2}/{3}.html',
                 },
                 runtime_config={
                     "root_directory": root_directory
