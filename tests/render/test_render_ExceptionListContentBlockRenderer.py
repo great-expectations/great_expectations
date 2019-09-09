@@ -3,7 +3,7 @@ import json
 
 def test_exception_list_content_block_renderer():
     # We should grab the exception message and add default formatting
-    result = ExceptionListContentBlockRenderer.render(
+    result = ExceptionListContentBlockRenderer().render(
         [
             {"success": False,
              "exception_info":

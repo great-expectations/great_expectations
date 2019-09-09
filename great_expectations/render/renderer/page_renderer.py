@@ -20,8 +20,8 @@ from ..types import (
 
 
 class ValidationResultsPageRenderer(Renderer):
-    @classmethod
-    def render(cls, validation_results={}):
+
+    def render(self, validation_results={}):
         run_id = validation_results['meta']['run_id']
         full_data_asset_identifier = validation_results['meta']['data_asset_name'] or ""
         expectation_suite_name = validation_results['meta']['expectation_suite_name']
@@ -39,12 +39,12 @@ class ValidationResultsPageRenderer(Renderer):
                 columns[column] = []
             columns[column].append(evr)
     
-        ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
+        ordered_columns = self._get_column_list_from_evrs(validation_results)
     
         overview_content_blocks = [
-            cls._render_validation_header(),
-            cls._render_validation_info(validation_results=validation_results),
-            cls._render_validation_statistics(validation_results=validation_results)
+            self._render_validation_header(),
+            self._render_validation_info(validation_results=validation_results),
+            self._render_validation_statistics(validation_results=validation_results)
         ]
     
         if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
@@ -60,7 +60,7 @@ class ValidationResultsPageRenderer(Renderer):
         ]
     
         sections += [
-            ValidationResultsColumnSectionRenderer.render(
+            ValidationResultsColumnSectionRenderer().render(
                 validation_results=columns[column],
             ) for column in ordered_columns
         ]
@@ -73,8 +73,7 @@ class ValidationResultsPageRenderer(Renderer):
             "sections": sections
         })
     
-    @classmethod
-    def _render_validation_header(cls):
+    def _render_validation_header(self):
         return RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Validation Overview",
@@ -86,8 +85,7 @@ class ValidationResultsPageRenderer(Renderer):
             }
         })
     
-    @classmethod
-    def _render_validation_info(cls, validation_results):
+    def _render_validation_info(self, validation_results):
         run_id = validation_results['meta']['run_id']
         full_data_asset_identifier = validation_results['meta']['data_asset_name'] or ""
         expectation_suite_name = validation_results['meta']['expectation_suite_name']
@@ -115,8 +113,7 @@ class ValidationResultsPageRenderer(Renderer):
             },
         })
     
-    @classmethod
-    def _render_validation_statistics(cls, validation_results):
+    def _render_validation_statistics(self, validation_results):
         statistics = validation_results["statistics"]
         return RenderedComponentContent(**{
             "content_block_type": "table",
@@ -140,22 +137,21 @@ class ValidationResultsPageRenderer(Renderer):
 
 
 class ExpectationSuitePageRenderer(Renderer):
-    @classmethod
-    def render(cls, expectations):
-        columns, ordered_columns = cls._group_and_order_expectations_by_column(expectations)
+    def render(self, expectations):
+        columns, ordered_columns = self._group_and_order_expectations_by_column(expectations)
         full_data_asset_identifier = expectations.get("data_asset_name") or ""
-        expectation_suite_name = cls._get_expectation_suite_name(expectations)
+        expectation_suite_name = self._get_expectation_suite_name(expectations)
 
         overview_content_blocks = [
-            cls._render_asset_header(expectations),
-            cls._render_asset_info(expectations)
+            self._render_asset_header(expectations),
+            self._render_asset_info(expectations)
         ]
         
-        table_level_expectations_content_block = cls._render_table_level_expectations(columns)
+        table_level_expectations_content_block = self._render_table_level_expectations(columns)
         if table_level_expectations_content_block != None:
             overview_content_blocks.append(table_level_expectations_content_block)
         
-        asset_notes_content_block = cls._render_asset_notes(expectations)
+        asset_notes_content_block = self._render_asset_notes(expectations)
         if asset_notes_content_block != None:
             overview_content_blocks.append(asset_notes_content_block)
         
@@ -167,7 +163,7 @@ class ExpectationSuitePageRenderer(Renderer):
         ]
         
         sections += [
-            ExpectationSuiteColumnSectionRenderer.render(expectations=columns[column]) for column in ordered_columns if column != "_nocolumn"
+            ExpectationSuiteColumnSectionRenderer().render(expectations=columns[column]) for column in ordered_columns if column != "_nocolumn"
         ]
         return RenderedDocumentContent(**{
             # "data_asset_name": short_data_asset_name,
@@ -177,19 +173,17 @@ class ExpectationSuitePageRenderer(Renderer):
             "sections": sections
         })
 
-    @classmethod
-    def _render_table_level_expectations(cls, columns):
+    def _render_table_level_expectations(self, columns):
         table_level_expectations = columns.get("_nocolumn")
         if not table_level_expectations:
             return None
         else:
-            expectation_bullet_list = ExpectationSuiteColumnSectionRenderer.render(
+            expectation_bullet_list = ExpectationSuiteColumnSectionRenderer().render(
                 expectations=table_level_expectations).content_blocks[1]
             expectation_bullet_list["header"] = "Table-Level Expectations"
             return expectation_bullet_list
         
-    @classmethod
-    def _render_asset_header(cls, expectations):
+    def _render_asset_header(self, expectations):
         return RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Expectation Suite Overview",
@@ -201,8 +195,7 @@ class ExpectationSuitePageRenderer(Renderer):
             }
         })
       
-    @classmethod
-    def _render_asset_info(cls, expectations):
+    def _render_asset_info(self, expectations):
         full_data_asset_identifier = expectations.get("data_asset_name") or ""
         data_asset_type = expectations.get("data_asset_type")
         expectation_suite_name = expectations.get("expectation_suite_name")
@@ -229,8 +222,7 @@ class ExpectationSuitePageRenderer(Renderer):
             },
         })
 
-    @classmethod
-    def _render_asset_notes(cls, expectations):
+    def _render_asset_notes(self, expectations):
         
         content = []
         
@@ -318,8 +310,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
 class ProfilingResultsPageRenderer(Renderer):
 
-    @classmethod
-    def render(cls, validation_results):
+    def render(self, validation_results):
         run_id = validation_results['meta']['run_id']
         full_data_asset_identifier = validation_results['meta']['data_asset_name'] or ""
         expectation_suite_name = validation_results['meta']['expectation_suite_name']
@@ -327,10 +318,10 @@ class ProfilingResultsPageRenderer(Renderer):
 
         # Group EVRs by column
         #TODO: When we implement a ValidationResultSuite class, this method will move there.
-        columns = cls._group_evrs_by_column(validation_results)
+        columns = self._group_evrs_by_column(validation_results)
 
-        ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
-        column_types = ProfilingResultsOverviewSectionRenderer._get_column_types(validation_results)
+        ordered_columns = Renderer()._get_column_list_from_evrs(validation_results)
+        column_types = ProfilingResultsOverviewSectionRenderer()._get_column_types(validation_results)
 
         if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
             data_asset_name = short_data_asset_name
@@ -345,13 +336,13 @@ class ProfilingResultsPageRenderer(Renderer):
             "utm_medium": "profiling-results-page",
             "sections":
                 [
-                    ProfilingResultsOverviewSectionRenderer.render(
+                    ProfilingResultsOverviewSectionRenderer().render(
                         validation_results,
                         section_name="Overview"
                     )
                 ] +
                 [
-                    ProfilingResultsColumnSectionRenderer.render(
+                    ProfilingResultsColumnSectionRenderer().render(
                         columns[column],
                         section_name=column,
                         column_type=column_types.get(column),

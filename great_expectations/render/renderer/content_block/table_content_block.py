@@ -8,21 +8,20 @@ from great_expectations.render.types import (
 
 class TableContentBlockRenderer(ContentBlockRenderer):
 
-    @classmethod
-    def render(cls, ge_object, header_row=[]):
+    def render(self, ge_object, header_row=[]):
         """Each expectation method should return a list of rows"""
         if isinstance(ge_object, list):
             table_entries = []
             for sub_object in ge_object:
-                expectation_type = cls._get_expectation_type(sub_object)
-                extra_rows_fn = getattr(cls, expectation_type, None)
+                expectation_type = self._get_expectation_type(sub_object)
+                extra_rows_fn = getattr(self, expectation_type, None)
                 if extra_rows_fn is not None:
                     rows = extra_rows_fn(sub_object)
                     table_entries.extend(rows)
         else:
             table_entries = []
-            expectation_type = cls._get_expectation_type(ge_object)
-            extra_rows_fn = getattr(cls, expectation_type, None)
+            expectation_type = self._get_expectation_type(ge_object)
+            extra_rows_fn = getattr(self, expectation_type, None)
             if extra_rows_fn is not None:
                 rows = extra_rows_fn(ge_object)
                 table_entries.extend(rows)
@@ -33,8 +32,7 @@ class TableContentBlockRenderer(ContentBlockRenderer):
             "table": table_entries
         })
 
-    @classmethod
-    def expect_column_values_to_not_match_regex(cls, ge_object):
+    def expect_column_values_to_not_match_regex(self, ge_object):
         regex = ge_object["expectation_config"]["kwargs"]["regex"]
         unexpected_count = ge_object["result"]["unexpected_count"]
         if regex == '^\\s+|\\s+$':
@@ -42,8 +40,7 @@ class TableContentBlockRenderer(ContentBlockRenderer):
         else:
             return [["Regex: %s" % regex, unexpected_count]]
 
-    @classmethod
-    def expect_column_unique_value_count_to_be_between(cls, ge_object):
+    def expect_column_unique_value_count_to_be_between(self, ge_object):
         observed_value = ge_object["result"]["observed_value"]
         return [
             [
@@ -60,8 +57,7 @@ class TableContentBlockRenderer(ContentBlockRenderer):
             ]
         ]
 
-    @classmethod
-    def expect_column_proportion_of_unique_values_to_be_between(cls, ge_object):
+    def expect_column_proportion_of_unique_values_to_be_between(self, ge_object):
         observed_value = ge_object["result"]["observed_value"]
         template_string_object = RenderedComponentContent(**{
             "content_block_type": "string_template",
@@ -77,18 +73,15 @@ class TableContentBlockRenderer(ContentBlockRenderer):
         else:
             return [[template_string_object, "%.1f%%" % (100*observed_value)]]
 
-    @classmethod
-    def expect_column_max_to_be_between(cls, ge_object):
+    def expect_column_max_to_be_between(self, ge_object):
         observed_value = ge_object["result"]["observed_value"]
         return [["Max", observed_value]]
 
-    @classmethod
-    def expect_column_mean_to_be_between(cls, ge_object):
+    def expect_column_mean_to_be_between(self, ge_object):
         observed_value = ge_object["result"]["observed_value"]
         return [["Mean", observed_value]]
 
-    @classmethod
-    def expect_column_values_to_not_be_null(cls, ge_object):
+    def expect_column_values_to_not_be_null(self, ge_object):
         return [
             [
                 RenderedComponentContent(**{
@@ -116,8 +109,7 @@ class TableContentBlockRenderer(ContentBlockRenderer):
             ]
         ]
 
-    @classmethod
-    def expect_column_values_to_be_null(cls, ge_object):
+    def expect_column_values_to_be_null(self, ge_object):
         return [
             ["Populated (n)", ge_object["result"]["unexpected_count"]],
             ["Populated (%)", "%.1f%%" %

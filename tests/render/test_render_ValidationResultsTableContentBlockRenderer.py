@@ -9,7 +9,7 @@ from great_expectations.render.types import RenderedComponentContent
 
 
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(evr_failed_with_exception):
-    result = ValidationResultsTableContentBlockRenderer.render([evr_failed_with_exception])
+    result = ValidationResultsTableContentBlockRenderer().render([evr_failed_with_exception])
     print(json.dumps(result, indent=2))
     assert result == {
         "content_block_type": "table",
@@ -102,7 +102,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
     
     
 def test_ValidationResultsTableContentBlockRenderer_render(titanic_profiled_name_column_evrs):
-    validation_results_table = ValidationResultsTableContentBlockRenderer.render(titanic_profiled_name_column_evrs)
+    validation_results_table = ValidationResultsTableContentBlockRenderer().render(titanic_profiled_name_column_evrs)
     print(json.dumps(validation_results_table, indent=2))
 
     assert type(validation_results_table) is RenderedComponentContent
@@ -124,7 +124,7 @@ def test_ValidationResultsTableContentBlockRenderer_render(titanic_profiled_name
     
     
 def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_success):
-    content_block_fn = ValidationResultsTableContentBlockRenderer._get_content_block_fn("expect_table_row_count_to_be_between")
+    content_block_fn = ValidationResultsTableContentBlockRenderer()._get_content_block_fn("expect_table_row_count_to_be_between")
     content_block_fn_output = content_block_fn(evr_success)
     print(json.dumps(content_block_fn_output, indent=2))
     
@@ -238,19 +238,19 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     }
     
     # test _get_observed_value when evr["result"]["observed_value"] exists
-    output_1 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_success)
+    output_1 = ValidationResultsTableContentBlockRenderer()._get_observed_value(evr_success)
     print(output_1)
     assert output_1 == 1313
     # test _get_observed_value when evr["result"] does not exist
-    output_2 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_no_result_key)
+    output_2 = ValidationResultsTableContentBlockRenderer()._get_observed_value(evr_no_result_key)
     print(output_2)
     assert output_2 == "--"
     # test _get_observed_value for expect_column_values_to_not_be_null expectation type
-    output_3 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_not_be_null)
+    output_3 = ValidationResultsTableContentBlockRenderer()._get_observed_value(evr_expect_column_values_to_not_be_null)
     print(output_3)
     assert(output_3) == "0 null"
     # test _get_observed_value for expect_column_values_to_be_null expectation type
-    output_4 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_be_null)
+    output_4 = ValidationResultsTableContentBlockRenderer()._get_observed_value(evr_expect_column_values_to_be_null)
     print(output_4)
     assert output_4 == "1313 null"
     
@@ -321,12 +321,12 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
     }
     
     # test for succeeded evr
-    output_1 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_success)
+    output_1 = ValidationResultsTableContentBlockRenderer()._get_unexpected_statement(evr_success)
     print(output_1)
     assert output_1 is None
     
     # test for failed evr
-    output_2 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed)
+    output_2 = ValidationResultsTableContentBlockRenderer()._get_unexpected_statement(evr_failed)
     print(json.dumps(output_2, indent=2))
     assert output_2 == {
       "content_block_type": "string_template",
@@ -347,7 +347,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
     }
     
     # test for evr with no "result" key
-    output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_no_result)
+    output_3 = ValidationResultsTableContentBlockRenderer()._get_unexpected_statement(evr_no_result)
     print(json.dumps(output_3, indent=2))
     assert output_3 == {
       "content_block_type": "string_template",
@@ -364,7 +364,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
     }
     
     # test for evr with no unexpected count
-    output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed_no_unexpected_count)
+    output_4 = ValidationResultsTableContentBlockRenderer()._get_unexpected_statement(evr_failed_no_unexpected_count)
     print(output_4)
     assert output_4 is None
 
@@ -611,22 +611,22 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     }
     
     # test for succeeded evr
-    output_1 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_success)
+    output_1 = ValidationResultsTableContentBlockRenderer()._get_unexpected_table(evr_success)
     print(output_1)
     assert output_1 is None
     
     # test for failed evr with no "result" key
-    output_2 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_no_result)
+    output_2 = ValidationResultsTableContentBlockRenderer()._get_unexpected_table(evr_failed_no_result)
     print(output_2)
     assert output_2 is None
     
     # test for failed evr with no unexpected list or unexpected counts
-    output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_no_unexpected_list_or_counts)
+    output_3 = ValidationResultsTableContentBlockRenderer()._get_unexpected_table(evr_failed_no_unexpected_list_or_counts)
     print(output_3)
     assert output_3 is None
     
     # test for failed evr with partial unexpected list
-    output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_partial_unexpected_list)
+    output_4 = ValidationResultsTableContentBlockRenderer()._get_unexpected_table(evr_failed_partial_unexpected_list)
     print(json.dumps(output_4, indent=2))
     assert output_4 == {
       "content_block_type": "table",
@@ -707,7 +707,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     }
     
     # test for failed evr with partial unexpected counts
-    output_5 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_partial_unexpected_counts)
+    output_5 = ValidationResultsTableContentBlockRenderer()._get_unexpected_table(evr_failed_partial_unexpected_counts)
     print(json.dumps(output_5, indent=2))
     assert output_5 == {
       "content_block_type": "table",
@@ -811,7 +811,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
 
 def test_ValidationResultsTableContentBlockRenderer_get_status_cell(evr_failed_with_exception, evr_success, evr_failed):
     # test for failed evr with exception
-    output_1 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_failed_with_exception)
+    output_1 = ValidationResultsTableContentBlockRenderer()._get_status_icon(evr_failed_with_exception)
     print(json.dumps(output_1, indent=2))
     assert output_1 == {
       "content_block_type": "string_template",
@@ -836,7 +836,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(evr_failed_w
     }
 
     # test for succeeded evr
-    output_2 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_success)
+    output_2 = ValidationResultsTableContentBlockRenderer()._get_status_icon(evr_success)
     print(json.dumps(output_2, indent=2))
     assert output_2 == {
       "content_block_type": "string_template",
@@ -861,7 +861,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(evr_failed_w
     }
     
     # test for failed evr
-    output_3 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_failed)
+    output_3 = ValidationResultsTableContentBlockRenderer()._get_status_icon(evr_failed)
     print(json.dumps(output_3, indent=2))
     assert output_3 == {
       "content_block_type": "string_template",

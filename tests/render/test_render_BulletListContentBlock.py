@@ -59,7 +59,7 @@ def test_all_expectations_using_test_definitions():
                     continue
 
                 # Attempt to render it
-                render_result = ExpectationSuiteBulletListContentBlockRenderer.render(
+                render_result = ExpectationSuiteBulletListContentBlockRenderer().render(
                     [fake_expectation])
    
                 assert isinstance(render_result, dict)

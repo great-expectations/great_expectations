@@ -25,8 +25,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         "classes": ["m-3", "table-responsive"],
     }
 
-    @classmethod
-    def _get_status_icon(cls, evr):
+    def _get_status_icon(self, evr):
         if evr["exception_info"]["raised_exception"]:
             return RenderedComponentContent(**{
                 "content_block_type": "string_template",
@@ -77,8 +76,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 }
             })
 
-    @classmethod
-    def _get_unexpected_table(cls, evr):
+    def _get_unexpected_table(self, evr):
         try:
             result = evr["result"]
         except KeyError:
@@ -117,8 +115,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         
         return unexpected_table_content_block
 
-    @classmethod
-    def _get_unexpected_statement(cls, evr):
+    def _get_unexpected_statement(self, evr):
         success = evr["success"]
         try:
             result = evr["result"]
@@ -160,8 +157,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 }
             })
 
-    @classmethod
-    def _get_observed_value(cls, evr):
+    def _get_observed_value(self, evr):
         try:
             result = evr["result"]
         except KeyError:
@@ -182,30 +178,28 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         else:
             return "--"
 
-    @classmethod
-    def _process_content_block(cls, content_block):
-        super(ValidationResultsTableContentBlockRenderer, cls)._process_content_block(content_block)
+    def _process_content_block(self, content_block):
+        super(ValidationResultsTableContentBlockRenderer, self)._process_content_block(content_block)
         content_block.update({
             "header_row": ["Status", "Expectation", "Observed Value"]
         })
 
-    @classmethod
-    def _get_content_block_fn(cls, expectation_type):
+    def _get_content_block_fn(self, expectation_type):
         expectation_string_fn = getattr(ExpectationStringRenderer, expectation_type, None)
         if expectation_string_fn is None:
             expectation_string_fn = getattr(ExpectationStringRenderer, "_missing_content_block_fn")
 
         #This function wraps expect_* methods from ExpectationStringRenderer to generate table classes
         def row_generator_fn(evr, styling=None, include_column_name=True):
-            expectation = evr["expectation_config"]
-            expectation_string_obj = expectation_string_fn(expectation, styling, include_column_name)
+            expectation = evr["expectation_config"] 
+            expectation_string_obj = expectation_string_fn(self, expectation, styling, include_column_name)
 
             # if expectation["exception_info"]["raised_exception"] == True:
-            status_cell = [cls._get_status_icon(evr)]
-            unexpected_statement = cls._get_unexpected_statement(evr)
-            unexpected_table = cls._get_unexpected_table(evr)
+            status_cell = [self._get_status_icon(evr)]
+            unexpected_statement = self._get_unexpected_statement(evr)
+            unexpected_table = self._get_unexpected_table(evr)
             expectation_cell = expectation_string_obj
-            observed_value = [str(cls._get_observed_value(evr))]
+            observed_value = [str(self._get_observed_value(evr))]
 
             #If the expectation has some unexpected values...:
             if unexpected_statement or unexpected_table:

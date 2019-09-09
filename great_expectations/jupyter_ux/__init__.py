@@ -224,8 +224,8 @@ def display_column_expectations_as_section(
 
     #TODO: Handle the case where zero evrs match the column name
 
-    document = render.renderer.ExpectationSuiteColumnSectionRenderer.render(column_expectation_list)
-    view = render.view.DefaultJinjaSectionView.render(
+    document = render.renderer.ExpectationSuiteColumnSectionRenderer().render(column_expectation_list)
+    view = render.view.DefaultJinjaSectionView().render(
         render.types.RenderedComponentContentWrapper(**{
             "section": document,
             "section_loop": {"index": 1},
@@ -265,8 +265,8 @@ def display_column_evrs_as_section(
 
     #TODO: Handle the case where zero evrs match the column name
 
-    document = render.renderer.ProfilingResultsColumnSectionRenderer.render(column_evr_list)
-    view = render.view.DefaultJinjaSectionView.render(
+    document = render.renderer.ProfilingResultsColumnSectionRenderer().render(column_evr_list)
+    view = render.view.DefaultJinjaSectionView().render(
         render.types.RenderedComponentContentWrapper(**{
             "section": document,
             "section_loop": {"index": 1},

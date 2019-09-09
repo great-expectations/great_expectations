@@ -19,27 +19,25 @@ from great_expectations.render.types import (
 
 class ProfilingResultsOverviewSectionRenderer(Renderer):
 
-    @classmethod
-    def render(cls, evrs, section_name=None):
+    def render(self, evrs, section_name=None):
 
         content_blocks = []
         # NOTE: I don't love the way this builds content_blocks as a side effect.
         # The top-level API is clean and scannable, but the function internals are counterintutitive and hard to test.
         # I wonder if we can enable something like jquery chaining for this. Tha would be concise AND testable.
         # Pressing on for now...
-        cls._render_header(evrs, content_blocks)
-        cls._render_dataset_info(evrs, content_blocks)
-        cls._render_variable_types(evrs, content_blocks)
-        cls._render_warnings(evrs, content_blocks)
-        cls._render_expectation_types(evrs, content_blocks)
+        self._render_header(evrs, content_blocks)
+        self._render_dataset_info(evrs, content_blocks)
+        self._render_variable_types(evrs, content_blocks)
+        self._render_warnings(evrs, content_blocks)
+        self._render_expectation_types(evrs, content_blocks)
 
         return RenderedSectionContent(**{
             "section_name": section_name,
             "content_blocks": content_blocks
         })
 
-    @classmethod
-    def _render_header(cls, evrs, content_blocks):
+    def _render_header(self, evrs, content_blocks):
         content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Overview",
@@ -51,12 +49,11 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             }
         }))
 
-    @classmethod
-    def _render_dataset_info(cls, evrs, content_blocks):
-        expect_table_row_count_to_be_between_evr = cls._find_evr_by_type(evrs['results'], "expect_table_row_count_to_be_between")
+    def _render_dataset_info(self, evrs, content_blocks):
+        expect_table_row_count_to_be_between_evr = self._find_evr_by_type(evrs['results'], "expect_table_row_count_to_be_between")
 
         table_rows = []
-        table_rows.append(["Number of variables", len(cls._get_column_list_from_evrs(evrs)), ])
+        table_rows.append(["Number of variables", len(self._get_column_list_from_evrs(evrs)), ])
 
         table_rows.append([
             RenderedComponentContent(**{
@@ -76,7 +73,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         ])
 
         table_rows += [
-            ["Missing cells", cls._get_percentage_missing_cells_str(evrs), ], # "866 (8.1%)"
+            ["Missing cells", self._get_percentage_missing_cells_str(evrs), ], # "866 (8.1%)"
             # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this
         ]
 
@@ -95,10 +92,9 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             },
         }))
 
-    @classmethod
-    def _render_variable_types(cls, evrs, content_blocks):
+    def _render_variable_types(self, evrs, content_blocks):
 
-        column_types = cls._get_column_types(evrs)
+        column_types = self._get_column_types(evrs)
         #TODO: check if we have the information to make this statement. Do all columns have type expectations?
         column_type_counter = Counter(column_types.values())
         table_rows = [[type, str(column_type_counter[type])] for type in ["int", "float", "string", "--"]]
@@ -118,8 +114,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             },
         }))
 
-    @classmethod
-    def _render_expectation_types(cls, evrs, content_blocks):
+    def _render_expectation_types(self, evrs, content_blocks):
 
         type_counts = defaultdict(int)
 
@@ -176,8 +171,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             },
         }))
 
-    @classmethod
-    def _render_warnings(cls, evrs, content_blocks):
+    def _render_warnings(self, evrs, content_blocks):
         return
 
         # def render_warning_row(template, column, n, p, badge_label):
@@ -239,15 +233,14 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         #     },
         # })
 
-    @classmethod
-    def _get_percentage_missing_cells_str(cls, evrs):
+    def _get_percentage_missing_cells_str(self, evrs):
 
-        columns = cls._get_column_list_from_evrs(evrs)
+        columns = self._get_column_list_from_evrs(evrs)
         if not columns or len(columns) == 0:
             warnings.warn("Cannot get % of missing cells - column list is empty")
             return "?"
 
-        expect_column_values_to_not_be_null_evrs = cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_not_be_null")
+        expect_column_values_to_not_be_null_evrs = self._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_not_be_null")
 
         if len(columns) > len(expect_column_values_to_not_be_null_evrs):
             warnings.warn("Cannot get % of missing cells - not all columns have expect_column_values_to_not_be_null expectations")
@@ -256,12 +249,11 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         # assume 1.0 missing for columns where ["result"]["unexpected_percent"] is not available
         return "{0:.2f}%".format(sum([evr["result"]["unexpected_percent"] if "unexpected_percent" in evr["result"] and evr["result"]["unexpected_percent"] is not None else 1.0 for evr in expect_column_values_to_not_be_null_evrs])/len(columns)*100)
 
-    @classmethod
-    def _get_column_types(cls, evrs):
-        columns = cls._get_column_list_from_evrs(evrs)
+    def _get_column_types(self, evrs):
+        columns = self._get_column_list_from_evrs(evrs)
 
-        type_evrs = cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_be_in_type_list") +\
-            cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_be_of_type")
+        type_evrs = self._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_be_in_type_list") +\
+            self._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_be_of_type")
 
         column_types = {}
         for column in columns:

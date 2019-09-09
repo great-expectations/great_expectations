@@ -12,7 +12,7 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
     # import pypandoc
     # print(pypandoc.convert_text("*hi*", to='html', format="md"))
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer()._render_asset_notes({
         "meta" : {
             "notes" : "*hi*"
         }
@@ -20,7 +20,7 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
     print(result)
     assert result["content"] == ["*hi*"]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer()._render_asset_notes({
         "meta" : {
             "notes" : ["*alpha*", "_bravo_", "charlie"]
         }
@@ -28,7 +28,7 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
     print(result)
     assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer()._render_asset_notes({
         "meta" : {
             "notes" : {
                 "format": "string",
@@ -39,7 +39,7 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
     print(result)
     assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer()._render_asset_notes({
         "meta" : {
             "notes" : {
                 "format": "markdown",
@@ -55,7 +55,7 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
     except OSError:
         assert result["content"] == ["*alpha*"]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer()._render_asset_notes({
         "meta" : {
             "notes" : {
                 "format": "markdown",
@@ -73,14 +73,14 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
 
 
 def test_expectation_summary_in_ExpectationSuitePageRenderer_render_asset_notes():
-    result = ExpectationSuitePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer()._render_asset_notes({
         "meta" : {},
         "expectations" : {}
     })
     print(result)
     assert result["content"] == ['This Expectation suite currently contains 0 total Expectations across 0 columns.']
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer()._render_asset_notes({
         "meta" : {
             "notes" : {
                 "format": "markdown",
@@ -103,7 +103,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_asset_notes(
             'hi',
         ]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer()._render_asset_notes({
         "meta" : {},
         "expectations" : [
             {
@@ -141,11 +141,11 @@ def test_ValidationResultsPageRenderer_render_validation_header():
             }
         }
     }
-    assert ValidationResultsPageRenderer._render_validation_header() == validation_header
+    assert ValidationResultsPageRenderer()._render_validation_header() == validation_header
     
     
 def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_evrs_1):
-    validation_info = ValidationResultsPageRenderer._render_validation_info(titanic_profiled_evrs_1)
+    validation_info = ValidationResultsPageRenderer()._render_validation_info(titanic_profiled_evrs_1)
     print(json.dumps(validation_info, indent=2))
     
     expected_validation_info = {
@@ -194,7 +194,7 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
 
 
 def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_profiled_evrs_1):
-    validation_statistics = ValidationResultsPageRenderer._render_validation_statistics(titanic_profiled_evrs_1)
+    validation_statistics = ValidationResultsPageRenderer()._render_validation_statistics(titanic_profiled_evrs_1)
     print(json.dumps(validation_statistics, indent=2))
     
     expected_validation_statistics = {

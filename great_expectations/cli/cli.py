@@ -309,10 +309,10 @@ def render(render_object):
         raw = json.load(infile)
 
     if "results" in raw:
-        model = ProfilingResultsPageRenderer.render(raw)
+        model = ProfilingResultsPageRenderer().render(raw)
     else:
-        model = ExpectationSuitePageRenderer.render(raw)
-    print(DefaultJinjaPageView.render(model))
+        model = ExpectationSuitePageRenderer().render(raw)
+    print(DefaultJinjaPageView().render(model))
 
 
 def main():

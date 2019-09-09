@@ -9,8 +9,7 @@ from great_expectations.render.types import (
 
 class SiteIndexPageRenderer(Renderer):
 
-    @classmethod
-    def _generate_data_asset_table_section(cls, data_asset_name, link_lists_dict):
+    def _generate_data_asset_table_section(self, data_asset_name, link_lists_dict):
         section_rows = []
         column_count = 1
         profiling_links = link_lists_dict["profiling_links"]
@@ -270,8 +269,7 @@ class SiteIndexPageRenderer(Renderer):
             
         return section_rows
         
-    @classmethod
-    def render(cls, index_links_dict):
+    def render(self, index_links_dict):
 
         sections = []
 
@@ -347,7 +345,7 @@ class SiteIndexPageRenderer(Renderer):
                 })
                 # data_assets
                 for data_asset, link_lists in data_assets.items():
-                    generator_table_rows += cls._generate_data_asset_table_section(data_asset, link_lists)
+                    generator_table_rows += self._generate_data_asset_table_section(data_asset, link_lists)
                     
                 content_blocks.append(generator_table)
 

@@ -11,8 +11,7 @@ class ValueListContentBlockRenderer(ContentBlockRenderer):
     values_list and graph, based on the size of the value list requested
     """
 
-    @classmethod
-    def expect_column_values_to_be_in_set(cls, evr, result_key="partial_unexpected_counts"):
+    def expect_column_values_to_be_in_set(self, evr, result_key="partial_unexpected_counts"):
         new_block = None
         if result_key == "partial_unexpected_counts":
             partial_unexpected_counts = evr["result"]["partial_unexpected_counts"]

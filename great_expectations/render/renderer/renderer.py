@@ -4,20 +4,21 @@ import hashlib
 
 
 class Renderer(object):
-    @classmethod
-    def render(cls, ge_object):
+
+    def __init__(self):
+        pass
+
+    def render(self, ge_object):
         return ge_object
 
-    @classmethod
-    def _id_from_configuration(cls, expectation_type, expectation_kwargs, data_asset_name=None):
+    def _id_from_configuration(self, expectation_type, expectation_kwargs, data_asset_name=None):
         urn_hash = hashlib.md5()
         urn_hash.update(expectation_type.encode('utf-8'))
         urn_hash.update(json.dumps(expectation_kwargs).encode('utf-8'))
         urn_hash.update(json.dumps(data_asset_name).encode('utf-8')) # Dump first even though this is a string in case it is null;
         return base64.b64encode(urn_hash.digest()).decode('utf-8')
 
-    @classmethod
-    def _get_expectation_type(cls, ge_object):
+    def _get_expectation_type(self, ge_object):
         if "expectation_type" in ge_object:
             # This is an expectation
             return ge_object["expectation_type"]
@@ -26,8 +27,7 @@ class Renderer(object):
             # This is a validation
             return ge_object["expectation_config"]["expectation_type"]
 
-    @classmethod
-    def _find_ge_object_type(cls, ge_object):
+    def _find_ge_object_type(self, ge_object):
         """We want upstream systems to have flexibility in what they provide
         Options include an expectations config, a list of expectations, a single expectation,
         a validation report, a list of evrs, or a single evr"""
@@ -51,15 +51,13 @@ class Renderer(object):
         raise ValueError("Unrecognized great expectations object.")
 
     #TODO: When we implement a ValidationResultSuite class, this method will move there.
-    @classmethod
-    def _find_evr_by_type(cls, evrs, type_):
+    def _find_evr_by_type(self, evrs, type_):
         for evr in evrs:
             if evr["expectation_config"]["expectation_type"] == type_:
                 return evr
 
     #TODO: When we implement a ValidationResultSuite class, this method will move there.
-    @classmethod
-    def _find_all_evrs_by_type(cls, evrs, type_, column_=None):
+    def _find_all_evrs_by_type(self, evrs, type_, column_=None):
         ret = []
         for evr in evrs:
             if evr["expectation_config"]["expectation_type"] == type_\
@@ -69,8 +67,7 @@ class Renderer(object):
         return ret
 
     #TODO: When we implement a ValidationResultSuite class, this method will move there.
-    @classmethod
-    def _get_column_list_from_evrs(cls, evrs):
+    def _get_column_list_from_evrs(self, evrs):
         """
         Get list of column names.
 
@@ -83,7 +80,7 @@ class Renderer(object):
         """
         evrs_ = evrs["results"] if "results" in evrs else evrs
 
-        expect_table_columns_to_match_ordered_list_evr = cls._find_evr_by_type(evrs_, "expect_table_columns_to_match_ordered_list")
+        expect_table_columns_to_match_ordered_list_evr = self._find_evr_by_type(evrs_, "expect_table_columns_to_match_ordered_list")
         if expect_table_columns_to_match_ordered_list_evr:
             ordered_columns = expect_table_columns_to_match_ordered_list_evr["result"]["observed_value"]
         else:
@@ -95,8 +92,7 @@ class Renderer(object):
         return ordered_columns
 
     #TODO: When we implement a ValidationResultSuite class, this method will move there.
-    @classmethod
-    def _group_evrs_by_column(cls, validation_results):
+    def _group_evrs_by_column(self, validation_results):
         columns = {}
         for evr in validation_results["results"]:
             if "column" in evr["expectation_config"]["kwargs"]:
@@ -111,8 +107,7 @@ class Renderer(object):
         return columns
 
     #TODO: When we implement an ExpectationSuite class, this method will move there.
-    @classmethod
-    def _group_and_order_expectations_by_column(cls, expectations):
+    def _group_and_order_expectations_by_column(self, expectations):
         # Group expectations by column
         columns = {}
         ordered_columns = None
@@ -139,8 +134,7 @@ class Renderer(object):
         return columns, ordered_columns
 
     #TODO: When we implement an ExpectationSuite class, this method will move there.
-    @classmethod
-    def _get_expectation_suite_name(cls, expectations):
+    def _get_expectation_suite_name(self, expectations):
         if "expectation_suite_name" in expectations:
             expectation_suite_name = expectations["expectation_suite_name"]
         else:

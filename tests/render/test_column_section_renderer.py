@@ -41,7 +41,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
     for column in evrs.keys():
         with open('./tests/render/output/test_render_profiling_results_column_section_renderer__' + column + '.json', 'w') \
                 as outfile:
-            json.dump(ProfilingResultsColumnSectionRenderer.render(evrs[column]), outfile, indent=2)
+            json.dump(ProfilingResultsColumnSectionRenderer().render(evrs[column]), outfile, indent=2)
 
 
 @pytest.mark.smoketest
@@ -61,7 +61,7 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     for column in exp_groups.keys():
         with open('./tests/render/output/test_render_expectation_suite_column_section_renderer' + column + '.json', 'w') \
                 as outfile:
-            json.dump(ExpectationSuiteColumnSectionRenderer.render(exp_groups[column]), outfile, indent=2)
+            json.dump(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]), outfile, indent=2)
 
     # # This can be used for regression testing
     # for column in exp_groups.keys():
@@ -155,7 +155,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
         }
     }
 
-    content_block = ProfilingResultsColumnSectionRenderer._render_header(
+    content_block = ProfilingResultsColumnSectionRenderer()._render_header(
         [evr_with_unescaped_dollar_sign],
         column_type=[],
     )
@@ -244,7 +244,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_pr
 
 
 def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_name_column_expectations):
-    remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_header(
+    remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer()._render_header(
         titanic_profiled_name_column_expectations,#["expectations"],
     )
 
@@ -287,7 +287,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
         }
       }
     }
-    remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_header(
+    remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer()._render_header(
         [expectation_with_unescaped_dollar_sign],
     )
     assert content_blocks == {
@@ -298,7 +298,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
 
 
 def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profiled_name_column_expectations):
-    remaining_expectations, content_block = ExpectationSuiteColumnSectionRenderer._render_bullet_list(
+    remaining_expectations, content_block = ExpectationSuiteColumnSectionRenderer()._render_bullet_list(
         titanic_profiled_name_column_expectations,#["expectations"],
     )
 
@@ -311,7 +311,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profil
     
     
 def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
-    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_header(
+    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer()._render_header(
         validation_results=titanic_profiled_name_column_evrs,
     )
 
@@ -356,7 +356,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped
         }
     }
 
-    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_header(
+    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer()._render_header(
         validation_results=[evr_with_unescaped_dollar_sign],
     )
     assert content_block == {
@@ -372,7 +372,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped
 
     
 def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_name_column_evrs):
-    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_table(
+    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer()._render_table(
         validation_results=titanic_profiled_name_column_evrs,
     )
 
@@ -409,7 +409,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
             'meta': {'BasicDatasetProfiler': {'confidence': 'very low'}}
         }
     }
-    result = ValidationResultsTableContentBlockRenderer.render([evr])
+    result = ValidationResultsTableContentBlockRenderer().render([evr])
     # print(json.dumps(result, indent=2))
 
     #Note: A better approach to testing would separate out styling into a separate test.

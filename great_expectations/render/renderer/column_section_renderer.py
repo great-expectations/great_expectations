@@ -22,8 +22,7 @@ def convert_to_string_and_escape(var):
     return re.sub("\$", "$$", str(var))
 
 class ColumnSectionRenderer(Renderer):
-    @classmethod
-    def _get_column_name(cls, ge_object):
+    def _get_column_name(self, ge_object):
         # This is broken out for ease of locating future validation here
         if isinstance(ge_object, list):
             candidate_object = ge_object[0]
@@ -47,33 +46,32 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
     #Note: Seems awkward to pass section_name and column_type into this renderer.
     #Can't we figure that out internally?
-    @classmethod
-    def render(cls, evrs, section_name=None, column_type=None):
+    def render(self, evrs, section_name=None, column_type=None):
         if section_name is None:
-            column = cls._get_column_name(evrs)
+            column = self._get_column_name(evrs)
         else:
             column = section_name
 
         content_blocks = []
 
-        content_blocks.append(cls._render_header(evrs, column_type))
-        # content_blocks.append(cls._render_column_type(evrs))
-        content_blocks.append(cls._render_overview_table(evrs))
-        content_blocks.append(cls._render_quantile_table(evrs))
-        content_blocks.append(cls._render_stats_table(evrs))
-        content_blocks.append(cls._render_histogram(evrs))
-        content_blocks.append(cls._render_values_set(evrs))
-        content_blocks.append(cls._render_bar_chart_table(evrs))
+        content_blocks.append(self._render_header(evrs, column_type))
+        # content_blocks.append(self._render_column_type(evrs))
+        content_blocks.append(self._render_overview_table(evrs))
+        content_blocks.append(self._render_quantile_table(evrs))
+        content_blocks.append(self._render_stats_table(evrs))
+        content_blocks.append(self._render_histogram(evrs))
+        content_blocks.append(self._render_values_set(evrs))
+        content_blocks.append(self._render_bar_chart_table(evrs))
 
-        # content_blocks.append(cls._render_statistics(evrs))
-        # content_blocks.append(cls._render_common_values(evrs))
-        # content_blocks.append(cls._render_extreme_values(evrs))
-        # content_blocks.append(cls._render_frequency(evrs))
-        # content_blocks.append(cls._render_composition(evrs))
-        # content_blocks.append(cls._render_expectation_types(evrs))
-        # content_blocks.append(cls._render_unrecognized(evrs))
+        # content_blocks.append(self._render_statistics(evrs))
+        # content_blocks.append(self._render_common_values(evrs))
+        # content_blocks.append(self._render_extreme_values(evrs))
+        # content_blocks.append(self._render_frequency(evrs))
+        # content_blocks.append(self._render_composition(evrs))
+        # content_blocks.append(self._render_expectation_types(evrs))
+        # content_blocks.append(self._render_unrecognized(evrs))
 
-        content_blocks.append(cls._render_failed(evrs))
+        content_blocks.append(self._render_failed(evrs))
         # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))
 
@@ -82,8 +80,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "content_blocks": populated_content_blocks,
         })
 
-    @classmethod
-    def _render_header(cls, evrs, column_type=None):
+    def _render_header(self, evrs, column_type=None):
         # NOTE: This logic is brittle
         try:
             column_name = evrs[0]["expectation_config"]["kwargs"]["column"]
@@ -116,8 +113,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             }
         })
 
-    @classmethod
-    def _render_expectation_types(cls, evrs, content_blocks):
+    def _render_expectation_types(self, evrs, content_blocks):
         # NOTE: The evr-fetching function is an kinda similar to the code other_section_
         # renderer.ProfilingResultsOverviewSectionRenderer._render_expectation_types
 
@@ -176,24 +172,23 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             },
         }))
 
-    @classmethod
-    def _render_overview_table(cls, evrs):
-        unique_n = cls._find_evr_by_type(
+    def _render_overview_table(self, evrs):
+        unique_n = self._find_evr_by_type(
             evrs,
             "expect_column_unique_value_count_to_be_between"
         )
-        unique_proportion = cls._find_evr_by_type(
+        unique_proportion = self._find_evr_by_type(
             evrs,
             "expect_column_proportion_of_unique_values_to_be_between"
         )
-        null_evr = cls._find_evr_by_type(
+        null_evr = self._find_evr_by_type(
             evrs,
             "expect_column_values_to_not_be_null"
         )
         evrs = [evr for evr in [unique_n, unique_proportion, null_evr] if (evr is not None and "result" in evr)]
 
         if len(evrs) > 0:
-            new_content_block = TableContentBlockRenderer.render(evrs)
+            new_content_block = TableContentBlockRenderer().render(evrs)
             new_content_block["header"] = "Properties"
             new_content_block["styling"] = {
                 "classes": ["col-4", ],
@@ -210,11 +205,10 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             }
             return new_content_block
 
-    @classmethod
-    def _render_quantile_table(cls, evrs):
+    def _render_quantile_table(self, evrs):
         table_rows = []
 
-        quantile_evr = cls._find_evr_by_type(
+        quantile_evr = self._find_evr_by_type(
             evrs,
             "expect_column_quantile_values_to_be_between"
         )
@@ -261,11 +255,10 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             },
         })
 
-    @classmethod
-    def _render_stats_table(cls, evrs):
+    def _render_stats_table(self, evrs):
         table_rows = []
 
-        mean_evr = cls._find_evr_by_type(
+        mean_evr = self._find_evr_by_type(
             evrs,
             "expect_column_mean_to_be_between"
         )
@@ -289,7 +282,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 mean_value
             ])
 
-        min_evr = cls._find_evr_by_type(
+        min_evr = self._find_evr_by_type(
             evrs,
             "expect_column_min_to_be_between"
         )
@@ -309,7 +302,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 min_value,
             ])
 
-        max_evr = cls._find_evr_by_type(
+        max_evr = self._find_evr_by_type(
             evrs,
             "expect_column_max_to_be_between"
         )
@@ -347,9 +340,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         else:
             return
 
-    @classmethod
-    def _render_values_set(cls, evrs):
-        set_evr = cls._find_evr_by_type(
+    def _render_values_set(self, evrs):
+        set_evr = self._find_evr_by_type(
             evrs,
             "expect_column_values_to_be_in_set"
         )
@@ -412,10 +404,9 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         return new_block
 
 
-    @classmethod
-    def _render_histogram(cls, evrs):
+    def _render_histogram(self, evrs):
         # NOTE: This code is very brittle
-        kl_divergence_evr = cls._find_evr_by_type(
+        kl_divergence_evr = self._find_evr_by_type(
             evrs,
             "expect_column_kl_divergence_to_be_less_than"
         )
@@ -474,9 +465,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         })
 
 
-    @classmethod
-    def _render_bar_chart_table(cls, evrs):
-        distinct_values_set_evr = cls._find_evr_by_type(
+    def _render_bar_chart_table(self, evrs):
+        distinct_values_set_evr = self._find_evr_by_type(
             evrs,
             "expect_column_distinct_values_to_be_in_set"
         )
@@ -531,12 +521,10 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         return new_block
 
-    @classmethod
-    def _render_failed(cls, evrs):
-        return ExceptionListContentBlockRenderer.render(evrs, include_column_name=False)
+    def _render_failed(self, evrs):
+        return ExceptionListContentBlockRenderer().render(evrs, include_column_name=False)
 
-    @classmethod
-    def _render_unrecognized(cls, evrs, content_blocks):
+    def _render_unrecognized(self, evrs, content_blocks):
         unrendered_blocks = []
         new_block = None
         for evr in evrs:
@@ -570,9 +558,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
 
 class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
-    @classmethod
-    def _render_header(cls, validation_results):
-        column = cls._get_column_name(validation_results)
+    def _render_header(self, validation_results):
+        column = self._get_column_name(validation_results)
         
         new_block = RenderedComponentContent(**{
             "content_block_type": "header",
@@ -587,22 +574,20 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         
         return validation_results, new_block
     
-    @classmethod
-    def _render_table(cls, validation_results):
-        new_block = ValidationResultsTableContentBlockRenderer.render(
+    def _render_table(self, validation_results):
+        new_block = ValidationResultsTableContentBlockRenderer().render(
             validation_results,
             include_column_name=False
         )
         
         return [], new_block
     
-    @classmethod
-    def render(cls, validation_results={}):
-        column = cls._get_column_name(validation_results)
+    def render(self, validation_results={}):
+        column = self._get_column_name(validation_results)
         content_blocks = []
-        remaining_evrs, content_block = cls._render_header(validation_results)
+        remaining_evrs, content_block = self._render_header(validation_results)
         content_blocks.append(content_block)
-        remaining_evrs, content_block = cls._render_table(remaining_evrs)
+        remaining_evrs, content_block = self._render_table(remaining_evrs)
         content_blocks.append(content_block)
 
         return RenderedSectionContent(**{
@@ -613,9 +598,8 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
 
 class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
 
-    @classmethod
-    def _render_header(cls, expectations):
-        column = cls._get_column_name(expectations)
+    def _render_header(self, expectations):
+        column = self._get_column_name(expectations)
 
         new_block = RenderedComponentContent(**{
             "content_block_type": "header",
@@ -630,25 +614,23 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
 
         return expectations, new_block
 
-    @classmethod
-    def _render_bullet_list(cls, expectations):
-        new_block = ExpectationSuiteBulletListContentBlockRenderer.render(
+    def _render_bullet_list(self, expectations):
+        new_block = ExpectationSuiteBulletListContentBlockRenderer().render(
             expectations,
             include_column_name=False,
         )
 
         return [], new_block
 
-    @classmethod
-    def render(cls, expectations={}):
-        column = cls._get_column_name(expectations)
+    def render(self, expectations={}):
+        column = self._get_column_name(expectations)
 
         content_blocks = []
-        remaining_expectations, header_block = cls._render_header(expectations)
+        remaining_expectations, header_block = self._render_header(expectations)
         content_blocks.append(header_block)
-        # remaining_expectations, content_blocks = cls._render_column_type(
+        # remaining_expectations, content_blocks = self._render_column_type(
         # remaining_expectations, content_blocks)
-        remaining_expectations, bullet_block = cls._render_bullet_list(remaining_expectations)
+        remaining_expectations, bullet_block = self._render_bullet_list(remaining_expectations)
         content_blocks.append(bullet_block)
 
         # NOTE : Some render* functions return None so we filter them out
