@@ -14,6 +14,7 @@ from ..types.base_resource_identifiers import (
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
+    SiteSectionIdentifier,
 )
 from .store import (
     ReadWriteStore,
@@ -141,28 +142,6 @@ class ValidationResultStore(NamespacedReadWriteStore):
         )
 
 
-from six import string_types
-from great_expectations.data_context.types.base_resource_identifiers import (
-    DataContextKey,
-)
-
-class SiteSectionResource(DataContextKey):
-    _required_keys = set([
-        "site_section_name",
-        "resource_identifier",
-    ])
-    _allowed_keys = _required_keys
-    _key_types = {
-        "site_section_name" : string_types,
-        # "resource_identifier", ... is NOT strictly typed.
-    }
-
-    def __hash__(self):
-        return hash(self.site_section_name+"::"+self.resource_identifier.to_string())
-
-    def __eq__(self, other):
-        return self.__hash__() == other.__hash__()
-
 class HtmlSiteStore(NamespacedReadWriteStore):
 
     def __init__(self,
@@ -200,42 +179,24 @@ class HtmlSiteStore(NamespacedReadWriteStore):
                 }
             ),
         }
-        # self._init_store_backend(
-        #     copy.deepcopy(store_backend),
-        #     runtime_config={
-        #         "root_directory": root_directory
-        #     }
-        # )
+
         self.root_directory = root_directory
         self.serialization_type = serialization_type
         self.base_directory = base_directory
 
+        # NOTE: Instead of using the filesystem as the source of record for keys,
+        # this class trackes keys separately in an internal set.
+        # This means that keys are stored for a specific session, but can't be fetched after the original
+        # HtmlSiteStore instance leaves scope.
+        # Doing it this way allows us to prevent namespace collisions among keys while still having multiple
+        # backends that write to the same directory structure.
+        # It's a pretty reasonable way for HtmlSiteStore to do its job---you just ahve to remember that it
+        # can't necessarily set and list_keys like most other Stores.
         self.keys = set()
-
-    # def _init_store_backend(self, store_backend_config, runtime_config):
-
-    #     # filepath_template: '{0}/{1}/{2}/{3}.json'
-
-    #     # if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
-    #     #     config_defaults = {
-    #     #         "key_length" : 4,
-    #     #         "module_name" : "great_expectations.data_context.store",
-    #     #     }
-    #     # else:
-    #     #     config_defaults = {
-    #     #         "module_name" : "great_expectations.data_context.store",
-    #     #     }
-
-    #     return instantiate_class_from_config(
-    #         config=store_backend_config,
-    #         runtime_config=runtime_config,
-    #         config_defaults={},
-    #     )
 
     def _get(self, key):
         self._validate_key(key)
 
-        # NOTE: We're currently not using the site_section_name of the key
         key_tuple = self._convert_resource_identifier_to_tuple(key.resource_identifier)
         return self.store_backends[
             type(key.resource_identifier)
@@ -246,16 +207,14 @@ class HtmlSiteStore(NamespacedReadWriteStore):
 
         self.keys.add(key)
 
-        # NOTE: We're currently not using the site_section_name of the key
         key_tuple = self._convert_resource_identifier_to_tuple(key.resource_identifier)
-        print(key_tuple)
         return self.store_backends[
             type(key.resource_identifier)
         ].set(key_tuple, serialized_value)
 
     def _validate_key(self, key):
-        if not isinstance(key, SiteSectionResource):
-            raise TypeError("key: {!r} must a SiteSectionResource, not {!r}".format(
+        if not isinstance(key, SiteSectionIdentifier):
+            raise TypeError("key: {!r} must a SiteSectionIdentifier, not {!r}".format(
                 key,
                 type(key),
             ))
@@ -276,7 +235,6 @@ class HtmlSiteStore(NamespacedReadWriteStore):
 
         keys = []
         for resource_identifier_type, store_backend in self.store_backends.items():
-            print(store_backend.list_keys())
             keys += [resource_identifier_type(*key_resource_identifier) for key_resource_identifier in store_backend.list_keys()]
 
         return keys
