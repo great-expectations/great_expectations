@@ -142,6 +142,7 @@ class DefaultSiteSectionBuilder(object):
         self.source_store = data_context.stores[source_store_name]
         # self.target_store = None # FIXME: Need better test fixtures. And to Implement the HtmlWriteOnlyStore class.
         self.target_store = data_context.stores[target_store_name]
+        self.run_id_filter = run_id_filter
 
         # TODO : Push conventions for configurability down to renderers and views.
         # Until then, they won't be configurable, and defaults will be hard.
@@ -165,6 +166,11 @@ class DefaultSiteSectionBuilder(object):
 
     def build(self):
         for resource_key in self.source_store.list_keys():
+
+            if self.run_id_filter:
+                if not self._resource_key_passes_run_id_filter(resource_key):
+                    continue
+
             resource = self.source_store.get(resource_key)
 
             # TODO : This will need to change slightly when renderer and view classes are configurable.
@@ -182,6 +188,19 @@ class DefaultSiteSectionBuilder(object):
 
             #Where do index_link_dicts live?
             # In the HtmlSiteStore!
+    
+    def _resource_key_passes_run_id_filter(self, resource_key):
+        if type(resource_key) == ValidationResultIdentifier:
+            run_id = resource_key.run_id
+        else:
+            raise TypeError("run_id_filter filtering is only implemented for ValidationResultResources.")
+
+        if self.run_id_filter.get("eq"):
+            return self.run_id_filter.get("eq") == run_id
+
+        elif self.run_id_filter.get("ne"):
+            return self.run_id_filter.get("ne") != run_id
+
 
 class DefaultSiteIndexBuilder(object):
 

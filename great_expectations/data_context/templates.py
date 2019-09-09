@@ -101,6 +101,11 @@ stores:
     class_name: HtmlSiteStore
     base_directory: uncommitted/documentation/local_site/
 
+  team_site_html_store:
+    module_name: great_expectations.data_context.store
+    class_name: HtmlSiteStore
+    base_directory: uncommitted/documentation/team_site/
+
 # Uncomment the lines below to enable a result callback.
 
 # result_callback:
@@ -147,6 +152,28 @@ data_docs:
           renderer:
             module_name: great_expectations.render.renderer
             class_name: ProfilingResultsPageRenderer
+
+    team_site:
+    # "team_site" is meant to support the "shared source of truth for a team" use case. 
+    # By default only the expectations section is enabled.
+    #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3). 
+    # Reach out on Slack (https://tinyurl.com/great-expectations-slack>) if you would like to discuss the best way to configure a team site.
+
+      module_name: great_expectations.render.renderer.new_site_builder
+      class_name: SiteBuilder
+      target_store_name: team_site_html_store
+      
+      site_index_builder:
+        class_name: DefaultSiteIndexBuilder
+      
+      site_section_builders:
+          
+        expectations:
+          class_name: DefaultSiteSectionBuilder
+          source_store_name: expectations_store
+          renderer:
+            module_name: great_expectations.render.renderer
+            class_name: ExpectationSuitePageRenderer
 
 #       site_store: # where the HTML will be written to (filesystem/S3)
 #         type: filesystem
