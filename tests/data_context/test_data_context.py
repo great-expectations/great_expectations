@@ -20,7 +20,10 @@ from great_expectations.data_context import (
     ExplorerDataContext,
 )
 from great_expectations.data_context.util import safe_mmkdir
-from great_expectations.data_context.types import NormalizedDataAssetName
+from great_expectations.data_context.types import (
+    NormalizedDataAssetName,
+    ExpectationSuiteIdentifier,
+)
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 from great_expectations.dataset import PandasDataset
 from great_expectations.util import gen_directory_tree_str
@@ -55,7 +58,7 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
 
     # print(empty_data_context.stores.keys())
     assert "local_validation_result_store" in not_so_empty_data_context.stores.keys()
-    assert not_so_empty_data_context.stores["local_validation_result_store"].config.store_backend["base_directory"] == \
+    assert not_so_empty_data_context.stores["local_validation_result_store"].store_backend.base_directory == \
         "uncommitted/validations/"
 
     my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
@@ -85,15 +88,17 @@ def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
     }
 
 
-def test_list_expectation_suites(data_context):
-    assert data_context.list_expectation_suites() == {
-        "mydatasource": {
-            "mygenerator": {
-                "my_dag_node": ["default"]
-            }
-        }
-    }
-
+def test_list_expectation_suite_keys(data_context):
+    assert data_context.list_expectation_suite_keys() == [
+        ExpectationSuiteIdentifier(
+            data_asset_name=(
+                "mydatasource",
+                "mygenerator",
+                "my_dag_node",
+            ),
+            expectation_suite_name="default"
+        )
+    ]
 
 def test_get_existing_data_asset_config(data_context):
     data_asset_config = data_context.get_expectation_suite('mydatasource/mygenerator/my_dag_node', 'default')
@@ -120,7 +125,7 @@ def test_save_data_asset_config(data_context):
                 "value": 10
             }
         })
-    data_context.save_expectation_suite(data_asset_config)
+    data_context.set_expectation_suite(data_asset_config)
     data_asset_config_saved = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
     assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
 
@@ -201,86 +206,82 @@ def test_register_validation_results(data_context):
 
     #TODO: Add a test that specifies a data_asset_name
 
+# FIXME : Temporarily deprecating this test, so we can develop DataSnapshotStore in a new branch.
+# def test_register_validation_results_saves_data_assset_snapshot(data_context):
+#     run_id = "460d61be-7266-11e9-8848-1681be663d3e"
+#     source_patient_data_results = {
+#         "meta": {
+#             "data_asset_name": "mydatasource/mygenerator/source_patient_data",
+#             "expectation_suite_name": "default"
+#         },
+#         "results": [
+#             {
+#                 "expectation_config": {
+#                     "expectation_type": "expect_table_row_count_to_equal",
+#                     "kwargs": {
+#                         "value": 1024,
+#                     }
+#                 },
+#                 "success": True,
+#                 "exception_info": {"exception_message": None,
+#                     "exception_traceback": None,
+#                     "raised_exception": False},
+#                 "result": {
+#                     "observed_value": 1024,
+#                     "element_count": 1024,
+#                     "missing_percent": 0.0,
+#                     "missing_count": 0
+#                 }
+#             }
+#         ],
+#         "success": False
+#     }
+#     data_asset = PandasDataset({"x": [1,2,3,4]})
 
-def test_register_validation_results_saves_data_assset_snapshot(data_context):
-    run_id = "460d61be-7266-11e9-8848-1681be663d3e"
-    source_patient_data_results = {
-        "meta": {
-            "data_asset_name": "mydatasource/mygenerator/source_patient_data",
-            "expectation_suite_name": "default"
-        },
-        "results": [
-            {
-                "expectation_config": {
-                    "expectation_type": "expect_table_row_count_to_equal",
-                    "kwargs": {
-                        "value": 1024,
-                    }
-                },
-                "success": True,
-                "exception_info": {"exception_message": None,
-                    "exception_traceback": None,
-                    "raised_exception": False},
-                "result": {
-                    "observed_value": 1024,
-                    "element_count": 1024,
-                    "missing_percent": 0.0,
-                    "missing_count": 0
-                }
-            }
-        ],
-        "success": False
-    }
-    data_asset = PandasDataset({"x": [1,2,3,4]})
+#     snapshot_dir = os.path.join(data_context.root_directory, "uncommitted/snapshots")
+#     print(snapshot_dir)
 
-    snapshot_dir = os.path.join(data_context.root_directory, "uncommitted/snapshots")
-    print(snapshot_dir)
+#     #The snapshot directory shouldn't exist yet
+#     assert not os.path.isfile(snapshot_dir)
 
-    #The snapshot directory shouldn't exist yet
-    assert not os.path.isfile(snapshot_dir)
-
-    data_context.add_store(
-        "data_asset_snapshot_store",
-        {
-            "module_name": "great_expectations.data_context.store",
-            "class_name": "NamespacedReadWriteStore",
-            "store_config" : {
-                "serialization_type" : "pandas_csv",
-                "resource_identifier_class_name": "ValidationResultIdentifier",
-                "store_backend" : {
-                    "module_name": "great_expectations.data_context.store",
-                    "class_name": "FilesystemStoreBackend",
-                    "base_directory" : "uncommitted/snapshots",
-                    "filepath_template": "{4}/{0}/{1}/{2}/validation-results-{2}-{3}-{4}.{file_extension}",
-                    "file_extension" : "csv.gz",
-                    # "compression" : "gzip",
-                    "replaced_substring": "/",
-                    "replacement_string": "___",
-                }
-            }
-        }
-    )
-    # print(json.dumps(data_context._project_config, indent=2))
+#     data_context.add_store(
+#         "data_asset_snapshot_store",
+#         {
+#             "module_name": "great_expectations.data_context.store",
+#             "class_name": "NamespacedReadWriteStore",
+#             "serialization_type" : "pandas_csv",
+#             "resource_identifier_class_name": "ValidationResultIdentifier",
+#             "store_backend" : {
+#                 "module_name": "great_expectations.data_context.store",
+#                 "class_name": "FixedLengthTupleFilesystemStoreBackend",
+#                 "base_directory" : "uncommitted/snapshots",
+#                 "filepath_template": "{4}/{0}/{1}/{2}/validation-results-{2}-{3}-{4}.{file_extension}",
+#                 "file_extension" : "csv.gz",
+#                 # "compression" : "gzip",
+#             }
+#         }
+#     )
+#     # print(json.dumps(data_context._project_config, indent=2))
     
-    #The snapshot directory shouldn't contain any files
-    # assert len(glob(snapshot_dir+"/*/*/*/*/*.csv.gz")) == 0
-    print(gen_directory_tree_str(snapshot_dir))
-    assert gen_directory_tree_str(snapshot_dir) == ""
+#     #The snapshot directory shouldn't contain any files
+#     # assert len(glob(snapshot_dir+"/*/*/*/*/*.csv.gz")) == 0
+#     print(gen_directory_tree_str(snapshot_dir))
+#     assert gen_directory_tree_str(snapshot_dir) == ""
 
-    res = data_context.register_validation_results(
-        run_id,
-        source_patient_data_results,
-        data_asset=data_asset
-    )
+#     res = data_context.register_validation_results(
+#         run_id,
+#         source_patient_data_results,
+#         data_asset=data_asset
+#     )
     
-    #This snapshot directory should now exist
-    assert os.path.isdir(snapshot_dir)
+#     #This snapshot directory should now exist
+#     assert os.path.isdir(snapshot_dir)
 
-    #we should have one file created as a side effect
-    print(gen_directory_tree_str(snapshot_dir))
-    glob_results = glob(snapshot_dir+"/*/*/*/*/*.csv.gz")
-    print(glob_results)
-    assert len(glob_results) == 1
+#     #we should have one file created as a side effect
+#     print(gen_directory_tree_str(snapshot_dir))
+#     glob_results = glob(snapshot_dir+"/*/*/*/*/*.csv.gz")
+#     print(glob_results)
+#     assert len(glob_results) == 1
 
 
 def test_compile(data_context):
@@ -315,7 +316,6 @@ def test_compile(data_context):
             }
         }
     }
-
 
 def test_normalize_data_asset_names_error(data_context):
     with pytest.raises(DataContextError) as exc:
@@ -449,7 +449,7 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
 
     # However, if we add a data_asset that would cause that name to be ambiguous, it will then fail:
     suite = data_context.get_expectation_suite("my_datasource/in_memory_generator/f1")
-    data_context.save_expectation_suite(suite)
+    data_context.set_expectation_suite(suite)
 
     with pytest.raises(DataContextError) as exc:
         name = data_context._normalize_data_asset_name("f1")
@@ -704,7 +704,6 @@ def test_add_store(empty_data_context):
         {
             "module_name": "great_expectations.data_context.store",
             "class_name": "BasicInMemoryStore",
-            "store_config" : {}
         }
     )
     assert "my_new_store" in empty_data_context.stores.keys()
@@ -716,7 +715,13 @@ def test_add_store(empty_data_context):
 def basic_data_context_config():
     return DataContextConfig(**{
         "plugins_directory": "plugins/",
-        "expectations_directory": "expectations/",
+        "expectations_store": {
+            "class_name": "ExpectationStore",
+            "store_backend": {
+                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "base_directory": "expectations/",
+            },
+        },
         "evaluation_parameter_store_name" : "evaluation_parameter_store",
         "datasources": {},
         "stores": {

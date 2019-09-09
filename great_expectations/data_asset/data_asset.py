@@ -786,12 +786,12 @@ class DataAsset(object):
         suppress_warnings=False
     ):
         warnings.warn("save_expectations_config is deprecated, and will be removed in a future release. " +
-                      "Please use save_expectation_suite instead.", DeprecationWarning)
-        self.save_expectation_suite(
+                      "Please use set_expectation_suite instead.", DeprecationWarning)
+        self.set_expectation_suite(
             filepath, discard_failed_expectations, discard_result_format_kwargs,
             discard_include_config_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
 
-    def save_expectation_suite(
+    def set_expectation_suite(
         self,
         filepath=None,
         discard_failed_expectations=True,
@@ -835,7 +835,7 @@ class DataAsset(object):
             suppress_warnings
         )
         if filepath is None and self._data_context is not None:
-            self._data_context.save_expectation_suite(expectation_suite)
+            self._data_context.set_expectation_suite(expectation_suite)
         elif filepath is not None:
             expectation_config_str = json.dumps(expectation_suite, indent=2)
             open(filepath, 'w').write(expectation_config_str)

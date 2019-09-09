@@ -21,7 +21,13 @@ PROJECT_OPTIONAL_CONFIG_COMMENT = """
 # and any configured evaluation parameter store
 
 plugins_directory: plugins/
-expectations_directory: expectations/
+
+expectations_store:
+  class_name: ExpectationStore
+  store_backend:
+    class_name: FixedLengthTupleFilesystemStoreBackend
+    base_directory: expectations/
+
 evaluation_parameter_store_name: evaluation_parameter_store
 
 # Configure additional data context options here.
@@ -35,19 +41,11 @@ evaluation_parameter_store_name: evaluation_parameter_store
 stores:
 
   local_validation_result_store:
-    module_name: great_expectations.data_context.store
-    class_name: NamespacedReadWriteStore
-    store_config:
-      resource_identifier_class_name: ValidationResultIdentifier
-      serialization_type: json
-      store_backend:
-        module_name: great_expectations.data_context.store
-        class_name: FilesystemStoreBackend
-        base_directory: uncommitted/validations/
-        file_extension: json
-        filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
-        replaced_substring: /
-        replacement_string: ___
+    class_name: ValidationResultStore
+    store_backend:
+      class_name: FixedLengthTupleFilesystemStoreBackend
+      base_directory: uncommitted/validations/
+      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
   # FIXME: These configs are temporarily commented out to facititate refactoring Stores.
 
@@ -81,19 +79,11 @@ stores:
   #     file_extension: .zzz
 
   fixture_validation_results_store:
-    module_name: great_expectations.data_context.store
-    class_name: NamespacedReadWriteStore
-    store_config:
-      resource_identifier_class_name: ValidationResultIdentifier
-      serialization_type: json
-      store_backend:
-        module_name: great_expectations.data_context.store
-        class_name: FilesystemStoreBackend
-        base_directory: fixtures/validations
-        file_extension: json
-        filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
-        replaced_substring: /
-        replacement_string: ___
+    class_name: ValidationResultStore
+    store_backend:
+      class_name: FixedLengthTupleFilesystemStoreBackend
+      base_directory: fixtures/validations
+      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
 #  data_asset_snapshot_store:
 #    module_name: great_expectations.data_context.store
