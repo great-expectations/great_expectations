@@ -1,0 +1,246 @@
+import logging
+logger = logging.getLogger(__name__)
+
+import json
+import importlib
+from collections import OrderedDict
+
+from great_expectations.render.renderer import (
+    SiteIndexPageRenderer
+)
+from great_expectations.render.view import (
+    DefaultJinjaIndexPageView,
+)
+from great_expectations.data_context.types import (
+    ValidationResultIdentifier,
+    ExpectationSuiteIdentifier,
+    DataAssetIdentifier,
+    NormalizedDataAssetName,
+)
+from great_expectations.data_context.util import (
+    instantiate_class_from_config,
+)
+
+from great_expectations.data_context.store.namespaced_read_write_store import (
+    SiteSectionResource,
+)
+
+class SiteBuilder(object):
+    """SiteBuilder builds data documentation for the project defined by a DataContext.
+
+    A data documentation site consists of HTML pages for expectation suites, profiling and validation results, and
+    an index.html page that links to all the pages.
+
+    The exact behavior of SiteBuilder is controlled by configuration in the DataContext's great_expectations.yml file.
+
+    Users can specify
+    * which datasources to document (by default, all)
+    * whether to include expectations, validations and profiling results sections
+    * where the expectations and validations should be read from (filesystem or S3)
+    * where the HTML files should be written (filesystem or S3)
+    * which renderer and view class should be used to render each section
+
+    Here is an example of config for a site:
+
+    local_site:
+        class_name: SiteBuilder
+        target_store_name: local_site_html_store
+
+        site_index_builder:
+            class_name: DefaultSiteIndexBuilder
+
+        # Verbose version:
+        # index_builder:
+        #     module_name: great_expectations.render.builder
+        #     class_name: DefaultSiteIndexBuilder
+        #     renderer:
+        #         module_name: great_expectations.render.renderer
+        #         class_name: SiteIndexPageRenderer
+        #     view:
+        #         module_name: great_expectations.render.view
+        #         class_name: DefaultJinjaIndexPageView
+
+        site_section_builders:
+            # Minimal specification
+            expectations:
+                class_name: DefaultSiteSectionBuilder
+                source_store_name: expectation_store
+            renderer:
+                module_name: great_expectations.render.renderer
+                class_name: ExpectationSuitePageRenderer
+                    
+            # More verbose specification with optional arguments
+            validations:
+                module_name: great_expectations.data_context.render
+                class_name: DefaultSiteSectionBuilder
+                source_store_name: local_validation_store
+                renderer:
+                    module_name: great_expectations.render.renderer
+                    class_name: SiteIndexPageRenderer
+                view:
+                    module_name: great_expectations.render.view
+                    class_name: DefaultJinjaIndexPageView
+
+        datasource_whitelist:
+
+    """
+
+    def __init__(self,
+        data_context,
+        target_store_name,
+        site_index_builder,
+        site_section_builders,
+        datasource_whitelist=None
+    ):
+        self.data_context = data_context
+        self.target_store_name = target_store_name
+
+        self.site_index_builder = instantiate_class_from_config(
+            config=site_index_builder,
+            runtime_config={
+                "data_context": data_context,
+                "target_store_name": target_store_name,
+            },
+            config_defaults={
+                "name" : "site_index_builder",
+                "module_name": "great_expectations.render.renderer.new_site_builder"
+            }
+        )
+
+        self.site_section_builders = {}
+        for site_section_name, site_section_config in site_section_builders.items():
+            self.site_section_builders[site_section_name] = instantiate_class_from_config(
+                config=site_section_config,
+                runtime_config={
+                    "data_context": data_context,
+                    "target_store_name": target_store_name,
+                },
+                config_defaults={
+                    "name" : site_section_name,
+                    "module_name": "great_expectations.render.renderer.new_site_builder"
+                }
+            )
+
+    def build(self):
+        for site_section, site_section_builder in self.site_section_builders.items():
+            site_section_builder.build()
+        
+        self.site_index_builder.build()
+
+class DefaultSiteSectionBuilder(object):
+
+    def __init__(self,
+        name,
+        data_context,
+        target_store_name,
+        source_store_name,
+        run_id_filter=None, #NOTE: Ideally, this would allow specification of ANY element (or combination of elements) within an ID key
+        renderer=None,
+        view=None,
+    ):
+        self.name = name
+        self.source_store = data_context.stores[source_store_name]
+        # self.target_store = None # FIXME: Need better test fixtures. And to Implement the HtmlWriteOnlyStore class.
+        self.target_store = data_context.stores[target_store_name]
+
+        # TODO : Push conventions for configurability down to renderers and views.
+        # Until then, they won't be configurable, and defaults will be hard.
+        if renderer == None:
+            renderer = {
+                "module_name": "great_expectations.render.renderer",
+                # "class_name": "SiteIndexPageRenderer",
+            }
+        renderer_module = importlib.import_module(renderer.pop("module_name"))
+        self.renderer_class = getattr(renderer_module, renderer.pop("class_name"))
+
+
+        if view == None:
+            view = {
+                "module_name" : "great_expectations.render.view",
+                "class_name" : "DefaultJinjaIndexPageView",
+            }
+        view_module = importlib.import_module(view.pop("module_name"))
+        self.view_class = getattr(view_module, view.pop("class_name"))
+
+
+    def build(self):
+        for resource_key in self.source_store.list_keys():
+            resource = self.source_store.get(resource_key)
+
+            # TODO : This will need to change slightly when renderer and view classes are configurable.
+            # TODO : Typing resources is SUPER important for usability now that we're slapping configurable renders together with arbitrary stores.
+            rendered_content = self.renderer_class.render(resource)
+            viewable_content = self.view_class.render(rendered_content)
+
+            self.target_store.set(
+                SiteSectionResource(
+                    site_section_name=self.name,
+                    resource_identifier=resource_key,
+                ),
+                viewable_content
+            )
+
+            #Where do index_link_dicts live?
+            # In the HtmlSiteStore!
+
+class DefaultSiteIndexBuilder(object):
+
+    def __init__(self,
+        name,
+        data_context,
+        target_store_name,
+        renderer=None,
+        view=None,
+    ):
+        # NOTE: This method is almost idenitcal to DefaultSiteSectionBuilder
+        self.name = name
+
+        self.target_store = data_context.stores[target_store_name]
+
+        # TODO : Push conventions for configurability down to renderers and views.
+        # Until then, they won't be configurable, and defaults will be hard.
+        if renderer == None:
+            renderer = {
+                "module_name": "great_expectations.render.renderer",
+                "class_name": "SiteIndexPageRenderer",
+            }
+        renderer_module = importlib.import_module(renderer.pop("module_name"))
+        self.renderer_class = getattr(renderer_module, renderer.pop("class_name"))
+
+
+        if view == None:
+            view = {
+                "module_name" : "great_expectations.render.view",
+                "class_name" : "DefaultJinjaIndexPageView",
+            }
+        view_module = importlib.import_module(view.pop("module_name"))
+        self.view_class = getattr(view_module, view.pop("class_name"))
+
+
+    def build(self):
+        # Loop over sections in the HtmlStore
+        logger.debug("DefaultSiteIndexBuilder.build")
+        for resource_key in self.target_store.list_keys():
+            pass
+            print(resource_key)
+            # print(resource_key.to_string())
+
+        # Generate a front page spanning all sections.
+
+        # Later: generate pages for each individual level of nesting
+        # Figure out how to skip unused levels of nesting
+        
+        # raise NotImplementedError
+        
+        # for resource_key in self.target_store.list_keys():
+        #     resource = self.source_store.get(resource_key)
+
+        #     # TODO : This will need to change slightly when renderer and view classes are configurable.
+        #     # TODO : Typing resources is SUPER important for usability now that we're slapping configurable renders together with arbitrary stores.
+        #     rendered_content = self.renderer_class.render(resource)
+        #     viewable_content = self.view_class.render(rendered_content)
+
+        #     # FIXME : Using key.to_string is a nasty hack.
+        #     self.target_store.set(resource_key.to_string(), viewable_content)
+
+        #     #Where do index_link_dicts live?

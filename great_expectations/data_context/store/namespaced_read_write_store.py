@@ -140,24 +140,143 @@ class ValidationResultStore(NamespacedReadWriteStore):
             config_defaults=config_defaults,
         )
 
+
+from six import string_types
+from great_expectations.data_context.types.base_resource_identifiers import (
+    DataContextKey,
+)
+
+class SiteSectionResource(DataContextKey):
+    _required_keys = set([
+        "site_section_name",
+        "resource_identifier",
+    ])
+    _allowed_keys = _required_keys
+    _key_types = {
+        "site_section_name" : string_types,
+        # "resource_identifier", ... is NOT strictly typed.
+    }
+
+    def __hash__(self):
+        return hash(self.site_section_name+"::"+self.resource_identifier.to_string())
+
+    def __eq__(self, other):
+        return self.__hash__() == other.__hash__()
+
 class HtmlSiteStore(NamespacedReadWriteStore):
-    
-    def _init_store_backend(self, store_backend_config, runtime_config):
-        self.key_class = ValidationResultIdentifier
 
-        if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
-            config_defaults = {
-                "key_length" : 5,
-                "module_name" : "great_expectations.data_context.store",
-            }
-        else:
-            config_defaults = {
-                "module_name" : "great_expectations.data_context.store",
-            }
+    def __init__(self,
+        root_directory,
+        base_directory,
+        serialization_type=None,
+    ):
+        # Each key type gets its own backend.
+        # If backends were DB connections, this could be inefficient, but it doesn't much matter for filepaths.
+        # One thing to watch for is reversibility of keys.
+        # If several types are being writtten to overlapping directories, we could get collisions.
+        self.store_backends = {
+            ExpectationSuiteIdentifier : instantiate_class_from_config(
+                config = {
+                    "module_name" : "great_expectations.data_context.store",
+                    "class_name" : "FixedLengthTupleFilesystemStoreBackend",
+                    "key_length" : 4,
+                    "base_directory" : base_directory,
+                    "filepath_template" : '{0}/{1}/{2}/{3}.html',
+                },
+                runtime_config={
+                    "root_directory": root_directory
+                }
+            ),
+            ValidationResultIdentifier : instantiate_class_from_config(
+                config = {
+                    "module_name" : "great_expectations.data_context.store",
+                    "class_name" : "FixedLengthTupleFilesystemStoreBackend",
+                    "key_length" : 5,
+                    "base_directory" : base_directory,
+                    "filepath_template" : '{4}/{0}/{1}/{2}/{3}.html',
+                },
+                runtime_config={
+                    "root_directory": root_directory
+                }
+            ),
+        }
+        # self._init_store_backend(
+        #     copy.deepcopy(store_backend),
+        #     runtime_config={
+        #         "root_directory": root_directory
+        #     }
+        # )
+        self.root_directory = root_directory
+        self.serialization_type = serialization_type
+        self.base_directory = base_directory
 
-        return instantiate_class_from_config(
-            config=store_backend_config,
-            runtime_config=runtime_config,
-            config_defaults=config_defaults,
-        )
+        self.keys = set()
 
+    # def _init_store_backend(self, store_backend_config, runtime_config):
+
+    #     # filepath_template: '{0}/{1}/{2}/{3}.json'
+
+    #     # if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
+    #     #     config_defaults = {
+    #     #         "key_length" : 4,
+    #     #         "module_name" : "great_expectations.data_context.store",
+    #     #     }
+    #     # else:
+    #     #     config_defaults = {
+    #     #         "module_name" : "great_expectations.data_context.store",
+    #     #     }
+
+    #     return instantiate_class_from_config(
+    #         config=store_backend_config,
+    #         runtime_config=runtime_config,
+    #         config_defaults={},
+    #     )
+
+    def _get(self, key):
+        self._validate_key(key)
+
+        # NOTE: We're currently not using the site_section_name of the key
+        key_tuple = self._convert_resource_identifier_to_tuple(key.resource_identifier)
+        return self.store_backends[
+            type(key.resource_identifier)
+        ].get(key_tuple)
+
+    def _set(self, key, serialized_value):
+        self._validate_key(key)
+
+        self.keys.add(key)
+
+        # NOTE: We're currently not using the site_section_name of the key
+        key_tuple = self._convert_resource_identifier_to_tuple(key.resource_identifier)
+        print(key_tuple)
+        return self.store_backends[
+            type(key.resource_identifier)
+        ].set(key_tuple, serialized_value)
+
+    def _validate_key(self, key):
+        if not isinstance(key, SiteSectionResource):
+            raise TypeError("key: {!r} must a SiteSectionResource, not {!r}".format(
+                key,
+                type(key),
+            ))
+
+        for key_class in self.store_backends.keys():
+            if isinstance(key.resource_identifier, key_class):
+                return
+
+        # The key's resource_identifier didn't match any known key_class
+        raise TypeError("resource_identifier in key: {!r} must one of {}, not {!r}".format(
+            key,
+            set(self.store_backends.keys()),
+            type(key),
+        ))
+
+    def list_keys(self):
+        return list(self.keys)
+
+        keys = []
+        for resource_identifier_type, store_backend in self.store_backends.items():
+            print(store_backend.list_keys())
+            keys += [resource_identifier_type(*key_resource_identifier) for key_resource_identifier in store_backend.list_keys()]
+
+        return keys

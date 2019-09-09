@@ -23,7 +23,8 @@ from ..types.base import DotDict
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
 
-from great_expectations.render.renderer.site_builder import SiteBuilder
+# from great_expectations.render.renderer.site_builder import SiteBuilder
+from great_expectations.render.renderer.new_site_builder import SiteBuilder
 
 try:
     from urllib.parse import urlparse
@@ -1283,10 +1284,17 @@ class ConfigOnlyDataContext(object):
             for site_name, site_config in sites.items():
                 logger.debug("Building site %s" % site_name,)
                 if (site_names and site_name in site_names) or not site_names or len(site_names) == 0:
-                    #TODO: get the builder class
                     #TODO: build the site config by using defaults if needed
                     complete_site_config = site_config
-                    index_page_locator_info = SiteBuilder.build(self, complete_site_config, specified_data_asset_name=data_asset_name)
+                    # print(json.dumps(complete_site_config, indent=2))
+                    site_builder = instantiate_class_from_config(
+                        config=complete_site_config,
+                        runtime_config={
+                            "data_context": self,
+                        },
+                        config_defaults={}
+                    )
+                    index_page_locator_info = site_builder.build()#self, complete_site_config, specified_data_asset_name=data_asset_name)
                     if index_page_locator_info:
                         index_page_locator_infos[site_name] = index_page_locator_info
         else:
