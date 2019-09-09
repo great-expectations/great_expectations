@@ -140,3 +140,24 @@ class ValidationResultStore(NamespacedReadWriteStore):
             config_defaults=config_defaults,
         )
 
+class HtmlSiteStore(NamespacedReadWriteStore):
+    
+    def _init_store_backend(self, store_backend_config, runtime_config):
+        self.key_class = ValidationResultIdentifier
+
+        if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
+            config_defaults = {
+                "key_length" : 5,
+                "module_name" : "great_expectations.data_context.store",
+            }
+        else:
+            config_defaults = {
+                "module_name" : "great_expectations.data_context.store",
+            }
+
+        return instantiate_class_from_config(
+            config=store_backend_config,
+            runtime_config=runtime_config,
+            config_defaults=config_defaults,
+        )
+

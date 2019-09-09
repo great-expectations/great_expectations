@@ -103,7 +103,7 @@ class SiteBuilder():
         if not datasources_to_document or datasources_to_document == '*':
             datasources_to_document = [datasource['name'] for datasource in data_context.list_datasources()]
 
-
+        # NOTE: Be careful not to confuse the notion of a Section here with a section in 
         sections_config = site_config.get('sections')
         if not sections_config:
             raise Exception('"sections" key is missing') #TODO: specific exception class
@@ -152,15 +152,15 @@ class SiteBuilder():
                         continue
 
                 generator = validation_result_key.expectation_suite_identifier.data_asset_name.generator
-
                 generator_asset = validation_result_key.expectation_suite_identifier.data_asset_name.generator_asset
-
                 expectation_suite_name = validation_result_key.expectation_suite_identifier.expectation_suite_name
 
-                validation = data_context.get_validation_result(data_asset_name,
-                                                                expectation_suite_name=expectation_suite_name,
-                                                                validations_store_name=site_config['validations_store']['name'],
-                                                                run_id=run_id)
+                validation = data_context.get_validation_result(
+                    data_asset_name,
+                    expectation_suite_name=expectation_suite_name,
+                    validations_store_name=site_config['validations_store']['name'],
+                    run_id=run_id
+                )
                 logger.info("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id,
                                                                                                           expectation_suite_name,
                                                                                                           data_asset_name))
@@ -228,7 +228,6 @@ class SiteBuilder():
                     expectation_suite_key.expectation_suite_name,
                     "expectations",
                 )
-
 
         # TODO: load dynamically
         model = SiteIndexPageRenderer.render(index_links_dict)
@@ -313,6 +312,8 @@ class SiteBuilder():
                 data_asset_name,
                 datasource, generator, generator_asset, expectation_suite_name, "profiling"
             )
+
+        print(index_links_dict)
 
 
     @classmethod
