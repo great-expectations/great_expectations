@@ -22,7 +22,7 @@ from great_expectations.data_context.util import (
 )
 
 from great_expectations.data_context.store.namespaced_read_write_store import (
-    SiteSectionResource,
+    SiteSectionIdentifier,
 )
 
 class SiteBuilder(object):
@@ -179,7 +179,7 @@ class DefaultSiteSectionBuilder(object):
             viewable_content = self.view_class.render(rendered_content)
 
             self.target_store.set(
-                SiteSectionResource(
+                SiteSectionIdentifier(
                     site_section_name=self.name,
                     resource_identifier=resource_key,
                 ),
@@ -241,7 +241,7 @@ class DefaultSiteIndexBuilder(object):
         logger.debug("DefaultSiteIndexBuilder.build")
         for resource_key in self.target_store.list_keys():
             pass
-            print(resource_key)
+            # print(resource_key)
             # print(resource_key.to_string())
 
         # Generate a front page spanning all sections.
