@@ -19,7 +19,13 @@ def totally_empty_data_context(tmp_path_factory):
 
     config = {
         "plugins_directory": "plugins/",
-        "expectations_directory": "expectations/",
+        "expectations_store": {
+            "class_name": "ExpectationStore",
+            "store_backend": {
+                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "base_directory": "expectations/"
+            }
+        },
         "evaluation_parameter_store_name": "not_a_real_store_name",
         "datasources": {},
         "stores": {},
@@ -46,7 +52,7 @@ def test_create(tmp_path_factory):
 
 
 def test_add_store(totally_empty_data_context):
-    assert len(totally_empty_data_context.stores.keys()) == 0
+    assert len(totally_empty_data_context.stores.keys()) == 1
 
     totally_empty_data_context.add_store(
         "my_inmemory_store",
@@ -56,12 +62,12 @@ def test_add_store(totally_empty_data_context):
         }
     )
     assert "my_inmemory_store" in totally_empty_data_context.stores.keys()
-    assert len(totally_empty_data_context.stores.keys()) == 1
+    assert len(totally_empty_data_context.stores.keys()) == 2
 
 
 def test_config_from_absolute_zero(totally_empty_data_context):
 
-    assert len(totally_empty_data_context.stores.keys()) == 0
+    assert len(totally_empty_data_context.stores.keys()) == 1
 
     totally_empty_data_context.add_store(
         "my_inmemory_store",
@@ -72,7 +78,7 @@ def test_config_from_absolute_zero(totally_empty_data_context):
         }
     )
     assert "my_inmemory_store" in totally_empty_data_context.stores.keys()
-    assert len(totally_empty_data_context.stores.keys()) == 1
+    assert len(totally_empty_data_context.stores.keys()) == 2
 
 
 def test_config_with_default_yml(tmp_path_factory):
@@ -80,9 +86,10 @@ def test_config_with_default_yml(tmp_path_factory):
     context = ge.data_context.DataContext.create(project_path)
 
     print(context.stores.keys())
-    assert len(context.stores.keys()) == 3
+    assert len(context.stores.keys()) == 4
     assert set(context.stores.keys()) == set([
         'local_validation_result_store',
+        "expectations_store",
         # 'local_profiling_store',
         # 'local_workbench_site_store',
         'evaluation_parameter_store',
@@ -101,6 +108,6 @@ def test_config_with_default_yml(tmp_path_factory):
     )
 
     print(context.stores.keys())
-    assert len(context.stores.keys()) == 4
+    assert len(context.stores.keys()) == 5
     assert "my_inmemory_store" in context.stores.keys()
     

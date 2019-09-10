@@ -266,7 +266,6 @@ class BasicInMemoryStore(ReadWriteStore):
 #             ))
 
 class EvaluationParameterStore(object):
-# class BasicInMemoryStore(object):
     """You want to be a dict. You get to be a dict. But we call you a Store."""
     
     def __init__(self, root_directory=None):

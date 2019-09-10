@@ -145,23 +145,19 @@ class FixedLengthTupleStoreBackend(StoreBackend):
     """
 
     def __init__(
-            self,
-            root_directory,
-            filepath_template,
-            key_length,
-            forbidden_substrings=["/", "\\"],
-            file_extension=None,
-            file_prefix=None,
+        self,
+        # base_directory,
+        filepath_template,
+        key_length,
+        root_directory,
+        forbidden_substrings=["/", "\\"],
     ):
+        assert isinstance(key_length, int)
         self.key_length = key_length
         self.forbidden_substrings = forbidden_substrings
-        self.file_extension = file_extension
-        self.file_prefix = file_prefix
 
         self.filepath_template = filepath_template
         self.verify_that_key_to_filepath_operation_is_reversible()
-
-
 
     def _validate_key(self, key):
         super(FixedLengthTupleStoreBackend, self)._validate_key(key)
@@ -194,10 +190,7 @@ class FixedLengthTupleStoreBackend(StoreBackend):
         # NOTE : These methods support fixed-length keys, but not variable.
         self._validate_key(key)
 
-        converted_string = self.filepath_template.format(*list(key), **{
-            "file_extension": self.file_extension,
-            "file_prefix": self.file_prefix,
-        })
+        converted_string = self.filepath_template.format(*list(key))
 
         return converted_string
 
@@ -211,10 +204,7 @@ class FixedLengthTupleStoreBackend(StoreBackend):
             lambda m, r=iter(tuple_index_list): next(r),
             self.filepath_template
         )
-        filepath_regex = intermediate_filepath_regex.format(*tuple_index_list, **{
-            "file_extension": self.file_extension,
-            "file_prefix": self.file_prefix,
-        })
+        filepath_regex = intermediate_filepath_regex.format(*tuple_index_list)
 
         # Apply the regex to the filepath
         matches = re.compile(filepath_regex).match(filepath)
@@ -264,21 +254,19 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
     """
 
     def __init__(
-            self,
-            base_directory,
-            filepath_template,
-            key_length,
-            root_directory,
-            forbidden_substrings=["/", "\\"],
-            file_extension=None,
-            file_prefix=None,
+        self,
+        base_directory,
+        filepath_template,
+        key_length,
+        root_directory,
+        forbidden_substrings=["/", "\\"],
     ):
-        super(FixedLengthTupleFilesystemStoreBackend, self).__init__(root_directory,
-                        filepath_template,
-                        key_length,
-                        forbidden_substrings=forbidden_substrings,
-                        file_extension=file_extension,
-                        file_prefix=file_prefix)
+        super(FixedLengthTupleFilesystemStoreBackend, self).__init__(
+            root_directory=root_directory,
+            filepath_template=filepath_template,
+            key_length=key_length,
+            forbidden_substrings=forbidden_substrings,
+        )
 
         self.base_directory = base_directory
 
@@ -353,22 +341,20 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
     so that we can write AND read using filenames as keys.
     """
     def __init__(
-            self,
-            root_directory,
-            filepath_template,
-            key_length,
-            bucket,
-            prefix,
-            forbidden_substrings=["/", "\\"],
-            file_extension=None,
-            file_prefix=None,
+        self,
+        root_directory,
+        filepath_template,
+        key_length,
+        bucket,
+        prefix,
+        forbidden_substrings=["/", "\\"],
     ):
-        super(FixedLengthTupleS3StoreBackend, self).__init__(root_directory,
-                        filepath_template,
-                        key_length,
-                        forbidden_substrings=forbidden_substrings,
-                        file_extension=file_extension,
-                        file_prefix=file_prefix)
+        super(FixedLengthTupleS3StoreBackend, self).__init__(
+            root_directory=root_directory,
+            filepath_template=filepath_template,
+            key_length=key_length,
+            forbidden_substrings=forbidden_substrings,
+        )
         self.bucket = bucket
         self.prefix = prefix
 

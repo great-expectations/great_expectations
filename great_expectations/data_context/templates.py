@@ -21,7 +21,13 @@ PROJECT_OPTIONAL_CONFIG_COMMENT = """
 # and any configured evaluation parameter store
 
 plugins_directory: plugins/
-expectations_directory: expectations/
+
+expectations_store:
+  class_name: ExpectationStore
+  store_backend:
+    class_name: FixedLengthTupleFilesystemStoreBackend
+    base_directory: expectations/
+
 evaluation_parameter_store_name: evaluation_parameter_store
 
 # Configure additional data context options here.
@@ -39,8 +45,7 @@ stores:
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
-      file_extension: json
-      filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
+      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
   # s3_validation_result_store:
   #   class_name: ValidationStore
@@ -87,8 +92,7 @@ stores:
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: fixtures/validations
-      file_extension: json
-      filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
+      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
 #  data_asset_snapshot_store:
 #    module_name: great_expectations.data_context.store

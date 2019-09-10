@@ -79,8 +79,7 @@ def test_ValidationResultStore_with_FixedLengthTupleFileSystemStoreBackend(tmp_p
             "module_name" : "great_expectations.data_context.store",
             "class_name" : "FixedLengthTupleFilesystemStoreBackend",
             "base_directory" : "my_store/",
-            "file_extension" : "txt",
-            "filepath_template" : "{4}/{0}/{1}/{2}/{3}.{file_extension}",
+            "filepath_template" : "{4}/{0}/{1}/{2}/{3}.txt",
         },
         root_directory = path,
     )

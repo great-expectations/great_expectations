@@ -2,9 +2,8 @@ import logging
 logger = logging.getLogger(__name__)
 import pytest
 from six import PY2
-
 import os
-
+import json
 
 @pytest.fixture()
 def data_context_config_string():
@@ -34,6 +33,39 @@ def test_preserve_comments(data_context):
     with open(config_filepath, "r") as infile:
         content = infile.read()
 
+        # Test that the lines occur, but don't insist on exact ordering.
+        # FIXME: This will be a problem for usability.
+        # Developers shouldn't have to deal with their yml getting scrambled every time they edit the datacontext.
+        content_lines = set(content.split("\n"))
+        test_content_lines = set("""\
+plugins_directory: plugins/
+stores:
+  evaluation_parameter_store:
+    module_name: great_expectations.data_context.store
+    class_name: EvaluationParameterStore
+datasources:
+  # For example, this one.
+  mydatasource:
+    type: pandas
+    generators:
+      # The name default is read if no datasource or generator is specified
+      mygenerator:
+        type: subdir_reader
+        base_directory: ../data
+
+evaluation_parameter_store_name: evaluation_parameter_store
+data_docs:
+  sites:
+expectations_store:
+  class_name: ExpectationStore
+  store_backend:
+    class_name: FixedLengthTupleFilesystemStoreBackend
+    base_directory: expectations/
+
+""".split("\n"))
+        assert content_lines == test_content_lines
+
+
     print("++++++++++++++++++++++++++++++++++++++++")
     print(content)
     print("----------------------------------------")
@@ -48,14 +80,23 @@ def test_preserve_comments(data_context):
         print(content)
         print("----------------------------------------")
 
-        if PY2:
-            assert content == """\
+        # Test that the lines occur, but don't insist on exact ordering.
+        # FIXME: This will be a problem for usability.
+        # Developers shouldn't have to deal with their yml getting scrambled every time they edit the datacontext.
+        content_lines = set(content.split("\n"))
+        test_content_lines = set("""\
 plugins_directory: plugins/
-expectations_directory: expectations/
 stores:
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore
+
+expectations_store:
+  class_name: ExpectationStore
+  store_backend:
+    class_name: FixedLengthTupleFilesystemStoreBackend
+    base_directory: expectations/
+
 datasources:
   # For example, this one.
   mydatasource:
@@ -80,9 +121,5 @@ datasources:
 evaluation_parameter_store_name: evaluation_parameter_store
 data_docs:
   sites:
-"""
-        else:
-          #Python 3 sorts lines differently. This test accomoddates shuffled lines.
-          content_lines = set(content.split("\n"))
-          test_content_lines = set(content.split("\n"))
-          assert content_lines == test_content_lines
+""".split("\n"))
+        assert content_lines == test_content_lines
