@@ -10,19 +10,25 @@ datasources:
         type: subdir_reader
         base_directory: ../data
 plugins_directory: plugins/
-expectations_directory: expectations/
+
+expectations_store:
+  class_name: ExpectationStore
+  store_backend:
+    class_name: FixedLengthTupleFilesystemStoreBackend
+    base_directory: expectations/
+
 evaluation_parameter_store_name: evaluation_parameter_store
+
 data_docs:
   sites:
-stores:
 
+stores:
   local_validation_result_store:
     class_name: ValidationResultStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
-      file_extension: json
-      filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
+      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
   # These next three blocks are never used in tests.
 
@@ -53,8 +59,7 @@ stores:
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: fixtures/validations
-      file_extension: json
-      filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
+      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
   evaluation_parameter_store:
       module_name: great_expectations.data_context.store

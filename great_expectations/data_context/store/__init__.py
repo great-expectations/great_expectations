@@ -13,6 +13,8 @@ from .store import (
     EvaluationParameterStore,
 )
 
-from .validation_store import (
-    ValidationResultStore
+from .namespaced_read_write_store import (
+    NamespacedReadWriteStore,
+    ValidationResultStore,
+    ExpectationStore,
 )

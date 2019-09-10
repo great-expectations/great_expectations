@@ -356,7 +356,7 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
         assert res["success"] is True
         res = batch.expect_column_to_exist("not_a_column")
         assert res["success"] is False
-        batch.save_expectation_suite()
+        batch.set_expectation_suite()
         assert os.path.isfile(os.path.join(
             data_context.root_directory,
             "expectations/spark_source/passthrough/new_asset/new_suite.json")

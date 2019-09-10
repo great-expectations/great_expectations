@@ -68,9 +68,8 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
     my_store = FixedLengthTupleFilesystemStoreBackend(
         root_directory=os.path.abspath(path),
         base_directory=project_path,
-        file_extension= "txt",
         key_length=3,
-        filepath_template= "{0}/{1}/{2}/foo-{2}-expectations.{file_extension}",
+        filepath_template= "{0}/{1}/{2}/foo-{2}-expectations.txt",
     )
 
     tuple_ = ("A__a", "B-b", "C")
@@ -94,9 +93,8 @@ def test_FixedLengthTupleFilesystemStoreBackend_verify_that_key_to_filepath_oper
     my_store = FixedLengthTupleFilesystemStoreBackend(
         root_directory=os.path.abspath(path),
         base_directory=project_path,
-        file_extension= "txt",
         key_length=3,
-        filepath_template= "{0}/{1}/{2}/foo-{2}-expectations.{file_extension}",
+        filepath_template= "{0}/{1}/{2}/foo-{2}-expectations.txt",
     )
     #This should pass silently
     my_store.verify_that_key_to_filepath_operation_is_reversible()
@@ -104,9 +102,8 @@ def test_FixedLengthTupleFilesystemStoreBackend_verify_that_key_to_filepath_oper
     my_store = FixedLengthTupleFilesystemStoreBackend(
         root_directory=os.path.abspath(path),
         base_directory=project_path,
-        file_extension= "txt",
         key_length=3,
-        filepath_template= "{0}/{1}/foo-{2}-expectations.{file_extension}",
+        filepath_template= "{0}/{1}/foo-{2}-expectations.txt",
     )
     #This also should pass silently
     my_store.verify_that_key_to_filepath_operation_is_reversible()
@@ -116,9 +113,8 @@ def test_FixedLengthTupleFilesystemStoreBackend_verify_that_key_to_filepath_oper
         my_store = FixedLengthTupleFilesystemStoreBackend(
             root_directory=os.path.abspath(path),
             base_directory=project_path,
-            file_extension= "txt",
             key_length=3,
-            filepath_template= "{0}/{1}/foo-expectations.{file_extension}",
+            filepath_template= "{0}/{1}/foo-expectations.txt",
         )
 
 
