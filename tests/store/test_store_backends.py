@@ -3,6 +3,8 @@ import json
 import importlib
 import os
 import re
+import boto3
+from moto import mock_s3
 
 import six
 if six.PY2: FileNotFoundError = IOError
@@ -14,6 +16,7 @@ from great_expectations.data_context.store import (
     StoreBackend,
     InMemoryStoreBackend,
     FixedLengthTupleFilesystemStoreBackend,
+    FixedLengthTupleS3StoreBackend,
 )
 from great_expectations.util import (
     gen_directory_tree_str,
@@ -167,3 +170,42 @@ test_FixedLengthTupleFilesystemStoreBackend__dir0/
     my_file_AAA
     my_file_BBB
 """
+
+@mock_s3
+def test_FixedLengthTupleS3StoreBackend():
+    """
+    What does this test test and why?
+
+    We will exercise the store backend's set method twice and then verify
+    that the we calling get and list methods will return the expected keys.
+
+    We will also check that the objects are stored on S3 at the expected location.
+
+    """
+    path = "dummy_str"
+    bucket = "leakybucket"
+    prefix = "this_is_a_test_prefix"
+
+    # create a bucket in Moto's mock AWS environment
+    conn = boto3.resource('s3', region_name='us-east-1')
+    conn.create_bucket(Bucket=bucket)
+
+    my_store = FixedLengthTupleS3StoreBackend(
+        root_directory=os.path.abspath(path), # NOTE: Eugene: 2019-09-06: root_directory should be removed from the base class
+        key_length=1,
+        filepath_template= "my_file_{0}",
+        bucket=bucket,
+        prefix=prefix,
+    )
+
+    my_store.set(("AAA",), "aaa")
+    assert my_store.get(("AAA",)) == b'aaa'
+
+    my_store.set(("BBB",), "bbb")
+    assert my_store.get(("BBB",)) == b'bbb'
+
+    print(my_store.list_keys())
+    assert set(my_store.list_keys()) == set([("AAA",), ("BBB",)])
+
+    assert set([s3_object_info['Key'] for s3_object_info in boto3.client('s3').list_objects(Bucket=bucket, Prefix=prefix)['Contents']])\
+           == set(['this_is_a_test_prefix/my_file_AAA', 'this_is_a_test_prefix/my_file_BBB'])

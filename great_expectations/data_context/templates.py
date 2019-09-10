@@ -42,6 +42,15 @@ stores:
       file_extension: json
       filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
 
+  # s3_validation_result_store:
+  #   class_name: ValidationStore
+  #   store_backend:
+  #     class_name: FixedLengthTupleS3StoreBackend
+  #     bucket: ???
+  #     prefix: ???
+  #     file_extension: json
+  #     filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
+
   # FIXME: These configs are temporarily commented out to facititate refactoring Stores.
 
   # local_profiling_store:

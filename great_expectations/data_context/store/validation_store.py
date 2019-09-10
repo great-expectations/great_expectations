@@ -48,6 +48,11 @@ class ValidationResultStore(ReadWriteStore):
                 "key_length" : 5,
                 "module_name" : "great_expectations.data_context.store",
             }
+        elif store_backend_config["class_name"] == "FixedLengthTupleS3StoreBackend":
+            config_defaults = {
+                "key_length": 5, # NOTE: Eugene: 2019-09-06: ???
+                "module_name": "great_expectations.data_context.store",
+            }
         else:
             config_defaults = {
                 "module_name" : "great_expectations.data_context.store",
