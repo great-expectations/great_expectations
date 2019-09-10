@@ -17,6 +17,7 @@ import datetime
 import shutil
 import importlib
 from collections import OrderedDict
+import warnings
 
 from .util import get_slack_callback, safe_mmkdir
 from ..types.base import DotDict
@@ -794,6 +795,13 @@ class ConfigOnlyDataContext(object):
 
         return expectation_suite
 
+    def save_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
+        warnings.warn("The save_expectation_suite method is deprecated will be removed in a future release.\n Please use set_expectation_suite instead.", DeprecationWarning)
+        self.set_expectation_suite(
+            expectation_suite,
+            data_asset_name,
+            expectation_suite_name,
+        )
 
     def set_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
         """Save the provided expectation suite into the DataContext.
