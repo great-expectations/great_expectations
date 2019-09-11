@@ -13,6 +13,9 @@ from great_expectations.render.view import (
 )
 from great_expectations.data_context.types import (
     ValidationResultIdentifier,
+    ExpectationSuiteIdentifier,
+    DataAssetIdentifier,
+    NormalizedDataAssetName,
 )
 
 class SiteBuilder():
@@ -100,7 +103,7 @@ class SiteBuilder():
         if not datasources_to_document or datasources_to_document == '*':
             datasources_to_document = [datasource['name'] for datasource in data_context.list_datasources()]
 
-
+        # NOTE: Be careful not to confuse the notion of a Section here with a section in 
         sections_config = site_config.get('sections')
         if not sections_config:
             raise Exception('"sections" key is missing') #TODO: specific exception class
@@ -149,15 +152,15 @@ class SiteBuilder():
                         continue
 
                 generator = validation_result_key.expectation_suite_identifier.data_asset_name.generator
-
                 generator_asset = validation_result_key.expectation_suite_identifier.data_asset_name.generator_asset
-
                 expectation_suite_name = validation_result_key.expectation_suite_identifier.expectation_suite_name
 
-                validation = data_context.get_validation_result(data_asset_name,
-                                                                expectation_suite_name=expectation_suite_name,
-                                                                validations_store_name=site_config['validations_store']['name'],
-                                                                run_id=run_id)
+                validation = data_context.get_validation_result(
+                    data_asset_name,
+                    expectation_suite_name=expectation_suite_name,
+                    validations_store_name=site_config['validations_store']['name'],
+                    run_id=run_id
+                )
                 logger.info("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id,
                                                                                                           expectation_suite_name,
                                                                                                           data_asset_name))
@@ -192,45 +195,39 @@ class SiteBuilder():
 
             expectations_renderer_class, expectations_view_class = cls.get_renderer_and_view_classes(expectations_section_config)
 
-            for datasource, v1 in data_context.list_expectation_suites().items():
+            for expectation_suite_key in data_context.stores['expectations_store'].list_keys():
 
-                if datasource not in datasources_to_document:
-                    continue
+                # NOTE : There's a bunch of redundant packing/unpacking logic here.
 
-                for generator, v2 in v1.items():
-                    for generator_asset, expectation_suite_names in v2.items():
-                        data_asset_name = data_context.data_asset_name_delimiter.join(
-                            [datasource, generator, generator_asset])
-                        if specified_data_asset_name:
-                               if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
-                                   continue
-                        for expectation_suite_name in expectation_suite_names:
-                            expectation_suite = data_context.get_expectation_suite(
-                                data_asset_name,
-                                expectation_suite_name=expectation_suite_name)
+                expectation_suite = data_context.stores['expectations_store'].get(expectation_suite_key)
+                data_asset_name = expectation_suite["data_asset_name"]
+                expectation_suite_name = expectation_suite_key.expectation_suite_name
 
-                            logger.info(
-                                "        Rendering expectation suite {} for data asset {}".format(
-                                    expectation_suite_name, data_asset_name))
-                            data_asset_name = expectation_suite['data_asset_name']
-                            expectation_suite_name = expectation_suite['expectation_suite_name']
-                            model = expectations_renderer_class.render(expectation_suite)
+                logger.info(
+                    "        Rendering expectation suite {} for data asset {}".format(
+                        expectation_suite_name,
+                        data_asset_name
+                    ))
+                model = expectations_renderer_class.render(expectation_suite)
 
-                            data_context.write_resource(
-                                expectations_view_class.render(model),  # bytes
-                                expectation_suite_name + '.html',  # name to be used inside namespace
-                                resource_store=site_config['site_store'],
-                                resource_namespace='expectations',
-                                data_asset_name=data_asset_name
-                            )
+                data_context.write_resource(
+                    expectations_view_class.render(model),  # bytes
+                    expectation_suite_name + '.html',  # name to be used inside namespace
+                    resource_store=site_config['site_store'],
+                    resource_namespace='expectations',
+                    data_asset_name=data_asset_name
+                )
 
-                            index_links_dict = cls.add_resource_info_to_index_links_dict(
-                                data_context,
-                                index_links_dict,
-                                data_asset_name,
-                                datasource, generator, generator_asset, expectation_suite_name, "expectations"
-                            )
-
+                index_links_dict = cls.add_resource_info_to_index_links_dict(
+                    data_context,
+                    index_links_dict,
+                    data_asset_name,
+                    expectation_suite_key.data_asset_name.datasource,
+                    expectation_suite_key.data_asset_name.generator,
+                    expectation_suite_key.data_asset_name.generator_asset,
+                    expectation_suite_key.expectation_suite_name,
+                    "expectations",
+                )
 
         # TODO: load dynamically
         model = SiteIndexPageRenderer.render(index_links_dict)
@@ -316,6 +313,8 @@ class SiteBuilder():
                 datasource, generator, generator_asset, expectation_suite_name, "profiling"
             )
 
+        print(index_links_dict)
+
 
     @classmethod
     def add_resource_info_to_index_links_dict(cls,
@@ -347,6 +346,7 @@ class SiteBuilder():
             base_path = section_name + "/" + run_id
         else:
             base_path = section_name
+        
         index_links_dict[datasource][generator][generator_asset][section_name + "_links"].append(
             {
                 "full_data_asset_name": data_asset_name,
@@ -365,60 +365,3 @@ class SiteBuilder():
         )
 
         return index_links_dict
-
-    # @classmethod
-    # def pack_validation_result_list_into_nested_dict(cls, validation_result_list, run_id_filter=None):
-    #     """
-    #     {
-    #       "run_id":
-    #         "datasource": {
-    #             "generator": {
-    #                 "generator_asset": [expectation_suite_1, expectation_suite_1, ...]
-    #             }
-    #         }
-    #     }
-    #     """
-    #
-    #     # NOTE : Future versions of Stores might allow fetching of nested objects.
-    #     # In that case, this logic would almost certainly live there instead.
-    #
-    #     validation_results = {}
-    #
-    #     relative_paths = validation_result_list
-    #
-    #     for result in relative_paths:
-    #         assert isinstance(result, ValidationResultIdentifier)
-    #
-    #         run_id = result.run_id
-    #
-    #         # run_id_filter attribute in the config of validation store allows to filter run ids
-    #         if run_id_filter:
-    #             if run_id_filter.get("eq"):
-    #                 if run_id_filter.get("eq") != run_id:
-    #                     continue
-    #             elif run_id_filter.get("ne"):
-    #                 if run_id_filter.get("ne") == run_id:
-    #                     continue
-    #
-    #         datasource_name = result.expectation_suite_identifier.data_asset_name.datasource
-    #         generator_name = result.expectation_suite_identifier.data_asset_name.generator
-    #         generator_asset = result.expectation_suite_identifier.data_asset_name.generator_asset
-    #
-    #         expectation_suite = result.expectation_suite_identifier.expectation_suite_name
-    #
-    #         if run_id not in validation_results:
-    #             validation_results[run_id] = {}
-    #
-    #         if datasource_name not in validation_results[run_id]:
-    #             validation_results[run_id][datasource_name] = {}
-    #
-    #         if generator_name not in validation_results[run_id][datasource_name]:
-    #             validation_results[run_id][datasource_name][generator_name] = {}
-    #
-    #         if generator_asset not in validation_results[run_id][datasource_name][generator_name]:
-    #             validation_results[run_id][datasource_name][generator_name][generator_asset] = []
-    #
-    #         validation_results[run_id][datasource_name][generator_name][generator_asset].append(expectation_suite)
-    #
-    #     # print(validation_results)
-    #     return validation_results

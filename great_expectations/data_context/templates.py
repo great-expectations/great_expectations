@@ -21,7 +21,13 @@ PROJECT_OPTIONAL_CONFIG_COMMENT = """
 # and any configured evaluation parameter store
 
 plugins_directory: plugins/
-expectations_directory: expectations/
+
+expectations_store:
+  class_name: ExpectationStore
+  store_backend:
+    class_name: FixedLengthTupleFilesystemStoreBackend
+    base_directory: expectations/
+
 evaluation_parameter_store_name: evaluation_parameter_store
 
 # Configure additional data context options here.
@@ -35,19 +41,20 @@ evaluation_parameter_store_name: evaluation_parameter_store
 stores:
 
   local_validation_result_store:
-    module_name: great_expectations.data_context.store
-    class_name: NamespacedReadWriteStore
-    store_config:
-      resource_identifier_class_name: ValidationResultIdentifier
-      serialization_type: json
-      store_backend:
-        module_name: great_expectations.data_context.store
-        class_name: FilesystemStoreBackend
-        base_directory: uncommitted/validations/
-        file_extension: json
-        filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
-        replaced_substring: /
-        replacement_string: ___
+    class_name: ValidationResultStore
+    store_backend:
+      class_name: FixedLengthTupleFilesystemStoreBackend
+      base_directory: uncommitted/validations/
+      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
+
+  # s3_validation_result_store:
+  #   class_name: ValidationStore
+  #   store_backend:
+  #     class_name: FixedLengthTupleS3StoreBackend
+  #     bucket: ???
+  #     prefix: ???
+  #     file_extension: json
+  #     filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
 
   # FIXME: These configs are temporarily commented out to facititate refactoring Stores.
 
@@ -81,19 +88,11 @@ stores:
   #     file_extension: .zzz
 
   fixture_validation_results_store:
-    module_name: great_expectations.data_context.store
-    class_name: NamespacedReadWriteStore
-    store_config:
-      resource_identifier_class_name: ValidationResultIdentifier
-      serialization_type: json
-      store_backend:
-        module_name: great_expectations.data_context.store
-        class_name: FilesystemStoreBackend
-        base_directory: fixtures/validations
-        file_extension: json
-        filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
-        replaced_substring: /
-        replacement_string: ___
+    class_name: ValidationResultStore
+    store_backend:
+      class_name: FixedLengthTupleFilesystemStoreBackend
+      base_directory: fixtures/validations
+      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
 #  data_asset_snapshot_store:
 #    module_name: great_expectations.data_context.store
@@ -106,10 +105,21 @@ stores:
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore
 
+  local_site_html_store:
+    module_name: great_expectations.data_context.store
+    class_name: HtmlSiteStore
+    base_directory: uncommitted/documentation/local_site/
+
+  team_site_html_store:
+    module_name: great_expectations.data_context.store
+    class_name: HtmlSiteStore
+    base_directory: uncommitted/documentation/team_site/
+
 # Uncomment the lines below to enable a result callback.
 
 # result_callback:
 #   slack: https://slack.com/replace_with_your_webhook
+
 
 data_docs:
   sites:
@@ -117,78 +127,62 @@ data_docs:
     # “local_site” renders documentation for all the datasources in the project from GE artifacts in the local repo. 
     # The site includes expectation suites and profiling and validation results from uncommitted directory. 
     # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
-      type: SiteBuilder
-      site_store: # where the HTML will be written to (filesystem/S3)
-        type: filesystem
-        base_directory: uncommitted/documentation/local_site
-      validations_store: # where to look for validation results (filesystem/S3)
-        name: local_validation_result_store
-      profiling_store: # where to look for profiling results (filesystem/S3)
-        name: local_validation_result_store
 
-      datasources: '*' # by default, all datasources
-      sections:
-        index:
+      module_name: great_expectations.render.renderer.new_site_builder
+      class_name: SiteBuilder
+      target_store_name: local_site_html_store
+      
+      site_index_builder:
+        class_name: DefaultSiteIndexBuilder
+      
+      site_section_builders:
+          
+        expectations:
+          class_name: DefaultSiteSectionBuilder
+          source_store_name: expectations_store
           renderer:
-            module: great_expectations.render.renderer
-            class: SiteIndexPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaIndexPageView
-        validations: # if not present, validation results are not rendered
+            module_name: great_expectations.render.renderer
+            class_name: ExpectationSuitePageRenderer
+
+        validations:
+          class_name: DefaultSiteSectionBuilder
+          source_store_name: local_validation_result_store
           run_id_filter:
             ne: profiling
           renderer:
-            module: great_expectations.render.renderer
-            class: ValidationResultsPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
-        expectations: # if not present, expectation suites are not rendered
-          renderer:
-            module: great_expectations.render.renderer
-            class: ExpectationSuitePageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
-        profiling: # if not present, profiling results are not rendered
+            module_name: great_expectations.render.renderer
+            class_name: ValidationResultsPageRenderer
+
+        profiling:
+          class_name: DefaultSiteSectionBuilder
+          source_store_name: local_validation_result_store
           run_id_filter:
             eq: profiling
           renderer:
-            module: great_expectations.render.renderer
-            class: ProfilingResultsPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
+            module_name: great_expectations.render.renderer
+            class_name: ProfilingResultsPageRenderer
 
     team_site:
-      # "team_site" is meant to support the "shared source of truth for a team" use case. 
-      # By default only the expectations section is enabled.
-      #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3). 
-      # Reach out on Slack (https://tinyurl.com/great-expectations-slack>) if you would like to discuss the best way to configure a team site.
-      type: SiteBuilder
-      site_store:
-        type: filesystem
-        base_directory: uncommitted/documentation/team_site
-#      validations_store:
-#      profiling_store:
+    # "team_site" is meant to support the "shared source of truth for a team" use case. 
+    # By default only the expectations section is enabled.
+    #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3). 
+    # Reach out on Slack (https://tinyurl.com/great-expectations-slack>) if you would like to discuss the best way to configure a team site.
 
-      datasources: '*'
-      sections:
-        index:
-          renderer:
-            module: great_expectations.render.renderer
-            class: SiteIndexPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaIndexPageView
+      module_name: great_expectations.render.renderer.new_site_builder
+      class_name: SiteBuilder
+      target_store_name: team_site_html_store
+      
+      site_index_builder:
+        class_name: DefaultSiteIndexBuilder
+      
+      site_section_builders:
+          
         expectations:
+          class_name: DefaultSiteSectionBuilder
+          source_store_name: expectations_store
           renderer:
-            module: great_expectations.render.renderer
-            class: ExpectationSuitePageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
+            module_name: great_expectations.render.renderer
+            class_name: ExpectationSuitePageRenderer
 
 """
 

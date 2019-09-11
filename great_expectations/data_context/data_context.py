@@ -17,13 +17,17 @@ import datetime
 import shutil
 import importlib
 from collections import OrderedDict
+import warnings
 
 from .util import get_slack_callback, safe_mmkdir
 from ..types.base import DotDict
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
 
-from great_expectations.render.renderer.site_builder import SiteBuilder
+# FIXME : fully deprecate site_builder, by replacing it with new_site_builder.
+# FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers. 
+# from great_expectations.render.renderer.site_builder import SiteBuilder
+from great_expectations.render.renderer.new_site_builder import SiteBuilder
 
 try:
     from urllib.parse import urlparse
@@ -39,24 +43,22 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from .store.types import (
-    StoreMetaConfig,
-)
 from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
 
 from .types import (
     NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
     DataContextConfig,
-    ValidationResultIdentifier,
-)
-from great_expectations.data_context.types.resource_identifiers import (
     DataAssetIdentifier,
-    ExpectationSuiteIdentifier
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
 )
 
 from .templates import (
     PROJECT_TEMPLATE,
     PROFILE_COMMENT,
+)
+from .util import (
+    instantiate_class_from_config
 )
 
 logger = logging.getLogger(__name__)
@@ -141,6 +143,10 @@ class ConfigOnlyDataContext(object):
 
         # Init stores
         self._stores = DotDict()
+        self.add_store(
+            "expectations_store",
+            copy.deepcopy(self._project_config["expectations_store"]),
+        )
         self._init_stores(self._project_config["stores"])
 
         self._compiled = False
@@ -179,41 +185,24 @@ class ConfigOnlyDataContext(object):
 
         Args:
             store_name (str): a key for the new Store in in self.stores
-            store_config (dict or StoreMetaConfig): a config for the Store to add
+            store_config (dict): a config for the Store to add
 
         Returns:
             store (Store)
         """
 
         self._project_config["stores"][store_name] = store_config
-        new_store = self._init_store_from_config(store_config)
+        new_store = instantiate_class_from_config(
+            config=store_config,
+            runtime_config={
+                "root_directory" : self.root_directory,
+            },
+            config_defaults={
+                "module_name" : "great_expectations.data_context.store"
+            }
+        )
         self._stores[store_name] = new_store
         return new_store
-
-    def _init_store_from_config(self, config):
-        typed_config = StoreMetaConfig(
-            coerce_types=True,
-            **config
-        )
-        if "store_config" not in typed_config:
-            typed_config.store_config = {}
-
-        # NOTE : This should pop module_name and class_name, thereby removing the need for a layer of nesting in this config
-        # TODO : Remove the extra layer of nesting from store_config
-        loaded_module = importlib.import_module(typed_config.module_name)
-        loaded_class = getattr(loaded_module, typed_config.class_name)
-
-        typed_sub_config = loaded_class.get_config_class()(
-            coerce_types=True,
-            **typed_config.store_config
-        )
-
-        instantiated_store = loaded_class(
-            config=typed_sub_config,
-            root_directory=self.root_directory,
-        )
-
-        return instantiated_store
 
     def _normalize_absolute_or_relative_path(self, path):
         if os.path.isabs(path):
@@ -238,13 +227,6 @@ class ConfigOnlyDataContext(object):
         """The directory in which custom plugin modules should be placed."""
         return self._normalize_absolute_or_relative_path(
             self._project_config.plugins_directory
-        )
-         
-    @property
-    def expectations_directory(self):
-        """The directory in which custom plugin modules should be placed."""
-        return self._normalize_absolute_or_relative_path(
-            self._project_config.expectations_directory
         )
 
     @property
@@ -286,7 +268,7 @@ class ConfigOnlyDataContext(object):
             None
         """
 
-        # NOTE : Once we start consistently generating ResourceIdentifiers at the source, all this packing/unpacking nonsense will vanish like a dream.
+        # NOTE : Once we start consistently generating DataContextKeys at the source, all this packing/unpacking nonsense will vanish like a dream.
         normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
         validation_result_identifier = ValidationResultIdentifier(
             coerce_types=True,
@@ -562,48 +544,12 @@ class ConfigOnlyDataContext(object):
         self._datasources[datasource_name] = datasource
         return datasource
             
-    def list_expectation_suites(self):
-        """Returns currently-defined expectation suites available in a nested dictionary structure
-        reflecting the namespace provided by this DataContext.
-
-        Returns:
-            Dictionary of currently-defined expectation suites::
-
-            {
-              datasource: {
-                generator: {
-                  generator_asset: [list_of_expectation_suites]
-                }
-              }
-              ...
-            }
-
+    def list_expectation_suite_keys(self):
+        """Returns a list of available expectation suite keys
         """
 
-        expectation_suites_dict = {}
-
-        # First, we construct the *actual* defined expectation suites
-        for datasource in os.listdir(self.expectations_directory):
-            datasource_path = os.path.join(self.expectations_directory, datasource)
-            if not os.path.isdir(datasource_path):
-                continue
-            if datasource not in expectation_suites_dict:
-                expectation_suites_dict[datasource] = {}
-            for generator in os.listdir(datasource_path):
-                generator_path = os.path.join(datasource_path, generator)
-                if not os.path.isdir(generator_path):
-                    continue
-                if generator not in expectation_suites_dict[datasource]:
-                    expectation_suites_dict[datasource][generator] = {}
-                for generator_asset in os.listdir(generator_path):
-                    generator_asset_path = os.path.join(generator_path, generator_asset)
-                    if os.path.isdir(generator_asset_path):
-                        candidate_suites = os.listdir(generator_asset_path)
-                        expectation_suites_dict[datasource][generator][generator_asset] = [
-                            suite_name[:-5] for suite_name in candidate_suites if suite_name.endswith(".json")
-                        ]
-
-        return expectation_suites_dict
+        keys = self.stores["expectations_store"].list_keys()
+        return keys
 
     def list_datasources(self):
         """List currently-configured datasources on this context.
@@ -649,18 +595,17 @@ class ConfigOnlyDataContext(object):
             )
 
         split_name = data_asset_name.split(self.data_asset_name_delimiter)
-        existing_expectation_suites = self.list_expectation_suites()
+        
+        existing_expectation_suite_keys = self.list_expectation_suite_keys()
         existing_namespaces = []
-        for datasource in existing_expectation_suites.keys():
-            for generator in existing_expectation_suites[datasource].keys():
-                for generator_asset in existing_expectation_suites[datasource][generator]:
-                    existing_namespaces.append(
-                        NormalizedDataAssetName(
-                            datasource,
-                            generator,
-                            generator_asset
-                        )
-                    )
+        for key in existing_expectation_suite_keys:
+            existing_namespaces.append(
+                NormalizedDataAssetName(
+                    key.data_asset_name.datasource,
+                    key.data_asset_name.generator,
+                    key.data_asset_name.generator_asset,
+                )
+            )
 
         if len(split_name) > 3:
             raise DataContextError(
@@ -821,7 +766,7 @@ class ConfigOnlyDataContext(object):
                 .format(datasource_name=split_name[0], generator_name=split_name[1])
             )
 
-    # TODO: This method should be changed to use a Store. The DataContext itself shouldn't need to know about reading from disc
+    # TODO: Instead of creating an expectation_suite by default, explicitly define a new create_expectation_suite method.
     def get_expectation_suite(self, data_asset_name, expectation_suite_name="default"):
         """Get or create a named expectation suite for the provided data_asset_name.
 
@@ -835,21 +780,30 @@ class ConfigOnlyDataContext(object):
         if not isinstance(data_asset_name, NormalizedDataAssetName):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
 
-        config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name, expectation_suite_name)
-        if os.path.isfile(config_file_path):
-            with open(config_file_path, 'r') as json_file:
-                read_config = json.load(json_file)
-            # update the data_asset_name to correspond to the current name (in case the config has been moved/renamed)
-            read_config["data_asset_name"] = self.data_asset_name_delimiter.join(data_asset_name)
-            return read_config
+        key = ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier(*data_asset_name),
+            expectation_suite_name=expectation_suite_name,
+        )
+
+        if self.stores["expectations_store"].has_key(key):
+            expectation_suite = self.stores["expectations_store"].get(key)
         else:
-            return get_empty_expectation_suite(
+            expectation_suite = get_empty_expectation_suite(
                 self.data_asset_name_delimiter.join(data_asset_name),
                 expectation_suite_name
             )
 
-    # TODO: This method should be changed to use a Store. The DataContext itself shouldn't need to know about writing to disc.
+        return expectation_suite
+
     def save_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
+        warnings.warn("The save_expectation_suite method is deprecated will be removed in a future release.\n Please use set_expectation_suite instead.", DeprecationWarning)
+        self.set_expectation_suite(
+            expectation_suite,
+            data_asset_name,
+            expectation_suite_name,
+        )
+
+    def set_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
         """Save the provided expectation suite into the DataContext.
 
         Args:
@@ -868,18 +822,22 @@ class ConfigOnlyDataContext(object):
             except KeyError:
                 raise DataContextError(
                     "data_asset_name must either be specified or present in the provided expectation suite")
+
         if expectation_suite_name is None:
             try:
                 expectation_suite_name = expectation_suite['expectation_suite_name']
             except KeyError:
                 raise DataContextError(
                     "expectation_suite_name must either be specified or present in the provided expectation suite")
+
         if not isinstance(data_asset_name, NormalizedDataAssetName):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name, expectation_suite_name)
-        safe_mmkdir(os.path.dirname(config_file_path), exist_ok=True)
-        with open(config_file_path, 'w') as outfile:
-            json.dump(expectation_suite, outfile, indent=2)
+
+        self.stores["expectations_store"].set(ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier(*data_asset_name),
+            expectation_suite_name=expectation_suite_name,
+        ), expectation_suite)
+
         self._compiled = False
 
     # TODO: This method will be replaced by DataContextAwareValidationActions.
@@ -947,6 +905,9 @@ class ConfigOnlyDataContext(object):
             else:
                 logger.warning("Unrecognized result_callback configuration.")
 
+
+        # Proposed TODO : Snapshotting shouldn't be a top-level concern in the DataContext.
+        # Instead, it should be available as a pluggable Action. 
         if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
             logging.debug("Storing validation results to data_asset_snapshot_store")
             self.stores.data_asset_snapshot_store.set(
@@ -1108,21 +1069,8 @@ class ConfigOnlyDataContext(object):
             "data_assets": {}
         }
 
-        known_asset_dict = self.list_expectation_suites()
-        # Convert known assets to the normalized name system
-        flat_assets_dict = {}
-        for datasource in known_asset_dict.keys():
-            for generator in known_asset_dict[datasource].keys():
-                for data_asset_name in known_asset_dict[datasource][generator].keys():
-                    flat_assets_dict[
-                        datasource + self._data_asset_name_delimiter +
-                        generator + self._data_asset_name_delimiter +
-                        data_asset_name
-                    ] = known_asset_dict[datasource][generator][data_asset_name]
-        config_paths = [y for x in os.walk(self.expectations_directory) for y in glob(os.path.join(x[0], '*.json'))]
-
-        for config_file in config_paths:
-            config = json.load(open(config_file, 'r'))
+        for key in self.stores["expectations_store"].list_keys():
+            config = self.stores["expectations_store"].get(key)
             for expectation in config["expectations"]:
                 for _, value in expectation["kwargs"].items():
                     if isinstance(value, dict) and '$PARAMETER' in value:
@@ -1146,10 +1094,6 @@ class ConfigOnlyDataContext(object):
                             except IndexError:
                                 logger.warning("Invalid parameter urn (not enough parts): %s" % parameter)
                                 continue
-
-                            if (data_asset_name not in flat_assets_dict or
-                                    expectation_suite_name not in flat_assets_dict[data_asset_name]):
-                                logger.warning("Adding parameter %s for unknown data asset config" % parameter)
 
                             if data_asset_name not in self._compiled_parameters["data_assets"]:
                                 self._compiled_parameters["data_assets"][data_asset_name] = {}
@@ -1242,6 +1186,7 @@ class ConfigOnlyDataContext(object):
                     path_components.append(expectation_suite_name)
 
             path_components.append(resource_name)
+
             path = os.path.join(
                 *path_components
             )
@@ -1346,13 +1291,23 @@ class ConfigOnlyDataContext(object):
         if data_docs_config:
             logger.debug("Found data_docs_config. Building sites...")
             sites = data_docs_config.get('sites', [])
+
             for site_name, site_config in sites.items():
                 logger.debug("Building site %s" % site_name,)
+
                 if (site_names and site_name in site_names) or not site_names or len(site_names) == 0:
-                    #TODO: get the builder class
-                    #TODO: build the site config by using defaults if needed
                     complete_site_config = site_config
-                    index_page_locator_info = SiteBuilder.build(self, complete_site_config, specified_data_asset_name=data_asset_name)
+                    site_builder = instantiate_class_from_config(
+                        config=complete_site_config,
+                        runtime_config={
+                            "data_context": self,
+                        },
+                        config_defaults={}
+                    )
+                    # TODO : Re-implement data_asset_name
+                    # TODO : Site builder no longer needs to return index_page_locator_info. Instead, the context can fetch the required info from Stores.
+                    index_page_locator_info = site_builder.build()#self, complete_site_config, specified_data_asset_name=data_asset_name)
+
                     if index_page_locator_info:
                         index_page_locator_infos[site_name] = index_page_locator_info
         else:
@@ -1486,7 +1441,7 @@ class ConfigOnlyDataContext(object):
                     new_expectation_count = len(expectation_suite["expectations"])
                     total_expectations += new_expectation_count
 
-                    self.save_expectation_suite(expectation_suite)
+                    self.set_expectation_suite(expectation_suite)
                     duration = (datetime.datetime.now() - start_time).total_seconds()
                     logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
                                 (new_column_count, row_count, name, duration))
@@ -1601,7 +1556,13 @@ class DataContext(ConfigOnlyDataContext):
         config_filepath = os.path.join(self.root_directory, "great_expectations.yml")
         with open(config_filepath, "w") as data:
             #Note: I don't know how this method preserves commenting, but it seems to work
-            config = dict(self._project_config)
+            config = copy.deepcopy(
+                dict(self._project_config)
+            )
+
+            #the expectation_store shouldn't appear in the list
+            del config["stores"]["expectations_store"]
+
             yaml.dump(config, data)
 
     def add_store(self, store_name, store_config):

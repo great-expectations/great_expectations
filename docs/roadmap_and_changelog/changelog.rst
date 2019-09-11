@@ -9,7 +9,6 @@ v0.8.0__develop
  method is still supported but is deprecated. See :ref:`GlobReaderGenerator` for details.
 * INTERNAL: rename LooselyTypedDotDict to AllowedKeysDotDict and add RequiredKeysDotDict as parent
 
-
 v0.7.8__develop
 -----------------
 
