@@ -175,8 +175,8 @@ class DefaultSiteSectionBuilder(object):
 
             # TODO : This will need to change slightly when renderer and view classes are configurable.
             # TODO : Typing resources is SUPER important for usability now that we're slapping configurable renders together with arbitrary stores.
-            rendered_content = self.renderer_class.render(resource)
-            viewable_content = self.view_class.render(rendered_content)
+            rendered_content = self.renderer_class().render(resource)
+            viewable_content = self.view_class().render(rendered_content)
 
             self.target_store.set(
                 SiteSectionIdentifier(
