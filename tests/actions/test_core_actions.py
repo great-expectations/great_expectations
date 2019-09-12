@@ -83,13 +83,13 @@ def test_SummarizeAndStoreAction():
     data_context.stores = stores
 
     action = SummarizeAndStoreAction(
-        name="my_action",
+        # name="my_action",
         data_context = data_context,
         # runtime_config = {
         #     stores = stores,
         #     services = {},
         # }
-        result_key="my_key",
+        # result_key="my_key",
         target_store_name = "fake_in_memory_store",
         summarizer = {
             "module_name": "great_expectations.actions.actions",
@@ -101,7 +101,7 @@ def test_SummarizeAndStoreAction():
     vr_id = "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
     action.take_action(
         validation_result_suite={},
-        validation_result_suite_identifier=ValidationResultIdentifier(from_string=vr_id)
+        validation_result_id=ValidationResultIdentifier(from_string=vr_id)
     )
     assert len(fake_in_memory_store.list_keys()) == 1
     assert fake_in_memory_store.list_keys()[0].to_string() == "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"

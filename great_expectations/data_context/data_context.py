@@ -153,6 +153,24 @@ class ConfigOnlyDataContext(object):
         )
         self._init_stores(self._project_config["stores"])
 
+        # Init validation operators
+        self.validation_operators = {}
+        # TODO : This key should NOT be optional in the project config.
+        # It can be empty, but not missing.
+        # However, for now, I'm adding this check, to avoid having to migrate all the test fixtures
+        # while still experimenting with the workings of validation operators and actions.
+        if "validation_operators" in self._project_config:
+            for validation_operator_name, validation_operator in self._project_config["validation_operators"].items():
+                self.validation_operators[validation_operator_name] = instantiate_class_from_config(
+                    config=validation_operator,
+                    runtime_config={
+                        "data_context": self,
+                    },
+                    config_defaults={
+                        "module_name": "great_expectations.actions.validation_operators"
+                    }
+                )
+
         self._compiled = False
 
         if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
@@ -482,10 +500,10 @@ class ConfigOnlyDataContext(object):
 
 
     # FIXME : This method isn't fully implemented or tested yet.
-    def convert_to_batch(self, 
+    def convert_to_batch(self,
         data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
-        data_asset_id_string=None, # If data_asset isn't a batch, then
-        data_asset_identifier=None, # Required
+        data_asset_id_string=None, # If data_asset isn't a batch, then this
+        data_asset_identifier=None, # ... or this is required
         run_identifier=None,
     ):
         if not data_asset is None:
@@ -519,8 +537,16 @@ class ConfigOnlyDataContext(object):
             if data_asset_identifier is not None:
                 assert isinstance(data_asset_identifier, DataAssetIdentifier)
 
-            else:
+            elif data_asset_id_string is not None:
                 data_asset_identifier = self._normalize_data_asset_name(data_asset_id_string)
+
+            else:
+                raise ValueError("convert_to_batch couldn't identify a data_asset_name from arguments {}".format({
+                    "type(data_asset)" : type(data_asset),
+                    "data_asset_id_string" : data_asset_id_string,
+                    "data_asset_identifier" : data_asset_identifier,
+                    "run_identifier" : run_identifier,
+                }))
 
             # FIXME: Need to look up the API for this.
             batch = self.get_batch(data_asset_identifier, run_identifier)
@@ -538,6 +564,22 @@ class ConfigOnlyDataContext(object):
         batch.run_id = run_identifier
 
         return batch
+
+    def run_validation_operator(self,
+        validation_operator_name,
+        data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
+        data_asset_id_string=None, # If data_asset isn't a batch, then this
+        data_asset_identifier=None, # ... or this is required
+        run_identifier=None,
+    ):
+        batch = self.convert_to_batch(
+            data_asset=data_asset,
+            data_asset_id_string=data_asset_id_string,
+            data_asset_identifier=data_asset_identifier,
+            run_identifier=run_identifier,
+        )
+
+        self.validation_operators[validation_operator_name].process_batch(batch)
 
     # NOTE: Abe 2019//08/22 : I think we want to change this to the new standard class_name, module_name syntax.
     # Doing this while maintaining backward compatibility to type_s (assuming we choose to do so) will require care.
