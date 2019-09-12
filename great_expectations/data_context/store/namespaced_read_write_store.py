@@ -5,6 +5,7 @@ import importlib
 from six import string_types
 import copy
 import json
+import os
 
 import pandas as pd
 
@@ -14,6 +15,7 @@ from ..types.base_resource_identifiers import (
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
+    SiteSectionIdentifier,
 )
 from .store import (
     ReadWriteStore,
@@ -159,3 +161,105 @@ class ValidationResultStore(NamespacedReadWriteStore):
             config_defaults=config_defaults,
         )
 
+
+class HtmlSiteStore(NamespacedReadWriteStore):
+
+    def __init__(self,
+        root_directory,
+        base_directory,
+        serialization_type=None,
+    ):
+        # Each key type gets its own backend.
+        # If backends were DB connections, this could be inefficient, but it doesn't much matter for filepaths.
+        # One thing to watch for is reversibility of keys.
+        # If several types are being writtten to overlapping directories, we could get collisions.
+        self.store_backends = {
+            ExpectationSuiteIdentifier : instantiate_class_from_config(
+                config = {
+                    "module_name" : "great_expectations.data_context.store",
+                    "class_name" : "FixedLengthTupleFilesystemStoreBackend",
+                    "key_length" : 4,
+                    "base_directory" : base_directory,
+                    "filepath_template" : 'expectations/{0}/{1}/{2}/{3}.html',
+                },
+                runtime_config={
+                    "root_directory": root_directory
+                }
+            ),
+            ValidationResultIdentifier : instantiate_class_from_config(
+                config = {
+                    "module_name" : "great_expectations.data_context.store",
+                    "class_name" : "FixedLengthTupleFilesystemStoreBackend",
+                    "key_length" : 5,
+                    "base_directory" : base_directory,
+                    "filepath_template" : '{4}/{0}/{1}/{2}/{3}.html',
+                },
+                runtime_config={
+                    "root_directory": root_directory
+                }
+            ),
+        }
+
+        self.root_directory = root_directory
+        self.serialization_type = serialization_type
+        self.base_directory = base_directory
+
+        # NOTE: Instead of using the filesystem as the source of record for keys,
+        # this class trackes keys separately in an internal set.
+        # This means that keys are stored for a specific session, but can't be fetched after the original
+        # HtmlSiteStore instance leaves scope.
+        # Doing it this way allows us to prevent namespace collisions among keys while still having multiple
+        # backends that write to the same directory structure.
+        # It's a pretty reasonable way for HtmlSiteStore to do its job---you just ahve to remember that it
+        # can't necessarily set and list_keys like most other Stores.
+        self.keys = set()
+
+    def _get(self, key):
+        self._validate_key(key)
+
+        key_tuple = self._convert_resource_identifier_to_tuple(key.resource_identifier)
+        return self.store_backends[
+            type(key.resource_identifier)
+        ].get(key_tuple)
+
+    def _set(self, key, serialized_value):
+        self._validate_key(key)
+
+        self.keys.add(key)
+
+        key_tuple = self._convert_resource_identifier_to_tuple(key.resource_identifier)
+        return self.store_backends[
+            type(key.resource_identifier)
+        ].set(key_tuple, serialized_value)
+
+    def _validate_key(self, key):
+        if not isinstance(key, SiteSectionIdentifier):
+            raise TypeError("key: {!r} must a SiteSectionIdentifier, not {!r}".format(
+                key,
+                type(key),
+            ))
+
+        for key_class in self.store_backends.keys():
+            if isinstance(key.resource_identifier, key_class):
+                return
+
+        # The key's resource_identifier didn't match any known key_class
+        raise TypeError("resource_identifier in key: {!r} must one of {}, not {!r}".format(
+            key,
+            set(self.store_backends.keys()),
+            type(key),
+        ))
+
+    def list_keys(self):
+        return list(self.keys)
+
+    def write_index_page(self, page):
+        # NOTE: This method is a temporary hack.
+        # Status as of 2019/09/09: this method is backward compatible against the previous implementation of site_builder
+        # However, it doesn't support backend pluggability---only implementation in a local filesystem.
+        # Also, if/when we want to support index pages at multiple levels of nesting, we'll need to extend.
+        # 
+        # Properly speaking, what we need is a class of BackendStore that can accomodate this...
+        # It's tricky with the current stores, sbecause the core get/set logic depends so strongly on fixed-length keys.
+        with open(os.path.join(self.root_directory, self.base_directory, "index.html"), "w") as file_:
+            file_.write(page)
