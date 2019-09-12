@@ -52,12 +52,25 @@ class DropAllVowelsSummarizer(object):
     def render(self, input):
         return input
 
+class NoOpAction(NamespacedValidationAction):
+
+    def __init__(self,
+        data_context,
+        # name,
+    ):
+        # self.name = name
+        self.data_context = data_context
+    
+    def take_action(self, validation_result_id, validation_result_suite):
+        print("Happily doing nothing")
+
+
 class SummarizeAndStoreAction(NamespacedValidationAction):
 
     def __init__(self,
         data_context,
-        name,
-        result_key,
+        # name,
+        # result_key,
         target_store_name,
         summarizer,
         # stores, # TODO: Migrate stores and services to a runtime_config object
@@ -76,15 +89,19 @@ class SummarizeAndStoreAction(NamespacedValidationAction):
         # Unless ALL stores are compatible...
         self.target_store = data_context.stores[target_store_name]
 
-    def take_action(self, validation_result_suite, validation_result_suite_identifier):
+    def take_action(self, validation_result_id, validation_result_suite ):
         logger.debug("SummarizeAndStoreAction.take_action")
 
-        if not isinstance(validation_result_suite_identifier, ValidationResultIdentifier):
-            raise TypeError("validation_result_suite_identifier must be of type ValidationResultIdentifier, not {0}".format(
-                type(validation_result_suite_identifier)
+        print(validation_result_id, validation_result_suite)
+        if validation_result_suite is None:
+            return
+
+        if not isinstance(validation_result_id, ValidationResultIdentifier):
+            raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                type(validation_result_suite_id)
             ))
 
         rendered_summary = self.summarizer.render(validation_result_suite)
 
-        self.target_store.set(validation_result_suite_identifier, rendered_summary)
+        self.target_store.set(validation_result_id, rendered_summary)
     

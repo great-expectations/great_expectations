@@ -49,7 +49,8 @@ def basic_data_context_config_for_validation_operator():
         },
         "data_docs": {
             "sites": {}
-        }
+        },
+        "validation_operators" : {},
     })
 
 
@@ -126,15 +127,18 @@ def test_hello_world(basic_data_context_config_for_validation_operator):
 
     vo = DefaultDataContextAwareValidationOperator(
         data_context=data_context,
+        process_warnings_and_quarantine_rows_on_error=True,
         action_list = [{
             "name": "add_warnings_to_store",
-            "module_name" : "great_expectations.actions",
-            "class_name" : "SummarizeAndStoreAction",
-            "result_key": "warnings",
-            "target_store_name": "warning_validation_result_store",
-            "summarizer":{
-                "module_name": "great_expectations.actions.actions",
-                "class_name": "TemporaryNoOpSummarizer",
+            "result_key": "warning",
+            "action" : {
+                "module_name" : "great_expectations.actions",
+                "class_name" : "SummarizeAndStoreAction",
+                "target_store_name": "warning_validation_result_store",
+                "summarizer":{
+                    "module_name": "great_expectations.actions.actions",
+                    "class_name": "TemporaryNoOpSummarizer",
+                }
             }
         }],
     )
