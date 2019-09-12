@@ -520,7 +520,8 @@ def test_data_context_result_store(titanic_data_context):
 
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
-    # assert False #for speed
+    # TODO : Use a standard test fixture
+    # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
 
     base_dir = str(tmp_path_factory.mktemp("project_dir"))
     project_dir = os.path.join(base_dir, "project_path")
@@ -570,7 +571,7 @@ project_path/
     )
     
     context.profile_datasource("titanic")
-    print(gen_directory_tree_str(project_dir))
+    # print(gen_directory_tree_str(project_dir))
     assert gen_directory_tree_str(project_dir) == """\
 project_path/
     data/
@@ -596,6 +597,8 @@ project_path/
         uncommitted/
             credentials/
             documentation/
+                local_site/
+                team_site/
             samples/
             validations/
                 profiling/
