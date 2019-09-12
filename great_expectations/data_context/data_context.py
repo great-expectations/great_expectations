@@ -23,7 +23,6 @@ from .util import get_slack_callback, safe_mmkdir
 from ..types.base import DotDict
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
-
 # FIXME : fully deprecate site_builder, by replacing it with new_site_builder.
 # FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers. 
 # from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -59,6 +58,9 @@ from .templates import (
 )
 from .util import (
     instantiate_class_from_config
+)
+from great_expectations.data_asset import (
+    DataAsset,
 )
 
 logger = logging.getLogger(__name__)
@@ -477,6 +479,65 @@ class ConfigOnlyDataContext(object):
                                           batch_kwargs,
                                           **kwargs)
         return data_asset
+
+
+    # FIXME : This method isn't fully implemented or tested yet.
+    def convert_to_batch(self, 
+        data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
+        data_asset_id_string=None, # If data_asset isn't a batch, then
+        data_asset_identifier=None, # Required
+        run_identifier=None,
+    ):
+        if not data_asset is None:
+            # Get a valid data_asset_identifier or raise an error
+            # if isinstance(data_asset, Batch):
+            if hasattr(data_asset, "data_asset_name") and isinstance(data_asset.data_asset_name, DataAssetIdentifier):
+                data_asset_identifier = data_asset.data_asset_identifier
+
+            else:
+                if data_asset_identifier is not None:
+                    assert isinstance(data_asset_identifier, DataAssetIdentifier)
+
+                elif data_asset_id_string is not None:
+                    data_asset_identifier = self._normalize_data_asset_name(data_asset_id_string)
+
+                else:
+                    raise ValueError("convert_to_batch couldn't identify a data_asset_name from arguments {}".format({
+                        "type(data_asset)" : type(data_asset),
+                        "data_asset_id_string" : data_asset_id_string,
+                        "data_asset_identifier" : data_asset_identifier,
+                        "run_identifier" : run_identifier,
+                    }))
+
+            if hasattr(data_asset, "run_id") and isinstance(data_asset.run_id, string_types):
+                run_id = data_asset.run_id
+
+            # We already have a data_asset identifier, so no further action needed.
+            batch = data_asset
+
+        else:
+            if data_asset_identifier is not None:
+                assert isinstance(data_asset_identifier, DataAssetIdentifier)
+
+            else:
+                data_asset_identifier = self._normalize_data_asset_name(data_asset_id_string)
+
+            # FIXME: Need to look up the API for this.
+            batch = self.get_batch(data_asset_identifier, run_identifier)
+
+        # At this point, we should have a properly typed and instantiated data_asset_identifier and run_identifier
+        assert isinstance(data_asset_identifier, DataAssetIdentifier)
+        assert isinstance(run_identifier, string_types)
+
+        assert isinstance(batch, DataAsset)
+
+        # NOTE: We don't have a true concept of a Batch aka DataContextAwareDataAsset yet.
+        # So attaching a data_asset_id and run_id to a generic DataAsset is the best we can do.
+        # This should eventually be switched to a properly typed class.
+        batch.data_asset_identifier = data_asset_identifier
+        batch.run_id = run_identifier
+
+        return batch
 
     # NOTE: Abe 2019//08/22 : I think we want to change this to the new standard class_name, module_name syntax.
     # Doing this while maintaining backward compatibility to type_s (assuming we choose to do so) will require care.

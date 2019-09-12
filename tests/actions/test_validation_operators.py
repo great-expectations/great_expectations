@@ -6,6 +6,7 @@ import pandas as pd
 import great_expectations as ge
 from great_expectations.actions.validation_operators import (
     DataContextAwareValidationOperator,
+    DefaultDataContextAwareValidationOperator,
 )
 from great_expectations.data_context import (
     ConfigOnlyDataContext,
@@ -51,53 +52,117 @@ def basic_data_context_config_for_validation_operator():
         }
     })
 
+
+# This is the at-the-boundary method for DataContext.
+# As such, it includes the ability to get a batch from a variety of identification methods
+# def run_validation_operator(self, 
+#     expectation_suite_name, # In the future, maybe we can allow this emthod to accept and expectation_suite instead of an es_name
+#     validation_operator_name,
+#     data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
+#     data_asset_id_string=None, # If data_asset isn't a batch, then
+#     data_asset_identifier=None, # Required
+#     run_identifier=None,
+#     # action_set_name="default",
+#     # process_warnings_and_quarantine_rows_on_error=False,
+# ):
+# def convert_to_batch(self, 
+#     data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
+#     data_asset_id_string=None, # If data_asset isn't a batch, then
+#     data_asset_identifier=None, # Required
+#     run_identifier=None,
+# ):
+#     if data_asset != None:
+#         # Get a valid data_asset_identifier or raise an error
+#         if isinstance(data_asset, Batch):
+#             data_asset_identifier = data_asset.data_asset_identifier
+
+#         else:
+#             if data_asset_identifier is not None:
+#                 assert isinstance(data_asset_identifier, DataAssetIdentifier)
+
+#             else:
+#                 data_asset_identifier = self._normalize_data_asset_name(data_asset_id_string)
+
+#         # We already have a data_asset identifier, so no further action needed.
+
+#     else:
+#         if data_asset_identifier is not None:
+#             assert isinstance(data_asset_identifier, DataAssetIdentifier)
+
+#         else:
+#             data_asset_identifier = self._normalize_data_asset_name(data_asset_id_string)
+
+#         # FIXME: Need to look up the API for this.
+#         batch = self.get_batch(data_asset_identifier, run_identifier)
+
+#     # At this point, we should have a properly typed and instantiated data_asset_identifier and batch
+#     assert isinstance(data_asset_identifier, DataAssetIdentifier)
+#     # assert isinstance(batch, Batch)
+#     assert isinstance(batch, DataAsset)
+
+#     batch.data_asset_identifier = data_asset_identifier
+
+#     return batch
+
+    # # Get the appropriate expectations
+    # self.stores["expectations_store"].get(
+    #     ExpectationSuiteIdentifier(
+    #         data_asset_identifier=data_asset_identifier,
+    #         expectation_suite_name=expectation_suite_name,
+    #     )
+    # )
+
+
+
+
+
+
 def test_hello_world(basic_data_context_config_for_validation_operator):
 
-    # FIXME:
-    return
-
-    context = ConfigOnlyDataContext(
+    data_context = ConfigOnlyDataContext(
         basic_data_context_config_for_validation_operator,
         "fake/testing/path/",
     )
 
-    vo = DataContextAwareValidationOperator(
-        # TODO: Turn this into a typed object.
-        config={
-            "default" : {
-                "add_warnings_to_store" : {
-                    "module_name" : "great_expectations.actions",
-                    "class_name" : "SummarizeAndStoreAction",
-                    "kwargs" : {
-                        "result_key": "warnings",
-                        "summarization_module_name": "great_expectations.actions.actions",
-                        "summarization_class_name": "TemporaryNoOpSummarizer",
-                        "target_store_name": "warning_validation_result_store",
-                    }
-                },
+    vo = DefaultDataContextAwareValidationOperator(
+        data_context=data_context,
+        action_list = [{
+            "name": "add_warnings_to_store",
+            "module_name" : "great_expectations.actions",
+            "class_name" : "SummarizeAndStoreAction",
+            "result_key": "warnings",
+            "target_store_name": "warning_validation_result_store",
+            "summarizer":{
+                "module_name": "great_expectations.actions.actions",
+                "class_name": "TemporaryNoOpSummarizer",
             }
-        },
-        context=context,
+        }],
     )
 
     my_df = pd.DataFrame({"x": [1,2,3,4,5]})
     my_ge_df = ge.from_pandas(my_df)
 
-    assert context.stores["warning_validation_result_store"].list_keys() == []
+    assert data_context.stores["warning_validation_result_store"].list_keys() == []
+
+    my_batch = data_context.convert_to_batch(
+        my_ge_df,
+        data_asset_identifier=DataAssetIdentifier(
+            from_string="DataAssetIdentifier.a.b.c"
+        ),
+        run_identifier="test_100"
+    )
 
     results = vo.process_batch(
-        batch=my_ge_df,
-        data_asset_identifier=DataAssetIdentifier("a", "b", "c"),
-        run_identifier="test-100",
-        # action_set_name="default",
+        batch=my_batch,
+        # expectation_suite_name_prefix="my_expectations",
     )
     # print(json.dumps(results["validation_results"], indent=2))
 
-    warning_validation_result_store_keys = context.stores["warning_validation_result_store"].list_keys() 
+    warning_validation_result_store_keys = data_context.stores["warning_validation_result_store"].list_keys() 
     print(warning_validation_result_store_keys)
     assert len(warning_validation_result_store_keys) == 1
 
-    first_validation_result = context.stores["warning_validation_result_store"].get(warning_validation_result_store_keys[0])
+    first_validation_result = data_context.stores["warning_validation_result_store"].get(warning_validation_result_store_keys[0])
     print(json.dumps(first_validation_result, indent=2))
     # assert context.stores["warning_validation_result_store"].get(warning_validation_result_store_keys[0]) == 1
     
