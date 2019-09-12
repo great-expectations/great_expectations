@@ -55,19 +55,17 @@ class DropAllVowelsSummarizer(object):
 class SummarizeAndStoreAction(NamespacedValidationAction):
 
     def __init__(self,
-        summarization_module_name,
-        summarization_class_name,
+        data_context,
+        name,
+        result_key,
         target_store_name,
-        stores, # TODO: Migrate stores and services to a runtime_config object
-        services, # TODO: Migrate stores and services to a runtime_config object
+        summarizer,
+        # stores, # TODO: Migrate stores and services to a runtime_config object
+        # services, # TODO: Migrate stores and services to a runtime_config object
     ):
 
-        # TODO: Maybe convert to instantiate_class_from_config?
-        self.summarization_class = instantiate_class_from_config(
-            config = {
-                "module_name": summarization_module_name,
-                "class_name": summarization_class_name,
-            },
+        self.summarizer = instantiate_class_from_config(
+            config = summarizer,
             runtime_config= {},
             config_defaults= {},
         )
@@ -76,7 +74,7 @@ class SummarizeAndStoreAction(NamespacedValidationAction):
 
         # NOTE: Eventually, we probably need a check to verify that this store is compatible with validation_result_suite_identifiers.
         # Unless ALL stores are compatible...
-        self.target_store = stores[target_store_name]
+        self.target_store = data_context.stores[target_store_name]
 
     def take_action(self, validation_result_suite, validation_result_suite_identifier):
         logger.debug("SummarizeAndStoreAction.take_action")
@@ -86,8 +84,7 @@ class SummarizeAndStoreAction(NamespacedValidationAction):
                 type(validation_result_suite_identifier)
             ))
 
-        rendered_summary = self.summarization_class.render(validation_result_suite)
+        rendered_summary = self.summarizer.render(validation_result_suite)
 
-        # FIXME: Don't use to_string
         self.target_store.set(validation_result_suite_identifier, rendered_summary)
     

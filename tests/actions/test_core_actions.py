@@ -75,12 +75,26 @@ def test_SummarizeAndStoreAction():
         "fake_in_memory_store" : fake_in_memory_store
     }
 
+    # NOTE: This is a hack meant to last until we implement runtime_configs
+    class Object(object):
+        pass
+
+    data_context = Object()
+    data_context.stores = stores
+
     action = SummarizeAndStoreAction(
-        summarization_module_name = "great_expectations.actions.actions",
-        summarization_class_name = "TemporaryNoOpSummarizer",
+        name="my_action",
+        data_context = data_context,
+        # runtime_config = {
+        #     stores = stores,
+        #     services = {},
+        # }
+        result_key="my_key",
         target_store_name = "fake_in_memory_store",
-        stores = stores,
-        services = {},
+        summarizer = {
+            "module_name": "great_expectations.actions.actions",
+            "class_name": "TemporaryNoOpSummarizer",
+        }
     )
     assert fake_in_memory_store.list_keys() == []
 

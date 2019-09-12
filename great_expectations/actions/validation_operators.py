@@ -7,6 +7,9 @@ import great_expectations as ge
 from ..util import (
     get_class_from_module_name_and_class_name,
 )
+from great_expectations.data_context.util import (
+    instantiate_class_from_config,
+)
 # from .types import (
 #     ActionConfig,
 #     ActionInternalConfig,
@@ -22,6 +25,8 @@ class ValidationOperator(object):
     """Zoned for expansion"""
     pass
 
+# TODO : Tidy up code smells here...
+
 class ActionAwareValidationOperator(ValidationOperator):
 
     def validate_and_take_action(self, batch, expectation_purpose="default"):
@@ -31,30 +36,62 @@ class DefaultActionAwareValidationOperator(ActionAwareValidationOperator):
     pass
 
 class DataContextAwareValidationOperator(ActionAwareValidationOperator):
-    def __init__(self, config, context):
-        self.config = config
-        self.context = context
+    def __init__(self,
+        data_context,
+        action_list,
+        expectation_suite_name_prefix="",
+    ):
+        self.data_context = data_context
+
+        self.action_list = []
+        for action_config in action_list:
+            new_action = instantiate_class_from_config(
+                config= action_config,
+                runtime_config={
+                    "data_context": self.data_context,
+                },
+                config_defaults={
+                    "module_name": "great_expectations.actions"
+                }
+            )
+            self.action_list.append(new_action)
+        
+        self.expectation_suite_name_prefix = expectation_suite_name_prefix
+    
+    def process_batch(self, batch, expectation_suite_name):
+        raise NotImplementedError
 
 
 #class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperator, DefaultActionAwareValidationOperator):
 class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperator):
-    # TODO: Move this to DefaultDataContextAwareValidationOperator
-    def process_batch(self, 
-        batch,
-        data_asset_identifier=None,
-        purpose="default",
-        run_identifier=None,
-        action_set_name="default",
+
+    def __init__(self,
+        data_context,
+        action_list,
+        expectation_suite_name_prefix="",
         process_warnings_and_quarantine_rows_on_error=False,
     ):
+        super(DefaultDataContextAwareValidationOperator, self).__init__(
+            data_context,
+            action_list,
+        )
+        
+        self.process_warnings_and_quarantine_rows_on_error = process_warnings_and_quarantine_rows_on_error
+        self.expectation_suite_name_prefix = expectation_suite_name_prefix
+
+    def process_batch(self, batch):
         # Get batch_identifier.
         # TODO : We should be using typed batch
-        if data_asset_identifier is None:
-            data_asset_identifier = batch.batch_identifier.data_asset_identifier
+        # if data_asset_identifier is None:
+        data_asset_identifier = batch.data_asset_identifier
+        run_id = batch.run_id
 
-        failure_expectations = self._get_expectation_suite(data_asset_identifier, purpose, "failure")
-        warning_expectations = self._get_expectation_suite(data_asset_identifier, purpose, "warning")
-        quarantine_expectations = self._get_expectation_suite(data_asset_identifier, purpose, "quarantine")
+        assert not data_asset_identifier is None
+        assert not run_id is None
+
+        failure_expectations = self._get_expectation_suite(data_asset_identifier, "failure")
+        warning_expectations = self._get_expectation_suite(data_asset_identifier, "warning")
+        quarantine_expectations = self._get_expectation_suite(data_asset_identifier, "quarantine")
         
         validation_result_dict = {
             "failure" : None,
@@ -66,11 +103,11 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
         #TODO: Add checking for exceptions in Expectations
 
         if validation_result_dict["failure"]["success"] == False:
-            if process_warnings_and_quarantine_rows_on_error == False:
+            if self.process_warnings_and_quarantine_rows_on_error == False:
 
                 #Process actions here
                 # TODO: This should include the whole return object, not just validation_results.
-                self._process_actions(validation_result_dict, self.config[action_set_name])
+                self._process_actions(validation_result_dict)
                 
                 return {
                     "validation_results" : validation_result_dict,
@@ -104,8 +141,7 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
     def _get_expectation_suite(
         self,
         data_asset_identifier,
-        purpose,
-        level,
+        expectation_suite_level,
     ):
         # FIXME: THis is a dummy method to quickly generate some ExpectationSuites
         df = pd.DataFrame({"x": range(10)})
@@ -116,26 +152,33 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
         return dummy_expectation_suite
 
         # TODO: Here's the REAL method.
-        # This method depends on implementation.
-        # return self.context.get_expectation_suite(
+        # return self.data_context.stores["expectations_suite"].get(
         #     ExpectationSuiteIdentifier(**{
-        #         "data_asset_identifier" : data_asset_identifier,
-        #         "suite_purpose" : purpose,
-        #         "level" : level,
+        #        data_asset_identifier=data_asset_identifier,
+        #        expectation_suite_name=self.expectation_suite_name_prefix+expectation_suite_level,
         #     })
-        # )
-    
-    def _process_actions(self, validation_results, action_set_config):
-        for k,v in action_set_config.items():
-            print(k,v)
-            loaded_module = importlib.import_module(v.pop("module_name"))
-            action_class = getattr(loaded_module, v.pop("class_name"))
 
-            action = action_class(
-                ActionInternalConfig(**v["kwargs"]),
-                stores = self.context.stores,
-                services = {},
-            )
+    # def _process_actions(self, validation_results, action_set_config):
+    #     for k,v in action_set_config.items():
+    #         print(k,v)
+    #         loaded_module = importlib.import_module(v.pop("module_name"))
+    #         action_class = getattr(loaded_module, v.pop("class_name"))
+
+    #         action = action_class(
+    #             ActionInternalConfig(**v["kwargs"]),
+    #             stores = self.context.stores,
+    #             services = {},
+    #         )
+    #         action.take_action(
+    #             validation_result_suite=validation_results,
+    #             # FIXME : Shouldn't be hardcoded
+    #             validation_result_suite_identifier=ValidationResultIdentifier(
+    #                 from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100"
+    #             )
+    #         )
+
+    def _process_actions(self, validation_results):
+        for action in self.action_list:
             action.take_action(
                 validation_result_suite=validation_results,
                 # FIXME : Shouldn't be hardcoded
