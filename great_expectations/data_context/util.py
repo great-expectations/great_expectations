@@ -149,15 +149,18 @@ def instantiate_class_from_config(config, runtime_config, config_defaults={}):
 
     module_name = config.pop("module_name", None)
     if module_name == None:
-        # TODO : Trap this error and throw an informative message
-        module_name = config_defaults.pop("module_name")
+        try:
+            module_name = config_defaults.pop("module_name")
+        except KeyError as e:
+            raise KeyError("Neither config : {} nor config_defaults : {} contains a module_name key.".format(
+                config, config_defaults,
+            ))
     else:
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
         config_defaults.pop("module_name", None)
 
     class_name = config.pop("class_name", None)
     if class_name == None:
-        # TODO : Trap this error and throw an informative message
         try:
             class_name = config_defaults.pop("class_name")
         except KeyError as e:
