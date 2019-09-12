@@ -72,8 +72,7 @@ class MetaSqlAlchemyDataset(Dataset):
 
             expected_condition = func(self, column, *args, **kwargs)
 
-            # FIXME Temporary Fix for counting missing values
-            # Added to compensate when an ignore_values argument is added to the expectation
+            # Added to prepare for when an ignore_values argument is added to the expectation
             ignore_values = [None]
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 ignore_values = []
@@ -82,28 +81,34 @@ class MetaSqlAlchemyDataset(Dataset):
                 # This only happens on expect_column_values_to_not_be_null expectations.
                 # Since there is no reason to look for most common unexpected values in this case,
                 # we will instruct the result formatting method to skip this step.
-                result_format['partial_unexpected_count'] = 0 
+                result_format['partial_unexpected_count'] = 0
+
+            ignore_values_conditions = []
+            if len(ignore_values) > 0 and None not in ignore_values or len(ignore_values) > 1 and None in ignore_values:
+                ignore_values_conditions += [
+                    sa.column(column).in_([val for val in ignore_values if val is not None])
+                ]
+            if None in ignore_values:
+                ignore_values_conditions += [sa.column(column).is_(None)]
+
+            if len(ignore_values_conditions) > 1:
+                ignore_values_condition = sa.or_(*ignore_values_conditions)
+            elif len(ignore_values_conditions) == 1:
+                ignore_values_condition = ignore_values_conditions[0]
+            else:
+                ignore_values_condition = sa.literal(False)
 
             count_query = sa.select([
                 sa.func.count().label('element_count'),
                 sa.func.sum(
-                    sa.case([(sa.or_(
-                        sa.column(column).in_(ignore_values),
-                        # Below is necessary b/c sa.in_() uses `==` but None != None
-                        # But we only consider this if None is actually in the list of ignore values
-                        sa.column(column).is_(None) if None in ignore_values else False), 1)], else_=0)
+                    sa.case([(ignore_values_condition, 1)], else_=0)
                 ).label('null_count'),
                 sa.func.sum(
                     sa.case([
                         (
                             sa.and_(
                                 sa.not_(expected_condition),
-                                sa.case([
-                                    (
-                                        sa.column(column).is_(None),
-                                        False
-                                    )
-                                ], else_=True) if None in ignore_values else True
+                                sa.not_(ignore_values_condition)
                             ),
                             1
                         )
@@ -125,17 +130,8 @@ class MetaSqlAlchemyDataset(Dataset):
             unexpected_query_results = self.engine.execute(
                 sa.select([sa.column(column)]).select_from(self._table).where(
                     sa.and_(sa.not_(expected_condition),
-                            sa.or_(
-                                # SA normally evaluates `== None` as `IS NONE`. However `sa.in_()`
-                                # replaces `None` as `NULL` in the list and incorrectly uses `== NULL`
-                                sa.case([
-                                    (
-                                        sa.column(column).is_(None),
-                                        False
-                                    )
-                                ], else_=True) if None in ignore_values else False,
-                                # Ignore any other values that are in the ignore list
-                                sa.column(column).in_(ignore_values) == False))
+                            sa.not_(ignore_values_condition)
+                            )
                 ).limit(unexpected_count_limit)
             )
 
