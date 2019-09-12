@@ -209,7 +209,8 @@ class FixedLengthTupleStoreBackend(StoreBackend):
         # Apply the regex to the filepath
         matches = re.compile(filepath_regex).match(filepath)
 
-        # Map key elements into the apprpriate parts of the tuple
+        #Map key elements into the appropriate parts of the tuple
+        # TODO: A common configuration error is for the key length to not match the number of elements in the filepath_template. We should trap this error and add a more informative message.
         new_key = list([None for element in range(self.key_length)])
         for i in range(len(tuple_index_list)):
             tuple_index = int(re.search('\d+', indexed_string_substitutions[i]).group(0))
