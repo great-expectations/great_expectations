@@ -4,11 +4,11 @@ from great_expectations.actions import (
     BasicValidationAction,
     SummarizeAndStoreAction,
 )
-from great_expectations.actions.types import (
-    ActionInternalConfig,
-    ActionConfig,
-    ActionSetConfig,
-)
+# from great_expectations.actions.types import (
+#     ActionInternalConfig,
+#     ActionConfig,
+#     ActionSetConfig,
+# )
 from great_expectations.data_context.store import (
     # NamespacedInMemoryStore
     ValidationResultStore,
@@ -20,44 +20,31 @@ from great_expectations.data_context.types.resource_identifiers import (
 
 def test_action_config():
 
-    ActionConfig(
-        coerce_types=True,
-        **{
-            "module_name" : "great_expectations.actions",
-            "class_name": "SummarizeAndSendToWebhookAction",
-            "kwargs" : {
-                "webhook": "http://myslackwebhook.com/",
-                "summarization_module_name": "great_expectations.render",
-                "summarization_class_name": "SummarizeValidationResultsForSlack",
-            }
-        }
-    )
+    action_config = {
+        "module_name" : "great_expectations.actions",
+        "class_name": "SummarizeAndSendToWebhookAction",
+        "webhook": "http://myslackwebhook.com/",
+        "summarization_module_name": "great_expectations.render",
+        "summarization_class_name": "SummarizeValidationResultsForSlack",
+    }
 
 def test_action_set_config():
 
-    ActionSetConfig(
-        coerce_types=True,
-        **{
-            "action_list" : {
-                "my_first_action" : {
-                    "module_name" : "great_expectations.actions",
-                    "class_name": "SummarizeAndSendToWebhookAction",
-                    "kwargs" : {
-                        "webhook": "http://myslackwebhook.com/",
-                        "summarization_module_name": "great_expectations.render",
-                        "summarization_class_name": "SummarizeValidationResultsForSlack",
-                    }
-                }
-            }
-        }
-    )
+    action_list = [{
+        "name" : "my_first_action",
+        "module_name" : "great_expectations.actions",
+        "class_name": "SummarizeAndSendToWebhookAction",
+        "webhook": "http://myslackwebhook.com/",
+        "summarization_module_name": "great_expectations.render",
+        "summarization_class_name": "SummarizeValidationResultsForSlack",
+    }]
 
 def test_subclass_of_BasicValidationAction():
     # I dunno. This is kind of a silly test.
 
     class MyCountingValidationAction(BasicValidationAction):
-        def __init__(self, config):
-            super(MyCountingValidationAction, self).__init__(config)
+        def __init__(self):
+            super(MyCountingValidationAction, self).__init__()
             self._counter = 0
 
         def take_action(self, validation_result_suite):
@@ -65,9 +52,7 @@ def test_subclass_of_BasicValidationAction():
 
     fake_validation_result_suite = {}
 
-    my_action = MyCountingValidationAction(
-        ActionInternalConfig(**{})
-    )
+    my_action = MyCountingValidationAction()
     assert my_action._counter == 0
 
     my_action.take_action(fake_validation_result_suite)
@@ -91,11 +76,9 @@ def test_SummarizeAndStoreAction():
     }
 
     action = SummarizeAndStoreAction(
-        ActionInternalConfig(**{
-            "summarization_module_name" : "great_expectations.actions.actions",
-            "summarization_class_name" : "TemporaryNoOpSummarizer",
-            "target_store_name" : "fake_in_memory_store",
-        }),
+        summarization_module_name = "great_expectations.actions.actions",
+        summarization_class_name = "TemporaryNoOpSummarizer",
+        target_store_name = "fake_in_memory_store",
         stores = stores,
         services = {},
     )

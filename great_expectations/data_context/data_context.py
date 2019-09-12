@@ -111,7 +111,9 @@ class ConfigOnlyDataContext(object):
                 template.write(PROJECT_TEMPLATE)
 
         return cls(os.path.join(project_root_dir, "great_expectations"))
-            
+
+    
+    # TODO : Migrate to an expressive __init__ method, with the top level of configs unpacked into named arguments.        
     def __init__(self, project_config, context_root_dir, data_asset_name_delimiter='/'):
         """DataContext constructor
 

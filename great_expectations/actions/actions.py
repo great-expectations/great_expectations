@@ -4,10 +4,13 @@ logger = logging.getLogger(__name__)
 from ..util import (
     get_class_from_module_name_and_class_name,
 )
-from .types import (
-    ActionConfig,
-    ActionInternalConfig,
+from great_expectations.data_context.util import (
+    instantiate_class_from_config,
 )
+# from .types import (
+#     ActionConfig,
+#     ActionInternalConfig,
+# )
 from ..data_context.types import (
     ValidationResultIdentifier
 )
@@ -15,11 +18,6 @@ from ..data_context.types import (
 # NOTE: Abe 2019/08/23 : This is first implementation of all these classes. Consider them UNSTABLE for now. 
 
 class BasicValidationAction(object):
-    def __init__(self, config):
-        #TODO: Add type checking
-        # assert isinstance(config, ActionInternalConfig)
-
-        self.config = config
 
     def take_action(self, validation_result_suite):
         return NotImplementedError
@@ -27,6 +25,8 @@ class BasicValidationAction(object):
 class NamespacedValidationAction(BasicValidationAction):
 
     def __init__(self, config, stores, services):
+        # TODO: Switch to expressive inits.
+        
         #Uses config to instantiate itself
         super(NameSpaceAwareValidationAction, self).__init__(config)
 
@@ -42,41 +42,41 @@ class NamespacedValidationAction(BasicValidationAction):
 
 # FIXME: This class is only here temporarily. It should be moved either to tests or renderers
 class TemporaryNoOpSummarizer(object):
-    @classmethod
-    def render(cls, input):
+
+    def render(self, input):
         return input
     
 # FIXME: This class is only here temporarily. It should be moved either to tests or renderers
 class DropAllVowelsSummarizer(object):
-    @classmethod
-    def render(cls, input):
+
+    def render(self, input):
         return input
 
 class SummarizeAndStoreAction(NamespacedValidationAction):
 
-    # NOTE : Abe 2019/08/22 : This pattern feels heavy to me.
-    # Maybe we can just have `config_required_keys`, and dynamically create the Config class in __init__...
-    # That would make sense if every Action needs to have a config spec AND we want the spec declared with the Action itself.
-    class SummarizeAndSendToStoreActionInternalConfig(ActionInternalConfig):
-        _required_keys = set([
-            "summarization_module_name",
-            "summarization_class_name",
-            "target_store_name",
-        ])
+    def __init__(self,
+        summarization_module_name,
+        summarization_class_name,
+        target_store_name,
+        stores, # TODO: Migrate stores and services to a runtime_config object
+        services, # TODO: Migrate stores and services to a runtime_config object
+    ):
 
-    def __init__(self, config, stores, services):
-        self.config = self.SummarizeAndSendToStoreActionInternalConfig(config)
-
-        self.summarization_class = get_class_from_module_name_and_class_name(
-            self.config.summarization_module_name,
-            self.config.summarization_class_name,
+        # TODO: Maybe convert to instantiate_class_from_config?
+        self.summarization_class = instantiate_class_from_config(
+            config = {
+                "module_name": summarization_module_name,
+                "class_name": summarization_class_name,
+            },
+            runtime_config= {},
+            config_defaults= {},
         )
 
         #??? Do we need a view_class as well?
 
         # NOTE: Eventually, we probably need a check to verify that this store is compatible with validation_result_suite_identifiers.
         # Unless ALL stores are compatible...
-        self.target_store = stores[self.config.target_store_name]
+        self.target_store = stores[target_store_name]
 
     def take_action(self, validation_result_suite, validation_result_suite_identifier):
         logger.debug("SummarizeAndStoreAction.take_action")
