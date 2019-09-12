@@ -7,10 +7,10 @@ import great_expectations as ge
 from ..util import (
     get_class_from_module_name_and_class_name,
 )
-from .types import (
-    ActionConfig,
-    ActionInternalConfig,
-)
+# from .types import (
+#     ActionConfig,
+#     ActionInternalConfig,
+# )
 from ..data_context.types import (
     ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
@@ -35,6 +35,9 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
         self.config = config
         self.context = context
 
+
+#class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperator, DefaultActionAwareValidationOperator):
+class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperator):
     # TODO: Move this to DefaultDataContextAwareValidationOperator
     def process_batch(self, 
         batch,
@@ -140,6 +143,3 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
                     from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100"
                 )
             )
-
-class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperator, DefaultActionAwareValidationOperator):
-    pass

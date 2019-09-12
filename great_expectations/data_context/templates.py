@@ -120,7 +120,7 @@ stores:
 # result_callback:
 #   slack: https://slack.com/replace_with_your_webhook
 
-
+# TODO : Remove the extra layer of yml nesting in v0.8:
 data_docs:
   sites:
     local_site: # site name
