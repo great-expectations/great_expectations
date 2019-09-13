@@ -499,6 +499,7 @@ class ConfigOnlyDataContext(object):
         return data_asset
 
 
+    # TODO : Move this into the DataContextAwareValidationOperator class
     # FIXME : This method isn't fully implemented or tested yet.
     def convert_to_batch(self,
         data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
@@ -572,6 +573,7 @@ class ConfigOnlyDataContext(object):
         data_asset_identifier=None, # ... or this is required
         run_identifier=None,
     ):
+        # TODO: Instantiate a DataContextAwareDataAsset
         batch = self.convert_to_batch(
             data_asset=data_asset,
             data_asset_id_string=data_asset_id_string,

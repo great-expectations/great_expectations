@@ -4,6 +4,7 @@ logger = logging.getLogger(__name__)
 import importlib
 import pandas as pd
 import json
+from six import string_types
 
 import great_expectations as ge
 from ..util import (
@@ -76,6 +77,7 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
         data_context,
         action_list,
         expectation_suite_name_prefix="",
+        expectation_suite_name_suffixes=["failure", "warning", "quarantine"],
         process_warnings_and_quarantine_rows_on_error=False,
     ):
         super(DefaultDataContextAwareValidationOperator, self).__init__(
@@ -87,6 +89,13 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
         self.process_warnings_and_quarantine_rows_on_error = process_warnings_and_quarantine_rows_on_error
         self.expectation_suite_name_prefix = expectation_suite_name_prefix
 
+        assert len(expectation_suite_name_suffixes) == 3
+        for suffix in expectation_suite_name_suffixes:
+            assert isinstance(suffix, string_types)
+        self.expectation_suite_name_suffixes = expectation_suite_name_suffixes
+
+
+    # Rename to `run`
     def process_batch(self, batch):
         # Get batch_identifier.
         # TODO : We should be using typed batch
@@ -101,6 +110,7 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
         # I'm NOT doing that, because lots of user research suggests that these 3 specific behaviors
         # (failure, warning, quarantine) will cover most of the common use cases for
         # post-validation dat treatment.
+        # TODO: Make it possible to override "failure", "warning", "quarantine" as default strings
         failure_validation_result_id = ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 data_asset_name=data_asset_identifier,
