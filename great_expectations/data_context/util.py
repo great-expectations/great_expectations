@@ -9,6 +9,7 @@ from collections import namedtuple
 import six
 import importlib
 import copy
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -196,3 +197,25 @@ def format_dict_for_error_message(dict_):
     # TODO : Tidy this up a bit. Indentation isn't fully consistent.
 
     return '\n\t'.join('\t\t'.join((str(key), str(dict_[key]))) for key in dict_)
+
+
+def replace_var(template_str, replace_variables_dict):
+    match = re.search(r'^\$\{(.*?)\}$', template_str)
+    if match:
+        ret = replace_variables_dict[match.group(1)]
+    else:
+        ret = template_str
+
+    return ret
+
+
+def replace_all_template_dict_values(data, replace_variables_dict):
+    """
+    Replace all template values in a dictionary.
+    :param data:
+    :param replace_variables_dict:
+    :return: a dictionary with all the template values replaced
+    """
+    if isinstance(data, dict):
+        return {k : replace_all_template_dict_values(v, replace_variables_dict) for k,v in data.items()}
+    return replace_var(data, replace_variables_dict)

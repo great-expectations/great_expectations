@@ -30,7 +30,7 @@ class SqlAlchemyDatasource(Datasource):
         uses $parameter, with additional kwargs passed to the get_batch method.
     """
 
-    def __init__(self, name="default", data_context=None, data_asset_type=None, profile=None, generators=None, **kwargs):
+    def __init__(self, name="default", data_context=None, data_asset_type=None, credentials=None, generators=None, **kwargs):
         if not sqlalchemy:
             raise DatasourceInitializationError(name, "ModuleNotFoundError: No module named 'sqlalchemy'")
 
@@ -54,9 +54,9 @@ class SqlAlchemyDatasource(Datasource):
                                                    data_context=data_context,
                                                    data_asset_type=data_asset_type,
                                                    generators=generators)
-        if profile is not None:
+        if credentials is not None:
             self._datasource_config.update({
-                "profile": profile
+                "credentials": credentials
             })
 
         try:
@@ -69,14 +69,15 @@ class SqlAlchemyDatasource(Datasource):
                 connection_string = kwargs.pop("connection_string")
                 self.engine = create_engine(connection_string, **kwargs)
                 self.engine.connect()
-            elif "url" in kwargs:
-                url = kwargs.pop("url")
+            elif "url" in credentials:
+                url = credentials.pop("url")
                 self.engine = create_engine(url, **kwargs)
                 self.engine.connect()
 
             # Otherwise, connect using remaining kwargs
             else:
-                self.engine = create_engine(self._get_sqlalchemy_connection_options(**kwargs))
+                # self.engine = create_engine(self._get_sqlalchemy_connection_options(**credentials))
+                self.engine = create_engine(self._get_sqlalchemy_connection_options())
                 self.engine.connect()
 
         except sqlalchemy.exc.OperationalError as sqlalchemy_error:
@@ -85,9 +86,10 @@ class SqlAlchemyDatasource(Datasource):
         self._build_generators()
 
     def _get_sqlalchemy_connection_options(self, **kwargs):
-        if "profile" in self._datasource_config:
-            profile = self._datasource_config["profile"]
-            credentials = self.data_context.get_profile_credentials(profile)
+        # NOTE: Eugene: 2019-09-10: reimplement, following the environments config logic!
+        datasource_config_with_vars_replaced = self.data_context.get_config_with_variables_replaced(config=self._datasource_config)
+        if "credentials" in datasource_config_with_vars_replaced:
+            credentials = datasource_config_with_vars_replaced["credentials"]
         else:
             credentials = {}
 

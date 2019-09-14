@@ -5,6 +5,7 @@ from great_expectations.types import Config
 
 class DataContextConfig(Config):
     _allowed_keys = set([
+        "credentials_file_path",
         "plugins_directory",
         "expectations_store",
         "evaluation_parameter_store_name",
@@ -23,6 +24,7 @@ class DataContextConfig(Config):
     ])
 
     _key_types = {
+        "credentials_file_path": string_types,
         "plugins_directory": string_types,
         "expectations_store": dict,
         "evaluation_parameter_store_name": string_types,
