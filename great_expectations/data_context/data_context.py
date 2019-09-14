@@ -19,12 +19,17 @@ import importlib
 from collections import OrderedDict
 import warnings
 
-from .util import get_slack_callback, safe_mmkdir
+from .util import get_slack_callback, safe_mmkdir, replace_all_template_dict_values
 from ..types.base import DotDict
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
 
 from great_expectations.render.renderer.site_builder import SiteBuilder
+
+from great_expectations.profile.metrics_utils import (
+get_nested_value_from_dict,
+set_nested_value_in_dict
+)
 
 try:
     from urllib.parse import urlparse
@@ -52,7 +57,8 @@ from .types import (
 
 from .templates import (
     PROJECT_TEMPLATE,
-    PROFILE_COMMENT,
+    CREDENTIALS_COMMENT,
+    CREDENTIALS_FILE_TEMPLATE
 )
 from .util import (
     instantiate_class_from_config
@@ -107,6 +113,10 @@ class ConfigOnlyDataContext(object):
             with open(os.path.join(project_root_dir, "great_expectations/great_expectations.yml"), "w") as template:
                 template.write(PROJECT_TEMPLATE)
 
+            safe_mmkdir(os.path.join(project_root_dir, "great_expectations/uncommitted"))
+            with open(os.path.join(project_root_dir, "great_expectations/uncommitted/credentials.yml"), "w") as template:
+                template.write(CREDENTIALS_FILE_TEMPLATE)
+
         return cls(os.path.join(project_root_dir, "great_expectations"))
             
     def __init__(self, project_config, context_root_dir, data_asset_name_delimiter='/'):
@@ -122,9 +132,10 @@ class ConfigOnlyDataContext(object):
             None
         """
         if not isinstance(project_config, DataContextConfig):
-            raise TypeError("project_config must be an instance of DataContextConfig, not {0}".format(
+            raise TypeError("project_config_for_writing must be an instance of DataContextConfig, not {0}".format(
                 type(project_config)
             ))
+
 
         self._project_config = project_config
         self._context_root_directory = os.path.abspath(context_root_dir)
@@ -331,60 +342,55 @@ class ConfigOnlyDataContext(object):
             expectation_suite_name
         )
 
-    def _get_all_profile_credentials(self):
-        """Get all profile credentials from the default location."""
+    def _get_all_credentials_properties(self):
+        """Get all credentials properties from the default location."""
 
         # TODO: support parameterized additional store locations
         try:
             with open(os.path.join(self.root_directory,
-                                   "uncommitted/credentials/profiles.yml"), "r") as profiles_file:
-                return yaml.load(profiles_file) or {}
+                                   self.get_project_config()["credentials_file_path"]), "r") as credentials_file:
+                return yaml.load(credentials_file) or {}
         except IOError as e:
             if e.errno != errno.ENOENT:
                 raise
-            logger.debug("Generating empty profile store.")
-            base_profile_store = yaml.load("{}")
-            base_profile_store.yaml_set_start_comment(PROFILE_COMMENT)
-            return base_profile_store
+            logger.debug("Generating empty credentials file.")
+            base_credentials_store = yaml.load("{}")
+            base_credentials_store.yaml_set_start_comment(CREDENTIALS_COMMENT)
+            return base_credentials_store
 
-    def get_project_config(self):
-        return self._project_config
+    def get_project_config(self, substitute_credentials=True):
+        project_config = self._project_config
 
-    def get_profile_credentials(self, profile_name):
-        """Get named profile credentials.
+        return project_config
 
-        Args:
-            profile_name (str): name of the profile for which to get credentials
+    def get_config_with_variables_replaced(self, config=None):
+        if not config:
+            config = self._project_config
 
-        Returns:
-            credentials (dict): dictionary of credentials
-        """
-        profiles = self._get_all_profile_credentials()
-        if profile_name in profiles:
-            return profiles[profile_name]
-        else:
-            return {}
+        return replace_all_template_dict_values(config, self._get_all_credentials_properties())
 
-    def add_profile_credentials(self, profile_name, **kwargs):
-        """Add named profile credentials.
+
+    def set_credentials_property(self, property_name, **kwargs):
+        """Set credentials property.
 
         Args:
-            profile_name: name of the profile for which to add credentials
-            **kwargs: credential key-value pairs
+            property_name: name of the property
+            **kwargs: credential key-value pairs'
 
         Returns:
             None
         """
-        profiles = self._get_all_profile_credentials()
-        profiles[profile_name] = dict(**kwargs)
-        profiles_filepath = os.path.join(self.root_directory, "uncommitted/credentials/profiles.yml")
-        safe_mmkdir(os.path.dirname(profiles_filepath), exist_ok=True)
-        if not os.path.isfile(profiles_filepath):
-            logger.info("Creating new profiles store at {profiles_filepath}".format(
-                profiles_filepath=profiles_filepath)
+        credentials = self._get_all_credentials_properties()
+        credentials[property_name] = dict(**kwargs)
+        credentials_filepath = os.path.join(self.root_directory, self.get_project_config()["credentials_file_path"])
+        safe_mmkdir(os.path.dirname(credentials_filepath), exist_ok=True)
+        if not os.path.isfile(credentials_filepath):
+            logger.info("Creating new credentials file at {credentials_filepath}".format(
+                profiles_filepath=credentials_filepath)
             )
-        with open(profiles_filepath, "w") as profiles_file:
-            yaml.dump(profiles, profiles_file)
+        with open(credentials_filepath, "w") as profiles_file:
+            yaml.dump(credentials, profiles_file)
+
 
     def get_available_data_asset_names(self, datasource_names=None, generator_names=None):
         """Inspect datasource and generators to provide available data_asset objects.
@@ -1501,13 +1507,15 @@ class DataContext(ConfigOnlyDataContext):
     """
 
     # def __init__(self, config, filepath, data_asset_name_delimiter='/'):
-    def __init__(self, context_root_dir=None, data_asset_name_delimiter='/'):
+    def __init__(self, context_root_dir=None, active_environment_name='default', data_asset_name_delimiter='/'):
 
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
             context_root_dir = self.find_context_root_dir()
         context_root_directory = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_directory
+
+        self.active_environment_name = active_environment_name
 
         project_config = self._load_project_config()
 
@@ -1519,18 +1527,52 @@ class DataContext(ConfigOnlyDataContext):
 
     # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
     def _load_project_config(self):
-        """Loads the project configuration file."""
+        """
+        Reads the project configuration by merging the config loaded from the project configuration file
+        with the one loaded from the self.active_environment_name section of the environments config file.
+
+        The values in the environments file take precedence.
+
+        self.active_environment_name value is set in the constructor of this object.
+
+        The location of the environments config file is taken from env_file_path property in the
+        project configuration file.
+
+        :return: a tuple: (
+            contents of the project configuration file - to be used for writing properties,
+            configuration created by the merge - all properties should be read from this object
+            )
+        """
         try:
             with open(os.path.join(self.root_directory, "great_expectations.yml"), "r") as data:
-                config = yaml.load(data)
-
-                if config["stores"] == None:
-                    config["stores"] = {}
-
-                return DataContextConfig(**config)
-
+                config_dict = yaml.load(data)
+                config = DataContextConfig(**config_dict)
         except IOError:
-            raise ConfigNotFoundError(self.root_directory)
+            raise ConfigNotFoundError("No configuration found in %s" % str(os.path.join(self.root_directory, "great_expectations.yml")))
+
+        # env_file_path = config.get("credentials_file_path", os.path.join(self.root_directory, "uncommitted/credentials.yml"))
+        # if not os.path.isabs(env_file_path):
+        #     env_file_path = os.path.join(self.root_directory, env_file_path)
+        # logger.debug("Reading environment config from this file: " + env_file_path)
+        #
+        # try:
+        #     with open(env_file_path, "r") as data:
+        #         environments_config_dict = yaml.load(data)
+        # except IOError: # Note: Eugene: 2019-09-09: if the yml is invalid, does this exception cover this case and is the error message clear?
+        #     raise ConfigNotFoundError("No environments config file found in %s" % str(env_file_path))
+        #
+        # active_environment_config_dict = environments_config_dict.get(self.active_environment_name)
+        # if active_environment_config_dict:
+        #     merged_config_dict = {**config_dict, **active_environment_config_dict}
+        # else:
+        #     merged_config_dict = config_dict
+        #     logger.debug("No entries in environment {0:s} in {1:s}".format(self.active_environment_name, env_file_path))
+        #
+        # if merged_config_dict["stores"] == None:
+        #     merged_config_dict["stores"] = {}
+        #
+        # return (config, DataContextConfig(**merged_config_dict))
+        return config
 
     # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
     def _save_project_config(self):
@@ -1561,6 +1603,7 @@ class DataContext(ConfigOnlyDataContext):
         logger.debug("Starting DataContext.add_datasource")
 
         new_datasource = super(DataContext, self).add_datasource(name, type_, **kwargs)
+
         self._save_project_config()
 
         return new_datasource

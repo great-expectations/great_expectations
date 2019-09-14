@@ -78,6 +78,13 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
                 database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
                                         show_default=True)
 
+                # Since we don't want to save the database credentials in the config file that will be
+                # committed in the repo, we will use our Variable Substitution feature to store the credentials
+                # in the credentials file (that will not be committed, since it is in the uncommitted directory)
+                # with the datasource's name as the variable name.
+                # The value of the datasource's "credntials" key in the config file (great_expectations.yml) will
+                # be ${datasource name}.
+                # GE will replace the ${datasource name} with the value from the credentials file in runtime.
                 credentials = {
                     "drivername": drivername,
                     "host": host,
@@ -96,11 +103,11 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
                     "url": sqlalchemy_url
                 }
 
-            context.add_profile_credentials(data_source_name, **credentials)
+            context.set_credentials_property(data_source_name, **credentials)
 
             try:
                 context.add_datasource(
-                    data_source_name, "sqlalchemy", profile=data_source_name)
+                    data_source_name, "sqlalchemy", credentials="${" + data_source_name + "}")
                 break
             except (DatasourceInitializationError, ModuleNotFoundError) as de:
                 cli_message(

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-PROJECT_HELP_COMMENT = """# Welcome to great expectations. 
+PROJECT_HELP_COMMENT = """
+# Welcome to great expectations. 
 # This project configuration file allows you to define datasources, 
 # generators, integrations, and other configuration artifacts that
 # make it easier to use Great Expectations.
@@ -16,6 +17,24 @@ PROJECT_HELP_COMMENT = """# Welcome to great expectations.
 """
 
 PROJECT_OPTIONAL_CONFIG_COMMENT = """
+
+# Great Expectations config file supports variable substitution.
+
+# Variable substitution enables these two use cases:
+# 1. do not store sensitive credentials in a committed file (since the credentials file should be in 
+#    the uncommitted directory  
+# 2. allow a config parameter to take different values, depending on the environment (e.g., dev/staging/prod)
+#
+# When GE encounters the following syntax in the config file:
+#
+# my_key: ${my_value}
+#
+# GE will attempt to replace the value of “my_key” first, with the value of env variable “my_value” (if set) and then with the value of the key “my_value” read from credentials file.
+#
+# If the replacing value comes from the config variables file, it can be a simple value or a dictionary. If it comes from an environment variable, it must be a simple value.
+#
+# 
+credentials_file_path: uncommitted/credentials.yml
 
 # The plugins_directory is where the data_context will look for custom_data_assets.py
 # and any configured evaluation parameter store
@@ -193,13 +212,23 @@ data_docs:
 
 PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + "datasources: {}\n" + PROJECT_OPTIONAL_CONFIG_COMMENT
 
-PROFILE_COMMENT = """This file stores profiles with database access credentials. 
-Do not commit this file to version control. 
+CREDENTIALS_COMMENT = """# NOTE: Eugene: 2019-09-11: fill in the text
 
-A profile can optionally have a single parameter called 
-"url" which will be passed to sqlalchemy's create_engine.
+"""
 
-Otherwise, all credential options specified here for a 
-given profile will be passed to sqlalchemy's create URL function.
+CREDENTIALS_FILE_TEMPLATE = """
+# Great Expectations config file supports variable substitution.
 
+# Variable substitution enables these two use cases:
+# 1. do not store sensitive credentials in a committed file (since the credentials file should be in 
+#    the uncommitted directory  
+# 2. allow a config parameter to take different values, depending on the environment (e.g., dev/staging/prod)
+#
+# When GE encounters the following syntax in the config file:
+#
+# my_key: ${my_value}
+#
+# GE will attempt to replace the value of “my_key” first, with the value of env variable “my_value” (if set) and then with the value of the key “my_value” read from credentials file.
+#
+# If the replacing value comes from the config variables file, it can be a simple value or a dictionary. If it comes from an environment variable, it must be a simple value.
 """
