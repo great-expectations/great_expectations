@@ -79,15 +79,20 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
         if not data_asset is None:
             # Get a valid data_asset_identifier or raise an error
             # if isinstance(data_asset, Batch):
-            if hasattr(data_asset, "data_asset_name") and isinstance(data_asset.data_asset_name, DataAssetIdentifier):
-                data_asset_identifier = data_asset.data_asset_identifier
+            if hasattr(data_asset, "_expectation_suite") and hasattr(data_asset._expectation_suite, "data_asset_name") and isinstance(data_asset._expectation_suite["data_asset_name"], DataAssetIdentifier):
+                    data_asset_identifier = data_asset._expectation_suite["data_asset_name"]
 
             else:
                 if data_asset_identifier is not None:
                     assert isinstance(data_asset_identifier, DataAssetIdentifier)
 
                 elif data_asset_id_string is not None:
-                    data_asset_identifier = self._normalize_data_asset_name(data_asset_id_string)
+                    data_asset_name = self.data_context._normalize_data_asset_name(data_asset_id_string)
+                    data_asset_identifier = DataAssetIdentifier(
+                        datasource=data_asset_name.datasource,
+                        generator=data_asset_name.generator,
+                        generator_asset=data_asset_name.generator_asset,
+                    )
 
                 else:
                     raise ValueError("convert_to_batch couldn't identify a data_asset_name from arguments {}".format({
@@ -97,9 +102,20 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
                         "run_identifier" : run_identifier,
                     }))
 
+            # NOTE: Abe 2019/09/16 : I don't believe that a data_asset can have a run_id.
+            # Including this here because future DataContextAwareDataAssets will likely have this property.
             if hasattr(data_asset, "run_id") and isinstance(data_asset.run_id, string_types):
-                run_id = data_asset.run_id
+                run_identifier = data_asset.run_id
 
+            elif run_identifier == None:
+                raise ValueError("convert_to_batch couldn't identify a run_id from arguments {}".format({
+                    "run_identifier" : run_identifier,
+                }))
+
+            # NOTE : Someday we may add type checking for run_ids
+            # For now, keep this no-op line, just to make the logic obvious.
+            run_identifier = run_identifier
+            
             # We already have a data_asset identifier, so no further action needed.
             batch = data_asset
 
@@ -108,7 +124,12 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
                 assert isinstance(data_asset_identifier, DataAssetIdentifier)
 
             elif data_asset_id_string is not None:
-                data_asset_identifier = self._normalize_data_asset_name(data_asset_id_string)
+                data_asset_name = self.data_context._normalize_data_asset_name(data_asset_id_string)
+                data_asset_identifier = DataAssetIdentifier(
+                    datasource=data_asset_name.datasource,
+                    generator=data_asset_name.generator,
+                    generator_asset=data_asset_name.generator_asset,
+                )
 
             else:
                 raise ValueError("convert_to_batch couldn't identify a data_asset_name from arguments {}".format({
@@ -118,8 +139,16 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
                     "run_identifier" : run_identifier,
                 }))
 
-            # FIXME: Need to look up the API for this.
-            batch = self.get_batch(data_asset_identifier, run_identifier)
+            if run_identifier == None:
+                raise ValueError("convert_to_batch couldn't identify a run_id from arguments {}".format({
+                    "run_identifier" : run_identifier,
+                }))
+
+            # NOTE : Someday we may add type checking for run_ids
+            # For now, keep this no-op line, just to make the logic obvious.
+            run_identifier = run_identifier
+
+            batch = self.data_context.get_batch(data_asset_identifier, run_identifier)
 
         # At this point, we should have a properly typed and instantiated data_asset_identifier and run_identifier
         assert isinstance(data_asset_identifier, DataAssetIdentifier)
@@ -249,12 +278,9 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
                 
                 return return_obj
 
-        print(warning_expectations)
-        print(batch.validate(warning_expectations))
         return_obj["validation_results"]["warning"] = (warning_validation_result_id, batch.validate(warning_expectations))
         return_obj["validation_results"]["quarantine"] = (quarantine_validation_result_id, batch.validate(quarantine_expectations, result_format="COMPLETE"))
         
-        print(return_obj["validation_results"]["quarantine"])
         #TODO: Add checking for exceptions in Expectations
 
         unexpected_index_set = self._get_unexpected_indexes(*return_obj["validation_results"]["quarantine"])
@@ -262,8 +288,6 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
         return_obj["data_assets"]["quarantined_batch"] = batch.loc[unexpected_index_set]
         return_obj["data_assets"]["nonquarantined_batch"] = batch.loc[set(batch.index) - set(unexpected_index_set)]
 
-        print("Validation successful")
-        
         #Process actions here
         # TODO: This should include the whole return object, not just validation_results.
         self._process_actions(return_obj)#, self.config[action_set_name])

@@ -789,6 +789,7 @@ class ConfigOnlyDataContext(object):
             datasources = [datasource["name"] for datasource in self.list_datasources()]
             if split_name[0] in datasources:
                 datasource = self.get_datasource(split_name[0])
+
                 generators = [generator["name"] for generator in datasource.list_generators()]
                 if split_name[1] in generators:
                     return NormalizedDataAssetName(*split_name)
