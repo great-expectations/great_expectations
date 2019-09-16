@@ -313,6 +313,35 @@ def dataset(request):
 
 
 @pytest.fixture()
+def sqlalchemy_dataset():
+    """Provide dataset fixtures that have special values and/or are otherwise useful outside
+    the standard json testing framework"""
+    if "postgresql" in CONTEXTS:
+        backend = "postgresql"
+    else:
+        backend = "sqlite"
+
+    data = {
+        "infinities": [-np.inf, -10, -np.pi, 0, np.pi, 10/2.2, np.inf],
+        "nulls": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
+        "naturals": [1, 2, 3, 4, 5, 6, 7]
+    }
+    schemas = {
+        "postgresql": {
+            "infinities": "DOUBLE_PRECISION",
+            "nulls": "DOUBLE_PRECISION",
+            "naturals": "DOUBLE_PRECISION"
+        },
+        "sqlite": {
+            "infinities": "FLOAT",
+            "nulls": "FLOAT",
+            "naturals": "FLOAT"
+        }
+    }
+    return get_dataset(backend, data, schemas=schemas, profiler=None)
+
+
+@pytest.fixture()
 def sqlitedb_engine():
     return sa.create_engine('sqlite://')
 

@@ -43,8 +43,6 @@ class Datasource(object):
     to configure the datasource to load and return DataAssets of the custom type.
     """
 
-    _batch_kwarg_types = tuple()
-
     @classmethod
     def from_configuration(cls, **kwargs):
         """

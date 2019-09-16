@@ -31,8 +31,6 @@ class PandasDatasource(Datasource):
     existing in-memory dataframes.
     """
 
-    _batch_kwarg_types = (PandasDatasourceBatchKwargs, )
-
     def __init__(self, name="pandas", data_context=None, data_asset_type=None, generators=None, **kwargs):
         if generators is None:
             # Provide a gentle way to build a datasource with a sane default,
@@ -78,10 +76,11 @@ class PandasDatasource(Datasource):
 
     def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
         batch_kwargs.update(kwargs)
+        # We will use and manipulate reader_options along the way
         reader_options = batch_kwargs.copy()
-        # We will use and manipulate batch_kwargs along the way
+
         # We need to build a batch_id to be used in the dataframe
-        batch_id = batch_kwargs.copy().update({
+        batch_id = ({
             "timestamp": time.time()
         })
 
@@ -101,7 +100,8 @@ class PandasDatasource(Datasource):
             raise ValueError("PandasDatasource cannot instantiate batch with data_asset_type: '%s'. It "
                              "must be a subclass of PandasDataset." % data_asset_type.__name__)
 
-        if "path" in batch_kwargs:
+        if isinstance(batch_kwargs, PathBatchKwargs):
+        # if "path" in batch_kwargs:
             path = reader_options.pop("path")  # We need to remove from the reader
             reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
             reader_options.pop("partition_id", "")

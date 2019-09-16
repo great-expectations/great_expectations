@@ -54,7 +54,7 @@ class GlobReaderGenerator(BatchGenerator):
                  reader_options=None,
                  asset_globs=None):
         logger.debug("Constructing GlobReaderGenerator {!r}".format(name))
-        super(GlobReaderGenerator, self).__init__(name, type_="glob_reader", datasource=datasource)
+        super(GlobReaderGenerator, self).__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = {}
 

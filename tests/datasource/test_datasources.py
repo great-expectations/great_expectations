@@ -162,29 +162,6 @@ def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connecti
     assert res["success"] is True
 
 
-def test_standalone_pandas_datasource(test_folder_connection_path):
-    datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
-
-    assert datasource.get_available_data_asset_names() == {"default": {"test"}}
-    manual_batch_kwargs = datasource.build_batch_kwargs(
-        "default",
-        os.path.join(str(test_folder_connection_path), "test.csv"))
-
-    # Get the default (subdir_path) generator
-    generator = datasource.get_generator()
-    auto_batch_kwargs = generator.yield_batch_kwargs("test")
-
-    assert manual_batch_kwargs["path"] == auto_batch_kwargs["path"]
-
-    # Include some extra kwargs...
-    # Note that we are using get_data_asset NOT get_batch here, since we are standalone (no batch concept)
-    dataset = datasource.get_data_asset("test",
-                                        generator_name="default", batch_kwargs=auto_batch_kwargs,
-                                        sep=",", header=0, index_col=0)
-    assert isinstance(dataset, PandasDataset)
-    assert (dataset["col_1"] == [1, 2, 3, 4, 5]).all()
-
-
 def test_standalone_sqlalchemy_datasource(test_db_connection_string):
     datasource = SqlAlchemyDatasource(
         'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
