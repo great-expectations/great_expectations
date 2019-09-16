@@ -92,7 +92,6 @@ class SummarizeAndStoreAction(NamespacedValidationAction):
     def take_action(self, validation_result_id, validation_result_suite ):
         logger.debug("SummarizeAndStoreAction.take_action")
 
-        print(validation_result_id, validation_result_suite)
         if validation_result_suite is None:
             return
 

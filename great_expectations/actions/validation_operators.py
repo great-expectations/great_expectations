@@ -13,13 +13,13 @@ from ..util import (
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
-# from .types import (
-#     ActionConfig,
-#     ActionInternalConfig,
-# )
 from ..data_context.types import (
+    DataAssetIdentifier,
     ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
+)
+from great_expectations.data_asset import (
+    DataAsset,
 )
 
 # NOTE: Abe 2019/08/24 : This is first implementation of all these classes. Consider them UNSTABLE for now. 
@@ -65,8 +65,91 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
             self.actions[action_config["name"]] = new_action
         
         self.expectation_suite_name_prefix = expectation_suite_name_prefix
-    
-    def process_batch(self, batch, expectation_suite_name):
+
+
+    # NOTE : Abe 2019/09/12 : It isn't clear to me that this method should live in ValidationOperators.
+    # Even though it's invoked from there, it feels more like a DataContext concern.
+    # FIXME : This method isn't fully implemented or tested yet.
+    def _get_or_convert_to_batch_from_identifiers(self,
+        data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
+        data_asset_id_string=None, # If data_asset isn't a batch, then this
+        data_asset_identifier=None, # ... or this is required
+        run_identifier=None,
+    ):
+        if not data_asset is None:
+            # Get a valid data_asset_identifier or raise an error
+            # if isinstance(data_asset, Batch):
+            if hasattr(data_asset, "data_asset_name") and isinstance(data_asset.data_asset_name, DataAssetIdentifier):
+                data_asset_identifier = data_asset.data_asset_identifier
+
+            else:
+                if data_asset_identifier is not None:
+                    assert isinstance(data_asset_identifier, DataAssetIdentifier)
+
+                elif data_asset_id_string is not None:
+                    data_asset_identifier = self._normalize_data_asset_name(data_asset_id_string)
+
+                else:
+                    raise ValueError("convert_to_batch couldn't identify a data_asset_name from arguments {}".format({
+                        "type(data_asset)" : type(data_asset),
+                        "data_asset_id_string" : data_asset_id_string,
+                        "data_asset_identifier" : data_asset_identifier,
+                        "run_identifier" : run_identifier,
+                    }))
+
+            if hasattr(data_asset, "run_id") and isinstance(data_asset.run_id, string_types):
+                run_id = data_asset.run_id
+
+            # We already have a data_asset identifier, so no further action needed.
+            batch = data_asset
+
+        else:
+            if data_asset_identifier is not None:
+                assert isinstance(data_asset_identifier, DataAssetIdentifier)
+
+            elif data_asset_id_string is not None:
+                data_asset_identifier = self._normalize_data_asset_name(data_asset_id_string)
+
+            else:
+                raise ValueError("convert_to_batch couldn't identify a data_asset_name from arguments {}".format({
+                    "type(data_asset)" : type(data_asset),
+                    "data_asset_id_string" : data_asset_id_string,
+                    "data_asset_identifier" : data_asset_identifier,
+                    "run_identifier" : run_identifier,
+                }))
+
+            # FIXME: Need to look up the API for this.
+            batch = self.get_batch(data_asset_identifier, run_identifier)
+
+        # At this point, we should have a properly typed and instantiated data_asset_identifier and run_identifier
+        assert isinstance(data_asset_identifier, DataAssetIdentifier)
+        assert isinstance(run_identifier, string_types)
+
+        assert isinstance(batch, DataAsset)
+
+        # NOTE: We don't have a true concept of a Batch aka DataContextAwareDataAsset yet.
+        # So attaching a data_asset_id and run_id to a generic DataAsset is the best we can do.
+        # This should eventually be switched to a properly typed class.
+        batch.data_asset_identifier = data_asset_identifier
+        batch.run_id = run_identifier
+
+        return batch
+
+    def run(self,
+        data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
+        data_asset_id_string=None, # If data_asset isn't a batch, then this
+        data_asset_identifier=None, # ... or this is required
+        run_identifier=None,
+    ):
+        batch = self._get_or_convert_to_batch_from_identifiers(
+            data_asset=data_asset,
+            data_asset_id_string=data_asset_id_string,
+            data_asset_identifier=data_asset_identifier,
+            run_identifier=run_identifier,
+        )
+        return self._run(batch)
+
+    def _run(self, batch):
         raise NotImplementedError
 
 
@@ -85,7 +168,6 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
             action_list,
         )
         
-        print(process_warnings_and_quarantine_rows_on_error)
         self.process_warnings_and_quarantine_rows_on_error = process_warnings_and_quarantine_rows_on_error
         self.expectation_suite_name_prefix = expectation_suite_name_prefix
 
@@ -95,8 +177,7 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
         self.expectation_suite_name_suffixes = expectation_suite_name_suffixes
 
 
-    # Rename to `run`
-    def process_batch(self, batch):
+    def _run(self, batch):
         # Get batch_identifier.
         # TODO : We should be using typed batch
         # if data_asset_identifier is None:

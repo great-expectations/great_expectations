@@ -59,9 +59,6 @@ from .templates import (
 from .util import (
     instantiate_class_from_config
 )
-from great_expectations.data_asset import (
-    DataAsset,
-)
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -498,74 +495,6 @@ class ConfigOnlyDataContext(object):
                                           **kwargs)
         return data_asset
 
-
-    # TODO : Move this into the DataContextAwareValidationOperator class
-    # FIXME : This method isn't fully implemented or tested yet.
-    def convert_to_batch(self,
-        data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
-        data_asset_id_string=None, # If data_asset isn't a batch, then this
-        data_asset_identifier=None, # ... or this is required
-        run_identifier=None,
-    ):
-        if not data_asset is None:
-            # Get a valid data_asset_identifier or raise an error
-            # if isinstance(data_asset, Batch):
-            if hasattr(data_asset, "data_asset_name") and isinstance(data_asset.data_asset_name, DataAssetIdentifier):
-                data_asset_identifier = data_asset.data_asset_identifier
-
-            else:
-                if data_asset_identifier is not None:
-                    assert isinstance(data_asset_identifier, DataAssetIdentifier)
-
-                elif data_asset_id_string is not None:
-                    data_asset_identifier = self._normalize_data_asset_name(data_asset_id_string)
-
-                else:
-                    raise ValueError("convert_to_batch couldn't identify a data_asset_name from arguments {}".format({
-                        "type(data_asset)" : type(data_asset),
-                        "data_asset_id_string" : data_asset_id_string,
-                        "data_asset_identifier" : data_asset_identifier,
-                        "run_identifier" : run_identifier,
-                    }))
-
-            if hasattr(data_asset, "run_id") and isinstance(data_asset.run_id, string_types):
-                run_id = data_asset.run_id
-
-            # We already have a data_asset identifier, so no further action needed.
-            batch = data_asset
-
-        else:
-            if data_asset_identifier is not None:
-                assert isinstance(data_asset_identifier, DataAssetIdentifier)
-
-            elif data_asset_id_string is not None:
-                data_asset_identifier = self._normalize_data_asset_name(data_asset_id_string)
-
-            else:
-                raise ValueError("convert_to_batch couldn't identify a data_asset_name from arguments {}".format({
-                    "type(data_asset)" : type(data_asset),
-                    "data_asset_id_string" : data_asset_id_string,
-                    "data_asset_identifier" : data_asset_identifier,
-                    "run_identifier" : run_identifier,
-                }))
-
-            # FIXME: Need to look up the API for this.
-            batch = self.get_batch(data_asset_identifier, run_identifier)
-
-        # At this point, we should have a properly typed and instantiated data_asset_identifier and run_identifier
-        assert isinstance(data_asset_identifier, DataAssetIdentifier)
-        assert isinstance(run_identifier, string_types)
-
-        assert isinstance(batch, DataAsset)
-
-        # NOTE: We don't have a true concept of a Batch aka DataContextAwareDataAsset yet.
-        # So attaching a data_asset_id and run_id to a generic DataAsset is the best we can do.
-        # This should eventually be switched to a properly typed class.
-        batch.data_asset_identifier = data_asset_identifier
-        batch.run_id = run_identifier
-
-        return batch
-
     def run_validation_operator(self,
         validation_operator_name,
         data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
@@ -573,15 +502,12 @@ class ConfigOnlyDataContext(object):
         data_asset_identifier=None, # ... or this is required
         run_identifier=None,
     ):
-        # TODO: Instantiate a DataContextAwareDataAsset
-        batch = self.convert_to_batch(
+        self.validation_operators[validation_operator_name].run(
             data_asset=data_asset,
             data_asset_id_string=data_asset_id_string,
             data_asset_identifier=data_asset_identifier,
             run_identifier=run_identifier,
         )
-
-        self.validation_operators[validation_operator_name].process_batch(batch)
 
     # NOTE: Abe 2019//08/22 : I think we want to change this to the new standard class_name, module_name syntax.
     # Doing this while maintaining backward compatibility to type_s (assuming we choose to do so) will require care.
