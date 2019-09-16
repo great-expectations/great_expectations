@@ -24,7 +24,10 @@ from ..types.base import DotDict
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
 
-from great_expectations.render.renderer.site_builder import SiteBuilder
+# FIXME : fully deprecate site_builder, by replacing it with new_site_builder.
+# FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers. 
+# from great_expectations.render.renderer.site_builder import SiteBuilder
+from great_expectations.render.renderer.new_site_builder import SiteBuilder
 
 try:
     from urllib.parse import urlparse
@@ -902,6 +905,9 @@ class ConfigOnlyDataContext(object):
             else:
                 logger.warning("Unrecognized result_callback configuration.")
 
+
+        # Proposed TODO : Snapshotting shouldn't be a top-level concern in the DataContext.
+        # Instead, it should be available as a pluggable Action. 
         if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
             logging.debug("Storing validation results to data_asset_snapshot_store")
             self.stores.data_asset_snapshot_store.set(
@@ -1285,13 +1291,23 @@ class ConfigOnlyDataContext(object):
         if data_docs_config:
             logger.debug("Found data_docs_config. Building sites...")
             sites = data_docs_config.get('sites', [])
+
             for site_name, site_config in sites.items():
                 logger.debug("Building site %s" % site_name,)
+
                 if (site_names and site_name in site_names) or not site_names or len(site_names) == 0:
-                    #TODO: get the builder class
-                    #TODO: build the site config by using defaults if needed
                     complete_site_config = site_config
-                    index_page_locator_info = SiteBuilder.build(self, complete_site_config, specified_data_asset_name=data_asset_name)
+                    site_builder = instantiate_class_from_config(
+                        config=complete_site_config,
+                        runtime_config={
+                            "data_context": self,
+                        },
+                        config_defaults={}
+                    )
+                    # TODO : Re-implement data_asset_name
+                    # TODO : Site builder no longer needs to return index_page_locator_info. Instead, the context can fetch the required info from Stores.
+                    index_page_locator_info = site_builder.build()#self, complete_site_config, specified_data_asset_name=data_asset_name)
+
                     if index_page_locator_info:
                         index_page_locator_infos[site_name] = index_page_locator_info
         else:
