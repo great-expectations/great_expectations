@@ -58,7 +58,7 @@ def basic_data_context_config_for_validation_operator():
                         "class_name" : "SummarizeAndStoreAction",
                         "target_store_name": "warning_validation_result_store",
                         "summarizer":{
-                            "module_name": "great_expectations.actions.actions",
+                            "module_name": "tests.test_plugins.fake_actions",
                             "class_name": "TemporaryNoOpSummarizer",
                         },
 

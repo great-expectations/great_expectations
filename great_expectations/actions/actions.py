@@ -40,17 +40,6 @@ class NamespacedValidationAction(BasicValidationAction):
     def take_action(self, validation_result_suite, validation_result_suite_identifier):
         return NotImplementedError
 
-# FIXME: This class is only here temporarily. It should be moved either to tests or renderers
-class TemporaryNoOpSummarizer(object):
-
-    def render(self, input):
-        return input
-    
-# FIXME: This class is only here temporarily. It should be moved either to tests or renderers
-class DropAllVowelsSummarizer(object):
-
-    def render(self, input):
-        return input
 
 class NoOpAction(NamespacedValidationAction):
 
