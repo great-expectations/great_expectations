@@ -148,16 +148,21 @@ def test_hello_world(basic_data_context_config_for_validation_operator):
 
     assert data_context.stores["warning_validation_result_store"].list_keys() == []
 
-    my_batch = data_context.convert_to_batch(
-        my_ge_df,
+    # my_batch = vo._get_or_convert_to_batch_from_identifiers(
+    #     my_ge_df,
+    #     data_asset_identifier=DataAssetIdentifier(
+    #         from_string="DataAssetIdentifier.a.b.c"
+    #     ),
+    #     run_identifier="test_100"
+    # )
+
+    results = vo.run(
+        data_asset=my_ge_df,
         data_asset_identifier=DataAssetIdentifier(
             from_string="DataAssetIdentifier.a.b.c"
         ),
         run_identifier="test_100"
-    )
-
-    results = vo.run(
-        batch=my_batch,
+        # batch=my_batch,
         # expectation_suite_name_prefix="my_expectations",
     )
     # print(json.dumps(results["validation_results"], indent=2))
