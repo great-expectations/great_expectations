@@ -7,6 +7,8 @@ from great_expectations.render.types import (
     RenderedDocumentContent
 )
 
+# FIXME : This class needs to be rebuilt to accept SiteSectionIdentifiers as input.
+# FIXME : This class needs tests.
 class SiteIndexPageRenderer(Renderer):
 
     @classmethod
