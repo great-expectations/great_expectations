@@ -69,7 +69,6 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
 
     # NOTE : Abe 2019/09/12 : It isn't clear to me that this method should live in ValidationOperators.
     # Even though it's invoked from there, it feels more like a DataContext concern.
-    # FIXME : This method isn't fully implemented or tested yet.
     def _get_or_convert_to_batch_from_identifiers(self,
         data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
         data_asset_id_string=None, # If data_asset isn't a batch, then this
@@ -77,9 +76,12 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
         run_identifier=None,
     ):
         if not data_asset is None:
+
             # Get a valid data_asset_identifier or raise an error
-            # if isinstance(data_asset, Batch):
             if hasattr(data_asset, "_expectation_suite") and hasattr(data_asset._expectation_suite, "data_asset_name") and isinstance(data_asset._expectation_suite["data_asset_name"], DataAssetIdentifier):
+            # NOTE: Once we have typed Batch aka DataContextAwareDataAssets, change this to:
+            # if isinstance(data_asset, Batch):
+
                     data_asset_identifier = data_asset._expectation_suite["data_asset_name"]
 
             else:
