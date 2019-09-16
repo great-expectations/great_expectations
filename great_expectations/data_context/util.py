@@ -1,17 +1,16 @@
 import requests
 import datetime
-import uuid
 import logging
 import os
 import json
 import errno
-from collections import namedtuple
 import six
 import importlib
 import copy
 import re
 
 logger = logging.getLogger(__name__)
+
 
 def build_slack_notification_request(validation_json=None):
     # Defaults
@@ -145,11 +144,30 @@ def parse_string_to_data_context_resource_identifier(string, separator="."):
 
     return class_instance
 
-def instantiate_class_from_config(config, runtime_config, config_defaults={}):
+
+def load_class(class_name, module_name):
+    # Get the class object itself from strings.
+    loaded_module = importlib.import_module(module_name)
+    try:
+        class_ = getattr(loaded_module, class_name)
+    except AttributeError as e:
+        raise AttributeError("Module : {} has no class named : {}".format(
+            module_name,
+            class_name,
+        ))
+    return class_
+
+
+def instantiate_class_from_config(config, runtime_config, config_defaults=None):
+    """Build a GE class from configuration dictionaries."""
+
+    if config_defaults is None:
+        config_defaults = {}
+
     config = copy.deepcopy(config)
 
     module_name = config.pop("module_name", None)
-    if module_name == None:
+    if module_name is None:
         try:
             module_name = config_defaults.pop("module_name")
         except KeyError as e:
@@ -161,7 +179,8 @@ def instantiate_class_from_config(config, runtime_config, config_defaults={}):
         config_defaults.pop("module_name", None)
 
     class_name = config.pop("class_name", None)
-    if class_name == None:
+    if class_name is None:
+    # TODO : Trap this error and throw an informative message
         try:
             class_name = config_defaults.pop("class_name")
         except KeyError as e:
@@ -172,15 +191,7 @@ def instantiate_class_from_config(config, runtime_config, config_defaults={}):
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
         config_defaults.pop("class_name", None)
 
-    # Get the class object itself from strings.
-    loaded_module = importlib.import_module(module_name)
-    try:
-        class_ = getattr(loaded_module, class_name)
-    except AttributeError as e:
-        raise AttributeError("Module : {} has no class named : {}".format(
-            module_name,
-            class_name,
-        ))
+    class_ = load_class(class_name=class_name, module_name=module_name)
 
     config_with_defaults = copy.deepcopy(config_defaults)
     config_with_defaults.update(config)
@@ -195,6 +206,7 @@ def instantiate_class_from_config(config, runtime_config, config_defaults={}):
         ) + str(e))
 
     return class_instance
+
 
 def format_dict_for_error_message(dict_):
     # TODO : Tidy this up a bit. Indentation isn't fully consistent.

@@ -17,6 +17,7 @@ try:
     from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
     from pyspark.sql import SparkSession, DataFrame
 except ImportError:
+    SparkSession = None
     # TODO: review logging more detail here
     logger.debug("Unable to load pyspark; install optional spark dependency for support.")
 
@@ -26,7 +27,20 @@ class SparkDFDatasource(Datasource):
     filesystem (the default subdir_reader generator) and databricks notebooks.
     """
 
-    def __init__(self, name="default", data_context=None, data_asset_type=None, generators=None, **kwargs):
+    @classmethod
+    def build_configuration(cls, data_asset_type=None, generators=None, **kwargs):
+        """
+        Build a full configuration object for a datasource, potentially including generators with defaults.
+
+        Args:
+            data_asset_type: A ClassConfig dictionary
+            generators: Generator configuration dictionary
+            **kwargs: Additional kwargs to be part of the datasource constructor's initialization
+
+        Returns:
+            A complete datasource configuration.
+
+        """
         if generators is None:
             # Provide a gentle way to build a datasource with a sane default,
             # including ability to specify the base_directory
@@ -34,11 +48,11 @@ class SparkDFDatasource(Datasource):
             reader_options = kwargs.pop("reader_options", {})
             generators = {
                 "default": {
-                    "type": "subdir_reader",
+                    "class_name": "SubdirReaderGenerator",
                     "base_directory": base_directory,
                     "reader_options": reader_options
                 }
-        }
+            }
 
         if data_asset_type is None:
             data_asset_type = ClassConfig(
@@ -50,14 +64,27 @@ class SparkDFDatasource(Datasource):
             except TypeError:
                 # In this case, we allow the passed config, for now, in case they're using a legacy string-only config
                 pass
+        configuration = kwargs
+        configuration.update({
+            "data_asset_type": data_asset_type,
+            "generators": generators,
+        })
+        return configuration
 
-        super(SparkDFDatasource, self).__init__(name, type_="spark",
-                                                data_context=data_context,
-                                                data_asset_type=data_asset_type,
-                                                generators=generators)
+    def __init__(self, name="default", data_context=None, data_asset_type=None, generators=None, **kwargs):
+        configuration_with_defaults = SparkDFDatasource.build_configuration(data_asset_type, generators, **kwargs)
+        data_asset_type = configuration_with_defaults.pop("data_asset_type")
+        generators = configuration_with_defaults.pop("generators")
+        super(SparkDFDatasource, self).__init__(
+            name,
+            data_context=data_context,
+            data_asset_type=data_asset_type,
+            generators=generators,
+            **configuration_with_defaults)
+
         try:
             self.spark = SparkSession.builder.getOrCreate()
-        except Exception:
+        except AttributeError:
             logger.error("Unable to load spark context; install optional spark dependency for support.")
             self.spark = None
 

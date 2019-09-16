@@ -57,13 +57,16 @@ def test_parquet_folder_connection_path(tmp_path_factory):
 def test_create_pandas_datasource(data_context, tmp_path_factory):
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
     name = "test_pandas_datasource"
-    type_ = "pandas"
-
-    data_context.add_datasource(name, type_, base_directory=str(basedir))
+    class_name = "PandasDatasource"
+    # OLD STYLE: Remove even from record later...
+    # type_ = "pandas"
+    # data_context.add_datasource(name, type_, base_directory=str(basedir))
+    data_context.add_datasource(name, class_name=class_name, base_directory=str(basedir))
     data_context_config = data_context.get_config()
 
-    assert name in data_context_config["datasources"] 
-    assert data_context_config["datasources"][name]["type"] == type_
+    assert name in data_context_config["datasources"]
+    assert data_context_config["datasources"][name]["class_name"] == class_name
+    # assert data_context_config["datasources"][name]["type"] == type_
 
     # We should now see updated configs
     # Finally, we should be able to confirm that the folder structure is as expected
@@ -72,17 +75,22 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
 
     assert data_context_file_config["datasources"][name] == data_context_config["datasources"][name]
 
+    # We should have added a default generator built from the default config
+    assert data_context_file_config["datasources"][name]["generators"]["default"]["class_name"] == \
+        "SubdirReaderGenerator"
+
 
 def test_pandas_datasource_custom_data_asset(data_context, test_folder_connection_path):
     name = "test_pandas_datasource"
-    type_ = "pandas"
+    # type_ = "pandas"
+    class_name = "PandasDatasource"
 
     data_asset_type_config = {
         "module_name": "custom_pandas_dataset",
         "class_name": "CustomPandasDataset"
     }
     data_context.add_datasource(name,
-                                type_,
+                                class_name=class_name,
                                 base_directory=test_folder_connection_path,
                                 data_asset_type=data_asset_type_config)
 
@@ -102,14 +110,15 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
 
 def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connection_string):
     name = "test_sqlalchemy_datasource"
-    type_ = "sqlalchemy"
+    # type_ = "sqlalchemy"
+    class_name = "SqlAlchemyDatasource"
 
     data_asset_type_config = {
         "module_name": "custom_sqlalchemy_dataset",
         "class_name": "CustomSqlAlchemyDataset"
     }
     data_context.add_datasource(name,
-                                type_,
+                                class_name=class_name,
                                 connection_string=test_db_connection_string,
                                 data_asset_type=data_asset_type_config)
 
@@ -130,14 +139,15 @@ def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connectio
 def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connection_path):
     pyspark_skip = pytest.importorskip("pyspark")
     name = "test_sparkdf_datasource"
-    type_ = "spark"
+    # type_ = "spark"
+    class_name = "SparkDFDatasource"
 
     data_asset_type_config = {
         "module_name": "custom_sparkdf_dataset",
         "class_name": "CustomSparkDFDataset"
     }
     data_context.add_datasource(name,
-                                type_,
+                                class_name=class_name,
                                 base_directory=test_folder_connection_path,
                                 data_asset_type=data_asset_type_config)
 
@@ -198,7 +208,8 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
 
 def test_create_sqlalchemy_datasource(data_context):
     name = "test_sqlalchemy_datasource"
-    type_ = "sqlalchemy"
+    # type_ = "sqlalchemy"
+    class_name = "SqlAlchemyDatasource"
 
     # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {
@@ -215,10 +226,10 @@ def test_create_sqlalchemy_datasource(data_context):
 
     # It should be possible to create a sqlalchemy source using these params without
     # saving a profile
-    data_context.add_datasource(name, type_, **connection_kwargs)
+    data_context.add_datasource(name, class_name=class_name, **connection_kwargs)
     data_context_config = data_context.get_config()
     assert name in data_context_config["datasources"]
-    assert data_context_config["datasources"][name]["type"] == type_
+    assert data_context_config["datasources"][name]["class_name"] == class_name
 
     # We should be able to get it in this session even without saving the config
     source = data_context.get_datasource(name)
@@ -229,11 +240,11 @@ def test_create_sqlalchemy_datasource(data_context):
 
     # But we should be able to add a source using a profile
     name = "second_source"
-    data_context.add_datasource(name, type_, profile="test_sqlalchemy_datasource")
+    data_context.add_datasource(name, class_name=class_name, profile="test_sqlalchemy_datasource")
 
     data_context_config = data_context.get_config()
     assert name in data_context_config["datasources"]
-    assert data_context_config["datasources"][name]["type"] == type_
+    assert data_context_config["datasources"][name]["class_name"] == class_name
     assert data_context_config["datasources"][name]["profile"] == profile_name
 
     source = data_context.get_datasource(name)
@@ -252,24 +263,43 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory):
     pyspark_skip = pytest.importorskip("pyspark")
     base_dir = tmp_path_factory.mktemp('test_create_sparkdf_datasource')
     name = "test_sparkdf_datasource"
-    type_ = "spark"
+    # type_ = "spark"
+    class_name = "SparkDFDatasource"
 
-    data_context.add_datasource(name, type_, base_directory=str(base_dir))
+    data_context.add_datasource(name, class_name=class_name,
+                                generators={
+                                    "default": {
+                                        "class_name": "SubdirReaderGenerator",
+                                        "base_directory": str(base_dir)
+                                    }
+                                }
+                                )
     data_context_config = data_context.get_config()
 
     assert name in data_context_config["datasources"] 
-    assert data_context_config["datasources"][name]["type"] == type_
+    assert data_context_config["datasources"][name]["class_name"] == class_name
     assert data_context_config["datasources"][name]["generators"]["default"]["base_directory"] == str(base_dir)
 
     base_dir = tmp_path_factory.mktemp('test_create_sparkdf_datasource-2')
     name = "test_sparkdf_datasource"
-    type_ = "spark"
 
-    data_context.add_datasource(name, type_, reader_options={"sep": "|", "header": False})
+    data_context.add_datasource(name,
+                                class_name=class_name,
+                                generators={
+                                    "default": {
+                                        "class_name": "SubdirReaderGenerator",
+                                        "reader_options":
+                                            {
+                                                "sep": "|",
+                                                "header": False
+                                            }
+                                    }
+                                    }
+                                )
     data_context_config = data_context.get_config()
 
     assert name in data_context_config["datasources"] 
-    assert data_context_config["datasources"][name]["type"] == type_ 
+    assert data_context_config["datasources"][name]["class_name"] == class_name
     assert data_context_config["datasources"][name]["generators"]["default"]["reader_options"]["sep"] == "|"
 
     # Note that pipe is special in yml, so let's also check to see that it was properly serialized
@@ -285,7 +315,7 @@ def test_sqlalchemy_source_templating(sqlitedb_engine):
     generator.add_query("test", "select 'cat' as ${col_name};")
     df = datasource.get_batch("test", col_name="animal_name")
     res = df.expect_column_to_exist("animal_name")
-    assert res["success"] == True
+    assert res["success"] is True
 
 
 def test_pandas_source_readcsv(data_context, tmp_path_factory):
