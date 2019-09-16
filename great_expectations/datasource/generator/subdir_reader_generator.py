@@ -29,7 +29,7 @@ class SubdirReaderGenerator(BatchGenerator):
                  datasource=None,
                  base_directory="/data",
                  reader_options=None):
-        super(SubdirReaderGenerator, self).__init__(name, type_="subdir_reader", datasource=datasource)
+        super(SubdirReaderGenerator, self).__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = {}
 

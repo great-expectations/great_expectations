@@ -618,8 +618,17 @@ class DataAsset(object):
     def get_config_value(self, key):
         return self._config[key]
 
-    def get_batch_kwargs(self):
+    @property
+    def batch_kwargs(self):
         return self._batch_kwargs
+
+    @property
+    def batch_id(self):
+        return self._batch_id
+
+    @property
+    def batch_fingerprint(self):
+        return self._batch_id.batch_fingerprint
 
     def discard_failing_expectations(self):
         res = self.validate(only_return_failures=True).get('results')

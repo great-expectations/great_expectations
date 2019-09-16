@@ -18,7 +18,7 @@ class DatabricksTableGenerator(BatchGenerator):
     def __init__(self, name="default",
                  datasource=None,
                  database="default"):
-        super(DatabricksTableGenerator, self).__init__(name, type_="databricks", datasource=datasource)
+        super(DatabricksTableGenerator, self).__init__(name, datasource=datasource)
         self.database = database
         try:
             self.spark = SparkSession.builder.getOrCreate()
