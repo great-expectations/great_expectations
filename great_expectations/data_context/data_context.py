@@ -64,6 +64,7 @@ from .templates import (
     CREDENTIALS_FILE_TEMPLATE
 )
 from .util import (
+    load_class,
     instantiate_class_from_config
 )
 
@@ -482,33 +483,73 @@ class ConfigOnlyDataContext(object):
                                           **kwargs)
         return data_asset
 
-    # NOTE: Abe 2019//08/22 : I think we want to change this to the new standard class_name, module_name syntax.
-    # Doing this while maintaining backward compatibility to type_s (assuming we choose to do so) will require care.
-    def add_datasource(self, name, type_, **kwargs):
-        """Add a new datasource to the data context.
-
-        The type\_ parameter must match one of the recognized types for the DataContext
+    def add_datasource(self, name, **kwargs):
+        """Add a new datasource to the data context, with configuration provided as kwargs.
 
         Args:
             name (str): the name for the new datasource to add
-            type_ (str): the type of datasource to add
+            kwargs (keyword arguments): the configuration for the new datasource
+
+        Note:
+            the type_ parameter is still supported as a way to add a datasource, but support will
+            be removed in a future release. Please update to using class_name instead.
 
         Returns:
             datasource (Datasource)
         """
-        logger.debug("Starting ConfigOnlyDataContext.add_datasource")
+        logger.debug("Starting ConfigOnlyDataContext.add_datasource for %s" % name)
+        if "generators" not in kwargs:
+            logger.warning("Adding a datasource without configuring a generator will rely on default"
+                           "generator behavior. Please add a generator.")
 
-        datasource_class = self._get_datasource_class(type_)
-        datasource = datasource_class(name=name, data_context=self, **kwargs)
+        if "type" in kwargs:
+            warnings.warn("Using type_ configuration to build datasource. Please update to using class_name.")
+            type_ = kwargs["type"]
+            datasource_class = self._get_datasource_class_from_type(type_)
+        else:
+            datasource_class = load_class(
+                kwargs.get("class_name"),
+                kwargs.get("module_name", "great_expectations.datasource")
+            )
+
+        # For any class that should be loaded, it may control its configuration construction
+        # by implementing a classmethod called build_configuration
+        if hasattr(datasource_class, "build_configuration"):
+            config = datasource_class.build_configuration(**kwargs)
+
+        datasource = self._build_datasource_from_config(**config)
         self._datasources[name] = datasource
-        self._project_config["datasources"][name] = datasource.get_config()
+        self._project_config["datasources"][name] = config
 
         return datasource
 
     def get_config(self):
         return self._project_config
 
-    def _get_datasource_class(self, datasource_type):
+    def _build_datasource_from_config(self, **kwargs):
+        if "type" in kwargs:
+            warnings.warn("Using type configuration to build datasource. Please update to using class_name.")
+            type_ = kwargs.pop("type")
+            datasource_class = self._get_datasource_class_from_type(type_)
+            kwargs.update({
+                "class_name": datasource_class.__name__
+            })
+        datasource = instantiate_class_from_config(
+            config=kwargs,
+            runtime_config={
+                "data_context": self
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource"
+            }
+        )
+        return datasource
+
+    def _get_datasource_class_from_type(self, datasource_type):
+        """NOTE: THIS METHOD OF BUILDING DATASOURCES IS DEPRECATED.
+        Instead, please specify class_name
+        """
+        warnings.warn("Using the 'type' key to instantiate a datasource is deprecated. Please use class_name instead.")
         if datasource_type == "pandas":
             return PandasDatasource
         elif datasource_type == "dbt":
@@ -537,16 +578,11 @@ class ConfigOnlyDataContext(object):
             return self._datasources[datasource_name]
         elif datasource_name in self._project_config["datasources"]:
             datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
-        # elif len(self._project_config["datasources"]) == 1:
-        #     datasource_name = list(self._project_config["datasources"])[0]
-        #     datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
         else:
             raise ValueError(
                 "Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name
             )
-        type_ = datasource_config.pop("type")
-        datasource_class= self._get_datasource_class(type_)
-        datasource = datasource_class(name=datasource_name, data_context=self, **datasource_config)
+        datasource = self._build_datasource_from_config(**datasource_config)
         self._datasources[datasource_name] = datasource
         return datasource
             
@@ -563,7 +599,22 @@ class ConfigOnlyDataContext(object):
         Returns:
             List(dict): each dictionary includes "name" and "type" keys
         """
-        return [{"name": key, "type": value["type"]} for key, value in self._project_config["datasources"].items()]
+        datasources = []
+        # NOTE: 20190916 - JPC - Upon deprecation of support for type: configuration, this can be simplified
+        for key, value in self._project_config["datasources"].items():
+            if "type" in value:
+                logger.warning("Datasource %s configured using type. Please use class_name instead." % key)
+                datasources.append({
+                    "name": key,
+                    "type": value["type"],
+                    "class_name": self._get_datasource_class_from_type(value["type"]).__name__
+                })
+            else:
+                datasources.append({
+                    "name": key,
+                    "class_name": value["class_name"]
+                })
+        return datasources
 
     def _normalize_data_asset_name(self, data_asset_name):
         """Normalizes data_asset_names for a data context.
@@ -1614,12 +1665,10 @@ class DataContext(ConfigOnlyDataContext):
         self._save_project_config()
         return new_store
 
+    def add_datasource(self, name, **kwargs):
+        logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
 
-    def add_datasource(self, name, type_, **kwargs):
-        logger.debug("Starting DataContext.add_datasource")
-
-        new_datasource = super(DataContext, self).add_datasource(name, type_, **kwargs)
-
+        new_datasource = super(DataContext, self).add_datasource(name, **kwargs)
         self._save_project_config()
 
         return new_datasource
