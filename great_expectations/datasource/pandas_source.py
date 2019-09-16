@@ -31,9 +31,20 @@ class PandasDatasource(Datasource):
     existing in-memory dataframes.
     """
 
-    _batch_kwarg_types = (PandasDatasourceBatchKwargs, )
+    @classmethod
+    def build_configuration(cls, data_asset_type=None, generators=None, **kwargs):
+        """
+        Build a full configuration object for a datasource, potentially including generators with defaults.
 
-    def __init__(self, name="pandas", data_context=None, data_asset_type=None, generators=None, **kwargs):
+        Args:
+            data_asset_type: A ClassConfig dictionary
+            generators: Generator configuration dictionary
+            **kwargs: Additional kwargs to be part of the datasource constructor's initialization
+
+        Returns:
+            A complete datasource configuration.
+
+        """
         if generators is None:
             # Provide a gentle way to build a datasource with a sane default,
             # including ability to specify the base_directory and reader_options
@@ -45,7 +56,7 @@ class PandasDatasource(Datasource):
             })
             generators = {
                 "default": {
-                    "type": "subdir_reader",
+                    "class_name": "SubdirReaderGenerator",
                     "base_directory": base_directory,
                     "reader_options": reader_options
                 }
@@ -60,10 +71,22 @@ class PandasDatasource(Datasource):
                 # In this case, we allow the passed config, for now, in case they're using a legacy string-only config
                 pass
 
-        super(PandasDatasource, self).__init__(name, type_="pandas",
+        configuration = kwargs
+        configuration.update({
+            "data_asset_type": data_asset_type,
+            "generators": generators,
+        })
+        return configuration
+
+    def __init__(self, name="pandas", data_context=None, data_asset_type=None, generators=None, **kwargs):
+        configuration_with_defaults = PandasDatasource.build_configuration(data_asset_type, generators, **kwargs)
+        data_asset_type = configuration_with_defaults.pop("data_asset_type")
+        generators = configuration_with_defaults.pop("generators")
+        super(PandasDatasource, self).__init__(name,
                                                data_context=data_context,
                                                data_asset_type=data_asset_type,
-                                               generators=generators)
+                                               generators=generators,
+                                               **configuration_with_defaults)
         self._build_generators()
 
     def _get_generator_class_from_type(self, type_):
