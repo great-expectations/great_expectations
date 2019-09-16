@@ -7,9 +7,6 @@ import great_expectations as ge
 from great_expectations.actions.validation_operators import (
     DataContextAwareValidationOperator,
 )
-# from great_expectations.data_context.store import (
-#     NamespacedInMemoryStore
-# )
 from great_expectations.data_context import (
     ConfigOnlyDataContext,
 )
@@ -17,21 +14,17 @@ from great_expectations.data_context.types import (
     DataContextConfig,
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
-    # RunIdentifier
 )
 
 @pytest.fixture()
 def basic_data_context_config_for_validation_operator():
     return DataContextConfig(**{
         "plugins_directory": "plugins/",
-        # "expectations_directory": "expectations/",
         "evaluation_parameter_store_name" : "evaluation_parameter_store",
         "expectations_store" : {
             "class_name": "ExpectationStore",
             "store_backend": {
                 "class_name": "InMemoryStoreBackend",
-                # "class_name": "FixedLengthTupleFilesystemStoreBackend",
-                # "base_directory": "expectations/",
             }
         },
         "datasources": {},
@@ -43,13 +36,10 @@ def basic_data_context_config_for_validation_operator():
             },
             "warning_validation_result_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "ValidationResultStore",#NamespacedInMemoryStore",
+                "class_name": "ValidationResultStore",
                 "store_backend": {
                     "class_name": "InMemoryStoreBackend",
                 }
-                # "store_config" : {
-                #     "resource_identifier_class_name" : "ValidationResultIdentifier",
-                # },
             }
         },
         "data_docs": {
@@ -80,9 +70,6 @@ def basic_data_context_config_for_validation_operator():
                         "module_name" : "great_expectations.actions",
                         "class_name" : "NoOpAction",
                     }
-                    # "summarization_module_name": "great_expectations.actions.actions",
-                    # "summarization_class_name": "TemporaryNoOpSummarizer",
-                    # "target_store_name": "warning_validation_result_store",
                 }]
             }
         }
@@ -115,9 +102,9 @@ def test_hello_world(basic_data_context_config_for_validation_operator):
         data_asset=my_ge_df,
         data_asset_identifier=data_asset_identifier,
         run_identifier="test-100",
-        # expectation_suite_name_prefix="",
         validation_operator_name="default",
     )
+    # TODO: Add tests for other argument structures for run_validation_operator
     # results = data_context.run_validation_operator(
     #     data_asset=my_ge_df,
     #     # validation_operator_name="default",
