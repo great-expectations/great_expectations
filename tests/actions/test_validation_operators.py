@@ -156,7 +156,7 @@ def test_hello_world(basic_data_context_config_for_validation_operator):
         run_identifier="test_100"
     )
 
-    results = vo.process_batch(
+    results = vo.run(
         batch=my_batch,
         # expectation_suite_name_prefix="my_expectations",
     )
