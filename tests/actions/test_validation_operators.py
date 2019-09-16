@@ -68,7 +68,7 @@ def test_hello_world(basic_data_context_config_for_validation_operator):
                 "class_name" : "SummarizeAndStoreAction",
                 "target_store_name": "warning_validation_result_store",
                 "summarizer":{
-                    "module_name": "great_expectations.actions.actions",
+                    "module_name": "tests.test_plugins.fake_actions",
                     "class_name": "TemporaryNoOpSummarizer",
                 }
             }
@@ -119,7 +119,7 @@ def test__get_or_convert_to_batch_from_identifiers(basic_data_context_config_for
                 "class_name" : "SummarizeAndStoreAction",
                 "target_store_name": "warning_validation_result_store",
                 "summarizer":{
-                    "module_name": "great_expectations.actions.actions",
+                    "module_name": "tests.test_plugins.fake_actions",
                     "class_name": "TemporaryNoOpSummarizer",
                 }
             }

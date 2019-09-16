@@ -92,7 +92,7 @@ def test_SummarizeAndStoreAction():
         # result_key="my_key",
         target_store_name = "fake_in_memory_store",
         summarizer = {
-            "module_name": "great_expectations.actions.actions",
+            "module_name": "tests.test_plugins.fake_actions",
             "class_name": "TemporaryNoOpSummarizer",
         }
     )
