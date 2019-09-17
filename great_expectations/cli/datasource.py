@@ -150,8 +150,8 @@ You can add a datasource later by editing the great_expectations.yml file.
             path = path[2:]
 
         if path.endswith("/"):
-            basenamepath = path[:-1]
-        default_data_source_name = os.path.basename(basenamepath)
+            path = path[:-1]
+        default_data_source_name = os.path.basename(path)
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
