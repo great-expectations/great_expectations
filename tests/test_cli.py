@@ -218,7 +218,7 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
             basedir, "great_expectations/great_expectations.yml"))
         config = yaml.load(
             open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
-        assert config["datasources"]["data__dir"]["type"] == "pandas"
+        assert config["datasources"]["data__dir"]["class_name"] == "PandasDatasource"
 
 
         print(gen_directory_tree_str(os.path.join(basedir, "great_expectations")))
@@ -238,7 +238,7 @@ great_expectations/
         integrate_validation_into_pipeline.ipynb
     plugins/
     uncommitted/
-        credentials/
+        credentials.yml
         documentation/
             local_site/
                 index.html
@@ -332,8 +332,12 @@ def test_cli_add_datasource(empty_data_context, filesystem_csv_2, capsys):
 
 
 def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
+
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -359,8 +363,10 @@ def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, c
     logger.removeHandler(handler)
 
 def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -386,8 +392,10 @@ def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
     logger.removeHandler(handler)
 
 def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -413,8 +421,10 @@ def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_cs
     logger.removeHandler(handler)
 
 def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -439,8 +449,10 @@ def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_
     logger.removeHandler(handler)
 
 def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     print(json.dumps(not_so_empty_data_context.get_project_config(), indent=2))
@@ -521,4 +533,4 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
     assert set(os.listdir(empty_directory)) == \
            {'datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'}
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
-           {'samples', 'documentation', 'validations', 'credentials'}
+           {'samples', 'documentation', 'validations'}
