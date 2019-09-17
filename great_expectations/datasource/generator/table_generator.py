@@ -71,7 +71,6 @@ class TableGenerator(BatchGenerator):
 
     """
 
-
     def __init__(self, name="default", datasource=None, assets={}):
         super(TableGenerator, self).__init__(name=name, datasource=datasource)
         try:
