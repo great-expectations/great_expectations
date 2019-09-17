@@ -194,31 +194,10 @@ def test_DefaultDataContextAwareValidationOperator_with_file_structure(tmp_path_
     assert gen_directory_tree_str(project_path) =="""\
 project/
     data/
-        bachelorette/
-            README.md
-            bachelorette.csv
-        bad-drivers/
-            README.md
-            bad-drivers.csv
-        bechdel/
-            README.md
-            analyze-bechdel.R
-            movies.csv
-        biopics/
-            README.md
-            biopics.csv
-        births/
-            README.md
-            US_births_1994-2003_CDC_NCHS.csv
-            US_births_2000-2014_SSA.csv
         bob-ross/
             README.md
             cluster-paintings.py
             elements-by-episode.csv
-        buster-posey-mvp/
-            README.md
-            baseball_imgcap_for_release.py
-            catcher_framing_capture.R
     great_expectations/
         .gitignore
         great_expectations.yml
