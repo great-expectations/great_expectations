@@ -17,7 +17,10 @@ def test_configuration_driven_site_builder(titanic_data_context, filesystem_csv_
 
     # adding another datasource to the context, but will configure the site to not document it -
     # this will allow us to test that the the datasource logic in the site builder is working properly.
-    titanic_data_context.add_datasource("unused_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    titanic_data_context.add_datasource("unused_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
 
     # creating another validation result using the profiler's suite (no need to use a new expectation suite
     # for this test). having two validation results - one with run id "profiling" - allows us to test
