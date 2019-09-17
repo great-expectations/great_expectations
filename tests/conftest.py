@@ -432,6 +432,20 @@ def filesystem_csv_3(tmp_path_factory):
     return base_dir
 
 @pytest.fixture()
+def filesystem_csv_4(tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp('test_files')
+    base_dir = str(base_dir)
+
+    # Put a file in the directory
+    toy_dataset = PandasDataset({
+        "x": [1, 2, 3],
+        "y": [1, 2, 3],
+    })
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+
+    return base_dir
+    
+@pytest.fixture()
 def titanic_profiled_evrs_1():
     return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
 
