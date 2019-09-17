@@ -46,8 +46,10 @@ def parameterized_expectation_suite():
 
 
 def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv))
     not_so_empty_data_context = empty_data_context
 
     # we should now be able to validate, and have validations saved.
@@ -78,7 +80,10 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
 
 
 def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
-    empty_data_context.add_datasource("my_datasource", "pandas", base_directory= str(filesystem_csv))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv))
     available_asset_names = empty_data_context.get_available_data_asset_names()
 
     assert available_asset_names == {
@@ -324,8 +329,10 @@ def test_normalize_data_asset_names_error(data_context):
 
 
 def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_csv):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv))
     data_context = empty_data_context
 
     data_context.data_asset_name_delimiter = '.'
@@ -362,8 +369,10 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     ###
     # Add a datasource
     ###
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv))
     data_context = empty_data_context
 
     # We can now reference existing or available data asset namespaces using
@@ -408,8 +417,10 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
         outfile.write("\n\n\n")
     with open(os.path.join(second_datasource_basedir, "f4.tsv"), "w") as outfile:
         outfile.write("\n\n\n")
-    data_context.add_datasource(
-        "my_second_datasource", "pandas", base_directory=second_datasource_basedir)
+    data_context.add_datasource("my_second_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=second_datasource_basedir)
 
     # We can still reference *unambiguous* data_asset_names:
     assert data_context._normalize_data_asset_name("f1") == \
@@ -472,24 +483,28 @@ def test_list_datasources(data_context):
     datasources = data_context.list_datasources()
 
     assert datasources == [
+
         {
-            "name": "mydatasource",
-            "type": "pandas"
+            'name': 'mydatasource',
+            'class_name': 'PandasDatasource'
         }
     ]
 
-    data_context.add_datasource("second_pandas_source", "pandas")
+    data_context.add_datasource("second_pandas_source",
+                           module_name="great_expectations.datasource",
+                           class_name="PandasDatasource",
+                           )
 
     datasources = data_context.list_datasources()
 
     assert datasources == [
         {
-            "name": "mydatasource",
-            "type": "pandas"
+            'name': 'mydatasource',
+            'class_name': 'PandasDatasource'
         },
         {
-            "name": "second_pandas_source",
-            "type": "pandas"
+            'name': 'second_pandas_source',
+            'class_name': 'PandasDatasource'
         }
     ]
 
@@ -559,17 +574,16 @@ project_path/
     context = DataContext.create(project_dir)
     ge_directory = os.path.join(project_dir, "great_expectations")
     scaffold_directories_and_notebooks(ge_directory)
-    context.add_datasource(
-        "titanic",
-        "pandas",
-        base_directory=os.path.join(project_dir, "data/titanic/")
-    )
-    context.add_datasource(
-        "random",
-        "pandas",
-        base_directory=os.path.join(project_dir, "data/random/")
-    )
-    
+    context.add_datasource("titanic",
+                            module_name="great_expectations.datasource",
+                            class_name="PandasDatasource",
+                            base_directory=os.path.join(project_dir, "data/titanic/"))
+
+    context.add_datasource("random",
+                            module_name="great_expectations.datasource",
+                            class_name="PandasDatasource",
+                            base_directory=os.path.join(project_dir, "data/random/"))
+
     context.profile_datasource("titanic")
     # print(gen_directory_tree_str(project_dir))
     assert gen_directory_tree_str(project_dir) == """\
@@ -595,7 +609,7 @@ project_path/
             integrate_validation_into_pipeline.ipynb
         plugins/
         uncommitted/
-            credentials/
+            credentials.yml
             documentation/
                 local_site/
                 team_site/

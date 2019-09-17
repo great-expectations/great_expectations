@@ -3,12 +3,19 @@
 datasources:
   # For example, this one.
   mydatasource:
-    type: pandas
+    module_name: great_expectations.datasource
+    class_name: PandasDatasource
+    data_asset_type:
+      class_name: PandasDataset
     generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
-        type: subdir_reader
+        class_name: SubdirReaderGenerator
         base_directory: ../data
+        reader_options:
+          sep:
+          engine: python
+
 
 credentials_file_path: uncommitted/credentials.yml
 
