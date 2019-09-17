@@ -7,7 +7,7 @@ except ImportError:
 
 
 class MockS3(object):
-    def list_objects_v2(self, *args, ContinuationToken=None, **kwargs):
+    def list_objects_v2(self, ContinuationToken=None, **kwargs):
         """MOCK"""
         if ContinuationToken is None:
             return {
