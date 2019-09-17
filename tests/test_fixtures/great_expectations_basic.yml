@@ -10,6 +10,8 @@ datasources:
         type: subdir_reader
         base_directory: ../data
 
+credentials_file_path: uncommitted/credentials.yml
+
 expectations_store:
   class_name: ExpectationStore
   store_backend:

@@ -86,6 +86,8 @@ class SqlAlchemyDatasource(Datasource):
             self._datasource_config.update({
                 "credentials": credentials
             })
+        else:
+            credentials = {}
 
         try:
             # if an engine was provided, use that
@@ -104,8 +106,7 @@ class SqlAlchemyDatasource(Datasource):
 
             # Otherwise, connect using remaining kwargs
             else:
-                # self.engine = create_engine(self._get_sqlalchemy_connection_options(**credentials))
-                self.engine = create_engine(self._get_sqlalchemy_connection_options())
+                self.engine = create_engine(self._get_sqlalchemy_connection_options(**kwargs))
                 self.engine.connect()
 
         except sqlalchemy.exc.OperationalError as sqlalchemy_error:
