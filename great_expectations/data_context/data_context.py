@@ -142,7 +142,9 @@ class ConfigOnlyDataContext(object):
 
 
         self._project_config = project_config
+        self._project_config_with_varibles_substituted = DataContextConfig(**self.get_config_with_variables_replaced())
         self._context_root_directory = os.path.abspath(context_root_dir)
+
 
         # Init plugins
         sys.path.append(self.plugins_directory)
@@ -150,7 +152,7 @@ class ConfigOnlyDataContext(object):
 
         # Init data sources
         self._datasources = {}
-        for datasource in self._project_config["datasources"].keys():
+        for datasource in self._project_config_with_varibles_substituted["datasources"].keys():
             self.get_datasource(datasource)
 
         # Init stores
@@ -159,7 +161,7 @@ class ConfigOnlyDataContext(object):
             "expectations_store",
             copy.deepcopy(self._project_config["expectations_store"]),
         )
-        self._init_stores(self._project_config["stores"])
+        self._init_stores(self._project_config_with_varibles_substituted["stores"])
 
         self._compiled = False
 
@@ -204,8 +206,9 @@ class ConfigOnlyDataContext(object):
         """
 
         self._project_config["stores"][store_name] = store_config
+        self._project_config_with_varibles_substituted["stores"][store_name] = self.get_config_with_variables_replaced(config=store_config)
         new_store = instantiate_class_from_config(
-            config=store_config,
+            config=self._project_config_with_varibles_substituted["stores"][store_name],
             runtime_config={
                 "root_directory" : self.root_directory,
             },
@@ -238,7 +241,7 @@ class ConfigOnlyDataContext(object):
     def plugins_directory(self):
         """The directory in which custom plugin modules should be placed."""
         return self._normalize_absolute_or_relative_path(
-            self._project_config.plugins_directory
+            self._project_config_with_varibles_substituted.plugins_directory
         )
 
     @property
@@ -362,7 +365,7 @@ class ConfigOnlyDataContext(object):
             base_credentials_store.yaml_set_start_comment(CREDENTIALS_COMMENT)
             return base_credentials_store
 
-    def get_project_config(self, substitute_credentials=True):
+    def get_project_config(self):
         project_config = self._project_config
 
         return project_config
@@ -520,7 +523,9 @@ class ConfigOnlyDataContext(object):
         # We perform variable substitution in the datasource's config here before using the config
         # to instantiate the datasource object. Variable substitution is a service that the data
         # context provides. Datasources should not see unsubstituted variables in their config.
-        datasource = self._build_datasource_from_config(**self.get_config_with_variables_replaced(config))
+        self._project_config_with_varibles_substituted["datasources"][name] = self.get_config_with_variables_replaced(config)
+
+        datasource = self._build_datasource_from_config(**self._project_config_with_varibles_substituted["datasources"][name])
         self._datasources[name] = datasource
         self._project_config["datasources"][name] = config
 
@@ -579,8 +584,8 @@ class ConfigOnlyDataContext(object):
         """
         if datasource_name in self._datasources:
             return self._datasources[datasource_name]
-        elif datasource_name in self._project_config["datasources"]:
-            datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
+        elif datasource_name in self._project_config_with_varibles_substituted["datasources"]:
+            datasource_config = copy.deepcopy(self._project_config_with_varibles_substituted["datasources"][datasource_name])
         else:
             raise ValueError(
                 "Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name
@@ -604,7 +609,7 @@ class ConfigOnlyDataContext(object):
         """
         datasources = []
         # NOTE: 20190916 - JPC - Upon deprecation of support for type: configuration, this can be simplified
-        for key, value in self._project_config["datasources"].items():
+        for key, value in self._project_config_with_varibles_substituted["datasources"].items():
             if "type" in value:
                 logger.warning("Datasource %s configured using type. Please use class_name instead." % key)
                 datasources.append({
@@ -958,8 +963,8 @@ class ConfigOnlyDataContext(object):
                 value=validation_results
             )
 
-        if "result_callback" in self._project_config:
-            result_callback = self._project_config["result_callback"]
+        if "result_callback" in self._project_config_with_varibles_substituted:
+            result_callback = self._project_config_with_varibles_substituted["result_callback"]
             if isinstance(result_callback, dict) and "slack" in result_callback:
                 get_slack_callback(result_callback["slack"])(validation_results)
             else:
@@ -1042,7 +1047,7 @@ class ConfigOnlyDataContext(object):
 
     @property
     def evaluation_parameter_store(self):
-        return self.stores[self._project_config.evaluation_parameter_store_name]
+        return self.stores[self._project_config_with_varibles_substituted.evaluation_parameter_store_name]
 
     def set_parameters_in_evaluation_parameter_store_by_run_id_and_key(self, run_id, key, value):
         """Store a new validation parameter.
@@ -1347,7 +1352,7 @@ class ConfigOnlyDataContext(object):
 
         # construct the config (merge defaults with specifics)
 
-        data_docs_config = self._project_config.get('data_docs')
+        data_docs_config = self._project_config_with_varibles_substituted.get('data_docs')
         if data_docs_config:
             logger.debug("Found data_docs_config. Building sites...")
             sites = data_docs_config.get('sites', [])
