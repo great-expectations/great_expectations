@@ -353,17 +353,21 @@ class ConfigOnlyDataContext(object):
         """Get all credentials properties from the default location."""
 
         # TODO: support parameterized additional store locations
-        try:
-            with open(os.path.join(self.root_directory,
-                                   self.get_project_config()["credentials_file_path"]), "r") as credentials_file:
-                return yaml.load(credentials_file) or {}
-        except IOError as e:
-            if e.errno != errno.ENOENT:
-                raise
-            logger.debug("Generating empty credentials file.")
-            base_credentials_store = yaml.load("{}")
-            base_credentials_store.yaml_set_start_comment(CREDENTIALS_COMMENT)
-            return base_credentials_store
+        # TODO: support ENV vars
+        credentials_file_path = self.get_project_config().get("credentials_file_path")
+        if credentials_file_path:
+            try:
+                with open(os.path.join(self.root_directory, credentials_file_path), "r") as credentials_file:
+                    return yaml.load(credentials_file) or {}
+            except IOError as e:
+                if e.errno != errno.ENOENT:
+                    raise
+                logger.debug("Generating empty credentials file.")
+                base_credentials_store = yaml.load("{}")
+                base_credentials_store.yaml_set_start_comment(CREDENTIALS_COMMENT)
+                return base_credentials_store
+        else:
+            return {}
 
     def get_project_config(self):
         project_config = self._project_config
