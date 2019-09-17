@@ -122,7 +122,7 @@ def test_validation_operator__run(basic_data_context_config_for_validation_opera
                 }
             }
         },{
-            "name": "add_warnings_to_store",
+            "name": "add_failures_to_store",
             "result_key": "failure",
             "action" : {
                 "module_name" : "great_expectations.actions",

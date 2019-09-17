@@ -1,6 +1,7 @@
 import pytest
 import json
 import os
+import shutil
 
 import pandas as pd
 
@@ -11,11 +12,15 @@ from great_expectations.actions.validation_operators import (
 )
 from great_expectations.data_context import (
     ConfigOnlyDataContext,
+    DataContext,
 )
 from great_expectations.data_context.types import (
     DataContextConfig,
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
+)
+from great_expectations.util import (
+    gen_directory_tree_str
 )
 
 @pytest.fixture()
@@ -176,4 +181,133 @@ def test_DefaultDataContextAwareValidationOperator(basic_data_context_config_for
 
 
     # assert False
-    
+
+def test_DefaultDataContextAwareValidationOperator_with_file_structure(tmp_path_factory):
+    base_path = str(tmp_path_factory.mktemp('test_DefaultDataContextAwareValidationOperator_with_file_structure__dir'))
+    project_path = os.path.join( base_path, "project")
+    print(os.getcwd())
+    shutil.copytree(
+        os.path.join( os.getcwd(), "tests/data_context/fixtures/post_init_project_v0.8.0_A" ),
+        project_path,
+    )
+    print(gen_directory_tree_str(project_path))
+    assert gen_directory_tree_str(project_path) =="""\
+project/
+    data/
+        bachelorette/
+            README.md
+            bachelorette.csv
+        bad-drivers/
+            README.md
+            bad-drivers.csv
+        bechdel/
+            README.md
+            analyze-bechdel.R
+            movies.csv
+        biopics/
+            README.md
+            biopics.csv
+        births/
+            README.md
+            US_births_1994-2003_CDC_NCHS.csv
+            US_births_2000-2014_SSA.csv
+        bob-ross/
+            README.md
+            cluster-paintings.py
+            elements-by-episode.csv
+        buster-posey-mvp/
+            README.md
+            baseball_imgcap_for_release.py
+            catcher_framing_capture.R
+    great_expectations/
+        .gitignore
+        great_expectations.yml
+        datasources/
+        expectations/
+            data__dir/
+                default/
+                    bob-ross/
+                        BasicDatasetProfiler.json
+                        failure.json
+                        quarantine.json
+                        warning.json
+        fixtures/
+        notebooks/
+            create_expectations.ipynb
+            integrate_validation_into_pipeline.ipynb
+        plugins/
+        uncommitted/
+            credentials/
+            documentation/
+                local_site/
+                    index.html
+                    expectations/
+                        data__dir/
+                            default/
+                                bob-ross/
+                                    BasicDatasetProfiler.html
+                    profiling/
+                        data__dir/
+                            default/
+                                bob-ross/
+                                    BasicDatasetProfiler.html
+                team_site/
+                    index.html
+                    expectations/
+                        data__dir/
+                            default/
+                                bob-ross/
+                                    BasicDatasetProfiler.html
+            samples/
+            validations/
+                profiling/
+                    data__dir/
+                        default/
+                            bob-ross/
+                                BasicDatasetProfiler.json
+"""
+
+    data_context = DataContext(
+        context_root_dir=os.path.join(project_path, "great_expectations"),
+    )
+
+    my_df = pd.DataFrame({"x": [1,2,3,4,5]})
+    my_ge_df = ge.from_pandas(my_df)
+
+    # assert data_context.stores["local_validation_result_store"].list_keys() == []
+    validation_store_path = os.path.join(project_path, "great_expectations/uncommitted/validations")
+    print(validation_store_path)
+    print(gen_directory_tree_str(validation_store_path))
+    assert gen_directory_tree_str(validation_store_path) == """\
+validations/
+    profiling/
+        data__dir/
+            default/
+                bob-ross/
+                    BasicDatasetProfiler.json
+"""
+
+    data_asset_identifier = DataAssetIdentifier("data__dir", "default", "bob-ross")
+    results = data_context.run_validation_operator(
+        data_asset=my_ge_df,
+        data_asset_identifier=data_asset_identifier,
+        run_identifier="test-100",
+        validation_operator_name="default",
+    )
+    # results = data_context.run_validation_operator(my_ge_df)
+
+    print(gen_directory_tree_str(validation_store_path))
+    assert gen_directory_tree_str(validation_store_path) == """\
+validations/
+    profiling/
+        data__dir/
+            default/
+                bob-ross/
+                    BasicDatasetProfiler.json
+    test-100/
+        data__dir/
+            default/
+                bob-ross/
+                    failure.json
+                    warning.json
+"""
