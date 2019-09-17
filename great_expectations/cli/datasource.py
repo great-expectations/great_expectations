@@ -53,7 +53,9 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
             show_default=True
         )
 
-        context.add_datasource(data_source_name, "pandas",
+        context.add_datasource(data_source_name,
+                               module_name="great_expectations.datasource",
+                               class_name="PandasDatasource",
                                base_directory=os.path.join("..", path))
 
     elif data_source_selection == "2":  # sqlalchemy
@@ -106,8 +108,11 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
             context.set_credentials_property(data_source_name, **credentials)
 
             try:
-                context.add_datasource(
-                    data_source_name, "sqlalchemy", credentials="${" + data_source_name + "}")
+                context.add_datasource(data_source_name,
+                                       module_name="great_expectations.datasource",
+                                       class_name="SqlAlchemyDatasource",
+                                       data_asset_type={"class_name": "SqlAlchemyDataset"},
+                                       credentials="${" + data_source_name + "}")
                 break
             except (DatasourceInitializationError, ModuleNotFoundError) as de:
                 cli_message(
