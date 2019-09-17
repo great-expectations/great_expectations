@@ -8,6 +8,7 @@ from .datasource import Datasource, ReaderMethods
 from great_expectations.datasource.generator.filesystem_path_generator import SubdirReaderGenerator
 from great_expectations.datasource.generator.databricks_generator import DatabricksTableGenerator
 from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
+from great_expectations.datasource.generator.s3_generator import S3Generator
 
 from great_expectations.types import ClassConfig
 
@@ -70,6 +71,8 @@ class SparkDFDatasource(Datasource):
             return DatabricksTableGenerator
         elif type_ == "memory":
             return InMemoryGenerator
+        elif type_ == "s3":
+            return S3Generator
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 

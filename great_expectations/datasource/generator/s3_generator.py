@@ -1,4 +1,3 @@
-import fnmatch
 import re
 
 import logging
@@ -86,7 +85,7 @@ class S3Generator(BatchGenerator):
 
     def _build_batch_kwargs(self, key, asset_reader_options=None):
         batch_kwargs = {
-            "s3": "s3a://" + self.bucket + key,
+            "s3": "s3a://" + self.bucket + "/" + key,
         }
         batch_kwargs.update(self.reader_options)
         if asset_reader_options is not None:
@@ -106,11 +105,21 @@ class S3Generator(BatchGenerator):
             })
 
         asset_options = self.s3.list_objects_v2(**query_options)
-        keys = [item["Key"] for item in asset_options["Contents"]]
-        keys = fnmatch.filter(keys, asset_config.get("glob", "*"))
+        if "Contents" not in asset_options:
+            raise BatchKwargsError(
+                "Unable to build batch_kwargs; is this asset configured correctly? Sometimes, a different"
+                "prefix is necessary.",
+                {
+                    "asset": asset_config,
+                    "CommonPrefixes": asset_options["CommonPrefixes"] if "CommonPrefixes" in asset_options else None
+                }
+            )
+
+        keys = [item["Key"] for item in asset_options["Contents"] if item["Size"] > 0]
+        keys = [key for key in filter(lambda x: re.match(asset_config.get("regex_filter", ".*"), x) is not None, keys)]
         for key in keys:
             yield self._build_batch_kwargs(
-                query_options["Prefix"] + query_options["Delimiter"] + key,
+                key,
                 asset_config.get("reader_options", {})
             )
 
