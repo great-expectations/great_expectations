@@ -193,6 +193,7 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
         expectation_suite_name_prefix="",
         expectation_suite_name_suffixes=["failure", "warning", "quarantine"],
         process_warnings_and_quarantine_rows_on_error=False,
+        allow_empty_expectation_suites=False, # NOTE : Abe 2019/09/17 : This is probably a nice affordance, but it's untested, and I'm not sure about the DX.
     ):
         super(DefaultDataContextAwareValidationOperator, self).__init__(
             data_context,
@@ -201,6 +202,7 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
         
         self.process_warnings_and_quarantine_rows_on_error = process_warnings_and_quarantine_rows_on_error
         self.expectation_suite_name_prefix = expectation_suite_name_prefix
+        self.allow_empty_expectation_suites = allow_empty_expectation_suites
 
         assert len(expectation_suite_name_suffixes) == 3
         for suffix in expectation_suite_name_suffixes:
@@ -221,26 +223,25 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
         # NOTE : Abe 2019/09/12 : Perhaps this could be generalized to a loop.
         # I'm NOT doing that, because lots of user research suggests that these 3 specific behaviors
         # (failure, warning, quarantine) will cover most of the common use cases for
-        # post-validation dat treatment.
-        # TODO: Make it possible to override "failure", "warning", "quarantine" as default strings
+        # post-validation data treatment.
         failure_validation_result_id = ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 data_asset_name=data_asset_identifier,
-                expectation_suite_name=self.expectation_suite_name_prefix+"failure"
+                expectation_suite_name=self.expectation_suite_name_prefix+self.expectation_suite_name_suffixes[0],
             ),
             run_id=run_id,
         )
         warning_validation_result_id = ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 data_asset_name=data_asset_identifier,
-                expectation_suite_name=self.expectation_suite_name_prefix+"warning"
+                expectation_suite_name=self.expectation_suite_name_prefix+self.expectation_suite_name_suffixes[1],
             ),
             run_id=run_id,
         )
         quarantine_validation_result_id = ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 data_asset_name=data_asset_identifier,
-                expectation_suite_name=self.expectation_suite_name_prefix+"quarantine"
+                expectation_suite_name=self.expectation_suite_name_prefix+self.expectation_suite_name_suffixes[2],
             ),
             run_id=run_id,
         )
@@ -291,39 +292,30 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
         return_obj["data_assets"]["nonquarantined_batch"] = batch.loc[set(batch.index) - set(unexpected_index_set)]
 
         #Process actions here
-        # TODO: This should include the whole return object, not just validation_results.
-        self._process_actions(return_obj)#, self.config[action_set_name])
+        self._process_actions(return_obj)
 
         # NOTE : We should consider typing this object, since it's passed between classes.
         return return_obj
-        # return {
-        #     "validation_results" : validation_result_dict,
-        #     # "non_quarantine_dataframe" : 
-        #     "quarantine_data_frame": quarantine_df,
-        # }
     
     def _get_expectation_suite_by_validation_result_id(
         self,
         validation_result_id
     ):
-        # FIXME: This is a dummy method to quickly generate some ExpectationSuites
-        df = pd.DataFrame({"x": range(10)})
-        ge_df = ge.from_pandas(df)
-        ge_df.expect_column_to_exist("x")
-        ge_df.expect_column_values_to_be_in_set("x", [1,2,3,4])
-        dummy_expectation_suite = ge_df.get_expectation_suite(discard_failed_expectations=False)
-        return dummy_expectation_suite
-
-        # TODO: Here's the REAL method.
-        # return self.data_context.stores["expectations_suite"].get(
-        #     validation_result_id.expectation_suite_identifier
-        # )
-        # validation_result
-        #     ExpectationSuiteIdentifier(**{
-        #        data_asset_identifier=data_asset_identifier,
-        #        expectation_suite_name=self.expectation_suite_name_prefix+expectation_suite_level,
-        #     })
-
+        try:
+            return self.data_context.stores["expectations_store"].get(
+                validation_result_id.expectation_suite_identifier
+            )
+        
+        # NOTE : Abe 2019/09/17 : I'm concerned that this may be too permissive, since
+        # it will catch any error in the Store, not just KeyErrors. In the longer term, a better
+        # solution will be to have the Stores catch other known errors and raise KeyErrors,
+        # so that methods like this can catch and handle a single error type.
+        except Exception as e:
+            if self.allow_empty_expectation_suites:
+                return None
+            else:
+                raise e
+        
     # TODO: test this method
     # TODO: Generalize this method to work with any data asset, not just pandas.
     def _get_unexpected_indexes(self, validation_result_id, validation_result_suite):
@@ -332,7 +324,8 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
         for expectation_validation_result in validation_result_suite["results"]:
             # TODO : Add checking for column_map Expectations
             if expectation_validation_result["success"] == False:
-                unexpected_index_set = unexpected_index_set.union(expectation_validation_result["result"]["unexpected_index_list"])
+                if expectation_validation_result["exception_info"] == None:
+                    unexpected_index_set = unexpected_index_set.union(expectation_validation_result["result"]["unexpected_index_list"])
 
         return unexpected_index_set
 

@@ -495,6 +495,9 @@ class ConfigOnlyDataContext(object):
                                           **kwargs)
         return data_asset
 
+
+    # TODO: In the future, we should expand this to allow it to take n data_assets.
+    # Currently, it can accept 0 or 1.
     def run_validation_operator(self,
         validation_operator_name,
         data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
