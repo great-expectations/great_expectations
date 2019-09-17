@@ -1,4 +1,11 @@
 import time
+import logging
+
+try:
+    from io import StringIO
+except ImportError:
+    from StringIO import StringIO
+
 from six import PY2, string_types
 
 import pandas as pd
@@ -12,6 +19,9 @@ from great_expectations.types import ClassConfig
 from great_expectations.exceptions import BatchKwargsError
 
 from .util import S3Url
+
+logger = logging.getLogger(__name__)
+
 
 class PandasDatasource(Datasource):
     """The PandasDatasource produces PandasDataset objects and supports generators capable of 
@@ -89,7 +99,7 @@ class PandasDatasource(Datasource):
                              "must be a subclass of PandasDataset." % data_asset_type.__name__)
 
         if "path" in batch_kwargs:
-            path = reader_options.pop("path")  # We need to remove from the reader
+            path = reader_options.pop("path")  # We remove this so it is not used as a reader option
             reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
             reader_method = reader_options.pop("reader_method", None)
             reader_fn, reader_fn_options = self._get_reader_fn(reader_method, path, reader_options)
@@ -108,15 +118,19 @@ class PandasDatasource(Datasource):
             reader_options.pop("timestamp", "")  # ditto timestamp (but missing ok)
             reader_method = reader_options.pop("reader_method", None)
             url = S3Url(raw_url)
+            logger.debug("Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key))
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
-            reader_fn, reader_fn_options = self._get_reader_fn(reader_method, s3.key, reader_options)
+            reader_fn, reader_fn_options = self._get_reader_fn(reader_method, url.key, reader_options)
 
             try:
-                df = getattr(pd, reader_fn)(s3_object["Body"].read(),
-                                            encoding=s3_object["ContentEncoding"],
-                                            **reader_fn_options)
+                df = getattr(pd, reader_fn)(
+                    StringIO(s3_object["Body"].read().decode(s3_object.get("ContentEncoding", "utf-8"))),
+                    **reader_fn_options
+                )
             except AttributeError:
                 raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
+            except IOError:
+                raise
 
         elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (pd.DataFrame, pd.Series)):
             df = batch_kwargs.pop("df")  # We don't want to store the actual dataframe in kwargs
