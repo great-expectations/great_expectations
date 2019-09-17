@@ -517,7 +517,10 @@ class ConfigOnlyDataContext(object):
         if hasattr(datasource_class, "build_configuration"):
             config = datasource_class.build_configuration(**kwargs)
 
-        datasource = self._build_datasource_from_config(**config)
+        # We perform variable substitution in the datasource's config here before using the config
+        # to instantiate the datasource object. Variable substitution is a service that the data
+        # context provides. Datasources should not see unsubstituted variables in their config.
+        datasource = self._build_datasource_from_config(**self.get_config_with_variables_replaced(config))
         self._datasources[name] = datasource
         self._project_config["datasources"][name] = config
 
