@@ -155,7 +155,12 @@ You can add a datasource later by editing the great_expectations.yml file.
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
-        context.add_datasource(data_source_name, "spark", base_directory=path)
+        context.add_datasource(data_source_name,
+                               module_name="great_expectations.datasource",
+                               class_name="SparkDFDatasource",
+                               base_directory=path) # NOTE: Eugene: 2019-09-17: review the path and make sure that the logic works both for abs and rel.
+                               # base_directory=os.path.join("..", path))
+
 
     # if data_source_selection == "5": # dbt
     #     dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
