@@ -156,8 +156,6 @@ class Datasource(object):
         Returns:
             datasource configuration dictionary
         """
-        if self._data_context is not None:
-            self.save_config()
         return self._datasource_config
 
     def _build_generator_from_config(self, **kwargs):
@@ -171,7 +169,9 @@ class Datasource(object):
             })
         generator = instantiate_class_from_config(
             config=kwargs,
-            runtime_config={},
+            runtime_config={
+                "datasource": self
+            },
             config_defaults={
                 "module_name": "great_expectations.datasource.generator"
             }
