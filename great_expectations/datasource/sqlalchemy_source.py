@@ -82,8 +82,6 @@ class SqlAlchemyDatasource(Datasource):
             generators=generators,
             **configuration_with_defaults)
 
-########
-        ### FIXME: EUGENE UPDATE WITH ENVIRONMENT LOGIC
         if credentials is not None:
             self._datasource_config.update({
                 "credentials": credentials
@@ -116,10 +114,8 @@ class SqlAlchemyDatasource(Datasource):
         self._build_generators()
 
     def _get_sqlalchemy_connection_options(self, **kwargs):
-        # NOTE: Eugene: 2019-09-10: reimplement, following the environments config logic!
-        datasource_config_with_vars_replaced = self.data_context.get_config_with_variables_replaced(config=self._datasource_config)
-        if "credentials" in datasource_config_with_vars_replaced:
-            credentials = datasource_config_with_vars_replaced["credentials"]
+        if "credentials" in self._datasource_config:
+            credentials = self._datasource_config["credentials"]
         else:
             credentials = {}
 
