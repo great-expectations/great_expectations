@@ -144,11 +144,17 @@ def parse_string_to_data_context_resource_identifier(string, separator="."):
 
     return class_instance
 
-def instantiate_class_from_config(config, runtime_config, config_defaults={}):
+
+def instantiate_class_from_config(config, runtime_config, config_defaults=None):
+    """Build a GE class from configuration dictionaries."""
+
+    if config_defaults is None:
+        config_defaults = {}
+
     config = copy.deepcopy(config)
 
     module_name = config.pop("module_name", None)
-    if module_name == None:
+    if module_name is None:
         try:
             module_name = config_defaults.pop("module_name")
         except KeyError as e:
@@ -160,7 +166,7 @@ def instantiate_class_from_config(config, runtime_config, config_defaults={}):
         config_defaults.pop("module_name", None)
 
     class_name = config.pop("class_name", None)
-    if class_name == None:
+    if class_name is None:
         try:
             class_name = config_defaults.pop("class_name")
         except KeyError as e:
@@ -194,6 +200,7 @@ def instantiate_class_from_config(config, runtime_config, config_defaults={}):
         ) + str(e))
 
     return class_instance
+
 
 def format_dict_for_error_message(dict_):
     # TODO : Tidy this up a bit. Indentation isn't fully consistent.
