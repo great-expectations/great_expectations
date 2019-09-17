@@ -97,9 +97,12 @@ class SparkDFDatasource(Datasource):
             raise ValueError("SparkDFDatasource cannot instantiate batch with data_asset_type: '%s'. It "
                              "must be a subclass of SparkDFDataset." % data_asset_type.__name__)
 
-        if "path" in batch_kwargs:
-            path = reader_options.pop("path")  # We remove this so it is not used as a reader option
-            reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
+        if "path" in batch_kwargs or "s3" in batch_kwargs:
+            if "path" in batch_kwargs:
+                path = reader_options.pop("path")  # We remove this so it is not used as a reader option
+            else:
+                path = reader_options.pop("s3")
+            reader_options.pop("timestamp", "")  # ditto timestamp (but missing ok)
             reader_method = reader_options.pop("reader_method", None)
             if reader_method is None:
                 reader_method = self._guess_reader_method_from_path(path)
@@ -134,6 +137,7 @@ class SparkDFDatasource(Datasource):
                 # Grab just the spark_df reference, since we want to override everything else
                 df = df.spark_df
             batch_kwargs["SparkDFRef"] = True
+
         else:
             raise BatchKwargsError("Unrecognized batch_kwargs for spark_source", batch_kwargs)
 
