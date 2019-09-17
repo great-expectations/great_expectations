@@ -215,6 +215,9 @@ def format_dict_for_error_message(dict_):
 
 
 def replace_var(template_str, replace_variables_dict):
+    if template_str is None:
+        return template_str
+
     match = re.search(r'^\$\{(.*?)\}$', template_str)
     if match:
         ret = replace_variables_dict[match.group(1)]
