@@ -103,6 +103,8 @@ def test_validation_operator__run(basic_data_context_config_for_validation_opera
         quarantine_expectations
     )
 
+    # TODO : Abe 2019/09/17 : We can make this config much more concise by subclassing an operator that knows how to define
+    # its own actions. Holding off on that for now, but we should consider it before shipping v0.8.0.
     vo = DefaultDataContextAwareValidationOperator(
         data_context=data_context,
         process_warnings_and_quarantine_rows_on_error=True,
