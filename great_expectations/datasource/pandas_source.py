@@ -6,10 +6,12 @@ import pandas as pd
 from .datasource import Datasource, ReaderMethods
 from great_expectations.datasource.generator.filesystem_path_generator import SubdirReaderGenerator, GlobReaderGenerator
 from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
+from great_expectations.datasource.generator.s3_generator import S3Generator
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.types import ClassConfig
 from great_expectations.exceptions import BatchKwargsError
 
+from .util import S3Url
 
 class PandasDatasource(Datasource):
     """The PandasDatasource produces PandasDataset objects and supports generators capable of 
@@ -57,6 +59,8 @@ class PandasDatasource(Datasource):
             return GlobReaderGenerator
         elif type_ == "memory":
             return InMemoryGenerator
+        elif type_ == "s3":
+            return S3Generator
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
@@ -88,32 +92,37 @@ class PandasDatasource(Datasource):
             path = reader_options.pop("path")  # We need to remove from the reader
             reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
             reader_method = reader_options.pop("reader_method", None)
-            if reader_method is None:
-                reader_method = self._guess_reader_method_from_path(path)
-                if reader_method is None:
-                    raise BatchKwargsError("Unable to determine reader for path: %s" % path, batch_kwargs)
-            else:
-                try:
-                    reader_method = ReaderMethods[reader_method]
-                except KeyError:
-                    raise BatchKwargsError("Unknown reader method: %s" % reader_method, batch_kwargs)
+            reader_fn, reader_fn_options = self._get_reader_fn(reader_method, path, reader_options)
+            try:
+                df = getattr(pd, reader_fn)(path, **reader_fn_options)
+            except AttributeError:
+                raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
 
-            if reader_method == ReaderMethods.CSV:
-                df = pd.read_csv(path, **reader_options)
-            elif reader_method == ReaderMethods.parquet:
-                df = pd.read_parquet(path, **reader_options)
-            elif reader_method == ReaderMethods.excel:
-                df = pd.read_excel(path, **reader_options)
-            elif reader_method == ReaderMethods.JSON:
-                df = pd.read_json(path, **reader_options)
-            else:
+        elif "s3" in batch_kwargs:
+            try:
+                import boto3
+                s3 = boto3.client("s3")
+            except ImportError:
+                raise BatchKwargsError("Unable to load boto3 client to read s3 asset.", batch_kwargs)
+            raw_url = reader_options.pop("s3")  # We need to remove from the reader
+            reader_options.pop("timestamp", "")  # ditto timestamp (but missing ok)
+            reader_method = reader_options.pop("reader_method", None)
+            url = S3Url(raw_url)
+            s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
+            reader_fn, reader_fn_options = self._get_reader_fn(reader_method, s3.key, reader_options)
+
+            try:
+                df = getattr(pd, reader_fn)(s3_object["Body"].read(),
+                                            encoding=s3_object["ContentEncoding"],
+                                            **reader_fn_options)
+            except AttributeError:
                 raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
 
         elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (pd.DataFrame, pd.Series)):
             df = batch_kwargs.pop("df")  # We don't want to store the actual dataframe in kwargs
             batch_kwargs["PandasInMemoryDF"] = True
         else:
-            raise BatchKwargsError("Invalid batch_kwargs: path or df is required for a PandasDatasource",
+            raise BatchKwargsError("Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
                                    batch_kwargs)
 
         return data_asset_type(df,
@@ -138,3 +147,27 @@ class PandasDatasource(Datasource):
                 "timestamp": time.time()
             })
         return kwargs
+
+    def _get_reader_fn(self, reader_method, path, reader_options):
+        if reader_method is None:
+            reader_method = self._guess_reader_method_from_path(path)
+            if reader_method is None:
+                raise BatchKwargsError("Unable to determine reader for path: %s" % path, reader_options)
+        else:
+            try:
+                reader_method = ReaderMethods[reader_method]
+            except KeyError:
+                raise BatchKwargsError("Unknown reader method: %s" % reader_method, reader_options)
+
+        if reader_method == ReaderMethods.CSV:
+            return "read_csv", reader_options
+        elif reader_method == ReaderMethods.parquet:
+            return "read_parquet", reader_options
+        elif reader_method == ReaderMethods.excel:
+            return "read_excel", reader_options
+        elif reader_method == ReaderMethods.JSON:
+            return "read_json", reader_options
+        elif reader_method == ReaderMethods.CSV_GZ:
+            return "read_csv", reader_options.update({"compression": "gzip"})
+
+        return None
