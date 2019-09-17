@@ -22,7 +22,7 @@ import warnings
 from .util import get_slack_callback, safe_mmkdir, replace_all_template_dict_values
 from ..types.base import DotDict
 
-from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
+from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError, InvalidConfigError
 
 # FIXME : fully deprecate site_builder, by replacing it with new_site_builder.
 # FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers. 
@@ -393,11 +393,16 @@ class ConfigOnlyDataContext(object):
         """
         credentials = self._get_all_credentials_properties()
         credentials[property_name] = dict(**kwargs)
-        credentials_filepath = os.path.join(self.root_directory, self.get_project_config()["credentials_file_path"])
+        credentials_filepath = self.get_project_config().get("credentials_file_path")
+        if not credentials_filepath:
+            raise InvalidConfigError("'credentials_file_path' property is not found in config - setting it is required to use this feature")
+
+        credentials_filepath = os.path.join(self.root_directory, credentials_filepath)
+
         safe_mmkdir(os.path.dirname(credentials_filepath), exist_ok=True)
         if not os.path.isfile(credentials_filepath):
             logger.info("Creating new credentials file at {credentials_filepath}".format(
-                profiles_filepath=credentials_filepath)
+                credentials_filepath=credentials_filepath)
             )
         with open(credentials_filepath, "w") as profiles_file:
             yaml.dump(credentials, profiles_file)

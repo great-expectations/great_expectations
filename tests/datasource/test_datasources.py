@@ -225,7 +225,7 @@ def test_create_sqlalchemy_datasource(data_context):
     # }
 
     # It should be possible to create a sqlalchemy source using these params without
-    # saving a profile
+    # saving substitution variables
     data_context.add_datasource(name, class_name=class_name, **connection_kwargs)
     data_context_config = data_context.get_config()
     assert name in data_context_config["datasources"]
@@ -235,27 +235,29 @@ def test_create_sqlalchemy_datasource(data_context):
     source = data_context.get_datasource(name)
     assert isinstance(source, SqlAlchemyDatasource)
 
-    profile_name = "test_sqlalchemy_datasource"
-    data_context.add_profile_credentials(profile_name, **connection_kwargs)
+    var_name = "test_sqlalchemy_datasource"
 
-    # But we should be able to add a source using a profile
+    data_context.set_credentials_property(var_name, **connection_kwargs)
+
+
+    # But we should be able to add a source using a substitution variable
     name = "second_source"
-    data_context.add_datasource(name, class_name=class_name, profile="test_sqlalchemy_datasource")
+    data_context.add_datasource(name, class_name=class_name,  credentials="${" + var_name + "}")
 
     data_context_config = data_context.get_config()
     assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["class_name"] == class_name
-    assert data_context_config["datasources"][name]["profile"] == profile_name
+    assert data_context_config["datasources"][name]["credentials"] == "${" + var_name + "}"
 
     source = data_context.get_datasource(name)
     assert isinstance(source, SqlAlchemyDatasource)
 
     # Finally, we should be able to confirm that the folder structure is as expected
-    with open(os.path.join(data_context.root_directory, "uncommitted/credentials/profiles.yml"), "r") as profiles_file:
-        profiles = yaml.load(profiles_file)
+    with open(os.path.join(data_context.root_directory, "uncommitted/credentials.yml"), "r") as credentials_file:
+        substitution_variables = yaml.load(credentials_file)
 
-    assert profiles == {
-        profile_name: dict(**connection_kwargs)
+    assert substitution_variables == {
+        var_name: dict(**connection_kwargs)
     }
 
 
@@ -324,17 +326,29 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
         pytest.skip()
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
     shutil.copy("./tests/test_sets/unicode.csv", basedir)
-    data_context.add_datasource(name="mysource", type_="pandas", reader_options={"encoding": "utf-8"}, base_directory=str(basedir))
+    data_context.add_datasource("mysource",
+                                module_name="great_expectations.datasource",
+                                class_name="PandasDatasource",
+                                reader_options={"encoding": "utf-8"},
+                                base_directory=str(basedir))
 
     batch = data_context.get_batch("mysource/unicode")
     assert len(batch["Μ"] == 1)
     assert "😁" in list(batch["Μ"])
 
-    data_context.add_datasource(name="mysource2", type_="pandas", base_directory=str(basedir))
+    data_context.add_datasource("mysource2",
+                                module_name="great_expectations.datasource",
+                                class_name="PandasDatasource",
+                                base_directory=str(basedir))
+
     batch = data_context.get_batch("mysource2/unicode")
     assert "😁" in list(batch["Μ"])
 
-    data_context.add_datasource(name="mysource3", type_="pandas", reader_options={"encoding": "utf-16"}, base_directory=str(basedir))
+    data_context.add_datasource("mysource3",
+                                module_name="great_expectations.datasource",
+                                class_name="PandasDatasource",
+                                reader_options={"encoding": "utf-16"},
+                                base_directory=str(basedir))
     with pytest.raises(UnicodeError, match="UTF-16 stream does not start with BOM"):
         batch = data_context.get_batch("mysource3/unicode")
 
@@ -373,7 +387,10 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path):
 def test_standalone_spark_passthrough_generator_datasource(data_context, dataset):
     pyspark_skip = pytest.importorskip("pyspark")
     # noinspection PyUnusedLocal
-    datasource = data_context.add_datasource("spark_source", "spark", generators={"passthrough": {"type": "memory"}})
+    datasource = data_context.add_datasource("spark_source",
+                                            module_name="great_expectations.datasource",
+                                            class_name="SparkDFDatasource",
+                                            generators={"passthrough": {"type": "memory"}})
 
     # We want to ensure that an externally-created spark DataFrame can be successfully instantiated using the
     # datasource built in a data context
