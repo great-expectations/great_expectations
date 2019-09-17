@@ -20,7 +20,8 @@ class S3Generator(BatchGenerator):
                  bucket=None,
                  reader_options=None,
                  assets=None,
-                 delimiter="/"):
+                 delimiter="/",
+                 max_keys=1000):
         super(S3Generator, self).__init__(name, type_="s3", datasource=datasource)
         if reader_options is None:
             reader_options = {}
@@ -38,9 +39,10 @@ class S3Generator(BatchGenerator):
         self._reader_options = reader_options
         self._assets = assets
         self._delimiter = delimiter
+        self._max_keys = max_keys
         self._iterators = {}
         try:
-            self.s3 = boto3.client('s3')
+            self._s3 = boto3.client('s3')
         except TypeError:
             raise(ImportError("Unable to load boto3, which is required for S3 generator"))
 
@@ -96,7 +98,8 @@ class S3Generator(BatchGenerator):
         query_options = {
             "Bucket": self.bucket,
             "Delimiter": asset_config.get("delimiter", self._delimiter),
-            "Prefix": asset_config.get("prefix", ""),
+            "Prefix": asset_config.get("prefix", None),
+            "MaxKeys": asset_config.get("max_keys", self._max_keys)
         }
 
         if "continuation_token" in iterator_dict:
@@ -104,14 +107,15 @@ class S3Generator(BatchGenerator):
                 "ContinuationToken": iterator_dict["continuation_token"]
             })
 
-        asset_options = self.s3.list_objects_v2(**query_options)
+        asset_options = self._s3.list_objects_v2(**query_options)
         if "Contents" not in asset_options:
             raise BatchKwargsError(
-                "Unable to build batch_kwargs; is this asset configured correctly? Sometimes, a different"
-                "prefix is necessary.",
+                "Unable to build batch_kwargs. The asset may not be configured correctly. If s3 returned common "
+                "prefixes it may not have been able to identify desired keys, and they are included in the "
+                "incomplete batch_kwargs object returned with this error.",
                 {
-                    "asset": asset_config,
-                    "CommonPrefixes": asset_options["CommonPrefixes"] if "CommonPrefixes" in asset_options else None
+                    "asset_configuration": asset_config,
+                    "common_prefixes": asset_options["CommonPrefixes"] if "CommonPrefixes" in asset_options else None
                 }
             )
 
