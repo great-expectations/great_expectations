@@ -37,7 +37,7 @@ def mock_s3_bucket():
         yield bucket
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def s3_generator(mock_s3_bucket):
     # We configure a generator that will fetch from (mocked) my_bucket
     # and will use glob patterns to match returned assets into batches of the same asset
@@ -99,6 +99,7 @@ def test_s3_generator_incremental_fetch(s3_generator, caplog):
 
     # When max_keys is not set, it defaults to 1000, so all items are returned in the first iterator batch,
     # causing only one fetch (and one log entry referencing the startup of the method)
+    caplog.clear()
     batch_kwargs = [kwargs for kwargs in s3_generator.get_iterator("data")]
     assert len(caplog.records) == 2
     assert len(batch_kwargs) == 2
@@ -107,6 +108,7 @@ def test_s3_generator_incremental_fetch(s3_generator, caplog):
     # The result is a new log record for each fetch (plus one for entering the method).
     # Since there are three assets matched by 'other_empty_delimiter' we create four additional log entries with three
     # refetch operations
+    caplog.clear()
     batch_kwargs = [kwargs for kwargs in s3_generator.get_iterator("other_empty_delimiter")]
-    assert len(caplog.records) == 2 + 4
+    assert len(caplog.records) == 4
     assert len(batch_kwargs) == 3
