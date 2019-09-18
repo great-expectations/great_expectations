@@ -380,7 +380,7 @@ class ConfigOnlyDataContext(object):
         return substitute_all_config_variables(config, self._load_config_variables_file())
 
 
-    def save_config_variable(self, config_variable_name, **value):
+    def save_config_variable(self, config_variable_name, value):
         """Save config variable value
 
         Args:
@@ -391,7 +391,7 @@ class ConfigOnlyDataContext(object):
             None
         """
         config_variables = self._load_config_variables_file()
-        config_variables[config_variable_name] = dict(**value)
+        config_variables[config_variable_name] = value
         config_variables_filepath = self.get_project_config().get("config_variables_file_path")
         if not config_variables_filepath:
             raise InvalidConfigError("'config_variables_file_path' property is not found in config - setting it is required to use this feature")
