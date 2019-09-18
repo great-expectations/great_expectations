@@ -191,6 +191,7 @@ def test_DefaultDataContextAwareValidationOperator_with_file_structure(tmp_path_
         project_path,
     )
     print(gen_directory_tree_str(project_path))
+
     assert gen_directory_tree_str(project_path) =="""\
 project/
     data/
@@ -201,7 +202,6 @@ project/
     great_expectations/
         .gitignore
         great_expectations.yml
-        datasources/
         expectations/
             data__dir/
                 default/
@@ -210,13 +210,10 @@ project/
                         failure.json
                         quarantine.json
                         warning.json
-        fixtures/
         notebooks/
             create_expectations.ipynb
             integrate_validation_into_pipeline.ipynb
-        plugins/
         uncommitted/
-            credentials/
             documentation/
                 local_site/
                     index.html
@@ -237,7 +234,6 @@ project/
                             default/
                                 bob-ross/
                                     BasicDatasetProfiler.html
-            samples/
             validations/
                 profiling/
                     data__dir/
