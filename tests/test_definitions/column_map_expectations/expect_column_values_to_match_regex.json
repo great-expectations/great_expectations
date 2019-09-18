@@ -4,13 +4,15 @@
     "data" : {
       "a" : ["aaa", "abb", "acc", "add", "bee"],
       "b" : ["aaa", "abb", "acc", "bdd", null],
-      "c" : [ null,  null,  null,  null, null]
+      "c" : [ null,  null,  null,  null, null],
+      "column_name with space": ["aaa", "abb", "acc", "add", "bee"]
     },
     "schemas": {
       "spark": {
         "a": "StringType",
         "b": "StringType",
-        "c": "StringType"
+        "c": "StringType",
+        "column_name with space": "StringType"
       }
     },
     "tests": [{
@@ -41,7 +43,23 @@
         "unexpected_list": ["bee"]
       },
       "suppress_test_for": ["sqlite"]
-      },{
+      },
+      {
+      "title": "Positive_test_column_name_has_space",
+      "exact_match_out" : false,
+      "in":{
+        "column": "column_name with space",
+        "regex": "^a",
+        "mostly": 0.8
+      },
+      "out":{
+        "success":true,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "suppress_test_for": ["sqlite"]
+      },
+      {
       "title": "Positive test, sufficient mostly w/ one non-matching value",
       "exact_match_out" : false,
       "in":{
