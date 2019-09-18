@@ -1,6 +1,11 @@
 .. _changelog:
 
 
+v0.7.10__develop
+-----------------
+
+
+
 v0.7.9
 -----------------
 * Add an S3 generator, which will introspect a configured bucket and generate batch_kwargs from identified objects
