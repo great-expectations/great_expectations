@@ -91,7 +91,13 @@ class SiteIndexPageRenderer(Renderer):
             first_row.append(profiling_results_bullet_list)
             
         if expectation_suite_links is not None:
-            expectation_suite_link_dict = expectation_suite_links[0]
+            if len(expectation_suite_links) > 0:
+                expectation_suite_link_dict = expectation_suite_links[0]
+            else:
+                expectation_suite_link_dict = {
+                    "expectation_suite_name": "",
+                    "filepath": ""
+                }
 
             expectation_suite_name = expectation_suite_link_dict["expectation_suite_name"]
 
