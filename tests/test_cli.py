@@ -166,7 +166,7 @@ def test_validate_custom_dataset():
     assert json_result == expected_cli_results
 
 
-def test_cli_evaluation_parameters(capsys):
+def test_cli_evaluation_parameters():
     with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
         runner = CliRunner()
         result = runner.invoke(cli, ["validate",
