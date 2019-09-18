@@ -17,6 +17,7 @@ from ..types import (
     RenderedSectionContent,
     RenderedComponentContent,
 )
+from collections import OrderedDict
 
 
 class ValidationResultsPageRenderer(Renderer):
@@ -118,15 +119,24 @@ class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def _render_validation_statistics(cls, validation_results):
         statistics = validation_results["statistics"]
+        statistics_dict = OrderedDict([
+            ("evaluated_expectations", "Evaluated Expectations"),
+            ("successful_expectations", "Successful Expectations"),
+            ("unsuccessful_expectations", "Unsuccessful Expectations"),
+            ("success_percent", "Success Percent")
+        ])
+        table_rows = []
+        for key, value in statistics_dict.items():
+            if statistics.get(key) is not None:
+                if key == "success_percent":
+                    table_rows.append([value, "{0:.2f}%".format(statistics[key])])
+                else:
+                    table_rows.append([value, statistics[key]])
+        
         return RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Statistics",
-            "table": [
-                ["Evaluated Expectations", statistics["evaluated_expectations"]],
-                ["Successful Expectations", statistics["successful_expectations"]],
-                ["Unsuccessful Expectations", statistics["unsuccessful_expectations"]],
-                ["Success Percent", "{0:.2f}%".format(statistics["success_percent"])],
-            ],
+            "table": table_rows,
             "styling": {
                 "classes": ["col-6", "table-responsive"],
                 "styles": {
