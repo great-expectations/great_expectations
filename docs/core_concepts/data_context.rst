@@ -60,6 +60,32 @@ configuration information. For example, the following simple configuration suppo
         default:
           type: memory
 
+The following configuration demonstrates a more complicated configuration for reading assets from s3 into pandas. It
+will access the amazon public NYC taxi data and provides access to two assets: 'taxi-green' and 'taxi-fhv' which
+represent two public datasets available from the resource.
+
+.. code-block:: yaml
+
+  datasources:
+    nyc_taxi:
+      type: pandas
+      generators:
+        s3:
+          type: s3
+          bucket: nyc-tlc
+          delimiter: '/'
+          reader_options:
+            sep: ','
+            engine: python
+          assets:
+            taxi-green:
+              prefix: trip data/
+              regex_filter: 'trip data/green.*\.csv'
+            taxi-fhv:
+              prefix: trip data/
+              regex_filter: 'trip data/fhv.*\.csv'
+      data_asset_type:
+        class_name: PandasDataset
 
 Note that the datasources section *includes* all defined generators as well as specifying their names.
 
