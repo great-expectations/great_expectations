@@ -28,15 +28,9 @@ def test_setting_config_variables_is_visible_immediately(data_context_with_varia
     # it is automatically created on the first write
     assert not os.path.isfile(os.path.join(context._context_root_directory, config_variables_file_path))
 
-    # the context's config has a one config variable
-    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"]["mygenerator"]["reader_options"]["test_variable_sub"] == "${replace_me}"
-
-    # verify that the config variable will be substituted with the value of the env var if there is no value in the
-    # config variables file
-    os.environ["replace_me"] = "value_from_env_var"
-    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"]["mygenerator"][
-               "reader_options"]["test_variable_sub"] == "value_from_env_var"
-
+    # the context's config has two config variables - one using the ${} syntax and the other - $.
+    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"]["mygenerator"]["reader_options"]["test_variable_sub1"] == "${replace_me}"
+    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"]["mygenerator"]["reader_options"]["test_variable_sub2"] == "$replace_me"
 
     # verify that we can save a config variable in the config variables file
     # and the value is retrievable
@@ -44,7 +38,17 @@ def test_setting_config_variables_is_visible_immediately(data_context_with_varia
     config_variables = context._load_config_variables_file()
     assert config_variables["replace_me"] == {"n1": "v1"}
 
-    # verify that the value of the config variable is immediately updated and the one from the
-    # config variables file takes precedence over the one from the env var
+    # verify that the value of the config variable is immediately updated.
+    # verify that the config variable will be substituted with the value from the file if the
+    # env variable is not set (for both ${} and $ syntax variations)
     context._project_config_with_varibles_substituted["datasources"]["mydatasource"]["generators"]["mygenerator"][
-               "reader_options"]["test_variable_sub"] == {"n1": "v1"}
+               "reader_options"]["test_variable_sub1"] == {"n1": "v1"}
+    context._project_config_with_varibles_substituted["datasources"]["mydatasource"]["generators"]["mygenerator"][
+               "reader_options"]["test_variable_sub2"] == {"n1": "v1"}
+
+    # verify that the value of the env var takes precedence over the one from the config variables file
+    os.environ["replace_me"] = "value_from_env_var"
+    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"]["mygenerator"][
+               "reader_options"]["test_variable_sub1"] == "value_from_env_var"
+
+
