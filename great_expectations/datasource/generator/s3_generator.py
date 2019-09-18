@@ -62,7 +62,7 @@ class S3Generator(BatchGenerator):
         return set(self._assets.keys())
 
     def _get_iterator(self, generator_asset, **kwargs):
-        logger.debug("Beginning SubdirReaderGenerator _get_iterator for generator_asset: %s" % generator_asset)
+        logger.debug("Beginning S3Generator _get_iterator for generator_asset: %s" % generator_asset)
 
         if generator_asset not in self._assets:
             batch_kwargs = {
@@ -107,6 +107,7 @@ class S3Generator(BatchGenerator):
                 "ContinuationToken": iterator_dict["continuation_token"]
             })
 
+        logger.debug("Fetching objects from S3 with query options: %s" % str(query_options))
         asset_options = self._s3.list_objects_v2(**query_options)
         if "Contents" not in asset_options:
             raise BatchKwargsError(
