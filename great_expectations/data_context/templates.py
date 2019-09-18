@@ -26,9 +26,9 @@ CONFIG_VARIABLES_INTRO = """
 #
 # When GE encounters the following syntax in the config file:
 #
-# my_key: ${my_value}
+# my_key: ${my_value} (or $my_value)
 #
-# GE will attempt to replace the value of “my_key” first, with the value of env variable “my_value” (if set) and then with the value of the key “my_value” read from credentials file.
+# GE will attempt to replace the value of “my_key” with the value of env variable “my_value” or with the value of the key “my_value” read from credentials file (env variable takes precedence).
 #
 # If the replacing value comes from the config variables file, it can be a simple value or a dictionary. If it comes from an environment variable, it must be a simple value.
 """
