@@ -272,6 +272,15 @@ class Dataset(MetaDataset):
                 column,
                 tuple(np.linspace(start=0, stop=1, num=n_bins+1))
             )
+        elif bins == 'auto':
+            # Use the method from numpy histogram_bin_edges
+            nonnull_count = self.get_column_nonnull_count(column)
+            sturges = np.log2(nonnull_count + 1)
+            min_, _25, _75, max_ = self.get_column_quantiles(column, (0.0, 0.25, 0.75, 1.0))
+            iqr = _75 - _25
+            fd = (2 * iqr) / (nonnull_count**(1/3))
+            n_bins = max(sturges, fd)
+            bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins+1)
         else:
             raise ValueError("Invalid parameter for bins argument")
         return bins
