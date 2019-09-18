@@ -30,6 +30,7 @@ class ReaderMethods(Enum):
     JSON = 4
     json = 4
     delta = 5
+    CSV_GZ = 6
 
 
 class Datasource(object):
@@ -423,6 +424,8 @@ class Datasource(object):
             return ReaderMethods.excel
         elif path.endswith(".json"):
             return ReaderMethods.JSON
+        elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
+            return ReaderMethods.CSV_GZ
         else:
             return None
 
