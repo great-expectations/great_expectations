@@ -12,15 +12,6 @@ def test_build_continuous_partition_object(numeric_high_card_dataset):
     if isinstance(numeric_high_card_dataset, SqlAlchemyDataset) and \
             isinstance(numeric_high_card_dataset.engine.dialect, sqlite_dialect.dialect):
         pytest.skip()
-    elif isinstance(numeric_high_card_dataset, SqlAlchemyDataset):
-        pytest.skip()
-        ###
-        #
-        # FIXME: There is a precision issue I have not yet resolved, wherein the
-        # last digit in postgres is truncated. I've looked at it before, but don't recall
-        # what the resolution was.
-        #
-        ###
 
     partition = build_continuous_partition_object(
         dataset=numeric_high_card_dataset,
