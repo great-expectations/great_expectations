@@ -24,6 +24,8 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy as sa
     from sqlalchemy.engine import reflection
+    from sqlalchemy.sql.expression import BinaryExpression, literal
+    from sqlalchemy.sql.operators import custom_op
 except ImportError:
     logger.debug("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
 
@@ -818,7 +820,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
-        return sa.text(column + " " + regex_fn + " '" + regex + "'")
+        return BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn))
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_not_match_regex(
@@ -833,7 +835,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
-        return sa.text(column + " " + regex_fn + " '" + regex + "'")
+        return BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn))
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_match_regex_list(self,
@@ -855,12 +857,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if match_on == "any":
             condition = \
                 sa.or_(
-                    *[sa.text(column + " " + regex_fn + " '" + regex + "'") for regex in regex_list]
+                    *[BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn)) for regex in regex_list]
                 )
         else:
             condition = \
                 sa.and_(
-                    *[sa.text(column + " " + regex_fn + " '" + regex + "'") for regex in regex_list]
+                    *[BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn)) for regex in regex_list]
                 )
         return condition
 
@@ -875,5 +877,5 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             raise NotImplementedError
 
         return sa.and_(
-            *[sa.text(column + " " + regex_fn + " '" + regex + "'") for regex in regex_list]
+            *[BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn)) for regex in regex_list]
         )
