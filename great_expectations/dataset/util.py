@@ -138,12 +138,13 @@ def partition_data(data, bins='auto', n_bins=10):
     return continuous_partition_data(data, bins, n_bins)
 
 
-def continuous_partition_data(data, bins='auto', n_bins=1, **kwargs):
+def continuous_partition_data(data, bins='auto', n_bins=10, **kwargs):
     """Convenience method for building a partition object on continuous data
 
     Args:
         data (list-like): The data from which to construct the estimate.
-        bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto' (for automatically spaced bins)
+        bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto'
+            (for automatically spaced bins)
         n_bins (int): Ignored if bins is auto.
         kwargs (mapping): Additional keyword arguments to be passed to numpy histogram
 
@@ -176,6 +177,39 @@ def continuous_partition_data(data, bins='auto', n_bins=1, **kwargs):
         "bins": bin_edges,
         "weights": hist / len(data)
     }
+
+
+def build_continuous_partition_object(dataset, column, bins='auto', n_bins=10):
+    """Convenience method for building a partition object on continuous data from a dataset and column
+
+    Args:
+        dataset (GE Dataset): the dataset for which to compute the partition
+        column (string): The name of the column for which to construct the estimate.
+        bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto'
+            (for automatically spaced bins)
+        n_bins (int): Ignored if bins is auto.
+
+    Returns:
+        A new partition_object::
+
+        {
+            "bins": (list) The endpoints of the partial partition of reals,
+            "weights": (list) The densities of the bins implied by the partition.
+        }
+        See :ref:`partition_object`.
+    """
+    # NOTE: we are *not* specifying a tail_weight_holdout by default.
+    bins = dataset.get_column_partition(column, bins, n_bins)
+    if isinstance(bins, np.ndarray):
+        bins = bins.tolist()
+    else:
+        bins = list(bins)
+    weights = list(np.array(dataset.get_column_hist(column, tuple(bins))) / dataset.get_column_nonnull_count(column))
+    partition_object = {
+        "bins": bins,
+        "weights": weights
+    }
+    return partition_object
 
 
 def infer_distribution_parameters(data, distribution, params=None):

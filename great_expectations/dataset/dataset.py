@@ -18,6 +18,7 @@ elif sys.version_info.major == 3:  # If python 3
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
+    build_continuous_partition_object,
     is_valid_partition_object,
     is_valid_categorical_partition_object
 )
@@ -272,6 +273,15 @@ class Dataset(MetaDataset):
                 column,
                 tuple(np.linspace(start=0, stop=1, num=n_bins+1))
             )
+        elif bins == 'auto':
+            # Use the method from numpy histogram_bin_edges
+            nonnull_count = self.get_column_nonnull_count(column)
+            sturges = np.log2(nonnull_count + 1)
+            min_, _25, _75, max_ = self.get_column_quantiles(column, (0.0, 0.25, 0.75, 1.0))
+            iqr = _75 - _25
+            fd = (2 * float(iqr)) / (nonnull_count**(1/3))
+            n_bins = max(sturges, fd)
+            bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins+1)
         else:
             raise ValueError("Invalid parameter for bins argument")
         return bins
@@ -3554,17 +3564,7 @@ class Dataset(MetaDataset):
 
         """
         if partition_object is None:
-            # NOTE: we are *not* specifying a tail_weight_holdout by default.
-            bins = self.get_column_partition(column)
-            if isinstance(bins, np.ndarray):
-                bins = bins.tolist()
-            else:
-                bins = list(bins)
-            weights = list(np.array(self.get_column_hist(column, tuple(bins))) / self.get_column_nonnull_count(column))
-            partition_object = {
-                "bins": bins,
-                "weights": weights
-            }
+            partition_object = build_continuous_partition_object(dataset=self, column=column, bins='auto')
 
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
