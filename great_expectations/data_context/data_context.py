@@ -1611,20 +1611,11 @@ class DataContext(ConfigOnlyDataContext):
     # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
     def _load_project_config(self):
         """
-        Reads the project configuration by merging the config loaded from the project configuration file
-        with the one loaded from the self.active_environment_name section of the environments config file.
+        Reads the project configuration from the project configuration file.
+        The file may contain ${SOME_VARIABLE} variables - see self._project_config_with_varibles_substituted
+        for how these are substituted.
 
-        The values in the environments file take precedence.
-
-        self.active_environment_name value is set in the constructor of this object.
-
-        The location of the environments config file is taken from env_file_path property in the
-        project configuration file.
-
-        :return: a tuple: (
-            contents of the project configuration file - to be used for writing properties,
-            configuration created by the merge - all properties should be read from this object
-            )
+        :return: the configuration object read from the file
         """
         try:
             with open(os.path.join(self.root_directory, "great_expectations.yml"), "r") as data:
