@@ -14,6 +14,34 @@ from great_expectations.exceptions import BatchKwargsError
 
 
 class S3Generator(BatchGenerator):
+    """
+    S3 Generator provides support for generating batches of data from an S3 bucket. For the S3 generator, assets must
+    be individually defined using a prefix and glob, although several additional configuration parameters are available
+    for assets (see below).
+
+    Example configuration::
+    datasources:
+      my_datasource:
+        ...
+        generators:
+          my_s3_generator:
+            type: s3
+            bucket: my_bucket.my_organization.priv
+            reader_options:  # Note that reader options can be specified globally or per-asset
+              sep: ","
+            delimiter: "/"  # Note that this is the delimiter for the BUCKET KEYS. By default it is "/"
+            max_keys: 100  # The maximum number of keys to fetch in a single list_objects request to s3. When accessing batch_kwargs through an iterator, the iterator will silently refetch if more keys were available
+            assets:
+              my_first_asset:
+                prefix: my_first_asset/
+                regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
+              access_logs:
+                prefix: access_logs
+                regex_filter: access_logs/2019.*\.csv.gz
+                sep: "~"
+                max_keys: 100
+    """
+
     def __init__(self,
                  name="default",
                  datasource=None,
@@ -22,6 +50,17 @@ class S3Generator(BatchGenerator):
                  assets=None,
                  delimiter="/",
                  max_keys=1000):
+        """ Initialize a new S3Generator
+
+        Args:
+            name: the name of the generator
+            datasource: the datasource to which it is attached
+            bucket: the name of the s3 bucket from which it generates batch_kwargs
+            reader_options: options passed to the datasource reader method
+            assets: asset configuration (see class docstring for more information)
+            delimiter: the BUCKET KEY delimiter
+            max_keys: the maximum number of keys to fetch in a single list_objects request to s3
+        """
         super(S3Generator, self).__init__(name, type_="s3", datasource=datasource)
         if reader_options is None:
             reader_options = {}
@@ -30,8 +69,7 @@ class S3Generator(BatchGenerator):
             assets = {
                 "default": {
                     "prefix": "",
-                    "glob": "*",
-                    "partition_regex": "(.*)"
+                    "regex_filter": ".*"
                 }
             }
 
@@ -51,7 +89,7 @@ class S3Generator(BatchGenerator):
         return self._reader_options
 
     @property
-    def asset_globs(self):
+    def assets(self):
         return self._assets
 
     @property
