@@ -237,7 +237,7 @@ def test_create_sqlalchemy_datasource(data_context):
 
     var_name = "test_sqlalchemy_datasource"
 
-    data_context.save_config_variable(var_name, **connection_kwargs)
+    data_context.save_config_variable(var_name, connection_kwargs)
 
 
     # But we should be able to add a source using a substitution variable

@@ -214,7 +214,20 @@ def format_dict_for_error_message(dict_):
     return '\n\t'.join('\t\t'.join((str(key), str(dict_[key]))) for key in dict_)
 
 
-def replace_var(template_str, replace_variables_dict):
+def substitute_config_variable(template_str, config_variables_dict):
+    """
+    This method takes a string, and if it is of the form ${SOME_VARIABLE}, returns the value of
+    SOME_VARIABLE, otherwise returns the string unchanged.
+
+    The value of SOME_VARIABLE is looked up in the config variables store (file).
+    If it is not found there, the method checks if the environment variable SOME_VARIABLE
+    is set.
+
+    :param template_str: a string that might or might not be of the form ${SOME_VARIABLE}
+    :param config_variables_dict: a dictionary of config variables. It is loaded from the
+            config variables store (by default, "uncommitted/config_variables.yml file)
+    :return:
+    """
     if template_str is None:
         return template_str
     try:
@@ -224,20 +237,28 @@ def replace_var(template_str, replace_variables_dict):
         return template_str
 
     if match:
-        ret = replace_variables_dict[match.group(1)]
+        config_variable_value = config_variables_dict.get(match.group(1))
+        if not config_variable_value:
+            config_variable_value =  os.getenv(match.group(1))
+            if not config_variable_value:
+                config_variable_value = template_str
     else:
-        ret = template_str
+        config_variable_value = template_str
 
-    return ret
+    return config_variable_value
 
 
 def substitute_all_config_variables(data, replace_variables_dict):
     """
-    Replace all template values in a dictionary.
+    Substitute all config variables of the form ${SOME_VARIABLE} in a dictionary-like
+    config object for their values.
+
+    The method traverses the dictionary recursively.
+
     :param data:
     :param replace_variables_dict:
-    :return: a dictionary with all the template values replaced
+    :return: a dictionary with all the variables replaced with their values
     """
     if isinstance(data, dict):
         return {k : substitute_all_config_variables(v, replace_variables_dict) for k, v in data.items()}
-    return replace_var(data, replace_variables_dict)
+    return substitute_config_variable(data, replace_variables_dict)
