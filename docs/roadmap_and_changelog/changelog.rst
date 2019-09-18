@@ -5,8 +5,10 @@ v0.7.9
 -----------------
 * Add an S3 generator, which will introspect a configured bucket and generate batch_kwargs from identified objects
 * Add support to PandasDatasource and SparkDFDatasource for reading directly from S3
-* Validation results in Site Index pages are now sorted to display the newest items first using the default
- run-id scheme
+* Enhance the Site Index page in documentation so that validation results are sorted and display the newest items first
+ when using the default run-id scheme
+* Add a new utility method, `build_continuous_partition_object` which will build partition objects using the dataset
+ API and so supports any GE backend.
 * Fix an issue where columns with spaces in their names caused failures in some SqlAlchemyDataset and SparkDFDataset
  expectations
 * Fix an issue where generated queries including null checks failed on MSSQL (#695)
