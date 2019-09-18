@@ -5,7 +5,7 @@ import glob
 from great_expectations.datasource.generator.batch_generator import BatchGenerator
 from great_expectations.exceptions import BatchKwargsError
 
-KNOWN_EXTENSIONS = ['.csv', '.tsv', '.parquet', '.xls', '.xlsx', '.json']
+KNOWN_EXTENSIONS = ['.csv', '.tsv', '.parquet', '.xls', '.xlsx', '.json', '.csv.gz', '.tsv.gz']
 
 
 class GlobReaderGenerator(BatchGenerator):
