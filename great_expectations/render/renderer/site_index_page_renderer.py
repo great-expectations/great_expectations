@@ -125,7 +125,7 @@ class SiteIndexPageRenderer(Renderer):
             })
             first_row.append(expectation_suite_link)
             
-            if validation_links is not None:
+            if validation_links is not None and expectation_suite_links:
                 sorted_validation_links = [
                     link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"], reverse=True)
                     if link_dict["expectation_suite_name"] == expectation_suite_name
