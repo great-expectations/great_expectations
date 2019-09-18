@@ -10,15 +10,12 @@ from great_expectations.render.types import (
 class SiteIndexPageRenderer(Renderer):
 
     @classmethod
-    def _generate_data_asset_table_section(cls, data_asset_name, link_lists_dict):
+    def _generate_data_asset_table_section(cls, data_asset_name, link_lists_dict, column_count):
         section_rows = []
-        column_count = 1
+
         profiling_links = link_lists_dict["profiling_links"]
-        if profiling_links: column_count += 1
         validation_links = link_lists_dict["validation_links"]
-        if validation_links: column_count += 1
         expectation_suite_links = link_lists_dict["expectation_suite_links"]
-        if expectation_suite_links: column_count += 1
         
         cell_width_pct = 100.0/column_count
 
@@ -59,7 +56,7 @@ class SiteIndexPageRenderer(Renderer):
         })
         first_row.append(data_asset_name)
         
-        if profiling_links:
+        if profiling_links is not None:
             profiling_results_bullets = [
                 RenderedComponentContent(**{
                     "content_block_type": "string_template",
@@ -93,7 +90,7 @@ class SiteIndexPageRenderer(Renderer):
             })
             first_row.append(profiling_results_bullet_list)
             
-        if expectation_suite_links:
+        if expectation_suite_links is not None:
             expectation_suite_link_dict = expectation_suite_links[0]
 
             expectation_suite_name = expectation_suite_link_dict["expectation_suite_name"]
@@ -122,9 +119,9 @@ class SiteIndexPageRenderer(Renderer):
             })
             first_row.append(expectation_suite_link)
             
-            if validation_links:
+            if validation_links is not None:
                 sorted_validation_links = [
-                    link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"])
+                    link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"], reverse=True)
                     if link_dict["expectation_suite_name"] == expectation_suite_name
                 ]
                 validation_link_bullets = [
@@ -163,9 +160,9 @@ class SiteIndexPageRenderer(Renderer):
                 })
                 first_row.append(validation_link_bullet_list)
 
-        if not expectation_suite_links and validation_links:
+        if not expectation_suite_links and validation_links is not None:
             sorted_validation_links = [
-                link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"])
+                link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"], reverse=True)
             ]
             validation_link_bullets = [
                 RenderedComponentContent(**{
@@ -234,9 +231,9 @@ class SiteIndexPageRenderer(Renderer):
                 })
                 expectation_suite_row.append(expectation_suite_link)
     
-                if validation_links:
+                if validation_links is not None:
                     sorted_validation_links = [
-                        link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"])
+                        link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"], reverse=True)
                         if link_dict["expectation_suite_name"] == expectation_suite_name
                     ]
                     validation_link_bullets = [
@@ -356,7 +353,7 @@ class SiteIndexPageRenderer(Renderer):
                 })
                 # data_assets
                 for data_asset, link_lists in data_assets.items():
-                    generator_table_rows += cls._generate_data_asset_table_section(data_asset, link_lists)
+                    generator_table_rows += cls._generate_data_asset_table_section(data_asset, link_lists, column_count=len(generator_table_header_row))
                     
                 content_blocks.append(generator_table)
 
