@@ -1,8 +1,17 @@
 .. _changelog:
 
 
-v0.7.9__develop
+v0.7.9
 -----------------
+* Add an S3 generator, which will introspect a configured bucket and generate batch_kwargs from identified objects
+* Add support to PandasDatasource and SparkDFDatasource for reading directly from S3
+* Validation results in Site Index pages are now sorted to display the newest items first using the default
+ run-id scheme
+* Fix an issue where columns with spaces in their names caused failures in some SqlAlchemyDataset and SparkDFDataset
+ expectations
+* Fix an issue where generated queries including null checks failed on MSSQL (#695)
+* Fix an issue where evaluation parameters passed in as a set instead of a list could cause JSON serialization problems
+ for the result object (#699)
 
 
 v0.7.8
