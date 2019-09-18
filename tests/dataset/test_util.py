@@ -20,10 +20,6 @@ def test_build_continuous_partition_object(numeric_high_card_dataset):
         n_bins=1
     )
     assert len(partition["weights"]) == 9
-    # print(partition["bins"])
-    # print(partition["weights"])
-    # print(sum(partition["weights"]))
-    # assert False
     assert is_valid_continuous_partition_object(partition)
 
     partition = build_continuous_partition_object(
