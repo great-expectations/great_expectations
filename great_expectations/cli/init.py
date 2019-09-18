@@ -67,7 +67,7 @@ Let's add Great Expectations to your project, by scaffolding a new great_expecta
         ├── plugins
         ├── uncommitted
         │   ├── validations
-        │   ├── credentials
+        │   ├── config_variables.yml
         │   ├── documentation
         │   └── samples
         └── .gitignore

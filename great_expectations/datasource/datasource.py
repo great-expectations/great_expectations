@@ -133,22 +133,6 @@ class Datasource(object):
             self.get_generator(generator)
 
 
-    # FIXME: Eugene, review for new style of getting credentials
-    def get_credentials(self, profile_name):
-        """
-        Return credentials for the named profile from the attached data context.
-
-        Args:
-            profile_name:
-
-        Returns:
-
-        """
-        if self._data_context is not None:
-            return self._data_context.get_profile_credentials(profile_name)
-        else:
-            raise ValueError("Cannot retrieve credentials without a DataContext.")
-
     def get_config(self):
         """
         Get the current configuration.

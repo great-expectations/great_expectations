@@ -238,7 +238,7 @@ great_expectations/
         integrate_validation_into_pipeline.ipynb
     plugins/
     uncommitted/
-        credentials.yml
+        config_variables.yml
         documentation/
             local_site/
                 index.html

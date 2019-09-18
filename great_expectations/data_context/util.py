@@ -231,7 +231,7 @@ def replace_var(template_str, replace_variables_dict):
     return ret
 
 
-def replace_all_template_dict_values(data, replace_variables_dict):
+def substitute_all_config_variables(data, replace_variables_dict):
     """
     Replace all template values in a dictionary.
     :param data:
@@ -239,5 +239,5 @@ def replace_all_template_dict_values(data, replace_variables_dict):
     :return: a dictionary with all the template values replaced
     """
     if isinstance(data, dict):
-        return {k : replace_all_template_dict_values(v, replace_variables_dict) for k,v in data.items()}
+        return {k : substitute_all_config_variables(v, replace_variables_dict) for k, v in data.items()}
     return replace_var(data, replace_variables_dict)

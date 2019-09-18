@@ -105,7 +105,7 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
                     "url": sqlalchemy_url
                 }
 
-            context.set_credentials_property(data_source_name, **credentials)
+            context.save_config_variable(data_source_name, **credentials)
 
             try:
                 context.add_datasource(data_source_name,

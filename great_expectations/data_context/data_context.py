@@ -19,7 +19,7 @@ import importlib
 from collections import OrderedDict
 import warnings
 
-from .util import get_slack_callback, safe_mmkdir, replace_all_template_dict_values
+from .util import get_slack_callback, safe_mmkdir, substitute_all_config_variables
 from ..types.base import DotDict
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError, InvalidConfigError
@@ -60,8 +60,8 @@ from .types import (
 
 from .templates import (
     PROJECT_TEMPLATE,
-    CREDENTIALS_COMMENT,
-    CREDENTIALS_FILE_TEMPLATE
+    CONFIG_VARIABLES_COMMENT,
+    CONFIG_VARIABLES_FILE_TEMPLATE
 )
 from .util import (
     load_class,
@@ -118,8 +118,8 @@ class ConfigOnlyDataContext(object):
                 template.write(PROJECT_TEMPLATE)
 
             safe_mmkdir(os.path.join(project_root_dir, "great_expectations/uncommitted"))
-            with open(os.path.join(project_root_dir, "great_expectations/uncommitted/credentials.yml"), "w") as template:
-                template.write(CREDENTIALS_FILE_TEMPLATE)
+            with open(os.path.join(project_root_dir, "great_expectations/uncommitted/config_variables.yml"), "w") as template:
+                template.write(CONFIG_VARIABLES_FILE_TEMPLATE)
 
         return cls(os.path.join(project_root_dir, "great_expectations"))
             
@@ -142,7 +142,7 @@ class ConfigOnlyDataContext(object):
 
 
         self._project_config = project_config
-        self._project_config_with_varibles_substituted = DataContextConfig(**self.get_config_with_variables_replaced())
+        self._project_config_with_varibles_substituted = DataContextConfig(**self.get_config_with_variables_substituted())
         self._context_root_directory = os.path.abspath(context_root_dir)
 
 
@@ -182,7 +182,7 @@ class ConfigOnlyDataContext(object):
             * great_expectations.yml
             * expectations
             * data documentation
-            * credentials
+            * config_variables
             * anything accessed via write_resource
 
         Note that stores do NOT manage plugins.
@@ -206,7 +206,7 @@ class ConfigOnlyDataContext(object):
         """
 
         self._project_config["stores"][store_name] = store_config
-        self._project_config_with_varibles_substituted["stores"][store_name] = self.get_config_with_variables_replaced(config=store_config)
+        self._project_config_with_varibles_substituted["stores"][store_name] = self.get_config_with_variables_substituted(config=store_config)
         new_store = instantiate_class_from_config(
             config=self._project_config_with_varibles_substituted["stores"][store_name],
             runtime_config={
@@ -349,23 +349,22 @@ class ConfigOnlyDataContext(object):
             expectation_suite_name
         )
 
-    def _get_all_credentials_properties(self):
-        """Get all credentials properties from the default location."""
+    def _load_config_variables_file(self):
+        """Get all config variables from the default location."""
+        # TODO: support stores
 
-        # TODO: support parameterized additional store locations
-        # TODO: support ENV vars
-        credentials_file_path = self.get_project_config().get("credentials_file_path")
-        if credentials_file_path:
+        config_variables_file_path = self.get_project_config().get("config_variables_file_path")
+        if config_variables_file_path:
             try:
-                with open(os.path.join(self.root_directory, credentials_file_path), "r") as credentials_file:
-                    return yaml.load(credentials_file) or {}
+                with open(os.path.join(self.root_directory, config_variables_file_path), "r") as config_variables_file:
+                    return yaml.load(config_variables_file) or {}
             except IOError as e:
                 if e.errno != errno.ENOENT:
                     raise
-                logger.debug("Generating empty credentials file.")
-                base_credentials_store = yaml.load("{}")
-                base_credentials_store.yaml_set_start_comment(CREDENTIALS_COMMENT)
-                return base_credentials_store
+                logger.debug("Generating empty config variables file.")
+                base_config_variables_store = yaml.load("{}")
+                base_config_variables_store.yaml_set_start_comment(CONFIG_VARIABLES_COMMENT)
+                return base_config_variables_store
         else:
             return {}
 
@@ -374,38 +373,38 @@ class ConfigOnlyDataContext(object):
 
         return project_config
 
-    def get_config_with_variables_replaced(self, config=None):
+    def get_config_with_variables_substituted(self, config=None):
         if not config:
             config = self._project_config
 
-        return replace_all_template_dict_values(config, self._get_all_credentials_properties())
+        return substitute_all_config_variables(config, self._load_config_variables_file())
 
 
-    def set_credentials_property(self, property_name, **kwargs):
-        """Set credentials property.
+    def save_config_variable(self, config_variable_name, **value):
+        """Save config variable value
 
         Args:
             property_name: name of the property
-            **kwargs: credential key-value pairs'
+            **value: the value to save
 
         Returns:
             None
         """
-        credentials = self._get_all_credentials_properties()
-        credentials[property_name] = dict(**kwargs)
-        credentials_filepath = self.get_project_config().get("credentials_file_path")
-        if not credentials_filepath:
-            raise InvalidConfigError("'credentials_file_path' property is not found in config - setting it is required to use this feature")
+        config_variables = self._load_config_variables_file()
+        config_variables[config_variable_name] = dict(**value)
+        config_variables_filepath = self.get_project_config().get("config_variables_file_path")
+        if not config_variables_filepath:
+            raise InvalidConfigError("'config_variables_file_path' property is not found in config - setting it is required to use this feature")
 
-        credentials_filepath = os.path.join(self.root_directory, credentials_filepath)
+        config_variables_filepath = os.path.join(self.root_directory, config_variables_filepath)
 
-        safe_mmkdir(os.path.dirname(credentials_filepath), exist_ok=True)
-        if not os.path.isfile(credentials_filepath):
-            logger.info("Creating new credentials file at {credentials_filepath}".format(
-                credentials_filepath=credentials_filepath)
+        safe_mmkdir(os.path.dirname(config_variables_filepath), exist_ok=True)
+        if not os.path.isfile(config_variables_filepath):
+            logger.info("Creating new substitution_variables file at {config_variables_filepath}".format(
+                config_variables_filepath=config_variables_filepath)
             )
-        with open(credentials_filepath, "w") as profiles_file:
-            yaml.dump(credentials, profiles_file)
+        with open(config_variables_filepath, "w") as config_variables_file:
+            yaml.dump(config_variables, config_variables_file)
 
 
     def get_available_data_asset_names(self, datasource_names=None, generator_names=None):
@@ -532,7 +531,7 @@ class ConfigOnlyDataContext(object):
         # We perform variable substitution in the datasource's config here before using the config
         # to instantiate the datasource object. Variable substitution is a service that the data
         # context provides. Datasources should not see unsubstituted variables in their config.
-        self._project_config_with_varibles_substituted["datasources"][name] = self.get_config_with_variables_replaced(config)
+        self._project_config_with_varibles_substituted["datasources"][name] = self.get_config_with_variables_substituted(config)
 
         datasource = self._build_datasource_from_config(**self._project_config_with_varibles_substituted["datasources"][name])
         self._datasources[name] = datasource
@@ -1634,28 +1633,6 @@ class DataContext(ConfigOnlyDataContext):
         except IOError:
             raise ConfigNotFoundError("No configuration found in %s" % str(os.path.join(self.root_directory, "great_expectations.yml")))
 
-        # env_file_path = config.get("credentials_file_path", os.path.join(self.root_directory, "uncommitted/credentials.yml"))
-        # if not os.path.isabs(env_file_path):
-        #     env_file_path = os.path.join(self.root_directory, env_file_path)
-        # logger.debug("Reading environment config from this file: " + env_file_path)
-        #
-        # try:
-        #     with open(env_file_path, "r") as data:
-        #         environments_config_dict = yaml.load(data)
-        # except IOError: # Note: Eugene: 2019-09-09: if the yml is invalid, does this exception cover this case and is the error message clear?
-        #     raise ConfigNotFoundError("No environments config file found in %s" % str(env_file_path))
-        #
-        # active_environment_config_dict = environments_config_dict.get(self.active_environment_name)
-        # if active_environment_config_dict:
-        #     merged_config_dict = {**config_dict, **active_environment_config_dict}
-        # else:
-        #     merged_config_dict = config_dict
-        #     logger.debug("No entries in environment {0:s} in {1:s}".format(self.active_environment_name, env_file_path))
-        #
-        # if merged_config_dict["stores"] == None:
-        #     merged_config_dict["stores"] = {}
-        #
-        # return (config, DataContextConfig(**merged_config_dict))
         return config
 
     # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
