@@ -123,6 +123,10 @@ class SiteIndexPageRenderer(Renderer):
             first_row.append(expectation_suite_link)
             
             if validation_links:
+                sorted_validation_links = [
+                    link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"])
+                    if link_dict["expectation_suite_name"] == expectation_suite_name
+                ]
                 validation_link_bullets = [
                     RenderedComponentContent(**{
                         "content_block_type": "string_template",
@@ -138,8 +142,7 @@ class SiteIndexPageRenderer(Renderer):
                                 }
                             }
                         }
-                    }) for link_dict in validation_links if
-                    link_dict["expectation_suite_name"] == expectation_suite_name
+                    }) for link_dict in sorted_validation_links
                 ]
                 validation_link_bullet_list = RenderedComponentContent(**{
                     "content_block_type": "bullet_list",
@@ -161,6 +164,9 @@ class SiteIndexPageRenderer(Renderer):
                 first_row.append(validation_link_bullet_list)
 
         if not expectation_suite_links and validation_links:
+            sorted_validation_links = [
+                link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"])
+            ]
             validation_link_bullets = [
                 RenderedComponentContent(**{
                     "content_block_type": "string_template",
@@ -176,7 +182,7 @@ class SiteIndexPageRenderer(Renderer):
                             }
                         }
                     }
-                }) for link_dict in validation_links
+                }) for link_dict in sorted_validation_links
             ]
             validation_link_bullet_list = RenderedComponentContent(**{
                 "content_block_type": "bullet_list",
@@ -229,6 +235,10 @@ class SiteIndexPageRenderer(Renderer):
                 expectation_suite_row.append(expectation_suite_link)
     
                 if validation_links:
+                    sorted_validation_links = [
+                        link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"])
+                        if link_dict["expectation_suite_name"] == expectation_suite_name
+                    ]
                     validation_link_bullets = [
                         RenderedComponentContent(**{
                             "content_block_type": "string_template",
@@ -244,8 +254,7 @@ class SiteIndexPageRenderer(Renderer):
                                     }
                                 }
                             }
-                        }) for link_dict in validation_links if
-                        link_dict["expectation_suite_name"] == expectation_suite_name
+                        }) for link_dict in sorted_validation_links
                     ]
                     validation_link_bullet_list = RenderedComponentContent(**{
                         "content_block_type": "bullet_list",
