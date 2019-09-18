@@ -609,7 +609,7 @@ project_path/
             integrate_validation_into_pipeline.ipynb
         plugins/
         uncommitted/
-            credentials.yml
+            config_variables.yml
             documentation/
                 local_site/
                 team_site/

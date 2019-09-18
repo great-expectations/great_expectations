@@ -55,7 +55,7 @@ datasources:
           engine: python
 
 
-credentials_file_path: uncommitted/credentials.yml
+config_variables_file_path: uncommitted/config_variables.yml
 expectations_store:
   class_name: ExpectationStore
   store_backend:
@@ -126,7 +126,7 @@ datasources:
         reader_options:
           sep:
           engine: python
-credentials_file_path: uncommitted/credentials.yml
+config_variables_file_path: uncommitted/config_variables.yml
 expectations_store:
   class_name: ExpectationStore
   store_backend:

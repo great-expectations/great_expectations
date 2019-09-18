@@ -237,7 +237,7 @@ def test_create_sqlalchemy_datasource(data_context):
 
     var_name = "test_sqlalchemy_datasource"
 
-    data_context.set_credentials_property(var_name, **connection_kwargs)
+    data_context.save_config_variable(var_name, **connection_kwargs)
 
 
     # But we should be able to add a source using a substitution variable
@@ -253,7 +253,7 @@ def test_create_sqlalchemy_datasource(data_context):
     assert isinstance(source, SqlAlchemyDatasource)
 
     # Finally, we should be able to confirm that the folder structure is as expected
-    with open(os.path.join(data_context.root_directory, "uncommitted/credentials.yml"), "r") as credentials_file:
+    with open(os.path.join(data_context.root_directory, "uncommitted/config_variables.yml"), "r") as credentials_file:
         substitution_variables = yaml.load(credentials_file)
 
     assert substitution_variables == {
