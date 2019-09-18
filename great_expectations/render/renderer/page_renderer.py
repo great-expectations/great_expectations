@@ -17,6 +17,7 @@ from ..types import (
     RenderedSectionContent,
     RenderedComponentContent,
 )
+from collections import OrderedDict
 
 
 class ValidationResultsPageRenderer(Renderer):
@@ -118,12 +119,12 @@ class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def _render_validation_statistics(cls, validation_results):
         statistics = validation_results["statistics"]
-        statistics_dict = {
-            "evaluated_expectations": "Evaluated Expectations",
-            "successful_expectations": "Successful Expectations",
-            "unsuccessful_expectations": "Unsuccessful Expectations",
-            "success_percent": "Success Percent"
-        }
+        statistics_dict = OrderedDict([
+            ("evaluated_expectations", "Evaluated Expectations"),
+            ("successful_expectations", "Successful Expectations"),
+            ("unsuccessful_expectations", "Unsuccessful Expectations"),
+            ("success_percent", "Success Percent")
+        ])
         table_rows = []
         for key, value in statistics_dict.items():
             if statistics.get(key) is not None:
