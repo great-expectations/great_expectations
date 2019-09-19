@@ -8,7 +8,7 @@ from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
 
-KNOWN_EXTENSIONS = ['.csv', '.tsv', '.parquet', '.xls', '.xlsx', '.json']
+KNOWN_EXTENSIONS = ['.csv', '.tsv', '.parquet', '.xls', '.xlsx', '.json', '.csv.gz', '.tsv.gz']
 
 
 class SubdirReaderGenerator(BatchGenerator):

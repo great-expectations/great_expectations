@@ -170,7 +170,7 @@ def test_validate_custom_dataset():
     assert json_result == expected_cli_results
 
 
-def test_cli_evaluation_parameters(capsys):
+def test_cli_evaluation_parameters():
     with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
         runner = CliRunner()
         result = runner.invoke(cli, ["validate",
@@ -390,6 +390,21 @@ def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
     assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
     logger.removeHandler(handler)
+
+def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem_csv_2, capsys):
+    empty_data_context.add_datasource(
+        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    not_so_empty_data_context = empty_data_context
+
+    project_root_dir = not_so_empty_data_context.root_directory
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["profile", "-d", project_root_dir, "--batch_kwargs", '{"sep": ",", "parse_dates": [0]}'])
+    evr = not_so_empty_data_context.get_validation_result("f1", expectation_suite_name="BasicDatasetProfiler")
+
+    assert evr["meta"]["batch_kwargs"]["parse_dates"] == [0]
+    assert evr["meta"]["batch_kwargs"]["sep"] == ","
 
 def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource("my_datasource",
