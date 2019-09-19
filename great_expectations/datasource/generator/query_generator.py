@@ -83,6 +83,7 @@ class QueryGenerator(BatchGenerator):
             else:
                 raise ValueError("Table name must be of shape '[SCHEMA.]TABLE'. Passed: " + data_asset_name)
             tables = self.inspector.get_table_names(schema=schema_name)
+            tables.extend(self.inspector.get_view_names(schema=schema_name))
             if table_name in tables:
                 return iter([
                     {
@@ -114,5 +115,6 @@ class QueryGenerator(BatchGenerator):
                     continue
 
                 tables.extend([table_name if self.inspector.default_schema_name == schema_name else schema_name + "." + table_name for table_name in self.inspector.get_table_names(schema=schema_name)])
+                tables.extend([view_name if self.inspector.default_schema_name == schema_name else schema_name + "." + view_name for view_name in self.inspector.get_view_names(schema=schema_name)])
 
         return set(defined_queries + tables)
