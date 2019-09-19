@@ -3,8 +3,10 @@ import pytest
 import os
 
 from great_expectations.exceptions import DataContextError
+from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource import SubdirReaderGenerator, GlobReaderGenerator
 from great_expectations.datasource.generator import DatabricksTableGenerator
+
 
 def test_file_kwargs_generator(data_context, filesystem_csv):
     base_dir = filesystem_csv
@@ -153,3 +155,18 @@ def test_databricks_generator():
     kwargs = [batch_kwargs for batch_kwargs in databricks_kwargs_iterator]
     assert "timestamp" in kwargs[0]
     assert "select * from" in kwargs[0]["query"].lower()
+
+
+def test_query_generator_view(sqlite_view_engine):
+    datasource = SqlAlchemyDatasource(engine=sqlite_view_engine, generators={
+        "query": {
+            "type": "queries"
+        }
+    })  # Build a datasource with a queries generator to introspect our database with a view
+    names = set(datasource.get_available_data_asset_names()["query"])
+
+    # We should see both the table *and* the primary view, but *not* the temp view
+    assert names == {
+        "main.test_table",
+        "main.test_view"
+    }
