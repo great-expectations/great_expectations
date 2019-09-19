@@ -16,7 +16,10 @@ from great_expectations.exceptions import BatchKwargsError
 def test_file_kwargs_generator(data_context, filesystem_csv):
     base_dir = filesystem_csv
 
-    datasource = data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
+    datasource = data_context.add_datasource("default",
+                                        module_name="great_expectations.datasource",
+                                        class_name="PandasDatasource",
+                                        base_directory=str(base_dir))
     generator = datasource.get_generator("default")
     known_data_asset_names = datasource.get_available_data_asset_names()
 
@@ -49,7 +52,10 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
 
 def test_file_kwargs_generator_error(data_context, filesystem_csv):
     base_dir = filesystem_csv
-    data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
+    data_context.add_datasource("default",
+                                module_name="great_expectations.datasource",
+                                class_name="PandasDatasource",
+                                base_directory=str(base_dir))
 
     with pytest.raises(DataContextError) as exc:
         data_context.get_batch("f4")
