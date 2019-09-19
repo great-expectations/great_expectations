@@ -207,7 +207,7 @@ class SiteBuilder():
                                                                                 expectation_suite_name=expectation_suite_name,
                                                                                 validations_store=site_config['validations_store'],
                                                                                 run_id=run_id)
-
+                                validation_success = validation['success']
                                 logger.info("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id, expectation_suite_name, data_asset_name))
                                 data_asset_name = validation['meta']['data_asset_name']
                                 expectation_suite_name = validation['meta']['expectation_suite_name']
@@ -246,7 +246,8 @@ class SiteBuilder():
                                         "source": datasource,
                                         "generator": generator,
                                         "asset": generator_asset,
-                                        "run_id": run_id
+                                        "run_id": run_id,
+                                        "validation_success": validation_success
                                     }
                                 )
 
