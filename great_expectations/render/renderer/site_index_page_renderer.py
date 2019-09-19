@@ -13,9 +13,9 @@ class SiteIndexPageRenderer(Renderer):
     def _generate_data_asset_table_section(cls, data_asset_name, link_lists_dict, column_count):
         section_rows = []
 
-        profiling_links = link_lists_dict["profiling_links"]
-        validation_links = link_lists_dict["validation_links"]
-        expectation_suite_links = link_lists_dict["expectation_suite_links"]
+        profiling_links = link_lists_dict.get("profiling_links")
+        validation_links = link_lists_dict.get("validation_links")
+        expectation_suite_links = link_lists_dict.get("expectation_suite_links")
         
         cell_width_pct = 100.0/column_count
 
@@ -208,7 +208,7 @@ class SiteIndexPageRenderer(Renderer):
         
         section_rows.append(first_row)
         
-        if len(expectation_suite_links) > 1:
+        if expectation_suite_links and len(expectation_suite_links) > 1:
             for expectation_suite_link_dict in expectation_suite_links[1:]:
                 expectation_suite_row = []
                 expectation_suite_name = expectation_suite_link_dict["expectation_suite_name"]
@@ -340,7 +340,7 @@ class SiteIndexPageRenderer(Renderer):
                     for data_asset, link_lists in data_assets.items():
                         if header in generator_table_header_row:
                             continue
-                        if link_lists[link_lists_key]:
+                        if link_lists_key in link_lists:
                             generator_table_header_row.append(header)
                 
                 generator_table = RenderedComponentContent(**{
