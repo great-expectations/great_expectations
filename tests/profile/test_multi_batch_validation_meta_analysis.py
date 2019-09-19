@@ -20,7 +20,7 @@ def test_get_metrics_basic(titanic_multibatch_data_context):
     """
     context = titanic_multibatch_data_context
     my_ds = context.get_datasource("mydatasource")
-    G = my_ds.get_generator()
+    G = my_ds.get_generator("mygenerator")
     G.reset_iterator('titanic')
     all_batch_kwargs = [x for x in G._data_asset_iterators['titanic']]
     all_batch_kwargs = sorted(all_batch_kwargs, key=lambda x: x['path'])
