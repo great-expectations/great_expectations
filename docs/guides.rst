@@ -16,6 +16,7 @@ Guides
    /guides/result_format
    /guides/validation_result
    /guides/evaluation_parameters
+   /guides/validation_operators_and_actions_intro
    /guides/conventions
    /guides/migrating_versions
    /guides/improving_library_documentation
