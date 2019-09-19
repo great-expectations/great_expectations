@@ -102,7 +102,7 @@ class SiteBuilder(object):
                 "target_store_name": target_store_name,
             },
             config_defaults={
-                "name" : "site_index_builder",
+                "name": "site_index_builder",
                 "module_name": "great_expectations.render.renderer.new_site_builder"
             }
         )
@@ -116,7 +116,7 @@ class SiteBuilder(object):
                     "target_store_name": target_store_name,
                 },
                 config_defaults={
-                    "name" : site_section_name,
+                    "name": site_section_name,
                     "module_name": "great_expectations.render.renderer.new_site_builder"
                 }
             )
@@ -154,11 +154,10 @@ class DefaultSiteSectionBuilder(object):
         renderer_module = importlib.import_module(renderer.pop("module_name"))
         self.renderer_class = getattr(renderer_module, renderer.pop("class_name"))
 
-
         if view == None:
             view = {
-                "module_name" : "great_expectations.render.view",
-                "class_name" : "DefaultJinjaIndexPageView",
+                "module_name": "great_expectations.render.view",
+                "class_name": "DefaultJinjaPageView",
             }
         view_module = importlib.import_module(view.pop("module_name"))
         self.view_class = getattr(view_module, view.pop("class_name"))
@@ -213,7 +212,7 @@ class DefaultSiteIndexBuilder(object):
     ):
         # NOTE: This method is almost idenitcal to DefaultSiteSectionBuilder
         self.name = name
-
+        self.data_context = data_context
         self.target_store = data_context.stores[target_store_name]
 
         # TODO : Push conventions for configurability down to renderers and views.
@@ -226,7 +225,6 @@ class DefaultSiteIndexBuilder(object):
         renderer_module = importlib.import_module(renderer.pop("module_name"))
         self.renderer_class = getattr(renderer_module, renderer.pop("class_name"))
 
-
         if view == None:
             view = {
                 "module_name" : "great_expectations.render.view",
@@ -235,18 +233,93 @@ class DefaultSiteIndexBuilder(object):
         view_module = importlib.import_module(view.pop("module_name"))
         self.view_class = getattr(view_module, view.pop("class_name"))
 
+    def add_resource_info_to_index_links_dict(self,
+                                              data_context,
+                                              index_links_dict,
+                                              data_asset_name,
+                                              datasource,
+                                              generator,
+                                              generator_asset,
+                                              expectation_suite_name,
+                                              section_name,
+                                              run_id=None
+                                              ):
+        if not datasource in index_links_dict:
+            index_links_dict[datasource] = OrderedDict()
+    
+        if not generator in index_links_dict[datasource]:
+            index_links_dict[datasource][generator] = OrderedDict()
+    
+        if not generator_asset in index_links_dict[datasource][generator]:
+            index_links_dict[datasource][generator][generator_asset] = {
+                'profiling_links': [],
+                'validation_links': [],
+                'expectations_links': []
+            }
+    
+        if run_id:
+            base_path = section_name + "/" + run_id
+        else:
+            base_path = section_name
+    
+        index_links_dict[datasource][generator][generator_asset][section_name + "_links"].append(
+            {
+                "full_data_asset_name": data_asset_name,
+                "expectation_suite_name": expectation_suite_name,
+                "filepath": data_context._get_normalized_data_asset_name_filepath(
+                    data_asset_name,
+                    expectation_suite_name,
+                    base_path=base_path,
+                    file_extension=".html"
+                ),
+                "source": datasource,
+                "generator": generator,
+                "asset": generator_asset,
+                "run_id": run_id
+            }
+        )
+    
+        return index_links_dict
 
     def build(self):
         # Loop over sections in the HtmlStore
         logger.debug("DefaultSiteIndexBuilder.build")
 
-        resource_keys = self.target_store.list_keys()
+        target_store = self.target_store
+        resource_keys = target_store.list_keys()
+        index_links_dict = OrderedDict()
+
+        for key in resource_keys:
+            key_resource_identifier = key.resource_identifier
+            
+            if type(key_resource_identifier) == ExpectationSuiteIdentifier:
+                self.add_resource_info_to_index_links_dict(
+                    data_context=self.data_context,
+                    index_links_dict=index_links_dict,
+                    data_asset_name=key_resource_identifier.data_asset_name.to_string(include_class_prefix=False),
+                    datasource=key_resource_identifier.data_asset_name.datasource,
+                    generator=key_resource_identifier.data_asset_name.generator,
+                    generator_asset=key_resource_identifier.data_asset_name.generator_asset,
+                    expectation_suite_name=key_resource_identifier.expectation_suite_name,
+                    section_name=key.site_section_name
+                )
+            elif type(key_resource_identifier) == ValidationResultIdentifier:
+                self.add_resource_info_to_index_links_dict(
+                    data_context=self.data_context,
+                    index_links_dict=index_links_dict,
+                    data_asset_name=key_resource_identifier.expectation_suite_identifier.data_asset_name.to_string(include_class_prefix=False),
+                    datasource=key_resource_identifier.expectation_suite_identifier.data_asset_name.datasource,
+                    generator=key_resource_identifier.expectation_suite_identifier.data_asset_name.generator,
+                    generator_asset=key_resource_identifier.expectation_suite_identifier.data_asset_name.generator_asset,
+                    expectation_suite_name=key_resource_identifier.expectation_suite_identifier.expectation_suite_name,
+                    section_name=key.site_section_name,
+                    run_id=key_resource_identifier.run_id
+                )
 
         # FIXME : There were no tests to verify that content is created or correct,
         # so it's not my job to re-implement, right?
-        # rendered_content = self.renderer_class.render(resource_keys)
-        # viewable_content = self.view_class.render(rendered_content)
-        viewable_content = ""
+        rendered_content = self.renderer_class.render(index_links_dict)
+        viewable_content = self.view_class.render(rendered_content)
 
         self.target_store.write_index_page(
             viewable_content
