@@ -1,5 +1,4 @@
-from builtins import str
-
+from six import string_types
 from ruamel.yaml import YAML, yaml_object
 
 
@@ -23,6 +22,6 @@ class ClassConfig(Config):
         "class_name"
     }
     _key_types = {
-        "module_name": str,
-        "class_name": str
+        "module_name": string_types,
+        "class_name": string_types
     }
