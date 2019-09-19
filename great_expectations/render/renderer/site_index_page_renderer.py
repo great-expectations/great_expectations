@@ -129,14 +129,22 @@ class SiteIndexPageRenderer(Renderer):
                     RenderedComponentContent(**{
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": "$link_text",
+                            "template": "${validation_success} $link_text",
                             "params": {
-                                "link_text": link_dict["run_id"]
+                                "link_text": link_dict["run_id"],
+                                "validation_success": ""
                             },
                             "tag": "a",
                             "styling": {
                                 "attributes": {
                                     "href": link_dict["filepath"]
+                                },
+                                "params": {
+                                    "validation_success": {
+                                        "tag": "i",
+                                        "classes": ["fas", "fa-check-circle", "text-success"] if link_dict[
+                                            "validation_success"] else ["fas", "fa-times", "text-danger"]
+                                    }
                                 }
                             }
                         }
@@ -167,14 +175,22 @@ class SiteIndexPageRenderer(Renderer):
                 RenderedComponentContent(**{
                     "content_block_type": "string_template",
                     "string_template": {
-                        "template": "$link_text",
+                        "template": "${validation_success} $link_text",
                         "params": {
-                            "link_text": link_dict["run_id"]
+                            "link_text": link_dict["run_id"],
+                            "validation_success": ""
                         },
                         "tag": "a",
                         "styling": {
                             "attributes": {
                                 "href": link_dict["filepath"]
+                            },
+                            "params": {
+                                "validation_success": {
+                                    "tag": "i",
+                                    "classes": ["fas", "fa-check-circle", "text-success"] if link_dict[
+                                        "validation_success"] else ["fas", "fa-times", "text-danger"]
+                                }
                             }
                         }
                     }
@@ -235,14 +251,21 @@ class SiteIndexPageRenderer(Renderer):
                         RenderedComponentContent(**{
                             "content_block_type": "string_template",
                             "string_template": {
-                                "template": "$link_text",
+                                "template": "${validation_success} $link_text",
                                 "params": {
-                                    "link_text": link_dict["run_id"]
+                                    "link_text": link_dict["run_id"],
+                                    "validation_success": ""
                                 },
                                 "tag": "a",
                                 "styling": {
                                     "attributes": {
                                         "href": link_dict["filepath"]
+                                    },
+                                    "params": {
+                                        "validation_success": {
+                                            "tag": "i",
+                                            "classes": ["fas", "fa-check-circle",  "text-success"] if link_dict["validation_success"] else ["fas", "fa-times", "text-danger"]
+                                        }
                                     }
                                 }
                             }
