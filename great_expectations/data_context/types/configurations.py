@@ -12,6 +12,7 @@ class DataContextConfig(Config):
         "datasources",
         "stores",
         "data_docs",  # TODO: Rename this to sites, to remove a layer of extraneous nesting
+        "validation_operators",
     ])
 
     _required_keys = set([
@@ -21,6 +22,7 @@ class DataContextConfig(Config):
         "datasources",
         "stores",
         "data_docs",
+        # "validation_operators", # TODO: Activate!
     ])
 
     _key_types = {
@@ -31,4 +33,5 @@ class DataContextConfig(Config):
         "datasources": dict,
         "stores": dict,
         "data_docs": dict,
+        "validation_operators": dict,
     }
