@@ -196,7 +196,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                  custom_sql=None, schema=None, *args, **kwargs):
 
         if custom_sql and not table_name:
-            # dashes are special characters in most databases so use undercores
+            # dashes are special characters in most databases so use underscores
             table_name = str(uuid.uuid4()).replace("-", "_")
 
         if table_name is None:
@@ -249,10 +249,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def head(self, n=5):
         """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
         return PandasDataset(
-            pd.read_sql(
-                sa.select(["*"]).select_from(self._table).limit(n),
-                con=self.engine
-            ), 
+            next(pd.read_sql_table(
+                table_name=self._table.name,
+                schema=self._table.schema,
+                con=self.engine,
+                chunksize=n
+            )),
             expectation_suite=self.get_expectation_suite(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
