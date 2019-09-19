@@ -50,7 +50,7 @@ class S3Generator(BatchGenerator):
                  assets=None,
                  delimiter="/",
                  max_keys=1000):
-        """ Initialize a new S3Generator
+        """Initialize a new S3Generator
 
         Args:
             name: the name of the generator
