@@ -144,7 +144,6 @@ def parse_string_to_data_context_resource_identifier(string, separator="."):
 
     return class_instance
 
-
 def load_class(class_name, module_name):
     # Get the class object itself from strings.
     loaded_module = importlib.import_module(module_name)
@@ -158,6 +157,9 @@ def load_class(class_name, module_name):
     return class_
 
 
+# TODO: Rename runtime_config to runtime_environment and pass it through as a typed object, rather than unpacking it.
+# TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
+# TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.
 def instantiate_class_from_config(config, runtime_config, config_defaults=None):
     """Build a GE class from configuration dictionaries."""
 
@@ -206,7 +208,6 @@ def instantiate_class_from_config(config, runtime_config, config_defaults=None):
         ) + str(e))
 
     return class_instance
-
 
 def format_dict_for_error_message(dict_):
     # TODO : Tidy this up a bit. Indentation isn't fully consistent.

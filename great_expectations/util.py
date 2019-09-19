@@ -1,5 +1,5 @@
 import os
-
+import importlib
 import pandas as pd
 import json
 import logging
@@ -254,4 +254,8 @@ def get_data_context(path=None):
     """
     pass
 
-
+# TODO : Deprecate this in favor of instantiate_class_from_config, once #675 is merged in.
+def get_class_from_module_name_and_class_name(module_name, class_name):
+    loaded_module = importlib.import_module(module_name)
+    loaded_class = getattr(loaded_module, class_name)
+    return loaded_class
