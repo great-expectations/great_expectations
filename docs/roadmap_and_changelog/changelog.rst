@@ -1,11 +1,13 @@
 .. _changelog:
 
 
-v0.7.10__develop
+v0.7.10
 -----------------
 * Fix an issue in generated documentation where the Home button failed to return to the index
 * Add S3 Generator to module docs and improve module docs formatting
 * Add support for views to QueryGenerator
+* Add success/failure icons to index page
+* Return to uniform histogram creation during profiling to avoid large partitions for internal performance reasons
 
 
 v0.7.9
