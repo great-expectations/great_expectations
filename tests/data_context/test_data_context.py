@@ -12,6 +12,7 @@ import os
 import shutil
 import json
 from glob import glob
+from collections import OrderedDict
 
 from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import (
@@ -482,13 +483,13 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
 def test_list_datasources(data_context):
     datasources = data_context.list_datasources()
 
-    assert datasources == [
+    assert OrderedDict(datasources) == OrderedDict([
 
         {
             'name': 'mydatasource',
             'class_name': 'PandasDatasource'
         }
-    ]
+    ])
 
     data_context.add_datasource("second_pandas_source",
                            module_name="great_expectations.datasource",
@@ -497,7 +498,7 @@ def test_list_datasources(data_context):
 
     datasources = data_context.list_datasources()
 
-    assert datasources == [
+    assert OrderedDict(datasources) == OrderedDict([
         {
             'name': 'mydatasource',
             'class_name': 'PandasDatasource'
@@ -506,7 +507,7 @@ def test_list_datasources(data_context):
             'name': 'second_pandas_source',
             'class_name': 'PandasDatasource'
         }
-    ]
+    ])
 
 
 def test_data_context_result_store(titanic_data_context):
