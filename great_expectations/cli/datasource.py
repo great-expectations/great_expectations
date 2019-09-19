@@ -53,7 +53,9 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
             show_default=True
         )
 
-        context.add_datasource(data_source_name, "pandas",
+        context.add_datasource(data_source_name,
+                               module_name="great_expectations.datasource",
+                               class_name="PandasDatasource",
                                base_directory=os.path.join("..", path))
 
     elif data_source_selection == "2":  # sqlalchemy
@@ -78,6 +80,13 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
                 database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
                                         show_default=True)
 
+                # Since we don't want to save the database credentials in the config file that will be
+                # committed in the repo, we will use our Variable Substitution feature to store the credentials
+                # in the credentials file (that will not be committed, since it is in the uncommitted directory)
+                # with the datasource's name as the variable name.
+                # The value of the datasource's "credntials" key in the config file (great_expectations.yml) will
+                # be ${datasource name}.
+                # GE will replace the ${datasource name} with the value from the credentials file in runtime.
                 credentials = {
                     "drivername": drivername,
                     "host": host,
@@ -96,11 +105,14 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
                     "url": sqlalchemy_url
                 }
 
-            context.add_profile_credentials(data_source_name, **credentials)
+            context.save_config_variable(data_source_name, credentials)
 
             try:
-                context.add_datasource(
-                    data_source_name, "sqlalchemy", profile=data_source_name)
+                context.add_datasource(data_source_name,
+                                       module_name="great_expectations.datasource",
+                                       class_name="SqlAlchemyDatasource",
+                                       data_asset_type={"class_name": "SqlAlchemyDataset"},
+                                       credentials="${" + data_source_name + "}")
                 break
             except (DatasourceInitializationError, ModuleNotFoundError) as de:
                 cli_message(
@@ -138,12 +150,17 @@ You can add a datasource later by editing the great_expectations.yml file.
             path = path[2:]
 
         if path.endswith("/"):
-            basenamepath = path[:-1]
-        default_data_source_name = os.path.basename(basenamepath)
+            path = path[:-1]
+        default_data_source_name = os.path.basename(path)
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
-        context.add_datasource(data_source_name, "spark", base_directory=path)
+        context.add_datasource(data_source_name,
+                               module_name="great_expectations.datasource",
+                               class_name="SparkDFDatasource",
+                               base_directory=path) # NOTE: Eugene: 2019-09-17: review the path and make sure that the logic works both for abs and rel.
+                               # base_directory=os.path.join("..", path))
+
 
     # if data_source_selection == "5": # dbt
     #     dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)

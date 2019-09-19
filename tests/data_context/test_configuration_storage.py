@@ -38,29 +38,38 @@ def test_preserve_comments(data_context):
         # Developers shouldn't have to deal with their yml getting scrambled every time they edit the datacontext.
         content_lines = set(content.split("\n"))
         test_content_lines = set("""\
-plugins_directory: plugins/
-stores:
-  evaluation_parameter_store:
-    module_name: great_expectations.data_context.store
-    class_name: EvaluationParameterStore
 datasources:
   # For example, this one.
   mydatasource:
-    type: pandas
+    module_name: great_expectations.datasource
+    class_name: PandasDatasource
+    data_asset_type:
+      class_name: PandasDataset
     generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
-        type: subdir_reader
+        class_name: SubdirReaderGenerator
         base_directory: ../data
+        reader_options:
+          sep:
+          engine: python
 
-evaluation_parameter_store_name: evaluation_parameter_store
-data_docs:
-  sites:
+
+config_variables_file_path: uncommitted/config_variables.yml
 expectations_store:
   class_name: ExpectationStore
   store_backend:
     class_name: FixedLengthTupleFilesystemStoreBackend
     base_directory: expectations/
+
+plugins_directory: plugins/
+evaluation_parameter_store_name: evaluation_parameter_store
+data_docs:
+  sites:
+stores:
+  evaluation_parameter_store:
+    module_name: great_expectations.data_context.store
+    class_name: EvaluationParameterStore
 
 """.split("\n"))
         assert content_lines == test_content_lines
@@ -70,7 +79,10 @@ expectations_store:
     print(content)
     print("----------------------------------------")
 
-    data_context.add_datasource("test_datasource", "pandas")
+    data_context.add_datasource("test_datasource",
+                                module_name="great_expectations.datasource",
+                                class_name="PandasDatasource",
+                                base_directory="../data")
 
     with open(config_filepath, "r") as infile:
 
@@ -85,41 +97,49 @@ expectations_store:
         # Developers shouldn't have to deal with their yml getting scrambled every time they edit the datacontext.
         content_lines = set(content.split("\n"))
         test_content_lines = set("""\
-plugins_directory: plugins/
-stores:
-  evaluation_parameter_store:
-    module_name: great_expectations.data_context.store
-    class_name: EvaluationParameterStore
+datasources:
+  # For example, this one.
+  mydatasource:
+    module_name: great_expectations.datasource
+    class_name: PandasDatasource
+    data_asset_type:
+      class_name: PandasDataset
+    generators:
+      # The name default is read if no datasource or generator is specified
+      mygenerator:
+        class_name: SubdirReaderGenerator
+        base_directory: ../data
+        reader_options:
+          sep:
+          engine: python
 
+
+  test_datasource:
+    module_name: great_expectations.datasource
+    class_name: PandasDatasource
+    data_asset_type:
+      class_name: PandasDataset
+    generators:
+      default:
+        class_name: SubdirReaderGenerator
+        base_directory: ../data
+        reader_options:
+          sep:
+          engine: python
+config_variables_file_path: uncommitted/config_variables.yml
 expectations_store:
   class_name: ExpectationStore
   store_backend:
     class_name: FixedLengthTupleFilesystemStoreBackend
     base_directory: expectations/
 
-datasources:
-  # For example, this one.
-  mydatasource:
-    type: pandas
-    generators:
-      # The name default is read if no datasource or generator is specified
-      mygenerator:
-        type: subdir_reader
-        base_directory: ../data
-
-  test_datasource:
-    generators:
-      default:
-        reader_options:
-          engine: python
-          sep:
-        base_directory: /data
-        type: subdir_reader
-    data_asset_type:
-      class_name: PandasDataset
-    type: pandas
+plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
 data_docs:
   sites:
+stores:
+  evaluation_parameter_store:
+    module_name: great_expectations.data_context.store
+    class_name: EvaluationParameterStore
 """.split("\n"))
         assert content_lines == test_content_lines

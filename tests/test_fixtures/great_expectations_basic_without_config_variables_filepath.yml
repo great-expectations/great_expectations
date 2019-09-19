@@ -17,8 +17,6 @@ datasources:
           engine: python
 
 
-config_variables_file_path: uncommitted/config_variables.yml
-
 expectations_store:
   class_name: ExpectationStore
   store_backend:

@@ -63,9 +63,9 @@ def test_validation_operator__run(basic_data_context_config_for_validation_opera
         project_path,
     )
 
-    data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_4)
-    )
+    data_context.add_datasource("my_datasource",
+                                class_name="PandasDatasource",
+                                base_directory=str(filesystem_csv_4))
 
     # NOTE : It's kinda annoying that these Expectation Suites start out with expect_column_to_exist.
     # How do I turn off that default...?
@@ -172,9 +172,9 @@ def test__get_or_convert_to_batch_from_identifiers(basic_data_context_config_for
         "fake/testing/path/",
     )
 
-    data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv)
-    )
+    data_context.add_datasource("my_datasource",
+                                class_name="PandasDatasource",
+                                base_directory=str(filesystem_csv))
 
     vo = DefaultDataContextAwareValidationOperator(
         data_context=data_context,

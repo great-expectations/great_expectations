@@ -108,9 +108,9 @@ def test_DefaultDataContextAwareValidationOperator(basic_data_context_config_for
         project_path,
     )
 
-    data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_4)
-    )
+    data_context.add_datasource("my_datasource",
+                                class_name="PandasDatasource",
+                                base_directory=str(filesystem_csv_4))
 
     df = data_context.get_batch("my_datasource/default/f1")
     df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
