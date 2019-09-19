@@ -15,7 +15,7 @@ class SiteIndexPageRenderer(Renderer):
 
         profiling_links = link_lists_dict.get("profiling_links")
         validation_links = link_lists_dict.get("validation_links")
-        expectation_suite_links = link_lists_dict("expectation_suite_links")
+        expectation_suite_links = link_lists_dict.get("expectation_suite_links")
         
         cell_width_pct = 100.0/column_count
 
