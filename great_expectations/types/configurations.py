@@ -1,4 +1,4 @@
-from future import str
+from builtins import str
 
 from ruamel.yaml import YAML, yaml_object
 
