@@ -20,26 +20,27 @@ class S3Generator(BatchGenerator):
     for assets (see below).
 
     Example configuration::
-    datasources:
-      my_datasource:
-        ...
-        generators:
-          my_s3_generator:
-            type: s3
-            bucket: my_bucket.my_organization.priv
-            reader_options:  # Note that reader options can be specified globally or per-asset
-              sep: ","
-            delimiter: "/"  # Note that this is the delimiter for the BUCKET KEYS. By default it is "/"
-            max_keys: 100  # The maximum number of keys to fetch in a single list_objects request to s3. When accessing batch_kwargs through an iterator, the iterator will silently refetch if more keys were available
-            assets:
-              my_first_asset:
-                prefix: my_first_asset/
-                regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
-              access_logs:
-                prefix: access_logs
-                regex_filter: access_logs/2019.*\.csv.gz
-                sep: "~"
-                max_keys: 100
+
+        datasources:
+          my_datasource:
+            ...
+            generators:
+              my_s3_generator:
+                type: s3
+                bucket: my_bucket.my_organization.priv
+                reader_options:  # Note that reader options can be specified globally or per-asset
+                  sep: ","
+                delimiter: "/"  # Note that this is the delimiter for the BUCKET KEYS. By default it is "/"
+                max_keys: 100  # The maximum number of keys to fetch in a single list_objects request to s3. When accessing batch_kwargs through an iterator, the iterator will silently refetch if more keys were available
+                assets:
+                  my_first_asset:
+                    prefix: my_first_asset/
+                    regex_filter: .*  # The regex filter will filter the results returned by S3 for the key and prefix to only those matching the regex
+                  access_logs:
+                    prefix: access_logs
+                    regex_filter: access_logs/2019.*\.csv.gz
+                    sep: "~"
+                    max_keys: 100
     """
 
     def __init__(self,

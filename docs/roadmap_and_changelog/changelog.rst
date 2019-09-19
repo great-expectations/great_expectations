@@ -3,7 +3,9 @@
 
 v0.7.10__develop
 -----------------
-
+* Fix an issue in generated documentation where the Home button failed to return to the index
+* Add S3 Generator to module docs and improve module docs formatting
+* Add support for views to QueryGenerator
 
 
 v0.7.9
@@ -11,14 +13,14 @@ v0.7.9
 * Add an S3 generator, which will introspect a configured bucket and generate batch_kwargs from identified objects
 * Add support to PandasDatasource and SparkDFDatasource for reading directly from S3
 * Enhance the Site Index page in documentation so that validation results are sorted and display the newest items first
- when using the default run-id scheme
+  when using the default run-id scheme
 * Add a new utility method, `build_continuous_partition_object` which will build partition objects using the dataset
- API and so supports any GE backend.
+  API and so supports any GE backend.
 * Fix an issue where columns with spaces in their names caused failures in some SqlAlchemyDataset and SparkDFDataset
- expectations
+  expectations
 * Fix an issue where generated queries including null checks failed on MSSQL (#695)
 * Fix an issue where evaluation parameters passed in as a set instead of a list could cause JSON serialization problems
- for the result object (#699)
+  for the result object (#699)
 
 
 v0.7.8
