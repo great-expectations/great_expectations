@@ -393,7 +393,9 @@ def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
 
 def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+        "my_datasource",
+        class_name="PandasDatasource",
+        base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
