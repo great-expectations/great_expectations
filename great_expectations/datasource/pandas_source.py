@@ -2,7 +2,8 @@ import time
 import hashlib
 import logging
 
-from builtins import str
+# from builtins import str
+from six import string_types
 
 try:
     from io import StringIO
@@ -19,7 +20,6 @@ from great_expectations.datasource.generator.subdir_reader_generator import Subd
 from great_expectations.datasource.generator.glob_reader_generator import GlobReaderGenerator
 from great_expectations.datasource.generator.s3_generator import S3Generator
 from great_expectations.datasource.types import (
-    PandasDatasourceBatchKwargs,
     PandasDatasourceMemoryBatchKwargs,
     PathBatchKwargs
 )
