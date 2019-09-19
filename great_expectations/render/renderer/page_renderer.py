@@ -70,8 +70,9 @@ class ValidationResultsPageRenderer(Renderer):
             "renderer_type": "ValidationResultsColumnSectionRenderer",
             "data_asset_name": data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
-            "page_title": run_id + "-" + expectation_suite_name + "-ProfilingResults",
-            "sections": sections
+            "page_title": run_id + "-" + expectation_suite_name + "-ValidationResults",
+            "sections": sections,
+            "utm_medium": "validation-results-page",
         })
     
     @classmethod
