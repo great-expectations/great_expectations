@@ -3564,7 +3564,7 @@ class Dataset(MetaDataset):
 
         """
         if partition_object is None:
-            partition_object = build_continuous_partition_object(dataset=self, column=column, bins='auto')
+            partition_object = build_continuous_partition_object(dataset=self, column=column, bins='uniform')
 
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
