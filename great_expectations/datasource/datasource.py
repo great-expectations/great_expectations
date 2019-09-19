@@ -410,6 +410,8 @@ class Datasource(object):
             return ReaderMethods.excel
         elif path.endswith(".json"):
             return ReaderMethods.JSON
+        elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
+            return ReaderMethods.CSV_GZ
         else:
             return None
 

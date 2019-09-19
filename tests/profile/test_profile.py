@@ -228,6 +228,12 @@ def test_BasicDatasetProfiler_on_titanic():
     df = ge.read_csv("./tests/test_sets/Titanic.csv")
     suite, evrs = df.profile(BasicDatasetProfiler)
 
+    # Check to make sure BasicDatasetProfiler is adding meta.columns with a single "description" field for each column
+    print(json.dumps(suite["meta"], indent=2))
+    assert "columns" in suite["meta"]
+    for k,v in suite["meta"]["columns"].items():
+        assert v == {"description":""}
+
     # Note: the above already produces an EVR; rerunning isn't strictly necessary just for EVRs
     evrs = df.validate(result_format="SUMMARY")  # ["results"]
 

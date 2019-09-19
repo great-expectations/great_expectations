@@ -16,6 +16,13 @@ from .test_utils import get_dataset
 
 CONTEXTS = ['PandasDataset', 'sqlite']
 
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "smoketest: mark test as smoketest--it does not have useful assertions but may produce side effects that"
+                     "require manual inspection."
+    )
+
 #####
 #
 # Spark Context
@@ -34,6 +41,12 @@ except (ImportError):
 #
 #####
 try:
+    ### NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
+    ### SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
+    ### round trip compared to NUMERIC, which stays as a python DECIMAL
+
+    ### Be sure to ensure that tests (and users!) understand that subtelty,
+    ### which can be important for distributional expectations, for example.
     engine = sa.create_engine('postgresql://postgres@localhost/test_ci')
     conn = engine.connect()
     CONTEXTS += ['postgresql']
@@ -126,7 +139,8 @@ def numeric_high_card_dataset(request):
             "norm_0_1": "float64",
         },
         "postgresql": {
-            "norm_0_1": "DOUBLE_PRECISION",
+            # "norm_0_1": "DOUBLE_PRECISION",
+            "norm_0_1": "NUMERIC",
         },
         "sqlite": {
             "norm_0_1": "FLOAT",
@@ -291,7 +305,7 @@ def dataset(request):
         "postgresql": {
             "infinities": "DOUBLE_PRECISION",
             "nulls": "DOUBLE_PRECISION",
-            "naturals": "DOUBLE_PRECISION"
+            "naturals": "NUMERIC"
         },
         "sqlite": {
             "infinities": "FLOAT",
