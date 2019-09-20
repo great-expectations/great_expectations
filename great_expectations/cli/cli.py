@@ -321,6 +321,43 @@ def render(render_object):
     print(DefaultJinjaPageView.render(model))
 
 
+@cli.command()
+@click.option(
+    '--target_directory',
+    '-d',
+    default="./",
+    help='The root of the project directory where you want to initialize Great Expectations.'
+)
+def check_config(target_directory):
+    """Check a config and raise helpful messages about antiquated formats."""
+    cli_message("Hi! Checking your config files for validity")
+
+    try:
+        context = DataContext(context_root_dir="{}/great_expectations/".format(target_directory))
+        config = context.get_project_config()
+        cli_message(str(config))
+    except DataContextError as err:
+        cli_message("Oh dear. Something went really wrong.")
+        logger.critical(err.message)
+        sys.exit(-1)
+
+    try:
+        if config["ge_config_version"] == 2:
+            cli_message("Great! You are using a version 2")
+    except KeyError:
+        cli_message("Hmm. You appear to be using an antiquated config version.")
+
+    # TODO check for other known obsolete keys
+
+    # TODO offer to build a new config format
+
+    # TODO archive the existing .yml
+
+    # TODO make new yml
+
+    cli_message("Hmm...")
+
+
 def main():
     handler = logging.StreamHandler()
     # Just levelname and message Could re-add other info if we want
