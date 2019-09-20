@@ -53,10 +53,23 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
             show_default=True
         )
 
-        context.add_datasource(data_source_name, "pandas",
+        context.add_datasource(data_source_name,
+                               module_name="great_expectations.datasource",
+                               class_name="PandasDatasource",
                                base_directory=os.path.join("..", path))
 
     elif data_source_selection == "2":  # sqlalchemy
+        try:
+            import sqlalchemy
+            from sqlalchemy import create_engine, MetaData
+        except ImportError:
+            cli_message(
+"""
+ERROR: Unable to import sqlalchemy - exiting.
+Please install the module before trying again.
+""")
+            return None
+
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default="mydb", show_default=True)
 
@@ -78,6 +91,13 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
                 database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
                                         show_default=True)
 
+                # Since we don't want to save the database credentials in the config file that will be
+                # committed in the repo, we will use our Variable Substitution feature to store the credentials
+                # in the credentials file (that will not be committed, since it is in the uncommitted directory)
+                # with the datasource's name as the variable name.
+                # The value of the datasource's "credntials" key in the config file (great_expectations.yml) will
+                # be ${datasource name}.
+                # GE will replace the ${datasource name} with the value from the credentials file in runtime.
                 credentials = {
                     "drivername": drivername,
                     "host": host,
@@ -96,11 +116,14 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
                     "url": sqlalchemy_url
                 }
 
-            context.add_profile_credentials(data_source_name, **credentials)
+            context.save_config_variable(data_source_name, credentials)
 
             try:
-                context.add_datasource(
-                    data_source_name, "sqlalchemy", profile=data_source_name)
+                context.add_datasource(data_source_name,
+                                       module_name="great_expectations.datasource",
+                                       class_name="SqlAlchemyDatasource",
+                                       data_asset_type={"class_name": "SqlAlchemyDataset"},
+                                       credentials="${" + data_source_name + "}")
                 break
             except (DatasourceInitializationError, ModuleNotFoundError) as de:
                 cli_message(
@@ -138,12 +161,17 @@ You can add a datasource later by editing the great_expectations.yml file.
             path = path[2:]
 
         if path.endswith("/"):
-            basenamepath = path[:-1]
-        default_data_source_name = os.path.basename(basenamepath)
+            path = path[:-1]
+        default_data_source_name = os.path.basename(path)
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
-        context.add_datasource(data_source_name, "spark", base_directory=path)
+        context.add_datasource(data_source_name,
+                               module_name="great_expectations.datasource",
+                               class_name="SparkDFDatasource",
+                               base_directory=path) # NOTE: Eugene: 2019-09-17: review the path and make sure that the logic works both for abs and rel.
+                               # base_directory=os.path.join("..", path))
+
 
     # if data_source_selection == "5": # dbt
     #     dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
@@ -161,7 +189,7 @@ You can add a datasource later by editing the great_expectations.yml file.
     return data_source_name
 
 
-def profile_datasource(context, data_source_name, data_assets=None, profile_all_data_assets=False, max_data_assets=20):
+def profile_datasource(context, data_source_name, data_assets=None, profile_all_data_assets=False, max_data_assets=20,additional_batch_kwargs=None):
     """"Profile a named datasource using the specified context"""
 
     msg_intro = """
@@ -220,7 +248,8 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
         data_assets=data_assets,
         profile_all_data_assets=profile_all_data_assets,
         max_data_assets=max_data_assets,
-        dry_run=True
+        dry_run=True,
+        additional_batch_kwargs=additional_batch_kwargs
     )
 
     if profiling_results['success']: # data context is ready to profile - run profiling
@@ -230,7 +259,8 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
             data_assets=data_assets,
             profile_all_data_assets=profile_all_data_assets,
             max_data_assets=max_data_assets,
-            dry_run=False
+            dry_run=False,
+            additional_batch_kwargs=additional_batch_kwargs
         )
         else:
             cli_message(msg_skipping)
@@ -358,10 +388,11 @@ msg_unknown_data_source = """
 We are looking for more types of data types to support.
 Please create a GitHub issue here:
 https://github.com/great-expectations/great_expectations/issues/new
-In the meantime you can see what Great Expectations can do on CSV files.
-To create expectations for your CSV files start Jupyter and open notebook
-great_expectations/notebooks/using_great_expectations_with_pandas.ipynb -
-it will walk you through configuring the database connection and next steps.
+
+In the meantime, consider reviewing the following notebook for an example of 
+creating and saving an expectation suite for validation:
+
+    <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
 """
 
 msg_go_to_notebook = """

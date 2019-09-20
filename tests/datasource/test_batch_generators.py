@@ -8,15 +8,19 @@ except ImportError:
     import mock
 
 from great_expectations.exceptions import DataContextError
+from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.generator import SubdirReaderGenerator, GlobReaderGenerator, DatabricksTableGenerator
-from great_expectations.datasource.types import BatchKwargs, PathBatchKwargs
+from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
 
 def test_file_kwargs_generator(data_context, filesystem_csv):
     base_dir = filesystem_csv
 
-    datasource = data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
+    datasource = data_context.add_datasource("default",
+                                        module_name="great_expectations.datasource",
+                                        class_name="PandasDatasource",
+                                        base_directory=str(base_dir))
     generator = datasource.get_generator("default")
     known_data_asset_names = datasource.get_available_data_asset_names()
 
@@ -49,7 +53,10 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
 
 def test_file_kwargs_generator_error(data_context, filesystem_csv):
     base_dir = filesystem_csv
-    data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
+    data_context.add_datasource("default",
+                                module_name="great_expectations.datasource",
+                                class_name="PandasDatasource",
+                                base_directory=str(base_dir))
 
     with pytest.raises(DataContextError) as exc:
         data_context.get_batch("f4")
@@ -338,3 +345,18 @@ def test_databricks_generator():
     kwargs = [batch_kwargs for batch_kwargs in databricks_kwargs_iterator]
     assert "timestamp" in kwargs[0]
     assert "select * from" in kwargs[0]["query"].lower()
+
+
+def test_query_generator_view(sqlite_view_engine):
+    datasource = SqlAlchemyDatasource(engine=sqlite_view_engine, generators={
+        "query": {
+            "type": "queries"
+        }
+    })  # Build a datasource with a queries generator to introspect our database with a view
+    names = set(datasource.get_available_data_asset_names()["query"])
+
+    # We should see both the table *and* the primary view, but *not* the temp view
+    assert names == {
+        "main.test_table",
+        "main.test_view"
+    }

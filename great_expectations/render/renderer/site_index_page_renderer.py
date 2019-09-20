@@ -23,7 +23,7 @@ class SiteIndexPageRenderer(Renderer):
         cell_width_pct = 100.0/column_count
 
         first_row = []
-        rowspan = str(len(expectations_links)) if expectations_links else "1"
+        rowspan = str(len(expectation_suite_links)) if expectation_suite_links else "1"
         
         data_asset_name = RenderedComponentContent(**{
             "content_block_type": "string_template",
@@ -403,4 +403,3 @@ class SiteIndexPageRenderer(Renderer):
                 "utm_medium": "index-page",
                 "sections": sections
             })
-
