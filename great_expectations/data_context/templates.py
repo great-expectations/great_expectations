@@ -128,7 +128,7 @@ data_docs:
     # The site includes expectation suites and profiling and validation results from uncommitted directory. 
     # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
 
-      module_name: great_expectations.render.renderer.new_site_builder
+      module_name: great_expectations.render.renderer.site_builder
       class_name: SiteBuilder
       target_store_name: local_site_html_store
       
@@ -168,7 +168,7 @@ data_docs:
     #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3). 
     # Reach out on Slack (https://tinyurl.com/great-expectations-slack>) if you would like to discuss the best way to configure a team site.
 
-      module_name: great_expectations.render.renderer.new_site_builder
+      module_name: great_expectations.render.renderer.site_builder
       class_name: SiteBuilder
       target_store_name: team_site_html_store
       

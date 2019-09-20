@@ -17,9 +17,16 @@ from great_expectations.data_context.types import (
     DataAssetIdentifier,
     NormalizedDataAssetName,
 )
+from great_expectations.data_context.util import (
+    instantiate_class_from_config,
+)
 
-class SiteBuilder():
-    """SiteBuilder builds a data documentation website for the project defined by a DataContext.
+from great_expectations.data_context.store.namespaced_read_write_store import (
+    SiteSectionIdentifier,
+)
+
+class SiteBuilder(object):
+    """SiteBuilder builds data documentation for the project defined by a DataContext.
 
     A data documentation site consists of HTML pages for expectation suites, profiling and validation results, and
     an index.html page that links to all the pages.
@@ -36,317 +43,225 @@ class SiteBuilder():
     Here is an example of config for a site:
 
     local_site:
-      type: SiteBuilder
-      site_store:
-        type: filesystem
-        base_directory: uncommitted/documentation/local_site
-      validations_store:
-        type: filesystem
-        base_directory: uncommitted/validations/
-        run_id_filter:
-          ne: profiling
-      profiling_store:
-        type: filesystem
-        base_directory: uncommitted/validations/
-        run_id_filter:
-          eq: profiling
+        class_name: SiteBuilder
+        target_store_name: local_site_html_store
 
-      datasources: '*'
-      sections:
-        index:
-          renderer:
-            module: great_expectations.render.renderer
-            class: SiteIndexPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaIndexPageView
-        validations:
-          renderer:
-            module: great_expectations.render.renderer
-            class: ValidationResultsPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
-        expectations:
-          renderer:
-            module: great_expectations.render.renderer
-            class: ExpectationSuitePageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
-        profiling:
-          renderer:
-            module: great_expectations.render.renderer
-            class: ProfilingResultsPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
+        site_index_builder:
+            class_name: DefaultSiteIndexBuilder
+
+        # Verbose version:
+        # index_builder:
+        #     module_name: great_expectations.render.builder
+        #     class_name: DefaultSiteIndexBuilder
+        #     renderer:
+        #         module_name: great_expectations.render.renderer
+        #         class_name: SiteIndexPageRenderer
+        #     view:
+        #         module_name: great_expectations.render.view
+        #         class_name: DefaultJinjaIndexPageView
+
+        site_section_builders:
+            # Minimal specification
+            expectations:
+                class_name: DefaultSiteSectionBuilder
+                source_store_name: expectation_store
+            renderer:
+                module_name: great_expectations.render.renderer
+                class_name: ExpectationSuitePageRenderer
+                    
+            # More verbose specification with optional arguments
+            validations:
+                module_name: great_expectations.data_context.render
+                class_name: DefaultSiteSectionBuilder
+                source_store_name: local_validation_store
+                renderer:
+                    module_name: great_expectations.render.renderer
+                    class_name: SiteIndexPageRenderer
+                view:
+                    module_name: great_expectations.render.view
+                    class_name: DefaultJinjaIndexPageView
+
+        datasource_whitelist:
+
     """
 
-    @classmethod
-    def build(cls, data_context, site_config, specified_data_asset_name=None):
-        """
+    def __init__(self,
+        data_context,
+        target_store_name,
+        site_index_builder,
+        site_section_builders,
+        datasource_whitelist=None
+    ):
+        self.data_context = data_context
+        self.target_store_name = target_store_name
 
-        :param data_context:
-        :param site_config:
-        :return: tupple: index_page_locator_info (a dictionary describing how to locate the index page of the site (specific to resource_store type)
-                         index_links_dict
-
-        """
-        logger.debug("Starting SiteBuilder.build")
-
-        index_links_dict = OrderedDict()
-
-        # the site config may specify the list of datasource names to document.
-        # if the config property is absent or is *, treat as "all"
-        datasources_to_document = site_config.get('datasources')
-        if not datasources_to_document or datasources_to_document == '*':
-            datasources_to_document = [datasource['name'] for datasource in data_context.list_datasources()]
-
-        # NOTE: Be careful not to confuse the notion of a Section here with a section in 
-        sections_config = site_config.get('sections')
-        if not sections_config:
-            raise Exception('"sections" key is missing') #TODO: specific exception class
-
-        # profiling results
-
-        profiling_section_config = sections_config.get('profiling')
-        if profiling_section_config:
-            new_index_links_dict = cls.generate_profiling_section(
-                profiling_section_config,
-                data_context,
-                index_links_dict,
-                datasources_to_document,
-                specified_data_asset_name,
-                site_config['site_store'],
-                site_config['profiling_store']['name']
-            )
-
-        # validations
-
-        validation_section_config = sections_config.get('validations')
-        if validation_section_config:
-            #TODO : Everything in this if statement can probably be factored into a generic version of `generate_profiling_section` -> `generate_section`
-            validation_renderer_class, validation_view_class = cls.get_renderer_and_view_classes(validation_section_config)
-
-            # FIXME: local_validation_result_store should not be hardcoded
-            for validation_result_key in data_context.stores['local_validation_result_store'].list_keys():
-                run_id = validation_result_key.run_id
-                run_id_filter = validation_section_config.get("run_id_filter")
-                # run_id_filter attribute in the config of validation store allows to filter run ids
-                if run_id_filter:
-                    if run_id_filter.get("eq"):
-                        if run_id_filter.get("eq") != run_id:
-                            continue
-                    elif run_id_filter.get("ne"):
-                        if run_id_filter.get("ne") == run_id:
-                            continue
-
-                datasource = validation_result_key.expectation_suite_identifier.data_asset_name.datasource
-                if datasource not in datasources_to_document:
-                    continue
-
-                data_asset_name = validation_result_key.expectation_suite_identifier.data_asset_name
-                if specified_data_asset_name:
-                    if data_asset_name != data_context._normalize_data_asset_name(specified_data_asset_name):
-                        continue
-
-                generator = validation_result_key.expectation_suite_identifier.data_asset_name.generator
-                generator_asset = validation_result_key.expectation_suite_identifier.data_asset_name.generator_asset
-                expectation_suite_name = validation_result_key.expectation_suite_identifier.expectation_suite_name
-
-                validation = data_context.get_validation_result(
-                    data_asset_name,
-                    expectation_suite_name=expectation_suite_name,
-                    validations_store_name=site_config['validations_store']['name'],
-                    run_id=run_id
-                )
-                logger.info("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id,
-                                                                                                          expectation_suite_name,
-                                                                                                          data_asset_name))
-                data_asset_name = validation['meta']['data_asset_name']
-                expectation_suite_name = validation['meta']['expectation_suite_name']
-                model = validation_renderer_class.render(validation)
-
-                data_context.write_resource(
-                    validation_view_class.render(model),  # bytes
-                    expectation_suite_name + '.html',  # name to be used inside namespace
-                    resource_store=site_config['site_store'],
-                    resource_namespace="validation",
-                    data_asset_name=data_asset_name,
-                    run_id=run_id
-                )
-
-                index_links_dict = cls.add_resource_info_to_index_links_dict(
-                    data_context,
-                    index_links_dict,
-                    data_asset_name,
-                    datasource, generator, generator_asset, expectation_suite_name,
-                    "validation",
-                    run_id = run_id
-                )
-
-        # expectation suites
-
-        expectations_section_config = sections_config.get('expectations')
-        if expectations_section_config:
-            #TODO : Everything in this if statement can probably be factored into a generic version of `generate_profiling_section` -> `generate_section`
-            # It's unclear whether the difference between Expectations and ValidationResults will require a second function.
-
-            expectations_renderer_class, expectations_view_class = cls.get_renderer_and_view_classes(expectations_section_config)
-
-            for expectation_suite_key in data_context.stores['expectations_store'].list_keys():
-
-                # NOTE : There's a bunch of redundant packing/unpacking logic here.
-
-                expectation_suite = data_context.stores['expectations_store'].get(expectation_suite_key)
-                data_asset_name = expectation_suite["data_asset_name"]
-                expectation_suite_name = expectation_suite_key.expectation_suite_name
-
-                logger.info(
-                    "        Rendering expectation suite {} for data asset {}".format(
-                        expectation_suite_name,
-                        data_asset_name
-                    ))
-                model = expectations_renderer_class.render(expectation_suite)
-
-                data_context.write_resource(
-                    expectations_view_class.render(model),  # bytes
-                    expectation_suite_name + '.html',  # name to be used inside namespace
-                    resource_store=site_config['site_store'],
-                    resource_namespace='expectations',
-                    data_asset_name=data_asset_name
-                )
-
-                index_links_dict = cls.add_resource_info_to_index_links_dict(
-                    data_context,
-                    index_links_dict,
-                    data_asset_name,
-                    expectation_suite_key.data_asset_name.datasource,
-                    expectation_suite_key.data_asset_name.generator,
-                    expectation_suite_key.data_asset_name.generator_asset,
-                    expectation_suite_key.expectation_suite_name,
-                    "expectations",
-                )
-
-        # TODO: load dynamically
-        model = SiteIndexPageRenderer.render(index_links_dict)
-
-        index_page_output = DefaultJinjaIndexPageView.render(model)
-
-        index_page_locator_info = data_context.write_resource(
-            index_page_output,  # bytes
-            'index.html',  # name to be used inside namespace
-            resource_store=site_config['site_store']
+        self.site_index_builder = instantiate_class_from_config(
+            config=site_index_builder,
+            runtime_config={
+                "data_context": data_context,
+                "target_store_name": target_store_name,
+            },
+            config_defaults={
+                "name": "site_index_builder",
+                "module_name": "great_expectations.render.renderer.site_builder"
+            }
         )
 
-        return (index_page_locator_info, index_links_dict)
+        self.site_section_builders = {}
+        for site_section_name, site_section_config in site_section_builders.items():
+            self.site_section_builders[site_section_name] = instantiate_class_from_config(
+                config=site_section_config,
+                runtime_config={
+                    "data_context": data_context,
+                    "target_store_name": target_store_name,
+                },
+                config_defaults={
+                    "name": site_section_name,
+                    "module_name": "great_expectations.render.renderer.site_builder"
+                }
+            )
 
-    @classmethod
-    def get_renderer_and_view_classes(cls, section_config):
-        try:
-            renderer_module = importlib.import_module(section_config['renderer']['module'])
-            renderer_class = getattr(renderer_module, section_config['renderer']['class'])
-            view_module = importlib.import_module(section_config['view']['module'])
-            view_class = getattr(view_module, section_config['view']['class'])
-        except Exception:
-            logger.exception("Failed to load profiling renderer or view class")
-            raise
+    def build(self):
+        for site_section, site_section_builder in self.site_section_builders.items():
+            site_section_builder.build()
         
-        return renderer_class, view_class
+        self.site_index_builder.build()
+
+class DefaultSiteSectionBuilder(object):
+
+    def __init__(self,
+        name,
+        data_context,
+        target_store_name,
+        source_store_name,
+        run_id_filter=None, #NOTE: Ideally, this would allow specification of ANY element (or combination of elements) within an ID key
+        renderer=None,
+        view=None,
+    ):
+        self.name = name
+        self.source_store = data_context.stores[source_store_name]
+        # self.target_store = None # FIXME: Need better test fixtures. And to Implement the HtmlWriteOnlyStore class.
+        self.target_store = data_context.stores[target_store_name]
+        self.run_id_filter = run_id_filter
+
+        # TODO : Push conventions for configurability down to renderers and views.
+        # Until then, they won't be configurable, and defaults will be hard.
+        if renderer == None:
+            renderer = {
+                "module_name": "great_expectations.render.renderer",
+                # "class_name": "SiteIndexPageRenderer",
+            }
+        renderer_module = importlib.import_module(renderer.pop("module_name"))
+        self.renderer_class = getattr(renderer_module, renderer.pop("class_name"))
+
+        if view == None:
+            view = {
+                "module_name": "great_expectations.render.view",
+                "class_name": "DefaultJinjaPageView",
+            }
+        view_module = importlib.import_module(view.pop("module_name"))
+        self.view_class = getattr(view_module, view.pop("class_name"))
 
 
-    @classmethod
-    def generate_profiling_section(cls, section_config, data_context, index_links_dict, datasources_to_document, specified_data_asset_name, resource_store, validations_store_name):
-        logger.debug("Starting SiteBuilder.generate_profiling_section")
+    def build(self):
+        for resource_key in self.source_store.list_keys():
 
-        profiling_renderer_class, profiling_view_class = cls.get_renderer_and_view_classes(section_config)
-
-        for validation_result_key in data_context.stores['local_validation_result_store'].list_keys():
-            run_id = validation_result_key.run_id
-            run_id_filter = section_config.get("run_id_filter")
-            # run_id_filter attribute in the config of validation store allows to filter run ids
-            if run_id_filter:
-                if run_id_filter.get("eq"):
-                    if run_id_filter.get("eq") != run_id:
-                        continue
-                elif run_id_filter.get("ne"):
-                    if run_id_filter.get("ne") == run_id:
-                        continue
-
-            datasource = validation_result_key.expectation_suite_identifier.data_asset_name.datasource
-            if datasource not in datasources_to_document:
-                continue
-
-            data_asset_name = validation_result_key.expectation_suite_identifier.data_asset_name
-            if specified_data_asset_name:
-                if data_asset_name != data_context._normalize_data_asset_name(specified_data_asset_name):
+            if self.run_id_filter:
+                if not self._resource_key_passes_run_id_filter(resource_key):
                     continue
 
-            generator = validation_result_key.expectation_suite_identifier.data_asset_name.generator
+            resource = self.source_store.get(resource_key)
 
-            generator_asset = validation_result_key.expectation_suite_identifier.data_asset_name.generator_asset
+            # TODO : This will need to change slightly when renderer and view classes are configurable.
+            # TODO : Typing resources is SUPER important for usability now that we're slapping configurable renders together with arbitrary stores.
+            rendered_content = self.renderer_class.render(resource)
+            viewable_content = self.view_class.render(rendered_content)
 
-            expectation_suite_name = validation_result_key.expectation_suite_identifier.expectation_suite_name
-
-            validation = data_context.get_validation_result(data_asset_name,
-                                                            expectation_suite_name=expectation_suite_name,
-                                                            validations_store_name=validations_store_name,
-                                                            run_id=run_id)
-            logger.info("        Rendering profiling for data asset {}".format(data_asset_name))
-            data_asset_name = validation['meta']['data_asset_name']
-            expectation_suite_name = validation['meta']['expectation_suite_name']
-            model = profiling_renderer_class.render(validation)
-
-            data_context.write_resource(
-                profiling_view_class.render(model),  # bytes
-                expectation_suite_name + '.html',  # name to be used inside namespace
-                resource_store=resource_store,
-                resource_namespace="profiling",
-                data_asset_name=data_asset_name
+            self.target_store.set(
+                SiteSectionIdentifier(
+                    site_section_name=self.name,
+                    resource_identifier=resource_key,
+                ),
+                viewable_content
             )
 
-            index_links_dict = cls.add_resource_info_to_index_links_dict(
-                data_context,
-                index_links_dict,
-                data_asset_name,
-                datasource, generator, generator_asset, expectation_suite_name, "profiling"
-            )
+            #Where do index_link_dicts live?
+            # In the HtmlSiteStore!
+    
+    def _resource_key_passes_run_id_filter(self, resource_key):
+        if type(resource_key) == ValidationResultIdentifier:
+            run_id = resource_key.run_id
+        else:
+            raise TypeError("run_id_filter filtering is only implemented for ValidationResultResources.")
 
-        print(index_links_dict)
+        if self.run_id_filter.get("eq"):
+            return self.run_id_filter.get("eq") == run_id
+
+        elif self.run_id_filter.get("ne"):
+            return self.run_id_filter.get("ne") != run_id
 
 
-    @classmethod
-    def add_resource_info_to_index_links_dict(cls,
+class DefaultSiteIndexBuilder(object):
+
+    def __init__(self,
+        name,
         data_context,
-        index_links_dict,
-        data_asset_name,
-        datasource,
-        generator,
-        generator_asset,
-        expectation_suite_name,
-        section_name,
-        run_id=None
+        target_store_name,
+        renderer=None,
+        view=None,
     ):
+        # NOTE: This method is almost idenitcal to DefaultSiteSectionBuilder
+        self.name = name
+        self.data_context = data_context
+        self.target_store = data_context.stores[target_store_name]
+
+        # TODO : Push conventions for configurability down to renderers and views.
+        # Until then, they won't be configurable, and defaults will be hard.
+        if renderer == None:
+            renderer = {
+                "module_name": "great_expectations.render.renderer",
+                "class_name": "SiteIndexPageRenderer",
+            }
+        renderer_module = importlib.import_module(renderer.pop("module_name"))
+        self.renderer_class = getattr(renderer_module, renderer.pop("class_name"))
+
+        if view == None:
+            view = {
+                "module_name" : "great_expectations.render.view",
+                "class_name" : "DefaultJinjaIndexPageView",
+            }
+        view_module = importlib.import_module(view.pop("module_name"))
+        self.view_class = getattr(view_module, view.pop("class_name"))
+
+    def add_resource_info_to_index_links_dict(self,
+                                              data_context,
+                                              index_links_dict,
+                                              data_asset_name,
+                                              datasource,
+                                              generator,
+                                              generator_asset,
+                                              expectation_suite_name,
+                                              section_name,
+                                              run_id=None
+                                              ):
         if not datasource in index_links_dict:
             index_links_dict[datasource] = OrderedDict()
-
+    
         if not generator in index_links_dict[datasource]:
             index_links_dict[datasource][generator] = OrderedDict()
-
+    
         if not generator_asset in index_links_dict[datasource][generator]:
             index_links_dict[datasource][generator][generator_asset] = {
                 'profiling_links': [],
                 'validation_links': [],
                 'expectations_links': []
             }
-
-
+    
         if run_id:
             base_path = section_name + "/" + run_id
         else:
             base_path = section_name
-        
+    
         index_links_dict[datasource][generator][generator_asset][section_name + "_links"].append(
             {
                 "full_data_asset_name": data_asset_name,
@@ -363,5 +278,49 @@ class SiteBuilder():
                 "run_id": run_id
             }
         )
-
+    
         return index_links_dict
+
+    def build(self):
+        # Loop over sections in the HtmlStore
+        logger.debug("DefaultSiteIndexBuilder.build")
+
+        target_store = self.target_store
+        resource_keys = target_store.list_keys()
+        index_links_dict = OrderedDict()
+
+        for key in resource_keys:
+            key_resource_identifier = key.resource_identifier
+            
+            if type(key_resource_identifier) == ExpectationSuiteIdentifier:
+                self.add_resource_info_to_index_links_dict(
+                    data_context=self.data_context,
+                    index_links_dict=index_links_dict,
+                    data_asset_name=key_resource_identifier.data_asset_name.to_string(include_class_prefix=False),
+                    datasource=key_resource_identifier.data_asset_name.datasource,
+                    generator=key_resource_identifier.data_asset_name.generator,
+                    generator_asset=key_resource_identifier.data_asset_name.generator_asset,
+                    expectation_suite_name=key_resource_identifier.expectation_suite_name,
+                    section_name=key.site_section_name
+                )
+            elif type(key_resource_identifier) == ValidationResultIdentifier:
+                self.add_resource_info_to_index_links_dict(
+                    data_context=self.data_context,
+                    index_links_dict=index_links_dict,
+                    data_asset_name=key_resource_identifier.expectation_suite_identifier.data_asset_name.to_string(include_class_prefix=False),
+                    datasource=key_resource_identifier.expectation_suite_identifier.data_asset_name.datasource,
+                    generator=key_resource_identifier.expectation_suite_identifier.data_asset_name.generator,
+                    generator_asset=key_resource_identifier.expectation_suite_identifier.data_asset_name.generator_asset,
+                    expectation_suite_name=key_resource_identifier.expectation_suite_identifier.expectation_suite_name,
+                    section_name=key.site_section_name,
+                    run_id=key_resource_identifier.run_id
+                )
+
+        # FIXME : There were no tests to verify that content is created or correct,
+        # so it's not my job to re-implement, right?
+        rendered_content = self.renderer_class.render(index_links_dict)
+        viewable_content = self.view_class.render(rendered_content)
+
+        self.target_store.write_index_page(
+            viewable_content
+        )
