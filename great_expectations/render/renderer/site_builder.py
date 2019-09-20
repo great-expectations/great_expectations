@@ -180,6 +180,26 @@ class DefaultSiteSectionBuilder(object):
                 
             resource = self.source_store.get(resource_key)
 
+            if type(resource_key) is ExpectationSuiteIdentifier:
+                expectation_suite_name = resource_key.expectation_suite_name
+                data_asset_name = resource_key.data_asset_name.generator_asset
+                logger.info(
+                    "        Rendering expectation suite {} for data asset {}".format(
+                        expectation_suite_name,
+                        data_asset_name
+                    ))
+            elif type(resource_key) is ValidationResultIdentifier:
+                data_asset_name = resource_key.expectation_suite_identifier.data_asset_name.generator_asset
+                run_id = resource_key.run_id
+                expectation_suite_name = resource_key.expectation_suite_identifier.expectation_suite_name
+                if run_id == "profiling":
+                    logger.info("        Rendering profiling for data asset {}".format(data_asset_name))
+                else:
+                    
+                    logger.info("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id,
+                                                                                                              expectation_suite_name,
+                                                                                                              data_asset_name))
+
             # TODO : This will need to change slightly when renderer and view classes are configurable.
             # TODO : Typing resources is SUPER important for usability now that we're slapping configurable renders together with arbitrary stores.
             rendered_content = self.renderer_class.render(resource)
