@@ -5,10 +5,6 @@ from great_expectations.types import Config
 
 class DataContextConfig(Config):
     _allowed_keys = set([
-        "ge_config_version",
-        # TODO temporary fix
-        # TODO warn if this is detected
-        "result_callback",
         "config_variables_file_path",
         "plugins_directory",
         "expectations_store",
@@ -20,7 +16,6 @@ class DataContextConfig(Config):
     ])
 
     _required_keys = set([
-        "ge_config_version",
         "plugins_directory",
         "expectations_store",
         "evaluation_parameter_store_name",
