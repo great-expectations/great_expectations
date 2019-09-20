@@ -37,9 +37,9 @@ The operator returns an object that contains sufficient information for the pipe
     {
         "success" : None,
         "validation_results" : {
-            "failure" : validation result id
-            "warning" : validation result id
-            "quarantine" : validation result id
+            "failure" : (validation result id, validation result),
+            "warning" : (validation result id, validation result),
+            "quarantine" : (validation result id, validation result)
         },
         "data_assets" : {
             "original_batch" : ...,
@@ -50,7 +50,7 @@ The operator returns an object that contains sufficient information for the pipe
 
 In addition to returning this object, the operator has side effects. It will store the validation results and will send a notification (e.g., Slack).
 
-The stores for validation results and the data snapshots, and the webshook where the notifications should be sent are specified in the operator's configuration.
+The stores for validation results and the data snapshots, and the webhook where the notifications should be sent are specified in the operator's configuration.
 
 
 How do I invoke an operator?
