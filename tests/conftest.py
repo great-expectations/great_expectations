@@ -390,12 +390,12 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
     scaffold_directories_and_notebooks(ge_directory)
     context.add_datasource(
         "titanic",
-        "pandas",
+        type="pandas",
         base_directory=os.path.join(project_dir, "data/titanic/")
     )
     context.add_datasource(
         "random",
-        "pandas",
+        type="pandas",
         base_directory=os.path.join(project_dir, "data/random/")
     )
     
