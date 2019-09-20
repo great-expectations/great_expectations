@@ -119,35 +119,3 @@ def test_SiteSectionBuilder(titanic_data_context, filesystem_csv_2):
     assert len(re.findall("<div.*>", content)) > 20 # Ah! Then it MUST be HTML!
     with open('./tests/render/output/test_SiteSectionBuilder.html', 'w') as f:
         f.write(content)
-
-
-# def test_SiteIndexBuilder(titanic_data_context, filesystem_csv_2):
-#     titanic_data_context.profile_datasource(titanic_data_context.list_datasources()[0]["name"])
-
-#     titanic_data_context.add_store(
-#         "local_site_html_store",
-#         {
-#             "module_name": "great_expectations.data_context.store",
-#             "class_name": "EvaluationParameterStore",
-#         }
-#     )
-
-#     my_site_section_builders = DefaultSiteIndexBuilder(
-#         titanic_data_context,
-#         target_store_name="local_site_html_store",
-#         renderer = {
-#             "module_name": "great_expectations.render.renderer",
-#             "class_name" : "ExpectationSuitePageRenderer",
-#         },
-#     )
-
-#     my_site_section_builders.build()
-
-#     print(titanic_data_context.stores["local_site_html_store"].list_keys())
-#     assert len(titanic_data_context.stores["local_site_html_store"].list_keys()) == 1
-    
-#     first_key = titanic_data_context.stores["local_site_html_store"].list_keys()[0]
-#     assert first_key == "ExpectationSuiteIdentifier.mydatasource.mygenerator.Titanic.BasicDatasetProfiler"
-
-#     content = titanic_data_context.stores["local_site_html_store"].get(first_key)
-#     assert len(re.findall("<div.*>", content)) > 20 # Ah! Then it MUST be HTML!
