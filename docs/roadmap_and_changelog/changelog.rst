@@ -11,48 +11,82 @@ v0.8.0__develop
  method is still supported but is deprecated. See :ref:`GlobReaderGenerator` for details.
 * INTERNAL: rename LooselyTypedDotDict to AllowedKeysDotDict and add RequiredKeysDotDict as parent
 
-v0.7.8__develop
+v0.7.10
 -----------------
+* Fix an issue in generated documentation where the Home button failed to return to the index
+* Add S3 Generator to module docs and improve module docs formatting
+* Add support for views to QueryGenerator
+* Add success/failure icons to index page
+* Return to uniform histogram creation during profiling to avoid large partitions for internal performance reasons
+
+
+v0.7.9
+-----------------
+* Add an S3 generator, which will introspect a configured bucket and generate batch_kwargs from identified objects
+* Add support to PandasDatasource and SparkDFDatasource for reading directly from S3
+* Enhance the Site Index page in documentation so that validation results are sorted and display the newest items first
+  when using the default run-id scheme
+* Add a new utility method, `build_continuous_partition_object` which will build partition objects using the dataset
+  API and so supports any GE backend.
+* Fix an issue where columns with spaces in their names caused failures in some SqlAlchemyDataset and SparkDFDataset
+  expectations
+* Fix an issue where generated queries including null checks failed on MSSQL (#695)
+* Fix an issue where evaluation parameters passed in as a set instead of a list could cause JSON serialization problems
+  for the result object (#699)
+
+
+v0.7.8
+-----------------
+* BREAKING: slack webhook URL now must be in the profiles.yml file (treat as a secret)
+* Profiler improvements:
+  - Display candidate profiling data assets in alphabetical order
+  - Add columns to the expectation_suite meta during profiling to support human-readable description information
+* Improve handling of optional dependencies during CLI init
+* Improve documentation for create_expectations notebook
+* Fix several anachronistic documentation and docstring phrases (#659, #660, #668, #681; #thanks @StevenMMortimer)
+* Fix data docs rendering issues:
+  - documentation rendering failure from unrecognized profiled column type (#679; thanks @dinedal))
+  - PY2 failure on encountering unicode (#676)
 
 
 v.0.7.7
 -----------------
 * Standardize the way that plugin module loading works. DataContext will begin to use the new-style class and plugin
-identification moving forward; yml configs should specify class_name and module_name (with module_name optional for
-GE types). For now, it is possible to use the "type" parameter in configuration (as before).
+  identification moving forward; yml configs should specify class_name and module_name (with module_name optional for
+  GE types). For now, it is possible to use the "type" parameter in configuration (as before).
 * Add support for custom data_asset_type to all datasources
 * Add support for strict_min and strict_max to inequality-based expectations to allow strict inequality checks
-(thanks @RoyalTS!)
+  (thanks @RoyalTS!)
 * Add support for reader_method = "delta" to SparkDFDatasource
 * Fix databricks generator (thanks @sspitz3!)
 * Improve performance of DataContext loading by moving optional import
 * Fix several memory and performance issues in SparkDFDataset.
- - Use only distinct value count instead of bringing values to driver
- - Migrate away from UDF for set membership, nullity, and regex expectations
+  - Use only distinct value count instead of bringing values to driver
+  - Migrate away from UDF for set membership, nullity, and regex expectations
 * Fix several UI issues in the data_documentation
- - Move prescriptive dataset expectations to Overview section
- - Fix broken link on Home breadcrumb
- - Scroll follows navigation properly
- - Improved flow for long items in value_set
- - Improved testing for ValidationRenderer
- - Clarify dependencies introduced in documentation sites
- - Improve testing and documentation for site_builder, including run_id filter
- - Fix missing header in Index page and cut-off tooltip
- - Add run_id to path for validation files
+  - Move prescriptive dataset expectations to Overview section
+  - Fix broken link on Home breadcrumb
+  - Scroll follows navigation properly
+  - Improved flow for long items in value_set
+  - Improved testing for ValidationRenderer
+  - Clarify dependencies introduced in documentation sites
+  - Improve testing and documentation for site_builder, including run_id filter
+  - Fix missing header in Index page and cut-off tooltip
+  - Add run_id to path for validation files
 
 
 v.0.7.6
 -----------------
-* New Validation Renderer! Supports turning validation results into HTML and displays differences between the expected \
- and the observed attributes of a dataset.
-* Data Documentation sites are now fully configurable; a data context can be configured to generate multiple \
- sites built with different GE objects to support a variety of data documentation use cases. See data documentation \
- guide for more detail.
+* New Validation Renderer! Supports turning validation results into HTML and displays differences between the expected
+  and the observed attributes of a dataset.
+* Data Documentation sites are now fully configurable; a data context can be configured to generate multiple
+  sites built with different GE objects to support a variety of data documentation use cases. See data documentation
+  guide for more detail.
 * CLI now has a new top-level command, `build-documentation` that can support rendering documentation for specified
- sites and even named data assets in a specific site.
+  sites and even named data assets in a specific site.
 * Introduced DotDict and LooselyTypedDotDict classes that allow to enforce typing of dictionaries.
-* Bug fixes: improved internal logic of rendering data documentation, slack notification, and CLI profile command when \
- datasource argument was not provided.
+* Bug fixes: improved internal logic of rendering data documentation, slack notification, and CLI profile command when
+  datasource argument was not provided.
 
 v.0.7.5
 -----------------

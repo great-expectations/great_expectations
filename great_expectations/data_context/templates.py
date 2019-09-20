@@ -7,7 +7,7 @@ PROJECT_HELP_COMMENT = """
 # make it easier to use Great Expectations.
 
 # For more help configuring great expectations, 
-# see the documentation at: https://greatexpectations.io/config_file.html
+# see the documentation at: https://docs.greatexpectations.io/en/latest/core_concepts/data_context.html#configuration
 
 # NOTE: GE uses the names of configured datasources and generators to manage
 # how expectations and other configuration artifacts are stored in the 
@@ -137,7 +137,7 @@ stores:
 # Uncomment the lines below to enable a result callback.
 
 # result_callback:
-#   slack: https://slack.com/replace_with_your_webhook
+#   slack: ${slack_callback_url}
 
 # TODO : Remove the extra layer of yml nesting in v0.8:
 data_docs:

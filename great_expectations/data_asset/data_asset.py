@@ -958,6 +958,9 @@ class DataAsset(object):
         if evaluation_parameters is not None:
             runtime_evaluation_parameters.update(evaluation_parameters)
 
+        # Convert evaluation parameters to be json-serializable
+        runtime_evaluation_parameters = recursively_convert_to_json_serializable(runtime_evaluation_parameters)
+
         # Warn if our version is different from the version in the configuration
         try:
             if expectation_suite['meta']['great_expectations.__version__'] != __version__:
@@ -968,8 +971,6 @@ class DataAsset(object):
         except KeyError:
             warnings.warn(
                 "WARNING: No great_expectations version found in configuration object.")
-
-
 
         ###
         # This is an early example of what will become part of the ValidationOperator
@@ -1071,7 +1072,7 @@ class DataAsset(object):
         }
 
         if evaluation_parameters is not None:
-            result.update({"evaluation_parameters": evaluation_parameters})
+            result.update({"evaluation_parameters": runtime_evaluation_parameters})
 
         if run_id is not None:
             result["meta"].update({"run_id": run_id})
