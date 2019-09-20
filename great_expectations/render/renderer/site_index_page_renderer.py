@@ -12,9 +12,10 @@ from great_expectations.render.types import (
 class SiteIndexPageRenderer(Renderer):
 
     @classmethod
-    def _generate_data_asset_table_section(cls, data_asset_name, link_lists_dict, column_count):
+    def _generate_data_asset_table_section(cls, data_asset_name, link_lists_dict, link_list_keys_to_render):
         section_rows = []
 
+        column_count = len(link_list_keys_to_render)
         profiling_links = link_lists_dict.get("profiling_links")
         validation_links = link_lists_dict.get("validation_links")
         expectation_suite_links = link_lists_dict.get("expectation_suite_links")
@@ -58,7 +59,7 @@ class SiteIndexPageRenderer(Renderer):
         })
         first_row.append(data_asset_name)
         
-        if profiling_links is not None:
+        if "profiling_links" in link_list_keys_to_render:
             profiling_results_bullets = [
                 RenderedComponentContent(**{
                     "content_block_type": "string_template",
@@ -92,7 +93,7 @@ class SiteIndexPageRenderer(Renderer):
             })
             first_row.append(profiling_results_bullet_list)
             
-        if expectation_suite_links is not None:
+        if "expectation_suite_links" in link_list_keys_to_render:
             if len(expectation_suite_links) > 0:
                 expectation_suite_link_dict = expectation_suite_links[0]
             else:
@@ -127,7 +128,7 @@ class SiteIndexPageRenderer(Renderer):
             })
             first_row.append(expectation_suite_link)
             
-            if validation_links is not None and expectation_suite_links:
+            if "validation_links" in link_list_keys_to_render and "expectation_suite_links" in link_list_keys_to_render:
                 sorted_validation_links = [
                     link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"], reverse=True)
                     if link_dict["expectation_suite_name"] == expectation_suite_name
@@ -136,14 +137,22 @@ class SiteIndexPageRenderer(Renderer):
                     RenderedComponentContent(**{
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": "$link_text",
+                            "template": "${validation_success} $link_text",
                             "params": {
-                                "link_text": link_dict["run_id"]
+                                "link_text": link_dict["run_id"],
+                                "validation_success": ""
                             },
                             "tag": "a",
                             "styling": {
                                 "attributes": {
                                     "href": link_dict["filepath"]
+                                },
+                                "params": {
+                                    "validation_success": {
+                                        "tag": "i",
+                                        "classes": ["fas", "fa-check-circle", "text-success"] if link_dict[
+                                            "validation_success"] else ["fas", "fa-times", "text-danger"]
+                                    }
                                 }
                             }
                         }
@@ -168,7 +177,7 @@ class SiteIndexPageRenderer(Renderer):
                 })
                 first_row.append(validation_link_bullet_list)
 
-        if not expectation_suite_links and validation_links is not None:
+        if not expectation_suite_links and "validation_links" in link_list_keys_to_render:
             sorted_validation_links = [
                 link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"], reverse=True)
             ]
@@ -176,14 +185,22 @@ class SiteIndexPageRenderer(Renderer):
                 RenderedComponentContent(**{
                     "content_block_type": "string_template",
                     "string_template": {
-                        "template": "$link_text",
+                        "template": "${validation_success} $link_text",
                         "params": {
-                            "link_text": link_dict["run_id"]
+                            "link_text": link_dict["run_id"],
+                            "validation_success": ""
                         },
                         "tag": "a",
                         "styling": {
                             "attributes": {
                                 "href": link_dict["filepath"]
+                            },
+                            "params": {
+                                "validation_success": {
+                                    "tag": "i",
+                                    "classes": ["fas", "fa-check-circle", "text-success"] if link_dict[
+                                        "validation_success"] else ["fas", "fa-times", "text-danger"]
+                                }
                             }
                         }
                     }
@@ -210,7 +227,7 @@ class SiteIndexPageRenderer(Renderer):
         
         section_rows.append(first_row)
         
-        if expectation_suite_links and len(expectation_suite_links) > 1:
+        if "expectation_suite_links" in link_list_keys_to_render and len(expectation_suite_links) > 1:
             for expectation_suite_link_dict in expectation_suite_links[1:]:
                 expectation_suite_row = []
                 expectation_suite_name = expectation_suite_link_dict["expectation_suite_name"]
@@ -239,7 +256,7 @@ class SiteIndexPageRenderer(Renderer):
                 })
                 expectation_suite_row.append(expectation_suite_link)
     
-                if validation_links is not None:
+                if "validation_links" in link_list_keys_to_render:
                     sorted_validation_links = [
                         link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"], reverse=True)
                         if link_dict["expectation_suite_name"] == expectation_suite_name
@@ -248,14 +265,21 @@ class SiteIndexPageRenderer(Renderer):
                         RenderedComponentContent(**{
                             "content_block_type": "string_template",
                             "string_template": {
-                                "template": "$link_text",
+                                "template": "${validation_success} $link_text",
                                 "params": {
-                                    "link_text": link_dict["run_id"]
+                                    "link_text": link_dict["run_id"],
+                                    "validation_success": ""
                                 },
                                 "tag": "a",
                                 "styling": {
                                     "attributes": {
                                         "href": link_dict["filepath"]
+                                    },
+                                    "params": {
+                                        "validation_success": {
+                                            "tag": "i",
+                                            "classes": ["fas", "fa-check-circle",  "text-success"] if link_dict["validation_success"] else ["fas", "fa-times", "text-danger"]
+                                        }
                                     }
                                 }
                             }
@@ -331,7 +355,8 @@ class SiteIndexPageRenderer(Renderer):
 
                 generator_table_rows = []
                 generator_table_header_row = ["Data Asset"]
-                
+                link_list_keys_to_render = []
+
                 header_dict = OrderedDict([
                     ["profiling_links", "Profiling Results"],
                     ["expectation_suite_links", "Expectation Suite"],
@@ -342,9 +367,10 @@ class SiteIndexPageRenderer(Renderer):
                     for data_asset, link_lists in data_assets.items():
                         if header in generator_table_header_row:
                             continue
-                        if link_lists_key in link_lists:
+                        if link_lists.get(link_lists_key):
                             generator_table_header_row.append(header)
-                
+                            link_list_keys_to_render.append(link_lists_key)
+
                 generator_table = RenderedComponentContent(**{
                     "content_block_type": "table",
                     "header_row": generator_table_header_row,
@@ -361,7 +387,7 @@ class SiteIndexPageRenderer(Renderer):
                 })
                 # data_assets
                 for data_asset, link_lists in data_assets.items():
-                    generator_table_rows += cls._generate_data_asset_table_section(data_asset, link_lists, column_count=len(generator_table_header_row))
+                    generator_table_rows += cls._generate_data_asset_table_section(data_asset, link_lists, link_list_keys_to_render=link_list_keys_to_render)
                     
                 content_blocks.append(generator_table)
 

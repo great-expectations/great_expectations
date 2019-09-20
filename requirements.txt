@@ -15,4 +15,4 @@ pyfiglet>=0.8
 termcolor>=1.1.0
 tzlocal>=1.2
 pypandoc>=1.4
-future>=0.17
+future>=0.16

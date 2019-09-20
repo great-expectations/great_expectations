@@ -5,6 +5,7 @@ import os
 import json
 import warnings
 
+import pandas as pd
 import numpy as np
 import sqlalchemy as sa
 
@@ -326,12 +327,12 @@ def dataset(request):
     return get_dataset(request.param, data, schemas=schemas)
 
 
-@pytest.fixture()
+@pytest.fixture
 def sqlitedb_engine():
     return sa.create_engine('sqlite://')
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def empty_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('empty_data_context'))
     context = ge.data_context.DataContext.create(project_path)
@@ -342,7 +343,7 @@ def empty_data_context(tmp_path_factory):
     return context
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def titanic_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('titanic_data_context'))
     context_path = os.path.join(project_path, "great_expectations")
@@ -355,7 +356,8 @@ def titanic_data_context(tmp_path_factory):
                 str(os.path.join(context_path, "../data/Titanic.csv")))
     return ge.data_context.DataContext(context_path)
 
-@pytest.fixture(scope="function")
+
+@pytest.fixture
 def titanic_multibatch_data_context(tmp_path_factory):
     """
     Based on titanic_data_context, but with 2 identical batches of
@@ -378,7 +380,7 @@ def titanic_multibatch_data_context(tmp_path_factory):
 
 
 
-@pytest.fixture()
+@pytest.fixture
 def data_context(tmp_path_factory):
     # This data_context is *manually* created to have the config we want, vs created with DataContext.create
     project_path = str(tmp_path_factory.mktemp('data_context'))
@@ -401,7 +403,7 @@ def data_context(tmp_path_factory):
     return ge.data_context.DataContext(context_path)
 
 
-@pytest.fixture()
+@pytest.fixture
 def filesystem_csv(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp('filesystem_csv')
     base_dir = str(base_dir)
@@ -420,7 +422,7 @@ def filesystem_csv(tmp_path_factory):
     return base_dir
 
 
-@pytest.fixture()
+@pytest.fixture
 def filesystem_csv_2(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp('test_files')
     base_dir = str(base_dir)
@@ -431,7 +433,8 @@ def filesystem_csv_2(tmp_path_factory):
 
     return base_dir
 
-@pytest.fixture()
+
+@pytest.fixture
 def filesystem_csv_3(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp('test_files')
     base_dir = str(base_dir)
@@ -458,13 +461,14 @@ def filesystem_csv_4(tmp_path_factory):
     toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
 
     return base_dir
-    
-@pytest.fixture()
+
+
+@pytest.fixture
 def titanic_profiled_evrs_1():
     return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
 
 
-@pytest.fixture()
+@pytest.fixture
 def titanic_profiled_name_column_evrs():
 
     #This is a janky way to fetch expectations matching a specific name from an EVR suite.
@@ -483,11 +487,12 @@ def titanic_profiled_name_column_evrs():
     return name_column_evrs
 
 
-@pytest.fixture()
+@pytest.fixture
 def titanic_profiled_expectations_1():
     return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json"))
 
-@pytest.fixture()
+
+@pytest.fixture
 def titanic_profiled_name_column_expectations():
     from great_expectations.render.renderer.renderer import (
         Renderer,
@@ -504,14 +509,14 @@ def titanic_profiled_name_column_expectations():
     return name_column_expectations
 
 
-@pytest.fixture()
+@pytest.fixture
 def titanic_validation_results():
     with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
         return json.load(infile)
 
 
 # various types of evr
-@pytest.fixture()
+@pytest.fixture
 def evr_failed():
     return {
       "success": False,
@@ -563,7 +568,7 @@ def evr_failed():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def evr_failed_with_exception():
     return {
         'success': False,
@@ -587,7 +592,7 @@ def evr_failed_with_exception():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def evr_success():
     return {
       "success": True,
@@ -608,3 +613,14 @@ def evr_success():
         }
       }
     }
+
+
+@pytest.fixture
+def sqlite_view_engine():
+    # Create a small in-memory engine with two views, one of which is temporary
+    sqlite_engine = sa.create_engine("sqlite://")
+    df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
+    df.to_sql("test_table", con=sqlite_engine)
+    sqlite_engine.execute("CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;")
+    sqlite_engine.execute("CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;")
+    return sqlite_engine

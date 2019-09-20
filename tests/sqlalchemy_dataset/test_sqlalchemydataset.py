@@ -180,9 +180,22 @@ def test_column_fallback():
     assert (dataset.expect_table_row_count_to_equal(value=3) == 
             fallback_dataset.expect_table_row_count_to_equal(value=3))
 
+
 @pytest.fixture
 def unexpected_count_df():
-    return  get_dataset("sqlite", {"a": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
+    return get_dataset("sqlite", {"a": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
+
+
+def test_sqlalchemy_dataset_view(sqlite_view_engine):
+    # This test demonstrates that a view can be used as a SqlAlchemyDataset table for purposes of validation
+    dataset = SqlAlchemyDataset("test_view", engine=sqlite_view_engine)
+    res = dataset.expect_table_row_count_to_equal(1)
+    assert res["success"] is True
+
+    # A temp view can also be used, though generators will not see it
+    dataset = SqlAlchemyDataset("test_temp_view", engine=sqlite_view_engine)
+    res = dataset.expect_table_row_count_to_equal(3)
+    assert res["success"] is True
 
 
 def test_sqlalchemy_dataset_unexpected_count_calculations(unexpected_count_df):
