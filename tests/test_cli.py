@@ -247,11 +247,12 @@ great_expectations/
                         default/
                             Titanic/
                                 BasicDatasetProfiler.html
-                profiling/
-                    data__dir/
-                        default/
-                            Titanic/
-                                BasicDatasetProfiler.html
+                validations/
+                    profiling/
+                        data__dir/
+                            default/
+                                Titanic/
+                                    BasicDatasetProfiler.html
             team_site/
                 index.html
                 expectations/
@@ -285,13 +286,13 @@ great_expectations/
         assert os.path.isfile(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/local_site/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html")
+                "great_expectations/uncommitted/documentation/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html")
         )
 
         assert os.path.getsize(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/local_site/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
+                "great_expectations/uncommitted/documentation/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
             )
         ) > 0
         print(result)
