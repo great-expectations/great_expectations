@@ -65,18 +65,19 @@ def test_new_SiteBuilder(site_builder_data_context_with_html_store_titanic_rando
     my_site_builder.build()
 
     # save documentation locally
-    safe_mmkdir("./tests/data_context/output")
-    safe_mmkdir("./tests/data_context/output/documentation")
+    safe_mmkdir("./tests/render/output")
+    safe_mmkdir("./tests/render/output/documentation")
 
-    if os.path.isdir("./tests/data_context/output/documentation"):
-        shutil.rmtree("./tests/data_context/output/documentation")
+    if os.path.isdir("./tests/render/output/documentation"):
+        shutil.rmtree("./tests/render/output/documentation")
     shutil.copytree(
         os.path.join(
-            ge_directory,
+            site_builder_data_context_with_html_store_titanic_random.root_directory,
             "uncommitted/documentation/"
         ),
-        "./tests/data_context/output/documentation"
+        "./tests/render/output/documentation"
     )
+
 
 def test_SiteSectionBuilder(titanic_data_context, filesystem_csv_2):
     titanic_data_context.profile_datasource(titanic_data_context.list_datasources()[0]["name"])
