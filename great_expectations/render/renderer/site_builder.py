@@ -43,6 +43,7 @@ class SiteBuilder(object):
     Here is an example of config for a site:
 
     local_site:
+        
         class_name: SiteBuilder
         target_store_name: local_site_html_store
 
@@ -81,6 +82,7 @@ class SiteBuilder(object):
                     module_name: great_expectations.render.view
                     class_name: DefaultJinjaIndexPageView
 
+        # specify a whitelist here if you would like to restrict the datasources to document
         datasource_whitelist:
 
     """
