@@ -10,7 +10,7 @@ from great_expectations.util import (
 from great_expectations.data_context.util import (
     parse_string_to_data_context_resource_identifier
 )
-from great_expectations.render.renderer.new_site_builder import (
+from great_expectations.render.renderer.site_builder import (
     SiteBuilder,
     DefaultSiteSectionBuilder,
     DefaultSiteIndexBuilder,
