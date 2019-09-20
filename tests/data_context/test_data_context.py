@@ -632,17 +632,18 @@ documentation/
                 default/
                     Titanic/
                         BasicDatasetProfiler.html
-        profiling/
-            random/
-                default/
-                    f1/
-                        BasicDatasetProfiler.html
-                    f2/
-                        BasicDatasetProfiler.html
-            titanic/
-                default/
-                    Titanic/
-                        BasicDatasetProfiler.html
+        validations/
+            profiling/
+                random/
+                    default/
+                        f1/
+                            BasicDatasetProfiler.html
+                        f2/
+                            BasicDatasetProfiler.html
+                titanic/
+                    default/
+                        Titanic/
+                            BasicDatasetProfiler.html
     team_site/
         index.html
         expectations/
