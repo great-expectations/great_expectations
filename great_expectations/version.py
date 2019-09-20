@@ -4,7 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-tag = "v0.7.8__develop"
+tag = "v0.8.0__develop"
 git_directory = os.environ.get("GE_DEV_DIR")
 
 

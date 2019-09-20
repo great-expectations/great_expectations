@@ -140,7 +140,12 @@ class BatchGenerator(object):
         except StopIteration:
             self.reset_iterator(data_asset_name)
             data_asset_iterator = self._data_asset_iterators[data_asset_name]
-            return next(data_asset_iterator)
+            try:
+                return next(data_asset_iterator)
+            except StopIteration:
+                # This is a degenerate case in which no kwargs are actually being generated
+                logger.warning("No batch_kwargs found data_asset_name %s" % data_asset_name)
+                return {}
         except TypeError:
             # If we don't actually have an iterator we can generate, even after resetting, just return empty
             logger.warning("Unable to generate batch_kwargs for data_asset_name %s" % data_asset_name)

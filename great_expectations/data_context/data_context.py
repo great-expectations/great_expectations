@@ -25,7 +25,7 @@ from ..types.base import DotDict
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError, InvalidConfigError
 
 # FIXME : fully deprecate site_builder, by replacing it with new_site_builder.
-# FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers. 
+# FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers.
 # from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.render.renderer.new_site_builder import SiteBuilder
 
@@ -83,7 +83,7 @@ class ConfigOnlyDataContext(object):
     2. ConfigOnlyDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed into DataContext class.
 
     Together, these changes make ConfigOnlyDataContext class more testable.
-    
+
     DataContext itself inherits from ConfigOnlyDataContext. It behaves essentially the same as the v0.7.* implementation of DataContext.
     """
 
@@ -194,7 +194,7 @@ class ConfigOnlyDataContext(object):
         """Initialize all Stores for this DataContext.
 
         Stores are a good fit for reading/writing objects that:
-            1. follow a clear key-value pattern, and 
+            1. follow a clear key-value pattern, and
             2. are usually edited programmatically, using the Context
 
         In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
@@ -207,7 +207,7 @@ class ConfigOnlyDataContext(object):
 
         Note that stores do NOT manage plugins.
         """
-        
+
         for store_name, store_config in store_configs.items():
             self.add_store(
                 store_name,
@@ -706,7 +706,7 @@ class ConfigOnlyDataContext(object):
             )
 
         split_name = data_asset_name.split(self.data_asset_name_delimiter)
-        
+
         existing_expectation_suite_keys = self.list_expectation_suite_keys()
         existing_namespaces = []
         for key in existing_expectation_suite_keys:
@@ -1019,7 +1019,7 @@ class ConfigOnlyDataContext(object):
 
 
         # Proposed TODO : Snapshotting shouldn't be a top-level concern in the DataContext.
-        # Instead, it should be available as a pluggable Action. 
+        # Instead, it should be available as a pluggable Action.
         if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
             logging.debug("Storing validation results to data_asset_snapshot_store")
             self.stores.data_asset_snapshot_store.set(
@@ -1116,11 +1116,9 @@ class ConfigOnlyDataContext(object):
 
         Args:
             run_id: current run_id
-            key: parameter key
-            value: parameter value
 
         Returns:
-            None
+            value stored in evaluation_parameter_store for the provided run_id and key
         """
         if self.evaluation_parameter_store.has_key(run_id):
             return copy.deepcopy(
@@ -1434,7 +1432,8 @@ class ConfigOnlyDataContext(object):
                            max_data_assets=20,
                            profile_all_data_assets=True,
                            profiler=BasicDatasetProfiler,
-                           dry_run=False):
+                           dry_run=False,
+                           additional_batch_kwargs=None):
         """Profile the named datasource using the named profiler.
 
         Args:
@@ -1446,7 +1445,7 @@ class ConfigOnlyDataContext(object):
             profile_all_data_assets: when True, all data assets are profiled, regardless of their number
             profiler: the profiler class to use
             dry_run: when true, the method checks arguments and reports if can profile or specifies the arguments that are missing
-
+            additional_batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
         Returns:
             A dictionary::
 
@@ -1528,9 +1527,13 @@ class ConfigOnlyDataContext(object):
                     start_time = datetime.datetime.now()
 
                     # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
+                    if additional_batch_kwargs is None:
+                        additional_batch_kwargs = {}
+
                     batch = self.get_batch(
                         data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
-                        expectation_suite_name=profiler.__name__
+                        expectation_suite_name=profiler.__name__,
+                        **additional_batch_kwargs
                     )
 
                     if not profiler.validate(batch):
@@ -1684,7 +1687,7 @@ class DataContext(ConfigOnlyDataContext):
 
     def add_store(self, store_name, store_config):
         logger.debug("Starting DataContext.add_store")
-        
+
         new_store = super(DataContext, self).add_store(store_name, store_config)
         self._save_project_config()
         return new_store
@@ -1696,7 +1699,7 @@ class DataContext(ConfigOnlyDataContext):
         self._save_project_config()
 
         return new_datasource
-      
+
     def find_context_root_dir(self):
         if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
             return "../"
