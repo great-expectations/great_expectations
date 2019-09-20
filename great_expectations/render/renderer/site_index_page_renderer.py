@@ -17,13 +17,13 @@ class SiteIndexPageRenderer(Renderer):
 
         column_count = len(link_list_keys_to_render)
         profiling_links = link_lists_dict.get("profiling_links")
-        validation_links = link_lists_dict.get("validation_links")
-        expectation_suite_links = link_lists_dict.get("expectation_suite_links")
+        validations_links = link_lists_dict.get("validations_links")
+        expectations_links = link_lists_dict.get("expectations_links")
         
         cell_width_pct = 100.0/column_count
 
         first_row = []
-        rowspan = str(len(expectation_suite_links)) if expectation_suite_links else "1"
+        rowspan = str(len(expectations_links)) if expectations_links else "1"
         
         data_asset_name = RenderedComponentContent(**{
             "content_block_type": "string_template",
@@ -93,9 +93,9 @@ class SiteIndexPageRenderer(Renderer):
             })
             first_row.append(profiling_results_bullet_list)
             
-        if "expectation_suite_links" in link_list_keys_to_render:
-            if len(expectation_suite_links) > 0:
-                expectation_suite_link_dict = expectation_suite_links[0]
+        if "expectations_links" in link_list_keys_to_render:
+            if len(expectations_links) > 0:
+                expectation_suite_link_dict = expectations_links[0]
             else:
                 expectation_suite_link_dict = {
                     "expectation_suite_name": "",
@@ -128,9 +128,9 @@ class SiteIndexPageRenderer(Renderer):
             })
             first_row.append(expectation_suite_link)
             
-            if "validation_links" in link_list_keys_to_render and "expectation_suite_links" in link_list_keys_to_render:
-                sorted_validation_links = [
-                    link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"], reverse=True)
+            if "validations_links" in link_list_keys_to_render and "expectations_links" in link_list_keys_to_render:
+                sorted_validations_links = [
+                    link_dict for link_dict in sorted(validations_links, key=lambda x: x["run_id"], reverse=True)
                     if link_dict["expectation_suite_name"] == expectation_suite_name
                 ]
                 validation_link_bullets = [
@@ -156,7 +156,8 @@ class SiteIndexPageRenderer(Renderer):
                                 }
                             }
                         }
-                    }) for link_dict in sorted_validation_links
+                    }) for link_dict in sorted_validations_links if
+                    link_dict["expectation_suite_name"] == expectation_suite_name
                 ]
                 validation_link_bullet_list = RenderedComponentContent(**{
                     "content_block_type": "bullet_list",
@@ -177,9 +178,9 @@ class SiteIndexPageRenderer(Renderer):
                 })
                 first_row.append(validation_link_bullet_list)
 
-        if not expectation_suite_links and "validation_links" in link_list_keys_to_render:
-            sorted_validation_links = [
-                link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"], reverse=True)
+        if not expectations_links and "validations_links" in link_list_keys_to_render:
+            sorted_validations_links = [
+                link_dict for link_dict in sorted(validations_links, key=lambda x: x["run_id"], reverse=True)
             ]
             validation_link_bullets = [
                 RenderedComponentContent(**{
@@ -204,7 +205,7 @@ class SiteIndexPageRenderer(Renderer):
                             }
                         }
                     }
-                }) for link_dict in sorted_validation_links
+                }) for link_dict in sorted_validations_links
             ]
             validation_link_bullet_list = RenderedComponentContent(**{
                 "content_block_type": "bullet_list",
@@ -227,8 +228,8 @@ class SiteIndexPageRenderer(Renderer):
         
         section_rows.append(first_row)
         
-        if "expectation_suite_links" in link_list_keys_to_render and len(expectation_suite_links) > 1:
-            for expectation_suite_link_dict in expectation_suite_links[1:]:
+        if "expectations_links" in link_list_keys_to_render and len(expectations_links) > 1:
+            for expectation_suite_link_dict in expectations_links[1:]:
                 expectation_suite_row = []
                 expectation_suite_name = expectation_suite_link_dict["expectation_suite_name"]
     
@@ -256,9 +257,9 @@ class SiteIndexPageRenderer(Renderer):
                 })
                 expectation_suite_row.append(expectation_suite_link)
     
-                if "validation_links" in link_list_keys_to_render:
-                    sorted_validation_links = [
-                        link_dict for link_dict in sorted(validation_links, key=lambda x: x["run_id"], reverse=True)
+                if "validations_links" in link_list_keys_to_render:
+                    sorted_validations_links = [
+                        link_dict for link_dict in sorted(validations_links, key=lambda x: x["run_id"], reverse=True)
                         if link_dict["expectation_suite_name"] == expectation_suite_name
                     ]
                     validation_link_bullets = [
@@ -283,7 +284,8 @@ class SiteIndexPageRenderer(Renderer):
                                     }
                                 }
                             }
-                        }) for link_dict in sorted_validation_links
+                        }) for link_dict in sorted_validations_links if
+                        link_dict["expectation_suite_name"] == expectation_suite_name
                     ]
                     validation_link_bullet_list = RenderedComponentContent(**{
                         "content_block_type": "bullet_list",
@@ -356,11 +358,11 @@ class SiteIndexPageRenderer(Renderer):
                 generator_table_rows = []
                 generator_table_header_row = ["Data Asset"]
                 link_list_keys_to_render = []
-
+                
                 header_dict = OrderedDict([
                     ["profiling_links", "Profiling Results"],
-                    ["expectation_suite_links", "Expectation Suite"],
-                    ["validation_links", "Validation Results"]
+                    ["expectations_links", "Expectation Suite"],
+                    ["validations_links", "Validation Results"]
                 ])
                 
                 for link_lists_key, header in header_dict.items():
@@ -370,7 +372,7 @@ class SiteIndexPageRenderer(Renderer):
                         if link_lists.get(link_lists_key):
                             generator_table_header_row.append(header)
                             link_list_keys_to_render.append(link_lists_key)
-
+                
                 generator_table = RenderedComponentContent(**{
                     "content_block_type": "table",
                     "header_row": generator_table_header_row,
