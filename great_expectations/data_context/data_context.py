@@ -122,7 +122,9 @@ class ConfigOnlyDataContext(object):
                 template.write(CONFIG_VARIABLES_FILE_TEMPLATE)
 
         return cls(os.path.join(project_root_dir, "great_expectations"))
-            
+
+
+    # TODO : Migrate to an expressive __init__ method, with the top level of configs unpacked into named arguments.
     def __init__(self, project_config, context_root_dir, data_asset_name_delimiter='/'):
         """DataContext constructor
 
@@ -162,6 +164,24 @@ class ConfigOnlyDataContext(object):
             copy.deepcopy(self._project_config["expectations_store"]),
         )
         self._init_stores(self._project_config_with_varibles_substituted["stores"])
+
+        # Init validation operators
+        self.validation_operators = {}
+        # TODO : This key should NOT be optional in the project config.
+        # It can be empty, but not missing.
+        # However, for now, I'm adding this check, to avoid having to migrate all the test fixtures
+        # while still experimenting with the workings of validation operators and actions.
+        if "validation_operators" in self._project_config:
+            for validation_operator_name, validation_operator in self._project_config["validation_operators"].items():
+                self.validation_operators[validation_operator_name] = instantiate_class_from_config(
+                    config=validation_operator,
+                    runtime_config={
+                        "data_context": self,
+                    },
+                    config_defaults={
+                        "module_name": "great_expectations.actions.validation_operators"
+                    }
+                )
 
         self._compiled = False
 
@@ -494,17 +514,33 @@ class ConfigOnlyDataContext(object):
                                           **kwargs)
         return data_asset
 
+
+    # TODO: In the future, we should expand this to allow it to take n data_assets.
+    # Currently, it can accept 0 or 1.
+    def run_validation_operator(self,
+        validation_operator_name,
+        data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
+        data_asset_id_string=None, # If data_asset isn't a batch, then this
+        data_asset_identifier=None, # ... or this is required
+        run_identifier=None,
+    ):
+        self.validation_operators[validation_operator_name].run(
+            data_asset=data_asset,
+            data_asset_id_string=data_asset_id_string,
+            data_asset_identifier=data_asset_identifier,
+            run_identifier=run_identifier,
+        )
+
+    # NOTE: Abe 2019/08/22 : I think we want to change this to the new standard class_name, module_name syntax.
+    # Doing this while maintaining backward compatibility to type_s (assuming we choose to do so) will require care.
     def add_datasource(self, name, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
-
         Args:
             name (str): the name for the new datasource to add
             kwargs (keyword arguments): the configuration for the new datasource
-
         Note:
             the type_ parameter is still supported as a way to add a datasource, but support will
             be removed in a future release. Please update to using class_name instead.
-
         Returns:
             datasource (Datasource)
         """
@@ -531,9 +567,11 @@ class ConfigOnlyDataContext(object):
         # We perform variable substitution in the datasource's config here before using the config
         # to instantiate the datasource object. Variable substitution is a service that the data
         # context provides. Datasources should not see unsubstituted variables in their config.
-        self._project_config_with_varibles_substituted["datasources"][name] = self.get_config_with_variables_substituted(config)
+        self._project_config_with_varibles_substituted["datasources"][
+            name] = self.get_config_with_variables_substituted(config)
 
-        datasource = self._build_datasource_from_config(**self._project_config_with_varibles_substituted["datasources"][name])
+        datasource = self._build_datasource_from_config(
+            **self._project_config_with_varibles_substituted["datasources"][name])
         self._datasources[name] = datasource
         self._project_config["datasources"][name] = config
 
@@ -829,6 +867,7 @@ class ConfigOnlyDataContext(object):
             datasources = [datasource["name"] for datasource in self.list_datasources()]
             if split_name[0] in datasources:
                 datasource = self.get_datasource(split_name[0])
+
                 generators = [generator["name"] for generator in datasource.list_generators()]
                 if split_name[1] in generators:
                     return NormalizedDataAssetName(*split_name)

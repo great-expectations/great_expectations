@@ -130,10 +130,8 @@ def test_ValidationResultIdentifier__init__nested_except_the_top_layer():
                 "generator_asset" : "c",
             },
             "expectation_suite_name": "hello",
-        },{
-            "execution_context": "testing",
-            "start_time_utc": 12345,
         },
+        "testing-12345",
         coerce_types=True
     )
 
