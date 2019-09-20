@@ -202,7 +202,6 @@ class DefaultSiteSectionBuilder(object):
                                                                                                               expectation_suite_name,
                                                                                                               data_asset_name))
 
-            # TODO : This will need to change slightly when renderer and view classes are configurable.
             # TODO : Typing resources is SUPER important for usability now that we're slapping configurable renders together with arbitrary stores.
             rendered_content = self.renderer_class.render(resource)
             viewable_content = self.view_class.render(rendered_content)
@@ -374,8 +373,6 @@ class DefaultSiteIndexBuilder(object):
                     validation_success=validation_success
                 )
 
-        # FIXME : There were no tests to verify that content is created or correct,
-        # so it's not my job to re-implement, right?
         rendered_content = self.renderer_class.render(index_links_dict)
         viewable_content = self.view_class.render(rendered_content)
 
