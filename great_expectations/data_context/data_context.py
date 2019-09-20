@@ -1305,8 +1305,7 @@ class ConfigOnlyDataContext(object):
                         config_defaults={}
                     )
                     # TODO : Re-implement data_asset_name
-                    # TODO : Site builder no longer needs to return index_page_locator_info. Instead, the context can fetch the required info from Stores.
-                    index_page_locator_info = site_builder.build()#self, complete_site_config, specified_data_asset_name=data_asset_name)
+                    index_page_locator_info = site_builder.build()[0]
 
                     if index_page_locator_info:
                         index_page_locator_infos[site_name] = index_page_locator_info
