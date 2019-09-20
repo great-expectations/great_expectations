@@ -95,6 +95,12 @@ class SiteBuilder(object):
         self.data_context = data_context
         self.target_store_name = target_store_name
 
+        # the site config may specify the list of datasource names to document.
+        # if the config property is absent or is *, treat as "all"
+        self.datasource_whitelist = datasource_whitelist
+        if not self.datasource_whitelist or self.datasource_whitelist == '*':
+            self.datasource_whitelist = [datasource['name'] for datasource in data_context.list_datasources()]
+
         self.site_index_builder = instantiate_class_from_config(
             config=site_index_builder,
             runtime_config={
@@ -123,9 +129,10 @@ class SiteBuilder(object):
 
     def build(self):
         for site_section, site_section_builder in self.site_section_builders.items():
-            site_section_builder.build()
+            site_section_builder.build(datasource_whitelist=self.datasource_whitelist)
         
-        self.site_index_builder.build()
+        return self.site_index_builder.build()
+
 
 class DefaultSiteSectionBuilder(object):
 
@@ -140,7 +147,6 @@ class DefaultSiteSectionBuilder(object):
     ):
         self.name = name
         self.source_store = data_context.stores[source_store_name]
-        # self.target_store = None # FIXME: Need better test fixtures. And to Implement the HtmlWriteOnlyStore class.
         self.target_store = data_context.stores[target_store_name]
         self.run_id_filter = run_id_filter
 
@@ -162,14 +168,16 @@ class DefaultSiteSectionBuilder(object):
         view_module = importlib.import_module(view.pop("module_name"))
         self.view_class = getattr(view_module, view.pop("class_name"))
 
-
-    def build(self):
+    def build(self, datasource_whitelist):
         for resource_key in self.source_store.list_keys():
 
             if self.run_id_filter:
                 if not self._resource_key_passes_run_id_filter(resource_key):
                     continue
-
+                    
+            if not self._resource_key_passes_datasource_whitelist(resource_key, datasource_whitelist):
+                continue
+                
             resource = self.source_store.get(resource_key)
 
             # TODO : This will need to change slightly when renderer and view classes are configurable.
@@ -185,8 +193,12 @@ class DefaultSiteSectionBuilder(object):
                 viewable_content
             )
 
-            #Where do index_link_dicts live?
-            # In the HtmlSiteStore!
+    def _resource_key_passes_datasource_whitelist(self, resource_key, datasource_whitelist):
+        if type(resource_key) is ExpectationSuiteIdentifier:
+            datasource = resource_key.data_asset_name.datasource
+        elif type(resource_key) is ValidationResultIdentifier:
+            datasource = resource_key.expectation_suite_identifier.data_asset_name.datasource
+        return datasource in datasource_whitelist
     
     def _resource_key_passes_run_id_filter(self, resource_key):
         if type(resource_key) == ValidationResultIdentifier:
