@@ -11,6 +11,7 @@ import sqlalchemy as sa
 import great_expectations as ge
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.data_context.util import safe_mmkdir
+from great_expectations.cli.init import scaffold_directories_and_notebooks
 
 from .test_utils import get_dataset
 
@@ -340,6 +341,63 @@ def titanic_data_context(tmp_path_factory):
     shutil.copy("./tests/test_sets/Titanic.csv",
                 str(os.path.join(context_path, "../data/Titanic.csv")))
     return ge.data_context.DataContext(context_path)
+
+@pytest.fixture(scope="function")
+def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, filesystem_csv_3):
+    base_dir = str(tmp_path_factory.mktemp("project_dir"))
+    project_dir = os.path.join(base_dir, "project_path")
+    os.mkdir(project_dir)
+    
+    os.makedirs(os.path.join(project_dir, "data"))
+    os.makedirs(os.path.join(project_dir, "data/titanic"))
+    curdir = os.path.abspath(os.getcwd())
+    shutil.copy(
+        "./tests/test_sets/Titanic.csv",
+        str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
+    )
+    
+    os.makedirs(os.path.join(project_dir, "data/random"))
+    curdir = os.path.abspath(os.getcwd())
+    shutil.copy(
+        os.path.join(filesystem_csv_3, "f1.csv"),
+        str(os.path.join(project_dir, "data/random/f1.csv"))
+    )
+    shutil.copy(
+        os.path.join(filesystem_csv_3, "f2.csv"),
+        str(os.path.join(project_dir, "data/random/f2.csv"))
+    )
+    
+    context = ge.data_context.DataContext.create(project_dir)
+    ge_directory = os.path.join(project_dir, "great_expectations")
+    scaffold_directories_and_notebooks(ge_directory)
+    context.add_datasource(
+        "titanic",
+        "pandas",
+        base_directory=os.path.join(project_dir, "data/titanic/")
+    )
+    context.add_datasource(
+        "random",
+        "pandas",
+        base_directory=os.path.join(project_dir, "data/random/")
+    )
+    
+    context.profile_datasource("titanic")
+    # print(gen_directory_tree_str(project_dir))
+    
+    context.profile_datasource("random")
+    # print(gen_directory_tree_str(project_dir))
+    
+    context.profile_datasource(context.list_datasources()[0]["name"])
+    
+    context.add_store(
+        "local_site_html_store",
+        {
+            "module_name": "great_expectations.data_context.store",
+            "class_name": "HtmlSiteStore",
+            "base_directory": os.path.join(project_dir, "great_expectations/uncommitted/documentation")
+        }
+    )
+    return context
 
 @pytest.fixture(scope="function")
 def titanic_multibatch_data_context(tmp_path_factory):
