@@ -17,8 +17,8 @@ class SiteIndexPageRenderer(Renderer):
         column_count = 1
         profiling_links = link_lists_dict["profiling_links"]
         if profiling_links: column_count += 1
-        validation_links = link_lists_dict["validation_links"]
-        if validation_links: column_count += 1
+        validations_links = link_lists_dict["validations_links"]
+        if validations_links: column_count += 1
         expectations_links = link_lists_dict["expectations_links"]
         if expectations_links: column_count += 1
         
@@ -124,7 +124,7 @@ class SiteIndexPageRenderer(Renderer):
             })
             first_row.append(expectation_suite_link)
             
-            if validation_links:
+            if validations_links:
                 validation_link_bullets = [
                     RenderedComponentContent(**{
                         "content_block_type": "string_template",
@@ -140,7 +140,7 @@ class SiteIndexPageRenderer(Renderer):
                                 }
                             }
                         }
-                    }) for link_dict in validation_links if
+                    }) for link_dict in validations_links if
                     link_dict["expectation_suite_name"] == expectation_suite_name
                 ]
                 validation_link_bullet_list = RenderedComponentContent(**{
@@ -162,7 +162,7 @@ class SiteIndexPageRenderer(Renderer):
                 })
                 first_row.append(validation_link_bullet_list)
 
-        if not expectations_links and validation_links:
+        if not expectations_links and validations_links:
             validation_link_bullets = [
                 RenderedComponentContent(**{
                     "content_block_type": "string_template",
@@ -178,7 +178,7 @@ class SiteIndexPageRenderer(Renderer):
                             }
                         }
                     }
-                }) for link_dict in validation_links
+                }) for link_dict in validations_links
             ]
             validation_link_bullet_list = RenderedComponentContent(**{
                 "content_block_type": "bullet_list",
@@ -230,7 +230,7 @@ class SiteIndexPageRenderer(Renderer):
                 })
                 expectation_suite_row.append(expectation_suite_link)
     
-                if validation_links:
+                if validations_links:
                     validation_link_bullets = [
                         RenderedComponentContent(**{
                             "content_block_type": "string_template",
@@ -246,7 +246,7 @@ class SiteIndexPageRenderer(Renderer):
                                     }
                                 }
                             }
-                        }) for link_dict in validation_links if
+                        }) for link_dict in validations_links if
                         link_dict["expectation_suite_name"] == expectation_suite_name
                     ]
                     validation_link_bullet_list = RenderedComponentContent(**{
@@ -323,7 +323,7 @@ class SiteIndexPageRenderer(Renderer):
                 header_dict = OrderedDict([
                     ["profiling_links", "Profiling Results"],
                     ["expectations_links", "Expectation Suite"],
-                    ["validation_links", "Validation Results"]
+                    ["validations_links", "Validation Results"]
                 ])
                 
                 for link_lists_key, header in header_dict.items():
