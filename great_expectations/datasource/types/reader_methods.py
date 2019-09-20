@@ -11,3 +11,4 @@ class ReaderMethods(Enum):
     JSON = 4
     json = 4
     delta = 5
+    CSV_GZ = 6
