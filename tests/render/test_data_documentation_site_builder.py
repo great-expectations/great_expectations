@@ -110,7 +110,7 @@ def test_configuration_driven_site_builder(titanic_data_context, filesystem_csv_
                     "run_id": None
                 }
                 ],
-                "validation_links": [
+                "validations_links": [
                 {
                     "full_data_asset_name": "mydatasource/mygenerator/Titanic",
                     "expectation_suite_name": "BasicDatasetProfiler",

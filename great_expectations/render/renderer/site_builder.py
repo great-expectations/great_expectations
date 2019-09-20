@@ -253,14 +253,14 @@ class DefaultSiteIndexBuilder(object):
         if not generator_asset in index_links_dict[datasource][generator]:
             index_links_dict[datasource][generator][generator_asset] = {
                 'profiling_links': [],
-                'validation_links': [],
+                'validations_links': [],
                 'expectations_links': []
             }
     
-        if run_id:
-            base_path = section_name + "/" + run_id
-        else:
-            base_path = section_name
+        # if run_id:
+        #     base_path = section_name + "/" + run_id
+        # else:
+        #     base_path = section_name
     
         index_links_dict[datasource][generator][generator_asset][section_name + "_links"].append(
             {
@@ -269,7 +269,7 @@ class DefaultSiteIndexBuilder(object):
                 "filepath": data_context._get_normalized_data_asset_name_filepath(
                     data_asset_name,
                     expectation_suite_name,
-                    base_path=base_path,
+                    base_path=section_name,
                     file_extension=".html"
                 ),
                 "source": datasource,
@@ -296,7 +296,10 @@ class DefaultSiteIndexBuilder(object):
                 self.add_resource_info_to_index_links_dict(
                     data_context=self.data_context,
                     index_links_dict=index_links_dict,
-                    data_asset_name=key_resource_identifier.data_asset_name.to_string(include_class_prefix=False),
+                    data_asset_name=key_resource_identifier.data_asset_name.to_string(
+                        include_class_prefix=False,
+                        separator=self.data_context.data_asset_name_delimiter
+                    ),
                     datasource=key_resource_identifier.data_asset_name.datasource,
                     generator=key_resource_identifier.data_asset_name.generator,
                     generator_asset=key_resource_identifier.data_asset_name.generator_asset,
@@ -307,7 +310,10 @@ class DefaultSiteIndexBuilder(object):
                 self.add_resource_info_to_index_links_dict(
                     data_context=self.data_context,
                     index_links_dict=index_links_dict,
-                    data_asset_name=key_resource_identifier.expectation_suite_identifier.data_asset_name.to_string(include_class_prefix=False),
+                    data_asset_name=key_resource_identifier.expectation_suite_identifier.data_asset_name.to_string(
+                        include_class_prefix=False,
+                        separator=self.data_context.data_asset_name_delimiter
+                    ),
                     datasource=key_resource_identifier.expectation_suite_identifier.data_asset_name.datasource,
                     generator=key_resource_identifier.expectation_suite_identifier.data_asset_name.generator,
                     generator_asset=key_resource_identifier.expectation_suite_identifier.data_asset_name.generator_asset,

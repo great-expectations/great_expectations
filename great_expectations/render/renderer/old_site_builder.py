@@ -337,7 +337,7 @@ class SiteBuilder():
         if not generator_asset in index_links_dict[datasource][generator]:
             index_links_dict[datasource][generator][generator_asset] = {
                 'profiling_links': [],
-                'validation_links': [],
+                'validations_links': [],
                 'expectations_links': []
             }
 
