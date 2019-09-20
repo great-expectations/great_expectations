@@ -367,8 +367,11 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
         str(os.path.join(project_dir, "data/random/f2.csv"))
     )
     
-    context = ge.data_context.DataContext.create(project_dir)
     ge_directory = os.path.join(project_dir, "great_expectations")
+    shutil.copy("./tests/test_fixtures/great_expectations_site_builder.yml",
+                str(os.path.join(project_dir, "great_expectations.yml")))
+    context = ge.data_context.DataContext.create(project_dir)
+    
     scaffold_directories_and_notebooks(ge_directory)
     context.add_datasource(
         "titanic",
@@ -389,14 +392,6 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
     
     context.profile_datasource(context.list_datasources()[0]["name"])
     
-    context.add_store(
-        "local_site_html_store",
-        {
-            "module_name": "great_expectations.data_context.store",
-            "class_name": "HtmlSiteStore",
-            "base_directory": os.path.join(project_dir, "great_expectations/uncommitted/documentation")
-        }
-    )
     return context
 
 @pytest.fixture(scope="function")
