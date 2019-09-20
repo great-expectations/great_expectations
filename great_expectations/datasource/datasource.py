@@ -216,7 +216,7 @@ class Datasource(object):
         # NOTE: 20190916 - JPC - Upon deprecation of support for type: configuration, this can be simplified
         for key, value in self._datasource_config["generators"].items():
             if "type" in value:
-                logger.warning("Datasource %s configured using type. Please use class_name instead." % key)
+                logger.warning("Generator %s configured using type. Please use class_name instead." % key)
                 generators.append({
                     "name": key,
                     "type": value["type"],
