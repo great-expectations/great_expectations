@@ -261,5 +261,7 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         # 
         # Properly speaking, what we need is a class of BackendStore that can accomodate this...
         # It's tricky with the current stores, sbecause the core get/set logic depends so strongly on fixed-length keys.
-        with open(os.path.join(self.root_directory, self.base_directory, "index.html"), "w") as file_:
+        index_page_path = os.path.join(self.root_directory, self.base_directory, "index.html")
+        with open(index_page_path, "w") as file_:
             file_.write(page)
+        return index_page_path
