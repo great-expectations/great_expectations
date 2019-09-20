@@ -276,7 +276,8 @@ class DefaultSiteIndexBuilder(object):
                                               generator_asset,
                                               expectation_suite_name,
                                               section_name,
-                                              run_id=None
+                                              run_id=None,
+                                              validation_success=None
                                               ):
         if not datasource in index_links_dict:
             index_links_dict[datasource] = OrderedDict()
@@ -291,10 +292,10 @@ class DefaultSiteIndexBuilder(object):
                 'expectations_links': []
             }
     
-        # if run_id:
-        #     base_path = section_name + "/" + run_id
-        # else:
-        #     base_path = section_name
+        if run_id:
+            base_path = "validations/" + run_id
+        else:
+            base_path = "expectations"
     
         index_links_dict[datasource][generator][generator_asset][section_name + "_links"].append(
             {
@@ -303,13 +304,14 @@ class DefaultSiteIndexBuilder(object):
                 "filepath": data_context._get_normalized_data_asset_name_filepath(
                     data_asset_name,
                     expectation_suite_name,
-                    base_path=section_name,
+                    base_path=base_path,
                     file_extension=".html"
                 ),
                 "source": datasource,
                 "generator": generator,
                 "asset": generator_asset,
-                "run_id": run_id
+                "run_id": run_id,
+                "validation_success": validation_success
             }
         )
     
@@ -341,6 +343,21 @@ class DefaultSiteIndexBuilder(object):
                     section_name=key.site_section_name
                 )
             elif type(key_resource_identifier) == ValidationResultIdentifier:
+                data_asset_name = key_resource_identifier.expectation_suite_identifier.data_asset_name.to_string(
+                        include_class_prefix=False,
+                        separator=self.data_context.data_asset_name_delimiter
+                    )
+                expectation_suite_name = key_resource_identifier.expectation_suite_identifier.expectation_suite_name
+                run_id = key_resource_identifier.run_id
+                validation = self.data_context.get_validation_result(
+                    data_asset_name=data_asset_name,
+                    expectation_suite_name=expectation_suite_name,
+                    validations_store_name="local_validation_result_store",
+                    run_id=run_id
+                )
+                
+                validation_success = validation.get("success")
+                
                 self.add_resource_info_to_index_links_dict(
                     data_context=self.data_context,
                     index_links_dict=index_links_dict,
@@ -351,9 +368,10 @@ class DefaultSiteIndexBuilder(object):
                     datasource=key_resource_identifier.expectation_suite_identifier.data_asset_name.datasource,
                     generator=key_resource_identifier.expectation_suite_identifier.data_asset_name.generator,
                     generator_asset=key_resource_identifier.expectation_suite_identifier.data_asset_name.generator_asset,
-                    expectation_suite_name=key_resource_identifier.expectation_suite_identifier.expectation_suite_name,
+                    expectation_suite_name=expectation_suite_name,
                     section_name=key.site_section_name,
-                    run_id=key_resource_identifier.run_id
+                    run_id=run_id,
+                    validation_success=validation_success
                 )
 
         # FIXME : There were no tests to verify that content is created or correct,
@@ -361,6 +379,7 @@ class DefaultSiteIndexBuilder(object):
         rendered_content = self.renderer_class.render(index_links_dict)
         viewable_content = self.view_class.render(rendered_content)
 
-        self.target_store.write_index_page(
-            viewable_content
+        return (
+            self.target_store.write_index_page(viewable_content),
+            index_links_dict
         )
