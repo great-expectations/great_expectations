@@ -47,6 +47,9 @@ from great_expectations.datasource import (
     SparkDFDatasource,
     DBTDatasource
 )
+from great_expectations.data_asset import (
+    DataAsset
+)
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
 
@@ -953,90 +956,121 @@ class ConfigOnlyDataContext(object):
         self._compiled = False
 
     # TODO: This method will be replaced by DataContextAwareValidationActions.
-    def register_validation_results(self, run_id, validation_results, data_asset=None):
-        """Process results of a validation run. This method is called by data_asset objects that are connected to
-         a DataContext during validation. It performs several actions:
-          - store the validation results to a validations_store, if one is configured
-          - store a snapshot of the data_asset, if so configured and a compatible data_asset is available
-          - perform a callback action using the validation results, if one is configured
-          - retrieve validation results referenced in other parameterized expectations and store them in the \
-            evaluation parameter store.
+    # def register_validation_results(self, run_id, validation_results, data_asset=None):
+    #     """Process results of a validation run. This method is called by data_asset objects that are connected to
+    #      a DataContext during validation. It performs several actions:
+    #       - store the validation results to a validations_store, if one is configured
+    #       - store a snapshot of the data_asset, if so configured and a compatible data_asset is available
+    #       - perform a callback action using the validation results, if one is configured
+    #       - retrieve validation results referenced in other parameterized expectations and store them in the \
+    #         evaluation parameter store.
 
-        Args:
-            run_id: the run_id for which to register validation results
-            validation_results: the validation results object
-            data_asset: the data_asset to snapshot, if snapshot is configured
+    #     Args:
+    #         run_id: the run_id for which to register validation results
+    #         validation_results: the validation results object
+    #         data_asset: the data_asset to snapshot, if snapshot is configured
 
-        Returns:
-            validation_results: Validation results object, with updated meta information including references to \
-            stored data, if appropriate
+    #     Returns:
+    #         validation_results: Validation results object, with updated meta information including references to \
+    #         stored data, if appropriate
+    #     """
+
+    #     try:
+    #         data_asset_name = validation_results["meta"]["data_asset_name"]
+    #     except KeyError:
+    #         logger.warning("No data_asset_name found in validation results; using '_untitled'")
+    #         data_asset_name = "_untitled"
+
+    #     try:
+    #         expectation_suite_name = validation_results["meta"]["expectation_suite_name"]
+    #     except KeyError:
+    #         logger.warning("No expectation_suite_name found in validation results; using '_untitled'")
+    #         expectation_suite_name = "_untitled"
+
+    #     try:
+    #         normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+    #     except DataContextError:
+    #         logger.warning(
+    #             "Registering validation results for a data_asset_name that cannot be normalized in this context."
+    #         )
+
+    #     expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
+
+    #     # NOTE : Once we have consistent type generation at the source, this repacking logic will be unnecessary.
+    #     key = ValidationResultIdentifier(
+    #         coerce_types=True,
+    #         **{
+    #             "expectation_suite_identifier": {
+    #                 "data_asset_name": tuple(normalized_data_asset_name),
+    #                 "expectation_suite_name": expectation_suite_name,
+    #             },
+    #             "run_id": run_id
+    #         })
+
+    #     if "local_validation_result_store" in self.stores:
+    #         self.stores.local_validation_result_store.set(
+    #             key=key,
+    #             value=validation_results
+    #         )
+
+    #     if "result_callback" in self._project_config_with_varibles_substituted:
+    #         result_callback = self._project_config_with_varibles_substituted["result_callback"]
+    #         if isinstance(result_callback, dict) and "slack" in result_callback:
+    #             get_slack_callback(result_callback["slack"])(validation_results)
+    #         else:
+    #             logger.warning("Unrecognized result_callback configuration.")
+
+
+    #     # Proposed TODO : Snapshotting shouldn't be a top-level concern in the DataContext.
+    #     # Instead, it should be available as a pluggable Action.
+    #     if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
+    #         logging.debug("Storing validation results to data_asset_snapshot_store")
+    #         self.stores.data_asset_snapshot_store.set(
+    #             key=key,
+    #             value=data_asset
+    #         )
+
+    #     self.extract_and_store_parameters_from_validation_results(
+    #         validation_results,
+    #         data_asset_name,
+    #         expectation_suite_name,
+    #         run_id,
+    #     )
+
+    #     return validation_results
+
+    def validate(self,
+        data_asset,
+        expectation_suite,
+        # run_id
+    ):
+        """Validate the given data_asset with the given expectation_suite
+
+        NOTE : Abe 2019/09/21 : The DataAsset.validate method contains a lot of logic that will need to be split between
+        the DataContextAwareDataAsset and BasicDataAsset classes, when we created those typed classes.
+        Some of the ContextAware logic may come to live in this method.
         """
+        assert isinstance(data_asset, DataAsset)
 
-        try:
-            data_asset_name = validation_results["meta"]["data_asset_name"]
-        except KeyError:
-            logger.warning("No data_asset_name found in validation results; using '_untitled'")
-            data_asset_name = "_untitled"
+        validation_results = data_asset.validate(expectation_suite)
+        
+        data_asset_name = self._normalize_data_asset_name(validation_results["meta"]["data_asset_name"])
+        run_id = validation_results["meta"]["run_id"]
+        expectation_suite_name = validation_results["meta"]["expectation_suite_name"]
 
-        try:
-            expectation_suite_name = validation_results["meta"]["expectation_suite_name"]
-        except KeyError:
-            logger.warning("No expectation_suite_name found in validation results; using '_untitled'")
-            expectation_suite_name = "_untitled"
+        assert isinstance(data_asset_name, NormalizedDataAssetName) 
+        assert run_id is not None
 
-        try:
-            normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        except DataContextError:
-            logger.warning(
-                "Registering validation results for a data_asset_name that cannot be normalized in this context."
-            )
-
-        expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
-
-        # NOTE : Once we have consistent type generation at the source, this repacking logic will be unnecessary.
-        key = ValidationResultIdentifier(
-            coerce_types=True,
-            **{
-                "expectation_suite_identifier": {
-                    "data_asset_name": tuple(normalized_data_asset_name),
-                    "expectation_suite_name": expectation_suite_name,
-                },
-                "run_id": run_id
-            })
-
-        if "local_validation_result_store" in self.stores:
-            self.stores.local_validation_result_store.set(
-                key=key,
-                value=validation_results
-            )
-
-        if "result_callback" in self._project_config_with_varibles_substituted:
-            result_callback = self._project_config_with_varibles_substituted["result_callback"]
-            if isinstance(result_callback, dict) and "slack" in result_callback:
-                get_slack_callback(result_callback["slack"])(validation_results)
-            else:
-                logger.warning("Unrecognized result_callback configuration.")
-
-
-        # Proposed TODO : Snapshotting shouldn't be a top-level concern in the DataContext.
-        # Instead, it should be available as a pluggable Action.
-        if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
-            logging.debug("Storing validation results to data_asset_snapshot_store")
-            self.stores.data_asset_snapshot_store.set(
-                key=key,
-                value=data_asset
-            )
-
-        self.extract_and_store_parameters_from_validation_results(
+        self._extract_and_store_parameters_from_validation_results(
             validation_results,
             data_asset_name,
             expectation_suite_name,
             run_id,
         )
-
         return validation_results
 
-    def extract_and_store_parameters_from_validation_results(self, validation_results, data_asset_name, expectation_suite_name, run_id):
+
+    def _extract_and_store_parameters_from_validation_results(self, validation_results, data_asset_name, expectation_suite_name, run_id):
 
         if not self._compiled:
             self._compile()
