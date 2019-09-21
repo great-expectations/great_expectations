@@ -134,6 +134,31 @@ stores:
     class_name: HtmlSiteStore
     base_directory: uncommitted/documentation/team_site/
 
+
+validation_operators:
+  default:
+    class_name: DefaultDataContextAwareValidationOperator
+    process_warnings_and_quarantine_rows_on_error: true
+    action_list :
+      - name: add_warnings_to_store
+        result_key: warning
+        action:
+          # module_name: great_expectations.actions
+          class_name: SummarizeAndStoreAction
+          target_store_name: local_validation_result_store
+          summarizer:
+            module_name: tests.test_plugins.fake_actions
+            class_name: TemporaryNoOpSummarizer
+      - name: add_failures_to_store
+        result_key: failure
+        action:
+          # module_name: great_expectations.actions
+          class_name: SummarizeAndStoreAction
+          target_store_name: local_validation_result_store
+          summarizer:
+            module_name: tests.test_plugins.fake_actions
+            class_name: TemporaryNoOpSummarizer
+    
 # Uncomment the lines below to enable a result callback.
 
 # result_callback:

@@ -136,7 +136,7 @@ def test_save_data_asset_config(data_context):
     assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
 
 
-def test_register_validation_results(data_context):
+def test_evaluation_parameter_store_methods(data_context):
     run_id = "460d61be-7266-11e9-8848-1681be663d3e"
     source_patient_data_results = {
         "meta": {
@@ -166,8 +166,13 @@ def test_register_validation_results(data_context):
         "success": True
     }
 
-    res = data_context.register_validation_results(run_id, source_patient_data_results)
-    assert res == source_patient_data_results  # results should always be returned, and in this case not modified
+    data_context._extract_and_store_parameters_from_validation_results(
+        source_patient_data_results,
+        data_asset_name=source_patient_data_results["meta"]["data_asset_name"],
+        expectation_suite_name=source_patient_data_results["meta"]["expectation_suite_name"],
+        run_id=run_id,
+    )
+
     bound_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024
@@ -202,8 +207,12 @@ def test_register_validation_results(data_context):
         "success": True
     }
 
-
-    data_context.register_validation_results(run_id, source_diabetes_data_results)
+    data_context._extract_and_store_parameters_from_validation_results(
+        source_diabetes_data_results,
+        data_asset_name=source_diabetes_data_results["meta"]["data_asset_name"],
+        expectation_suite_name=source_diabetes_data_results["meta"]["expectation_suite_name"],
+        run_id=run_id,
+    )
     bound_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024,
