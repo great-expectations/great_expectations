@@ -45,39 +45,41 @@ def parameterized_expectation_suite():
     with open("tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json", "r") as suite:
         return json.load(suite)
 
+# FIXME : I believe that we want to deprecate this test because this behavior is no longer part of 
+# the intended behavior for batch.validate. Instead, data_context.run_validation_operator will handle it.
+# Assuming we agree, we should delete the commented code.
+# def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv):
+#     empty_data_context.add_datasource("my_datasource",
+#                                     module_name="great_expectations.datasource",
+#                                     class_name="PandasDatasource",
+#                                     base_directory=str(filesystem_csv))
+#     not_so_empty_data_context = empty_data_context
 
-def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv):
-    empty_data_context.add_datasource("my_datasource",
-                                    module_name="great_expectations.datasource",
-                                    class_name="PandasDatasource",
-                                    base_directory=str(filesystem_csv))
-    not_so_empty_data_context = empty_data_context
+#     # we should now be able to validate, and have validations saved.
+#     # assert not_so_empty_data_context._project_config["validations_store"]["local"]["base_directory"] == \
+#     #     "uncommitted/validations/"
+#     validations_dir = os.path.join(empty_data_context.root_directory, "uncommitted/validations/")
+#     # assert gen_directory_tree_str(validations_dir) == "/\n"
 
-    # we should now be able to validate, and have validations saved.
-    # assert not_so_empty_data_context._project_config["validations_store"]["local"]["base_directory"] == \
-    #     "uncommitted/validations/"
-    validations_dir = os.path.join(empty_data_context.root_directory, "uncommitted/validations/")
-    # assert gen_directory_tree_str(validations_dir) == "/\n"
+#     # print(empty_data_context.stores.keys())
+#     assert "local_validation_result_store" in not_so_empty_data_context.stores.keys()
+#     assert not_so_empty_data_context.stores["local_validation_result_store"].store_backend.base_directory == \
+#         "uncommitted/validations/"
 
-    # print(empty_data_context.stores.keys())
-    assert "local_validation_result_store" in not_so_empty_data_context.stores.keys()
-    assert not_so_empty_data_context.stores["local_validation_result_store"].store_backend.base_directory == \
-        "uncommitted/validations/"
+#     my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
+#     my_batch.expect_column_to_exist("a")
 
-    my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
-    my_batch.expect_column_to_exist("a")
+#     with mock.patch("datetime.datetime") as mock_datetime:
+#         mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
+#         validation_result = my_batch.validate()
 
-    with mock.patch("datetime.datetime") as mock_datetime:
-        mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
-        validation_result = my_batch.validate()
+#     print(gen_directory_tree_str(validations_dir))
 
-    print(gen_directory_tree_str(validations_dir))
-
-    with open(os.path.join(not_so_empty_data_context.root_directory, 
-            "uncommitted/validations/1955-11-05T000000Z/my_datasource/default/f1/default.json")) as infile:
-        saved_validation_result = json.load(infile)
+#     with open(os.path.join(not_so_empty_data_context.root_directory, 
+#             "uncommitted/validations/1955-11-05T000000Z/my_datasource/default/f1/default.json")) as infile:
+#         saved_validation_result = json.load(infile)
     
-    assert validation_result == saved_validation_result
+#     assert validation_result == saved_validation_result
 
 
 def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
@@ -523,7 +525,12 @@ def test_data_context_result_store(titanic_data_context):
     """
     Test that validation results can be correctly fetched from the configured results store
     """
+    print(titanic_data_context.stores["local_validation_result_store"].list_keys())
+
     profiling_results = titanic_data_context.profile_datasource("mydatasource")
+
+    print(titanic_data_context.stores["local_validation_result_store"].list_keys())
+
     for profiling_result in profiling_results['results']:
         data_asset_name = profiling_result[1]['meta']['data_asset_name']
         validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")

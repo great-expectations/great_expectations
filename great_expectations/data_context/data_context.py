@@ -1458,6 +1458,8 @@ class ConfigOnlyDataContext(object):
 
         return index_page_locator_infos
 
+    # Proposed TODO : Abe 2019/09/21 : I think we want to convert this method into a configurable profiler class, so that
+    # it can be pluggable and configurable
     def profile_datasource(self,
                            datasource_name,
                            generator_name=None,
@@ -1563,9 +1565,12 @@ class ConfigOnlyDataContext(object):
                     if additional_batch_kwargs is None:
                         additional_batch_kwargs = {}
 
+                    normalized_data_asset_name = NormalizedDataAssetName(datasource_name, generator_name, name)
+                    expectation_suite_name = profiler.__name__
+
                     batch = self.get_batch(
-                        data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
-                        expectation_suite_name=profiler.__name__,
+                        data_asset_name=normalized_data_asset_name,
+                        expectation_suite_name=expectation_suite_name,
                         **additional_batch_kwargs
                     )
 
@@ -1576,8 +1581,23 @@ class ConfigOnlyDataContext(object):
 
                     # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
                     # will have more to unpack.
-                    expectation_suite, validation_result = profiler.profile(batch, run_id=run_id)
+                    expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
                     profiling_results['results'].append((expectation_suite, validation_result))
+
+
+                    # Proposed TODO : Turn this method into a configurable profiler class,
+                    # so that this store name doesn't have to be hard coded.
+                    if "local_validation_result_store" in self.stores:
+                        self.stores.local_validation_result_store.set(
+                            key=ValidationResultIdentifier(
+                                expectation_suite_identifier=ExpectationSuiteIdentifier(
+                                    data_asset_name=tuple(normalized_data_asset_name),
+                                    expectation_suite_name=expectation_suite_name,
+                                ),
+                                run_id=run_id
+                            ),
+                            value=validation_results,
+                        )
 
                     if isinstance(batch, Dataset):
                         # For datasets, we can produce some more detailed statistics
