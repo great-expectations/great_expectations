@@ -175,15 +175,10 @@ class ConfigOnlyDataContext(object):
         # However, for now, I'm adding this check, to avoid having to migrate all the test fixtures
         # while still experimenting with the workings of validation operators and actions.
         if "validation_operators" in self._project_config:
-            for validation_operator_name, validation_operator in self._project_config["validation_operators"].items():
-                self.validation_operators[validation_operator_name] = instantiate_class_from_config(
-                    config=validation_operator,
-                    runtime_config={
-                        "data_context": self,
-                    },
-                    config_defaults={
-                        "module_name": "great_expectations.actions.validation_operators"
-                    }
+            for validation_operator_name, validation_operator_config in self._project_config["validation_operators"].items():
+                self.add_validation_operator(
+                    validation_operator_name,
+                    validation_operator_config,
                 )
 
         self._compiled = False
@@ -221,7 +216,7 @@ class ConfigOnlyDataContext(object):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
         Args:
-            store_name (str): a key for the new Store in in self.stores
+            store_name (str): a key for the new Store in in self._stores
             store_config (dict): a config for the Store to add
 
         Returns:
@@ -241,6 +236,32 @@ class ConfigOnlyDataContext(object):
         )
         self._stores[store_name] = new_store
         return new_store
+
+    def add_validation_operator(self, validation_operator_name, validation_operator_config):
+        """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
+
+        Args:
+            validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
+            validation_operator_config (dict): a config for the ValidationOperator to add
+
+        Returns:
+            validation_operator (ValidationOperator)
+        """
+
+        self._project_config["validation_operators"][validation_operator_name] = validation_operator_config
+        self._project_config_with_varibles_substituted["validation_operators"][validation_operator_name] = self.get_config_with_variables_substituted(config=validation_operator_config)
+        new_validation_operator = instantiate_class_from_config(
+            config=self._project_config_with_varibles_substituted["validation_operators"][validation_operator_name],
+            runtime_config={
+                "data_context" : self,
+            },
+            config_defaults={
+                "module_name" : "great_expectations.actions.validation_operators"
+            }
+        )
+        self.validation_operators[validation_operator_name] = new_validation_operator
+        return new_validation_operator
+
 
     def _normalize_absolute_or_relative_path(self, path):
         if os.path.isabs(path):
@@ -1582,23 +1603,30 @@ class ConfigOnlyDataContext(object):
                     # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
                     # will have more to unpack.
                     expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
-                    profiling_results['results'].append((expectation_suite, validation_result))
+                    profiling_results['results'].append((expectation_suite, validation_results))
 
+                    expectation_suite_id = ExpectationSuiteIdentifier(
+                        data_asset_name=tuple(normalized_data_asset_name),
+                        expectation_suite_name=expectation_suite_name,
+                    )
+                    # print(expectation_suite_id)
+
+                    # self.set_expectation_suite(
+                    #     expectation_suite_id,
+                    #     expectation_suite
+                    # )
 
                     # Proposed TODO : Turn this method into a configurable profiler class,
                     # so that this store name doesn't have to be hard coded.
                     if "local_validation_result_store" in self.stores:
                         self.stores.local_validation_result_store.set(
                             key=ValidationResultIdentifier(
-                                expectation_suite_identifier=ExpectationSuiteIdentifier(
-                                    data_asset_name=tuple(normalized_data_asset_name),
-                                    expectation_suite_name=expectation_suite_name,
-                                ),
+                                expectation_suite_identifier=expectation_suite_id,
                                 run_id=run_id
                             ),
                             value=validation_results,
                         )
-
+                    
                     if isinstance(batch, Dataset):
                         # For datasets, we can produce some more detailed statistics
                         row_count = batch.get_row_count()
@@ -1622,10 +1650,10 @@ class ConfigOnlyDataContext(object):
                     skipped_data_assets += 1
                 # FIXME: this is a workaround for catching SQLAlchemny exceptions without taking SQLAlchemy dependency.
                 # Think how to avoid this.
-                except Exception as e:
-                    logger.warning("Exception while profiling %s. (Perhaps a loading error?) Skipping." % (name))
-                    logger.debug(str(e))
-                    skipped_data_assets += 1
+                # except Exception as e:
+                #     logger.warning("Exception while profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                #     logger.debug(str(e))
+                #     skipped_data_assets += 1
 
             total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
             logger.info("""

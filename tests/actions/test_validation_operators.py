@@ -111,7 +111,7 @@ def test_validation_operator__run(basic_data_context_config_for_validation_opera
         # allow_empty_expectation_suites=True,
         action_list = [{
             "name": "add_warnings_to_store",
-            "result_key": "warning",
+            "result_key": "validation_results.warning",
             "action" : {
                 "module_name" : "great_expectations.actions",
                 "class_name" : "SummarizeAndStoreAction",
@@ -123,7 +123,7 @@ def test_validation_operator__run(basic_data_context_config_for_validation_opera
             }
         },{
             "name": "add_failures_to_store",
-            "result_key": "failure",
+            "result_key": "validation_results.failure",
             "action" : {
                 "module_name" : "great_expectations.actions",
                 "class_name" : "SummarizeAndStoreAction",
