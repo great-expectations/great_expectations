@@ -183,6 +183,97 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
     def _run(self, batch):
         raise NotImplementedError
 
+    # TODO : Test this method
+    def _process_actions(self, result_obj):
+        for action in self.action_list:
+            logger.debug("Processing action with name {}".format(action["name"]))
+            
+            if action["result_key"] != None:
+                # TODO : Instead of hardcoding "validation_results", allow result_keys to
+                # express nested lookups by using . as a separator:
+                # "validation_results.warning"
+                key_parts = action["result_key"].split(".")
+                result_sub_obj = result_obj
+                for part in key_parts:
+                    try:
+                        result_sub_obj = result_sub_obj[part]
+                    except KeyError as e:
+                        raise KeyError("result_sub_object doesn't have key {}, only {}".format(
+                            part,
+                            result_sub_obj.keys(),
+                        ))
+
+                validation_result_suite = result_sub_obj#result_obj["validation_results"][action["result_key"]]
+
+                self.actions[action["name"]].take_action(
+                    validation_result_id=validation_result_suite[0],
+                    validation_result_suite=validation_result_suite[1],
+                )
+
+            else:
+                # TODO : Review this convention and see if we like it...
+                self.actions[action["name"]].take_action(None, None)
+
+
+class BasicDataContextAwareValidationOperator(DataContextAwareValidationOperator):
+
+    def __init__(self,
+        data_context,
+        action_list,
+        expectation_suite_name,
+    ):
+        super(BasicDataContextAwareValidationOperator, self).__init__(
+            data_context,
+            action_list,
+        )
+        
+        self.expectation_suite_name = expectation_suite_name
+
+    def _run(self, batch):
+        # Get batch_identifier.
+        # TODO : We should be using typed batches
+        # if data_asset_identifier is None:
+        data_asset_identifier = batch.data_asset_identifier
+        run_id = batch.run_id
+
+        assert not data_asset_identifier is None
+        assert not run_id is None
+
+        expectation_suite_identifier = ExpectationSuiteIdentifier(
+            data_asset_name=data_asset_identifier,
+            expectation_suite_name=self.expectation_suite_name,
+        )
+
+        expectation_suite = self.data_context.stores["expectations_store"].get(expectation_suite_identifier)
+
+        validation_result = self.data_context.validate(
+            batch,
+            expectation_suite,
+        )
+
+        validation_result_id = ValidationResultIdentifier(
+            expectation_suite_identifier=expectation_suite_identifier,
+            run_id=run_id,
+        )
+
+        # NOTE : Abe 2019/09/12: We should consider typing this object, since it's passed between classes.
+        # Maybe use a Store, since it's a key-value thing...?
+        # For now, I'm NOT typing it until we gain more practical experience with operators and actions.
+        return_obj = {
+            "success" : None,
+            # NOTE : storing validation_results as (id, value) tuples is a temporary fix,
+            # until we implement typed ValidationResultSuite objects.
+            "validation_result" : (
+                validation_result_id,
+                validation_result_id
+            )
+        }
+
+        self._process_actions(return_obj)
+
+        return return_obj
+
+
 
 #class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperator, DefaultActionAwareValidationOperator):
 class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperator):
@@ -328,44 +419,3 @@ class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperat
                     unexpected_index_set = unexpected_index_set.union(expectation_validation_result["result"]["unexpected_index_list"])
 
         return unexpected_index_set
-
-
-    # def _process_actions(self, validation_results, action_set_config):
-    #     for k,v in action_set_config.items():
-    #         print(k,v)
-    #         loaded_module = importlib.import_module(v.pop("module_name"))
-    #         action_class = getattr(loaded_module, v.pop("class_name"))
-
-    #         action = action_class(
-    #             ActionInternalConfig(**v["kwargs"]),
-    #             stores = self.context.stores,
-    #             services = {},
-    #         )
-    #         action.take_action(
-    #             validation_result_suite=validation_results,
-    #             # FIXME : Shouldn't be hardcoded
-    #             validation_result_suite_identifier=ValidationResultIdentifier(
-    #                 from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100"
-    #             )
-    #         )
-
-    # TODO: test this method
-    def _process_actions(self, result_obj):
-        for action in self.action_list:
-            logger.debug("Processing action with name {}".format(action["name"]))
-            
-            if action["result_key"] != None:
-                # TODO : Instead of hardcoding "validation_results", allow result_keys to
-                # express nested lookups by using . as a separator:
-                # "validation_results.warning"
-                validation_result_suite = result_obj["validation_results"][action["result_key"]]
-
-                self.actions[action["name"]].take_action(
-                    validation_result_id=validation_result_suite[0],
-                    validation_result_suite=validation_result_suite[1],
-                )
-
-            else:
-                # TODO : Review this convention and see if we like it...
-                self.actions[action["name"]].take_action(None, None)
-
