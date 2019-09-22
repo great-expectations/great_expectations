@@ -265,7 +265,7 @@ class BasicDataContextAwareValidationOperator(DataContextAwareValidationOperator
             # until we implement typed ValidationResultSuite objects.
             "validation_result" : (
                 validation_result_id,
-                validation_result_id
+                validation_result
             )
         }
 
