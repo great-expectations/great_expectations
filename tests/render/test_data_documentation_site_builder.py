@@ -70,6 +70,15 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     # set datasource_whitelist
     local_site_config['datasource_whitelist'] = ['titanic']
 
+    keys_as_strings = [x.to_string() for x in context.stores["local_validation_result_store"].list_keys()]
+    print("\n".join(keys_as_strings))
+    assert set(keys_as_strings) == set([
+        "ValidationResultIdentifier.titanic.default.Titanic.BasicDatasetProfiler.test_run_id_12345",
+        "ValidationResultIdentifier.titanic.default.Titanic.BasicDatasetProfiler.profiling",
+        "ValidationResultIdentifier.random.default.f2.BasicDatasetProfiler.profiling",
+        "ValidationResultIdentifier.random.default.f1.BasicDatasetProfiler.profiling",
+    ])
+
     res = SiteBuilder(
             data_context=context,
             **local_site_config
