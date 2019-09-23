@@ -48,3 +48,12 @@ def test_head(context):
     assert head["a"][0] == 2.0
     suite = head.get_expectation_suite()
     assert len(suite["expectations"]) == 5
+
+    # Interestingly, the original implementation failed to work for a single
+    # column (it would always name the column "*").
+    # This should also work if we only get a single column
+    dataset = get_dataset(context, {"a": data["a"]}, schemas=schemas.get(context), caching=True)
+    head = dataset.head(1)
+    assert isinstance(head, PandasDataset)
+    assert len(head) == 1
+    assert list(head.columns) == ["a"]

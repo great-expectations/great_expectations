@@ -3,6 +3,8 @@
 
 v0.7.11__develop
 -----------------
+* Fix an issue where head() lost the column name for SqlAlchemyDataset objects with a single column
+* Fix logic for the 'auto' bin selection of `build_continuous_partition_object`
 
 
 v0.7.10
