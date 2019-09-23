@@ -20,7 +20,7 @@ class SiteIndexPageRenderer(Renderer):
         validations_links = link_lists_dict.get("validations_links")
         expectations_links = link_lists_dict.get("expectations_links")
         
-        cell_width_pct = 100.0/column_count
+        cell_width_pct = 100.0/(column_count + 1)
 
         first_row = []
         rowspan = str(len(expectations_links)) if expectations_links else "1"
