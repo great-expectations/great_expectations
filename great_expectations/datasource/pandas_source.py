@@ -21,7 +21,8 @@ from great_expectations.datasource.generator.glob_reader_generator import GlobRe
 from great_expectations.datasource.generator.s3_generator import S3Generator
 from great_expectations.datasource.types import (
     PandasDatasourceMemoryBatchKwargs,
-    PathBatchKwargs
+    PathBatchKwargs,
+    PathBatchId
 )
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.types import ClassConfig
@@ -124,7 +125,7 @@ class PandasDatasource(Datasource):
         reader_options = batch_kwargs.copy()
 
         # We need to build a batch_id to be used in the dataframe
-        batch_id = ({
+        batch_id = PathBatchId({
             "timestamp": time.time()
         })
 
@@ -144,8 +145,7 @@ class PandasDatasource(Datasource):
             raise ValueError("PandasDatasource cannot instantiate batch with data_asset_type: '%s'. It "
                              "must be a subclass of PandasDataset." % data_asset_type.__name__)
 
-        if isinstance(batch_kwargs, PathBatchKwargs):
-        # if "path" in batch_kwargs:
+        if "path" in batch_kwargs:
             path = reader_options.pop("path")  # We remove this so it is not used as a reader option
             reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
             reader_options.pop("partition_id", "")
