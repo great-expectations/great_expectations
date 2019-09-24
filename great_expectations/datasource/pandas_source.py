@@ -44,7 +44,6 @@ class PandasDatasource(Datasource):
     existing in-memory dataframes.
     """
 
-    def __init__(self, name="pandas", data_context=None, data_asset_type=None, generators=None, **kwargs):
     @classmethod
     def build_configuration(cls, data_asset_type=None, generators=None, **kwargs):
         """
