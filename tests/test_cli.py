@@ -48,6 +48,7 @@ Options:
 Commands:
   add-datasource       Add a new datasource to the data context
   build-documentation  Build data documentation for a project.
+  check-config         Check a config and raise helpful messages about...
   init                 Initialize a new Great Expectations project.
   profile              Profile datasources from the specified context.
   render               Render a great expectations object to documentation.

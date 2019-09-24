@@ -108,12 +108,12 @@ class ConfigOnlyDataContext(object):
             DataContext
         """
         if not os.path.isdir(project_root_dir):
-            raise DataContextError("project_root_dir must be a directory in which to initialize a new DataContext")
+            raise ge_exceptions.DataContextError("project_root_dir must be a directory in which to initialize a new DataContext")
         else:
             try:
                 os.mkdir(os.path.join(project_root_dir, "great_expectations"))
             except (FileExistsError, OSError):
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "Cannot create a DataContext object when a great_expectations directory "
                     "already exists at the provided root directory.")
 

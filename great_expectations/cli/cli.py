@@ -191,7 +191,7 @@ def init(target_directory):
 
     try:
         context = DataContext.create(target_directory)
-    except DataContextError as err:
+    except ge_exceptions.DataContextError as err:
         logger.critical(err.message)
         sys.exit(-1)
 
@@ -218,7 +218,7 @@ def add_datasource(directory):
     """
     try:
         context = DataContext(directory)
-    except ConfigNotFoundError:
+    except ge_exceptions.ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
 
@@ -261,7 +261,7 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
 
     try:
         context = DataContext(directory)
-    except ConfigNotFoundError:
+    except ge_exceptions.ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
 
@@ -297,7 +297,7 @@ def build_documentation(directory, site_name, data_asset_name):
         
     try:
         context = DataContext(directory)
-    except ConfigNotFoundError:
+    except ge_exceptions.ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
 
