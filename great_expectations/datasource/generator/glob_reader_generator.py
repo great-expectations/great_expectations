@@ -119,12 +119,12 @@ class GlobReaderGenerator(BatchGenerator):
                                         generator_asset: generator_asset,
                                         partition_id: partition_id
                                     })
-        kwargs = self._build_batch_kwargs_from_path(path[0], glob_config)
+        new_kwargs = self._build_batch_kwargs_from_path(path[0], glob_config)
         if batch_kwargs is not None:
-            kwargs.update(batch_kwargs)
+            new_kwargs.update(batch_kwargs)
         if kwargs is not None:
-            kwargs.update(kwargs)
-        return kwargs
+            new_kwargs.update(kwargs)
+        return new_kwargs
 
     def _get_generator_asset_paths(self, generator_asset):
         """
