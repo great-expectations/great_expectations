@@ -130,7 +130,7 @@ class S3Generator(BatchGenerator):
         for path in path_list:
             yield self._build_batch_kwargs(path)
 
-    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
         try:
             asset_config = self._assets[generator_asset]
         except KeyError:

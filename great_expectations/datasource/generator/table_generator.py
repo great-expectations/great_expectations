@@ -169,7 +169,7 @@ class TableGenerator(BatchGenerator):
 
         return set(defined_assets + tables)
 
-    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
         all_the_kwargs = batch_kwargs.copy()
         all_the_kwargs.update(kwargs)
         return next(self._get_iterator(generator_asset, partition_id=partition_id, **all_the_kwargs))

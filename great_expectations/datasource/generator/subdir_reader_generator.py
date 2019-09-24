@@ -66,7 +66,7 @@ class SubdirReaderGenerator(BatchGenerator):
         # Otherwise, subdir files are partition ids
         return self._get_valid_file_options(base_directory=os.path.join(self.base_directory, generator_asset))
 
-    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
         path = None
         for extension in KNOWN_EXTENSIONS:
             if os.path.isfile(os.path.join(self.base_directory, generator_asset + "." + extension)):

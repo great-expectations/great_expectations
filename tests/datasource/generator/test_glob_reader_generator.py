@@ -125,7 +125,7 @@ def test_glob_reader_generator_partitioning():
             "20190104",
             "20190105",
         }
-        batch_kwargs = glob_generator.build_batch_kwargs_from_partition("asset1", "20190101")
+        batch_kwargs = glob_generator.build_batch_kwargs_from_partition_id("asset1", "20190101")
         assert isinstance(batch_kwargs, PathBatchKwargs)
         assert batch_kwargs["path"] == "/data/project/asset1/20190101__my_data.csv"
         assert "timestamp" in batch_kwargs
@@ -148,14 +148,14 @@ def test_glob_reader_generator_partitioning():
         }
         with pytest.raises(BatchKwargsError):
             # There is no valid partition id defined
-            batch_kwargs = glob_generator.build_batch_kwargs_from_partition("no_partition_asset1", "this_is_a_batch_of_data.csv")
+            batch_kwargs = glob_generator.build_batch_kwargs_from_partition_id("no_partition_asset1", "this_is_a_batch_of_data.csv")
 
         with pytest.raises(BatchKwargsError):
             # ...and partition_id of none is unsuccessful
-            batch_kwargs = glob_generator.build_batch_kwargs_from_partition("no_partition_asset1", partition_id=None)
+            batch_kwargs = glob_generator.build_batch_kwargs_from_partition_id("no_partition_asset1", partition_id=None)
 
         # ... but we *can* fall back to a path as the partition_id, though it is not advised
-        batch_kwargs = glob_generator.build_batch_kwargs_from_partition("no_partition_asset1",
+        batch_kwargs = glob_generator.build_batch_kwargs_from_partition_id("no_partition_asset1",
                                                                         "no_partition_asset1/this_is_a_batch_of_data.csv")
         assert isinstance(batch_kwargs, PathBatchKwargs)
         assert batch_kwargs["path"] == "/data/project/no_partition_asset1/this_is_a_batch_of_data.csv"

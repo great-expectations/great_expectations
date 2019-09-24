@@ -117,7 +117,7 @@ class BatchGenerator(object):
             self.reset_iterator(data_asset_name, **kwargs)
             return self._data_asset_iterators[data_asset_name]
 
-    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
         """
         Build batch kwargs for the named generator_asset based on partition_id and optionally existing batch_kwargs.
         Args:
