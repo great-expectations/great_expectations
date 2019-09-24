@@ -66,7 +66,7 @@ def basic_data_context_config_for_validation_operator():
                 "process_warnings_and_quarantine_rows_on_error" : True,
                 "action_list" : [{
                     "name": "add_warnings_to_store",
-                    "result_key": "warning",
+                    "result_key": "validation_results.warning",
                     "action" : {
                         # "module_name" : "great_expectations.actions",
                         "class_name" : "SummarizeAndStoreAction",
@@ -78,7 +78,7 @@ def basic_data_context_config_for_validation_operator():
                     }
                 },{
                     "name": "add_failures_to_store",
-                    "result_key": "failure",
+                    "result_key": "validation_results.failure",
                     "action" : {
                         # "module_name" : "great_expectations.actions",
                         "class_name" : "SummarizeAndStoreAction",

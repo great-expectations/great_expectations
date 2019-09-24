@@ -172,7 +172,7 @@ def from_pandas(pandas_df,
 
 
 def validate(data_asset, expectation_suite=None, data_asset_name=None, data_context=None, data_asset_type=None, *args, **kwargs):
-    """Validate the provided data asset using the provided expectation suite"""
+    """Validate the provided data asset using the provided expectation suite"""    
     if expectation_suite is None and data_context is None:
         raise ValueError(
             "Either an expectation suite or a DataContext is required for validation.")
@@ -193,7 +193,16 @@ def validate(data_asset, expectation_suite=None, data_asset_name=None, data_cont
     # If the object is already a Dataset type, then this is purely a convenience method
     # and no conversion is needed
     if isinstance(data_asset, dataset.Dataset) and data_asset_type is None:
-        return data_asset.validate(expectation_suite=expectation_suite, data_context=data_context, *args, **kwargs)
+        if data_context is None:
+            return data_asset.validate(expectation_suite=expectation_suite, *args, **kwargs)
+        else:
+            return data_context.validate(
+                data_asset,
+                expectation_suite,
+                *args, **kwargs
+            )
+        # return data_asset.validate(expectation_suite=expectation_suite, data_context=data_context, *args, **kwargs)
+
     elif data_asset_type is None:
         # Guess the GE data_asset_type based on the type of the data_asset
         if isinstance(data_asset, pd.DataFrame):
@@ -215,7 +224,11 @@ def validate(data_asset, expectation_suite=None, data_asset_name=None, data_cont
 
     data_asset_ = _convert_to_dataset_class(
         data_asset, data_asset_type, expectation_suite)
-    return data_asset_.validate(*args, data_context=data_context, **kwargs)
+    
+    if data_context is None:
+        return data_asset_.validate(*args, data_context=data_context, **kwargs)
+    else:
+        return data_context.validate(data_asset_, *args, **kwargs)
 
 
 # https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
