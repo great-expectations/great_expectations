@@ -108,7 +108,7 @@ class GlobReaderGenerator(BatchGenerator):
         ])
         return partition_ids
 
-    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
         """Build batch kwargs from a partition id."""
         glob_config = self._get_generator_asset_config(generator_asset)
         batch_paths = self._get_generator_asset_paths(generator_asset)

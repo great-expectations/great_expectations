@@ -103,7 +103,7 @@ class QueryGenerator(BatchGenerator):
 
         return set(defined_queries)
 
-    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
         """Build batch kwargs from a partition id."""
         raw_query = self._get_raw_query(generator_asset)
         if "$partition_id" not in raw_query and "${partition_id}" not in raw_query:

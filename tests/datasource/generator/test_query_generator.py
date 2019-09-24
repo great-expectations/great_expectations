@@ -47,6 +47,6 @@ def test_partition_id():
         }
     )
 
-    batch_kwargs = generator.build_batch_kwargs_from_partition("my_asset", "foo")
+    batch_kwargs = generator.build_batch_kwargs_from_partition_id("my_asset", "foo")
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceQueryBatchKwargs)
     assert batch_kwargs.query == "SELECT * FROM my_table WHERE value = foo"
