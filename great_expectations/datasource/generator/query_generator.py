@@ -67,6 +67,7 @@ class QueryGenerator(BatchGenerator):
     def _get_iterator(self, generator_asset, **kwargs):
         raw_query = self._get_raw_query(generator_asset)
         if raw_query is None:
+            logger.warning("No query defined for generator asset: %s" % generator_asset)
             # There is no valid query path or temp query storage defined with the generator_asset
             return None
 
