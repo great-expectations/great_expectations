@@ -75,7 +75,7 @@ class BatchKwargs(RequiredKeysDotDict):
         id_keys = (set(self.keys()) - set(self._batch_fingerprint_ignored_keys)) - {self._partition_id_key}
         if len(id_keys) == 1:
             key = list(id_keys)[0]
-            hash_ = key + ":" + self[key]
+            hash_ = key + ":" + str(self[key])
         else:
             hash_dict = {k: self[k] for k in id_keys}
             hash_ = md5(str(sorted(hash_dict.items())).encode("utf-8")).hexdigest()
@@ -126,14 +126,28 @@ class PathBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs)
     }
 
 
+class S3BatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
+    """PathBatchKwargs represents kwargs suitable for reading a file from a given path."""
+    _required_keys = {
+        "s3"
+    }
+    # NOTE: JPC - 20190821: Eventually, we will probably want to have some logic that decides to use, say,
+    # an md5 hash of a file instead of a path to decide when it's the same, or to differentiate paths
+    # from s3 from paths on a local filesystem
+    _key_types = {
+        "s3": string_types,
+        "reader_method": ReaderMethods
+    }
+
+
 class PathBatchId(PathBatchKwargs):
     """The BatchId requires a timestamp. It could also include additional identifying information such as an
     md5 hash of the file."""
-    _required_keys = PathBatchKwargs._required_keys | {
+    _required_keys = {
         "timestamp"
     }
     # No additional ignored keys
-    _batch_fingerprint_ignored_keys = PathBatchKwargs._batch_fingerprint_ignored_keys | set()
+    _batch_fingerprint_ignored_keys = set()
     _key_types = {
         "timestamp": float
     }
