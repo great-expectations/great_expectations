@@ -26,8 +26,8 @@ class AssetConfigurationSchema(Schema):
     table = fields.Str()
     schema = fields.Str()
 
-    @post_load
-    def make_asset_configuration(self, data):
+    @post_load(pass_many=False)
+    def make_asset_configuration(self, data, **kwargs):
         return AssetConfiguration(**data)
 
 
@@ -71,8 +71,10 @@ class TableGenerator(BatchGenerator):
 
     """
 
-    def __init__(self, name="default", datasource=None, assets={}):
+    def __init__(self, name="default", datasource=None, assets=None):
         super(TableGenerator, self).__init__(name=name, datasource=datasource)
+        if not assets:
+            assets = {}
         try:
             self._assets = {
                 asset_name: assetConfigurationSchema.load(asset_config) for
