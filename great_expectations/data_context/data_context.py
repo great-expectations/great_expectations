@@ -543,15 +543,25 @@ class ConfigOnlyDataContext(object):
     # Currently, it can accept 0 or 1.
     def run_validation_operator(self,
         validation_operator_name,
-        data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
-        data_asset_id_string=None, # If data_asset isn't a batch, then this
-        data_asset_identifier=None, # ... or this is required
+        assets_to_validate,
         run_identifier=None,
     ):
+        """
+        Run a validation operator to validate data assets and to perform the business logic around
+        validation that the operator implements.
+
+        :param validation_operator_name: name of the operator, as appears in the context's config file
+        :param assets_to_validate: a list that specifies the data assets that the operator will validate.
+                                    The members of the list can be either batches (which means that have
+                                    data asset identifier, batch kwargs and expectation suite identifier)
+                                    or a triple that will allow the operator to fetch the batch:
+                                    (data asset identifier, batch kwargs, expectation suite identifier)
+        :param run_identifier: run id - this is set by the caller and should correspond to something
+                                meaningful to the user (e.g., pipeline run id or timestamp)
+        :return: A result object that is defined by the class of the operator that is invoked.
+        """
         self.validation_operators[validation_operator_name].run(
-            data_asset=data_asset,
-            data_asset_id_string=data_asset_id_string,
-            data_asset_identifier=data_asset_identifier,
+            assets_to_validate=assets_to_validate,
             run_identifier=run_identifier,
         )
 
@@ -1059,37 +1069,6 @@ class ConfigOnlyDataContext(object):
     #     )
 
     #     return validation_results
-
-    def validate(self,
-        data_asset,
-        expectation_suite,
-        # run_id
-    ):
-        """Validate the given data_asset with the given expectation_suite
-
-        NOTE : Abe 2019/09/21 : The DataAsset.validate method contains a lot of logic that will need to be split between
-        the DataContextAwareDataAsset and BasicDataAsset classes, when we created those typed classes.
-        Some of the ContextAware logic may come to live in this method.
-        """
-        assert isinstance(data_asset, DataAsset)
-
-        validation_results = data_asset.validate(expectation_suite)
-        
-        data_asset_name = self._normalize_data_asset_name(validation_results["meta"]["data_asset_name"])
-        run_id = validation_results["meta"]["run_id"]
-        expectation_suite_name = validation_results["meta"]["expectation_suite_name"]
-
-        assert isinstance(data_asset_name, NormalizedDataAssetName) 
-        assert run_id is not None
-
-        self._extract_and_store_parameters_from_validation_results(
-            validation_results,
-            data_asset_name,
-            expectation_suite_name,
-            run_id,
-        )
-        return validation_results
-
 
     def _extract_and_store_parameters_from_validation_results(self, validation_results, data_asset_name, expectation_suite_name, run_id):
 
