@@ -274,7 +274,48 @@
             "success":true
           },
           "only_for": ["spark"]
+        },
+        {
+          "title": "dtype_object_and_type_object_still_has_aggregate_semantics",
+          "_note": "note that type is object (which maps to numpy dtype('O')), but observed value is 'object_', which *also* maps to the same value and would also be a legit input here.",
+          "exact_match_out": false,
+          "in": {
+            "column": "z",
+            "type_": "object"
+          },
+          "out": {
+            "success": true,
+            "observed_value": "object_"
+          },
+          "only_for": ["pandas"]
+        },
+        {
+          "title": "dtype_object_and_type_object_still_has_aggregate_semantics_object_underscore",
+          "exact_match_out": false,
+          "in": {
+            "column": "z",
+            "type_": "object_"
+          },
+          "out": {
+            "success": true,
+            "observed_value": "object_"
+          },
+          "only_for": ["pandas"]
+        },
+        {
+          "title": "dtype_object_and_type_object_still_has_aggregate_semantics_big_O",
+          "exact_match_out": false,
+          "in": {
+            "column": "z",
+            "type_": "O"
+          },
+          "out": {
+            "success": true,
+            "observed_value": "object_"
+          },
+          "only_for": ["pandas"]
         }
+
       ]
     },
     {

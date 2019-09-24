@@ -170,7 +170,7 @@ def test_validate_custom_dataset():
     assert json_result == expected_cli_results
 
 
-def test_cli_evaluation_parameters(capsys):
+def test_cli_evaluation_parameters():
     with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
         runner = CliRunner()
         result = runner.invoke(cli, ["validate",
@@ -218,7 +218,7 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
             basedir, "great_expectations/great_expectations.yml"))
         config = yaml.load(
             open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
-        assert config["datasources"]["data__dir"]["type"] == "pandas"
+        assert config["datasources"]["data__dir"]["class_name"] == "PandasDatasource"
 
 
         print(gen_directory_tree_str(os.path.join(basedir, "great_expectations")))
@@ -238,7 +238,7 @@ great_expectations/
         integrate_validation_into_pipeline.ipynb
     plugins/
     uncommitted/
-        credentials/
+        config_variables.yml
         documentation/
             local_site/
                 index.html
@@ -247,11 +247,12 @@ great_expectations/
                         default/
                             Titanic/
                                 BasicDatasetProfiler.html
-                profiling/
-                    data__dir/
-                        default/
-                            Titanic/
-                                BasicDatasetProfiler.html
+                validations/
+                    profiling/
+                        data__dir/
+                            default/
+                                Titanic/
+                                    BasicDatasetProfiler.html
             team_site/
                 index.html
                 expectations/
@@ -285,13 +286,13 @@ great_expectations/
         assert os.path.isfile(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/local_site/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html")
+                "great_expectations/uncommitted/documentation/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html")
         )
 
         assert os.path.getsize(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/local_site/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
+                "great_expectations/uncommitted/documentation/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
             )
         ) > 0
         print(result)
@@ -332,8 +333,12 @@ def test_cli_add_datasource(empty_data_context, filesystem_csv_2, capsys):
 
 
 def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
+
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -359,8 +364,10 @@ def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, c
     logger.removeHandler(handler)
 
 def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -385,9 +392,28 @@ def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
     logger.removeHandler(handler)
 
-def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
+def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+        "my_datasource",
+        class_name="PandasDatasource",
+        base_directory=str(filesystem_csv_2))
+    not_so_empty_data_context = empty_data_context
+
+    project_root_dir = not_so_empty_data_context.root_directory
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["profile", "-d", project_root_dir, "--batch_kwargs", '{"sep": ",", "parse_dates": [0]}'])
+    evr = not_so_empty_data_context.get_validation_result("f1", expectation_suite_name="BasicDatasetProfiler")
+
+    assert evr["meta"]["batch_kwargs"]["parse_dates"] == [0]
+    assert evr["meta"]["batch_kwargs"]["sep"] == ","
+
+def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -413,8 +439,10 @@ def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_cs
     logger.removeHandler(handler)
 
 def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -439,8 +467,10 @@ def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_
     logger.removeHandler(handler)
 
 def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     print(json.dumps(not_so_empty_data_context.get_project_config(), indent=2))
@@ -521,4 +551,4 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
     assert set(os.listdir(empty_directory)) == \
            {'datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'}
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
-           {'samples', 'documentation', 'validations', 'credentials'}
+           {'samples', 'documentation', 'validations'}

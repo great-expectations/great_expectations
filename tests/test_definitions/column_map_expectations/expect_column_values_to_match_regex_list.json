@@ -3,7 +3,8 @@
   "datasets" : [{
     "data" : {
       "w" : ["111", "222", "333", "123", "321", "444", "456", "654", "555", null],
-      "x" : ["man", "plan", "canal", "panama", "hat", "bat", "bit", "bot", "but", "bet"]
+      "x" : ["man", "plan", "canal", "panama", "hat", "bat", "bit", "bot", "but", "bet"],
+      "column_name with space": ["man", "plan", "canal", "panama", "hat", "bat", "bit", "bot", "but", "bet"]
     },
     "tests" : [{
       "title" : "Basic positive test",
@@ -64,6 +65,21 @@
       "exact_match_out" : false,
       "in": {
         "column": "x",
+        "regex_list": ["^.*a.*$", "b.t"],
+        "match_on": "any"
+      },
+      "out": {
+        "unexpected_list": [],
+        "unexpected_index_list": [],
+        "success": true
+      },
+      "suppress_test_for": ["sqlite"]
+    },
+    {
+      "title" : "Positive_test_column_name_has_space_and_match_on=any",
+      "exact_match_out" : false,
+      "in": {
+        "column": "column_name with space",
         "regex_list": ["^.*a.*$", "b.t"],
         "match_on": "any"
       },

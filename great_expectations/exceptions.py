@@ -15,8 +15,11 @@ class InvalidConfigError(DataContextError):
         self.message = message
     
 class ConfigNotFoundError(DataContextError):
-    def __init__(self, context_root_directory):
-        self.message = "No configuration found in %s" % str(os.path.join(context_root_directory, "great_expectations"))
+    """
+    the config file or the environments file cannot be found
+    """
+    def __init__(self, message):
+        self.message = message
 
 class ExpectationSuiteNotFoundError(GreatExpectationsError):
     def __init__(self, data_asset_name):

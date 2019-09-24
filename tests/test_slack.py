@@ -97,31 +97,6 @@ def test_build_slack_notification_request_with_successful_validation(validation_
         ]
     }
     assertDeepAlmostEqual(expected, obs)
-
-
-def test_build_slack_notification_request_with_successful_validation_and_batch_kwargs(validation_json):
-    batch_kwargs = {
-         "path": "/Users/user/some_path/some_file.csv",
-         "timestamp": "1565286704.3622668",
-         "sep": None,
-         "engine": "python"
-    }
-    validation_json["meta"]["batch_kwargs"] = batch_kwargs
-    
-    with mock.patch("datetime.datetime") as mock_datetime:
-        mock_datetime.strftime.return_value = "05/05/19 12:12:12"
-        obs = build_slack_notification_request(validation_json)
-
-    assert isinstance(obs, dict)
-    print(obs)
-    assert len(obs["blocks"]) == 5
-    batch_kwargs_text = obs["blocks"][1]["text"]["text"]
-    for key, val in batch_kwargs.items():
-        assert key in batch_kwargs_text
-        if val is not None:
-            assert val in batch_kwargs_text
-        else:
-            assert 'null' in batch_kwargs_text
     
 
 def test_build_slack_notification_request_with_failed_validation(validation_json):

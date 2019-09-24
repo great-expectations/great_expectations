@@ -89,6 +89,50 @@ The argument ``expectation_suite_name`` specifies the name of the expectation su
 
 .. image:: ../images/get_batch.jpg
 
+
+If you want to validate data in Pandas Dataframes or in Spark Dataframes:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* If GE listed and profiled your files correctly:
+
+.. code-block:: python
+
+    data_asset_name = CHOOSE FROM THE LIST ABOVE IN THE NOTEBOOK
+    batch = context.get_batch(data_asset_name,
+                              expectation_suite_name)
+
+* Otherwise (you want to control the logic of reading the data):
+
+.. code-block:: python
+
+    df = load the data into a dataframe, e.g., df = SparkDFDataset(spark.read.csv... or pd.read_csv(...
+    data_asset_name = COME UP WITH A NAME - THIS WILL CREATE A NEW DATA ASSET
+    batch = context.get_batch(data_asset_name,
+                              expectation_suite_name,
+                              df)
+
+
+If you want to validate data in a database:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* To validate an existing table:
+
+.. code-block:: python
+
+    data_asset_name = CHOOSE THE NAME OF YOUR TABLE FROM THE LIST OF DATA ASSETS ABOVE IN THE NOTEBOOK
+    df = context.get_batch(data_asset_name,
+                            expectation_suite_name='my_suite')
+
+* To validate a query result set:
+
+.. code-block:: python
+
+    data_asset_name = NAME YOUR QUERY (E.G., daily_users_query) - THIS WILL CREATE A NEW DATA ASSET
+    df = context.get_batch(data_asset_name,
+                            expectation_suite_name='my_suite',
+                            query='SQL FOR YOUR QUERY')
+
+
 Reader Options
 ---------------
 
