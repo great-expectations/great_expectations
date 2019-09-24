@@ -83,11 +83,11 @@ def test_db_introspection(sqlalchemy_dataset):
 
 def test_query_generator_view(sqlite_view_engine):
     datasource = SqlAlchemyDatasource(engine=sqlite_view_engine, generators={
-        "query": {
-            "type": "queries"
+        "table": {
+            "class_name": "TableGenerator"
         }
     })  # Build a datasource with a queries generator to introspect our database with a view
-    names = set(datasource.get_available_data_asset_names()["query"])
+    names = set(datasource.get_available_data_asset_names()["table"])
 
     # We should see both the table *and* the primary view, but *not* the temp view
     assert names == {
