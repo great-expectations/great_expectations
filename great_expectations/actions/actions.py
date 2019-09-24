@@ -86,7 +86,7 @@ class SummarizeAndStoreAction(NamespacedValidationAction):
 
         if not isinstance(validation_result_id, ValidationResultIdentifier):
             raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
-                type(validation_result_suite_id)
+                type(validation_result_id)
             ))
 
         rendered_summary = self.summarizer.render(validation_result_suite)
