@@ -3,6 +3,7 @@ from .actions import (
     NamespacedValidationAction,
     NoOpAction,
     SummarizeAndStoreAction,
+    SlackNotificationAction
 )
 
 from .validation_operators import (
