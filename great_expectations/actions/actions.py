@@ -28,7 +28,7 @@ class NamespacedValidationAction(BasicValidationAction):
         # TODO: Switch to expressive inits.
         
         #Uses config to instantiate itself
-        super(NameSpaceAwareValidationAction, self).__init__(config)
+        super(NamespacedValidationAction, self).__init__(config)
 
         #The config may include references to stores and services.
         #Both act like endpoints to which results can be sent.
