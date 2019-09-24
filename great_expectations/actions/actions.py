@@ -4,6 +4,7 @@ logger = logging.getLogger(__name__)
 from ..util import (
     get_class_from_module_name_and_class_name,
 )
+
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
@@ -18,42 +19,176 @@ from ..data_context.types import (
 # NOTE: Abe 2019/08/23 : This is first implementation of all these classes. Consider them UNSTABLE for now. 
 
 class BasicValidationAction(object):
+    """
+    The base class of all actions that act on validation results.
 
-    def take_action(self, validation_result_suite):
+    It defines the signature of the public run method that take a validation result suite
+    """
+
+    def run(self, validation_result_suite):
         return NotImplementedError
 
 class NamespacedValidationAction(BasicValidationAction):
+    """
+    This is the base class for all actions that act on validation results
+    and are aware of a data context namespace structure.
 
-    def __init__(self, config, stores, services):
-        # TODO: Switch to expressive inits.
-        
-        #Uses config to instantiate itself
-        super(NameSpaceAwareValidationAction, self).__init__(config)
+    The data context is passed to this class in its constructor.
+    """
 
-        #The config may include references to stores and services.
-        #Both act like endpoints to which results can be sent.
-        #Stores support both reading and writing, in key-value fashion.
-        #Services only support writing.
-        #Future versions of Services may get results returned as part of the call.
-        #(Some) Stores and Services will need persistent connections, which are managed by the DataContext.
+    def __init__(self, data_context):
+        self.data_context = data_context
 
-    def take_action(self, validation_result_suite, validation_result_suite_identifier):
+    def run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
+        """
+
+        :param validation_result_suite:
+        :param validation_result_suite_identifier:
+        :param data_asset:
+        :return:
+        """
         return NotImplementedError
 
 
 class NoOpAction(NamespacedValidationAction):
 
-    def __init__(self,
-        data_context,
-        # name,
-    ):
-        # self.name = name
-        self.data_context = data_context
+    def __init__(self, data_context,):
+        super(NoOpAction, self).__init__(data_context)
     
-    def take_action(self, validation_result_id, validation_result_suite):
+    def run(self, validation_result_id, validation_result_suite, data_asset):
         print("Happily doing nothing")
 
 
+class StoreAction(NamespacedValidationAction):
+    """
+    StoreAction is a namespeace-aware validation action that stores a validation result
+    in the store.
+    """
+
+    def __init__(self,
+                 data_context,
+                 target_store_name,
+                 ):
+        """
+
+        :param data_context: data context
+        :param target_store_name: the name of the store in the data context which
+                should be used to store the validation result
+        """
+
+        super(StoreAction, self).__init__(data_context)
+
+        # NOTE: Eventually, we probably need a check to verify that this store is compatible with validation_result_suite_identifiers.
+        # Unless ALL stores are compatible...
+        self.target_store = data_context.stores[target_store_name]
+
+    def run(self, validation_result_suite_id, validation_result_suite, data_asset):
+        logger.debug("StoreAction.run")
+
+        if validation_result_suite is None:
+            return
+
+        if not isinstance(validation_result_suite_id, ValidationResultIdentifier):
+            raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                type(validation_result_suite_id)
+            ))
+
+
+        self.target_store.set(validation_result_suite_id, validation_result_suite)
+
+
+class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
+    """
+    ExtractAndStoreEvaluationParamsAction is a namespeace-aware validation action that
+    extracts evaluation parameters from a validation result and stores them in the store
+    configured for this action.
+
+    Evaluation parameters allow expectations to refer to statistics/metrics computed
+    in the process of validating other prior expectations.
+    """
+
+    def __init__(self,
+                 data_context,
+                 target_store_name,
+                 ):
+        """
+
+        :param data_context: data context
+        :param target_store_name: the name of the store in the data context which
+                should be used to store the validation result
+        """
+        super(ExtractAndStoreEvaluationParamsAction, self).__init__(data_context)
+
+        # NOTE: Eventually, we probably need a check to verify that this store is compatible with validation_result_suite_identifiers.
+        # Unless ALL stores are compatible...
+        self.target_store = data_context.stores[target_store_name]
+
+    def run(self, validation_result_suite_id, validation_result_suite, data_asset):
+        logger.debug("ExtractAndStoreEvaluationParamsAction.run")
+
+        if validation_result_suite is None:
+            return
+
+        if not isinstance(validation_result_suite_id, ValidationResultIdentifier):
+            raise TypeError("validation_result_id must be of type ExtractAndStoreEvaluationParamsAction, not {0}".format(
+                type(validation_result_suite_id)
+            ))
+
+
+        self.data_context.extract_and_store_parameters_from_validation_results(
+            validation_result_suite,
+            validation_result_suite_id.expectation_suite_identifier.data_asset_name,
+            validation_result_suite_id.expectation_suite_identifier.expectation_suite_name,
+            validation_result_suite_id.run_id,
+        )
+
+class StoreSnapshotOnFailAction(NamespacedValidationAction):
+    """
+    StoreSnapshotOnFailAction is a namespeace-aware validation action that
+    stores the data asset to the snapshot store for a later review in case the
+    validation of the data asset failed and the data asset was found to not meet
+    the expectations.
+
+    The snapshot store is configured in the data context and its name (as appears
+    in the data context's configuration) is passed to the action in its config.
+    configured for this action.
+    """
+
+    def __init__(self,
+                 data_context,
+                 target_store_name,
+                 ):
+        """
+
+        :param data_context: data context
+        :param target_store_name: the name of the store in the data context which
+                should be used to store the validation result
+        """
+        super(ExtractAndStoreEvaluationParamsAction, self).__init__(data_context)
+
+        # NOTE: Eventually, we probably need a check to verify that this store is compatible with validation_result_suite_identifiers.
+        # Unless ALL stores are compatible...
+        self.target_store = data_context.stores[target_store_name]
+
+    def run(self, validation_result_suite_id, validation_result_suite, data_asset):
+        logger.debug("ExtractAndStoreEvaluationParamsAction.run")
+
+        if validation_result_suite is None:
+            return
+
+        if not isinstance(validation_result_suite_id, ValidationResultIdentifier):
+            raise TypeError("validation_result_id must be of type ExtractAndStoreEvaluationParamsAction, not {0}".format(
+                type(validation_result_suite_id)
+            ))
+
+        if validation_result_suite["success"] is False and "data_asset_snapshot_store" in self.stores:
+            logging.debug("Storing validation results to data_asset_snapshot_store")
+            self.stores.data_asset_snapshot_store.set(
+                key=validation_result_suite_id,
+                value=data_asset
+            )
+
+# NOTE: Eugene: 2019-09-23: Since actions are "stackable", it is better for each action to do one thing.
 class SummarizeAndStoreAction(NamespacedValidationAction):
 
     def __init__(self,
@@ -78,8 +213,8 @@ class SummarizeAndStoreAction(NamespacedValidationAction):
         # Unless ALL stores are compatible...
         self.target_store = data_context.stores[target_store_name]
 
-    def take_action(self, validation_result_id, validation_result_suite ):
-        logger.debug("SummarizeAndStoreAction.take_action")
+    def run(self, validation_result_id, validation_result_suite ):
+        logger.debug("SummarizeAndStoreAction.run")
 
         if validation_result_suite is None:
             return
