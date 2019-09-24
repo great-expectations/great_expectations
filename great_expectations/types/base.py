@@ -1,4 +1,11 @@
 import logging
+
+from great_expectations.exceptions import (
+    InvalidTopLevelConfigKeyError,
+    MissingTopLevelConfigKeyError,
+    InvalidConfigValueTypeError,
+)
+
 logger = logging.getLogger(__name__)
 
 from collections import Iterable
@@ -97,7 +104,7 @@ class RequiredKeysDotDict(DotDict):
         super(RequiredKeysDotDict, self).__init__(*args, **kwargs)
         for key in self._required_keys:
             if key not in self.keys():
-                raise KeyError("key: {!r} is missing even though it's in the required keys: {!r}".format(
+                raise MissingTopLevelConfigKeyError("key: {!r} is missing even though it's in the required keys: {!r}".format(
                     key,
                     self._required_keys
                 ))
@@ -176,7 +183,7 @@ class RequiredKeysDotDict(DotDict):
                         any_match = True
 
                 if not any_match:
-                    raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
+                    raise InvalidConfigValueTypeError("key: {!r} must be of type {!r}, not {!r}".format(
                         key,
                         type_,
                         type(value),
@@ -184,7 +191,7 @@ class RequiredKeysDotDict(DotDict):
 
             else:
                 if not isinstance(value, type_):
-                    raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
+                    raise InvalidConfigValueTypeError("key: {!r} must be of type {!r}, not {!r}".format(
                         key,
                         type_,
                         type(value),
@@ -304,7 +311,7 @@ class AllowedKeysDotDict(RequiredKeysDotDict):
 
     def __setitem__(self, key, val):
         if key not in self._allowed_keys:
-            raise KeyError("key: {!r} not in allowed keys: {!r}".format(
+            raise InvalidTopLevelConfigKeyError("key: {!r} not in allowed keys: {!r}".format(
                 key,
                 self._allowed_keys
             ))

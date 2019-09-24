@@ -1,0 +1,10 @@
+# This must have all the required keys and an invalid one
+this_is_a_wildly_invalid_top_level_key: "stuff"
+
+ge_config_version: "foo"
+plugins_directory: "foo"
+expectations_store: "foo"
+evaluation_parameter_store_name: "foo"
+datasources: "foo"
+stores: "foo"
+data_docs: "foo"

@@ -16,7 +16,7 @@ from great_expectations.render.renderer import ProfilingResultsPageRenderer, Exp
 from great_expectations.data_context import DataContext
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
-from great_expectations.exceptions import DataContextError, ConfigNotFoundError
+import great_expectations.exceptions as ge_exceptions
 from great_expectations import __version__, read_csv
 from pyfiglet import figlet_format
 import click
@@ -330,32 +330,64 @@ def render(render_object):
 )
 def check_config(target_directory):
     """Check a config and raise helpful messages about antiquated formats."""
-    cli_message("Hi! Checking your config files for validity")
+    cli_message("Hi! Let's check your config files for validity.")
 
+    do_config_check(target_directory)
+
+
+def do_config_check(target_directory):
     try:
-        context = DataContext(context_root_dir="{}/great_expectations/".format(target_directory))
+        context = DataContext(
+            context_root_dir="{}/great_expectations/".format(target_directory))
         config = context.get_project_config()
-        cli_message(str(config))
-    except DataContextError as err:
+        check_for_obsolete_config_file(config)
+        cli_message("You're config file appears valid!")
+    except (
+            ge_exceptions.InvalidConfigurationYamlError,
+            ge_exceptions.InvalidTopLevelConfigKeyError,
+            ge_exceptions.MissingTopLevelConfigKeyError,
+            ge_exceptions.InvalidConfigValueTypeError,
+            ge_exceptions.InvalidConfigVersionError,
+            ge_exceptions.UnsupportedConfigVersionError,
+            ) as err:
+        cli_message(err.message)
+
+        # TODO offer to build a new config format only after specific errors
+        selected = click.prompt(
+            "Would you like to archive your existing config and create a new config template?",
+            type=click.Choice(["Y", "n"]),
+            show_choices=True
+        )
+        if selected == "Y":
+            cli_message(
+                "Great! First let's move your existing `great_expectations.yml` to `great_expectations.yml.archive`")
+
+        # TODO archive the existing .yml
+
+        # TODO make new yml
+
+    # TODO this section probably isn't legit
+    except ge_exceptions.DataContextError as err:
         cli_message("Oh dear. Something went really wrong.")
         logger.critical(err.message)
         sys.exit(-1)
 
-    try:
-        if config["ge_config_version"] == 2:
-            cli_message("Great! You are using a version 2")
-    except KeyError:
-        cli_message("Hmm. You appear to be using an antiquated config version.")
 
-    # TODO check for other known obsolete keys
+def check_for_obsolete_config_file(config):
+    """
+    Check if a config is obviously out of date.
+    Note this can go away when configs are more strongly typed.
+    """
+    # TODO remove this warning and add results_callback the obsolete keys list when slack is changed
+    if "result_callback" in config.keys():
+        # TODO add link to docs in message
+        cli_message("Please note that the key `results_callback` will be moved in the next release.")
 
-    # TODO offer to build a new config format
-
-    # TODO archive the existing .yml
-
-    # TODO make new yml
-
-    cli_message("Hmm...")
+    obsolete_keys = ["validations_stores"]
+    for obsolete_key in obsolete_keys:
+        if obsolete_key in config.keys():
+            cli_message("""Hmm. You appear to be using an antiquated config version.
+    The `{}` key is obsolete and no longer used.""".format(obsolete_key))
 
 
 def main():

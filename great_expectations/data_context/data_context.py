@@ -3,7 +3,7 @@
 import os
 import json
 import logging
-from ruamel.yaml import YAML
+from ruamel.yaml import YAML, YAMLError
 import sys
 import copy
 import errno
@@ -22,7 +22,7 @@ import warnings
 from .util import get_slack_callback, safe_mmkdir, substitute_all_config_variables
 from ..types.base import DotDict
 
-from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError, InvalidConfigError
+import great_expectations.exceptions as ge_exceptions
 
 # FIXME : fully deprecate site_builder, by replacing it with new_site_builder.
 # FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers.
@@ -74,6 +74,9 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 ALLOWED_DELIMITERS = ['.', '/']
+MINIMUM_SUPPORTED_CONFIG_VERSION = 2
+MAXIMUM_SUPPORTED_CONFIG_VERSION = 2
+MAXIMUM_EXISTENT_CONFIG_VERSION = 2
 
 
 class ConfigOnlyDataContext(object):
@@ -1662,8 +1665,16 @@ class DataContext(ConfigOnlyDataContext):
             with open(os.path.join(self.root_directory, "great_expectations.yml"), "r") as data:
                 config_dict = yaml.load(data)
                 config = DataContextConfig(**config_dict)
+        except YAMLError as err:
+            raise ge_exceptions.InvalidConfigurationYamlError("Your configuration file is not a valid yml file likely due to a yml syntax error.")
+        # TODO test this sucker
         except IOError:
-            raise ConfigNotFoundError("No configuration found in %s" % str(os.path.join(self.root_directory, "great_expectations.yml")))
+            raise ge_exceptions.ConfigNotFoundError("No configuration found in %s" % str(os.path.join(self.root_directory, "great_expectations.yml")))
+
+        if config.ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+            raise ge_exceptions.UnsupportedConfigVersionError("You appear to have an invalid config version. The version number must be between {} and {}.".format(MINIMUM_SUPPORTED_CONFIG_VERSION, MAXIMUM_SUPPORTED_CONFIG_VERSION))
+        elif config.ge_config_version > MAXIMUM_SUPPORTED_CONFIG_VERSION:
+            raise ge_exceptions.InvalidConfigVersionError("You appear to have an invalid config version. The maximum valid version is {}.".format(MAXIMUM_EXISTENT_CONFIG_VERSION))
 
         return config
 

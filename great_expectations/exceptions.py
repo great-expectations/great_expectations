@@ -1,14 +1,42 @@
 import os
 
+
 class GreatExpectationsError(Exception):
     def __init__(self, message):
         self.message = message  
 
+
 class DataContextError(GreatExpectationsError):
     pass
 
+
+class InvalidConfigurationYamlError(GreatExpectationsError):
+    pass
+
+
+class InvalidTopLevelConfigKeyError(GreatExpectationsError):
+    pass
+
+
+class MissingTopLevelConfigKeyError(GreatExpectationsError):
+    pass
+
+
+class InvalidConfigValueTypeError(GreatExpectationsError):
+    pass
+
+
+class InvalidConfigVersionError(GreatExpectationsError):
+    pass
+
+
+class UnsupportedConfigVersionError(GreatExpectationsError):
+    pass
+
+
 class ProfilerError(GreatExpectationsError):
     pass
+
 
 class InvalidConfigError(DataContextError):
     def __init__(self, message):

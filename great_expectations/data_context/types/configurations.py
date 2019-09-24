@@ -26,6 +26,7 @@ class DataContextConfig(Config):
     ])
 
     _key_types = {
+        "ge_config_version": int,
         "config_variables_file_path": string_types,
         "plugins_directory": string_types,
         "expectations_store": dict,
