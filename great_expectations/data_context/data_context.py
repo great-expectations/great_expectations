@@ -288,7 +288,7 @@ class ConfigOnlyDataContext(object):
     def data_asset_name_delimiter(self, new_delimiter):
         """data_asset_name_delimiter property setter method"""
         if new_delimiter not in ALLOWED_DELIMITERS:
-            raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
+            raise ge_exceptions.DataContextError("Invalid delimiter: delimiter must be one of: {}".format(ALLOWED_DELIMITERS))
         else:
             self._data_asset_name_delimiter = new_delimiter
 
@@ -1661,20 +1661,36 @@ class DataContext(ConfigOnlyDataContext):
 
         :return: the configuration object read from the file
         """
+        path_to_yml = os.path.join(self.root_directory, "great_expectations.yml")
         try:
-            with open(os.path.join(self.root_directory, "great_expectations.yml"), "r") as data:
+            with open(path_to_yml, "r") as data:
                 config_dict = yaml.load(data)
                 config = DataContextConfig(**config_dict)
         except YAMLError as err:
-            raise ge_exceptions.InvalidConfigurationYamlError("Your configuration file is not a valid yml file likely due to a yml syntax error.")
-        # TODO test this sucker
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Your configuration file is not a valid yml file likely due to a yml syntax error."
+            )
         except IOError:
-            raise ge_exceptions.ConfigNotFoundError("No configuration found in %s" % str(os.path.join(self.root_directory, "great_expectations.yml")))
+            raise ge_exceptions.ConfigNotFoundError(
+                "No configuration found in %s" % str(path_to_yml)
+            )
 
-        if config.ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
-            raise ge_exceptions.UnsupportedConfigVersionError("You appear to have an invalid config version. The version number must be between {} and {}.".format(MINIMUM_SUPPORTED_CONFIG_VERSION, MAXIMUM_SUPPORTED_CONFIG_VERSION))
-        elif config.ge_config_version > MAXIMUM_SUPPORTED_CONFIG_VERSION:
-            raise ge_exceptions.InvalidConfigVersionError("You appear to have an invalid config version. The maximum valid version is {}.".format(MAXIMUM_EXISTENT_CONFIG_VERSION))
+        version = config.ge_config_version
+
+        if version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+            raise ge_exceptions.UnsupportedConfigVersionError(
+                "You appear to have an invalid config version ({}).\n    The version number must be between {} and {}.".format(
+                    version,
+                    MINIMUM_SUPPORTED_CONFIG_VERSION,
+                    MAXIMUM_SUPPORTED_CONFIG_VERSION,
+                )
+            )
+        elif version > MAXIMUM_SUPPORTED_CONFIG_VERSION:
+            raise ge_exceptions.InvalidConfigVersionError(
+                "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
+                    version, MAXIMUM_EXISTENT_CONFIG_VERSION
+                )
+            )
 
         return config
 

@@ -7,6 +7,12 @@ import great_expectations.exceptions as ge_exceptions
 BASE_DIR = "fixtures"
 
 
+def test_DataContext_raises_error_on_config_not_found():
+    local_dir = file_relative_path(__file__, os.path.join(BASE_DIR, ""))
+    with pytest.raises(ge_exceptions.ConfigNotFoundError):
+        DataContext(local_dir)
+
+
 def test_DataContext_raises_error_on_unparsable_yaml_file():
     local_dir = file_relative_path(__file__, os.path.join(BASE_DIR, "bad_yml"))
     with pytest.raises(ge_exceptions.InvalidConfigurationYamlError):
