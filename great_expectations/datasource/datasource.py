@@ -321,7 +321,7 @@ class Datasource(object):
             # noinspection PyUnboundLocalVariable
             generator = self.get_generator(generator_name)
             if generator is not None:
-                batch_kwargs = generator.yield_batch_kwargs(generator_asset)
+                batch_kwargs = generator.yield_batch_kwargs(generator_asset, **kwargs)
 
         return self._get_data_asset(batch_kwargs, expectation_suite, **kwargs)
 

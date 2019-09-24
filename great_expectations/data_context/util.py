@@ -199,6 +199,7 @@ def instantiate_class_from_config(config, runtime_config, config_defaults=None):
 
     return class_instance
 
+
 def format_dict_for_error_message(dict_):
     # TODO : Tidy this up a bit. Indentation isn't fully consistent.
 

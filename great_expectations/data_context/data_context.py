@@ -531,8 +531,6 @@ class ConfigOnlyDataContext(object):
             run_identifier=run_identifier,
         )
 
-    # NOTE: Abe 2019/08/22 : I think we want to change this to the new standard class_name, module_name syntax.
-    # Doing this while maintaining backward compatibility to type_s (assuming we choose to do so) will require care.
     def add_datasource(self, name, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:

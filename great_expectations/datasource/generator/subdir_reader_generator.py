@@ -29,7 +29,7 @@ class SubdirReaderGenerator(BatchGenerator):
                  datasource=None,
                  base_directory="/data",
                  reader_options=None):
-        super(SubdirReaderGenerator, self).__init__(name, type_="subdir_reader", datasource=datasource)
+        super(SubdirReaderGenerator, self).__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = {}
 
@@ -66,7 +66,7 @@ class SubdirReaderGenerator(BatchGenerator):
         # Otherwise, subdir files are partition ids
         return self._get_valid_file_options(base_directory=os.path.join(self.base_directory, generator_asset))
 
-    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
         path = None
         for extension in KNOWN_EXTENSIONS:
             if os.path.isfile(os.path.join(self.base_directory, generator_asset + "." + extension)):
