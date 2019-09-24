@@ -353,17 +353,17 @@ def do_config_check(target_directory):
         cli_message(err.message)
 
         # TODO offer to build a new config format only after specific errors
-        selected = click.prompt(
-            "Would you like to archive your existing config and create a new config template?",
-            type=click.Choice(["Y", "n"]),
-            show_choices=True
-        )
-        if selected == "Y":
-            cli_message(
-                "Great! First let's move your existing `great_expectations.yml` to `great_expectations.yml.archive`")
-
+        # selected = click.prompt(
+        #     "Would you like to archive your existing config and create a new config template?",
+        #     type=click.Choice(["Y", "n"]),
+        #     show_choices=True
+        # )
+        # if selected == "Y":
+        #     cli_message(
+        #         "Great! First let's move your existing `great_expectations.yml` to `great_expectations.yml.archive`")
+        #
         # TODO archive the existing .yml
-
+        #
         # TODO make new yml
 
     # TODO this section probably isn't legit
