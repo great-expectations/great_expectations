@@ -47,7 +47,7 @@ class SqlAlchemyDatasource(Datasource):
         if generators is None:
             generators = {
                 "default": {
-                    "class_name": "QueryGenerator"
+                    "class_name": "TableGenerator"
                 }
             }
 
