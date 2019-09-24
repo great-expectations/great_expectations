@@ -9,7 +9,7 @@ except ImportError:
 
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.datasource.generator.batch_generator import BatchGenerator
-from great_expectations.datasource.types import PathBatchKwargs
+from great_expectations.datasource.types import ReaderMethods, S3BatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class S3Generator(BatchGenerator):
                  reader_options=None,
                  assets=None,
                  delimiter="/",
-                 reader_method="None",
+                 reader_method=None,
                  max_keys=1000):
         """Initialize a new S3Generator
 
@@ -166,12 +166,12 @@ class S3Generator(BatchGenerator):
         }
         batch_kwargs.update(self.reader_options)
         if self._reader_method is not None:
-            batch_kwargs["reader_method"] = self._reader_method
+            batch_kwargs["reader_method"] = ReaderMethods(self._reader_method)
         if asset_config.get("reader_options") is not None:
             batch_kwargs.update(asset_config.get("reader_options"))
         if asset_config.get("reader_method") is not None:
-            batch_kwargs.update(asset_config.get("reader_method"))
-        return PathBatchKwargs(batch_kwargs)
+            batch_kwargs.update(ReaderMethods(asset_config.get("reader_method")))
+        return S3BatchKwargs(batch_kwargs)
 
     def _get_asset_options(self, asset_config, iterator_dict):
         query_options = {
@@ -209,7 +209,7 @@ class S3Generator(BatchGenerator):
             # Recursively fetch more
             for key in self._get_asset_options(asset_config, iterator_dict):
                 yield key
-        else:
+        elif "continuation_token" in iterator_dict:
             # Make sure we clear the token once we've gotten fully through
             del iterator_dict["continuation_token"]
 
