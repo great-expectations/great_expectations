@@ -56,14 +56,15 @@ def test_HtmlSiteStore(tmp_path_factory):
     assert gen_directory_tree_str(path) == """\
 test_HtmlSiteStore_with_FixedLengthTupleFileSystemStoreBackend__dir0/
     my_store/
-        prod-100/
-            a/
-                b/
-                    c/
-                        quarantine.html
-        prod-20/
-            a/
-                b/
-                    c/
-                        quarantine.html
+        validations/
+            prod-100/
+                a/
+                    b/
+                        c/
+                            quarantine.html
+            prod-20/
+                a/
+                    b/
+                        c/
+                            quarantine.html
 """
