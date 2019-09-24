@@ -165,6 +165,124 @@ def test_validation_operator__run(basic_data_context_config_for_validation_opera
 
     #TODO: One DataSnapshotStores are implemented, add a test for quarantined data
 
+
+def test_validation_operator__run_slack(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
+    project_path = str(tmp_path_factory.mktemp('great_expectations'))
+
+    # NOTE: This setup is almost identical to test_DefaultDataContextAwareValidationOperator.
+    # Consider converting to a single fixture.
+
+    data_context = ConfigOnlyDataContext(
+        basic_data_context_config_for_validation_operator,
+        project_path,
+    )
+
+    data_context.add_datasource("my_datasource",
+                                class_name="PandasDatasource",
+                                base_directory=str(filesystem_csv_4))
+
+    # NOTE : It's kinda annoying that these Expectation Suites start out with expect_column_to_exist.
+    # How do I turn off that default...?
+    df = data_context.get_batch("my_datasource/default/f1")
+    df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
+    failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
+
+    df.expect_column_values_to_not_be_null(column="y")
+    warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
+
+    df = data_context.get_batch("my_datasource/default/f1")
+    df.expect_column_values_to_be_in_set(column="x", value_set=[1,3,5,7,9])
+    quarantine_expectations = df.get_expectation_suite(discard_failed_expectations=False)
+
+    data_asset_identifier = DataAssetIdentifier("my_datasource", "default", "f1")
+    data_context.stores["expectations_store"].set(
+        ExpectationSuiteIdentifier(
+            data_asset_name=data_asset_identifier,
+            expectation_suite_name="failure"
+        ),
+        failure_expectations
+    )
+    data_context.stores["expectations_store"].set(
+        ExpectationSuiteIdentifier(
+            data_asset_name=data_asset_identifier,
+            expectation_suite_name="warning"
+        ),
+        warning_expectations
+    )
+    data_context.stores["expectations_store"].set(
+        ExpectationSuiteIdentifier(
+            data_asset_name=data_asset_identifier,
+            expectation_suite_name="quarantine"
+        ),
+        quarantine_expectations
+    )
+
+    # TODO : Abe 2019/09/17 : We can make this config much more concise by subclassing an operator that knows how to define
+    # its own actions. Holding off on that for now, but we should consider it before shipping v0.8.0.
+    vo = DefaultDataContextAwareValidationOperator(
+        data_context=data_context,
+        process_warnings_and_quarantine_rows_on_error=True,
+        # allow_empty_expectation_suites=True,
+        action_list = [{
+            "name": "slack_notify_failures",
+            "result_key": "failure",
+            "action" : {
+                "module_name" : "great_expectations.actions",
+                "class_name" : "SummarizeAndNotifySlackAction",
+                "webhook": "https://hooks.slack.com/services/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",
+                "notify_on": "success",
+                "summarizer":{
+                    "module_name": "great_expectations.render.renderer.slack_renderer",
+                    "class_name": "SlackRenderer",
+                }
+            }
+        },
+        #     {
+        #     "name": "add_failures_to_store",
+        #     "result_key": "failure",
+        #     "action" : {
+        #         "module_name" : "great_expectations.actions",
+        #         "class_name" : "SummarizeAndStoreAction",
+        #         "target_store_name": "validation_result_store",
+        #         "summarizer":{
+        #             "module_name": "tests.test_plugins.fake_actions",
+        #             "class_name": "TemporaryNoOpSummarizer",
+        #         }
+        #     }
+        # }
+        ],
+    )
+
+    my_df = pd.DataFrame({"x": [1,2,3,4,5], "y": [1,2,3,4,None]})
+    my_ge_df = ge.from_pandas(my_df)
+
+    assert data_context.stores["validation_result_store"].list_keys() == []
+
+    results = vo.run(
+        data_asset=my_ge_df,
+        data_asset_identifier=DataAssetIdentifier(
+            from_string="DataAssetIdentifier.my_datasource.default.f1"
+        ),
+        run_identifier="test_100"
+    )
+    # print(json.dumps(results["validation_results"], indent=2))
+
+    # validation_result_store_keys = data_context.stores["validation_result_store"].list_keys()
+    # print(validation_result_store_keys)
+    # assert len(validation_result_store_keys) == 2
+    # assert ValidationResultIdentifier(from_string="ValidationResultIdentifier.my_datasource.default.f1.warning.test_100") in validation_result_store_keys
+    # assert ValidationResultIdentifier(from_string="ValidationResultIdentifier.my_datasource.default.f1.failure.test_100") in validation_result_store_keys
+    #
+    # assert data_context.stores["validation_result_store"].get(
+    #     ValidationResultIdentifier(from_string="ValidationResultIdentifier.my_datasource.default.f1.warning.test_100")
+    # )["success"] == False
+    # assert data_context.stores["validation_result_store"].get(
+    #     ValidationResultIdentifier(from_string="ValidationResultIdentifier.my_datasource.default.f1.failure.test_100")
+    # )["success"] == True
+
+    #TODO: One DataSnapshotStores are implemented, add a test for quarantined data
+
+
 def test__get_or_convert_to_batch_from_identifiers(basic_data_context_config_for_validation_operator, filesystem_csv):
 
     data_context = ConfigOnlyDataContext(
