@@ -341,7 +341,7 @@ def do_config_check(target_directory):
             context_root_dir="{}/great_expectations/".format(target_directory))
         config = context.get_project_config()
         check_for_obsolete_config_file(config)
-        cli_message("You're config file appears valid!")
+        cli_message("Your config file appears valid!")
     except (
             ge_exceptions.InvalidConfigurationYamlError,
             ge_exceptions.InvalidTopLevelConfigKeyError,
@@ -366,9 +366,8 @@ def do_config_check(target_directory):
         #
         # TODO make new yml
 
-    # TODO this section probably isn't legit
     except ge_exceptions.DataContextError as err:
-        cli_message("Oh dear. Something went really wrong.")
+        cli_message(err.message)
         logger.critical(err.message)
         sys.exit(-1)
 
