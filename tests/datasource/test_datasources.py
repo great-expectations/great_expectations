@@ -120,7 +120,12 @@ def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connectio
     data_context.add_datasource(name,
                                 class_name=class_name,
                                 connection_string=test_db_connection_string,
-                                data_asset_type=data_asset_type_config)
+                                data_asset_type=data_asset_type_config,
+                                generators={
+                                    "default": {
+                                        "class_name": "TableGenerator"
+                                    }
+                                })
 
     # We should now see updated configs
     with open(os.path.join(data_context.root_directory, "great_expectations.yml"), "r") as data_context_config_file:
