@@ -46,11 +46,6 @@ def test_subdir_reader_path_partitioning(tmp_path_factory):
     assert "timestamp" in asset_1_kwargs[0]
     assert len(asset_1_kwargs[0].keys()) == 3
 
-    assert asset_1_kwargs[0].batch_kwargs_fingerprint == \
-       asset_1_kwargs[0]["partition_id"] + "::" + "path:" + asset_1_kwargs[0]["path"]
-    # FIXME: Or whether this one should pass (because timestamp *is* part of fingerprint)
-    assert asset_1_kwargs[0].batch_id_fingerprint == BatchKwargs.build_batch_fingerprint(asset_1_kwargs[0])
-
     assert len(asset_2_kwargs) == 2
     paths = set([kwargs["path"] for kwargs in asset_2_kwargs])
     assert paths == {
