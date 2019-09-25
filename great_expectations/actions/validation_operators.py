@@ -37,9 +37,9 @@ class ValidationOperator(object):
         raise NotImplementedError
 
 
-class ValidationOperatorPerformActionList(ValidationOperator):
+class PerformActionListValidationOperator(ValidationOperator):
     """
-    ValidationOperatorPerformActionList is a validation operator
+    PerformActionListValidationOperator is a validation operator
     that validates each batch in the list that is passed to its run
     method and then invokes a list of configured actions on every
     validation result.
@@ -53,7 +53,7 @@ class ValidationOperatorPerformActionList(ValidationOperator):
 
 
       my_simple_operator:
-        class_name: ValidationOperatorPerformActionList
+        class_name: PerformActionListValidationOperator
         action_list:
           - name: store_validation_result
             action:
@@ -202,264 +202,246 @@ class ValidationOperatorPerformActionList(ValidationOperator):
     def run(self, assets_to_validate, run_identifier):
         result_object = {}
 
-        batches_to_validate = [self._get_or_convert_to_batch_from_identifiers(item) for item in assets_to_validate]
-        for batch in batches_to_validate:
+        for item in assets_to_validate:
+            batch = self._get_or_convert_to_batch_from_identifiers(item)
+            expectation_suite_identifier = ExpectationSuiteIdentifier(
+                data_asset_name=batch.data_asset_identifier,
+                expectation_suite_name=batch._expectation_suite.expectation_suite_name
+            )
+            validation_result_id = ValidationResultIdentifier(
+                expectation_suite_identifier=expectation_suite_identifier,
+                run_id=run_identifier,
+            )
+            result_object[validation_result_id] = {}
             batch_validation_result = batch.validate()
+            result_object[validation_result_id]["validation_result"] = batch_validation_result
+            batch_actions_results = self._run_actions(batch, batch._expectation_suite, batch_validation_result, run_identifier)
+            result_object[validation_result_id]["actions_results"] = batch_actions_results
 
-            for action in self.action_list:
-                # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
-                logger.debug("Processing validation action with name {}".format(action["name"]))
+        # NOTE: Eugene: 2019-09-24: Need to define this result object. Discussion required!
+        return result_object
 
 
-                expectation_suite_identifier = ExpectationSuiteIdentifier(
-                    data_asset_name=batch.data_asset_identifier,
-                    expectation_suite_name=batch._expectation_suite.expectation_suite_name
+    def _run_actions(self, batch, expectation_suite, batch_validation_result, run_identifier):
+        """
+        Runs all actions configured for this operator on the result of validating one
+        batch against one expectation suite.
+
+        If an action fails with an exception, the method does not continue.
+
+        :param batch:
+        :param expectation_suite:
+        :param batch_validation_result:
+        :param run_identifier:
+        :return: a dictionary: {action name -> result returned by the action}
+        """
+        batch_actions_results = {}
+        for action in self.action_list:
+            # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
+            logger.debug("Processing validation action with name {}".format(action["name"]))
+
+            expectation_suite_identifier = ExpectationSuiteIdentifier(
+                data_asset_name=batch.data_asset_identifier,
+                expectation_suite_name=batch._expectation_suite.expectation_suite_name
+            )
+
+            validation_result_id = ValidationResultIdentifier(
+                expectation_suite_identifier=expectation_suite_identifier,
+                run_id=run_identifier,
+            )
+            try:
+                action_result = self.actions[action["name"]].run(
+                                                validation_result_suite_id=validation_result_id,
+                                                validation_result_suite=batch_validation_result,
+                                                data_asset=batch
                 )
 
-                validation_result_id = ValidationResultIdentifier(
-                    expectation_suite_identifier=expectation_suite_identifier,
-                    run_id=run_identifier,
-                )
-                self.actions[action["name"]].run(
-                    validation_result_suite_id=validation_result_id,
-                    validation_result_suite=batch._expectation_suite,
-                    data_asset = batch
-                )
+                batch_actions_results[action["name"]] = {} if action_result is None else action_result
+            except Exception as e:
+                logger.exception("Error running action with name {}".format(action["name"]))
+                raise e
+
+        return batch_actions_results
 
 
-        # NOTE: Eugene: 2019-09-23: define and fill out the result object.
+
+        result_object = {}
+
+        for item in assets_to_validate:
+            batch = self._get_or_convert_to_batch_from_identifiers(item)
+            expectation_suite_identifier = ExpectationSuiteIdentifier(
+                data_asset_name=batch.data_asset_identifier,
+                expectation_suite_name=batch._expectation_suite.expectation_suite_name
+            )
+            validation_result_id = ValidationResultIdentifier(
+                expectation_suite_identifier=expectation_suite_identifier,
+                run_id=run_identifier,
+            )
+            result_object[validation_result_id] = {}
+            batch_validation_result = batch.validate()
+            result_object[validation_result_id]["validation_result"] = batch_validation_result
+            batch_actions_results = self._run_actions(batch, batch._expectation_suite, batch_validation_result, run_identifier)
+            result_object[validation_result_id]["actions_results"] = batch_actions_results
+
+        # NOTE: Eugene: 2019-09-24: Need to define this result object. Discussion required!
         return result_object
 
 
 
-#     # TODO : Test this method
-#     def _process_actions(self, result_obj):
-#         for action in self.action_list:
-#             logger.debug("Processing action with name {}".format(action["name"]))
-#
-#             if action["result_key"] != None:
-#                 # TODO : Instead of hardcoding "validation_results", allow result_keys to
-#                 # express nested lookups by using . as a separator:
-#                 # "validation_results.warning"
-#                 key_parts = action["result_key"].split(".")
-#                 result_sub_obj = result_obj
-#                 for part in key_parts:
-#                     try:
-#                         result_sub_obj = result_sub_obj[part]
-#                     except KeyError as e:
-#                         raise KeyError("result_sub_object doesn't have key {}, only {}".format(
-#                             part,
-#                             result_sub_obj.keys(),
-#                         ))
-#
-#                 validation_result_suite = result_sub_obj#result_obj["validation_results"][action["result_key"]]
-#
-#                 self.actions[action["name"]].run(
-#                     validation_result_id=validation_result_suite[0],
-#                     validation_result_suite=validation_result_suite[1],
-#                 )
-#
-#             else:
-#                 # TODO : Review this convention and see if we like it...
-#                 self.actions[action["name"]].run(None, None)
-#
-#
-# class BasicDataContextAwareValidationOperator(DataContextAwareValidationOperator):
-#
-#     def __init__(self,
-#         data_context,
-#         action_list
-#     ):
-#         super(BasicDataContextAwareValidationOperator, self).__init__(
-#             data_context,
-#             action_list,
-#         )
-#
-#
-#     def _run(self, batch):
-#         # Get batch_identifier.
-#         # TODO : We should be using typed batches
-#         # if data_asset_identifier is None:
-#         data_asset_identifier = batch.data_asset_identifier
-#         run_id = batch.run_id
-#
-#         assert not data_asset_identifier is None
-#         assert not run_id is None
-#
-#
-#         validation_result = batch.validate()
-#
-#         ExpectationSuiteIdentifier(OrderedDataContextKey):
-#             _key_order = [
-#                 "data_asset_name",
-#                 "expectation_suite_name",
-#             ]
-#
-#         validation_result_id = ValidationResultIdentifier(
-#             expectation_suite_identifier=expectation_suite_identifier,
-#             run_id=run_id,
-#         )
-#
-#         # NOTE : Abe 2019/09/12: We should consider typing this object, since it's passed between classes.
-#         # Maybe use a Store, since it's a key-value thing...?
-#         # For now, I'm NOT typing it until we gain more practical experience with operators and actions.
-#         return_obj = {
-#             "success" : None,
-#             # NOTE : storing validation_results as (id, value) tuples is a temporary fix,
-#             # until we implement typed ValidationResultSuite objects.
-#             "validation_result" : (
-#                 validation_result_id,
-#                 validation_result
-#             )
-#         }
-#
-#         self._process_actions(return_obj)
-#
-#         return return_obj
-#
-#
-#
-# #class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperator, DefaultActionAwareValidationOperator):
-# class DefaultDataContextAwareValidationOperator(DataContextAwareValidationOperator):
-#
-#     def __init__(self,
-#         data_context,
-#         action_list,
-#         expectation_suite_name_prefix="",
-#         expectation_suite_name_suffixes=["failure", "warning", "quarantine"],
-#         process_warnings_and_quarantine_rows_on_error=False,
-#         allow_empty_expectation_suites=False, # NOTE : Abe 2019/09/17 : This is probably a nice affordance, but it's untested, and I'm not sure about the DX.
-#     ):
-#         super(DefaultDataContextAwareValidationOperator, self).__init__(
-#             data_context,
-#             action_list,
-#         )
-#
-#         self.process_warnings_and_quarantine_rows_on_error = process_warnings_and_quarantine_rows_on_error
-#         self.expectation_suite_name_prefix = expectation_suite_name_prefix
-#         self.allow_empty_expectation_suites = allow_empty_expectation_suites
-#
-#         assert len(expectation_suite_name_suffixes) == 3
-#         for suffix in expectation_suite_name_suffixes:
-#             assert isinstance(suffix, string_types)
-#         self.expectation_suite_name_suffixes = expectation_suite_name_suffixes
-#
-#
-#     def _run(self, batch):
-#         # Get batch_identifier.
-#         # TODO : We should be using typed batch
-#         # if data_asset_identifier is None:
-#         data_asset_identifier = batch.data_asset_identifier
-#         run_id = batch.run_id
-#
-#         assert not data_asset_identifier is None
-#         assert not run_id is None
-#
-#         # NOTE : Abe 2019/09/12 : Perhaps this could be generalized to a loop.
-#         # I'm NOT doing that, because lots of user research suggests that these 3 specific behaviors
-#         # (failure, warning, quarantine) will cover most of the common use cases for
-#         # post-validation data treatment.
-#         failure_validation_result_id = ValidationResultIdentifier(
-#             expectation_suite_identifier=ExpectationSuiteIdentifier(
-#                 data_asset_name=data_asset_identifier,
-#                 expectation_suite_name=self.expectation_suite_name_prefix+self.expectation_suite_name_suffixes[0],
-#             ),
-#             run_id=run_id,
-#         )
-#         warning_validation_result_id = ValidationResultIdentifier(
-#             expectation_suite_identifier=ExpectationSuiteIdentifier(
-#                 data_asset_name=data_asset_identifier,
-#                 expectation_suite_name=self.expectation_suite_name_prefix+self.expectation_suite_name_suffixes[1],
-#             ),
-#             run_id=run_id,
-#         )
-#         quarantine_validation_result_id = ValidationResultIdentifier(
-#             expectation_suite_identifier=ExpectationSuiteIdentifier(
-#                 data_asset_name=data_asset_identifier,
-#                 expectation_suite_name=self.expectation_suite_name_prefix+self.expectation_suite_name_suffixes[2],
-#             ),
-#             run_id=run_id,
-#         )
-#
-#         failure_expectations = self._get_expectation_suite_by_validation_result_id(failure_validation_result_id)
-#         warning_expectations = self._get_expectation_suite_by_validation_result_id(warning_validation_result_id)
-#         quarantine_expectations = self._get_expectation_suite_by_validation_result_id(quarantine_validation_result_id)
-#
-#         # NOTE : Abe 2019/09/12: We should consider typing this object, since it's passed between classes.
-#         # Maybe use a Store, since it's a key-value thing...?
-#         # For now, I'm NOT typing it until we gain more practical experience with operators and actions.
-#         return_obj = {
-#             "success" : None,
-#             "validation_results" : {
-#                 # NOTE : storing validation_results as (id, value) tuples is a temporary fix,
-#                 # until we implement typed ValidationResultSuite objects.
-#                 "failure" : (failure_validation_result_id, None),
-#                 "warning" : (warning_validation_result_id, None),
-#                 "quarantine" : (quarantine_validation_result_id, None),
-#             },
-#             "data_assets" : {
-#                 "original_batch" : batch,
-#                 "nonquarantined_batch" : None,
-#                 "quarantined_batch" : None,
-#             }
-#         }
-#
-#         return_obj["validation_results"]["failure"] = (failure_validation_result_id, batch.validate(failure_expectations))
-#         return_obj["success"] = return_obj["validation_results"]["failure"][1]["success"]
-#
-#         #TODO: Add checking for exceptions in Expectations
-#         if return_obj["success"] == False:
-#             if self.process_warnings_and_quarantine_rows_on_error == False:
-#
-#                 #Process actions here
-#                 self._process_actions(return_obj)
-#
-#                 return return_obj
-#
-#         return_obj["validation_results"]["warning"] = (warning_validation_result_id, batch.validate(warning_expectations))
-#         return_obj["validation_results"]["quarantine"] = (quarantine_validation_result_id, batch.validate(quarantine_expectations, result_format="COMPLETE"))
-#
-#         #TODO: Add checking for exceptions in Expectations
-#
-#         unexpected_index_set = self._get_unexpected_indexes(*return_obj["validation_results"]["quarantine"])
-#         # TODO: Generalize this method to work with any data asset, not just pandas.
-#         return_obj["data_assets"]["quarantined_batch"] = batch.loc[unexpected_index_set]
-#         return_obj["data_assets"]["nonquarantined_batch"] = batch.loc[set(batch.index) - set(unexpected_index_set)]
-#
-#         #Process actions here
-#         self._process_actions(return_obj)
-#
-#         # NOTE : We should consider typing this object, since it's passed between classes.
-#         return return_obj
-#
-#     def _get_expectation_suite_by_validation_result_id(
-#         self,
-#         validation_result_id
-#     ):
-#         try:
-#             return self.data_context.stores["expectations_store"].get(
-#                 validation_result_id.expectation_suite_identifier
-#             )
-#
-#         # NOTE : Abe 2019/09/17 : I'm concerned that this may be too permissive, since
-#         # it will catch any error in the Store, not just KeyErrors. In the longer term, a better
-#         # solution will be to have the Stores catch other known errors and raise KeyErrors,
-#         # so that methods like this can catch and handle a single error type.
-#         except Exception as e:
-#             if self.allow_empty_expectation_suites:
-#                 return None
-#             else:
-#                 raise e
-#
-#     # TODO: test this method
-#     # TODO: Generalize this method to work with any data asset, not just pandas.
-#     def _get_unexpected_indexes(self, validation_result_id, validation_result_suite):
-#         unexpected_index_set = set()
-#
-#         for expectation_validation_result in validation_result_suite["results"]:
-#             # TODO : Add checking for column_map Expectations
-#             if expectation_validation_result["success"] == False:
-#                 if expectation_validation_result["exception_info"] == None:
-#                     unexpected_index_set = unexpected_index_set.union(expectation_validation_result["result"]["unexpected_index_list"])
-#
-#         return unexpected_index_set
+class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
+    """
+    ErrorsVsWarningsValidationOperator is a validation operator
+    that accepts a list batches of data assets (or the information necessary to fetch these batches).
+    The operator retrieves 2 expectation suites for each data asset/batch - one containing
+    the critical expectations ("error") and the other containing non-critical expectations
+    ("warning"). By default, the operator assumes that the first is called "error" and the
+    second is called "warning", but "expectation_suite_name_prefix" attribute can be specified
+    in the operator's configuration to make sure it searched for "{expectation_suite_name_prefix}failure"
+    and {expectation_suite_name_prefix}warning" expectation suites for each data asset.
+
+    The operator validates each batch against its "failure" and "warning" expectation suites and
+    invokes a list of actions on every validation result.
+
+    The list of these actions is specified in the operator's configuration
+
+    Each action in the list must be an instance of NamespacedValidationAction
+    class (or its descendants).
+
+    Below is an example of this operator's configuration:
+    TODO
+
+    The operator returns an object that looks like that:
+
+    ErrorsVsWarningsValidationOperator
+    {
+        "success": True/False,
+        "failure": {
+            expectation suite identifier: {
+                "validation_result": validation result,
+                "action_results": {action name: action result object}
+            }
+        }
+        "warning": {
+            expectation suite identifier: {
+                "validation_result": validation result,
+                "action_results": {action name: action result object}
+            }
+        }
+    }
+
+    """
+
+
+    def __init__(self,
+        data_context,
+        action_list,
+        expectation_suite_name_prefix="",
+        expectation_suite_name_suffixes=["failure", "warning"],
+        stop_on_first_error=False,
+    ):
+        super(ErrorsVsWarningsValidationOperator, self).__init__(
+            data_context,
+            action_list,
+        )
+
+        self.stop_on_first_error = stop_on_first_error
+        self.expectation_suite_name_prefix = expectation_suite_name_prefix
+
+        assert len(expectation_suite_name_suffixes) == 2
+        for suffix in expectation_suite_name_suffixes:
+            assert isinstance(suffix, string_types)
+        self.expectation_suite_name_suffixes = expectation_suite_name_suffixes
+
+    def run(self, assets_to_validate, run_identifier):
+        # NOTE : Abe 2019/09/12: We should consider typing this object, since it's passed between classes.
+        # Maybe use a Store, since it's a key-value thing...?
+        # For now, I'm NOT typing it until we gain more practical experience with operators and actions.
+        return_obj = {
+            "success": None,
+            "failure": {},
+            "warning": {}
+        }
+
+        for item in assets_to_validate:
+            batch = self._get_or_convert_to_batch_from_identifiers(item)
+
+            # TODO : We should be using typed batch
+            data_asset_identifier = batch.data_asset_identifier
+            run_id = run_identifier
+
+            assert not data_asset_identifier is None
+            assert not run_id is None
+
+            # NOTE : Abe 2019/09/12 : Perhaps this could be generalized to a loop.
+            # I'm NOT doing that, because lots of user research suggests that these 3 specific behaviors
+            # (failure, warning, quarantine) will cover most of the common use cases for
+            # post-validation data treatment.
+
+            failure_expectation_suite_identifier = ExpectationSuiteIdentifier(
+                data_asset_name=data_asset_identifier,
+                expectation_suite_name=self.expectation_suite_name_prefix + self.expectation_suite_name_suffixes[0]
+            )
+
+            failure_validation_result_id = ValidationResultIdentifier(
+                expectation_suite_identifier=failure_expectation_suite_identifier,
+                run_id=run_id,
+            )
+
+            failure_expectation_suite = None
+            try:
+                failure_expectation_suite = self.data_context.stores["expectations_store"].get(
+                    failure_expectation_suite_identifier
+                )
+
+            # NOTE : Abe 2019/09/17 : I'm concerned that this may be too permissive, since
+            # it will catch any error in the Store, not just KeyErrors. In the longer term, a better
+            # solution will be to have the Stores catch other known errors and raise KeyErrors,
+            # so that methods like this can catch and handle a single error type.
+            except Exception as e:
+                logger.debug("Failure expectation suite not found: {}".format(failure_expectation_suite_identifier))
+
+            if failure_expectation_suite:
+                return_obj["failure"][failure_validation_result_id] = {}
+                failure_validation_result = batch.validate(failure_expectation_suite)
+                return_obj["failure"][failure_validation_result_id]["validation_result"] = failure_validation_result
+                failure_actions_results = self._run_actions(batch, failure_expectation_suite, failure_validation_result, run_identifier)
+                return_obj["failure"][failure_validation_result_id]["actions_results"] = failure_actions_results
+
+                if not failure_validation_result["success"] and self.process_warnings_on_error:
+                    break
+
+
+            warning_expectation_suite_identifier = ExpectationSuiteIdentifier(
+                data_asset_name=data_asset_identifier,
+                expectation_suite_name=self.expectation_suite_name_prefix + self.expectation_suite_name_suffixes[1]
+            )
+
+            warning_validation_result_id = ValidationResultIdentifier(
+                expectation_suite_identifier=warning_expectation_suite_identifier,
+                run_id=run_id,
+            )
+
+            warning_expectation_suite = None
+            try:
+                warning_expectation_suite = self.data_context.stores["expectations_store"].get(
+                    warning_expectation_suite_identifier
+                )
+            except Exception as e:
+                logger.debug("Warning expectation suite not found: {}".format(warning_expectation_suite_identifier))
+
+            if warning_expectation_suite:
+                return_obj["warning"][warning_validation_result_id] = {}
+                warning_validation_result = batch.validate(warning_expectation_suite)
+                return_obj["warning"][warning_validation_result_id]["validation_result"] = warning_validation_result
+                warning_actions_results = self._run_actions(batch, warning_expectation_suite, warning_validation_result, run_identifier)
+                return_obj["warning"][warning_validation_result_id]["actions_results"] = warning_actions_results
+
+
+        return_obj["success"] = all([val["validation_result"]["success"] for val in return_obj["failure"].values()]) or len(return_obj["success"]) == 0
+
+        # NOTE: Eugene: 2019-09-24: Slack notification?
+        # NOTE: Eugene: 2019-09-24: Update the data doc sites?
+
+        return return_obj
+
+

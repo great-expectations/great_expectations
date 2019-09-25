@@ -11,5 +11,6 @@ from .actions import (
 
 from .validation_operators import (
     ValidationOperator,
-    ValidationOperatorPerformActionList
+    PerformActionListValidationOperator,
+    ErrorsVsWarningsValidationOperator
 )
