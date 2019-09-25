@@ -96,15 +96,15 @@ class SlackNotificationAction(NamespacedValidationAction):
         else:
             self.notify_on = "all"
         
-    def take_action(self, validation_result_id, validation_result_suite):
+    def run(self, validation_result_suite_id, validation_result_suite, data_asset=None):
         logger.debug("SummarizeAndNotifySlackAction.take_action")
     
         if validation_result_suite is None:
             return
         
-        if not isinstance(validation_result_id, ValidationResultIdentifier):
-            raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
-                type(validation_result_id)
+        if not isinstance(validation_result_suite_id, ValidationResultIdentifier):
+            raise TypeError("validation_result_suite_id must be of type ValidationResultIdentifier, not {0}".format(
+                type(validation_result_suite_id)
             ))
 
         validation_success = validation_result_suite["success"]
@@ -113,7 +113,7 @@ class SlackNotificationAction(NamespacedValidationAction):
                 self.notify_on == "success" and validation_success or \
                 self.notify_on == "failure" and not validation_success:
             query = self.renderer.render(validation_result_suite)
-            self._send_slack_notification(query)
+            return self._send_slack_notification(query)
         else:
             return
                 
