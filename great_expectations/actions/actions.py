@@ -61,32 +61,40 @@ class NoOpAction(NamespacedValidationAction):
 
 
 class SlackNotificationAction(NamespacedValidationAction):
+    """
+    SlackNotificationAction is a namespeace-aware validation action that sends a Slack notification to a given webhook.
+    """
     
     def __init__(
             self,
             data_context,
-            summarizer,
-            webhook=None,
-            notify_on="all", # "failure", "success"
-            # result_key="failure",
-            # name,
-            # result_key,
-            # target_store_name,
-            # stores,
-            # services
+            renderer,
+            slack_webhook=None,
+            notify_on=None,
     ):
+        """
+        :param data_context: data context
+        :param renderer: dictionary specifying the renderer used to generate a query consumable by Slack API
+        :param slack_webhook: string - incoming Slack webhook to send notification to
+        :param notify_on: string - "all", "failure", "success" - specifies validation status that will trigger notification
+        """
         self.data_context = data_context
-        self.summarizer = instantiate_class_from_config(
-            config=summarizer,
+        self.renderer = instantiate_class_from_config(
+            config=renderer,
             runtime_config={},
             config_defaults={},
         )
-        if webhook:
-            self.webhook = webhook
+        if slack_webhook:
+            self.slack_webhook = slack_webhook
         else:
-            webhook = data_context.get_project_config().get("slack_webhook")
-        assert webhook, "No Slack webhook found in action or project configs."
-        self.notify_on = notify_on
+            slack_webhook = data_context.get_config_with_variables_substituted().get("notifications", {}).get("slack_webhook")
+        assert slack_webhook, "No Slack webhook found in action or project configs."
+        if notify_on:
+            self.notify_on = notify_on
+        elif data_context.get_config_with_variables_substituted().get("notifications", {}).get("notify_on"):
+            self.notify_on = data_context.get_config_with_variables_substituted().get("notifications", {}).get("notify_on")
+        else:
+            self.notify_on = "all"
         
     def take_action(self, validation_result_id, validation_result_suite):
         logger.debug("SummarizeAndNotifySlackAction.take_action")
@@ -104,7 +112,7 @@ class SlackNotificationAction(NamespacedValidationAction):
         if self.notify_on == "all" or \
                 self.notify_on == "success" and validation_success or \
                 self.notify_on == "failure" and not validation_success:
-            query = self.summarizer.render(validation_result_suite)
+            query = self.renderer.render(validation_result_suite)
             self._send_slack_notification(query)
         else:
             return
@@ -113,12 +121,12 @@ class SlackNotificationAction(NamespacedValidationAction):
         session = requests.Session()
     
         try:
-            response = session.post(url=self.webhook, json=query)
+            response = session.post(url=self.slack_webhook, json=query)
         except requests.ConnectionError:
             logger.warning(
                 'Failed to connect to Slack webhook at {url} '
                 'after {max_retries} retries.'.format(
-                    url=self.webhook, max_retries=10))
+                    url=self.slack_webhook, max_retries=10))
         except Exception as e:
             logger.error(str(e))
         else:
@@ -126,9 +134,11 @@ class SlackNotificationAction(NamespacedValidationAction):
                 logger.warning(
                     'Request to Slack webhook at {url} '
                     'returned error {status_code}: {text}'.format(
-                        url=self.webhook,
+                        url=self.slack_webhook,
                         status_code=response.status_code,
                         text=response.text))
+            else:
+                return "Slack notification succeeded."
 
 
 class StoreAction(NamespacedValidationAction):
