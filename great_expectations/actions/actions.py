@@ -135,7 +135,7 @@ class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
             ))
 
 
-        self.data_context.extract_and_store_parameters_from_validation_results(
+        self.data_context._extract_and_store_parameters_from_validation_results(
             validation_result_suite,
             validation_result_suite_id.expectation_suite_identifier.data_asset_name,
             validation_result_suite_id.expectation_suite_identifier.expectation_suite_name,
