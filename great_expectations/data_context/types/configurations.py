@@ -5,6 +5,8 @@ from great_expectations.types import Config
 
 class DataContextConfig(Config):
     _allowed_keys = set([
+        "ge_config_version",
+        "result_callback",
         "config_variables_file_path",
         "plugins_directory",
         "expectations_store",
@@ -16,6 +18,8 @@ class DataContextConfig(Config):
     ])
 
     _required_keys = set([
+        # TODO next version re-introduce ge_config_version as required
+        # "ge_config_version",
         "plugins_directory",
         "expectations_store",
         "evaluation_parameter_store_name",
@@ -26,6 +30,7 @@ class DataContextConfig(Config):
     ])
 
     _key_types = {
+        "ge_config_version": int,
         "config_variables_file_path": string_types,
         "plugins_directory": string_types,
         "expectations_store": dict,

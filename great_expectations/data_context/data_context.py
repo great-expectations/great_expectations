@@ -3,36 +3,28 @@
 import os
 import json
 import logging
-from ruamel.yaml import YAML
+from ruamel.yaml import YAML, YAMLError
 import sys
 import copy
 import errno
-from glob import glob
 from six import (
     string_types,
     PY2,
     PY3
 )
 import datetime
-import shutil
-import importlib
-from collections import OrderedDict
 import warnings
 
 from .util import get_slack_callback, safe_mmkdir, substitute_all_config_variables
 from ..types.base import DotDict
 
-from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError, InvalidConfigError
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.exceptions import DataContextError
 
 # FIXME : fully deprecate site_builder, by replacing it with new_site_builder.
 # FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers.
 # from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.render.renderer.site_builder import SiteBuilder
 
-from great_expectations.profile.metrics_utils import (
-get_nested_value_from_dict,
-set_nested_value_in_dict
-)
 
 try:
     from urllib.parse import urlparse
@@ -48,7 +40,6 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
 
 from .types import (
     NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
@@ -74,6 +65,9 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 ALLOWED_DELIMITERS = ['.', '/']
+
+CURRENT_CONFIG_VERSION = 1
+MINIMUM_SUPPORTED_CONFIG_VERSION = 1
 
 
 class ConfigOnlyDataContext(object):
@@ -105,17 +99,16 @@ class ConfigOnlyDataContext(object):
             DataContext
         """
         if not os.path.isdir(project_root_dir):
-            raise DataContextError("project_root_dir must be a directory in which to initialize a new DataContext")
+            raise ge_exceptions.DataContextError("project_root_dir must be a directory in which to initialize a new DataContext")
         else:
             try:
                 os.mkdir(os.path.join(project_root_dir, "great_expectations"))
             except (FileExistsError, OSError):
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "Cannot create a DataContext object when a great_expectations directory "
                     "already exists at the provided root directory.")
 
-            with open(os.path.join(project_root_dir, "great_expectations/great_expectations.yml"), "w") as template:
-                template.write(PROJECT_TEMPLATE)
+            cls.write_project_template_to_disk(project_root_dir)
 
             safe_mmkdir(os.path.join(project_root_dir, "great_expectations/uncommitted"))
             with open(os.path.join(project_root_dir, "great_expectations/uncommitted/config_variables.yml"), "w") as template:
@@ -123,6 +116,14 @@ class ConfigOnlyDataContext(object):
 
         return cls(os.path.join(project_root_dir, "great_expectations"))
 
+    @classmethod
+    def write_project_template_to_disk(cls, project_root_dir):
+        file_path = os.path.join(
+            project_root_dir,
+            "great_expectations/great_expectations.yml"
+        )
+        with open(file_path, "w") as template:
+            template.write(PROJECT_TEMPLATE)
 
     # TODO : Migrate to an expressive __init__ method, with the top level of configs unpacked into named arguments.
     def __init__(self, project_config, context_root_dir, data_asset_name_delimiter='/'):
@@ -285,7 +286,7 @@ class ConfigOnlyDataContext(object):
     def data_asset_name_delimiter(self, new_delimiter):
         """data_asset_name_delimiter property setter method"""
         if new_delimiter not in ALLOWED_DELIMITERS:
-            raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
+            raise ge_exceptions.DataContextError("Invalid delimiter: delimiter must be one of: {}".format(ALLOWED_DELIMITERS))
         else:
             self._data_asset_name_delimiter = new_delimiter
 
@@ -414,7 +415,7 @@ class ConfigOnlyDataContext(object):
         config_variables[config_variable_name] = value
         config_variables_filepath = self.get_project_config().get("config_variables_file_path")
         if not config_variables_filepath:
-            raise InvalidConfigError("'config_variables_file_path' property is not found in config - setting it is required to use this feature")
+            raise ge_exceptions.InvalidConfigError("'config_variables_file_path' property is not found in config - setting it is required to use this feature")
 
         config_variables_filepath = os.path.join(self.root_directory, config_variables_filepath)
 
@@ -1465,7 +1466,7 @@ class ConfigOnlyDataContext(object):
             if len(data_asset_names[datasource_name].keys()) == 1:
                 generator_name = list(data_asset_names[datasource_name].keys())[0]
         if generator_name not in data_asset_names[datasource_name]:
-            raise ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
+            raise ge_exceptions.ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
 
         data_asset_name_list = list(data_asset_names[datasource_name][generator_name])
         total_data_assets = len(data_asset_name_list)
@@ -1534,7 +1535,7 @@ class ConfigOnlyDataContext(object):
                     )
 
                     if not profiler.validate(batch):
-                        raise ProfilerError(
+                        raise ge_exceptions.ProfilerError(
                             "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
                         )
 
@@ -1558,7 +1559,7 @@ class ConfigOnlyDataContext(object):
                     logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
                                 (new_column_count, row_count, name, duration))
 
-                except ProfilerError as err:
+                except ge_exceptions.ProfilerError as err:
                     logger.warning(err.message)
                 except IOError as exc:
                     logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
@@ -1656,14 +1657,49 @@ class DataContext(ConfigOnlyDataContext):
 
         :return: the configuration object read from the file
         """
+        path_to_yml = os.path.join(self.root_directory, "great_expectations.yml")
         try:
-            with open(os.path.join(self.root_directory, "great_expectations.yml"), "r") as data:
+            with open(path_to_yml, "r") as data:
                 config_dict = yaml.load(data)
-                config = DataContextConfig(**config_dict)
-        except IOError:
-            raise ConfigNotFoundError("No configuration found in %s" % str(os.path.join(self.root_directory, "great_expectations.yml")))
 
-        return config
+        except YAMLError as err:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Your configuration file is not a valid yml file likely due to a yml syntax error."
+            )
+        except IOError:
+            raise ge_exceptions.ConfigNotFoundError(
+                "No configuration found in %s" % str(path_to_yml)
+            )
+
+        version = config_dict.get("ge_config_version", 0)
+
+        # TODO clean this up once type-checking configs is more robust
+        if not isinstance(version, int):
+            raise ge_exceptions.InvalidConfigValueTypeError("The key `ge_config_version` must be an integer. Please check your config file.")
+
+        # When migrating from 0.7.x to 0.8.0
+        if version == 0 and "validations_stores" in list(config_dict.keys()):
+            raise ge_exceptions.ZeroDotSevenConfigVersionError(
+                "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
+            )
+        elif version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+            raise ge_exceptions.UnsupportedConfigVersionError(
+                "You appear to have an invalid config version ({}).\n    The version number must be between {} and {}.".format(
+                    version,
+                    MINIMUM_SUPPORTED_CONFIG_VERSION,
+                    CURRENT_CONFIG_VERSION,
+                )
+            )
+        elif version > CURRENT_CONFIG_VERSION:
+            raise ge_exceptions.InvalidConfigVersionError(
+                "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
+                    version,
+                    CURRENT_CONFIG_VERSION
+                )
+            )
+
+        return DataContextConfig(**config_dict)
+
 
     # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
     def _save_project_config(self):
@@ -1706,7 +1742,7 @@ class DataContext(ConfigOnlyDataContext):
         elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
             return "./"
         else:
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "Unable to locate context root directory. Please provide a directory name."
             )
 

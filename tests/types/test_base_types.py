@@ -3,6 +3,11 @@ import pytest
 from six import PY2, string_types
 import sys
 
+from great_expectations.exceptions import (
+    MissingTopLevelConfigKeyError,
+    InvalidConfigValueTypeError,
+    InvalidTopLevelConfigKeyError,
+)
 from great_expectations.types import (
     DotDict,
     AllowedKeysDotDict,
@@ -65,17 +70,17 @@ def test_DotDict_dot_syntax():
 
 
 def test_allowed_keys_dot_dict_raises_error():
-    with pytest.raises(KeyError):
+    with pytest.raises(InvalidTopLevelConfigKeyError):
         D = AllowedKeysDotDict(**{
             'x': 1,
         })
 
     d = AllowedKeysDotDict(**{})
 
-    with pytest.raises(KeyError):
+    with pytest.raises(InvalidTopLevelConfigKeyError):
         d["x"] = "hello?"
     
-    with pytest.raises(KeyError):
+    with pytest.raises(InvalidTopLevelConfigKeyError):
         d.x = "goodbye?"
 
     # Note that we raise AttributeError instead of KeyError here since the
@@ -122,10 +127,10 @@ def test_allowed_keys_dot_dict_subclass():
         "z": "estella",
     }
 
-    with pytest.raises(KeyError):
+    with pytest.raises(InvalidTopLevelConfigKeyError):
         d["w"] = 100
 
-    with pytest.raises(KeyError):
+    with pytest.raises(InvalidTopLevelConfigKeyError):
         d.w = 100
 
     with pytest.raises(AttributeError):
@@ -140,7 +145,7 @@ def test_allowed_keys_dot_dict_subclass_required_keys():
         _allowed_keys = {"x", "y", "z"}
         _required_keys = {"x"}
 
-    with pytest.raises(KeyError):
+    with pytest.raises(MissingTopLevelConfigKeyError):
         d = MyAllowedKeysDotDict(**{
             'y': 1,
         })
@@ -183,7 +188,7 @@ def test_allowed_keys_dot_dict_subclass_key_types():
         'x': 1,
     })
 
-    with pytest.raises(TypeError):
+    with pytest.raises(InvalidConfigValueTypeError):
         d = MyAllowedKeysDotDict(**{
             'x': "1",
         })
@@ -193,7 +198,7 @@ def test_allowed_keys_dot_dict_subclass_key_types():
         "y": "hello",
     })
 
-    with pytest.raises(TypeError):
+    with pytest.raises(InvalidConfigValueTypeError):
         d = MyAllowedKeysDotDict(**{
             'x': 1,
             'y': 10,
@@ -211,10 +216,10 @@ def test_allowed_keys_dot_dict_subclass_key_types():
         "y": "10",
     }
 
-    with pytest.raises(TypeError):
+    with pytest.raises(InvalidConfigValueTypeError):
         d["x"] = "not an int"
 
-    with pytest.raises(TypeError):
+    with pytest.raises(InvalidConfigValueTypeError):
         d.x = "not an int"
 
     with pytest.raises(ValueError):
@@ -357,7 +362,7 @@ def test_allowed_keys_dot_dict_recursive_coercion():
             }
         )
 
-    with pytest.raises(KeyError):
+    with pytest.raises(MissingTopLevelConfigKeyError):
         MyAllowedKeysDotDict(
             coerce_types=True,
             **{
@@ -489,7 +494,7 @@ def test_allowed_keys_dot_dict_unicode_issues():
     })
 
     if PY2:
-        with pytest.raises(TypeError):
+        with pytest.raises(InvalidConfigValueTypeError):
             MyLTDD(**{
                 "a": u"hello"
             })
@@ -525,12 +530,12 @@ def test_allowed_keys_dot_dict_multiple_types():
         "a": 1.5
     })
 
-    with pytest.raises(TypeError):
+    with pytest.raises(InvalidConfigValueTypeError):
         B = MyLTDD(**{
             "a": "string"
         })
 
-    with pytest.raises(TypeError):
+    with pytest.raises(InvalidConfigValueTypeError):
         B = MyLTDD(**{
             "a": None
         })
@@ -590,7 +595,7 @@ def test_required_keys_dotdict():
     class MyRequiredKeysDotDict(RequiredKeysDotDict):
         _required_keys = {"class_name"}
 
-    with pytest.raises(KeyError):
+    with pytest.raises(MissingTopLevelConfigKeyError):
         # required key is missing
         d = MyRequiredKeysDotDict({"blarg": "isarealthreat"})
 
