@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import shutil
+
 from .datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
@@ -16,7 +18,7 @@ from great_expectations.render.renderer import ProfilingResultsPageRenderer, Exp
 from great_expectations.data_context import DataContext
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
-from great_expectations.exceptions import DataContextError, ConfigNotFoundError
+import great_expectations.exceptions as ge_exceptions
 from great_expectations import __version__, read_csv
 from pyfiglet import figlet_format
 import click
@@ -191,7 +193,7 @@ def init(target_directory):
 
     try:
         context = DataContext.create(target_directory)
-    except DataContextError as err:
+    except ge_exceptions.DataContextError as err:
         logger.critical(err.message)
         sys.exit(-1)
 
@@ -218,7 +220,7 @@ def add_datasource(directory):
     """
     try:
         context = DataContext(directory)
-    except ConfigNotFoundError:
+    except ge_exceptions.ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
 
@@ -261,7 +263,7 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
 
     try:
         context = DataContext(directory)
-    except ConfigNotFoundError:
+    except ge_exceptions.ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
 
@@ -297,7 +299,7 @@ def build_documentation(directory, site_name, data_asset_name):
         
     try:
         context = DataContext(directory)
-    except ConfigNotFoundError:
+    except ge_exceptions.ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
 
@@ -319,6 +321,80 @@ def render(render_object):
     else:
         model = ExpectationSuitePageRenderer.render(raw)
     print(DefaultJinjaPageView.render(model))
+
+
+@cli.command()
+@click.option(
+    '--target_directory',
+    '-d',
+    default="./",
+    help='The root of the project directory where you want to initialize Great Expectations.'
+)
+def check_config(target_directory):
+    """Check a config and raise helpful messages about antiquated formats."""
+    cli_message("Checking your config files for validity...\n")
+
+    try:
+        is_config_ok, error_message = do_config_check(target_directory)
+        if is_config_ok:
+            cli_message("Your config file appears valid!")
+        else:
+            cli_message(error_message)
+            sys.exit(1)
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        cli_message(err.message)
+
+        original_filename = "great_expectations.yml"
+        archive_filename = "great_expectations.yml.archive"
+
+        if click.confirm("\nWould you like to install a new config file template?\n    We will move your existing `{}` to `{}`".format(original_filename, archive_filename), default=True):
+            _archive_existing_project_config(archive_filename, target_directory)
+            DataContext.write_project_template_to_disk(target_directory)
+
+            cli_message(
+                """\nOK. You now have a new yml config file in `{}`.
+
+- Please copy the relevant values from the archived file ({}) into this new
+template.
+""".format(original_filename, archive_filename)
+            )
+        else:
+            # FIXME/TODO insert doc url here
+            cli_message(
+                """\nOK. Note to run great_expectations you will need to upgrade your config file to the latest format.
+- Please see the docs here: """
+            )
+
+        cli_message("""- We are super sorry about this breaking change! :]
+- If you are running into any problems, please reach out on Slack and we can
+help you in realtime: https://tinyurl.com/great-expectations-slack""")
+        sys.exit(0)
+
+
+def _archive_existing_project_config(archive_filename, target_directory):
+    base = os.path.join(target_directory, "great_expectations")
+    source = os.path.join(base, "great_expectations.yml")
+    destination = os.path.join(base, archive_filename)
+    shutil.move(source, destination)
+
+
+def do_config_check(target_directory):
+    try:
+        DataContext(
+            context_root_dir="{}/great_expectations/".format(target_directory)
+        )
+        return True, None
+    except (
+            ge_exceptions.InvalidConfigurationYamlError,
+            ge_exceptions.InvalidTopLevelConfigKeyError,
+            ge_exceptions.MissingTopLevelConfigKeyError,
+            ge_exceptions.InvalidConfigValueTypeError,
+            ge_exceptions.InvalidConfigVersionError,
+            ge_exceptions.UnsupportedConfigVersionError,
+            ge_exceptions.DataContextError,
+            ) as err:
+        logger.critical(err.message)
+        return False, err.message
 
 
 def main():

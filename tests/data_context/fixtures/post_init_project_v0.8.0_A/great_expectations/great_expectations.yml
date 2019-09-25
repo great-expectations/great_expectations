@@ -1,3 +1,4 @@
+ge_config_version: 1
 plugins_directory: plugins/
 
 expectations_store:
