@@ -3,6 +3,7 @@ import pytest
 from great_expectations.actions import (
     BasicValidationAction,
     SummarizeAndStoreAction,
+    SlackNotificationAction
 )
 # from great_expectations.actions.types import (
 #     ActionInternalConfig,
@@ -16,7 +17,9 @@ from great_expectations.data_context.store import (
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier
 )
-
+from great_expectations.data_context.types import (
+    ValidationResultIdentifier
+)
 
 def test_action_config():
 
@@ -110,3 +113,34 @@ def test_SummarizeAndStoreAction():
     )) == {}
 
 
+def test_SlackNotificationAction(data_context):
+    renderer = {
+                    "module_name": "great_expectations.render.renderer.slack_renderer",
+                    "class_name": "SlackRenderer",
+                }
+    slack_webhook = "https://hooks.slack.com/services/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"
+    notify_on = "all"
+    
+    slack_action = SlackNotificationAction(
+        data_context=data_context,
+        renderer=renderer,
+        slack_webhook=slack_webhook,
+        notify_on=notify_on
+    )
+
+    validation_result_suite = {'results': [], 'success': True,
+                               'statistics': {'evaluated_expectations': 0, 'successful_expectations': 0,
+                                              'unsuccessful_expectations': 0, 'success_percent': None},
+                               'meta': {'great_expectations.__version__': 'v0.8.0__develop',
+                                        'data_asset_name': {'datasource': 'x', 'generator': 'y',
+                                                            'generator_asset': 'z'},
+                                        'expectation_suite_name': 'default', 'run_id': '2019-09-25T060538.829112Z'}}
+    
+    validation_result_suite_id = ValidationResultIdentifier(**{'expectation_suite_identifier': {
+        'data_asset_name': {'datasource': 'x', 'generator': 'y', 'generator_asset': 'z'},
+        'expectation_suite_name': 'default'}, 'run_id': 'test_100'})
+
+    assert slack_action.run(
+        validation_result_suite_id=validation_result_suite_id,
+        validation_result_suite=validation_result_suite
+    ) == "Slack notification succeeded."
