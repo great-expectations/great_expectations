@@ -494,7 +494,7 @@ def test_allowed_keys_dot_dict_unicode_issues():
     })
 
     if PY2:
-        with pytest.raises(TypeError):
+        with pytest.raises(InvalidConfigValueTypeError):
             MyLTDD(**{
                 "a": u"hello"
             })
