@@ -1,15 +1,12 @@
 import pytest
-import os
-
-import pandas as pd
 
 from great_expectations.data_context.store import (
     ValidationResultStore,
 )
 from great_expectations.data_context.types import (
-    DataAssetIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.exceptions import MissingTopLevelConfigKeyError
 from great_expectations.util import (
     gen_directory_tree_str,
 )
@@ -28,7 +25,7 @@ def test_ValidationResultStore_with_InMemoryStoreBackend():
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
 
-    with pytest.raises(KeyError):
+    with pytest.raises(MissingTopLevelConfigKeyError):
         my_store.get(ValidationResultIdentifier(**{}))
     
     ns_1 = ValidationResultIdentifier(
@@ -87,7 +84,7 @@ def test_ValidationResultStore_with_FixedLengthTupleFileSystemStoreBackend(tmp_p
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
 
-    with pytest.raises(KeyError):
+    with pytest.raises(MissingTopLevelConfigKeyError):
         my_store.get(ValidationResultIdentifier(**{}))
     
     ns_1 = ValidationResultIdentifier(
