@@ -360,10 +360,9 @@ def check_config(target_directory):
 
 def do_config_check(target_directory):
     try:
-        context = DataContext(
-            context_root_dir="{}/great_expectations/".format(target_directory))
-        config = context.get_project_config()
-        check_for_obsolete_config_file(config)
+        DataContext(
+            context_root_dir="{}/great_expectations/".format(target_directory)
+        )
         return True, None
     except (
             ge_exceptions.InvalidConfigurationYamlError,
@@ -376,23 +375,6 @@ def do_config_check(target_directory):
             ) as err:
         logger.critical(err.message)
         return False, err.message
-
-
-def check_for_obsolete_config_file(config):
-    """
-    Check if a config is obviously out of date.
-    Note this can go away when configs are more strongly typed.
-    """
-    # TODO remove this warning and add results_callback the obsolete keys list when slack is changed
-    if "result_callback" in config.keys():
-        # TODO add link to docs in message
-        cli_message("Please note that the key `results_callback` will be moved in the next release.")
-
-    obsolete_keys = ["validations_stores"]
-    for obsolete_key in obsolete_keys:
-        if obsolete_key in config.keys():
-            cli_message("""Hmm. You appear to be using an antiquated config version.
-    The `{}` key is obsolete and no longer used.""".format(obsolete_key))
 
 
 def main():

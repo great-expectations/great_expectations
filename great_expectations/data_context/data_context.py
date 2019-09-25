@@ -1675,7 +1675,7 @@ class DataContext(ConfigOnlyDataContext):
         # When migrating from 0.7.x to 0.8.0
         if version == 0 and "validations_stores" in list(config_dict.keys()):
             raise ge_exceptions.ZeroDotSevenConfigVersionError(
-                "You appear to be using a config version from the 0.7.x series. This is no longer supported"
+                "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
             )
         elif version < MINIMUM_SUPPORTED_CONFIG_VERSION:
             raise ge_exceptions.UnsupportedConfigVersionError(
