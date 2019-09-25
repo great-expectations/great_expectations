@@ -223,7 +223,8 @@ def add_datasource(directory):
     except ge_exceptions.ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
-
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, directory)
 
     data_source_name = add_datasource_impl(context)
 
@@ -266,6 +267,9 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
     except ge_exceptions.ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, directory)
+        return
 
     if batch_kwargs is not None:
         batch_kwargs = json.loads(batch_kwargs)
@@ -302,6 +306,9 @@ def build_documentation(directory, site_name, data_asset_name):
     except ge_exceptions.ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, directory)
+        return
 
     build_documentation_impl(context, site_name=site_name, data_asset_name=data_asset_name)
 
@@ -331,7 +338,7 @@ def render(render_object):
     help='The root of the project directory where you want to initialize Great Expectations.'
 )
 def check_config(target_directory):
-    """Check a config and raise helpful messages about antiquated formats."""
+    """Check a config for validity and help with migrations."""
     cli_message("Checking your config files for validity...\n")
 
     try:
@@ -342,33 +349,36 @@ def check_config(target_directory):
             cli_message(error_message)
             sys.exit(1)
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        cli_message(err.message)
+        _offer_to_install_new_template(err, target_directory)
 
-        original_filename = "great_expectations.yml"
-        archive_filename = "great_expectations.yml.archive"
 
-        if click.confirm("\nWould you like to install a new config file template?\n    We will move your existing `{}` to `{}`".format(original_filename, archive_filename), default=True):
-            _archive_existing_project_config(archive_filename, target_directory)
-            DataContext.write_project_template_to_disk(target_directory)
+def _offer_to_install_new_template(err, target_directory):
+    cli_message(err.message)
+    original_filename = "great_expectations.yml"
+    archive_filename = "great_expectations.yml.archive"
+    if click.confirm(
+            "\nWould you like to install a new config file template?\n    We will move your existing `{}` to `{}`".format(
+                    original_filename, archive_filename), default=True):
+        _archive_existing_project_config(archive_filename, target_directory)
+        DataContext.write_project_template_to_disk(target_directory)
 
-            cli_message(
-                """\nOK. You now have a new yml config file in `{}`.
+        cli_message(
+            """\nOK. You now have a new yml config file in `{}`.
 
 - Please copy the relevant values from the archived file ({}) into this new
 template.
 """.format(original_filename, archive_filename)
-            )
-        else:
-            # FIXME/TODO insert doc url here
-            cli_message(
-                """\nOK. Note to run great_expectations you will need to upgrade your config file to the latest format.
+        )
+    else:
+        # FIXME/TODO insert doc url here
+        cli_message(
+            """\nOK. Note to run great_expectations you will need to upgrade your config file to the latest format.
 - Please see the docs here: """
-            )
-
-        cli_message("""- We are super sorry about this breaking change! :]
+        )
+    cli_message("""- We are super sorry about this breaking change! :]
 - If you are running into any problems, please reach out on Slack and we can
 help you in realtime: https://tinyurl.com/great-expectations-slack""")
-        sys.exit(0)
+    sys.exit(0)
 
 
 def _archive_existing_project_config(archive_filename, target_directory):
