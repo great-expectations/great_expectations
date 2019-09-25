@@ -314,6 +314,7 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
 
     ErrorsVsWarningsValidationOperator
     {
+        "data_asset_identifiers": list of data asset identifiers
         "success": True/False,
         "failure": {
             expectation suite identifier: {
@@ -357,6 +358,7 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
         # Maybe use a Store, since it's a key-value thing...?
         # For now, I'm NOT typing it until we gain more practical experience with operators and actions.
         return_obj = {
+            "data_asset_identifiers": [],
             "success": None,
             "failure": {},
             "warning": {}
@@ -371,6 +373,8 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
 
             assert not data_asset_identifier is None
             assert not run_id is None
+
+            return_obj["data_asset_identifiers"].append(data_asset_identifier)
 
             # NOTE : Abe 2019/09/12 : Perhaps this could be generalized to a loop.
             # I'm NOT doing that, because lots of user research suggests that these 3 specific behaviors
