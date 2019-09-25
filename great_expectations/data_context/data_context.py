@@ -560,7 +560,7 @@ class ConfigOnlyDataContext(object):
                                 meaningful to the user (e.g., pipeline run id or timestamp)
         :return: A result object that is defined by the class of the operator that is invoked.
         """
-        self.validation_operators[validation_operator_name].run(
+        return self.validation_operators[validation_operator_name].run(
             assets_to_validate=assets_to_validate,
             run_identifier=run_identifier,
         )
