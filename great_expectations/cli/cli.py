@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import shutil
+
 from .datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
@@ -330,7 +332,7 @@ def render(render_object):
 )
 def check_config(target_directory):
     """Check a config and raise helpful messages about antiquated formats."""
-    cli_message("Hi! Let's check your config files for validity.")
+    cli_message("Checking your config files for validity...\n")
 
     try:
         is_config_ok, error_message = do_config_check(target_directory)
@@ -341,21 +343,39 @@ def check_config(target_directory):
             sys.exit(1)
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         cli_message(err.message)
-        cli_message("Would you like to build a new config file?")
 
-        # TODO offer to build a new config format only after specific errors
-        # selected = click.prompt(
-        #     "Would you like to archive your existing config and create a new config template?",
-        #     type=click.Choice(["Y", "n"]),
-        #     show_choices=True
-        # )
-        # if selected == "Y":
-        #     cli_message(
-        #         "Great! First let's move your existing `great_expectations.yml` to `great_expectations.yml.archive`")
-        #
-        # TODO archive the existing .yml
-        #
-        # TODO make new yml
+        original_filename = "great_expectations.yml"
+        archive_filename = "great_expectations.yml.archive"
+
+        if click.confirm("\nWould you like to install a new config file template?\n    We will move your existing `{}` to `{}`".format(original_filename, archive_filename), default=True):
+            _archive_existing_project_config(archive_filename, target_directory)
+            DataContext.write_project_template_to_disk(target_directory)
+
+            cli_message(
+                """\nOK. You now have a new yml config file in `{}`.
+
+- Please copy the relevant values from the archived file ({}) into this new
+template.
+""".format(original_filename, archive_filename)
+            )
+        else:
+            # FIXME/TODO insert doc url here
+            cli_message(
+                """\nOK. Note to run great_expectations you will need to upgrade your config file to the latest format.
+- Please see the docs here: """
+            )
+
+        cli_message("""- We are super sorry about this breaking change! :]
+- If you are running into any problems, please reach out on Slack and we can
+help you in realtime: https://tinyurl.com/great-expectations-slack""")
+        sys.exit(0)
+
+
+def _archive_existing_project_config(archive_filename, target_directory):
+    base = os.path.join(target_directory, "great_expectations")
+    source = os.path.join(base, "great_expectations.yml")
+    destination = os.path.join(base, archive_filename)
+    shutil.move(source, destination)
 
 
 def do_config_check(target_directory):

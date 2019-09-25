@@ -108,8 +108,7 @@ class ConfigOnlyDataContext(object):
                     "Cannot create a DataContext object when a great_expectations directory "
                     "already exists at the provided root directory.")
 
-            with open(os.path.join(project_root_dir, "great_expectations/great_expectations.yml"), "w") as template:
-                template.write(PROJECT_TEMPLATE)
+            cls.write_project_template_to_disk(project_root_dir)
 
             safe_mmkdir(os.path.join(project_root_dir, "great_expectations/uncommitted"))
             with open(os.path.join(project_root_dir, "great_expectations/uncommitted/config_variables.yml"), "w") as template:
@@ -117,6 +116,14 @@ class ConfigOnlyDataContext(object):
 
         return cls(os.path.join(project_root_dir, "great_expectations"))
 
+    @classmethod
+    def write_project_template_to_disk(cls, project_root_dir):
+        file_path = os.path.join(
+            project_root_dir,
+            "great_expectations/great_expectations.yml"
+        )
+        with open(file_path, "w") as template:
+            template.write(PROJECT_TEMPLATE)
 
     # TODO : Migrate to an expressive __init__ method, with the top level of configs unpacked into named arguments.
     def __init__(self, project_config, context_root_dir, data_asset_name_delimiter='/'):
@@ -408,7 +415,7 @@ class ConfigOnlyDataContext(object):
         config_variables[config_variable_name] = value
         config_variables_filepath = self.get_project_config().get("config_variables_file_path")
         if not config_variables_filepath:
-            raise InvalidConfigError("'config_variables_file_path' property is not found in config - setting it is required to use this feature")
+            raise ge_exceptions.InvalidConfigError("'config_variables_file_path' property is not found in config - setting it is required to use this feature")
 
         config_variables_filepath = os.path.join(self.root_directory, config_variables_filepath)
 
@@ -1461,7 +1468,7 @@ class ConfigOnlyDataContext(object):
             if len(data_asset_names[datasource_name].keys()) == 1:
                 generator_name = list(data_asset_names[datasource_name].keys())[0]
         if generator_name not in data_asset_names[datasource_name]:
-            raise ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
+            raise ge_exceptions.ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
 
         data_asset_name_list = list(data_asset_names[datasource_name][generator_name])
         total_data_assets = len(data_asset_name_list)
@@ -1530,7 +1537,7 @@ class ConfigOnlyDataContext(object):
                     )
 
                     if not profiler.validate(batch):
-                        raise ProfilerError(
+                        raise ge_exceptions.ProfilerError(
                             "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
                         )
 
@@ -1554,7 +1561,7 @@ class ConfigOnlyDataContext(object):
                     logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
                                 (new_column_count, row_count, name, duration))
 
-                except ProfilerError as err:
+                except ge_exceptions.ProfilerError as err:
                     logger.warning(err.message)
                 except IOError as exc:
                     logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
