@@ -57,3 +57,11 @@ def test_DataContext_raises_error_on_old_config_version():
     )
     with pytest.raises(ge_exceptions.UnsupportedConfigVersionError):
         DataContext(local_dir)
+
+
+def test_DataContext_raises_error_on_missing_config_version_aka_version_zero():
+    local_dir = file_relative_path(
+        __file__, os.path.join(BASE_DIR, "version_zero")
+    )
+    with pytest.raises(ge_exceptions.ZeroDotSevenConfigVersionError):
+        DataContext(local_dir)

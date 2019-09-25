@@ -7,32 +7,24 @@ from ruamel.yaml import YAML, YAMLError
 import sys
 import copy
 import errno
-from glob import glob
 from six import (
     string_types,
     PY2,
     PY3
 )
 import datetime
-import shutil
-import importlib
-from collections import OrderedDict
 import warnings
 
 from .util import get_slack_callback, safe_mmkdir, substitute_all_config_variables
 from ..types.base import DotDict
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.exceptions import DataContextError
 
 # FIXME : fully deprecate site_builder, by replacing it with new_site_builder.
 # FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers.
 # from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.render.renderer.site_builder import SiteBuilder
 
-from great_expectations.profile.metrics_utils import (
-get_nested_value_from_dict,
-set_nested_value_in_dict
-)
 
 try:
     from urllib.parse import urlparse
@@ -48,7 +40,6 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
 
 from .types import (
     NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
@@ -74,9 +65,9 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 ALLOWED_DELIMITERS = ['.', '/']
-MINIMUM_SUPPORTED_CONFIG_VERSION = 2
-MAXIMUM_SUPPORTED_CONFIG_VERSION = 2
-MAXIMUM_EXISTENT_CONFIG_VERSION = 2
+
+CURRENT_CONFIG_VERSION = 1
+MINIMUM_SUPPORTED_CONFIG_VERSION = 1
 
 
 class ConfigOnlyDataContext(object):
@@ -1665,7 +1656,7 @@ class DataContext(ConfigOnlyDataContext):
         try:
             with open(path_to_yml, "r") as data:
                 config_dict = yaml.load(data)
-                config = DataContextConfig(**config_dict)
+
         except YAMLError as err:
             raise ge_exceptions.InvalidConfigurationYamlError(
                 "Your configuration file is not a valid yml file likely due to a yml syntax error."
@@ -1675,24 +1666,35 @@ class DataContext(ConfigOnlyDataContext):
                 "No configuration found in %s" % str(path_to_yml)
             )
 
-        version = config.ge_config_version
+        version = config_dict.get("ge_config_version", 0)
 
-        if version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+        # TODO clean this up once type-checking configs is more robust
+        if not isinstance(version, int):
+            raise ge_exceptions.InvalidConfigValueTypeError("The key `ge_config_version` must be an integer. Please check your config file.")
+
+        # When migrating from 0.7.x to 0.8.0
+        if version == 0 and "validations_stores" in list(config_dict.keys()):
+            raise ge_exceptions.ZeroDotSevenConfigVersionError(
+                "You appear to be using a config version from the 0.7.x series. This is no longer supported"
+            )
+        elif version < MINIMUM_SUPPORTED_CONFIG_VERSION:
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "You appear to have an invalid config version ({}).\n    The version number must be between {} and {}.".format(
                     version,
                     MINIMUM_SUPPORTED_CONFIG_VERSION,
-                    MAXIMUM_SUPPORTED_CONFIG_VERSION,
+                    CURRENT_CONFIG_VERSION,
                 )
             )
-        elif version > MAXIMUM_SUPPORTED_CONFIG_VERSION:
+        elif version > CURRENT_CONFIG_VERSION:
             raise ge_exceptions.InvalidConfigVersionError(
                 "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
-                    version, MAXIMUM_EXISTENT_CONFIG_VERSION
+                    version,
+                    CURRENT_CONFIG_VERSION
                 )
             )
 
-        return config
+        return DataContextConfig(**config_dict)
+
 
     # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
     def _save_project_config(self):
@@ -1735,7 +1737,7 @@ class DataContext(ConfigOnlyDataContext):
         elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
             return "./"
         else:
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "Unable to locate context root directory. Please provide a directory name."
             )
 

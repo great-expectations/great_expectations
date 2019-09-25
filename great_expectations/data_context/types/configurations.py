@@ -18,7 +18,8 @@ class DataContextConfig(Config):
     ])
 
     _required_keys = set([
-        "ge_config_version",
+        # TODO next version re-introduce ge_config_version as required
+        # "ge_config_version",
         "plugins_directory",
         "expectations_store",
         "evaluation_parameter_store_name",

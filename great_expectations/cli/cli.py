@@ -332,25 +332,16 @@ def check_config(target_directory):
     """Check a config and raise helpful messages about antiquated formats."""
     cli_message("Hi! Let's check your config files for validity.")
 
-    do_config_check(target_directory)
-
-
-def do_config_check(target_directory):
     try:
-        context = DataContext(
-            context_root_dir="{}/great_expectations/".format(target_directory))
-        config = context.get_project_config()
-        check_for_obsolete_config_file(config)
-        cli_message("Your config file appears valid!")
-    except (
-            ge_exceptions.InvalidConfigurationYamlError,
-            ge_exceptions.InvalidTopLevelConfigKeyError,
-            ge_exceptions.MissingTopLevelConfigKeyError,
-            ge_exceptions.InvalidConfigValueTypeError,
-            ge_exceptions.InvalidConfigVersionError,
-            ge_exceptions.UnsupportedConfigVersionError,
-            ) as err:
+        is_config_ok, error_message = do_config_check(target_directory)
+        if is_config_ok:
+            cli_message("Your config file appears valid!")
+        else:
+            cli_message(error_message)
+            sys.exit(1)
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         cli_message(err.message)
+        cli_message("Would you like to build a new config file?")
 
         # TODO offer to build a new config format only after specific errors
         # selected = click.prompt(
@@ -366,10 +357,25 @@ def do_config_check(target_directory):
         #
         # TODO make new yml
 
-    except ge_exceptions.DataContextError as err:
-        cli_message(err.message)
+
+def do_config_check(target_directory):
+    try:
+        context = DataContext(
+            context_root_dir="{}/great_expectations/".format(target_directory))
+        config = context.get_project_config()
+        check_for_obsolete_config_file(config)
+        return True, None
+    except (
+            ge_exceptions.InvalidConfigurationYamlError,
+            ge_exceptions.InvalidTopLevelConfigKeyError,
+            ge_exceptions.MissingTopLevelConfigKeyError,
+            ge_exceptions.InvalidConfigValueTypeError,
+            ge_exceptions.InvalidConfigVersionError,
+            ge_exceptions.UnsupportedConfigVersionError,
+            ge_exceptions.DataContextError,
+            ) as err:
         logger.critical(err.message)
-        sys.exit(-1)
+        return False, err.message
 
 
 def check_for_obsolete_config_file(config):
