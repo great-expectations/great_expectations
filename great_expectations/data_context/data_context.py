@@ -1976,7 +1976,7 @@ data_docs:
       # "team_site" is meant to support the "shared source of truth for a team" use case. 
       # By default only the expectations section is enabled.
       #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3). 
-      # Reach out on Slack (https://tinyurl.com/great-expectations-slack>) if you would like to discuss the best way to configure a team site.
+      # Reach out on Slack (https://greatexpectations.io/slack>) if you would like to discuss the best way to configure a team site.
       type: SiteBuilder
       site_store:
         type: filesystem
