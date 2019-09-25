@@ -6,7 +6,7 @@ Migrating Between Versions
 
 While we are committed to keeping Great Expectations as stable as possible,
 sometimes breaking changes are necessary to maintain our trajectory. This is
-especially true as the library has evolved from just a data quality tool to an
+especially true as the library has evolved from just a data quality tool to a
 slightly more opinionated framework.
 
 Great Expectations provides a warning when the currently-installed version is different from the version stored in the
