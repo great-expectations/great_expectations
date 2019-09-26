@@ -4,6 +4,7 @@ import pytest
 import json
 import copy
 
+from freezegun import freeze_time
 import pandas as pd
 
 import great_expectations as ge
@@ -167,7 +168,8 @@ def test_perform_action_list_validation_operator_run(basic_data_context_config_f
     #TODO: One DataSnapshotStores are implemented, add a test for quarantined data
 
 
-def test_errors_warnings_validation_operator_run(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
+@freeze_time("09/26/19 13:42:41")
+def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
     project_path = str(tmp_path_factory.mktemp('great_expectations'))
 
     # NOTE: This setup is almost identical to test_DefaultDataContextAwareValidationOperator.
@@ -258,7 +260,7 @@ def test_errors_warnings_validation_operator_run(basic_data_context_config_for_v
     my_ge_df_3 = ge.from_pandas(my_df_3)
     my_ge_df_3._expectation_suite["data_asset_name"] = DataAssetIdentifier("my_datasource", "default", "f3")
 
-    results = vo.run(
+    return_obj = vo.run(
         assets_to_validate=[
             my_ge_df_1,
             my_ge_df_2,
@@ -266,11 +268,22 @@ def test_errors_warnings_validation_operator_run(basic_data_context_config_for_v
         ],
         run_identifier="test_100"
     )
-    test = 2134
-    # print(json.dumps(results["validation_results"], indent=2))
+    slack_query = vo._build_slack_query(return_obj)
+    expected_slack_query = {'blocks': [{'type': 'divider'}, {'type': 'section', 'text': {'type': 'mrkdwn',
+                                                                                         'text': '*FailureVsWarning Validation Operator Completed.*'}},
+                                       {'type': 'divider'},
+                                       {'type': 'section', 'text': {'type': 'mrkdwn', 'text': '*Status*: Failed :x:'}},
+                                       {'type': 'section', 'text': {'type': 'mrkdwn',
+                                                                    'text': "*Data Asset List:* [{'datasource': 'my_datasource', 'generator': 'default', 'generator_asset': 'f1'}, {'datasource': 'my_datasource', 'generator': 'default', 'generator_asset': 'f2'}, {'datasource': 'my_datasource', 'generator': 'default', 'generator_asset': 'f3'}]"}},
+                                       {'type': 'section', 'text': {'type': 'mrkdwn',
+                                                                    'text': "*Failed Data Assets:* [{'datasource': 'my_datasource', 'generator': 'default', 'generator_asset': 'f2'}]"}},
+                                       {'type': 'section', 'text': {'type': 'mrkdwn', 'text': '*Run ID:* test_100'}},
+                                       {'type': 'section',
+                                        'text': {'type': 'mrkdwn', 'text': '*Timestamp:* 09/26/19 13:42:41'}},
+                                       {'type': 'divider'}, {'type': 'context', 'elements': [{'type': 'mrkdwn',
+                                                                                              'text': 'Learn about FailureVsWarning Validation Operators at https://docs.greatexpectations.io/en/latest/guides/failure_vs_warning_validation_operator.html'}]}]}
 
-
-
+    assert slack_query == expected_slack_query
 
 # TODO: replace once the updated get_batch is integrated.
 # def test__get_or_convert_to_batch_from_identifiers(basic_data_context_config_for_validation_operator, filesystem_csv):
