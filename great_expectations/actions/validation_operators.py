@@ -336,6 +336,7 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
         expectation_suite_name_prefix="",
         expectation_suite_name_suffixes=["failure", "warning"],
         stop_on_first_error=False,
+        slack_webhook=None
     ):
         super(ErrorsVsWarningsValidationOperator, self).__init__(
             data_context,
@@ -349,6 +350,74 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
         for suffix in expectation_suite_name_suffixes:
             assert isinstance(suffix, string_types)
         self.expectation_suite_name_suffixes = expectation_suite_name_suffixes
+        
+        if slack_webhook:
+            self.slack_webhook = slack_webhook
+        else:
+            self.slack_webhook = data_context.get_config_with_variables_substituted().get("notifications", {}).get("slack_webhook")
+
+    def _build_slack_query(self, run_return_obj):
+        timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
+        success = run_return_obj.get("success")
+        status_text = "Success :tada:" if success else "Failed :x:"
+        run_id = run_return_obj.get("run_id")
+        data_asset_identifiers = run_return_obj.get("data_asset_identifiers")
+        failed_data_assets = []
+        
+        if run_return_obj.get("failure"):
+            failed_data_assets = [
+                validation_result_identifier["expectation_suite_identifier"]["data_asset_name"] for validation_result_identifier, value in run_return_obj.get("failure").items() \
+                if not value["validation_result"]["success"]
+            ]
+    
+        title_block = {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "*FailureVsWarning Validation Operator Completed.*",
+            },
+        }
+    
+        query = {"blocks": [title_block]}
+
+        status_element = {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "*Status*: {}".format(status_text)},
+        }
+        query["blocks"].append(status_element)
+        
+        data_asset_identifiers_element = {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "*Data Asset List:* {}".format(data_asset_identifiers)
+            }
+        }
+        query["blocks"].append(data_asset_identifiers_element)
+    
+        if not success:
+            failed_data_assets_element = {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Failed Data Assets:* {}".format(failed_data_assets)
+                }
+            }
+            query["blocks"].append(failed_data_assets_element)
+    
+        footer_section = {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": "Validation Operator run id {} ran at {}".format(run_id, timestamp),
+                }
+            ],
+        }
+        query["blocks"].append(footer_section)
+        return query
 
     def run(self, assets_to_validate, run_identifier):
         # NOTE : Abe 2019/09/12: We should consider typing this object, since it's passed between classes.
@@ -358,7 +427,8 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
             "data_asset_identifiers": [],
             "success": None,
             "failure": {},
-            "warning": {}
+            "warning": {},
+            "run_id": run_identifier
         }
 
         for item in assets_to_validate:
@@ -408,7 +478,7 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
                 failure_actions_results = self._run_actions(batch, failure_expectation_suite_identifier, failure_expectation_suite, failure_validation_result, run_identifier)
                 return_obj["failure"][failure_validation_result_id]["actions_results"] = failure_actions_results
 
-                if not failure_validation_result["success"] and self.process_warnings_on_error:
+                if not failure_validation_result["success"] and self.stop_on_first_error:
                     break
 
 
@@ -438,10 +508,14 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
                 return_obj["warning"][warning_validation_result_id]["actions_results"] = warning_actions_results
 
 
-        return_obj["success"] = all([val["validation_result"]["success"] for val in return_obj["failure"].values()]) or len(return_obj["success"]) == 0
+        return_obj["success"] = all([val["validation_result"]["success"] for val in return_obj["failure"].values()]) #or len(return_obj["success"]) == 0
 
         # NOTE: Eugene: 2019-09-24: Slack notification?
         # NOTE: Eugene: 2019-09-24: Update the data doc sites?
+
+        if self.slack_webhook:
+            slack_query = self._build_slack_query(run_return_obj=return_obj)
+            send_slack_notification(query=slack_query, slack_webhook=self.slack_webhook)
 
         return return_obj
 
