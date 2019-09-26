@@ -213,16 +213,16 @@ class PerformActionListValidationOperator(ValidationOperator):
                 run_id=run_identifier,
             )
             result_object[validation_result_id] = {}
-            batch_validation_result = batch.validate()
+            batch_validation_result = batch.validate(run_id=run_identifier)
             result_object[validation_result_id]["validation_result"] = batch_validation_result
-            batch_actions_results = self._run_actions(batch, batch._expectation_suite, batch_validation_result, run_identifier)
+            batch_actions_results = self._run_actions(batch, expectation_suite_identifier, batch._expectation_suite, batch_validation_result, run_identifier)
             result_object[validation_result_id]["actions_results"] = batch_actions_results
 
         # NOTE: Eugene: 2019-09-24: Need to define this result object. Discussion required!
         return result_object
 
 
-    def _run_actions(self, batch, expectation_suite, batch_validation_result, run_identifier):
+    def _run_actions(self, batch, expectation_suite_identifier, expectation_suite, batch_validation_result, run_identifier):
         """
         Runs all actions configured for this operator on the result of validating one
         batch against one expectation suite.
@@ -239,11 +239,6 @@ class PerformActionListValidationOperator(ValidationOperator):
         for action in self.action_list:
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
             logger.debug("Processing validation action with name {}".format(action["name"]))
-
-            expectation_suite_identifier = ExpectationSuiteIdentifier(
-                data_asset_name=batch.data_asset_identifier,
-                expectation_suite_name=batch._expectation_suite.expectation_suite_name
-            )
 
             validation_result_id = ValidationResultIdentifier(
                 expectation_suite_identifier=expectation_suite_identifier,
@@ -408,7 +403,7 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
                 return_obj["failure"][failure_validation_result_id] = {}
                 failure_validation_result = batch.validate(failure_expectation_suite)
                 return_obj["failure"][failure_validation_result_id]["validation_result"] = failure_validation_result
-                failure_actions_results = self._run_actions(batch, failure_expectation_suite, failure_validation_result, run_identifier)
+                failure_actions_results = self._run_actions(batch, failure_expectation_suite_identifier, failure_expectation_suite, failure_validation_result, run_identifier)
                 return_obj["failure"][failure_validation_result_id]["actions_results"] = failure_actions_results
 
                 if not failure_validation_result["success"] and self.process_warnings_on_error:
@@ -437,7 +432,7 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
                 return_obj["warning"][warning_validation_result_id] = {}
                 warning_validation_result = batch.validate(warning_expectation_suite)
                 return_obj["warning"][warning_validation_result_id]["validation_result"] = warning_validation_result
-                warning_actions_results = self._run_actions(batch, warning_expectation_suite, warning_validation_result, run_identifier)
+                warning_actions_results = self._run_actions(batch, warning_expectation_suite_identifier, warning_expectation_suite, warning_validation_result, run_identifier)
                 return_obj["warning"][warning_validation_result_id]["actions_results"] = warning_actions_results
 
 

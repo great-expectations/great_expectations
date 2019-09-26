@@ -40,13 +40,13 @@ def test_validate_using_data_context(dataset, data_context):
     assert data_context._compiled is False
     res = ge.validate(dataset, data_asset_name="mydatasource/mygenerator/my_dag_node", data_context=data_context)
 
-    # After handling a validation result registration, it should be
-    assert data_context._compiled is True
+    # Since the handling of evaluation parameters is no longer happening without an action,
+    # the context should still be not compiles after validation.
+    assert data_context._compiled is False
 
     # And, we should have validated the right number of expectations from the context-provided config
     assert res["success"] is False
     assert res["statistics"]["evaluated_expectations"] == 2
-
 
 def test_validate_using_data_context_path(dataset, data_context):
     print(data_context._project_config)
