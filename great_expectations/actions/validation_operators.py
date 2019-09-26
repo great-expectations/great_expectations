@@ -65,10 +65,6 @@ class PerformActionListValidationOperator(ValidationOperator):
             action:
               class_name: ExtractAndStoreEvaluationParamsAction
               target_store_name: evaluation_parameter_store
-          - name: save_dataset_snapshot_on_failure
-            action:
-              class_name: StoreSnapshotOnFailAction
-              target_store_name: evaluation_parameter_store
     """
 
     def __init__(self, data_context, action_list):
