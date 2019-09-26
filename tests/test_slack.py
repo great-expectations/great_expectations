@@ -4,7 +4,7 @@ try:
 except ImportError:
     import mock
 
-from great_expectations.data_context.util import get_slack_callback, build_slack_notification_request
+from great_expectations.data_context.util import build_slack_notification_request
 from .test_utils import assertDeepAlmostEqual
 
 
@@ -22,9 +22,9 @@ def validation_json():
     }
 
 
-def test_get_slack_callback_returns_callable():
-    obs = get_slack_callback("foo")
-    assert callable(obs)
+# def test_get_slack_callback_returns_callable():
+#     obs = get_slack_callback("foo")
+#     assert callable(obs)
 
 
 def test_build_slack_notification_request_with_no_validation_json():

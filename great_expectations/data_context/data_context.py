@@ -970,6 +970,16 @@ class ConfigOnlyDataContext(object):
             )
 
     def create_expectation_suite(self, data_asset_name, expectation_suite_name):
+        """Build a new expectation suite and save it into the data_context expectation store.
+
+        Args:
+            data_asset_name: The name of the data_asset for which this suite will be stored.
+                data_asset_name will be normalized if it is a string
+            expectation_suite_name: The name of the expectation_suite to create
+
+        Returns:
+            A new (empty) expectation suite.
+        """
         if not isinstance(data_asset_name, NormalizedDataAssetName):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
 
