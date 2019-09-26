@@ -376,8 +376,11 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
                 "text": "*FailureVsWarning Validation Operator Completed.*",
             },
         }
-    
-        query = {"blocks": [title_block]}
+        divider_block = {
+            "type": "divider"
+        }
+
+        query = {"blocks": [divider_block, title_block, divider_block]}
 
         status_element = {
             "type": "section",
@@ -406,16 +409,41 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
             }
             query["blocks"].append(failed_data_assets_element)
     
+        run_id_element = {
+            "type": "section",
+            "text":
+                {
+                    "type": "mrkdwn",
+                    "text": "*Run ID:* {}".format(run_id),
+                }
+            ,
+        }
+        query["blocks"].append(run_id_element)
+        
+        timestamp_element = {
+            "type": "section",
+            "text":
+                {
+                    "type": "mrkdwn",
+                    "text": "*Timestamp:* {}".format(timestamp),
+                }
+            ,
+        }
+        query["blocks"].append(timestamp_element)
+        query["blocks"].append(divider_block)
+
+        documentation_url = "https://docs.greatexpectations.io/en/latest/guides/failure_vs_warning_validation_operator.html"
         footer_section = {
             "type": "context",
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": "Validation Operator run id {} ran at {}".format(run_id, timestamp),
+                    "text": "Learn about FailureVsWarning Validation Operators at {}".format(documentation_url),
                 }
             ],
         }
         query["blocks"].append(footer_section)
+        
         return query
 
     def run(self, assets_to_validate, run_identifier):
