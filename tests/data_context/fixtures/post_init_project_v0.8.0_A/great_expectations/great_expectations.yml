@@ -30,7 +30,7 @@ datasources:
 
 validation_operators:
   errors_and_warnings_validation_operator:
-    class_name: ErrorsVsWarningsValidationOperator
+    class_name: RunWarningAndFailureExpectationSuitesValidationOperator
     action_list:
       - name: store_validation_result
         action:
