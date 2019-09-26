@@ -1,5 +1,6 @@
 # This is a basic configuration for testing.
 # It has comments that should be preserved.
+ge_config_version: 1
 datasources:
   # For example, this one.
   mydatasource:

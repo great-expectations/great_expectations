@@ -38,6 +38,7 @@ def test_preserve_comments(data_context):
         # Developers shouldn't have to deal with their yml getting scrambled every time they edit the datacontext.
         content_lines = set(content.split("\n"))
         test_content_lines = set("""\
+ge_config_version: 1
 datasources:
   # For example, this one.
   mydatasource:
@@ -97,6 +98,7 @@ stores:
         # Developers shouldn't have to deal with their yml getting scrambled every time they edit the datacontext.
         content_lines = set(content.split("\n"))
         test_content_lines = set("""\
+ge_config_version: 1
 datasources:
   # For example, this one.
   mydatasource:
