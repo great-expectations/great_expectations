@@ -141,28 +141,17 @@ stores:
 
 
 validation_operators:
-  default:
-    class_name: DefaultDataContextAwareValidationOperator
-    process_warnings_and_quarantine_rows_on_error: true
-    action_list :
-      - name: add_warnings_to_store
-        result_key: warning
+  action_list_validation_operator:
+    class_name: PerformActionListValidationOperator
+    action_list:
+      - name: store_validation_result
         action:
-          # module_name: great_expectations.actions
-          class_name: SummarizeAndStoreAction
+          class_name: StoreAction
           target_store_name: local_validation_result_store
-          summarizer:
-            module_name: tests.test_plugins.fake_actions
-            class_name: TemporaryNoOpSummarizer
-      - name: add_failures_to_store
-        result_key: failure
+      - name: store_evaluation_params
         action:
-          # module_name: great_expectations.actions
-          class_name: SummarizeAndStoreAction
-          target_store_name: local_validation_result_store
-          summarizer:
-            module_name: tests.test_plugins.fake_actions
-            class_name: TemporaryNoOpSummarizer
+          class_name: ExtractAndStoreEvaluationParamsAction
+          target_store_name: evaluation_parameter_store
     
 # Uncomment the lines below to enable a result callback.
 
