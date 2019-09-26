@@ -4,7 +4,6 @@ from .actions import (
     NoOpAction,
     StoreAction,
     ExtractAndStoreEvaluationParamsAction,
-    StoreSnapshotOnFailAction,
     SlackNotificationAction
 )
 
