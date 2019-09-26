@@ -336,7 +336,8 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
         expectation_suite_name_prefix="",
         expectation_suite_name_suffixes=["failure", "warning"],
         stop_on_first_error=False,
-        slack_webhook=None
+        slack_webhook=None,
+        notify_on="all"
     ):
         super(ErrorsVsWarningsValidationOperator, self).__init__(
             data_context,
@@ -351,10 +352,8 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
             assert isinstance(suffix, string_types)
         self.expectation_suite_name_suffixes = expectation_suite_name_suffixes
         
-        if slack_webhook:
-            self.slack_webhook = slack_webhook
-        else:
-            self.slack_webhook = data_context.get_config_with_variables_substituted().get("notifications", {}).get("slack_webhook")
+        self.slack_webhook = slack_webhook
+        self.notify_on = notify_on
 
     def _build_slack_query(self, run_return_obj):
         timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
@@ -510,12 +509,13 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
 
         return_obj["success"] = all([val["validation_result"]["success"] for val in return_obj["failure"].values()]) #or len(return_obj["success"]) == 0
 
-        # NOTE: Eugene: 2019-09-24: Slack notification?
         # NOTE: Eugene: 2019-09-24: Update the data doc sites?
-
         if self.slack_webhook:
-            slack_query = self._build_slack_query(run_return_obj=return_obj)
-            send_slack_notification(query=slack_query, slack_webhook=self.slack_webhook)
+            if self.notify_on == "all" or \
+                    self.notify_on == "success" and return_obj["success"] or \
+                    self.notify_on == "failure" and not return_obj["success"]:
+                slack_query = self._build_slack_query(run_return_obj=return_obj)
+                send_slack_notification(query=slack_query, slack_webhook=self.slack_webhook)
 
         return return_obj
 
