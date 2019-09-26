@@ -5,6 +5,7 @@ from .actions import (
     StoreAction,
     ExtractAndStoreEvaluationParamsAction,
     StoreSnapshotOnFailAction,
+    SlackNotificationAction
 )
 
 from .validation_operators import (
@@ -12,3 +13,6 @@ from .validation_operators import (
     PerformActionListValidationOperator,
     ErrorsVsWarningsValidationOperator
 )
+
+from .util import *
+

@@ -36,6 +36,11 @@ CONFIG_VARIABLES_INTRO = """
 PROJECT_OPTIONAL_CONFIG_COMMENT = CONFIG_VARIABLES_INTRO + """
 config_variables_file_path: uncommitted/config_variables.yml
 
+# Configure notifications here
+notifications:
+    slack_webhook: ${slack_webhook}
+    notify_on: ${notify_on}
+
 # The plugins_directory is where the data_context will look for custom_data_assets.py
 # and any configured evaluation parameter store
 
