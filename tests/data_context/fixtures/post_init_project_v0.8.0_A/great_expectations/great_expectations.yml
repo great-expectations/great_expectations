@@ -7,6 +7,7 @@ expectations_store:
     base_directory: expectations/
 
 evaluation_parameter_store_name: evaluation_parameter_store
+profiling_store_name: local_validation_result_store
 
 # Uncomment the lines below to enable a result callback.
 

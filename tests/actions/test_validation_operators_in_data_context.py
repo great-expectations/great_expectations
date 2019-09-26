@@ -28,6 +28,7 @@ def basic_data_context_config_for_validation_operator():
     return DataContextConfig(**{
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name" : "evaluation_parameter_store",
+        "profiling_store_name": "validation_result_store",
         "expectations_store" : {
             "class_name": "ExpectationStore",
             "store_backend": {
@@ -84,56 +85,48 @@ def test_PerformActionListValidationOperator(basic_data_context_config_for_valid
                                 class_name="PandasDatasource",
                                 base_directory=str(filesystem_csv_4))
 
-    df = data_context.get_batch("my_datasource/default/f1")
+    data_context.create_expectation_suite("my_datasource/default/f1", "foo")
+    df = data_context.get_batch("my_datasource/default/f1", "foo",
+                                batch_kwargs=data_context.yield_batch_kwargs("my_datasource/default/f1"))
     df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
     failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
-
-    data_asset_identifier = DataAssetIdentifier("my_datasource", "default", "f1")
-    data_context.stores["expectations_store"].set(
-        ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_identifier,
-            expectation_suite_name="failure"
-        ),
-        failure_expectations
-    )
-    data_context.stores["expectations_store"].set(
-        ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_identifier,
-            expectation_suite_name="warning"
-        ),
-        warning_expectations
-    )
+    data_context.save_expectation_suite(failure_expectations, data_asset_name="my_datasource/default/f1",
+                                        expectation_suite_name="failure")
+    data_context.save_expectation_suite(warning_expectations, data_asset_name="my_datasource/default/f1",
+                                        expectation_suite_name="warning")
 
     print("W"*80)
     print(json.dumps(warning_expectations, indent=2))
     print(json.dumps(failure_expectations, indent=2))
 
-
-    batch = data_context.get_batch("my_datasource/default/f1", expectation_suite_name="failure")
+    validator_batch_kwargs = data_context.yield_batch_kwargs("my_datasource/default/f1")
+    batch = data_context.get_batch("my_datasource/default/f1",
+                                   expectation_suite_name="failure",
+                                   batch_kwargs=validator_batch_kwargs
+                                   )
 
     assert data_context.stores["validation_result_store"].list_keys() == []
-
+    # We want to demonstrate running the validation operator with both a pre-built batch (DataAsset) and with
+    # a tuple of parameters for get_batch
     operator_result = data_context.run_validation_operator(
-        assets_to_validate=[batch],
+        assets_to_validate=[batch, ("my_datasource/default/f1", "warning", validator_batch_kwargs)],
         run_identifier="test-100",
         validation_operator_name="store_val_res_and_extract_eval_params",
     )
     # results = data_context.run_validation_operator(my_ge_df)
 
-    warning_validation_result_store_keys = data_context.stores["validation_result_store"].list_keys()
-    print(warning_validation_result_store_keys)
-    assert len(warning_validation_result_store_keys) == 1
+    validation_result_store_keys = data_context.stores["validation_result_store"].list_keys()
+    print(validation_result_store_keys)
+    assert len(validation_result_store_keys) == 2
+    assert len(operator_result.keys()) == 2
 
-    first_validation_result = data_context.stores["validation_result_store"].get(warning_validation_result_store_keys[0])
+    first_validation_result = data_context.stores["validation_result_store"].get(validation_result_store_keys[0])
     print(json.dumps(first_validation_result, indent=2))
-    assert data_context.stores["validation_result_store"].get(warning_validation_result_store_keys[0])["success"] == True
-
-    assert len(operator_result.keys()) == 1
-
+    assert data_context.stores["validation_result_store"].get(validation_result_store_keys[0])["success"] is True
 
 
 def test_ErrorsVsWarningsValidationOperator_with_file_structure(tmp_path_factory):
@@ -201,7 +194,11 @@ project/
     )
 
     my_df = pd.DataFrame({"x": [1,2,3,4,5]})
-    batch = data_context.get_batch("data__dir/default/bob-ross", "default")
+
+    data_asset_name = "data__dir/default/bob-ross"
+    data_context.create_expectation_suite(data_asset_name=data_asset_name, expectation_suite_name="default")
+    batch = data_context.get_batch(data_asset_name=data_asset_name, expectation_suite_name="default",
+                                   batch_kwargs=data_context.yield_batch_kwargs(data_asset_name))
     # my_ge_df = ge.from_pandas(my_df)
 
     # assert data_context.stores["local_validation_result_store"].list_keys() == []

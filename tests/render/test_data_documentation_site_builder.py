@@ -53,7 +53,8 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     # for this test). having two validation results - one with run id "profiling" - allows us to test
     # the logic of run_id_filter that helps filtering validation results to be included in
     # the profiling and the validation sections.
-    batch = context.get_batch('Titanic', expectation_suite_name='BasicDatasetProfiler')
+    batch = context.get_batch('Titanic', expectation_suite_name='BasicDatasetProfiler',
+                              batch_kwargs=context.yield_batch_kwargs('Titanic'))
     run_id = "test_run_id_12345"
     context.run_validation_operator(
         assets_to_validate=[batch],

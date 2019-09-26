@@ -47,6 +47,8 @@ expectations_store:
     class_name: FixedLengthTupleFilesystemStoreBackend
     base_directory: expectations/
 
+profiling_store_name: local_validation_result_store
+
 evaluation_parameter_store_name: evaluation_parameter_store
 
 # Configure additional data context options here.

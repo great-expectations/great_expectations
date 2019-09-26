@@ -116,7 +116,7 @@ class BasicDatasetProfiler(DatasetProfiler):
 
         number_of_columns = len(columns)
         for i, column in enumerate(columns):
-            logger.info("            Preparing column {} of {}: {}".format(i, number_of_columns, column))
+            logger.info("            Preparing column {} of {}: {}".format(i+1, number_of_columns, column))
 
             # df.expect_column_to_exist(column)
 
