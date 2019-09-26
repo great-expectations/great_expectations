@@ -198,9 +198,9 @@ class PerformActionListValidationOperator(ValidationOperator):
 
 
 
-class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
+class RunWarningAndFailureExpectationSuitesValidationOperator(PerformActionListValidationOperator):
     """
-    ErrorsVsWarningsValidationOperator is a validation operator
+    RunWarningAndFailureExpectationSuitesValidationOperator is a validation operator
     that accepts a list batches of data assets (or the information necessary to fetch these batches).
     The operator retrieves 2 expectation suites for each data asset/batch - one containing
     the critical expectations ("error") and the other containing non-critical expectations
@@ -222,7 +222,7 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
 
     The operator returns an object that looks like that:
 
-    ErrorsVsWarningsValidationOperator
+    RunWarningAndFailureExpectationSuitesValidationOperator
     {
         "data_asset_identifiers": list of data asset identifiers
         "success": True/False,
@@ -252,7 +252,7 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
         slack_webhook=None,
         notify_on="all"
     ):
-        super(ErrorsVsWarningsValidationOperator, self).__init__(
+        super(RunWarningAndFailureExpectationSuitesValidationOperator, self).__init__(
             data_context,
             action_list,
         )
