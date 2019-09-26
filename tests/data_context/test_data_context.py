@@ -45,42 +45,6 @@ def parameterized_expectation_suite():
     with open("tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json", "r") as suite:
         return json.load(suite)
 
-# FIXME : I believe that we want to deprecate this test because this behavior is no longer part of 
-# the intended behavior for batch.validate. Instead, data_context.run_validation_operator will handle it.
-# Assuming we agree, we should delete the commented code.
-# def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv):
-#     empty_data_context.add_datasource("my_datasource",
-#                                     module_name="great_expectations.datasource",
-#                                     class_name="PandasDatasource",
-#                                     base_directory=str(filesystem_csv))
-#     not_so_empty_data_context = empty_data_context
-
-#     # we should now be able to validate, and have validations saved.
-#     # assert not_so_empty_data_context._project_config["validations_store"]["local"]["base_directory"] == \
-#     #     "uncommitted/validations/"
-#     validations_dir = os.path.join(empty_data_context.root_directory, "uncommitted/validations/")
-#     # assert gen_directory_tree_str(validations_dir) == "/\n"
-
-#     # print(empty_data_context.stores.keys())
-#     assert "local_validation_result_store" in not_so_empty_data_context.stores.keys()
-#     assert not_so_empty_data_context.stores["local_validation_result_store"].store_backend.base_directory == \
-#         "uncommitted/validations/"
-
-#     my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
-#     my_batch.expect_column_to_exist("a")
-
-#     with mock.patch("datetime.datetime") as mock_datetime:
-#         mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
-#         validation_result = my_batch.validate()
-
-#     print(gen_directory_tree_str(validations_dir))
-
-#     with open(os.path.join(not_so_empty_data_context.root_directory, 
-#             "uncommitted/validations/1955-11-05T000000Z/my_datasource/default/f1/default.json")) as infile:
-#         saved_validation_result = json.load(infile)
-    
-#     assert validation_result == saved_validation_result
-
 
 def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
     empty_data_context.add_datasource("my_datasource",
@@ -116,14 +80,14 @@ def test_get_existing_data_asset_config(data_context):
 
 
 def test_get_new_data_asset_config(data_context):
-    data_asset_config = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
+    data_asset_config = data_context.create_expectation_suite('this_data_asset_config_does_not_exist', 'default')
     assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist'
     assert data_asset_config['expectation_suite_name'] == 'default'
     assert len(data_asset_config['expectations']) == 0
 
 
 def test_save_data_asset_config(data_context):
-    data_asset_config = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
+    data_asset_config = data_context.create_expectation_suite('this_data_asset_config_does_not_exist', 'default')
     assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist'
     assert data_asset_config["expectation_suite_name"] == "default"
     assert len(data_asset_config['expectations']) == 0
@@ -133,7 +97,7 @@ def test_save_data_asset_config(data_context):
                 "value": 10
             }
         })
-    data_context.set_expectation_suite(data_asset_config)
+    data_context.save_expectation_suite(data_asset_config)
     data_asset_config_saved = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
     assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
 
@@ -471,8 +435,8 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
         NormalizedDataAssetName("my_datasource", "default", "f1")
 
     # However, if we add a data_asset that would cause that name to be ambiguous, it will then fail:
-    suite = data_context.get_expectation_suite("my_datasource/in_memory_generator/f1")
-    data_context.set_expectation_suite(suite)
+    suite = data_context.create_expectation_suite("my_datasource/in_memory_generator/f1", "default")
+    data_context.save_expectation_suite(suite)
 
     with pytest.raises(DataContextError) as exc:
         name = data_context._normalize_data_asset_name("f1")
@@ -757,7 +721,8 @@ def basic_data_context_config():
                 "base_directory": "expectations/",
             },
         },
-        "evaluation_parameter_store_name" : "evaluation_parameter_store",
+        "evaluation_parameter_store_name": "evaluation_parameter_store",
+        "profiling_store_name": "does_not_have_to_be_real",
         "datasources": {},
         "stores": {
             "evaluation_parameter_store" : {
@@ -781,7 +746,9 @@ def test_ExplorerDataContext(titanic_data_context):
 def test_ExplorerDataContext_expectation_widget(titanic_data_context):
     context_root_directory = titanic_data_context.root_directory
     explorer_data_context = ExplorerDataContext(context_root_directory)
-    data_asset = explorer_data_context.get_batch('Titanic', expectation_suite_name='my_suite')
+    explorer_data_context.create_expectation_suite('Titanic', expectation_suite_name='my_suite')
+    data_asset = explorer_data_context.get_batch('Titanic', expectation_suite_name='my_suite',
+                                                 batch_kwargs=explorer_data_context.yield_batch_kwargs("Titanic"))
     widget_output = data_asset.expect_column_to_exist('test')
     print(widget_output)
     if sys.version[0:3] == '2.7':

@@ -3,7 +3,7 @@ import pytest
 from great_expectations.actions import (
     BasicValidationAction,
     SlackNotificationAction,
-    StoreAction,
+    StoreAction
 )
 # from great_expectations.actions.types import (
 #     ActionInternalConfig,
