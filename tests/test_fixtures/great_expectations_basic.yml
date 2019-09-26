@@ -4,7 +4,7 @@ ge_config_version: 1
 # Here's a comment between the config version and the datassources
 datasources:
   # For example, this one.
-  mydatasource:
+  mydatasource: # This should stay by mydatasource
     module_name: great_expectations.datasource
     class_name: PandasDatasource
     data_asset_type:
