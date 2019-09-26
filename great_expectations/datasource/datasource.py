@@ -12,6 +12,7 @@ from great_expectations.data_context.util import (
     load_class,
     instantiate_class_from_config
 )
+from great_expectations.data_asset.util import get_empty_expectation_suite
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource.types import ReaderMethods
 from great_expectations.types import ClassConfig
@@ -229,7 +230,7 @@ class Datasource(object):
                 })
         return generators
 
-    def get_batch(self, data_asset_name, expectation_suite_name="default", batch_kwargs=None, **kwargs):
+    def get_batch(self, data_asset_name, expectation_suite_name, batch_kwargs, **kwargs):
         """
         Get a batch of data from the datasource.
 
@@ -253,10 +254,7 @@ class Datasource(object):
             A data_asset consisting of the specified batch of data with the named expectation suite connected.
 
         """
-        # expectation_suite = None
         if isinstance(data_asset_name, NormalizedDataAssetName):  # this richer type can include more metadata
-            generator_name = data_asset_name.generator
-            generator_asset = data_asset_name.generator_asset
             if self._data_context is not None:
                 expectation_suite = self._data_context.get_expectation_suite(
                     data_asset_name,
@@ -271,36 +269,18 @@ class Datasource(object):
                     "using '/' as a default delimiter."
                 )
         else:
-            warnings.warn("datasources will require NormalizedDataAssetName to use get_batch in a future release."
-                          "Use get_data_asset instead.", DeprecationWarning)
-            # TODO: Upon deprecation of support as noted above, raise an exception in this codepath
-            # raise BatchKwargsError("get_batch requires a NormalizedDataAssetName. Use get_data_asset instead.")
-            generators = [generator["name"] for generator in self.list_generators()]
-            if len(generators) == 1:
-                generator_name = generators[0]
-            elif "default" in generators:
-                generator_name = "default"
-            elif batch_kwargs is None:
-                raise BatchKwargsError(
-                    "No generator name provided or guessable, but no batch_kwargs were provided.", None
-                )
-            return self.get_data_asset(data_asset_name, generator_name, batch_kwargs, **kwargs)
+            expectation_suite = get_empty_expectation_suite(data_asset_name=data_asset_name,
+                                                            expectation_suite_name=expectation_suite_name)
 
-        if batch_kwargs is None:
-            # noinspection PyUnboundLocalVariable
-            generator = self.get_generator(generator_name)
-            if generator is not None:
-                batch_kwargs = generator.yield_batch_kwargs(generator_asset)
-            else:
-                raise ValueError("No generator or batch_kwargs available to provide a dataset.")
-        elif not isinstance(batch_kwargs, dict):
+        # Support partition_id or other mechanisms of building batch_kwargs
+        if not isinstance(batch_kwargs, dict):
             batch_kwargs = self.build_batch_kwargs(data_asset_name, batch_kwargs)
 
         return self._get_data_asset(batch_kwargs, expectation_suite, **kwargs)
 
     def get_data_asset(self,
                        generator_asset,
-                       generator_name="default",
+                       generator_name=None,
                        expectation_suite=None,
                        batch_kwargs=None,
                        **kwargs):
@@ -321,7 +301,7 @@ class Datasource(object):
             # noinspection PyUnboundLocalVariable
             generator = self.get_generator(generator_name)
             if generator is not None:
-                batch_kwargs = generator.yield_batch_kwargs(generator_asset)
+                batch_kwargs = generator.yield_batch_kwargs(generator_asset, **kwargs)
 
         return self._get_data_asset(batch_kwargs, expectation_suite, **kwargs)
 

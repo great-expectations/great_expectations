@@ -3,3 +3,4 @@ from .glob_reader_generator import GlobReaderGenerator
 from .subdir_reader_generator import SubdirReaderGenerator
 from .in_memory_generator import InMemoryGenerator
 from .query_generator import QueryGenerator
+from .table_generator import TableGenerator

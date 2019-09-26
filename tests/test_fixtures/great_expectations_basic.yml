@@ -27,6 +27,7 @@ expectations_store:
 
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
+profiling_store_name: local_validation_result_store
 
 data_docs:
   sites:
@@ -35,3 +36,6 @@ stores:
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore
+
+  local_validation_result_store:
+    class_name: BasicInMemoryStore

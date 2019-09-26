@@ -164,7 +164,9 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
                                     base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
-    batch = not_so_empty_data_context.get_batch("my_datasource/f1")
+    not_so_empty_data_context.create_expectation_suite("my_datasource/f1", "default")
+    batch_kwargs = not_so_empty_data_context.yield_batch_kwargs("my_datasource/f1")
+    batch = not_so_empty_data_context.get_batch("my_datasource/f1", "default", batch_kwargs)
     expectations_config, validation_results = BasicDatasetProfiler.profile(
         batch)
 

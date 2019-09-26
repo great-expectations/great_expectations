@@ -71,6 +71,13 @@ from .util import (
     instantiate_class_from_config
 )
 
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
+    # just fall through
+    SQLAlchemyError = ProfilerError
+
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -423,7 +430,6 @@ class ConfigOnlyDataContext(object):
 
         return substitute_all_config_variables(config, self._load_config_variables_file())
 
-
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
 
@@ -449,7 +455,6 @@ class ConfigOnlyDataContext(object):
             )
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
-
 
     def get_available_data_asset_names(self, datasource_names=None, generator_names=None):
         """Inspect datasource and generators to provide available data_asset objects.
@@ -500,25 +505,80 @@ class ConfigOnlyDataContext(object):
                     "If providing generators, you must either specify one generator for each datasource or only "
                     "one datasource."
                 )
-        else: # generator_names is None
+        else:  # generator_names is None
             for datasource_name in datasource_names:
                 datasource = self.get_datasource(datasource_name)
                 data_asset_names[datasource_name] = datasource.get_available_data_asset_names(None)
 
         return data_asset_names
 
-    def get_batch(self, data_asset_name, expectation_suite_name="default", batch_kwargs=None, **kwargs):
+    def yield_batch_kwargs(self, data_asset_name, **kwargs):
+        """Yields a the next batch_kwargs for the provided data_asset_name, supplemented by any kwargs provided inline.
+
+        Args:
+            data_asset_name (str or NormalizedDataAssetName): the name from which to provide batch_kwargs
+            **kwargs: additional kwargs to supplement the returned batch_kwargs
+
+        Returns:
+            BatchKwargs
+
         """
-        Get a batch of data from the specified data_asset_name. Attaches the named expectation_suite, and uses the \
-        provided batch_kwargs.
+        if not isinstance(data_asset_name, NormalizedDataAssetName):
+            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+
+        datasource = self.get_datasource(data_asset_name.datasource)
+        generator = datasource.get_generator(data_asset_name.generator)
+        batch_kwargs = generator.yield_batch_kwargs(data_asset_name.generator_asset)
+        batch_kwargs.update(**kwargs)
+
+        return batch_kwargs
+
+    def build_batch_kwargs(self, data_asset_name, partition_id=None, **kwargs):
+        """Builds batch kwargs for the provided data_asset_name, using an optional partition_id or building from
+        provided kwargs.
+
+        build_batch_kwargs relies on the generator's implementation
+
+        Args:
+            data_asset_name (str or NormalizedDataAssetName): the name from which to provide batch_kwargs
+            partition_id (str): partition_id to use when building batch_kwargs
+            **kwargs: additional kwargs to supplement the returned batch_kwargs
+
+        Returns:
+            BatchKwargs
+
+        """
+        if not isinstance(data_asset_name, NormalizedDataAssetName):
+            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+
+        datasource = self.get_datasource(data_asset_name.datasource)
+        if partition_id is not None:
+            kwargs.update({
+                "partition_id": partition_id
+            })
+        batch_kwargs = datasource.build_batch_kwargs(data_asset_name.generator, **kwargs)
+
+        return batch_kwargs
+
+    def get_batch(self, data_asset_name, expectation_suite_name, batch_kwargs, **kwargs):
+        """
+        Get a batch of data, using the namespace of the provided data_asset_name.
+
+        get_batch constructs its batch by first normalizing the data_asset_name (if not already normalized into either
+        a DataAssetName) and then:
+          (1) getting data using the provided batch_kwargs; and
+          (2) attaching the named expectation suite
+
+        A single partition_id may be used in place of batch_kwargs when using a data_asset_name whose generator
+        supports that partition type, and additional kwargs will be used to supplement the provided batch_kwargs.
 
         Args:
             data_asset_name: name of the data asset. The name will be normalized. \
-            (See :py:meth:`_normalize_data_asset_name` )
+                (See :py:meth:`_normalize_data_asset_name` )
             expectation_suite_name: name of the expectation suite to attach to the data_asset returned
             batch_kwargs: key-value pairs describing the batch of data the datasource should fetch. \
-            (See :class:`BatchGenerator` ) If no batch_kwargs are specified, then the context will get the next
-            available batch_kwargs for the data_asset.
+                (See :class:`BatchGenerator` ) If no batch_kwargs are specified, then the context will get the next
+                available batch_kwargs for the data_asset.
             **kwargs: additional key-value pairs to pass to the datasource when fetching the batch.
 
         Returns:
@@ -537,7 +597,6 @@ class ConfigOnlyDataContext(object):
                                           batch_kwargs,
                                           **kwargs)
         return data_asset
-
 
     # TODO: In the future, we should expand this to allow it to take n data_assets.
     # Currently, it can accept 0 or 1.
@@ -565,8 +624,6 @@ class ConfigOnlyDataContext(object):
             run_identifier=run_identifier,
         )
 
-    # NOTE: Abe 2019/08/22 : I think we want to change this to the new standard class_name, module_name syntax.
-    # Doing this while maintaining backward compatibility to type_s (assuming we choose to do so) will require care.
     def add_datasource(self, name, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
@@ -912,9 +969,37 @@ class ConfigOnlyDataContext(object):
                 .format(datasource_name=split_name[0], generator_name=split_name[1])
             )
 
-    # TODO: Instead of creating an expectation_suite by default, explicitly define a new create_expectation_suite method.
+    def create_expectation_suite(self, data_asset_name, expectation_suite_name):
+        """Build a new expectation suite and save it into the data_context expectation store.
+
+        Args:
+            data_asset_name: The name of the data_asset for which this suite will be stored.
+                data_asset_name will be normalized if it is a string
+            expectation_suite_name: The name of the expectation_suite to create
+
+        Returns:
+            A new (empty) expectation suite.
+        """
+        if not isinstance(data_asset_name, NormalizedDataAssetName):
+            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+
+        expectation_suite = get_empty_expectation_suite(
+            # FIXME: For now, we just cast this to a string to be close to the old behavior
+            self.data_asset_name_delimiter.join(data_asset_name),
+            expectation_suite_name
+        )
+
+        key = ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier(*data_asset_name),
+            expectation_suite_name=expectation_suite_name,
+        )
+
+        self._stores["expectations_store"].set(key, expectation_suite)
+
+        return expectation_suite
+
     def get_expectation_suite(self, data_asset_name, expectation_suite_name="default"):
-        """Get or create a named expectation suite for the provided data_asset_name.
+        """Get a named expectation suite for the provided data_asset_name.
 
         Args:
             data_asset_name (str or NormalizedDataAssetName): the data asset name to which the expectation suite belongs
@@ -932,24 +1017,14 @@ class ConfigOnlyDataContext(object):
         )
 
         if self.stores["expectations_store"].has_key(key):
-            expectation_suite = self.stores["expectations_store"].get(key)
+            return self.stores["expectations_store"].get(key)
         else:
-            expectation_suite = get_empty_expectation_suite(
-                self.data_asset_name_delimiter.join(data_asset_name),
-                expectation_suite_name
+            raise DataContextError(
+                "No expectation_suite found for data_asset_name %s and expectation_suite_name %s" %
+                (data_asset_name, expectation_suite_name)
             )
 
-        return expectation_suite
-
     def save_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
-        warnings.warn("The save_expectation_suite method is deprecated will be removed in a future release.\n Please use set_expectation_suite instead.", DeprecationWarning)
-        self.set_expectation_suite(
-            expectation_suite,
-            data_asset_name,
-            expectation_suite_name,
-        )
-
-    def set_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
         """Save the provided expectation suite into the DataContext.
 
         Args:
@@ -968,6 +1043,8 @@ class ConfigOnlyDataContext(object):
             except KeyError:
                 raise DataContextError(
                     "data_asset_name must either be specified or present in the provided expectation suite")
+        else:
+            expectation_suite['data_asset_name'] = data_asset_name
 
         if expectation_suite_name is None:
             try:
@@ -975,6 +1052,8 @@ class ConfigOnlyDataContext(object):
             except KeyError:
                 raise DataContextError(
                     "expectation_suite_name must either be specified or present in the provided expectation suite")
+        else:
+            expectation_suite['expectation_suite_name'] = expectation_suite_name
 
         if not isinstance(data_asset_name, NormalizedDataAssetName):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
@@ -1121,6 +1200,10 @@ class ConfigOnlyDataContext(object):
     @property
     def evaluation_parameter_store(self):
         return self.stores[self._project_config_with_varibles_substituted.evaluation_parameter_store_name]
+
+    @property
+    def profiling_store(self):
+        return self.stores[self._project_config_with_varibles_substituted.profiling_store_name]
 
     def set_parameters_in_evaluation_parameter_store_by_run_id_and_key(self, run_id, key, value):
         """Store a new validation parameter.
@@ -1336,7 +1419,6 @@ class ConfigOnlyDataContext(object):
 
         return resource_locator_info
 
-
     def get_validation_result(
         self,
         data_asset_name,
@@ -1378,6 +1460,10 @@ class ConfigOnlyDataContext(object):
             # but when we do so, that Store will need to function as more than just a key-value Store.
             key_list = selected_store.list_keys()
             run_id_set = set([key.run_id for key in key_list])
+            if len(run_id_set) == 0:
+                logger.warning("No valid run_id values found.")
+                return {}
+
             run_id = max(run_id_set)
 
         key = ValidationResultIdentifier(
@@ -1557,13 +1643,21 @@ class ConfigOnlyDataContext(object):
                     if additional_batch_kwargs is None:
                         additional_batch_kwargs = {}
 
-                    normalized_data_asset_name = NormalizedDataAssetName(datasource_name, generator_name, name)
+                    normalized_data_asset_name = self._normalize_data_asset_name(name)
                     expectation_suite_name = profiler.__name__
+                    self.create_expectation_suite(
+                        data_asset_name=normalized_data_asset_name,
+                        expectation_suite_name=expectation_suite_name
+                    )
+                    batch_kwargs = self.yield_batch_kwargs(
+                        data_asset_name=normalized_data_asset_name,
+                        **additional_batch_kwargs
+                    )
 
                     batch = self.get_batch(
                         data_asset_name=normalized_data_asset_name,
                         expectation_suite_name=expectation_suite_name,
-                        **additional_batch_kwargs
+                        batch_kwargs=batch_kwargs
                     )
 
                     if not profiler.validate(batch):
@@ -1576,28 +1670,20 @@ class ConfigOnlyDataContext(object):
                     expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
                     profiling_results['results'].append((expectation_suite, validation_results))
 
-                    expectation_suite_id = ExpectationSuiteIdentifier(
-                        data_asset_name=tuple(normalized_data_asset_name),
-                        expectation_suite_name=expectation_suite_name,
-                    )
-                    # print(expectation_suite_id)
-
-                    # self.set_expectation_suite(
-                    #     expectation_suite_id,
-                    #     expectation_suite
-                    # )
-
-                    # Proposed TODO : Turn this method into a configurable profiler class,
-                    # so that this store name doesn't have to be hard coded.
-                    if "local_validation_result_store" in self.stores:
-                        self.stores.local_validation_result_store.set(
-                            key=ValidationResultIdentifier(
-                                expectation_suite_identifier=expectation_suite_id,
-                                run_id=run_id
+                    # This hack covers an uglier hack in which a hard-coded store name was used.
+                    self.profiling_store.set(
+                        key=ValidationResultIdentifier(
+                            expectation_suite_identifier=ExpectationSuiteIdentifier(
+                                data_asset_name=DataAssetIdentifier(
+                                    *normalized_data_asset_name
+                                ),
+                                expectation_suite_name=expectation_suite_name
                             ),
-                            value=validation_results,
-                        )
-                    
+                            run_id=run_id
+                        ),
+                        value=validation_results
+                    )
+
                     if isinstance(batch, Dataset):
                         # For datasets, we can produce some more detailed statistics
                         row_count = batch.get_row_count()
@@ -1608,23 +1694,21 @@ class ConfigOnlyDataContext(object):
                     new_expectation_count = len(expectation_suite["expectations"])
                     total_expectations += new_expectation_count
 
-                    self.set_expectation_suite(expectation_suite)
+                    self.save_expectation_suite(expectation_suite)
                     duration = (datetime.datetime.now() - start_time).total_seconds()
                     logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
                                 (new_column_count, row_count, name, duration))
 
                 except ProfilerError as err:
                     logger.warning(err.message)
-                except IOError as exc:
-                    logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
-                    logger.debug(str(exc))
+                except IOError as err:
+                    logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % name)
+                    logger.debug(str(err))
                     skipped_data_assets += 1
-                # FIXME: this is a workaround for catching SQLAlchemny exceptions without taking SQLAlchemy dependency.
-                # Think how to avoid this.
-                # except Exception as e:
-                #     logger.warning("Exception while profiling %s. (Perhaps a loading error?) Skipping." % (name))
-                #     logger.debug(str(e))
-                #     skipped_data_assets += 1
+                except SQLAlchemyError as e:
+                    logger.warning("SqlAlchemyError while profiling %s. Skipping." % name)
+                    logger.debug(str(e))
+                    skipped_data_assets += 1
 
             total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
             logger.info("""
