@@ -66,7 +66,7 @@ class DatasetProfiler(DataAssetProfiler):
 
         expectation_suite = cls._profile(data_asset)
 
-        batch_kwargs = data_asset.get_batch_kwargs()
+        batch_kwargs = data_asset.batch_kwargs
         expectation_suite = cls.add_meta(expectation_suite, batch_kwargs)
         validation_results = data_asset.validate(expectation_suite, run_id=run_id, result_format="SUMMARY")
         return expectation_suite, validation_results

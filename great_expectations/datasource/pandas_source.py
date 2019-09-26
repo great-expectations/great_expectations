@@ -21,7 +21,8 @@ from great_expectations.datasource.generator.glob_reader_generator import GlobRe
 from great_expectations.datasource.generator.s3_generator import S3Generator
 from great_expectations.datasource.types import (
     PandasDatasourceMemoryBatchKwargs,
-    PathBatchKwargs
+    PathBatchKwargs,
+    PathBatchId
 )
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.types import ClassConfig
@@ -120,10 +121,11 @@ class PandasDatasource(Datasource):
         # We handle it here so that the updated value will be in the batch_kwargs for transparency to the user.
         if PY2 and "sep" in batch_kwargs and batch_kwargs["sep"] is not None:
             batch_kwargs["sep"] = str(batch_kwargs["sep"])
+        # We will use and manipulate reader_options along the way
         reader_options = batch_kwargs.copy()
-        # We will use and manipulate batch_kwargs along the way
+
         # We need to build a batch_id to be used in the dataframe
-        batch_id = batch_kwargs.copy().update({
+        batch_id = PathBatchId({
             "timestamp": time.time()
         })
 
@@ -181,6 +183,8 @@ class PandasDatasource(Datasource):
 
         elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (pd.DataFrame, pd.Series)):
             df = batch_kwargs.pop("df")  # We don't want to store the actual dataframe in kwargs
+            # Record this in the kwargs *and* the id
+            batch_kwargs["PandasInMemoryDF"] = True
             batch_id["PandasInMemoryDF"] = True
             if df.memory_usage().sum() < HASH_THRESHOLD:
                 batch_id["fingerprint"] = hashlib.md5(pd.util.hash_pandas_object(df, index=True).values).hexdigest()
@@ -221,12 +225,12 @@ class PandasDatasource(Datasource):
         # Now that we know whether we can use a generator, build the kwargs
         if generator is not None:
             if len(args) == 1:  # We interpret a single argument as a partition_id
-                batch_kwargs = generator.build_batch_kwargs_from_partition(args[0], batch_kwargs=kwargs)
+                batch_kwargs = generator.build_batch_kwargs_from_partition_id(args[0], batch_kwargs=kwargs)
             elif len(args) > 0:
                 raise BatchKwargsError("Multiple positional arguments were provided to build_batch_kwargs, but only"
                                        "one is supported. Please provide named arguments to build_batch_kwargs.")
             elif "partition_id" in kwargs:
-                batch_kwargs = generator.build_batch_kwargs_from_partition(kwargs["partition_id"], batch_kwargs=kwargs)
+                batch_kwargs = generator.build_batch_kwargs_from_partition_id(kwargs["partition_id"], batch_kwargs=kwargs)
             else:
                 batch_kwargs = generator.yield_batch_kwargs(data_asset_name, kwargs)
         else:

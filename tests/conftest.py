@@ -329,6 +329,35 @@ def dataset(request):
 
 
 @pytest.fixture
+def sqlalchemy_dataset():
+    """Provide dataset fixtures that have special values and/or are otherwise useful outside
+    the standard json testing framework"""
+    if "postgresql" in CONTEXTS:
+        backend = "postgresql"
+    else:
+        backend = "sqlite"
+
+    data = {
+        "infinities": [-np.inf, -10, -np.pi, 0, np.pi, 10/2.2, np.inf],
+        "nulls": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
+        "naturals": [1, 2, 3, 4, 5, 6, 7]
+    }
+    schemas = {
+        "postgresql": {
+            "infinities": "DOUBLE_PRECISION",
+            "nulls": "DOUBLE_PRECISION",
+            "naturals": "DOUBLE_PRECISION"
+        },
+        "sqlite": {
+            "infinities": "FLOAT",
+            "nulls": "FLOAT",
+            "naturals": "FLOAT"
+        }
+    }
+    return get_dataset(backend, data, schemas=schemas, profiler=None)
+
+
+@pytest.fixture
 def sqlitedb_engine():
     return sa.create_engine('sqlite://')
 
@@ -357,12 +386,12 @@ def titanic_data_context(tmp_path_factory):
                 str(os.path.join(context_path, "../data/Titanic.csv")))
     return ge.data_context.DataContext(context_path)
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, filesystem_csv_3):
     base_dir = str(tmp_path_factory.mktemp("project_dir"))
     project_dir = os.path.join(base_dir, "project_path")
     os.mkdir(project_dir)
-    
+
     os.makedirs(os.path.join(project_dir, "data"))
     os.makedirs(os.path.join(project_dir, "data/titanic"))
     curdir = os.path.abspath(os.getcwd())
@@ -370,7 +399,7 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
         "./tests/test_sets/Titanic.csv",
         str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
     )
-    
+
     os.makedirs(os.path.join(project_dir, "data/random"))
     curdir = os.path.abspath(os.getcwd())
     shutil.copy(
@@ -381,12 +410,12 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
         os.path.join(filesystem_csv_3, "f2.csv"),
         str(os.path.join(project_dir, "data/random/f2.csv"))
     )
-    
+
     ge_directory = os.path.join(project_dir, "great_expectations")
     shutil.copy("./tests/test_fixtures/great_expectations_site_builder.yml",
                 str(os.path.join(project_dir, "great_expectations.yml")))
     context = ge.data_context.DataContext.create(project_dir)
-    
+
     scaffold_directories_and_notebooks(ge_directory)
     context.add_datasource(
         "titanic",
@@ -398,15 +427,15 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
         type="pandas",
         base_directory=os.path.join(project_dir, "data/random/")
     )
-    
+
     context.profile_datasource("titanic")
     # print(gen_directory_tree_str(project_dir))
-    
+
     context.profile_datasource("random")
     # print(gen_directory_tree_str(project_dir))
-    
+
     context.profile_datasource(context.list_datasources()[0]["name"])
-    
+
     return context
 
 @pytest.fixture

@@ -54,7 +54,7 @@ class GlobReaderGenerator(BatchGenerator):
                  reader_options=None,
                  asset_globs=None):
         logger.debug("Constructing GlobReaderGenerator {!r}".format(name))
-        super(GlobReaderGenerator, self).__init__(name, type_="glob_reader", datasource=datasource)
+        super(GlobReaderGenerator, self).__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = {}
 
@@ -108,7 +108,7 @@ class GlobReaderGenerator(BatchGenerator):
         ])
         return partition_ids
 
-    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
         """Build batch kwargs from a partition id."""
         glob_config = self._get_generator_asset_config(generator_asset)
         batch_paths = self._get_generator_asset_paths(generator_asset)
@@ -119,12 +119,12 @@ class GlobReaderGenerator(BatchGenerator):
                                         generator_asset: generator_asset,
                                         partition_id: partition_id
                                     })
-        kwargs = self._build_batch_kwargs_from_path(path[0], glob_config)
+        new_kwargs = self._build_batch_kwargs_from_path(path[0], glob_config)
         if batch_kwargs is not None:
-            kwargs.update(batch_kwargs)
+            new_kwargs.update(batch_kwargs)
         if kwargs is not None:
-            kwargs.update(kwargs)
-        return kwargs
+            new_kwargs.update(kwargs)
+        return new_kwargs
 
     def _get_generator_asset_paths(self, generator_asset):
         """
