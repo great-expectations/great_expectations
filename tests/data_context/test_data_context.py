@@ -46,47 +46,6 @@ def parameterized_expectation_suite():
         return json.load(suite)
 
 
-def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv):
-    empty_data_context.add_datasource("my_datasource",
-                                    module_name="great_expectations.datasource",
-                                    class_name="PandasDatasource",
-                                    base_directory=str(filesystem_csv))
-    not_so_empty_data_context = empty_data_context
-
-    # we should now be able to validate, and have validations saved.
-    # assert not_so_empty_data_context._project_config["validations_store"]["local"]["base_directory"] == \
-    #     "uncommitted/validations/"
-    validations_dir = os.path.join(empty_data_context.root_directory, "uncommitted/validations/")
-    # assert gen_directory_tree_str(validations_dir) == "/\n"
-
-    # print(empty_data_context.stores.keys())
-    assert "local_validation_result_store" in not_so_empty_data_context.stores.keys()
-    assert not_so_empty_data_context.stores["local_validation_result_store"].store_backend.base_directory == \
-        "uncommitted/validations/"
-
-    # create a suite for our test
-    data_asset_name = "my_datasource/f1"
-    # We have to explicitly choose an expectation suite name, but normalization on the data_asset_name
-    # will insert our single generator, named default
-    not_so_empty_data_context.create_expectation_suite(data_asset_name, "default")
-
-    my_batch = not_so_empty_data_context.get_batch("my_datasource/f1", "default",
-                                                   not_so_empty_data_context.yield_batch_kwargs(data_asset_name))
-    my_batch.expect_column_to_exist("a")
-
-    with mock.patch("datetime.datetime") as mock_datetime:
-        mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
-        validation_result = my_batch.validate()
-
-    print(gen_directory_tree_str(validations_dir))
-
-    with open(os.path.join(not_so_empty_data_context.root_directory, 
-            "uncommitted/validations/1955-11-05T000000Z/my_datasource/default/f1/default.json")) as infile:
-        saved_validation_result = json.load(infile)
-    
-    assert validation_result == saved_validation_result
-
-
 def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
     empty_data_context.add_datasource("my_datasource",
                                     module_name="great_expectations.datasource",
@@ -143,7 +102,7 @@ def test_save_data_asset_config(data_context):
     assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
 
 
-def test_register_validation_results(data_context):
+def test_evaluation_parameter_store_methods(data_context):
     run_id = "460d61be-7266-11e9-8848-1681be663d3e"
     source_patient_data_results = {
         "meta": {
@@ -173,8 +132,13 @@ def test_register_validation_results(data_context):
         "success": True
     }
 
-    res = data_context.register_validation_results(run_id, source_patient_data_results)
-    assert res == source_patient_data_results  # results should always be returned, and in this case not modified
+    data_context._extract_and_store_parameters_from_validation_results(
+        source_patient_data_results,
+        data_asset_name=source_patient_data_results["meta"]["data_asset_name"],
+        expectation_suite_name=source_patient_data_results["meta"]["expectation_suite_name"],
+        run_id=run_id,
+    )
+
     bound_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024
@@ -209,8 +173,12 @@ def test_register_validation_results(data_context):
         "success": True
     }
 
-
-    data_context.register_validation_results(run_id, source_diabetes_data_results)
+    data_context._extract_and_store_parameters_from_validation_results(
+        source_diabetes_data_results,
+        data_asset_name=source_diabetes_data_results["meta"]["data_asset_name"],
+        expectation_suite_name=source_diabetes_data_results["meta"]["expectation_suite_name"],
+        run_id=run_id,
+    )
     bound_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024,
@@ -521,7 +489,12 @@ def test_data_context_result_store(titanic_data_context):
     """
     Test that validation results can be correctly fetched from the configured results store
     """
+    print(titanic_data_context.stores["local_validation_result_store"].list_keys())
+
     profiling_results = titanic_data_context.profile_datasource("mydatasource")
+
+    print(titanic_data_context.stores["local_validation_result_store"].list_keys())
+
     for profiling_result in profiling_results['results']:
         data_asset_name = profiling_result[1]['meta']['data_asset_name']
         validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
