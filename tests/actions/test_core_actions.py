@@ -2,6 +2,7 @@ import pytest
 
 from great_expectations.actions import (
     BasicValidationAction,
+    SlackNotificationAction
     StoreAction,
 )
 # from great_expectations.actions.types import (
@@ -17,7 +18,9 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
 )
-
+from great_expectations.data_context.types import (
+    ValidationResultIdentifier
+)
 
 def test_subclass_of_BasicValidationAction():
     # I dunno. This is kind of a silly test.
@@ -75,6 +78,39 @@ def test_StoreAction():
     assert fake_in_memory_store.get(ValidationResultIdentifier(
         from_string="ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
     )) == {}
+
+
+def test_SlackNotificationAction(data_context):
+    renderer = {
+                    "module_name": "great_expectations.render.renderer.slack_renderer",
+                    "class_name": "SlackRenderer",
+                }
+    slack_webhook = "https://hooks.slack.com/services/test/slack/webhook"
+    notify_on = "all"
+    
+    slack_action = SlackNotificationAction(
+        data_context=data_context,
+        renderer=renderer,
+        slack_webhook=slack_webhook,
+        notify_on=notify_on
+    )
+
+    validation_result_suite = {'results': [], 'success': True,
+                               'statistics': {'evaluated_expectations': 0, 'successful_expectations': 0,
+                                              'unsuccessful_expectations': 0, 'success_percent': None},
+                               'meta': {'great_expectations.__version__': 'v0.8.0__develop',
+                                        'data_asset_name': {'datasource': 'x', 'generator': 'y',
+                                                            'generator_asset': 'z'},
+                                        'expectation_suite_name': 'default', 'run_id': '2019-09-25T060538.829112Z'}}
+    
+    validation_result_suite_id = ValidationResultIdentifier(**{'expectation_suite_identifier': {
+        'data_asset_name': {'datasource': 'x', 'generator': 'y', 'generator_asset': 'z'},
+        'expectation_suite_name': 'default'}, 'run_id': 'test_100'})
+
+    # assert slack_action.run(
+    #     validation_result_suite_id=validation_result_suite_id,
+    #     validation_result_suite=validation_result_suite
+    # ) == "Slack notification succeeded."
 
 
 # def test_ExtractAndStoreEvaluationParamsAction():

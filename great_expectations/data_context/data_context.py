@@ -19,7 +19,7 @@ import importlib
 from collections import OrderedDict
 import warnings
 
-from .util import get_slack_callback, safe_mmkdir, substitute_all_config_variables
+from .util import safe_mmkdir, substitute_all_config_variables
 from ..types.base import DotDict
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError, InvalidConfigError
@@ -1043,14 +1043,6 @@ class ConfigOnlyDataContext(object):
     #             key=key,
     #             value=validation_results
     #         )
-
-    #     if "result_callback" in self._project_config_with_varibles_substituted:
-    #         result_callback = self._project_config_with_varibles_substituted["result_callback"]
-    #         if isinstance(result_callback, dict) and "slack" in result_callback:
-    #             get_slack_callback(result_callback["slack"])(validation_results)
-    #         else:
-    #             logger.warning("Unrecognized result_callback configuration.")
-
 
     #     # Proposed TODO : Snapshotting shouldn't be a top-level concern in the DataContext.
     #     # Instead, it should be available as a pluggable Action.
