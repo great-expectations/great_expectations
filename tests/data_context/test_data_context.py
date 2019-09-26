@@ -713,6 +713,7 @@ def test_add_store(empty_data_context):
 @pytest.fixture()
 def basic_data_context_config():
     return DataContextConfig(**{
+        "ge_config_version": 1,
         "plugins_directory": "plugins/",
         "expectations_store": {
             "class_name": "ExpectationStore",

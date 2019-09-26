@@ -5,6 +5,12 @@ from great_expectations.datasource.types import BatchFingerprint
 
 
 # noinspection PyPep8Naming
+from great_expectations.exceptions import (
+    InvalidTopLevelConfigKeyError,
+    MissingTopLevelConfigKeyError,
+)
+
+
 def test_NamespaceAwareValidationMetric():
     metric_no_value = NamespaceAwareValidationMetric(
         data_asset_name=NormalizedDataAssetName("my_dataset", "my_generator", "my_asset"),
@@ -37,7 +43,7 @@ def test_NamespaceAwareValidationMetric():
         BatchFingerprint(partition_id="20190101", fingerprint="74d1a208bcf41091d60c9d333a85b82f"),
         'column_value_count', (('column', 'Age'),))
 
-    with pytest.raises(KeyError):
+    with pytest.raises(InvalidTopLevelConfigKeyError):
         extra_key_metric = NamespaceAwareValidationMetric(
             data_asset_name=NormalizedDataAssetName("my_dataset", "my_generator", "my_asset"),
             batch_fingerprint=BatchFingerprint(partition_id="20190101", fingerprint="74d1a208bcf41091d60c9d333a85b82f"),
@@ -49,7 +55,7 @@ def test_NamespaceAwareValidationMetric():
             not_a_key="lemmein"
         )
 
-    with pytest.raises(KeyError):
+    with pytest.raises(MissingTopLevelConfigKeyError):
         missing_key_metric = NamespaceAwareValidationMetric(
             data_asset_name=NormalizedDataAssetName("my_dataset", "my_generator", "my_asset"),
             batch_fingerprint=BatchFingerprint(partition_id="20190101", fingerprint="74d1a208bcf41091d60c9d333a85b82f"),

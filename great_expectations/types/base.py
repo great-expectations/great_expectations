@@ -1,4 +1,11 @@
 import logging
+
+from great_expectations.exceptions import (
+    InvalidTopLevelConfigKeyError,
+    MissingTopLevelConfigKeyError,
+    InvalidConfigValueTypeError,
+)
+
 logger = logging.getLogger(__name__)
 
 from collections import Iterable
@@ -97,10 +104,7 @@ class RequiredKeysDotDict(DotDict):
         super(RequiredKeysDotDict, self).__init__(*args, **kwargs)
         for key in self._required_keys:
             if key not in self.keys():
-                raise KeyError("key: {!r} is missing even though it's in the required keys: {!r}".format(
-                    key,
-                    self._required_keys
-                ))
+                raise MissingTopLevelConfigKeyError("You are missing a required key: `{}`\n    Please ensure that it is in your config file.".format(key))
 
         for key, value in self.items():
             if key in self._key_types:
@@ -176,7 +180,7 @@ class RequiredKeysDotDict(DotDict):
                         any_match = True
 
                 if not any_match:
-                    raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
+                    raise InvalidConfigValueTypeError("key: {!r} must be of type {!r}, not {!r}".format(
                         key,
                         type_,
                         type(value),
@@ -184,7 +188,7 @@ class RequiredKeysDotDict(DotDict):
 
             else:
                 if not isinstance(value, type_):
-                    raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
+                    raise InvalidConfigValueTypeError("key: {!r} must be of type {!r}, not {!r}".format(
                         key,
                         type_,
                         type(value),
@@ -285,10 +289,7 @@ class AllowedKeysDotDict(RequiredKeysDotDict):
         super(AllowedKeysDotDict, self).__init__(*args, **kwargs)
         for key in self.keys():
             if key not in self._allowed_keys:
-                raise KeyError("key: {!r} not in allowed keys: {!r}".format(
-                    key,
-                    self._allowed_keys
-                ))
+                self._raise_invalid_top_level_error(key)
 
     def __getattr__(self, item):
         if item in self._allowed_keys:
@@ -304,14 +305,19 @@ class AllowedKeysDotDict(RequiredKeysDotDict):
 
     def __setitem__(self, key, val):
         if key not in self._allowed_keys:
-            raise KeyError("key: {!r} not in allowed keys: {!r}".format(
-                key,
-                self._allowed_keys
-            ))
+            self._raise_invalid_top_level_error(key)
 
         super(AllowedKeysDotDict, self).__setattr__(key, val)
 
     __setattr__ = __setitem__
+
+    def _raise_invalid_top_level_error(self, key):
+        raise InvalidTopLevelConfigKeyError(
+            "The key `{}` is not allowed.\n    Please remove it from your config.\n    Allowed keys are: {!r}".format(
+                key,
+                self._allowed_keys
+            ))
+
 
 class OrderedKeysDotDict(AllowedKeysDotDict):
     """extends AllowedKeysDotDict with a strict ordering of parameters.
