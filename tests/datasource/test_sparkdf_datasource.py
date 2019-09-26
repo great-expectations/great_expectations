@@ -152,7 +152,7 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path):
                                    expectation_suite_name="default",
                                    batch_kwargs={
                                        "path": os.path.join(test_folder_connection_path,
-                                                            'test.parquet')
+                                                            'test.csv')
                                    },
                                    header=True)
     assert isinstance(dataset, SparkDFDataset)
