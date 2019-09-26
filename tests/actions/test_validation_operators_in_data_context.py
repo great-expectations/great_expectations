@@ -93,28 +93,19 @@ def test_PerformActionListValidationOperator(basic_data_context_config_for_valid
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
-    data_asset_identifier = DataAssetIdentifier("my_datasource", "default", "f1")
-    data_context.stores["expectations_store"].set(
-        ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_identifier,
-            expectation_suite_name="failure"
-        ),
-        failure_expectations
-    )
-    data_context.stores["expectations_store"].set(
-        ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_identifier,
-            expectation_suite_name="warning"
-        ),
-        warning_expectations
-    )
+    data_context.save_expectation_suite(failure_expectations, data_asset_name="my_datasource/default/f1",
+                                        expectation_suite_name="failure")
+    data_context.save_expectation_suite(warning_expectations, data_asset_name="my_datasource/default/f1",
+                                        expectation_suite_name="warning")
 
     print("W"*80)
     print(json.dumps(warning_expectations, indent=2))
     print(json.dumps(failure_expectations, indent=2))
 
-
-    batch = data_context.get_batch("my_datasource/default/f1", expectation_suite_name="failure")
+    batch = data_context.get_batch("my_datasource/default/f1",
+                                   expectation_suite_name="failure",
+                                   batch_kwargs=data_context.yield_batch_kwargs("my_datasource/default/f1")
+                                   )
 
     assert data_context.stores["validation_result_store"].list_keys() == []
 
@@ -202,7 +193,11 @@ project/
     )
 
     my_df = pd.DataFrame({"x": [1,2,3,4,5]})
-    batch = data_context.get_batch("data__dir/default/bob-ross", "default")
+
+    data_asset_name = "data__dir/default/bob-ross"
+    data_context.create_expectation_suite(data_asset_name=data_asset_name, expectation_suite_name="default")
+    batch = data_context.get_batch(data_asset_name=data_asset_name, expectation_suite_name="default",
+                                   batch_kwargs=data_context.yield_batch_kwargs(data_asset_name))
     # my_ge_df = ge.from_pandas(my_df)
 
     # assert data_context.stores["local_validation_result_store"].list_keys() == []
