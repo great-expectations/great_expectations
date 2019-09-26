@@ -28,6 +28,7 @@ def safe_mmkdir(directory, exist_ok=True):
         if e.errno != errno.EEXIST:
             raise
 
+
 # TODO : Consider moving this into types.resource_identifiers.DataContextKey.
 # NOTE : We **don't** want to encourage stringification of keys, other than in tests, etc.
 # TODO : Rename to parse_string_to_data_context_key
@@ -40,6 +41,7 @@ def parse_string_to_data_context_resource_identifier(string, separator="."):
     class_instance = class_(*(string_elements[1:]))
 
     return class_instance
+
 
 def load_class(class_name, module_name):
     # Get the class object itself from strings.
@@ -106,6 +108,7 @@ def instantiate_class_from_config(config, runtime_config, config_defaults=None):
 
     return class_instance
 
+
 def format_dict_for_error_message(dict_):
     # TODO : Tidy this up a bit. Indentation isn't fully consistent.
 
@@ -145,8 +148,6 @@ def substitute_config_variable(template_str, config_variables_dict):
         config_variable_value = template_str
 
     return config_variable_value
-
-
 
 
 def substitute_all_config_variables(data, replace_variables_dict):
