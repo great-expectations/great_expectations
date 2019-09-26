@@ -13,10 +13,10 @@ def test_SlackRenderer():
                                         'data_asset_name': {'datasource': 'x', 'generator': 'y',
                                                             'generator_asset': 'z'},
                                         'expectation_suite_name': 'default', 'run_id': '2019-09-25T060538.829112Z'}}
-    expected_renderer_output = {'blocks': [{'type': 'section', 'text': {'type': 'mrkdwn',
-                                                                        'text': "*Validated batch from data asset:* `{'datasource': 'x', 'generator': 'y', 'generator_asset': 'z'}`\n*Status: Success :tada:*\n0 of 0 expectations were met\n\n"}},
-                                           {'type': 'context', 'elements': [{'type': 'mrkdwn',
-                                                                             'text': 'Great Expectations run id 2019-09-25T060538.829112Z ran at 09/24/19 23:18:36'}]}]}
+    expected_renderer_output = {'blocks': [{'type': 'divider'}, {'type': 'section', 'text': {'type': 'mrkdwn',
+                                                                                             'text': "*Validated batch from data asset:* `{'datasource': 'x', 'generator': 'y', 'generator_asset': 'z'}`\n*Status: Success :tada:*\n*Run ID:* 2019-09-25T060538.829112Z\n*Timestamp:* 09/24/19 23:18:36\n*Summary:* 0 of 0 expectations were met\n\n"}},
+                                           {'type': 'divider'}, {'type': 'context', 'elements': [{'type': 'mrkdwn',
+                                                                                                  'text': 'Learn how to review validation results at https://docs.greatexpectations.io/en/latest/guides/reviewing_validation_results.html'}]}]}
     renderer_output = SlackRenderer().render(validation_result_suite)
     
     assert renderer_output == expected_renderer_output
