@@ -352,7 +352,11 @@ class ErrorsVsWarningsValidationOperator(PerformActionListValidationOperator):
             batch = self._build_batch_from_item(item)
 
             # TODO : We should be using typed batch
-            data_asset_identifier = batch.data_asset_identifier
+            data_asset_identifier = DataAssetIdentifier(
+                *self.data_context._normalize_data_asset_name(
+                    batch._expectation_suite["data_asset_name"]
+                )
+            )
             run_id = run_identifier
 
             assert not data_asset_identifier is None
