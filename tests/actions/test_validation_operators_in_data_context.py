@@ -8,7 +8,7 @@ import pandas as pd
 import great_expectations as ge
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.actions.validation_operators import (
-    DataContextAwareValidationOperator,
+    PerformActionListValidationOperator,
 )
 from great_expectations.data_context import (
     ConfigOnlyDataContext,
@@ -39,68 +39,40 @@ def basic_data_context_config_for_validation_operator():
             # This isn't currently used for Validation Actions, but it's required for DataContext to work.
             "evaluation_parameter_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "InMemoryStoreBackend",
+                "class_name": "EvaluationParameterStore",
             },
-            "warning_validation_result_store" : {
+            "validation_result_store" : {
                 "module_name": "great_expectations.data_context.store",
                 "class_name": "ValidationResultStore",
                 "store_backend": {
                     "class_name": "InMemoryStoreBackend",
                 }
             },
-            "failure_validation_result_store" : {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "ValidationResultStore",
-                "store_backend": {
-                    "class_name": "InMemoryStoreBackend",
-                }
-            }
         },
         "data_docs": {
             "sites": {}
         },
         "validation_operators": {
-            "default" : {
-                # "module_name" : "great_expectations.actions.validation_operators",
-                "class_name" : "DefaultDataContextAwareValidationOperator",
-                "process_warnings_and_quarantine_rows_on_error" : True,
+            "store_val_res_and_extract_eval_params" : {
+                "class_name" : "PerformActionListValidationOperator",
                 "action_list" : [{
-                    "name": "add_warnings_to_store",
-                    "result_key": "warning",
+                    "name": "store_validation_result",
                     "action" : {
-                        # "module_name" : "great_expectations.actions",
-                        "class_name" : "SummarizeAndStoreAction",
-                        "target_store_name": "warning_validation_result_store",
-                        "summarizer":{
-                            "module_name": "tests.test_plugins.fake_actions",
-                            "class_name": "TemporaryNoOpSummarizer",
-                        },
+                        "class_name" : "StoreAction",
+                        "target_store_name": "validation_result_store",
                     }
                 },{
-                    "name": "add_failures_to_store",
-                    "result_key": "failure",
+                    "name": "extract_and_store_eval_parameters",
                     "action" : {
-                        # "module_name" : "great_expectations.actions",
-                        "class_name" : "SummarizeAndStoreAction",
-                        "target_store_name": "failure_validation_result_store",
-                        "summarizer":{
-                            "module_name": "tests.test_plugins.fake_actions",
-                            "class_name": "TemporaryNoOpSummarizer",
-                        },
-                    }
-                },{
-                    "name" : "send_slack_message",
-                    "result_key": None,
-                    "action" : {
-                        "module_name" : "great_expectations.actions",
-                        "class_name" : "NoOpAction",
+                        "class_name" : "ExtractAndStoreEvaluationParamsAction",
+                        "target_store_name": "evaluation_parameter_store",
                     }
                 }]
             }
         }
     })
 
-def test_DefaultDataContextAwareValidationOperator(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
+def test_PerformActionListValidationOperator(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
     project_path = str(tmp_path_factory.mktemp('great_expectations'))
 
     data_context = ConfigOnlyDataContext(
@@ -121,13 +93,6 @@ def test_DefaultDataContextAwareValidationOperator(basic_data_context_config_for
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
-    df = data_context.get_batch("my_datasource/default/f1", "foo",
-                                batch_kwargs=data_context.yield_batch_kwargs("my_datasource/default/f1"))
-
-    df.expect_column_values_to_be_in_set(column="x", value_set=[1,3,5,7,9])
-    quarantine_expectations = df.get_expectation_suite(discard_failed_expectations=False)
-
-
     data_asset_identifier = DataAssetIdentifier("my_datasource", "default", "f1")
     data_context.stores["expectations_store"].set(
         ExpectationSuiteIdentifier(
@@ -143,50 +108,36 @@ def test_DefaultDataContextAwareValidationOperator(basic_data_context_config_for
         ),
         warning_expectations
     )
-    data_context.stores["expectations_store"].set(
-        ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_identifier,
-            expectation_suite_name="quarantine"
-        ),
-        quarantine_expectations
-    )
 
     print("W"*80)
     print(json.dumps(warning_expectations, indent=2))
     print(json.dumps(failure_expectations, indent=2))
-    print(json.dumps(quarantine_expectations, indent=2))
 
 
-    my_df = pd.DataFrame({"x": [1,2,3,4,5]})
-    my_ge_df = ge.from_pandas(my_df)
+    batch = data_context.get_batch("my_datasource/default/f1", expectation_suite_name="failure")
 
-    assert data_context.stores["warning_validation_result_store"].list_keys() == []
+    assert data_context.stores["validation_result_store"].list_keys() == []
 
-    results = data_context.run_validation_operator(
-        data_asset=my_ge_df,
-        data_asset_identifier=data_asset_identifier,
+    operator_result = data_context.run_validation_operator(
+        assets_to_validate=[batch],
         run_identifier="test-100",
-        validation_operator_name="default",
+        validation_operator_name="store_val_res_and_extract_eval_params",
     )
     # results = data_context.run_validation_operator(my_ge_df)
 
-    warning_validation_result_store_keys = data_context.stores["warning_validation_result_store"].list_keys()
+    warning_validation_result_store_keys = data_context.stores["validation_result_store"].list_keys()
     print(warning_validation_result_store_keys)
     assert len(warning_validation_result_store_keys) == 1
 
-    first_validation_result = data_context.stores["warning_validation_result_store"].get(warning_validation_result_store_keys[0])
+    first_validation_result = data_context.stores["validation_result_store"].get(warning_validation_result_store_keys[0])
     print(json.dumps(first_validation_result, indent=2))
-    assert data_context.stores["warning_validation_result_store"].get(warning_validation_result_store_keys[0])["success"] == False
+    assert data_context.stores["validation_result_store"].get(warning_validation_result_store_keys[0])["success"] == True
+
+    assert len(operator_result.keys()) == 1
 
 
-    failure_validation_result_store_keys = data_context.stores["failure_validation_result_store"].list_keys()
-    print(json.dumps(data_context.stores["failure_validation_result_store"].get(failure_validation_result_store_keys[0]), indent=2))
-    assert data_context.stores["failure_validation_result_store"].get(failure_validation_result_store_keys[0])["success"] == True
 
-
-    # assert False
-
-def test_DefaultDataContextAwareValidationOperator_with_file_structure(tmp_path_factory):
+def test_ErrorsVsWarningsValidationOperator_with_file_structure(tmp_path_factory):
     base_path = str(tmp_path_factory.mktemp('test_DefaultDataContextAwareValidationOperator_with_file_structure__dir'))
     project_path = os.path.join( base_path, "project")
     print(os.getcwd())
@@ -251,7 +202,8 @@ project/
     )
 
     my_df = pd.DataFrame({"x": [1,2,3,4,5]})
-    my_ge_df = ge.from_pandas(my_df)
+    batch = data_context.get_batch("data__dir/default/bob-ross", "default")
+    # my_ge_df = ge.from_pandas(my_df)
 
     # assert data_context.stores["local_validation_result_store"].list_keys() == []
     validation_store_path = os.path.join(project_path, "great_expectations/uncommitted/validations")
@@ -268,12 +220,10 @@ validations/
 
     data_asset_identifier = DataAssetIdentifier("data__dir", "default", "bob-ross")
     results = data_context.run_validation_operator(
-        data_asset=my_ge_df,
-        data_asset_identifier=data_asset_identifier,
+        assets_to_validate=[batch],
         run_identifier="test-100",
-        validation_operator_name="default",
+        validation_operator_name="errors_and_warnings_validation_operator",
     )
-    # results = data_context.run_validation_operator(my_ge_df)
 
     print(gen_directory_tree_str(validation_store_path))
     assert gen_directory_tree_str(validation_store_path) == """\
