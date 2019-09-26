@@ -65,6 +65,16 @@ class NoOpAction(NamespacedValidationAction):
 class SlackNotificationAction(NamespacedValidationAction):
     """
     SlackNotificationAction is a namespeace-aware validation action that sends a Slack notification to a given webhook.
+    
+    Example config:
+    {
+        "renderer": {
+            "module_name": "great_expectations.render.renderer.slack_renderer",
+            "class_name": "SlackRenderer",
+        },
+        "slack_webhook": "https://example_webhook",
+        "notify_on": "all"
+    }
     """
     
     def __init__(
@@ -77,6 +87,11 @@ class SlackNotificationAction(NamespacedValidationAction):
         """
         :param data_context: data context
         :param renderer: dictionary specifying the renderer used to generate a query consumable by Slack API
+            e.g.:
+                {
+                   "module_name": "great_expectations.render.renderer.slack_renderer",
+                   "class_name": "SlackRenderer",
+               }
         :param slack_webhook: string - incoming Slack webhook to send notification to
         :param notify_on: string - "all", "failure", "success" - specifies validation status that will trigger notification
         """
