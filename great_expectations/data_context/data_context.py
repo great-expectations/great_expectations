@@ -68,6 +68,13 @@ from .util import (
     instantiate_class_from_config
 )
 
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
+    # just fall through
+    SQLAlchemyError = ProfilerError
+
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -933,9 +940,17 @@ class ConfigOnlyDataContext(object):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
 
         expectation_suite = get_empty_expectation_suite(
-            data_asset_name,
+            # FIXME: For now, we just cast this to a string to be close to the old behavior
+            self.data_asset_name_delimiter.join(data_asset_name),
             expectation_suite_name
         )
+
+        key = ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier(*data_asset_name),
+            expectation_suite_name=expectation_suite_name,
+        )
+
+        self._stores["expectations_store"].set(key, expectation_suite)
 
         return expectation_suite
 
@@ -953,11 +968,11 @@ class ConfigOnlyDataContext(object):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
 
         key = ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(*data_asset_name, delimiter=self.data_asset_name_delimiter),
+            data_asset_name=DataAssetIdentifier(*data_asset_name),
             expectation_suite_name=expectation_suite_name,
         )
 
-        if key in self.stores["expectations_store"]:
+        if self.stores["expectations_store"].has_key(key):
             return self.stores["expectations_store"].get(key)
         else:
             raise DataContextError(
@@ -978,9 +993,6 @@ class ConfigOnlyDataContext(object):
         Returns:
             None
         """
-        if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
-
         if data_asset_name is None:
             try:
                 data_asset_name = expectation_suite['data_asset_name']
@@ -999,8 +1011,11 @@ class ConfigOnlyDataContext(object):
         else:
             expectation_suite['expectation_suite_name'] = expectation_suite_name
 
+        if not isinstance(data_asset_name, NormalizedDataAssetName):
+            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+
         self.stores["expectations_store"].set(ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(*data_asset_name, delimiter=self.data_asset_name_delimiter),
+            data_asset_name=DataAssetIdentifier(*data_asset_name),
             expectation_suite_name=expectation_suite_name,
         ), expectation_suite)
 
@@ -1394,8 +1409,7 @@ class ConfigOnlyDataContext(object):
             data_asset_name = DataAssetIdentifier(
                 datasource=data_asset_name.datasource,
                 generator=data_asset_name.generator,
-                generator_asset=data_asset_name.generator_asset,
-                delimiter=self.data_asset_name_delimiter
+                generator_asset=data_asset_name.generator_asset
             )
 
 
@@ -1406,6 +1420,10 @@ class ConfigOnlyDataContext(object):
             # but when we do so, that Store will need to function as more than just a key-value Store.
             key_list = selected_store.list_keys()
             run_id_set = set([key.run_id for key in key_list])
+            if len(run_id_set) == 0:
+                logger.warning("No valid run_id values found.")
+                return {}
+
             run_id = max(run_id_set)
 
         key = ValidationResultIdentifier(
@@ -1583,10 +1601,19 @@ class ConfigOnlyDataContext(object):
                     if additional_batch_kwargs is None:
                         additional_batch_kwargs = {}
 
+                    self.create_expectation_suite(
+                        data_asset_name=name,
+                        expectation_suite_name=profiler.__name__
+                    )
+                    batch_kwargs = self.yield_batch_kwargs(
+                        data_asset_name=name,
+                        **additional_batch_kwargs
+                    )
+
                     batch = self.get_batch(
                         data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
                         expectation_suite_name=profiler.__name__,
-                        **additional_batch_kwargs
+                        batch_kwargs=batch_kwargs
                     )
 
                     if not profiler.validate(batch):
@@ -1609,21 +1636,19 @@ class ConfigOnlyDataContext(object):
                     new_expectation_count = len(expectation_suite["expectations"])
                     total_expectations += new_expectation_count
 
-                    self.set_expectation_suite(expectation_suite)
+                    self.save_expectation_suite(expectation_suite)
                     duration = (datetime.datetime.now() - start_time).total_seconds()
                     logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
                                 (new_column_count, row_count, name, duration))
 
                 except ProfilerError as err:
                     logger.warning(err.message)
-                except IOError as exc:
-                    logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
-                    logger.debug(str(exc))
+                except IOError as err:
+                    logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % name)
+                    logger.debug(str(err))
                     skipped_data_assets += 1
-                # FIXME: this is a workaround for catching SQLAlchemny exceptions without taking SQLAlchemy dependency.
-                # Think how to avoid this.
-                except Exception as e:
-                    logger.warning("Exception while profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                except SQLAlchemyError as e:
+                    logger.warning("SqlAlchemyError while profiling %s. Skipping." % name)
                     logger.debug(str(e))
                     skipped_data_assets += 1
 
