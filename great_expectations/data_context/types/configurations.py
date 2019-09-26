@@ -8,6 +8,7 @@ class DataContextConfig(Config):
         "config_variables_file_path",
         "plugins_directory",
         "expectations_store",
+        "profiling_store_name",
         "evaluation_parameter_store_name",
         "datasources",
         "stores",
@@ -18,6 +19,7 @@ class DataContextConfig(Config):
     _required_keys = set([
         "plugins_directory",
         "expectations_store",
+        "profiling_store_name",
         "evaluation_parameter_store_name",
         "datasources",
         "stores",
@@ -29,6 +31,7 @@ class DataContextConfig(Config):
         "config_variables_file_path": string_types,
         "plugins_directory": string_types,
         "expectations_store": dict,
+        "profiling_store_name": string_types,
         "evaluation_parameter_store_name": string_types,
         "datasources": dict,
         "stores": dict,

@@ -721,7 +721,8 @@ def basic_data_context_config():
                 "base_directory": "expectations/",
             },
         },
-        "evaluation_parameter_store_name" : "evaluation_parameter_store",
+        "evaluation_parameter_store_name": "evaluation_parameter_store",
+        "profiling_store_name": "does_not_have_to_be_real",
         "datasources": {},
         "stores": {
             "evaluation_parameter_store" : {

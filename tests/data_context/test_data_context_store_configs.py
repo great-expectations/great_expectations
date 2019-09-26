@@ -27,6 +27,7 @@ def totally_empty_data_context(tmp_path_factory):
             }
         },
         "evaluation_parameter_store_name": "not_a_real_store_name",
+        "profiling_store_name": "another_fake_store",
         "datasources": {},
         "stores": {},
         "data_docs": {
