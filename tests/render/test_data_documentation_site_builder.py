@@ -28,20 +28,20 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     context.add_validation_operator(
         "validate_and_store",
         {
-            "class_name" : "BasicDataContextAwareValidationOperator",
-            "expectation_suite_name": "BasicDatasetProfiler",
-            "action_list" : [{
-                "name" : "store_validation_results",
-                "result_key" : "validation_result",
-                "action" : {
-                    "class_name": "SummarizeAndStoreAction",
-                    "summarizer": {
-                        "module_name": "tests.test_plugins.fake_actions",
-                        "class_name": "TemporaryNoOpSummarizer",
-                    },
-                    "target_store_name": "local_validation_result_store",
-                }
-            }],
+        "class_name": "PerformActionListValidationOperator",
+        "action_list": [{
+            "name": "store_validation_result",
+            "action": {
+                "class_name": "StoreAction",
+                "target_store_name": "local_validation_result_store",
+            }
+        }, {
+            "name": "extract_and_store_eval_parameters",
+            "action": {
+                "class_name": "ExtractAndStoreEvaluationParamsAction",
+                "target_store_name": "evaluation_parameter_store",
+            }
+        }]
         }
     )
 
@@ -56,8 +56,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     batch = context.get_batch('Titanic', expectation_suite_name='BasicDatasetProfiler')
     run_id = "test_run_id_12345"
     context.run_validation_operator(
-        data_asset=batch,
-        data_asset_id_string=batch.get_expectation_suite()["data_asset_name"],
+        assets_to_validate=[batch],
         run_identifier=run_id,
         validation_operator_name="validate_and_store",
     )

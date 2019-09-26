@@ -172,7 +172,7 @@ def from_pandas(pandas_df,
 
 
 def validate(data_asset, expectation_suite=None, data_asset_name=None, data_context=None, data_asset_type=None, *args, **kwargs):
-    """Validate the provided data asset using the provided expectation suite"""    
+    """Validate the provided data asset using the provided expectation suite"""
     if expectation_suite is None and data_context is None:
         raise ValueError(
             "Either an expectation suite or a DataContext is required for validation.")
@@ -181,7 +181,7 @@ def validate(data_asset, expectation_suite=None, data_asset_name=None, data_cont
         logger.info("Using expectation suite from DataContext.")
         # Allow data_context to be a string, and try loading it from path in that case
         if isinstance(data_context, string_types):
-            data_context = DataContext(data_context)                
+            data_context = DataContext(data_context)
         expectation_suite = data_context.get_expectation_suite(data_asset_name)
     else:
         if data_asset_name in expectation_suite:
@@ -193,16 +193,7 @@ def validate(data_asset, expectation_suite=None, data_asset_name=None, data_cont
     # If the object is already a Dataset type, then this is purely a convenience method
     # and no conversion is needed
     if isinstance(data_asset, dataset.Dataset) and data_asset_type is None:
-        if data_context is None:
-            return data_asset.validate(expectation_suite=expectation_suite, *args, **kwargs)
-        else:
-            return data_context.validate(
-                data_asset,
-                expectation_suite,
-                *args, **kwargs
-            )
-        # return data_asset.validate(expectation_suite=expectation_suite, data_context=data_context, *args, **kwargs)
-
+        return data_asset.validate(expectation_suite=expectation_suite, data_context=data_context, *args, **kwargs)
     elif data_asset_type is None:
         # Guess the GE data_asset_type based on the type of the data_asset
         if isinstance(data_asset, pd.DataFrame):
@@ -224,11 +215,66 @@ def validate(data_asset, expectation_suite=None, data_asset_name=None, data_cont
 
     data_asset_ = _convert_to_dataset_class(
         data_asset, data_asset_type, expectation_suite)
-    
-    if data_context is None:
-        return data_asset_.validate(*args, data_context=data_context, **kwargs)
-    else:
-        return data_context.validate(data_asset_, *args, **kwargs)
+    return data_asset_.validate(*args, data_context=data_context, **kwargs)
+
+# def validate(data_asset, expectation_suite=None, data_asset_name=None, data_context=None, data_asset_type=None, *args, **kwargs):
+#     """Validate the provided data asset using the provided expectation suite"""
+#     if expectation_suite is None and data_context is None:
+#         raise ValueError(
+#             "Either an expectation suite or a DataContext is required for validation.")
+#
+#     if expectation_suite is None:
+#         logger.info("Using expectation suite from DataContext.")
+#         # Allow data_context to be a string, and try loading it from path in that case
+#         if isinstance(data_context, string_types):
+#             data_context = DataContext(data_context)
+#         expectation_suite = data_context.get_expectation_suite(data_asset_name)
+#     else:
+#         if data_asset_name in expectation_suite:
+#             logger.info("Using expectation suite with name %s" %
+#                         expectation_suite["data_asset_name"])
+#         else:
+#             logger.info("Using expectation suite with no data_asset_name")
+#
+#     # If the object is already a Dataset type, then this is purely a convenience method
+#     # and no conversion is needed
+#     if isinstance(data_asset, dataset.Dataset) and data_asset_type is None:
+#         if data_context is None:
+#             return data_asset.validate(expectation_suite=expectation_suite, *args, **kwargs)
+#         else:
+#             return data_context.validate(
+#                 data_asset,
+#                 expectation_suite,
+#                 *args, **kwargs
+#             )
+#         # return data_asset.validate(expectation_suite=expectation_suite, data_context=data_context, *args, **kwargs)
+#
+#     elif data_asset_type is None:
+#         # Guess the GE data_asset_type based on the type of the data_asset
+#         if isinstance(data_asset, pd.DataFrame):
+#             data_asset_type = dataset.PandasDataset
+#         # Add other data_asset_type conditions here as needed
+#
+#     # Otherwise, we will convert for the user to a subclass of the
+#     # existing class to enable new expectations, but only for datasets
+#     if not isinstance(data_asset, (dataset.Dataset, pd.DataFrame)):
+#         raise ValueError(
+#             "The validate util method only supports dataset validations, including custom subclasses. For other data asset types, use the object's own validate method.")
+#
+#     if not issubclass(type(data_asset), data_asset_type):
+#         if isinstance(data_asset, (pd.DataFrame)) and issubclass(data_asset_type, dataset.PandasDataset):
+#             pass  # This is a special type of allowed coercion
+#         else:
+#             raise ValueError(
+#                 "The validate util method only supports validation for subtypes of the provided data_asset_type.")
+#
+#     data_asset_ = _convert_to_dataset_class(
+#         data_asset, data_asset_type, expectation_suite)
+#
+#     if data_context is None:
+#         return data_asset_.validate(*args, data_context=data_context, **kwargs)
+#     else:
+#         return data_context.validate(data_asset_, *args, **kwargs)
 
 
 # https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
