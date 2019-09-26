@@ -50,6 +50,7 @@ def basic_data_context_config_for_validation_operator():
                 }
             }
         },
+        "profiling_store_name": "validation_result_store",
         "data_docs": {
             "sites": {}
         },
@@ -184,63 +185,33 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
                                 class_name="PandasDatasource",
                                 base_directory=str(filesystem_csv_4))
 
-    # NOTE : It's kinda annoying that these Expectation Suites start out with expect_column_to_exist.
-    # How do I turn off that default...?
-    df = data_context.get_batch("my_datasource/default/f1")
+    data_context.create_expectation_suite(data_asset_name="my_datasource/default/f1", expectation_suite_name="failure")
+    df = data_context.get_batch("my_datasource/default/f1", "failure",
+                                batch_kwargs=data_context.yield_batch_kwargs("my_datasource/default/f1"))
     df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
     failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
+    data_context.save_expectation_suite(failure_expectations, data_asset_name="my_datasource/default/f1",
+                                        expectation_suite_name="failure")
 
+
+    data_context.create_expectation_suite(data_asset_name="my_datasource/default/f1", expectation_suite_name="warning")
+    df = data_context.get_batch("my_datasource/default/f1", "warning",
+                                batch_kwargs=data_context.yield_batch_kwargs("my_datasource/default/f1"))
+    df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
+    data_context.save_expectation_suite(warning_expectations, data_asset_name="my_datasource/default/f1",
+                                        expectation_suite_name="warning")
 
+    data_context.save_expectation_suite(failure_expectations, data_asset_name="my_datasource/default/f2",
+                                        expectation_suite_name="failure")
+    data_context.save_expectation_suite(failure_expectations, data_asset_name="my_datasource/default/f3",
+                                        expectation_suite_name="failure")
+    data_context.save_expectation_suite(warning_expectations, data_asset_name="my_datasource/default/f2",
+                                        expectation_suite_name="warning")
+    data_context.save_expectation_suite(warning_expectations, data_asset_name="my_datasource/default/f3",
+                                        expectation_suite_name="warning")
 
-    data_asset_identifier_1 = DataAssetIdentifier("my_datasource", "default", "f1")
-    data_context.stores["expectations_store"].set(
-        ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_identifier_1,
-            expectation_suite_name="failure"
-        ),
-        failure_expectations
-    )
-    data_context.stores["expectations_store"].set(
-        ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_identifier_1,
-            expectation_suite_name="warning"
-        ),
-        warning_expectations
-    )
-
-    data_asset_identifier_2 = DataAssetIdentifier("my_datasource", "default", "f2")
-    data_context.stores["expectations_store"].set(
-        ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_identifier_2,
-            expectation_suite_name="failure"
-        ),
-        failure_expectations
-    )
-    data_context.stores["expectations_store"].set(
-        ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_identifier_2,
-            expectation_suite_name="warning"
-        ),
-        warning_expectations
-    )
-    
-    data_asset_identifier_3 = DataAssetIdentifier("my_datasource", "default", "f3")
-    data_context.stores["expectations_store"].set(
-        ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_identifier_3,
-            expectation_suite_name="failure"
-        ),
-        failure_expectations
-    )
-    data_context.stores["expectations_store"].set(
-        ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_identifier_3,
-            expectation_suite_name="warning"
-        ),
-        warning_expectations
-    )
 
     vo = ErrorsVsWarningsValidationOperator(
         data_context=data_context,
