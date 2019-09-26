@@ -102,30 +102,30 @@ def test_PerformActionListValidationOperator(basic_data_context_config_for_valid
     print(json.dumps(warning_expectations, indent=2))
     print(json.dumps(failure_expectations, indent=2))
 
+    validator_batch_kwargs = data_context.yield_batch_kwargs("my_datasource/default/f1")
     batch = data_context.get_batch("my_datasource/default/f1",
                                    expectation_suite_name="failure",
-                                   batch_kwargs=data_context.yield_batch_kwargs("my_datasource/default/f1")
+                                   batch_kwargs=validator_batch_kwargs
                                    )
 
     assert data_context.stores["validation_result_store"].list_keys() == []
-
+    # We want to demonstrate running the validation operator with both a pre-built batch (DataAsset) and with
+    # a tuple of parameters for get_batch
     operator_result = data_context.run_validation_operator(
-        assets_to_validate=[batch],
+        assets_to_validate=[batch, ("my_datasource/default/f1", "warning", validator_batch_kwargs)],
         run_identifier="test-100",
         validation_operator_name="store_val_res_and_extract_eval_params",
     )
     # results = data_context.run_validation_operator(my_ge_df)
 
-    warning_validation_result_store_keys = data_context.stores["validation_result_store"].list_keys()
-    print(warning_validation_result_store_keys)
-    assert len(warning_validation_result_store_keys) == 1
+    validation_result_store_keys = data_context.stores["validation_result_store"].list_keys()
+    print(validation_result_store_keys)
+    assert len(validation_result_store_keys) == 2
+    assert len(operator_result.keys()) == 2
 
-    first_validation_result = data_context.stores["validation_result_store"].get(warning_validation_result_store_keys[0])
+    first_validation_result = data_context.stores["validation_result_store"].get(validation_result_store_keys[0])
     print(json.dumps(first_validation_result, indent=2))
-    assert data_context.stores["validation_result_store"].get(warning_validation_result_store_keys[0])["success"] == True
-
-    assert len(operator_result.keys()) == 1
-
+    assert data_context.stores["validation_result_store"].get(validation_result_store_keys[0])["success"] is True
 
 
 def test_ErrorsVsWarningsValidationOperator_with_file_structure(tmp_path_factory):
