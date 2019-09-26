@@ -22,7 +22,11 @@ class SlackRenderer(Renderer):
             },
         }
     
-        query = {"blocks": [title_block]}
+        divider_block = {
+            "type": "divider"
+        }
+    
+        query = {"blocks": [divider_block, title_block]}
     
         if validation_json:
             if "meta" in validation_json:
@@ -41,8 +45,8 @@ class SlackRenderer(Renderer):
             if validation_json["success"]:
                 status = "Success :tada:"
         
-            query["blocks"][0]["text"]["text"] = "*Validated batch from data asset:* `{}`\n*Status: {}*\n{}".format(
-                data_asset_name, status, check_details_text)
+            query["blocks"][1]["text"]["text"] = "*Validated batch from data asset:* `{}`\n*Status: {}*\n*Run ID:* {}\n*Timestamp:* {}\n*Summary:* {}".format(
+                data_asset_name, status, run_id, timestamp, check_details_text)
         
             if "result_reference" in validation_json["meta"]:
                 report_element = {
@@ -63,14 +67,16 @@ class SlackRenderer(Renderer):
                 }
                 query["blocks"].append(dataset_element)
     
+        documentation_url = "https://docs.greatexpectations.io/en/latest/guides/reviewing_validation_results.html"
         footer_section = {
             "type": "context",
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": "Great Expectations run id {} ran at {}".format(run_id, timestamp),
+                    "text": "Learn how to review validation results at {}".format(documentation_url),
                 }
             ],
         }
+        query["blocks"].append(divider_block)
         query["blocks"].append(footer_section)
         return query

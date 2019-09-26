@@ -65,18 +65,33 @@ class NoOpAction(NamespacedValidationAction):
 class SlackNotificationAction(NamespacedValidationAction):
     """
     SlackNotificationAction is a namespeace-aware validation action that sends a Slack notification to a given webhook.
+    
+    Example config:
+    {
+        "renderer": {
+            "module_name": "great_expectations.render.renderer.slack_renderer",
+            "class_name": "SlackRenderer",
+        },
+        "slack_webhook": "https://example_webhook",
+        "notify_on": "all"
+    }
     """
     
     def __init__(
             self,
             data_context,
             renderer,
-            slack_webhook=None,
-            notify_on=None,
+            slack_webhook,
+            notify_on="all",
     ):
         """
         :param data_context: data context
         :param renderer: dictionary specifying the renderer used to generate a query consumable by Slack API
+            e.g.:
+                {
+                   "module_name": "great_expectations.render.renderer.slack_renderer",
+                   "class_name": "SlackRenderer",
+               }
         :param slack_webhook: string - incoming Slack webhook to send notification to
         :param notify_on: string - "all", "failure", "success" - specifies validation status that will trigger notification
         """
@@ -86,20 +101,12 @@ class SlackNotificationAction(NamespacedValidationAction):
             runtime_config={},
             config_defaults={},
         )
-        if slack_webhook:
-            self.slack_webhook = slack_webhook
-        else:
-            slack_webhook = data_context.get_config_with_variables_substituted().get("notifications", {}).get("slack_webhook")
-        assert slack_webhook, "No Slack webhook found in action or project configs."
-        if notify_on:
-            self.notify_on = notify_on
-        elif data_context.get_config_with_variables_substituted().get("notifications", {}).get("notify_on"):
-            self.notify_on = data_context.get_config_with_variables_substituted().get("notifications", {}).get("notify_on")
-        else:
-            self.notify_on = "all"
+        self.slack_webhook = slack_webhook
+        assert slack_webhook, "No Slack webhook found in action config."
+        self.notify_on = notify_on
         
     def run(self, validation_result_suite_id, validation_result_suite, data_asset=None):
-        logger.debug("SummarizeAndNotifySlackAction.take_action")
+        logger.debug("SlackNotificationAction.run")
     
         if validation_result_suite is None:
             return
