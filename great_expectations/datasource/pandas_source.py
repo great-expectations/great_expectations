@@ -183,6 +183,8 @@ class PandasDatasource(Datasource):
 
         elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (pd.DataFrame, pd.Series)):
             df = batch_kwargs.pop("df")  # We don't want to store the actual dataframe in kwargs
+            # Record this in the kwargs *and* the id
+            batch_kwargs["PandasInMemoryDF"] = True
             batch_id["PandasInMemoryDF"] = True
             if df.memory_usage().sum() < HASH_THRESHOLD:
                 batch_id["fingerprint"] = hashlib.md5(pd.util.hash_pandas_object(df, index=True).values).hexdigest()

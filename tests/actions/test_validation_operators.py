@@ -67,16 +67,20 @@ def test_validation_operator__run(basic_data_context_config_for_validation_opera
                                 class_name="PandasDatasource",
                                 base_directory=str(filesystem_csv_4))
 
-    # NOTE : It's kinda annoying that these Expectation Suites start out with expect_column_to_exist.
-    # How do I turn off that default...?
-    df = data_context.get_batch("my_datasource/default/f1")
+    data_asset_name = "my_datasource/default/f1"
+    data_context.create_expectation_suite(data_asset_name, "foo")
+    df = data_context.get_batch(data_asset_name,
+                                "foo",
+                                batch_kwargs=data_context.yield_batch_kwargs(data_asset_name))
     df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
     failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
-    df = data_context.get_batch("my_datasource/default/f1")
+    data_context.create_expectation_suite(data_asset_name, "default")
+    df = data_context.get_batch(data_asset_name, "default",
+                                batch_kwargs=data_context.yield_batch_kwargs(data_asset_name))
     df.expect_column_values_to_be_in_set(column="x", value_set=[1,3,5,7,9])
     quarantine_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 

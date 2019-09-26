@@ -187,7 +187,7 @@ Review and Save Expectation Suite
 
 .. code-block:: python
 
-    df.set_expectation_suite()
+    df.save_expectation_suite()
 
 Because this data asset is connected to the DataContext, GE determines the location to save the expectation suite:
 
@@ -201,9 +201,9 @@ When we call ``get_expectation_suite``, we might see this warning in the output:
 
 When we save an expectation suite, by default, GE will drop any expectation that was not successful on its last run.
 
-Sometimes we want to save an expectation even though it did not validate successfully on the current batch (e.g., we have a reason to believe that our expectation is correct and the current batch has bad entries). In this case we pass and additional argument to ``set_expectation_suite`` method:
+Sometimes we want to save an expectation even though it did not validate successfully on the current batch (e.g., we have a reason to believe that our expectation is correct and the current batch has bad entries). In this case we pass and additional argument to ``save_expectation_suite`` method:
 
 .. code-block:: python
 
-    df.set_expectation_suite(discard_failed_expectations=False)
+    df.save_expectation_suite(discard_failed_expectations=False)
 

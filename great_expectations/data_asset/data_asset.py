@@ -785,22 +785,7 @@ class DataAsset(object):
         logger.info(message + settings_message)
         return expectation_suite
 
-    def save_expectations_config(
-        self,
-        filepath=None,
-        discard_failed_expectations=True,
-        discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-        suppress_warnings=False
-    ):
-        warnings.warn("save_expectations_config is deprecated, and will be removed in a future release. " +
-                      "Please use set_expectation_suite instead.", DeprecationWarning)
-        self.set_expectation_suite(
-            filepath, discard_failed_expectations, discard_result_format_kwargs,
-            discard_include_config_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
-
-    def set_expectation_suite(
+    def save_expectation_suite(
         self,
         filepath=None,
         discard_failed_expectations=True,
@@ -844,7 +829,7 @@ class DataAsset(object):
             suppress_warnings
         )
         if filepath is None and self._data_context is not None:
-            self._data_context.set_expectation_suite(expectation_suite)
+            self._data_context.save_expectation_suite(expectation_suite)
         elif filepath is not None:
             expectation_config_str = json.dumps(expectation_suite, indent=2)
             open(filepath, 'w').write(expectation_config_str)
@@ -1139,7 +1124,7 @@ class DataAsset(object):
         """Gets the current name of this data_asset as stored in the expectations configuration."""
         return self._expectation_suite.get("data_asset_name", None)
 
-    def set_expectation_suite_name(self, expectation_suite_name):
+    def save_expectation_suite_name(self, expectation_suite_name):
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
         self._expectation_suite["expectation_suite_name"] = expectation_suite_name
     

@@ -64,7 +64,14 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
     assert not_so_empty_data_context.stores["local_validation_result_store"].store_backend.base_directory == \
         "uncommitted/validations/"
 
-    my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
+    # create a suite for our test
+    data_asset_name = "my_datasource/f1"
+    # We have to explicitly choose an expectation suite name, but normalization on the data_asset_name
+    # will insert our single generator, named default
+    not_so_empty_data_context.create_expectation_suite(data_asset_name, "default")
+
+    my_batch = not_so_empty_data_context.get_batch("my_datasource/f1", "default",
+                                                   not_so_empty_data_context.yield_batch_kwargs(data_asset_name))
     my_batch.expect_column_to_exist("a")
 
     with mock.patch("datetime.datetime") as mock_datetime:
@@ -114,14 +121,14 @@ def test_get_existing_data_asset_config(data_context):
 
 
 def test_get_new_data_asset_config(data_context):
-    data_asset_config = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
+    data_asset_config = data_context.create_expectation_suite('this_data_asset_config_does_not_exist', 'default')
     assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist'
     assert data_asset_config['expectation_suite_name'] == 'default'
     assert len(data_asset_config['expectations']) == 0
 
 
 def test_save_data_asset_config(data_context):
-    data_asset_config = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
+    data_asset_config = data_context.create_expectation_suite('this_data_asset_config_does_not_exist', 'default')
     assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist'
     assert data_asset_config["expectation_suite_name"] == "default"
     assert len(data_asset_config['expectations']) == 0
@@ -131,7 +138,7 @@ def test_save_data_asset_config(data_context):
                 "value": 10
             }
         })
-    data_context.set_expectation_suite(data_asset_config)
+    data_context.save_expectation_suite(data_asset_config)
     data_asset_config_saved = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
     assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
 
@@ -460,8 +467,8 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
         NormalizedDataAssetName("my_datasource", "default", "f1")
 
     # However, if we add a data_asset that would cause that name to be ambiguous, it will then fail:
-    suite = data_context.get_expectation_suite("my_datasource/in_memory_generator/f1")
-    data_context.set_expectation_suite(suite)
+    suite = data_context.create_expectation_suite("my_datasource/in_memory_generator/f1", "default")
+    data_context.save_expectation_suite(suite)
 
     with pytest.raises(DataContextError) as exc:
         name = data_context._normalize_data_asset_name("f1")
@@ -765,7 +772,9 @@ def test_ExplorerDataContext(titanic_data_context):
 def test_ExplorerDataContext_expectation_widget(titanic_data_context):
     context_root_directory = titanic_data_context.root_directory
     explorer_data_context = ExplorerDataContext(context_root_directory)
-    data_asset = explorer_data_context.get_batch('Titanic', expectation_suite_name='my_suite')
+    explorer_data_context.create_expectation_suite('Titanic', expectation_suite_name='my_suite')
+    data_asset = explorer_data_context.get_batch('Titanic', expectation_suite_name='my_suite',
+                                                 batch_kwargs=explorer_data_context.yield_batch_kwargs("Titanic"))
     widget_output = data_asset.expect_column_to_exist('test')
     print(widget_output)
     if sys.version[0:3] == '2.7':

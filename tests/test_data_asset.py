@@ -220,7 +220,7 @@ class TestDataAsset(unittest.TestCase):
             output_config,
         )
 
-        df.set_expectation_suite(directory_name + '/temp1.json')
+        df.save_expectation_suite(directory_name + '/temp1.json')
         temp_file = open(directory_name+'/temp1.json')
         self.assertEqual(
             json.load(temp_file),
@@ -296,7 +296,7 @@ class TestDataAsset(unittest.TestCase):
             output_config
         )
 
-        df.set_expectation_suite(
+        df.save_expectation_suite(
             directory_name+'/temp2.json',
             discard_failed_expectations=False
         )
@@ -372,7 +372,7 @@ class TestDataAsset(unittest.TestCase):
             msg="Second Test Set"
         )
 
-        df.set_expectation_suite(
+        df.save_expectation_suite(
             directory_name+'/temp3.json',
             discard_result_format_kwargs=False,
             discard_include_config_kwargs=False,

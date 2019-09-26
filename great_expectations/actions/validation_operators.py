@@ -150,7 +150,8 @@ class DataContextAwareValidationOperator(ActionAwareValidationOperator):
             # For now, keep this no-op line, just to make the logic obvious.
             run_identifier = run_identifier
 
-            batch = self.data_context.get_batch(data_asset_identifier, run_identifier)
+            batch = self.data_context.get_batch(data_asset_identifier, run_identifier,
+                                                batch_kwargs=self.data_context.yield_batch_kwargs(data_asset_identifier))
 
         # At this point, we should have a properly typed and instantiated data_asset_identifier and run_identifier
         assert isinstance(data_asset_identifier, DataAssetIdentifier)
