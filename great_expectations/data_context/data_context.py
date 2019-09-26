@@ -1201,6 +1201,10 @@ class ConfigOnlyDataContext(object):
     def evaluation_parameter_store(self):
         return self.stores[self._project_config_with_varibles_substituted.evaluation_parameter_store_name]
 
+    @property
+    def profiling_store(self):
+        return self.stores[self._project_config_with_varibles_substituted.profiling_store_name]
+
     def set_parameters_in_evaluation_parameter_store_by_run_id_and_key(self, run_id, key, value):
         """Store a new validation parameter.
 
@@ -1639,18 +1643,20 @@ class ConfigOnlyDataContext(object):
                     if additional_batch_kwargs is None:
                         additional_batch_kwargs = {}
 
+                    normalized_data_asset_name = self._normalize_data_asset_name(name)
+                    expectation_suite_name = profiler.__name__
                     self.create_expectation_suite(
-                        data_asset_name=name,
-                        expectation_suite_name=profiler.__name__
+                        data_asset_name=normalized_data_asset_name,
+                        expectation_suite_name=expectation_suite_name
                     )
                     batch_kwargs = self.yield_batch_kwargs(
-                        data_asset_name=name,
+                        data_asset_name=normalized_data_asset_name,
                         **additional_batch_kwargs
                     )
 
                     batch = self.get_batch(
-                        data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
-                        expectation_suite_name=profiler.__name__,
+                        data_asset_name=normalized_data_asset_name,
+                        expectation_suite_name=expectation_suite_name,
                         batch_kwargs=batch_kwargs
                     )
 
@@ -1664,28 +1670,20 @@ class ConfigOnlyDataContext(object):
                     expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
                     profiling_results['results'].append((expectation_suite, validation_results))
 
-                    expectation_suite_id = ExpectationSuiteIdentifier(
-                        data_asset_name=tuple(normalized_data_asset_name),
-                        expectation_suite_name=expectation_suite_name,
-                    )
-                    # print(expectation_suite_id)
-
-                    # self.set_expectation_suite(
-                    #     expectation_suite_id,
-                    #     expectation_suite
-                    # )
-
-                    # Proposed TODO : Turn this method into a configurable profiler class,
-                    # so that this store name doesn't have to be hard coded.
-                    if "local_validation_result_store" in self.stores:
-                        self.stores.local_validation_result_store.set(
-                            key=ValidationResultIdentifier(
-                                expectation_suite_identifier=expectation_suite_id,
-                                run_id=run_id
+                    # This hack covers an uglier hack in which a hard-coded store name was used.
+                    self.profiling_store.set(
+                        key=ValidationResultIdentifier(
+                            expectation_suite_identifier=ExpectationSuiteIdentifier(
+                                data_asset_name=DataAssetIdentifier(
+                                    *normalized_data_asset_name
+                                ),
+                                expectation_suite_name=expectation_suite_name
                             ),
-                            value=validation_results,
-                        )
-                    
+                            run_id=run_id
+                        ),
+                        value=validation_results
+                    )
+
                     if isinstance(batch, Dataset):
                         # For datasets, we can produce some more detailed statistics
                         row_count = batch.get_row_count()
