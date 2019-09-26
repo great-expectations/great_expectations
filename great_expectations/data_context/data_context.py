@@ -383,6 +383,7 @@ class ConfigOnlyDataContext(object):
                 if e.errno != errno.ENOENT:
                     raise
                 logger.debug("Generating empty config variables file.")
+                # TODO this might be the comment problem?
                 base_config_variables_store = yaml.load("{}")
                 base_config_variables_store.yaml_set_start_comment(CONFIG_VARIABLES_COMMENT)
                 return base_config_variables_store
