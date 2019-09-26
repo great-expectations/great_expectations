@@ -112,7 +112,7 @@ def test_DefaultDataContextAwareValidationOperator(basic_data_context_config_for
                                 class_name="PandasDatasource",
                                 base_directory=str(filesystem_csv_4))
 
-    data_context.create_expectation_suite("my_datasource/default/f1")
+    data_context.create_expectation_suite("my_datasource/default/f1", "foo")
     df = data_context.get_batch("my_datasource/default/f1", "foo",
                                 batch_kwargs=data_context.yield_batch_kwargs("my_datasource/default/f1"))
     df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
