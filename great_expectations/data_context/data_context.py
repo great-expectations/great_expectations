@@ -19,7 +19,7 @@ import importlib
 from collections import OrderedDict
 import warnings
 
-from .util import get_slack_callback, safe_mmkdir, substitute_all_config_variables
+from .util import safe_mmkdir, substitute_all_config_variables
 from ..types.base import DotDict
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError, InvalidConfigError
@@ -46,6 +46,9 @@ from great_expectations.datasource import (
     SqlAlchemyDatasource,
     SparkDFDatasource,
     DBTDatasource
+)
+from great_expectations.data_asset import (
+    DataAsset
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.datasource.types import BatchKwargs, BatchFingerprint
@@ -179,15 +182,10 @@ class ConfigOnlyDataContext(object):
         # However, for now, I'm adding this check, to avoid having to migrate all the test fixtures
         # while still experimenting with the workings of validation operators and actions.
         if "validation_operators" in self._project_config:
-            for validation_operator_name, validation_operator in self._project_config["validation_operators"].items():
-                self.validation_operators[validation_operator_name] = instantiate_class_from_config(
-                    config=validation_operator,
-                    runtime_config={
-                        "data_context": self,
-                    },
-                    config_defaults={
-                        "module_name": "great_expectations.actions.validation_operators"
-                    }
+            for validation_operator_name, validation_operator_config in self._project_config["validation_operators"].items():
+                self.add_validation_operator(
+                    validation_operator_name,
+                    validation_operator_config,
                 )
 
         self._compiled = False
@@ -225,7 +223,7 @@ class ConfigOnlyDataContext(object):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
         Args:
-            store_name (str): a key for the new Store in in self.stores
+            store_name (str): a key for the new Store in in self._stores
             store_config (dict): a config for the Store to add
 
         Returns:
@@ -245,6 +243,32 @@ class ConfigOnlyDataContext(object):
         )
         self._stores[store_name] = new_store
         return new_store
+
+    def add_validation_operator(self, validation_operator_name, validation_operator_config):
+        """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
+
+        Args:
+            validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
+            validation_operator_config (dict): a config for the ValidationOperator to add
+
+        Returns:
+            validation_operator (ValidationOperator)
+        """
+
+        self._project_config["validation_operators"][validation_operator_name] = validation_operator_config
+        self._project_config_with_varibles_substituted["validation_operators"][validation_operator_name] = self.get_config_with_variables_substituted(config=validation_operator_config)
+        new_validation_operator = instantiate_class_from_config(
+            config=self._project_config_with_varibles_substituted["validation_operators"][validation_operator_name],
+            runtime_config={
+                "data_context" : self,
+            },
+            config_defaults={
+                "module_name" : "great_expectations.actions.validation_operators"
+            }
+        )
+        self.validation_operators[validation_operator_name] = new_validation_operator
+        return new_validation_operator
+
 
     def _normalize_absolute_or_relative_path(self, path):
         if os.path.isabs(path):
@@ -578,15 +602,25 @@ class ConfigOnlyDataContext(object):
     # Currently, it can accept 0 or 1.
     def run_validation_operator(self,
         validation_operator_name,
-        data_asset=None, # A data asset that COULD be a batch, OR a generic data asset
-        data_asset_id_string=None, # If data_asset isn't a batch, then this
-        data_asset_identifier=None, # ... or this is required
+        assets_to_validate,
         run_identifier=None,
     ):
-        self.validation_operators[validation_operator_name].run(
-            data_asset=data_asset,
-            data_asset_id_string=data_asset_id_string,
-            data_asset_identifier=data_asset_identifier,
+        """
+        Run a validation operator to validate data assets and to perform the business logic around
+        validation that the operator implements.
+
+        :param validation_operator_name: name of the operator, as appears in the context's config file
+        :param assets_to_validate: a list that specifies the data assets that the operator will validate.
+                                    The members of the list can be either batches (which means that have
+                                    data asset identifier, batch kwargs and expectation suite identifier)
+                                    or a triple that will allow the operator to fetch the batch:
+                                    (data asset identifier, batch kwargs, expectation suite identifier)
+        :param run_identifier: run id - this is set by the caller and should correspond to something
+                                meaningful to the user (e.g., pipeline run id or timestamp)
+        :return: A result object that is defined by the class of the operator that is invoked.
+        """
+        return self.validation_operators[validation_operator_name].run(
+            assets_to_validate=assets_to_validate,
             run_identifier=run_identifier,
         )
 
@@ -1022,90 +1056,82 @@ class ConfigOnlyDataContext(object):
         self._compiled = False
 
     # TODO: This method will be replaced by DataContextAwareValidationActions.
-    def register_validation_results(self, run_id, validation_results, data_asset=None):
-        """Process results of a validation run. This method is called by data_asset objects that are connected to
-         a DataContext during validation. It performs several actions:
-          - store the validation results to a validations_store, if one is configured
-          - store a snapshot of the data_asset, if so configured and a compatible data_asset is available
-          - perform a callback action using the validation results, if one is configured
-          - retrieve validation results referenced in other parameterized expectations and store them in the \
-            evaluation parameter store.
+    # def register_validation_results(self, run_id, validation_results, data_asset=None):
+    #     """Process results of a validation run. This method is called by data_asset objects that are connected to
+    #      a DataContext during validation. It performs several actions:
+    #       - store the validation results to a validations_store, if one is configured
+    #       - store a snapshot of the data_asset, if so configured and a compatible data_asset is available
+    #       - perform a callback action using the validation results, if one is configured
+    #       - retrieve validation results referenced in other parameterized expectations and store them in the \
+    #         evaluation parameter store.
 
-        Args:
-            run_id: the run_id for which to register validation results
-            validation_results: the validation results object
-            data_asset: the data_asset to snapshot, if snapshot is configured
+    #     Args:
+    #         run_id: the run_id for which to register validation results
+    #         validation_results: the validation results object
+    #         data_asset: the data_asset to snapshot, if snapshot is configured
 
-        Returns:
-            validation_results: Validation results object, with updated meta information including references to \
-            stored data, if appropriate
-        """
+    #     Returns:
+    #         validation_results: Validation results object, with updated meta information including references to \
+    #         stored data, if appropriate
+    #     """
 
-        try:
-            data_asset_name = validation_results["meta"]["data_asset_name"]
-        except KeyError:
-            logger.warning("No data_asset_name found in validation results; using '_untitled'")
-            data_asset_name = "_untitled"
+    #     try:
+    #         data_asset_name = validation_results["meta"]["data_asset_name"]
+    #     except KeyError:
+    #         logger.warning("No data_asset_name found in validation results; using '_untitled'")
+    #         data_asset_name = "_untitled"
 
-        try:
-            expectation_suite_name = validation_results["meta"]["expectation_suite_name"]
-        except KeyError:
-            logger.warning("No expectation_suite_name found in validation results; using '_untitled'")
-            expectation_suite_name = "_untitled"
+    #     try:
+    #         expectation_suite_name = validation_results["meta"]["expectation_suite_name"]
+    #     except KeyError:
+    #         logger.warning("No expectation_suite_name found in validation results; using '_untitled'")
+    #         expectation_suite_name = "_untitled"
 
-        try:
-            normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        except DataContextError:
-            logger.warning(
-                "Registering validation results for a data_asset_name that cannot be normalized in this context."
-            )
+    #     try:
+    #         normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+    #     except DataContextError:
+    #         logger.warning(
+    #             "Registering validation results for a data_asset_name that cannot be normalized in this context."
+    #         )
 
-        expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
+    #     expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
 
-        # NOTE : Once we have consistent type generation at the source, this repacking logic will be unnecessary.
-        key = ValidationResultIdentifier(
-            coerce_types=True,
-            **{
-                "expectation_suite_identifier": {
-                    "data_asset_name": tuple(normalized_data_asset_name),
-                    "expectation_suite_name": expectation_suite_name,
-                },
-                "run_id": run_id
-            })
+    #     # NOTE : Once we have consistent type generation at the source, this repacking logic will be unnecessary.
+    #     key = ValidationResultIdentifier(
+    #         coerce_types=True,
+    #         **{
+    #             "expectation_suite_identifier": {
+    #                 "data_asset_name": tuple(normalized_data_asset_name),
+    #                 "expectation_suite_name": expectation_suite_name,
+    #             },
+    #             "run_id": run_id
+    #         })
 
-        if "local_validation_result_store" in self.stores:
-            self.stores.local_validation_result_store.set(
-                key=key,
-                value=validation_results
-            )
+    #     if "local_validation_result_store" in self.stores:
+    #         self.stores.local_validation_result_store.set(
+    #             key=key,
+    #             value=validation_results
+    #         )
 
-        if "result_callback" in self._project_config_with_varibles_substituted:
-            result_callback = self._project_config_with_varibles_substituted["result_callback"]
-            if isinstance(result_callback, dict) and "slack" in result_callback:
-                get_slack_callback(result_callback["slack"])(validation_results)
-            else:
-                logger.warning("Unrecognized result_callback configuration.")
+    #     # Proposed TODO : Snapshotting shouldn't be a top-level concern in the DataContext.
+    #     # Instead, it should be available as a pluggable Action.
+    #     if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
+    #         logging.debug("Storing validation results to data_asset_snapshot_store")
+    #         self.stores.data_asset_snapshot_store.set(
+    #             key=key,
+    #             value=data_asset
+    #         )
 
+    #     self.extract_and_store_parameters_from_validation_results(
+    #         validation_results,
+    #         data_asset_name,
+    #         expectation_suite_name,
+    #         run_id,
+    #     )
 
-        # Proposed TODO : Snapshotting shouldn't be a top-level concern in the DataContext.
-        # Instead, it should be available as a pluggable Action.
-        if validation_results["success"] is False and "data_asset_snapshot_store" in self.stores:
-            logging.debug("Storing validation results to data_asset_snapshot_store")
-            self.stores.data_asset_snapshot_store.set(
-                key=key,
-                value=data_asset
-            )
+    #     return validation_results
 
-        self.extract_and_store_parameters_from_validation_results(
-            validation_results,
-            data_asset_name,
-            expectation_suite_name,
-            run_id,
-        )
-
-        return validation_results
-
-    def extract_and_store_parameters_from_validation_results(self, validation_results, data_asset_name, expectation_suite_name, run_id):
+    def _extract_and_store_parameters_from_validation_results(self, validation_results, data_asset_name, expectation_suite_name, run_id):
 
         if not self._compiled:
             self._compile()
@@ -1496,6 +1522,8 @@ class ConfigOnlyDataContext(object):
 
         return index_page_locator_infos
 
+    # Proposed TODO : Abe 2019/09/21 : I think we want to convert this method into a configurable profiler class, so that
+    # it can be pluggable and configurable
     def profile_datasource(self,
                            datasource_name,
                            generator_name=None,
@@ -1623,9 +1651,31 @@ class ConfigOnlyDataContext(object):
 
                     # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
                     # will have more to unpack.
-                    expectation_suite, validation_result = profiler.profile(batch, run_id=run_id)
-                    profiling_results['results'].append((expectation_suite, validation_result))
+                    expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
+                    profiling_results['results'].append((expectation_suite, validation_results))
 
+                    expectation_suite_id = ExpectationSuiteIdentifier(
+                        data_asset_name=tuple(normalized_data_asset_name),
+                        expectation_suite_name=expectation_suite_name,
+                    )
+                    # print(expectation_suite_id)
+
+                    # self.set_expectation_suite(
+                    #     expectation_suite_id,
+                    #     expectation_suite
+                    # )
+
+                    # Proposed TODO : Turn this method into a configurable profiler class,
+                    # so that this store name doesn't have to be hard coded.
+                    if "local_validation_result_store" in self.stores:
+                        self.stores.local_validation_result_store.set(
+                            key=ValidationResultIdentifier(
+                                expectation_suite_identifier=expectation_suite_id,
+                                run_id=run_id
+                            ),
+                            value=validation_results,
+                        )
+                    
                     if isinstance(batch, Dataset):
                         # For datasets, we can produce some more detailed statistics
                         row_count = batch.get_row_count()

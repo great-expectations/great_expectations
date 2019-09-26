@@ -837,6 +837,9 @@ class DataAsset(object):
             raise ValueError("Unable to save config: filepath or data_context must be available.")
 
     #TODO: when validate is called and expectation editor is in data_context, need to bypass widget creation
+    # NOTE : Abe 2019/09/21 : This method contains a lot of logic that will need to be split between
+    # the DataContextAwareDataAsset and BasicDataAsset classes, when we created those typed classes.
+    # Some of the ContextAware logic may go to live in the DataContext itself.
     def validate(self, 
                  expectation_suite=None, 
                  run_id=None,
@@ -1077,8 +1080,9 @@ class DataAsset(object):
         if self._batch_kwargs is not None:
             result["meta"].update({"batch_kwargs": self._batch_kwargs})
 
-        if data_context is not None:
-            result = data_context.register_validation_results(run_id, result, self)
+        # NOTE: AFAICT, this never changes the value of result. Anybody know otherwise?
+        # if data_context is not None:
+        #     result = data_context.register_validation_results(run_id, result, self)
 
         self._data_context = validate__data_context
         self._config["interactive_evaluation"] = validate__interactive_evaluation

@@ -36,6 +36,11 @@ CONFIG_VARIABLES_INTRO = """
 PROJECT_OPTIONAL_CONFIG_COMMENT = CONFIG_VARIABLES_INTRO + """
 config_variables_file_path: uncommitted/config_variables.yml
 
+# Configure notifications here
+notifications:
+    slack_webhook: ${slack_webhook}
+    notify_on: ${notify_on}
+
 # The plugins_directory is where the data_context will look for custom_data_assets.py
 # and any configured evaluation parameter store
 
@@ -134,6 +139,20 @@ stores:
     class_name: HtmlSiteStore
     base_directory: uncommitted/documentation/team_site/
 
+
+validation_operators:
+  action_list_validation_operator:
+    class_name: PerformActionListValidationOperator
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreAction
+          target_store_name: local_validation_result_store
+      - name: store_evaluation_params
+        action:
+          class_name: ExtractAndStoreEvaluationParamsAction
+          target_store_name: evaluation_parameter_store
+    
 # Uncomment the lines below to enable a result callback.
 
 # result_callback:
