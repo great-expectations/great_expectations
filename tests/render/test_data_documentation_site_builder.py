@@ -24,6 +24,27 @@ from great_expectations.data_context.util import safe_mmkdir
 
 def test_configuration_driven_site_builder(site_builder_data_context_with_html_store_titanic_random):
     context = site_builder_data_context_with_html_store_titanic_random
+
+    context.add_validation_operator(
+        "validate_and_store",
+        {
+        "class_name": "PerformActionListValidationOperator",
+        "action_list": [{
+            "name": "store_validation_result",
+            "action": {
+                "class_name": "StoreAction",
+                "target_store_name": "local_validation_result_store",
+            }
+        }, {
+            "name": "extract_and_store_eval_parameters",
+            "action": {
+                "class_name": "ExtractAndStoreEvaluationParamsAction",
+                "target_store_name": "evaluation_parameter_store",
+            }
+        }]
+        }
+    )
+
     # profiling the Titanic datasource will generate one expectation suite and one validation
     # that is a profiling result
     context.profile_datasource(context.list_datasources()[0]["name"])
@@ -35,7 +56,11 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     batch = context.get_batch('Titanic', expectation_suite_name='BasicDatasetProfiler',
                               batch_kwargs=context.yield_batch_kwargs('Titanic'))
     run_id = "test_run_id_12345"
-    batch.validate(run_id=run_id)
+    context.run_validation_operator(
+        assets_to_validate=[batch],
+        run_identifier=run_id,
+        validation_operator_name="validate_and_store",
+    )
 
     data_docs_config = context._project_config.get('data_docs')
     local_site_config = data_docs_config['sites']['local_site']
@@ -44,6 +69,15 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     # set datasource_whitelist
     local_site_config['datasource_whitelist'] = ['titanic']
+
+    keys_as_strings = [x.to_string() for x in context.stores["local_validation_result_store"].list_keys()]
+    print("\n".join(keys_as_strings))
+    assert set(keys_as_strings) == set([
+        "ValidationResultIdentifier.titanic.default.Titanic.BasicDatasetProfiler.test_run_id_12345",
+        "ValidationResultIdentifier.titanic.default.Titanic.BasicDatasetProfiler.profiling",
+        "ValidationResultIdentifier.random.default.f2.BasicDatasetProfiler.profiling",
+        "ValidationResultIdentifier.random.default.f1.BasicDatasetProfiler.profiling",
+    ])
 
     res = SiteBuilder(
             data_context=context,
