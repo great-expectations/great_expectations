@@ -136,7 +136,8 @@ stores:
 
 
 validation_operators:
-  action_list_validation_operator:
+  # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
+  perform_action_list_operator:
     class_name: PerformActionListValidationOperator
     action_list:
       - name: store_validation_result
@@ -147,6 +148,14 @@ validation_operators:
         action:
           class_name: ExtractAndStoreEvaluationParamsAction
           target_store_name: evaluation_parameter_store
+      - name: store_evaluation_params
+        action:
+          class_name: SlackNotificationAction
+          slack_webhook: ${validation_notification_slack_webhook}
+#          notify_on: all
+          renderer:
+            module_name: great_expectations.render.renderer.slack_renderer
+            class_name: SlackRenderer
     
 # Uncomment the lines below to enable a result callback.
 
