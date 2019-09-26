@@ -10,7 +10,7 @@ import pandas as pd
 import great_expectations as ge
 from great_expectations.actions.validation_operators import (
     PerformActionListValidationOperator,
-    ErrorsVsWarningsValidationOperator
+    RunWarningAndFailureExpectationSuitesValidationOperator
 )
 
 from great_expectations.data_context import (

@@ -129,7 +129,7 @@ def test_PerformActionListValidationOperator(basic_data_context_config_for_valid
     assert data_context.stores["validation_result_store"].get(validation_result_store_keys[0])["success"] is True
 
 
-def test_ErrorsVsWarningsValidationOperator_with_file_structure(tmp_path_factory):
+def test_RunWarningAndFailureExpectationSuitesValidationOperator_with_file_structure(tmp_path_factory):
     base_path = str(tmp_path_factory.mktemp('test_DefaultDataContextAwareValidationOperator_with_file_structure__dir'))
     project_path = os.path.join( base_path, "project")
     print(os.getcwd())
