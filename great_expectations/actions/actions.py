@@ -17,6 +17,8 @@ from ..data_context.types import (
     ValidationResultIdentifier
 )
 
+from .util import send_slack_notification
+
 # NOTE: Abe 2019/08/23 : This is first implementation of all these classes. Consider them UNSTABLE for now. 
 
 class BasicValidationAction(object):
@@ -113,32 +115,9 @@ class SlackNotificationAction(NamespacedValidationAction):
                 self.notify_on == "success" and validation_success or \
                 self.notify_on == "failure" and not validation_success:
             query = self.renderer.render(validation_result_suite)
-            return self._send_slack_notification(query)
+            return send_slack_notification(query, slack_webhook=self.slack_webhook)
         else:
             return
-                
-    def _send_slack_notification(self, query):
-        session = requests.Session()
-    
-        try:
-            response = session.post(url=self.slack_webhook, json=query)
-        except requests.ConnectionError:
-            logger.warning(
-                'Failed to connect to Slack webhook at {url} '
-                'after {max_retries} retries.'.format(
-                    url=self.slack_webhook, max_retries=10))
-        except Exception as e:
-            logger.error(str(e))
-        else:
-            if response.status_code != 200:
-                logger.warning(
-                    'Request to Slack webhook at {url} '
-                    'returned error {status_code}: {text}'.format(
-                        url=self.slack_webhook,
-                        status_code=response.status_code,
-                        text=response.text))
-            else:
-                return "Slack notification succeeded."
 
 
 class StoreAction(NamespacedValidationAction):
