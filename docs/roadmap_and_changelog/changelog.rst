@@ -3,11 +3,11 @@
 v0.8.0__develop
 -----------------
 * MAJOR CHANGE: Datasources should now be configured using the module_name and class_name syntax to support easier
- plugin use. "type" parameter is still supported but expect it to be removed in a future release.
+  plugin use. "type" parameter is still supported but expect it to be removed in a future release.
 * MAJOR CHANGE: Generators should now be configured using the new module_name and class_name syntax to support easier
- plugin use. "type" parameter is still supported but expect it to be removed in a future release.
+  plugin use. "type" parameter is still supported but expect it to be removed in a future release.
 * GlobReaderGenerator now supports additional configuration options for identifying partitions via regex. The old
- method is still supported but is deprecated. See :ref:`GlobReaderGenerator` for details.
+  method is still supported but is deprecated. See :class:`GlobReaderGenerator` for details.
 * INTERNAL: rename LooselyTypedDotDict to AllowedKeysDotDict and add RequiredKeysDotDict as parent
 * Major documentation reorganization with additional content to improve readability.
 

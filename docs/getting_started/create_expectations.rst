@@ -63,10 +63,10 @@ Get Batch
 Datasources and generators work together closely with your pipeline infrastructure to provide Great Expectations
 batches of data to validate. The generator is responsible for identifying the ``batch_kwargs`` that a datasource will
 use to load a batch of data. For example the :class:`~great_expectations.datasource.generator.\
-filesystem_path_generator.SubdirReaderGenerator`
+subdir_reader_generator.SubdirReaderGenerator`
 generator will create batches of data based on individual files and group those batches into a single data_asset based
 on the subdirectory in which they are located. By contrast, the :class:`~great_expectations.datasource.generator.\
-filesystem_path_generator.GlobReaderGenerator`
+glob_reader_generator.GlobReaderGenerator`
 will also create batches of data based on individual files, but uses defined glob-style match patterns to group those
 batches into named data assets.
 
@@ -187,7 +187,7 @@ Review and Save Expectation Suite
 
 .. code-block:: python
 
-    df.set_expectation_suite()
+    df.save_expectation_suite()
 
 Because this data asset is connected to the DataContext, GE determines the location to save the expectation suite:
 
@@ -201,9 +201,9 @@ When we call ``get_expectation_suite``, we might see this warning in the output:
 
 When we save an expectation suite, by default, GE will drop any expectation that was not successful on its last run.
 
-Sometimes we want to save an expectation even though it did not validate successfully on the current batch (e.g., we have a reason to believe that our expectation is correct and the current batch has bad entries). In this case we pass and additional argument to ``set_expectation_suite`` method:
+Sometimes we want to save an expectation even though it did not validate successfully on the current batch (e.g., we have a reason to believe that our expectation is correct and the current batch has bad entries). In this case we pass and additional argument to ``save_expectation_suite`` method:
 
 .. code-block:: python
 
-    df.set_expectation_suite(discard_failed_expectations=False)
+    df.save_expectation_suite(discard_failed_expectations=False)
 

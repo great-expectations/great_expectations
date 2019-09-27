@@ -108,7 +108,12 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
     assert data_context_file_config["datasources"][name]["data_asset_type"]["class_name"] == "CustomPandasDataset"
 
     # We should be able to get a dataset of the correct type from the datasource.
-    batch = data_context.get_batch("test_pandas_datasource/default/test")
+    data_asset_name = "test_pandas_datasource/default/test"
+    data_context.create_expectation_suite(data_asset_name=data_asset_name, expectation_suite_name="default")
+    batch = data_context.get_batch(data_asset_name=data_asset_name,
+                                   expectation_suite_name="default",
+                                   batch_kwargs=data_context.yield_batch_kwargs(data_asset_name=data_asset_name)
+    )
     assert type(batch).__name__ == "CustomPandasDataset"
     res = batch.expect_column_values_to_have_odd_lengths("col_2")
     assert res["success"] is True
@@ -126,7 +131,10 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
                                 reader_options={"encoding": "utf-8"},
                                 base_directory=str(basedir))
 
-    batch = data_context.get_batch("mysource/unicode")
+    data_context.create_expectation_suite(data_asset_name="mysource/unicode", expectation_suite_name="default")
+    batch = data_context.get_batch("mysource/unicode",
+                                   "default",
+                                   data_context.yield_batch_kwargs("mysource/unicode"))
     assert len(batch["Μ"] == 1)
     assert "😁" in list(batch["Μ"])
 
@@ -135,7 +143,11 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
                                 class_name="PandasDatasource",
                                 base_directory=str(basedir))
 
-    batch = data_context.get_batch("mysource2/unicode")
+    data_context.create_expectation_suite(data_asset_name="mysource2/unicode", expectation_suite_name="default")
+    batch = data_context.get_batch("mysource2/unicode",
+                                   "default",
+                                   data_context.yield_batch_kwargs("mysource2/unicode")
+    )
     assert "😁" in list(batch["Μ"])
 
     data_context.add_datasource("mysource3",
@@ -144,12 +156,23 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
                                 reader_options={"encoding": "utf-16"},
                                 base_directory=str(basedir))
     with pytest.raises(UnicodeError, match="UTF-16 stream does not start with BOM"):
-        batch = data_context.get_batch("mysource3/unicode")
+        data_context.create_expectation_suite(data_asset_name="mysource3/unicode", expectation_suite_name="default")
+        batch = data_context.get_batch("mysource3/unicode",
+                                       "default",
+                                       data_context.yield_batch_kwargs("mysource3/unicode")
+                                       )
 
     with pytest.raises(LookupError, match="unknown encoding: blarg"):
-        batch = data_context.get_batch("mysource/unicode", encoding='blarg')
+        batch = data_context.get_batch("mysource/unicode",
+                                       "default",
+                                       batch_kwargs=data_context.yield_batch_kwargs("mysource/unicode"),
+                                       encoding='blarg')
 
-    batch = data_context.get_batch("mysource2/unicode", encoding='utf-8')
+    batch = data_context.get_batch("mysource2/unicode",
+                                   "default",
+                                   batch_kwargs=data_context.yield_batch_kwargs("mysource2/unicode"),
+                                   encoding='utf-8'
+                                   )
     assert "😁" in list(batch["Μ"])
 
 

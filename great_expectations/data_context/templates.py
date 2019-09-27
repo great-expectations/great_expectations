@@ -49,6 +49,8 @@ expectations_store:
     class_name: FixedLengthTupleFilesystemStoreBackend
     base_directory: expectations/
 
+profiling_store_name: local_validation_result_store
+
 evaluation_parameter_store_name: evaluation_parameter_store
 
 # Configure additional data context options here.
@@ -136,6 +138,29 @@ stores:
     class_name: HtmlSiteStore
     base_directory: uncommitted/documentation/team_site/
 
+
+validation_operators:
+  # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
+  perform_action_list_operator:
+    class_name: PerformActionListValidationOperator
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreAction
+          target_store_name: local_validation_result_store
+      - name: store_evaluation_params
+        action:
+          class_name: ExtractAndStoreEvaluationParamsAction
+          target_store_name: evaluation_parameter_store
+      - name: store_evaluation_params
+        action:
+          class_name: SlackNotificationAction
+          slack_webhook: ${validation_notification_slack_webhook}
+#          notify_on: all
+          renderer:
+            module_name: great_expectations.render.renderer.slack_renderer
+            class_name: SlackRenderer
+    
 # Uncomment the lines below to enable a result callback.
 
 # result_callback:
@@ -190,7 +215,7 @@ data_docs:
     # "team_site" is meant to support the "shared source of truth for a team" use case. 
     # By default only the expectations section is enabled.
     #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3). 
-    # Reach out on Slack (https://tinyurl.com/great-expectations-slack>) if you would like to discuss the best way to configure a team site.
+    # Reach out on Slack (https://greatexpectations.io/slack>) if you would like to discuss the best way to configure a team site.
 
       # specify a whitelist here if you would like to restrict the datasources to document
       datasource_whitelist: '*'

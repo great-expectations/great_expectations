@@ -1,4 +1,4 @@
-.. _glossary:
+.. _expectation_glossary:
 
 ================================================================================
 Glossary of expectations

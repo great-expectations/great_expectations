@@ -57,7 +57,12 @@ def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connectio
     assert data_context_file_config["datasources"][name]["data_asset_type"]["class_name"] == "CustomSqlAlchemyDataset"
 
     # We should be able to get a dataset of the correct type from the datasource.
-    batch = data_context.get_batch("test_sqlalchemy_datasource/default/table_1")
+    data_context.create_expectation_suite("test_sqlalchemy_datasource/default/table_1", "boo")
+    batch = data_context.get_batch(
+        "test_sqlalchemy_datasource/default/table_1",
+        "boo",
+        data_context.yield_batch_kwargs("test_sqlalchemy_datasource/default/table_1")
+    )
     assert type(batch).__name__ == "CustomSqlAlchemyDataset"
     res = batch.expect_column_func_value_to_be("col_1", 1)
     assert res["success"] is True
@@ -68,8 +73,8 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
         'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
 
     assert datasource.get_available_data_asset_names() == {"default": {"main.table_1", "main.table_2"}}
-    dataset1 = datasource.get_data_asset("main.table_1")
-    dataset2 = datasource.get_data_asset("main.table_2")
+    dataset1 = datasource.get_data_asset("main.table_1", "default")
+    dataset2 = datasource.get_data_asset("main.table_2", "default")
     assert isinstance(dataset1, SqlAlchemyDataset)
     assert isinstance(dataset2, SqlAlchemyDataset)
 
@@ -137,6 +142,9 @@ def test_sqlalchemy_source_templating(sqlitedb_engine):
     })
     generator = datasource.get_generator("foo")
     generator.add_query("test", "select 'cat' as ${col_name};")
-    df = datasource.get_batch("test", col_name="animal_name")
+    df = datasource.get_batch("test",
+                              "my_suite",
+                              generator.yield_batch_kwargs("test", col_name="animal_name")
+                              )
     res = df.expect_column_to_exist("animal_name")
     assert res["success"] is True
