@@ -377,7 +377,7 @@ template.
         )
     cli_message("""- We are super sorry about this breaking change! :]
 - If you are running into any problems, please reach out on Slack and we can
-help you in realtime: https://tinyurl.com/great-expectations-slack""")
+help you in realtime:https://greatexpectations.io/slack""")
     sys.exit(0)
 
 

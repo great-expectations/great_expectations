@@ -98,4 +98,6 @@ documentation for more information.
 Stores
 _______
 
-Stores are undergoing a significant redesign. Please reach out on slack for more information on configuring stores!
+Stores provide a valuable abstraction for making access to critical resources such as expectation suites, validation
+results, profiling data, data documentation, and evaluation parameters both easy to configure and to extend and
+customize. See the :ref:`stores_reference` for more information.

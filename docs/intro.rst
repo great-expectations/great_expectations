@@ -110,7 +110,7 @@ Who maintains Great Expectations?
 
 Great Expectations is under active development by James Campbell, Abe Gong, Eugene Mandel and Rob Lim, with help from many others.
 
-If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public Slack channel: https://tinyurl.com/great-expectations-slack
+If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public Slack channel:https://greatexpectations.io/slack
 
 If you'd like to contribute to Great Expectations, please head to the :ref:`community` section.
 

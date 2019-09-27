@@ -11,9 +11,9 @@ Welcome to Great Expectations!
 
    intro
    getting_started
-   community
    features
    reference
+   community
    roadmap_changelog
    module_docs
 

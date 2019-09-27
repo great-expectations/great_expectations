@@ -8,7 +8,9 @@ Features
 
    /features/expectations
    /features/validation
+   /features/profiling
+   /features/data_documentation
    /features/data_context
    /features/datasource
-   /features/custom_expectations
-   /glossary
+   /features/batch_generator
+
