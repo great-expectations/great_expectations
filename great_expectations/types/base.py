@@ -340,7 +340,8 @@ class OrderedKeysDotDict(AllowedKeysDotDict):
 
     def __init__(self, *args, **kwargs):
         logger.debug(self.__class__.__name__)
-        assert set(self._key_order) == set(self._allowed_keys)
+        # We allow additional keys that are NOT part of the key order (such as a changeable delimiter)
+        assert set(self._key_order) <= set(self._allowed_keys)
         assert set(self._key_order) == set(self._required_keys)
 
         coerce_types = kwargs.pop("coerce_types", True),

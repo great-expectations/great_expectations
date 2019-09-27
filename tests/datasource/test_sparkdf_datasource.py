@@ -57,8 +57,12 @@ def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connecti
     assert data_context_file_config["datasources"][name]["data_asset_type"]["class_name"] == "CustomSparkDFDataset"
 
     # We should be able to get a dataset of the correct type from the datasource.
+    data_context.create_expectation_suite("test_sparkdf_datasource/default/test", "default")
+    batch_kwargs = data_context.yield_batch_kwargs("test_sparkdf_datasource/default/test")
     batch = data_context.get_batch(
         "test_sparkdf_datasource/default/test",
+        expectation_suite_name="default",
+        batch_kwargs=batch_kwargs,
         header=True,
         inferSchema=True
     )
@@ -127,7 +131,12 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
     assert datasource.get_available_data_asset_names() == {
         "default": set(['test'])
     }
-    dataset = datasource.get_batch('test')
+    dataset = datasource.get_batch('test',
+                                   expectation_suite_name="default",
+                                   batch_kwargs={
+                                       "path": os.path.join(test_parquet_folder_connection_path,
+                                                            'test.parquet')
+                                   })
     assert isinstance(dataset, SparkDFDataset)
     # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
     assert dataset.spark_df.head()['col_1'] == 1
@@ -139,7 +148,13 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path):
     assert datasource.get_available_data_asset_names() == {
         "default": set(['test'])
     }
-    dataset = datasource.get_batch('test', header=True)
+    dataset = datasource.get_batch('test',
+                                   expectation_suite_name="default",
+                                   batch_kwargs={
+                                       "path": os.path.join(test_folder_connection_path,
+                                                            'test.csv')
+                                   },
+                                   header=True)
     assert isinstance(dataset, SparkDFDataset)
     # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
     assert dataset.spark_df.head()['col_1'] == '1'
@@ -156,6 +171,7 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
     # We want to ensure that an externally-created spark DataFrame can be successfully instantiated using the
     # datasource built in a data context
     # Our dataset fixture is parameterized by all backends. The spark source should only accept a spark dataset
+    data_context.create_expectation_suite("spark_source/passthrough/new_asset", "new_suite")
 
     if isinstance(dataset, SparkDFDataset):
         # We should be smart enough to figure out this is a batch:
@@ -164,7 +180,7 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
         assert res["success"] is True
         res = batch.expect_column_to_exist("not_a_column")
         assert res["success"] is False
-        batch.set_expectation_suite()
+        batch.save_expectation_suite()
         assert os.path.isfile(os.path.join(
             data_context.root_directory,
             "expectations/spark_source/passthrough/new_asset/new_suite.json")

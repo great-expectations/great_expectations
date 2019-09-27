@@ -1,8 +1,8 @@
 .. _evaluation_parameters:
 
-================================================================================
+######################
 Evaluation Parameters
-================================================================================
+######################
 
 Often, the specific parameters associated with an expectation will be derived from upstream steps in a processing \
 pipeline. For example, we may want to `expect_table_row_count_to_equal` a value stored in a previous step, but we \
@@ -57,8 +57,9 @@ Finally, the command-line tool also allows you to provide a JSON file that conta
 
 .. _data_context_evaluation_parameter_store:
 
+***************************************
 DataContext Evaluation Parameter Store
-=======================================
+***************************************
 
 When a DataContext has a configured evaluation parameter store, it can automatically identify and store evaluation
 parameters that are referenced in other expectation suites. The evaluation parameter store uses a URN schema for 

@@ -8,101 +8,9 @@ import six
 import importlib
 import copy
 import re
+from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
-
-
-def build_slack_notification_request(validation_json=None):
-    # Defaults
-    timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
-    status = "Failed :x:"
-    run_id = None
-
-    title_block = {
-        "type": "section",
-        "text": {
-            "type": "mrkdwn",
-            "text": "No validation occurred. Please ensure you passed a validation_json.",
-        },
-    }
-
-    query = {"blocks": [title_block]}
-
-    if validation_json:
-        if "meta" in validation_json:
-            data_asset_name = validation_json["meta"].get(
-                "data_asset_name", "no_name_provided_" + datetime.datetime.utcnow().isoformat().replace(":", "") + "Z"
-            )
-            expectation_suite_name = validation_json["meta"].get("expectation_suite_name", "default")
-
-        n_checks_succeeded = validation_json["statistics"]["successful_expectations"]
-        n_checks = validation_json["statistics"]["evaluated_expectations"]
-        run_id = validation_json["meta"].get("run_id", None)
-        check_details_text = "{} of {} expectations were met\n\n".format(
-            n_checks_succeeded, n_checks)
-
-        if validation_json["success"]:
-            status = "Success :tada:"
-
-        query["blocks"][0]["text"]["text"] = "*Validated batch from data asset:* `{}`\n*Status: {}*\n{}".format(
-            data_asset_name, status, check_details_text)
-
-        if "result_reference" in validation_json["meta"]:
-            report_element = {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "- *Validation Report*: {}".format(validation_json["meta"]["result_reference"])},
-            }
-            query["blocks"].append(report_element)
-
-        if "dataset_reference" in validation_json["meta"]:
-            dataset_element = {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "- *Validation data asset*: {}".format(validation_json["meta"]["dataset_reference"])
-                },
-            }
-            query["blocks"].append(dataset_element)
-
-    footer_section = {
-        "type": "context",
-        "elements": [
-            {
-                "type": "mrkdwn",
-                "text": "Great Expectations run id {} ran at {}".format(run_id, timestamp),
-            }
-        ],
-    }
-    query["blocks"].append(footer_section)
-    return query
-
-
-def get_slack_callback(webhook):
-    def send_slack_notification(validation_json=None):
-        """Post a slack notification."""
-        session = requests.Session()
-        query = build_slack_notification_request(validation_json)
-
-        try:
-            response = session.post(url=webhook, json=query)
-        except requests.ConnectionError:
-            logger.warning(
-                'Failed to connect to Slack webhook at {url} '
-                'after {max_retries} retries.'.format(
-                    url=webhook, max_retries=10))
-        except Exception as e:
-            logger.error(str(e))
-        else:
-            if response.status_code != 200:
-                logger.warning(
-                    'Request to Slack webhook at {url} '
-                    'returned error {status_code}: {text}'.format(
-                        url=webhook,
-                        status_code=response.status_code,
-                        text=response.text))
-    return send_slack_notification
 
 
 def safe_mmkdir(directory, exist_ok=True):
@@ -121,6 +29,7 @@ def safe_mmkdir(directory, exist_ok=True):
         if e.errno != errno.EEXIST:
             raise
 
+
 # TODO : Consider moving this into types.resource_identifiers.DataContextKey.
 # NOTE : We **don't** want to encourage stringification of keys, other than in tests, etc.
 # TODO : Rename to parse_string_to_data_context_key
@@ -133,6 +42,7 @@ def parse_string_to_data_context_resource_identifier(string, separator="."):
     class_instance = class_(*(string_elements[1:]))
 
     return class_instance
+
 
 def load_class(class_name, module_name):
     # Get the class object itself from strings.
@@ -241,8 +151,6 @@ def substitute_config_variable(template_str, config_variables_dict):
     return config_variable_value
 
 
-
-
 def substitute_all_config_variables(data, replace_variables_dict):
     """
     Substitute all config variables of the form ${SOME_VARIABLE} in a dictionary-like
@@ -254,6 +162,8 @@ def substitute_all_config_variables(data, replace_variables_dict):
     :param replace_variables_dict:
     :return: a dictionary with all the variables replaced with their values
     """
-    if isinstance(data, dict):
+    if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {k : substitute_all_config_variables(v, replace_variables_dict) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [substitute_all_config_variables(v, replace_variables_dict) for v in data]
     return substitute_config_variable(data, replace_variables_dict)

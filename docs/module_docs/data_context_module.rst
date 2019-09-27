@@ -10,7 +10,7 @@ Data Context Module
     :show-inheritance:
     :exclude-members: DataContext
 
-great_expectations.data_context.DataContext
+DataContext
 --------------------------------------------
 
     .. autoclass:: great_expectations.data_context.DataContext
