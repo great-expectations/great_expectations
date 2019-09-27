@@ -36,7 +36,7 @@ QueryGenerator
 SubdirReaderGenerator
 ----------------------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.filesystem_path_generator.SubdirReaderGenerator
+.. autoclass:: great_expectations.datasource.generator.subdir_reader_generator.SubdirReaderGenerator
     :members:
     :undoc-members:
     :show-inheritance:
@@ -45,7 +45,7 @@ SubdirReaderGenerator
 GlobReaderGenerator
 -------------------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.filesystem_path_generator.GlobReaderGenerator
+.. autoclass:: great_expectations.datasource.generator.glob_reader_generator.GlobReaderGenerator
     :members:
     :undoc-members:
     :show-inheritance:

@@ -50,7 +50,7 @@ See the links below for good, practical tutorials for these tools.
 **git**
 
     * https://git-scm.com/
-    * https://guides.github.com/
+    * https://reference.github.com/
     * https://www.atlassian.com/git/tutorials
 
 
