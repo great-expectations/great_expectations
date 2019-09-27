@@ -1,4 +1,4 @@
-.. _batch_kwargs:
+.. _batch_kwargs_reference:
 
 
 ############################

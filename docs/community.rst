@@ -6,17 +6,18 @@ Community
 We're committed to supporting and growing the community around Great Expectations.
 It's not enough to build a great tool. We want to build a great community as well.
 
-.. Open source doesn’t always have the best reputation for being friendly and welcoming, and that makes us sad. Everyone belongs in open source, and Great Expectations is dedicated to making you feel welcome.
+Open source doesn’t always have the best reputation for being friendly and welcoming, and that makes us sad.
+Everyone belongs in open source, and Great Expectations is dedicated to making you feel welcome.
 
 Get in touch with the Great Expectations team
 ---------------------------------------------------------------------
 
-Join our public slack channel here:https://greatexpectations.io/slack. We're not always available, but we're there and responsive an awful lot of the time.
+Join our public slack channel here: `join slack <https://greatexpectations.io/slack>`__. We're not always available, but we're there and responsive an awful lot of the time.
 
 Ask a question
 ---------------------------------------------------------------------
 
-Slack is good for that, too:https://greatexpectations.io/slack
+Slack is good for that, too: `join slack <https://greatexpectations.io/slack>`__.
 
 File a bug report or feature request
 ---------------------------------------------------------------------

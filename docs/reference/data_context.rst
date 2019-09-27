@@ -4,7 +4,7 @@
 Data Context Reference
 ############################
 
-A :ref:`data_manages` manages assets for a project.
+A :ref:`data_context` manages assets for a project.
 
 *************************
 Configuration
