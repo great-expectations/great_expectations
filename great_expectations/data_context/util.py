@@ -8,6 +8,7 @@ import six
 import importlib
 import copy
 import re
+from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
 
@@ -161,6 +162,8 @@ def substitute_all_config_variables(data, replace_variables_dict):
     :param replace_variables_dict:
     :return: a dictionary with all the variables replaced with their values
     """
-    if isinstance(data, dict):
+    if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {k : substitute_all_config_variables(v, replace_variables_dict) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [substitute_all_config_variables(v, replace_variables_dict) for v in data]
     return substitute_config_variable(data, replace_variables_dict)

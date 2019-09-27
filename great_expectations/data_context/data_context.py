@@ -183,7 +183,7 @@ class ConfigOnlyDataContext(object):
         # However, for now, I'm adding this check, to avoid having to migrate all the test fixtures
         # while still experimenting with the workings of validation operators and actions.
         if "validation_operators" in self._project_config:
-            for validation_operator_name, validation_operator_config in self._project_config["validation_operators"].items():
+            for validation_operator_name, validation_operator_config in self._project_config_with_varibles_substituted["validation_operators"].items():
                 self.add_validation_operator(
                     validation_operator_name,
                     validation_operator_config,
