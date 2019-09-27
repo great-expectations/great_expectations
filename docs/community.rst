@@ -11,12 +11,12 @@ It's not enough to build a great tool. We want to build a great community as wel
 Get in touch with the Great Expectations team
 ---------------------------------------------------------------------
 
-Join our public slack channel here: https://tinyurl.com/great-expectations-slack. We're not always available, but we're there and responsive an awful lot of the time.
+Join our public slack channel here: https://greatexpectations.io/slack. We're not always available, but we're there and responsive an awful lot of the time.
 
 Ask a question
 ---------------------------------------------------------------------
 
-Slack is good for that, too: https://tinyurl.com/great-expectations-slack
+Slack is good for that, too: https://greatexpectations.io/slack
 
 File a bug report or feature request
 ---------------------------------------------------------------------

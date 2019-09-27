@@ -196,7 +196,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                  custom_sql=None, schema=None, *args, **kwargs):
 
         if custom_sql and not table_name:
-            # dashes are special characters in most databases so use undercores
+            # dashes are special characters in most databases so use underscores
             table_name = str(uuid.uuid4()).replace("-", "_")
 
         if table_name is None:
@@ -249,10 +249,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def head(self, n=5):
         """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
         return PandasDataset(
-            pd.read_sql(
-                sa.select(["*"]).select_from(self._table).limit(n),
-                con=self.engine
-            ), 
+            next(pd.read_sql_table(
+                table_name=self._table.name,
+                schema=self._table.schema,
+                con=self.engine,
+                chunksize=n
+            )),
             expectation_suite=self.get_expectation_suite(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
@@ -692,6 +694,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                            column,
                                            min_value=None,
                                            max_value=None,
+                                           strict_min=False,
+                                           strict_max=False,
                                            allow_cross_type_comparisons=None,
                                            parse_strings_as_datetimes=None,
                                            output_strftime_format=None,
@@ -705,23 +709,45 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             if max_value:
                 max_value = parse(max_value)
 
-        if min_value != None and max_value != None and min_value > max_value:
+        if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
         if min_value is None:
-            return sa.column(column) <= max_value
+            if strict_max:
+                return sa.column(column) < max_value
+            else:
+                return sa.column(column) <= max_value
 
         elif max_value is None:
-            return min_value <= sa.column(column)
+            if strict_min:
+                return min_value < sa.column(column)
+            else:
+                return min_value <= sa.column(column)
 
         else:
-            return sa.and_(
-                min_value <= sa.column(column),
-                sa.column(column) <= max_value
-            )
+            if strict_min and strict_max:
+                return sa.and_(
+                    min_value < sa.column(column),
+                    sa.column(column) < max_value
+                )
+            elif strict_min:
+                return sa.and_(
+                    min_value < sa.column(column),
+                    sa.column(column) <= max_value
+                )
+            elif strict_max:
+                return sa.and_(
+                    min_value <= sa.column(column),
+                    sa.column(column) < max_value
+                )
+            else:
+                return sa.and_(
+                    min_value <= sa.column(column),
+                    sa.column(column) <= max_value
+                )
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
