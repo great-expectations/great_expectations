@@ -213,7 +213,7 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
                                         expectation_suite_name="warning")
 
 
-    vo = ErrorsVsWarningsValidationOperator(
+    vo = RunWarningAndFailureExpectationSuitesValidationOperator(
         data_context=data_context,
         action_list = [],
         slack_webhook="https://hooks.slack.com/services/test/slack/webhook"
