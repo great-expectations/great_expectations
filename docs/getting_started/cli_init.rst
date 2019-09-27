@@ -128,7 +128,7 @@ Our example project has a ``data/`` folder containing several CSVs. Within the C
 
     ========== Datasources ==========
 
-    See https://docs.greatexpectations.io/en/latest/core_concepts/datasource.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop for more information about datasources.
+    See https://docs.greatexpectations.io/en/latest/features/datasource.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop for more information about datasources.
 
 
     Configure a datasource:
@@ -170,7 +170,7 @@ For a SQL data source, configuration would look like this instead:
 
     ========== Datasources ==========
 
-    See https://docs.greatexpectations.io/en/latest/core_concepts/datasource.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop for more information about datasources.
+    See https://docs.greatexpectations.io/en/latest/features/datasource.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop for more information about datasources.
 
 
     Configure a datasource:
@@ -252,7 +252,7 @@ Warning: For large data sets, the current default profiler may run slowly and im
     data source (without sampling), which may be very time consuming. 
     As a rule of thumb, we recommend starting with data smaller than 100MB.
 
-    To learn more about profiling, visit https://docs.greatexpectations.io/en/latest/guides/profiling.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0.
+    To learn more about profiling, visit https://docs.greatexpectations.io/en/latest/reference/profiling.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0.
             
     Proceed? [Y/n]: Y
     Profiling 'data__dir' with 'BasicDatasetProfiler'
@@ -406,7 +406,7 @@ Within the CLI, we compile to documentation as follows:
 
     Before committing, please make sure that this data does not contain sensitive information!
 
-    To learn more: https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop
+    To learn more: https://docs.greatexpectations.io/en/latest/reference/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop
 
     Move the profiled data and build HTML documentation? [Y/n]: Y
 

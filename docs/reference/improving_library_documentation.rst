@@ -31,7 +31,7 @@ Within the table of contents, each section has specific role to play.
 * *Getting started* helps users get started quickly. Along the way it briefly orients new users to concepts that will be important to learn later.
 * *Community* helps expand the Great Expectations community by explaining how to get in touch to ask questions, make contributions, etc.
 * *Core concepts* are always phrased as nouns. These docs provide more examples of usage, and deeper explanations for why Great Expectations is set up the way it is.
-* *Guides* are always phrased as verbs: "Creating custom Expectations", "Deploying Great Expectations in Spark", etc. They help users accomplish specific goals that go beyond the generic Getting Started tutorials.
+* *reference* are always phrased as verbs: "Creating custom Expectations", "Deploying Great Expectations in Spark", etc. They help users accomplish specific goals that go beyond the generic Getting Started tutorials.
 * *Changelog and roadmap* 
 * *Module docs*
 
