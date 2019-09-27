@@ -1,6 +1,5 @@
 .. _changelog:
 
-
 v0.8.0__develop
 -----------------
 * MAJOR CHANGE: Datasources should now be configured using the module_name and class_name syntax to support easier
@@ -10,6 +9,15 @@ v0.8.0__develop
 * GlobReaderGenerator now supports additional configuration options for identifying partitions via regex. The old
  method is still supported but is deprecated. See :ref:`GlobReaderGenerator` for details.
 * INTERNAL: rename LooselyTypedDotDict to AllowedKeysDotDict and add RequiredKeysDotDict as parent
+* Major documentation reorganization with additional content to improve readability.
+
+v0.7.11__develop
+-----------------
+* Fix an issue where head() lost the column name for SqlAlchemyDataset objects with a single column
+* Fix logic for the 'auto' bin selection of `build_continuous_partition_object`
+* Add missing jinja2 dependency
+* Fix an issue with inconsistent availability of strict_min and strict_max options on expect_column_values_to_be_between
+
 
 v0.7.10
 -----------------

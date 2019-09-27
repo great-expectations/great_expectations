@@ -162,11 +162,11 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
         ],
         [
           "Great Expectations Version",
-          "0.7.10"
+          "0.7.11__develop"
         ],
         [
           "Run ID",
-          "2019-09-19T203700.240912Z"
+          "2019-09-20T205021.264760Z"
         ],
         [
           "Validation Succeeded",

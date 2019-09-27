@@ -126,6 +126,7 @@ def pytest_generate_tests(metafunc):
     )
 
 
+@pytest.mark.filterwarnings("ignore:Setting result format to COMPLETE")
 def test_case_runner(test_case):
     if test_case['skip']:
         pytest.skip()
