@@ -211,8 +211,6 @@ cooltip_style_element = """<style type="text/css">
 def display_column_expectations_as_section(
     expectation_suite,
     column,
-    section_renderer=render.renderer.column_section_renderer.ExpectationSuiteColumnSectionRenderer,
-    view_renderer=render.view.view.DefaultJinjaSectionView,
     include_styling=True,
     return_without_displaying=False,
 ):
@@ -253,8 +251,6 @@ def display_column_expectations_as_section(
 def display_column_evrs_as_section(
     evrs,
     column,
-    section_renderer=render.renderer.column_section_renderer.ProfilingResultsColumnSectionRenderer,
-    view_renderer=render.view.view.DefaultJinjaSectionView,
     include_styling=True,
     return_without_displaying=False,
 ):

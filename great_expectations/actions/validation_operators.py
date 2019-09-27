@@ -54,7 +54,7 @@ class PerformActionListValidationOperator(ValidationOperator):
     Below is an example of this operator's configuration:
 
 
-      my_simple_operator:
+    perform_action_list_operator:
         class_name: PerformActionListValidationOperator
         action_list:
           - name: store_validation_result
@@ -65,6 +65,15 @@ class PerformActionListValidationOperator(ValidationOperator):
             action:
               class_name: ExtractAndStoreEvaluationParamsAction
               target_store_name: evaluation_parameter_store
+          - name: send_slack_notification_on_validation_result
+            action:
+              class_name: SlackNotificationAction
+              # put the actual webhook URL in the uncommitted/config_variables.yml file
+              slack_webhook: ${validation_notification_slack_webhook}
+             notify_on: all # possible values: "all", "failure", "success"
+              renderer:
+                module_name: great_expectations.render.renderer.slack_renderer
+                class_name: SlackRenderer
     """
 
     def __init__(self, data_context, action_list):
@@ -203,8 +212,8 @@ class RunWarningAndFailureExpectationSuitesValidationOperator(PerformActionListV
     RunWarningAndFailureExpectationSuitesValidationOperator is a validation operator
     that accepts a list batches of data assets (or the information necessary to fetch these batches).
     The operator retrieves 2 expectation suites for each data asset/batch - one containing
-    the critical expectations ("error") and the other containing non-critical expectations
-    ("warning"). By default, the operator assumes that the first is called "error" and the
+    the critical expectations ("failure") and the other containing non-critical expectations
+    ("warning"). By default, the operator assumes that the first is called "failure" and the
     second is called "warning", but "expectation_suite_name_prefix" attribute can be specified
     in the operator's configuration to make sure it searched for "{expectation_suite_name_prefix}failure"
     and {expectation_suite_name_prefix}warning" expectation suites for each data asset.
@@ -217,12 +226,33 @@ class RunWarningAndFailureExpectationSuitesValidationOperator(PerformActionListV
     Each action in the list must be an instance of NamespacedValidationAction
     class (or its descendants).
 
+    The operator sends a Slack notification (if "slack_webhook" is present in its
+    config). The "notify_on" config property controls whether the notification
+    should be sent only in the case of failure ("failure"), only in the case
+    of success ("success"), or always ("all").
+
     Below is an example of this operator's configuration:
-    TODO
+    run_warning_and_failure_expectation_suites:
+        class_name: RunWarningAndFailureExpectationSuitesValidationOperator
+        # put the actual webhook URL in the uncommitted/config_variables.yml file
+        slack_webhook: ${validation_notification_slack_webhook}
+        action_list:
+          - name: store_validation_result
+            action:
+              class_name: StoreAction
+              target_store_name: local_validation_result_store
+          - name: store_evaluation_params
+            action:
+              class_name: ExtractAndStoreEvaluationParamsAction
+              target_store_name: evaluation_parameter_store
 
-    The operator returns an object that looks like that:
 
-    RunWarningAndFailureExpectationSuitesValidationOperator
+    The operator returns an object that looks like the example below.
+
+    The value of "success" is True if no critical expectation suites ("failure")
+    failed to validate (non-critial ("warning") expectation suites
+    are allowed to fail without affecting the success status of the run.
+
     {
         "data_asset_identifiers": list of data asset identifiers
         "success": True/False,
