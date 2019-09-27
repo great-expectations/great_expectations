@@ -12,8 +12,8 @@ Welcome to Great Expectations!
    intro
    getting_started
    community
-   core_concepts
-   guides
+   features
+   reference
    roadmap_changelog
    module_docs
 
