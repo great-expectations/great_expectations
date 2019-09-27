@@ -63,10 +63,10 @@ Get Batch
 Datasources and generators work together closely with your pipeline infrastructure to provide Great Expectations
 batches of data to validate. The generator is responsible for identifying the ``batch_kwargs`` that a datasource will
 use to load a batch of data. For example the :class:`~great_expectations.datasource.generator.\
-filesystem_path_generator.SubdirReaderGenerator`
+subdir_reader_generator.SubdirReaderGenerator`
 generator will create batches of data based on individual files and group those batches into a single data_asset based
 on the subdirectory in which they are located. By contrast, the :class:`~great_expectations.datasource.generator.\
-filesystem_path_generator.GlobReaderGenerator`
+glob_reader_generator.GlobReaderGenerator`
 will also create batches of data based on individual files, but uses defined glob-style match patterns to group those
 batches into named data assets.
 

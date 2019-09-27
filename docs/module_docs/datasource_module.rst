@@ -7,14 +7,14 @@ Datasource Module
     :members:
     :undoc-members:
     :show-inheritance:
-    :exclude-members: Datasource, BatchGenerator
+    :exclude-members: Datasource, PandasDatasource, SqlAlchemyDatasource, SparkDFDatasource
 
     .. autoclass:: great_expectations.datasource.Datasource
         :members:
         :undoc-members:
 
 
-great_expectations.datasource.pandas_source
+PandasDatasource
 ---------------------------------------------
 
 .. autoclass:: great_expectations.datasource.pandas_source.PandasDatasource
@@ -23,7 +23,7 @@ great_expectations.datasource.pandas_source
     :show-inheritance:
 
 
-great_expectations.datasource.sqlalchemy_source
+SqlAlchemyDatasource
 ------------------------------------------------
 
 .. autoclass:: great_expectations.datasource.sqlalchemy_source.SqlAlchemyDatasource
@@ -32,7 +32,7 @@ great_expectations.datasource.sqlalchemy_source
     :show-inheritance:
 
 
-great_expectations.datasource.spark_source
+SparkDFDatasource
 ---------------------------------------------
 
 .. autoclass:: great_expectations.datasource.spark_source.SparkDFDatasource
