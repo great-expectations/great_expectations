@@ -1,4 +1,4 @@
-.. _stores:
+.. _stores_reference:
 
 
 ###############

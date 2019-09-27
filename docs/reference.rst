@@ -4,6 +4,13 @@
 Reference
 #############
 
+Reference materials provide clear descriptions of GE features. See the :ref:`module_docs` for more detailed descriptions
+of classes and methods.
+
+********************
+Basic Functionality
+********************
+
 .. toctree::
    :maxdepth: 2
 
@@ -13,28 +20,48 @@ Reference
    /reference/custom_expectations
    /reference/implemented_expectations
 
-   /reference/extending_great_expectations
+**************
+Core GE Types
+**************
+
+.. toctree::
+   :maxdepth: 2
 
    /reference/standard_arguments
    /reference/result_format
    /reference/validation_result
+   /reference/batch_kwargs
 
+************************
+Configuration Reference
+************************
 
-   /reference/evaluation_parameters
-
-   /reference/data_asset_features
+.. toctree::
+   :maxdepth: 2
 
    /reference/data_context
+   /reference/migrating_versions
 
-   /reference/batch_kwargs
+******************
+Advanced Features
+******************
+
+.. toctree::
+   :maxdepth: 2
+
+   /reference/evaluation_parameters
+   /reference/data_asset_features
+   /reference/stores_reference
    /reference/batch_identification
    /reference/validation_operators
 
-SUBSECTION
-==========
+*****************************
+Extending Great Expectations
+*****************************
 
+.. toctree::
+   :maxdepth: 2
 
-   /reference/migrating_versions
-
+   /reference/extending_great_expectations
    /reference/contributing
    /reference/improving_library_documentation

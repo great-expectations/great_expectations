@@ -10,5 +10,24 @@ stores.
 When data assets are fetched from a :class:`Datasource`, they have :ref:`batch_kwargs`, :ref:`batch_id`, and
 :ref:`batch_fingerprint` properties which an help track those properties.
 
+.. _batch_kwargs:
+
 *****************
-bat
+Batch Kwargs
+*****************
+
+See the :ref:`batch_kwargs_reference` for more information.
+
+
+.. _batch_id:
+
+*****************
+Batch Id
+*****************
+
+
+.. _batch_fingerprint:
+
+******************
+Batch Fingerprint
+******************

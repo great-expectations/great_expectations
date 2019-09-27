@@ -208,7 +208,6 @@ cooltip_style_element = """<style type="text/css">
 """
 
 
-
 def display_column_expectations_as_section(
     expectation_suite,
     column,
