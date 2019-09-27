@@ -1,58 +1,20 @@
-.. _data_documentation:
+.. _data_documentation_reference:
 
-Data Documentation
-===================
+######################################
+Data Documentation Reference
+######################################
 
-Data Documentation compiles raw Great Expectations objects including expectation suites and validation reports into
-structured documents such as HTML documentation that displays key characteristics of a dataset. Together, Documentation,
-Profiling, and Validation are the three core services offered by GE.
+By default, GE creates two data documentation sites for a new project:
 
+1. "local_site" renders documentation for all the datasources in the project from GE artifacts in the local filesystem. The site includes expectation suites and profiling and validation results from the `uncommitted` directory. Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
+2. "team_site" is meant to support the "shared source of truth for a team" use case. By default only the expectations section is enabled. Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes) based on the team's decisions about where these are stored.) Reach out on `Slack <https://greatexpectations.io/slack>`__ if you would like to discuss the best way to configure a team site.
 
-Data Documentation is implemented in the :py:mod:`great_expectations.render` module.
-
-HTML documentation
--------------------
-
-HTML documentation takes expectation suites and validation results and produces clear, functional, and self-healing
-documentation of expected and observed data characteristics. Together with profiling, it can help to rapidly create
-a clearer picture of your data, and keep your entire team on the same page as data evolves.
-
-For example, the default BasicDatasetProfiler in GE will produce validation_results which compile to a page for each
-table or DataFrame including an overview section:
-
-.. image:: ../images/movie_db_profiling_screenshot_2.jpg
-
-And then detailed statistics for each column:
-
-.. image:: ../images/movie_db_profiling_screenshot_1.jpg
+Users have full control over configuring Data Documentation for their project - they can modify the two pre-configured sites (or remove them altogether) and add new sites with a configuration that meets the project's needs. The easiest way to add a new site to the configuration is to copy the "local_site" configuration block in great_expectations.yml, give the copy a new name and modify the details as needed.
 
 
-The GE DataContext uses a configurable "data documentation site" to define which artifacts to compile and how to render them as documentation. Multiple sites can be configured inside a project, each suitable for a particular data documentation use case.
-
-For example, we have identified three common use cases for using documentation in a data project. They are to:
-
-1. Visualize all Great Expectations artifacts in the local repo of a project as HTML: expectation suites, validation results and profiling results.
-2. Maintain a "shared source of truth" for a team working on a data project. This documentation renders all the artifacts committed in the source control system (expectation suites and profiling results) and a continuously updating data quality report, built from a chronological list of validations by run id.
-3. Share a spec of a dataset with a client or a partner. This is similar to API documentation in software development. This documentation would include profiling results of the dataset to give the reader a quick way to grasp what the data looks like, and one or more expectation suites that encode what is expected from the data to be considered valid.
-
-To support these (and possibly other) use cases GE has a concept of "data documentation site". Multiple sites can be configured inside a project, each suitable for a particular data documentation use case.
-
-Here is an example of a site:
-
-.. image:: ../images/data_doc_site_index_page.png
-
-The behavior of a site is controlled by configuration in the DataContext's great_expectations.yml file.
-
-Users can specify
-
-* which datasources to document (by default, all)
-* whether to include expectations, validations and profiling results sections
-* where the expectations and validations should be read from (filesystem or S3)
-* where the HTML files should be written (filesystem or S3)
-* which renderer and view class should be used to render each section
-
+***************************************
 Data Documentation Site Configuration
-*************************************
+***************************************
 
 Here is an example of a site configuration from great_expectations.yml:
 
@@ -109,23 +71,12 @@ Here is an example of a site configuration from great_expectations.yml:
 
 * ``validations_store`` and ``profiling_store`` in the example above specify the location of validation and profiling results that the site will include in the documentation. The store's ``type`` can be ``filesystem`` or ``s3`` (S3 store is not currently implemented, but will be supported in the near future.) ``base_directory`` must be specified for ``filesystem`` stores. The optional ``run_id_filter`` attribute allows to include (``eq`` for exact match) or exclude (``ne``) validation results with a particular run id.
 
-
-
-Adjusting Data Documentation For Your Project's Needs
-*****************************************************
-
-By default, GE creates two data documentation sites for a new project:
-
-1. "local_site" renders documentation for all the datasources in the project from GE artifacts in the local filesystem. The site includes expectation suites and profiling and validation results from the `uncommitted` directory. Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
-2. "team_site" is meant to support the "shared source of truth for a team" use case. By default only the expectations section is enabled. Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes) based on the team's decisions about where these are stored.) Reach out on `Slack <https://tinyurl.com/great-expectations-slack>`__ if you would like to discuss the best way to configure a team site.
-
-Users have full control over configuring Data Documentation for their project - they can modify the two pre-configured sites (or remove them altogether) and add new sites with a configuration that meets the project's needs. The easiest way to add a new site to the configuration is to copy the "local_site" configuration block in great_expectations.yml, give the copy a new name and modify the details as needed.
-
-How to build documentation
-===========================
+*************************
+Building Documentation
+*************************
 
 Using the CLI
----------------
+===============
 
 The great_expectations CLI can build comprehensive documentation from expectation suites available to the configured
 context and validations available in the ``great_expectations/fixtures`` directory.
@@ -151,7 +102,7 @@ To render just one data asset (this might be useful for debugging), call
 
 
 Using the raw API
-------------------
+===================
 
 The underlying python API for rendering documentation is still new and evolving. Use the following snippet as a guide
 for how to profile a single batch of data and build documentation from the validation_result.
@@ -185,10 +136,11 @@ for how to profile a single batch of data and build documentation from the valid
 
 
 Dependencies
----------------
+===============
 * Font Awesome 5.10.1
 * Bootstrap 4.3.1
 * jQuery 3.2.1
 * Vega 5.3.5
 * Vega-Lite 3.2.1
 * Vega-Embed 4.0.0
+

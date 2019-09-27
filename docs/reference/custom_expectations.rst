@@ -18,6 +18,19 @@ Fear not! Great Expectations is designed for customization and extensibility.
 
 Side note: in future versions, Great Expectations will probably grow to include additional Expectations. If you have an Expectation that could be universally useful, please make the case on the `Great Expectations issue tracker on github <https://github.com/great-expectations/great_expectations/issues>`_.
 
+
+Types of expectations
+------------------------------------------------------------------------------
+
+Under the hood, great_expectations evaluates similar kinds of expectations using standard logic, including:
+
+* `column_map_expectations`, which apply their condition to each value in a column independently of other values
+* `column_aggregate_expectations`, which apply their condition to an aggregate value or values from the column
+
+In general, if a column is empty, a column_map_expectation will return True (vacuously), whereas a column_aggregate_expectation will return False (since no aggregate value could be computed).
+Adding an expectation about element counts to a set of expectations is usually therefore very important to ensure the overall set of expectations captures the full set of constraints you expect.
+
+
 The easy way
 --------------------------------------------------------------------------------
 
@@ -25,7 +38,7 @@ The easy way
 2. Define custom functions containing your business logic
 3. Use the `column_map_expectation` and `column_aggregate_expectation` decorators to turn them into full Expectations. Note that each dataset class implements its own versions of `@column_map_expectation` and `@column_aggregate_expectation`, so you should consult the documentation of each class to ensure you are returning the correct information to the decorator.
 
-Note: following Great Expectations :ref:`naming_conventions` is highly recommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you.
+Note: following Great Expectations patterns for :ref:`extending_great_expectations` is highly recommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you.
 
 For example, in Pandas:
 
