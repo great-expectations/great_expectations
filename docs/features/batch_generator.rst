@@ -1,6 +1,6 @@
 .. _batch_generator:
 
-Batch Generator
+Batch Generators
 ==================
 
 Batch generators produce identifying information, called "batch_kwargs" that datasources

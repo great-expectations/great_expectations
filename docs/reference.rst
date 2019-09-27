@@ -33,13 +33,15 @@ Core GE Types
    /reference/batch_kwargs
 
 ************************
-Configuration Reference
+Configuration Guides
 ************************
 
 .. toctree::
    :maxdepth: 2
 
-   /reference/data_context
+   /reference/data_context_reference
+   /reference/data_documentation_reference
+   /reference/profiling_reference
    /reference/migrating_versions
 
 ******************
