@@ -2,7 +2,8 @@
 
 v0.8.0__develop
 -----------------
-Version 0.8.0 will be another MAJOR update to Great Expectations, with many improvements focused on configurability
+
+Version 0.8.0 is a significant update to Great Expectations, with many improvements focused on configurability
 and usability.  See the :ref:`migrating_versions` guide for more details on specific changes.
 
 Highlights include:
@@ -13,21 +14,23 @@ Highlights include:
 
 2. First-class support for plugins in a DataContext, with several features that make it easier to configure and
    maintain DataContexts across common deployment patterns.
-   - Environments: A DataContext can now manage :ref:`environment_and_secrets` more easily thanks to more dynamic and
+
+   - **Environments**: A DataContext can now manage :ref:`environment_and_secrets` more easily thanks to more dynamic and
      flexible variable substitution.
-   - Stores: A new internal abstraction for DataContexts, :ref:`stores_reference`, make extending GE easier by
+   - **Stores**: A new internal abstraction for DataContexts, :ref:`stores_reference`, make extending GE easier by
      consolidating logic for reading and writing resources from a database, local, or cloud storage.
-   - Types: Utilities configured in a DataContext are now referenced using `class_name` and `module_name` throughout
+   - **Types**: Utilities configured in a DataContext are now referenced using `class_name` and `module_name` throughout
      the DataContext configuration, making it easier to extend or supplement pre-built resources. For now, the "type"
      parameter is still supported but expect it to be removed in a future release.
 
 3. Partitioners: Batch Kwargs are clarified and enhanced to help easily reference well-known chunks of data using a
    partition_id. Batch ID and Batch Fingerprint help round out support for enhanced metadata around data
-   assets that GE validates. See :ref:`batch_identification` for more information. The `GlobReaderGenerator`,
+   assets that GE validates. See :ref:`batch_identifiers` for more information. The `GlobReaderGenerator`,
    `QueryGenerator`, `S3Generator`, `SubdirReaderGenerator`, and `TableGenerator` all support partition_id for
    easily accessing data assets.
 
-4. Other Improvements
+4. Other Improvements:
+
    - We're beginning a long process of some under-the-covers refactors designed to make GE more maintainable as we
      begin adding additional features.
    - Restructured documentation: our docs have a new structure and have been reorganized to provide space for more

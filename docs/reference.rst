@@ -69,8 +69,6 @@ Extending Great Expectations
    /reference/improving_library_documentation
 
 
-.. _supporting_resources:
-
 **********************************
 Supporting Resources
 **********************************

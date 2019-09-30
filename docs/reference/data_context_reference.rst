@@ -97,21 +97,21 @@ a dictionary or list, which is often useful for configuring database access.
 
 ..code-block:: yaml
 
-prod_credentials:
-  type: postgresql
-  host: secure_server
-  port: 5432
-  username: username
-  password: sensitive_password
-  database: ge
+  prod_credentials:
+    type: postgresql
+    host: secure_server
+    port: 5432
+    username: username
+    password: sensitive_password
+    database: ge
 
-dev_credentials:
-  type: postgresql
-  host: localhost
-  port: 5432
-  username: dev
-  password: dev
-  database: ge
+  dev_credentials:
+    type: postgresql
+    host: localhost
+    port: 5432
+    username: dev
+    password: dev
+    database: ge
 
 
 Environment Variable Substitution
