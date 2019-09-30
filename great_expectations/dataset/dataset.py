@@ -279,8 +279,11 @@ class Dataset(MetaDataset):
             sturges = np.log2(nonnull_count + 1)
             min_, _25, _75, max_ = self.get_column_quantiles(column, (0.0, 0.25, 0.75, 1.0))
             iqr = _75 - _25
-            fd = (2 * float(iqr)) / (nonnull_count**(1/3))
-            n_bins = max(sturges, fd)
+            if (iqr < 1e-10):  # Consider IQR 0 and do not use variance-based estimator
+                n_bins = sturges
+            else:
+                fd = (2 * float(iqr)) / (nonnull_count**(1/3))
+                n_bins = max(int(np.ceil(sturges)), int(np.ceil(float(max_ - min_) / fd)))
             bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins+1)
         else:
             raise ValueError("Invalid parameter for bins argument")

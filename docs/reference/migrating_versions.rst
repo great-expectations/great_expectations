@@ -1,8 +1,8 @@
 .. _migrating_versions:
 
-
+###################################
 Migrating Between Versions
-===========================
+###################################
 
 While we are committed to keeping Great Expectations as stable as possible,
 sometimes breaking changes are necessary to maintain our trajectory. This is
@@ -15,16 +15,11 @@ expectation suite.
 Since expectation semantics are usually consistent across versions, there is little change required when upgrading
 great expectations, with some exceptions noted here.
 
-Upgrading to 0.8.x
-------------------
+*********************************
+Using the check-config Command
+*********************************
 
-In the 0.8.0 release, our config format has changed dramatically to enable tons
-of great new features like extensibility.
-
-Introducing the check-config Command
-+++++++++++++++++++++++++++++++++++++
-
-To facilitate this substantial config format change we have created a command
+To facilitate this substantial config format change, starting with version 0.8.0 we have created a command
 to sanity check your config files. From your project directory, run:
 
 >>> great_expectations check-config
@@ -36,8 +31,27 @@ You will most likely be prompted to install a new template. Rest assured that
 your original yaml file will be archived automatically for you. Even so, it's
 in your source control system already, right? ;-)
 
+*************************
+Upgrading to 0.8.x
+*************************
+
+In the 0.8.0 release, our config format has changed dramatically to enable tons
+of great new features like extensibility.
+
+Some specific changes:
+
+- New top-level keys:
+  - `evaluation_parameter_store_name`
+  - `expectation_store`
+  - `profiling_store_name`
+- Deprecation of the `type` key for configuring objects (replaced by `class_name` (and `module_name` as well when
+  ambiguous).
+- Completely new `SiteBuilder` configuration. See :ref:`data_documentation_reference`.
+
+
+*************************
 Upgrading to 0.7.x
-------------------
+*************************
 
 In version 0.7, GE introduced several new features, and significantly changed the way DataContext objects work:
 

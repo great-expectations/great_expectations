@@ -1,15 +1,15 @@
 .. _validation_result:
 
-
+###################
 Validation Results
-===================
+###################
 
 Validation results include information about each expectation that was validated and a ``statistics`` section that
 describes the overall number of validated expectations and results.
 
 For example:
 
-::
+.. code-block:: json
 
     {
       "meta": {
@@ -94,3 +94,10 @@ For example:
         "success_percent": 0
       }
     }
+
+
+*****************************
+Reviewing Validation Results
+*****************************
+
+TODO: Description of process for reviewing validation results

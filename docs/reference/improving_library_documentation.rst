@@ -49,3 +49,10 @@ The CLI has some conventions of its own.
 * Clickable links (usually to documentation) are blue.
 * Copyable bash commands are green.
 * All top-level bash commands must be verbs: "build documentation", not "documentation"
+
+
+Resources
+===========
+* We follow the
+  `Sphinx guide for sections <http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#sections>`__.
+

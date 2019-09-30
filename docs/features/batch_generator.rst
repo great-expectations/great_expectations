@@ -1,7 +1,8 @@
 .. _batch_generator:
 
-Batch Generator
-==================
+##################
+Batch Generators
+##################
 
 Batch generators produce identifying information, called "batch_kwargs" that datasources
 can use to get individual batches of data. They add flexibility in how to obtain data
@@ -13,8 +14,9 @@ the Events table with a timestamp on February 7, 2012," which a SqlAlchemyDataso
 could use to materialize a SqlAlchemyDataset corresponding to that batch of data and
 ready for validation.
 
+********
 Batch
-------
+********
 
 A batch is a sample from a data asset, sliced according to a particular rule.
 For example, an hourly slide of the Events table or “most recent `users` records.”
