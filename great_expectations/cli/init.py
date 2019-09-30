@@ -52,10 +52,16 @@ def scaffold_directories_and_notebooks(base_dir):
 
     for directory in [notebook_dir_name, "expectations", "datasources", "uncommitted", "plugins", "fixtures"]:
         safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
+        # Add a gitkeep file (as a convention).
+        # NOTE: 20191001 - JPC - we recognize this is somewhat brittle. Consider easier integration with other VCS
+        # systems and/or detecting missing subdirs better during other operations (which is what prompted the addition
+        # of gitkeep filesin the first place)
+        open(os.path.join(base_dir, "uncommitted", directory, ".gitkeep"), "a").close()
 
     for uncommitted_directory in ["validations", "documentation", "samples"]:
         safe_mmkdir(os.path.join(base_dir, "uncommitted",
                                  uncommitted_directory), exist_ok=True)
+        open(os.path.join(base_dir, "uncommitted", uncommitted_directory, ".gitkeep"), "a").close()
 
     for notebook in glob.glob(file_relative_path(__file__, "../init_notebooks/*.ipynb")):
         notebook_name = os.path.basename(notebook)

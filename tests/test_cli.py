@@ -550,6 +550,10 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
     print(empty_directory)
 
     assert set(os.listdir(empty_directory)) == \
-           {'datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'}
+           {'datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks', '.gitkeep'}
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
            {'samples', 'documentation', 'validations'}
+
+    # A gitkeep file should be created so that when committed, overall structure is preserved
+    for subdir in {'samples', 'documentation', 'validations'}:
+        assert ".gitkeep" in os.listdir(os.path.join(empty_directory, "uncommitted", subdir))
