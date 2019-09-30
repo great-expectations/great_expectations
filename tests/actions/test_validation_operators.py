@@ -17,7 +17,7 @@ from great_expectations.data_context import (
     ConfigOnlyDataContext,
 )
 from great_expectations.data_context.types import (
-    DataContextConfig,
+    # DataContextConfig,
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -25,7 +25,8 @@ from great_expectations.data_context.types import (
 
 @pytest.fixture()
 def basic_data_context_config_for_validation_operator():
-    return DataContextConfig(**{
+    # return DataContextConfig(**{
+    return {
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name" : "evaluation_parameter_store",
         "expectations_store" : {
@@ -55,7 +56,8 @@ def basic_data_context_config_for_validation_operator():
             "sites": {}
         },
         "validation_operators" : {},
-    })
+    }
+    # })
 
 
 @freeze_time("09/26/19 13:42:41")

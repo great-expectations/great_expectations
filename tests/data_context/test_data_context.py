@@ -29,9 +29,9 @@ from great_expectations.cli.init import scaffold_directories_and_notebooks
 from great_expectations.dataset import PandasDataset
 from great_expectations.util import gen_directory_tree_str
 
-from great_expectations.data_context.types import (
-    DataContextConfig,
-)
+# from great_expectations.data_context.types import (
+#     DataContextConfig,
+# )
 from great_expectations.data_context.store import (
     BasicInMemoryStore,
     EvaluationParameterStore,
@@ -710,9 +710,11 @@ def test_add_store(empty_data_context):
 
     assert isinstance(new_store, BasicInMemoryStore)
 
-@pytest.fixture()
+
+@pytest.fixture
 def basic_data_context_config():
-    return DataContextConfig(**{
+    # return DataContextConfig(**{
+    return {
         "ge_config_version": 1,
         "plugins_directory": "plugins/",
         "expectations_store": {
@@ -734,7 +736,8 @@ def basic_data_context_config():
         "data_docs": {
             "sites": {}
         }
-    })
+    }
+    # })
 
 
 def test_ExplorerDataContext(titanic_data_context):
