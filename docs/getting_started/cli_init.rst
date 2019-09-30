@@ -3,10 +3,6 @@
 Step 1: Run ``great_expectations init``
 ===============================================
 
-.. toctree::
-   :maxdepth: 2
-
-
 Video
 ------
 
@@ -128,7 +124,7 @@ Our example project has a ``data/`` folder containing several CSVs. Within the C
 
     ========== Datasources ==========
 
-    See https://docs.greatexpectations.io/en/latest/core_concepts/datasource.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop for more information about datasources.
+    See https://docs.greatexpectations.io/en/latest/features/datasource.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop for more information about datasources.
 
 
     Configure a datasource:
@@ -170,7 +166,7 @@ For a SQL data source, configuration would look like this instead:
 
     ========== Datasources ==========
 
-    See https://docs.greatexpectations.io/en/latest/core_concepts/datasource.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop for more information about datasources.
+    See https://docs.greatexpectations.io/en/latest/features/datasource.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop for more information about datasources.
 
 
     Configure a datasource:
@@ -211,7 +207,7 @@ The corresponding config would be:
                     type: queries
             profile: my_db
 
-Note: the CLI will also create a ``uncommitted/credentials/profiles.yml`` files to contain SQL credentials. Note that this file goes in the ``uncommitted/`` directory, which should *NOT* be committed to source control.
+Note: the CLI will also create a ``uncommitted/credentials/profiles.yml`` files to contain SQL credentials. Note that this file goes in the ``uncommitted/`` directory, which should *NOT* be committed to source control. It may also contain a Slack webhook url for notifications.
 
 Strictly speaking, a Great Expectations Datasource is not the data itself, but part of a *pointer* to a data compute environment where Expectations can be evaluated, called a `DataAsset.` Fully describing the pointer requires a 3-ple:
 
@@ -252,7 +248,7 @@ Warning: For large data sets, the current default profiler may run slowly and im
     data source (without sampling), which may be very time consuming. 
     As a rule of thumb, we recommend starting with data smaller than 100MB.
 
-    To learn more about profiling, visit https://docs.greatexpectations.io/en/latest/guides/profiling.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0.
+    To learn more about profiling, visit https://docs.greatexpectations.io/en/latest/reference/profiling.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0.
             
     Proceed? [Y/n]: Y
     Profiling 'data__dir' with 'BasicDatasetProfiler'
@@ -406,7 +402,7 @@ Within the CLI, we compile to documentation as follows:
 
     Before committing, please make sure that this data does not contain sensitive information!
 
-    To learn more: https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop
+    To learn more: https://docs.greatexpectations.io/en/latest/reference/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop
 
     Move the profiled data and build HTML documentation? [Y/n]: Y
 

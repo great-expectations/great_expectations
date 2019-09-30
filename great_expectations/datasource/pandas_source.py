@@ -5,14 +5,24 @@ import logging
 # from builtins import str
 from six import string_types
 
+try:
+    from io import StringIO
+except ImportError:
+    from StringIO import StringIO
+
+from six import PY2
+
 import pandas as pd
 
 from .datasource import Datasource, ReaderMethods
-from great_expectations.datasource.generator import InMemoryGenerator, SubdirReaderGenerator, GlobReaderGenerator
+from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
+from great_expectations.datasource.generator.subdir_reader_generator import SubdirReaderGenerator
+from great_expectations.datasource.generator.glob_reader_generator import GlobReaderGenerator
+from great_expectations.datasource.generator.s3_generator import S3Generator
 from great_expectations.datasource.types import (
-    PandasDatasourceBatchKwargs,
     PandasDatasourceMemoryBatchKwargs,
-    PathBatchKwargs
+    PathBatchKwargs,
+    PathBatchId
 )
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.types import ClassConfig
@@ -24,6 +34,10 @@ logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
 
+from .util import S3Url
+
+logger = logging.getLogger(__name__)
+
 
 class PandasDatasource(Datasource):
     """The PandasDatasource produces PandasDataset objects and supports generators capable of 
@@ -31,9 +45,20 @@ class PandasDatasource(Datasource):
     existing in-memory dataframes.
     """
 
-    _batch_kwarg_types = (PandasDatasourceBatchKwargs, )
+    @classmethod
+    def build_configuration(cls, data_asset_type=None, generators=None, **kwargs):
+        """
+        Build a full configuration object for a datasource, potentially including generators with defaults.
 
-    def __init__(self, name="pandas", data_context=None, data_asset_type=None, generators=None, **kwargs):
+        Args:
+            data_asset_type: A ClassConfig dictionary
+            generators: Generator configuration dictionary
+            **kwargs: Additional kwargs to be part of the datasource constructor's initialization
+
+        Returns:
+            A complete datasource configuration.
+
+        """
         if generators is None:
             # Provide a gentle way to build a datasource with a sane default,
             # including ability to specify the base_directory and reader_options
@@ -45,7 +70,7 @@ class PandasDatasource(Datasource):
             })
             generators = {
                 "default": {
-                    "type": "subdir_reader",
+                    "class_name": "SubdirReaderGenerator",
                     "base_directory": base_directory,
                     "reader_options": reader_options
                 }
@@ -60,10 +85,22 @@ class PandasDatasource(Datasource):
                 # In this case, we allow the passed config, for now, in case they're using a legacy string-only config
                 pass
 
-        super(PandasDatasource, self).__init__(name, type_="pandas",
+        configuration = kwargs
+        configuration.update({
+            "data_asset_type": data_asset_type,
+            "generators": generators,
+        })
+        return configuration
+
+    def __init__(self, name="pandas", data_context=None, data_asset_type=None, generators=None, **kwargs):
+        configuration_with_defaults = PandasDatasource.build_configuration(data_asset_type, generators, **kwargs)
+        data_asset_type = configuration_with_defaults.pop("data_asset_type")
+        generators = configuration_with_defaults.pop("generators")
+        super(PandasDatasource, self).__init__(name,
                                                data_context=data_context,
                                                data_asset_type=data_asset_type,
-                                               generators=generators)
+                                               generators=generators,
+                                               **configuration_with_defaults)
         self._build_generators()
 
     def _get_generator_class_from_type(self, type_):
@@ -73,15 +110,22 @@ class PandasDatasource(Datasource):
             return GlobReaderGenerator
         elif type_ == "memory":
             return InMemoryGenerator
+        elif type_ == "s3":
+            return S3Generator
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
     def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
         batch_kwargs.update(kwargs)
+        # pandas cannot take unicode as a delimiter, which can happen in py2. Handle this case explicitly.
+        # We handle it here so that the updated value will be in the batch_kwargs for transparency to the user.
+        if PY2 and "sep" in batch_kwargs and batch_kwargs["sep"] is not None:
+            batch_kwargs["sep"] = str(batch_kwargs["sep"])
+        # We will use and manipulate reader_options along the way
         reader_options = batch_kwargs.copy()
-        # We will use and manipulate batch_kwargs along the way
+
         # We need to build a batch_id to be used in the dataframe
-        batch_id = batch_kwargs.copy().update({
+        batch_id = PathBatchId({
             "timestamp": time.time()
         })
 
@@ -102,39 +146,50 @@ class PandasDatasource(Datasource):
                              "must be a subclass of PandasDataset." % data_asset_type.__name__)
 
         if "path" in batch_kwargs:
-            path = reader_options.pop("path")  # We need to remove from the reader
+            path = reader_options.pop("path")  # We remove this so it is not used as a reader option
             reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
             reader_options.pop("partition_id", "")
 
             reader_method = reader_options.pop("reader_method", None)
-            if reader_method is None:
-                reader_method = self._guess_reader_method_from_path(path)
-                if reader_method is None:
-                    raise BatchKwargsError("Unable to determine reader for path: %s" % path, batch_kwargs)
-            else:
-                try:
-                    reader_method = ReaderMethods[reader_method]
-                except KeyError:
-                    raise BatchKwargsError("Unknown reader method: %s" % reader_method, batch_kwargs)
-
-            if reader_method == ReaderMethods.CSV:
-                df = pd.read_csv(path, **reader_options)
-            elif reader_method == ReaderMethods.parquet:
-                df = pd.read_parquet(path, **reader_options)
-            elif reader_method == ReaderMethods.excel:
-                df = pd.read_excel(path, **reader_options)
-            elif reader_method == ReaderMethods.JSON:
-                df = pd.read_json(path, **reader_options)
-            else:
+            reader_fn, reader_fn_options = self._get_reader_fn(reader_method, path, reader_options)
+            try:
+                df = getattr(pd, reader_fn)(path, **reader_fn_options)
+            except AttributeError:
                 raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
+
+        elif "s3" in batch_kwargs:
+            try:
+                import boto3
+                s3 = boto3.client("s3")
+            except ImportError:
+                raise BatchKwargsError("Unable to load boto3 client to read s3 asset.", batch_kwargs)
+            raw_url = reader_options.pop("s3")  # We need to remove from the reader
+            reader_options.pop("timestamp", "")  # ditto timestamp (but missing ok)
+            reader_method = reader_options.pop("reader_method", None)
+            url = S3Url(raw_url)
+            logger.debug("Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key))
+            s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
+            reader_fn, reader_fn_options = self._get_reader_fn(reader_method, url.key, reader_options)
+
+            try:
+                df = getattr(pd, reader_fn)(
+                    StringIO(s3_object["Body"].read().decode(s3_object.get("ContentEncoding", "utf-8"))),
+                    **reader_fn_options
+                )
+            except AttributeError:
+                raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
+            except IOError:
+                raise
 
         elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (pd.DataFrame, pd.Series)):
             df = batch_kwargs.pop("df")  # We don't want to store the actual dataframe in kwargs
+            # Record this in the kwargs *and* the id
+            batch_kwargs["PandasInMemoryDF"] = True
             batch_id["PandasInMemoryDF"] = True
             if df.memory_usage().sum() < HASH_THRESHOLD:
                 batch_id["fingerprint"] = hashlib.md5(pd.util.hash_pandas_object(df, index=True).values).hexdigest()
         else:
-            raise BatchKwargsError("Invalid batch_kwargs: path or df is required for a PandasDatasource",
+            raise BatchKwargsError("Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
                                    batch_kwargs)
 
         # FIXME: currently, batch_id and batch_kwargs are overlapping and are both included completely
@@ -170,12 +225,12 @@ class PandasDatasource(Datasource):
         # Now that we know whether we can use a generator, build the kwargs
         if generator is not None:
             if len(args) == 1:  # We interpret a single argument as a partition_id
-                batch_kwargs = generator.build_batch_kwargs_from_partition(args[0], batch_kwargs=kwargs)
+                batch_kwargs = generator.build_batch_kwargs_from_partition_id(args[0], batch_kwargs=kwargs)
             elif len(args) > 0:
                 raise BatchKwargsError("Multiple positional arguments were provided to build_batch_kwargs, but only"
                                        "one is supported. Please provide named arguments to build_batch_kwargs.")
             elif "partition_id" in kwargs:
-                batch_kwargs = generator.build_batch_kwargs_from_partition(kwargs["partition_id"], batch_kwargs=kwargs)
+                batch_kwargs = generator.build_batch_kwargs_from_partition_id(kwargs["partition_id"], batch_kwargs=kwargs)
             else:
                 batch_kwargs = generator.yield_batch_kwargs(data_asset_name, kwargs)
         else:
@@ -189,7 +244,7 @@ class PandasDatasource(Datasource):
                         "df": args[0]
                     })
                     batch_kwargs = PandasDatasourceMemoryBatchKwargs(**kwargs)
-                elif isinstance(args[0], string_types):
+                elif isinstance(args[0], str):
                     kwargs.update({
                         "path": args[0],
                     })
@@ -207,3 +262,27 @@ class PandasDatasource(Datasource):
                     raise BatchKwargsError("Invalid kwargs provided to build_batch_kwargs: either a valid df or path"
                                            "key must be provided.")
         return batch_kwargs
+
+    def _get_reader_fn(self, reader_method, path, reader_options):
+        if reader_method is None:
+            reader_method = self._guess_reader_method_from_path(path)
+            if reader_method is None:
+                raise BatchKwargsError("Unable to determine reader for path: %s" % path, reader_options)
+        else:
+            try:
+                reader_method = ReaderMethods[reader_method]
+            except KeyError:
+                raise BatchKwargsError("Unknown reader method: %s" % reader_method, reader_options)
+
+        if reader_method == ReaderMethods.CSV:
+            return "read_csv", reader_options
+        elif reader_method == ReaderMethods.parquet:
+            return "read_parquet", reader_options
+        elif reader_method == ReaderMethods.excel:
+            return "read_excel", reader_options
+        elif reader_method == ReaderMethods.JSON:
+            return "read_json", reader_options
+        elif reader_method == ReaderMethods.CSV_GZ:
+            return "read_csv", reader_options.update({"compression": "gzip"})
+
+        return None

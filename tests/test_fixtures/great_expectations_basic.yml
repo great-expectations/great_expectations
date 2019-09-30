@@ -1,14 +1,25 @@
 # This is a basic configuration for testing.
 # It has comments that should be preserved.
+ge_config_version: 1
+# Here's a comment between the config version and the datassources
 datasources:
   # For example, this one.
-  mydatasource:
-    type: pandas
+  mydatasource: # This should stay by mydatasource
+    module_name: great_expectations.datasource
+    class_name: PandasDatasource
+    data_asset_type:
+      class_name: PandasDataset
     generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
-        type: subdir_reader
+        class_name: SubdirReaderGenerator
         base_directory: ../data
+        reader_options:
+          sep:
+          engine: python
+
+
+config_variables_file_path: uncommitted/config_variables.yml
 
 expectations_store:
   class_name: ExpectationStore
@@ -18,6 +29,7 @@ expectations_store:
 
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
+profiling_store_name: local_validation_result_store
 
 data_docs:
   sites:
@@ -26,3 +38,6 @@ stores:
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore
+
+  local_validation_result_store:
+    class_name: BasicInMemoryStore

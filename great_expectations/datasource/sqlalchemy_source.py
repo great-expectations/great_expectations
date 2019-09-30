@@ -30,13 +30,25 @@ class SqlAlchemyDatasource(Datasource):
         uses $parameter, with additional kwargs passed to the get_batch method.
     """
 
-    def __init__(self, name="default", data_context=None, data_asset_type=None, profile=None, generators=None, **kwargs):
-        if not sqlalchemy:
-            raise DatasourceInitializationError(name, "ModuleNotFoundError: No module named 'sqlalchemy'")
+    @classmethod
+    def build_configuration(cls, data_asset_type=None, generators=None, **kwargs):
+        """
+        Build a full configuration object for a datasource, potentially including generators with defaults.
 
+        Args:
+            data_asset_type: A ClassConfig dictionary
+            generators: Generator configuration dictionary
+            **kwargs: Additional kwargs to be part of the datasource constructor's initialization
+
+        Returns:
+            A complete datasource configuration.
+
+        """
         if generators is None:
             generators = {
-                "default": {"type": "queries"}
+                "default": {
+                    "class_name": "TableGenerator"
+                }
             }
 
         if data_asset_type is None:
@@ -49,15 +61,33 @@ class SqlAlchemyDatasource(Datasource):
                 # In this case, we allow the passed config, for now, in case they're using a legacy string-only config
                 pass
 
-        super(SqlAlchemyDatasource, self).__init__(name,
-                                                   type_="sqlalchemy",
-                                                   data_context=data_context,
-                                                   data_asset_type=data_asset_type,
-                                                   generators=generators)
-        if profile is not None:
+        configuration = kwargs
+        configuration.update({
+            "data_asset_type": data_asset_type,
+            "generators": generators,
+        })
+        return configuration
+
+    def __init__(self, name="default", data_context=None, data_asset_type=None, credentials=None, generators=None, **kwargs):
+        if not sqlalchemy:
+            raise DatasourceInitializationError(name, "ModuleNotFoundError: No module named 'sqlalchemy'")
+
+        configuration_with_defaults = SqlAlchemyDatasource.build_configuration(data_asset_type, generators, **kwargs)
+        data_asset_type = configuration_with_defaults.pop("data_asset_type")
+        generators = configuration_with_defaults.pop("generators")
+        super(SqlAlchemyDatasource, self).__init__(
+            name,
+            data_context=data_context,
+            data_asset_type=data_asset_type,
+            generators=generators,
+            **configuration_with_defaults)
+
+        if credentials is not None:
             self._datasource_config.update({
-                "profile": profile
+                "credentials": credentials
             })
+        else:
+            credentials = {}
 
         try:
             # if an engine was provided, use that
@@ -69,8 +99,8 @@ class SqlAlchemyDatasource(Datasource):
                 connection_string = kwargs.pop("connection_string")
                 self.engine = create_engine(connection_string, **kwargs)
                 self.engine.connect()
-            elif "url" in kwargs:
-                url = kwargs.pop("url")
+            elif "url" in credentials:
+                url = credentials.pop("url")
                 self.engine = create_engine(url, **kwargs)
                 self.engine.connect()
 
@@ -85,9 +115,8 @@ class SqlAlchemyDatasource(Datasource):
         self._build_generators()
 
     def _get_sqlalchemy_connection_options(self, **kwargs):
-        if "profile" in self._datasource_config:
-            profile = self._datasource_config["profile"]
-            credentials = self.data_context.get_profile_credentials(profile)
+        if "credentials" in self._datasource_config:
+            credentials = self._datasource_config["credentials"]
         else:
             credentials = {}
 

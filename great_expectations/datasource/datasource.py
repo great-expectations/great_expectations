@@ -8,6 +8,11 @@ import logging
 from ruamel.yaml import YAML
 
 from ..data_context.types import NormalizedDataAssetName
+from great_expectations.data_context.util import (
+    load_class,
+    instantiate_class_from_config
+)
+from great_expectations.data_asset.util import get_empty_expectation_suite
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource.types import ReaderMethods
 from great_expectations.types import ClassConfig
@@ -43,8 +48,6 @@ class Datasource(object):
     to configure the datasource to load and return DataAssets of the custom type.
     """
 
-    _batch_kwarg_types = tuple()
-
     @classmethod
     def from_configuration(cls, **kwargs):
         """
@@ -59,13 +62,32 @@ class Datasource(object):
         """
         return cls(**kwargs)
 
-    def __init__(self, name, type_, data_context=None, data_asset_type=None, generators=None):
+    @classmethod
+    def build_configuration(cls, class_name, module_name="great_expectations.datasource", data_asset_type=None, generators=None, **kwargs):
+        """
+        Build a full configuration object for a datasource, potentially including generators with defaults.
+
+        Args:
+            class_name: The name of the class for which to build the config
+            module_name: The name of the module in which the datasource class is located
+            data_asset_type: A ClassConfig dictionary
+            generators: Generator configuration dictionary
+            **kwargs: Additional kwargs to be part of the datasource constructor's initialization
+
+        Returns:
+            A complete datasource configuration.
+
+        """
+        class_ = load_class(class_name=class_name, module_name=module_name)
+        configuration = class_.build_configuration(data_asset_type=data_asset_type, generators=generators, **kwargs)
+        return configuration
+
+    def __init__(self, name, data_context=None, data_asset_type=None, generators=None, **kwargs):
         """
         Build a new datasource.
 
         Args:
             name: the name for the datasource
-            type_: the type of the datasource
             data_context: data context to which to connect
             data_asset_type (ClassConfig): the type of DataAsset to produce
             generators: generators to add to the datasource
@@ -80,14 +102,12 @@ class Datasource(object):
         self._generators = {}
         if generators is None:
             generators = {}
-        self._datasource_config = {
-            "type": type_,
+        self._datasource_config = kwargs
+
+        self._datasource_config.update({
             "generators": generators,
             "data_asset_type": data_asset_type
-        }
-
-        # extra_config = self._load_datasource_config()
-        # self._datasource_config.update(extra_config)
+        })
 
     @property
     def data_context(self):
@@ -113,37 +133,6 @@ class Datasource(object):
         for generator in self._datasource_config["generators"].keys():
             self.get_generator(generator)
 
-    # def _load_datasource_config(self):
-    #     # For now, just use the data context config
-    #     return {}
-    #     # if self._data_context is None:
-    #     #     # Setup is done; no additional config to read
-    #     #     return {}
-    #     # try:
-    #     #     config_path = os.path.join(self._data_context.root_directory,
-    #                                      "datasources", self._name, "config.yml")
-    #     #     with open(config_path, "r") as data:
-    #     #         extra_config = yaml.load(data) or {}
-    #     #     logger.info("Loading config from %s" % str(config_path))
-    #     #     return extra_config
-    #     # except FileNotFoundError:
-    #     #     logger.debug("No additional config file found.")
-    #     #     return {}
-
-    def get_credentials(self, profile_name):
-        """
-        Return credentials for the named profile from the attached data context.
-
-        Args:
-            profile_name:
-
-        Returns:
-
-        """
-        if self._data_context is not None:
-            return self._data_context.get_profile_credentials(profile_name)
-        else:
-            raise ValueError("Cannot retrieve credentials without a DataContext.")
 
     def get_config(self):
         """
@@ -152,54 +141,34 @@ class Datasource(object):
         Returns:
             datasource configuration dictionary
         """
-        if self._data_context is not None:
-            self.save_config()
         return self._datasource_config
 
-    def save_config(self):
-        """Save the datasource config.
-
-        If there is no attached DataContext, a datasource will save its config in the current directory
-        in a file called "great_expectations.yml
-
-        Returns:
-            None
-        """
-
-        #FIXME: Not clear if deprecating this causes any breakages elsewhere...
-        
-        #Yikes. This is not the datasource's job:
-        # if self._data_context is not None:
-        #     self._data_context._save_project_config()
-        # else:
-        #     config_filepath = "great_expectations.yml"
-        #     with open(config_filepath, 'w') as config_file:
-        #         yaml.dump(self._datasource_config, config_file)
-
-
-        # if self._data_context is not None:
-        #     base_config = copy.deepcopy(self._datasource_config)
-        #     if "config_file" in base_config:
-        #         config_filepath = os.path.join(self._data_context.root_directory,
-        #                                        base_config.pop["config_file"])
-        #     else:
-        #         config_filepath = os.path.join(self._data_context.root_directory,
-        #                                        "datasources", self._name, "config.yml")
-        # else:
-        #     logger.warning("Unable to save config with no data context attached.")
-
-        # safe_mmkdir(os.path.dirname(config_filepath), exist_ok=True)
-        # with open(config_filepath, "w") as data_file:
-        #     yaml.safe_dump(self._datasource_config, data_file)
+    def _build_generator_from_config(self, **kwargs):
+        if "type" in kwargs:
+            warnings.warn("Using type to configure generators is now deprecated. Please use module_name and class_name"
+                          "instead.")
+            type_ = kwargs.pop("type")
+            generator_class = self._get_generator_class_from_type(type_)
+            kwargs.update({
+                "class_name": generator_class.__name__
+            })
+        generator = instantiate_class_from_config(
+            config=kwargs,
+            runtime_config={
+                "datasource": self
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.generator"
+            }
+        )
+        return generator
 
     def add_generator(self, name, generator_config, **kwargs):
         """Add a generator to the datasource.
 
-        The generator type\_ must be one of the recognized types for the datasource.
-
         Args:
             name (str): the name of the new generator to add
-            type\_ (str): the type of the new generator to add
+            generator_config: the configuration parameters to add to the datasource
             kwargs: additional keyword arguments will be passed directly to the new generator's constructor
 
         Returns:
@@ -211,10 +180,11 @@ class Datasource(object):
             generator_config = {
                 "type": generator_config
             }
+        generator_config.update(kwargs)
+        generator = self._build_generator_from_config(**generator_config)
         self._datasource_config["generators"][name] = generator_config
-        if self._data_context is not None:
-            self.save_config()
-        return self.get_generator(name)
+
+        return generator
 
     def get_generator(self, generator_name="default"):
         """Get the (named) generator from a datasource)
@@ -229,28 +199,11 @@ class Datasource(object):
             return self._generators[generator_name]
         elif generator_name in self._datasource_config["generators"]:
             generator_config = copy.deepcopy(self._datasource_config["generators"][generator_name])
-        elif len(self._datasource_config["generators"]) == 1:
-            # If there's only one generator, we will use it by default
-            generator_name = list(self._datasource_config["generators"])[0]
-            generator_config = copy.deepcopy(self._datasource_config["generators"][generator_name])
         else:
             raise ValueError(
                 "Unable to load generator %s -- no configuration found or invalid configuration." % generator_name
             )
-        if "type" in generator_config:
-            warnings.warn("Using type to configure generators is now deprecated. Please use module_name and class_name"
-                          "instead.")
-            type_ = generator_config.pop("type")
-            generator_class = self._get_generator_class_from_type(type_)
-        else:
-            class_config = ClassConfig(
-                moule_name=generator_config.pop("module_name", "great_expectations.datasource.generator"),
-                class_name=generator_config.pop("class_name")
-            )
-            loaded_module = import_module(class_config.module_name)
-            generator_class = getattr(loaded_module, class_config.class_name)
-
-        generator = generator_class(name=generator_name, datasource=self, **generator_config)
+        generator = self._build_generator_from_config(**generator_config)
         self._generators[generator_name] = generator
         return generator
 
@@ -260,10 +213,24 @@ class Datasource(object):
         Returns:
             List(dict): each dictionary includes "name" and "type" keys
         """
+        generators = []
+        # NOTE: 20190916 - JPC - Upon deprecation of support for type: configuration, this can be simplified
+        for key, value in self._datasource_config["generators"].items():
+            if "type" in value:
+                logger.warning("Generator %s configured using type. Please use class_name instead." % key)
+                generators.append({
+                    "name": key,
+                    "type": value["type"],
+                    "class_name": self._get_generator_class_from_type(value["type"]).__name__
+                })
+            else:
+                generators.append({
+                    "name": key,
+                    "class_name": value["class_name"]
+                })
+        return generators
 
-        return [{"name": key, "type": value["type"]} for key, value in self._datasource_config["generators"].items()]
-
-    def get_batch(self, data_asset_name, expectation_suite_name="default", batch_kwargs=None, **kwargs):
+    def get_batch(self, data_asset_name, expectation_suite_name, batch_kwargs, **kwargs):
         """
         Get a batch of data from the datasource.
 
@@ -287,10 +254,7 @@ class Datasource(object):
             A data_asset consisting of the specified batch of data with the named expectation suite connected.
 
         """
-        # expectation_suite = None
         if isinstance(data_asset_name, NormalizedDataAssetName):  # this richer type can include more metadata
-            generator_name = data_asset_name.generator
-            generator_asset = data_asset_name.generator_asset
             if self._data_context is not None:
                 expectation_suite = self._data_context.get_expectation_suite(
                     data_asset_name,
@@ -305,36 +269,18 @@ class Datasource(object):
                     "using '/' as a default delimiter."
                 )
         else:
-            warnings.warn("datasources will require NormalizedDataAssetName to use get_batch in a future release."
-                          "Use get_data_asset instead.", DeprecationWarning)
-            # TODO: Upon deprecation of support as noted above, raise an exception in this codepath
-            # raise BatchKwargsError("get_batch requires a NormalizedDataAssetName. Use get_data_asset instead.")
-            generators = [generator["name"] for generator in self.list_generators()]
-            if len(generators) == 1:
-                generator_name = generators[0]
-            elif "default" in generators:
-                generator_name = "default"
-            elif batch_kwargs is None:
-                raise BatchKwargsError(
-                    "No generator name provided or guessable, but no batch_kwargs were provided.", None
-                )
-            return self.get_data_asset(data_asset_name, generator_name, batch_kwargs, **kwargs)
+            expectation_suite = get_empty_expectation_suite(data_asset_name=data_asset_name,
+                                                            expectation_suite_name=expectation_suite_name)
 
-        if batch_kwargs is None:
-            # noinspection PyUnboundLocalVariable
-            generator = self.get_generator(generator_name)
-            if generator is not None:
-                batch_kwargs = generator.yield_batch_kwargs(generator_asset)
-            else:
-                raise ValueError("No generator or batch_kwargs available to provide a dataset.")
-        elif not isinstance(batch_kwargs, dict):
+        # Support partition_id or other mechanisms of building batch_kwargs
+        if not isinstance(batch_kwargs, dict):
             batch_kwargs = self.build_batch_kwargs(data_asset_name, batch_kwargs)
 
         return self._get_data_asset(batch_kwargs, expectation_suite, **kwargs)
 
     def get_data_asset(self,
                        generator_asset,
-                       generator_name="default",
+                       generator_name=None,
                        expectation_suite=None,
                        batch_kwargs=None,
                        **kwargs):
@@ -355,7 +301,7 @@ class Datasource(object):
             # noinspection PyUnboundLocalVariable
             generator = self.get_generator(generator_name)
             if generator is not None:
-                batch_kwargs = generator.yield_batch_kwargs(generator_asset)
+                batch_kwargs = generator.yield_batch_kwargs(generator_asset, **kwargs)
 
         return self._get_data_asset(batch_kwargs, expectation_suite, **kwargs)
 
@@ -444,6 +390,8 @@ class Datasource(object):
             return ReaderMethods.excel
         elif path.endswith(".json"):
             return ReaderMethods.JSON
+        elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
+            return ReaderMethods.CSV_GZ
         else:
             return None
 

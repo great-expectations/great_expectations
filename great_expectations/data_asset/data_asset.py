@@ -618,8 +618,17 @@ class DataAsset(object):
     def get_config_value(self, key):
         return self._config[key]
 
-    def get_batch_kwargs(self):
+    @property
+    def batch_kwargs(self):
         return self._batch_kwargs
+
+    @property
+    def batch_id(self):
+        return self._batch_id
+
+    @property
+    def batch_fingerprint(self):
+        return self._batch_id.batch_fingerprint
 
     def discard_failing_expectations(self):
         res = self.validate(only_return_failures=True).get('results')
@@ -776,22 +785,7 @@ class DataAsset(object):
         logger.info(message + settings_message)
         return expectation_suite
 
-    def save_expectations_config(
-        self,
-        filepath=None,
-        discard_failed_expectations=True,
-        discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-        suppress_warnings=False
-    ):
-        warnings.warn("save_expectations_config is deprecated, and will be removed in a future release. " +
-                      "Please use set_expectation_suite instead.", DeprecationWarning)
-        self.set_expectation_suite(
-            filepath, discard_failed_expectations, discard_result_format_kwargs,
-            discard_include_config_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
-
-    def set_expectation_suite(
+    def save_expectation_suite(
         self,
         filepath=None,
         discard_failed_expectations=True,
@@ -835,7 +829,7 @@ class DataAsset(object):
             suppress_warnings
         )
         if filepath is None and self._data_context is not None:
-            self._data_context.set_expectation_suite(expectation_suite)
+            self._data_context.save_expectation_suite(expectation_suite)
         elif filepath is not None:
             expectation_config_str = json.dumps(expectation_suite, indent=2)
             open(filepath, 'w').write(expectation_config_str)
@@ -843,6 +837,9 @@ class DataAsset(object):
             raise ValueError("Unable to save config: filepath or data_context must be available.")
 
     #TODO: when validate is called and expectation editor is in data_context, need to bypass widget creation
+    # NOTE : Abe 2019/09/21 : This method contains a lot of logic that will need to be split between
+    # the DataContextAwareDataAsset and BasicDataAsset classes, when we created those typed classes.
+    # Some of the ContextAware logic may go to live in the DataContext itself.
     def validate(self, 
                  expectation_suite=None, 
                  run_id=None,
@@ -958,6 +955,9 @@ class DataAsset(object):
         if evaluation_parameters is not None:
             runtime_evaluation_parameters.update(evaluation_parameters)
 
+        # Convert evaluation parameters to be json-serializable
+        runtime_evaluation_parameters = recursively_convert_to_json_serializable(runtime_evaluation_parameters)
+
         # Warn if our version is different from the version in the configuration
         try:
             if expectation_suite['meta']['great_expectations.__version__'] != __version__:
@@ -968,8 +968,6 @@ class DataAsset(object):
         except KeyError:
             warnings.warn(
                 "WARNING: No great_expectations version found in configuration object.")
-
-
 
         ###
         # This is an early example of what will become part of the ValidationOperator
@@ -1071,7 +1069,7 @@ class DataAsset(object):
         }
 
         if evaluation_parameters is not None:
-            result.update({"evaluation_parameters": evaluation_parameters})
+            result.update({"evaluation_parameters": runtime_evaluation_parameters})
 
         if run_id is not None:
             result["meta"].update({"run_id": run_id})
@@ -1082,8 +1080,9 @@ class DataAsset(object):
         if self._batch_kwargs is not None:
             result["meta"].update({"batch_kwargs": self._batch_kwargs})
 
-        if data_context is not None:
-            result = data_context.register_validation_results(run_id, result, self)
+        # NOTE: AFAICT, this never changes the value of result. Anybody know otherwise?
+        # if data_context is not None:
+        #     result = data_context.register_validation_results(run_id, result, self)
 
         self._data_context = validate__data_context
         self._config["interactive_evaluation"] = validate__interactive_evaluation
@@ -1129,7 +1128,7 @@ class DataAsset(object):
         """Gets the current name of this data_asset as stored in the expectations configuration."""
         return self._expectation_suite.get("data_asset_name", None)
 
-    def set_expectation_suite_name(self, expectation_suite_name):
+    def save_expectation_suite_name(self, expectation_suite_name):
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
         self._expectation_suite["expectation_suite_name"] = expectation_suite_name
     

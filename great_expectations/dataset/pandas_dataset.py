@@ -461,7 +461,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         numpy 'string_' (bytes)); consequently, it is not possible to test for string columns using aggregate semantics.
         """
         # Short-circuit if the dtype tells us; in that case use column-aggregate (vs map) semantics
-        if self[column].dtype != "object" or type_ is None:
+        if self[column].dtype != "object" or type_ is None or type_ in ["object", "object_", "O"]:
             res = self._expect_column_values_to_be_of_type__aggregate(
                 column, type_, **kwargs
             )
@@ -846,51 +846,76 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
             if type(val) == None:
                 return False
-            else:
-                if min_value is not None and max_value is not None:
-                    if allow_cross_type_comparisons:
-                        try:
+            if min_value is not None and max_value is not None:
+                if allow_cross_type_comparisons:
+                    try:
+                        if strict_min and strict_max:
+                            return (min_value < val) and (val < max_value)
+                        elif strict_min:
+                            return (min_value < val) and (val <= max_value)
+                        elif strict_max:
+                            return (min_value <= val) and (val < max_value)
+                        else:
                             return (min_value <= val) and (val <= max_value)
-                        except TypeError:
-                            return False
-
-                    else:
-                        if (isinstance(val, string_types) != isinstance(min_value, string_types)) or (isinstance(val, string_types) != isinstance(max_value, string_types)):
-                            raise TypeError(
-                                "Column values, min_value, and max_value must either be None or of the same type.")
-
-                        return (min_value <= val) and (val <= max_value)
-
-                elif min_value is None and max_value is not None:
-                    if allow_cross_type_comparisons:
-                        try:
-                            return val <= max_value
-                        except TypeError:
-                            return False
-
-                    else:
-                        if isinstance(val, string_types) != isinstance(max_value, string_types):
-                            raise TypeError(
-                                "Column values, min_value, and max_value must either be None or of the same type.")
-
-                        return val <= max_value
-
-                elif min_value is not None and max_value is None:
-                    if allow_cross_type_comparisons:
-                        try:
-                            return min_value <= val
-                        except TypeError:
-                            return False
-
-                    else:
-                        if isinstance(val, string_types) != isinstance(min_value, string_types):
-                            raise TypeError(
-                                "Column values, min_value, and max_value must either be None or of the same type.")
-
-                        return min_value <= val
+                    except TypeError:
+                        return False
 
                 else:
-                    return False
+                    if (isinstance(val, string_types) != isinstance(min_value, string_types)) or (isinstance(val, string_types) != isinstance(max_value, string_types)):
+                        raise TypeError(
+                            "Column values, min_value, and max_value must either be None or of the same type.")
+
+                    if strict_min and strict_max:
+                        return (min_value < val) and (val < max_value)
+                    elif strict_min:
+                        return (min_value < val) and (val <= max_value)
+                    elif strict_max:
+                        return (min_value <= val) and (val < max_value)
+                    else:
+                        return (min_value <= val) and (val <= max_value)
+
+            elif min_value is None and max_value is not None:
+                if allow_cross_type_comparisons:
+                    try:
+                        if strict_max:
+                            return val < max_value
+                        else:
+                            return val <= max_value
+                    except TypeError:
+                        return False
+
+                else:
+                    if isinstance(val, string_types) != isinstance(max_value, string_types):
+                        raise TypeError(
+                            "Column values, min_value, and max_value must either be None or of the same type.")
+
+                    if strict_max:
+                        return val < max_value
+                    else:
+                        return val <= max_value
+
+            elif min_value is not None and max_value is None:
+                if allow_cross_type_comparisons:
+                    try:
+                        if strict_min:
+                            return min_value < val
+                        else:
+                            return min_value <= val
+                    except TypeError:
+                        return False
+
+                else:
+                    if isinstance(val, string_types) != isinstance(min_value, string_types):
+                        raise TypeError(
+                            "Column values, min_value, and max_value must either be None or of the same type.")
+
+                    if strict_min:
+                        return min_value < val
+                    else:
+                        return min_value <= val
+
+            else:
+                return False
 
         return temp_column.map(is_between)
 

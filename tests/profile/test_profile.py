@@ -158,11 +158,15 @@ def test_BasicDatasetProfiler_numeric_high_cardinality(numeric_high_card_dataset
 
 # noinspection PyPep8Naming
 def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
-    batch = not_so_empty_data_context.get_batch("my_datasource/f1")
+    not_so_empty_data_context.create_expectation_suite("my_datasource/f1", "default")
+    batch_kwargs = not_so_empty_data_context.yield_batch_kwargs("my_datasource/f1")
+    batch = not_so_empty_data_context.get_batch("my_datasource/f1", "default", batch_kwargs)
     expectations_config, validation_results = BasicDatasetProfiler.profile(
         batch)
 
@@ -190,8 +194,10 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
 def test_context_profiler(empty_data_context, filesystem_csv_2):
     """This just validates that it's possible to profile using the datasource hook, and have
     validation results available in the DataContext"""
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     assert not_so_empty_data_context.list_expectation_suite_keys() == []
@@ -223,6 +229,12 @@ def test_BasicDatasetProfiler_on_titanic():
     """
     df = ge.read_csv("./tests/test_sets/Titanic.csv")
     suite, evrs = df.profile(BasicDatasetProfiler)
+
+    # Check to make sure BasicDatasetProfiler is adding meta.columns with a single "description" field for each column
+    print(json.dumps(suite["meta"], indent=2))
+    assert "columns" in suite["meta"]
+    for k,v in suite["meta"]["columns"].items():
+        assert v == {"description":""}
 
     # Note: the above already produces an EVR; rerunning isn't strictly necessary just for EVRs
     evrs = df.validate(result_format="SUMMARY")  # ["results"]

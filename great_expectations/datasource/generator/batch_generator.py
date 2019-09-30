@@ -71,10 +71,10 @@ class BatchGenerator(object):
 
     _batch_kwargs_type = BatchKwargs
 
-    def __init__(self, name, type_, datasource=None):
+    def __init__(self, name, datasource=None):
         self._name = name
         self._generator_config = {
-            "type": type_
+            "class_name": self.__class__.__name__
         }
         self._data_asset_iterators = {}
         self._datasource = datasource
@@ -107,17 +107,17 @@ class BatchGenerator(object):
         else:
             logger.warning("Unable to save generator config without a datasource attached.")
      
-    def reset_iterator(self, data_asset_name):
-        self._data_asset_iterators[data_asset_name] = self._get_iterator(data_asset_name)
+    def reset_iterator(self, data_asset_name, **kwargs):
+        self._data_asset_iterators[data_asset_name] = self._get_iterator(data_asset_name, **kwargs)
 
-    def get_iterator(self, data_asset_name):
+    def get_iterator(self, data_asset_name, **kwargs):
         if data_asset_name in self._data_asset_iterators:
             return self._data_asset_iterators[data_asset_name]
         else:
-            self.reset_iterator(data_asset_name)
+            self.reset_iterator(data_asset_name, **kwargs)
             return self._data_asset_iterators[data_asset_name]
 
-    def build_batch_kwargs_from_partition(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
         """
         Build batch kwargs for the named generator_asset based on partition_id and optionally existing batch_kwargs.
         Args:
@@ -131,16 +131,21 @@ class BatchGenerator(object):
         """
         raise NotImplementedError
 
-    def yield_batch_kwargs(self, data_asset_name):
+    def yield_batch_kwargs(self, data_asset_name, **kwargs):
         if data_asset_name not in self._data_asset_iterators:
-            self.reset_iterator(data_asset_name)
+            self.reset_iterator(data_asset_name, **kwargs)
         data_asset_iterator = self._data_asset_iterators[data_asset_name]
         try:
             return next(data_asset_iterator)
         except StopIteration:
-            self.reset_iterator(data_asset_name)
+            self.reset_iterator(data_asset_name, **kwargs)
             data_asset_iterator = self._data_asset_iterators[data_asset_name]
-            return next(data_asset_iterator)
+            try:
+                return next(data_asset_iterator)
+            except StopIteration:
+                # This is a degenerate case in which no kwargs are actually being generated
+                logger.warning("No batch_kwargs found data_asset_name %s" % data_asset_name)
+                return {}
         except TypeError:
             # If we don't actually have an iterator we can generate, even after resetting, just return empty
             logger.warning("Unable to generate batch_kwargs for data_asset_name %s" % data_asset_name)

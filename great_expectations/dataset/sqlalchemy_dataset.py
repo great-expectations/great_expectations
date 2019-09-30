@@ -24,6 +24,8 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy as sa
     from sqlalchemy.engine import reflection
+    from sqlalchemy.sql.expression import BinaryExpression, literal
+    from sqlalchemy.sql.operators import custom_op
 except ImportError:
     logger.debug("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
 
@@ -72,8 +74,7 @@ class MetaSqlAlchemyDataset(Dataset):
 
             expected_condition = func(self, column, *args, **kwargs)
 
-            # FIXME Temporary Fix for counting missing values
-            # Added to compensate when an ignore_values argument is added to the expectation
+            # Added to prepare for when an ignore_values argument is added to the expectation
             ignore_values = [None]
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 ignore_values = []
@@ -82,28 +83,34 @@ class MetaSqlAlchemyDataset(Dataset):
                 # This only happens on expect_column_values_to_not_be_null expectations.
                 # Since there is no reason to look for most common unexpected values in this case,
                 # we will instruct the result formatting method to skip this step.
-                result_format['partial_unexpected_count'] = 0 
+                result_format['partial_unexpected_count'] = 0
+
+            ignore_values_conditions = []
+            if len(ignore_values) > 0 and None not in ignore_values or len(ignore_values) > 1 and None in ignore_values:
+                ignore_values_conditions += [
+                    sa.column(column).in_([val for val in ignore_values if val is not None])
+                ]
+            if None in ignore_values:
+                ignore_values_conditions += [sa.column(column).is_(None)]
+
+            if len(ignore_values_conditions) > 1:
+                ignore_values_condition = sa.or_(*ignore_values_conditions)
+            elif len(ignore_values_conditions) == 1:
+                ignore_values_condition = ignore_values_conditions[0]
+            else:
+                ignore_values_condition = sa.literal(False)
 
             count_query = sa.select([
                 sa.func.count().label('element_count'),
                 sa.func.sum(
-                    sa.case([(sa.or_(
-                        sa.column(column).in_(ignore_values),
-                        # Below is necessary b/c sa.in_() uses `==` but None != None
-                        # But we only consider this if None is actually in the list of ignore values
-                        sa.column(column).is_(None) if None in ignore_values else False), 1)], else_=0)
+                    sa.case([(ignore_values_condition, 1)], else_=0)
                 ).label('null_count'),
                 sa.func.sum(
                     sa.case([
                         (
                             sa.and_(
                                 sa.not_(expected_condition),
-                                sa.case([
-                                    (
-                                        sa.column(column).is_(None),
-                                        False
-                                    )
-                                ], else_=True) if None in ignore_values else True
+                                sa.not_(ignore_values_condition)
                             ),
                             1
                         )
@@ -125,17 +132,8 @@ class MetaSqlAlchemyDataset(Dataset):
             unexpected_query_results = self.engine.execute(
                 sa.select([sa.column(column)]).select_from(self._table).where(
                     sa.and_(sa.not_(expected_condition),
-                            sa.or_(
-                                # SA normally evaluates `== None` as `IS NONE`. However `sa.in_()`
-                                # replaces `None` as `NULL` in the list and incorrectly uses `== NULL`
-                                sa.case([
-                                    (
-                                        sa.column(column).is_(None),
-                                        False
-                                    )
-                                ], else_=True) if None in ignore_values else False,
-                                # Ignore any other values that are in the ignore list
-                                sa.column(column).in_(ignore_values) == False))
+                            sa.not_(ignore_values_condition)
+                            )
                 ).limit(unexpected_count_limit)
             )
 
@@ -198,7 +196,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                  custom_sql=None, schema=None, *args, **kwargs):
 
         if custom_sql and not table_name:
-            # dashes are special characters in most databases so use undercores
+            # dashes are special characters in most databases so use underscores
             table_name = str(uuid.uuid4()).replace("-", "_")
 
         if table_name is None:
@@ -251,10 +249,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def head(self, n=5):
         """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
         return PandasDataset(
-            pd.read_sql(
-                sa.select(["*"]).select_from(self._table).limit(n),
-                con=self.engine
-            ), 
+            next(pd.read_sql_table(
+                table_name=self._table.name,
+                schema=self._table.schema,
+                con=self.engine,
+                chunksize=n
+            )),
             expectation_suite=self.get_expectation_suite(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
@@ -694,6 +694,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                            column,
                                            min_value=None,
                                            max_value=None,
+                                           strict_min=False,
+                                           strict_max=False,
                                            allow_cross_type_comparisons=None,
                                            parse_strings_as_datetimes=None,
                                            output_strftime_format=None,
@@ -707,23 +709,45 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             if max_value:
                 max_value = parse(max_value)
 
-        if min_value != None and max_value != None and min_value > max_value:
+        if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
         if min_value is None:
-            return sa.column(column) <= max_value
+            if strict_max:
+                return sa.column(column) < max_value
+            else:
+                return sa.column(column) <= max_value
 
         elif max_value is None:
-            return min_value <= sa.column(column)
+            if strict_min:
+                return min_value < sa.column(column)
+            else:
+                return min_value <= sa.column(column)
 
         else:
-            return sa.and_(
-                min_value <= sa.column(column),
-                sa.column(column) <= max_value
-            )
+            if strict_min and strict_max:
+                return sa.and_(
+                    min_value < sa.column(column),
+                    sa.column(column) < max_value
+                )
+            elif strict_min:
+                return sa.and_(
+                    min_value < sa.column(column),
+                    sa.column(column) <= max_value
+                )
+            elif strict_max:
+                return sa.and_(
+                    min_value <= sa.column(column),
+                    sa.column(column) < max_value
+                )
+            else:
+                return sa.and_(
+                    min_value <= sa.column(column),
+                    sa.column(column) <= max_value
+                )
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
@@ -822,7 +846,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
-        return sa.text(column + " " + regex_fn + " '" + regex + "'")
+        return BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn))
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_not_match_regex(
@@ -837,7 +861,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
-        return sa.text(column + " " + regex_fn + " '" + regex + "'")
+        return BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn))
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_match_regex_list(self,
@@ -859,12 +883,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if match_on == "any":
             condition = \
                 sa.or_(
-                    *[sa.text(column + " " + regex_fn + " '" + regex + "'") for regex in regex_list]
+                    *[BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn)) for regex in regex_list]
                 )
         else:
             condition = \
                 sa.and_(
-                    *[sa.text(column + " " + regex_fn + " '" + regex + "'") for regex in regex_list]
+                    *[BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn)) for regex in regex_list]
                 )
         return condition
 
@@ -879,5 +903,5 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             raise NotImplementedError
 
         return sa.and_(
-            *[sa.text(column + " " + regex_fn + " '" + regex + "'") for regex in regex_list]
+            *[BinaryExpression(sa.column(column), literal(regex), custom_op(regex_fn)) for regex in regex_list]
         )

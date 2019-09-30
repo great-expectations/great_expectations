@@ -4,6 +4,8 @@ at evaluation time, and store parameters in expectation_suite
 """
 
 import pytest
+import json
+
 import numpy as np
 
 from great_expectations.data_asset import DataAsset
@@ -103,6 +105,28 @@ def test_validation_substitution(single_expectation_custom_data_asset):
     validation_result = single_expectation_custom_data_asset.validate(
         evaluation_parameters={"upstream_dag_key": "upstream_dag_value"})
     assert validation_result["results"][0]["result"]["details"]["expectation_argument"] == "upstream_dag_value"
+
+
+def test_validation_substitution_with_json_coercion(single_expectation_custom_data_asset):
+    # Set up an expectation using a parameter, providing a default value.
+
+    # Use a value that is a set. Note that there is no problem converting the type for the expectation (set -> list)
+    result = single_expectation_custom_data_asset.expect_nothing(
+        expectation_argument={"$PARAMETER": "upstream_dag_key",
+                              "$PARAMETER.upstream_dag_key": {"temporary_value"}})
+    assert result["result"]["details"]["expectation_argument"] == ["temporary_value"]
+
+    # Provide a run-time evaluation parameter
+    validation_result = single_expectation_custom_data_asset.validate(
+        evaluation_parameters={"upstream_dag_key": {"upstream_dag_value"}})
+    assert validation_result["results"][0]["result"]["details"]["expectation_argument"] == ["upstream_dag_value"]
+
+    # Verify that the entire result object including evaluation_parameters is serializable
+    assert validation_result["evaluation_parameters"]["upstream_dag_key"] == ["upstream_dag_value"]
+    try:
+        json.dumps(validation_result)
+    except TypeError as err:
+        pytest.fail("Error converting validation_result to json. Got TypeError: %s" + str(err))
 
 
 def test_validation_parameters_returned(single_expectation_custom_data_asset):

@@ -1,8 +1,10 @@
 import os
 import logging
-import time
+from string import Template
 
 from .batch_generator import BatchGenerator
+from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
+from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +23,10 @@ class QueryGenerator(BatchGenerator):
     """Produce query-style batch_kwargs from sql files stored on disk
     """
 
-    def __init__(self, datasource, name="default"):
-        # TODO: Add tests for QueryGenerator
-        super(QueryGenerator, self).__init__(name=name, type_="queries", datasource=datasource)
+    # FIXME: This needs to be updated to use a store so that the query generator does not have to manage storage itself
+    # FIXME: New tests should then be added
+    def __init__(self, name="default", datasource=None, queries=None):
+        super(QueryGenerator, self).__init__(name=name, datasource=datasource)
         if (
                 datasource is not None and
                 datasource.data_context is not None and
@@ -43,54 +46,46 @@ class QueryGenerator(BatchGenerator):
                                               "queries")
         else:
             self._queries_path = None
-            self._queries = {}
 
-        if datasource is not None:
-            self.engine = datasource.engine
-            try:
-                self.inspector = sqlalchemy.inspect(self.engine)
+        if queries is None:
+            queries = {}
 
-            except sqlalchemy.exc.OperationalError:
-                logger.warning("Unable to create inspector from engine in generator '%s'" % name)
-                self.inspector = None
+        self._queries = queries
 
-    def _get_iterator(self, data_asset_name, **kwargs):
+    def _get_raw_query(self, generator_asset):
+        raw_query = None
         if self._queries_path:
-            if data_asset_name in [path[:-4] for path in os.listdir(self._queries_path) if str(path).endswith(".sql")]:
-                with open(os.path.join(self._queries_path, data_asset_name) + ".sql", "r") as data:
-                    return iter([{
-                        "query": data.read(),
-                        "timestamp": time.time()
-                    }])
+            if generator_asset in [path[:-4] for path in os.listdir(self._queries_path) if str(path).endswith(".sql")]:
+                with open(os.path.join(self._queries_path, generator_asset) + ".sql", "r") as data:
+                    raw_query = data.read()
         elif self._queries:
-            if data_asset_name in self._queries:
-                return iter([{
-                    "query": self._queries[data_asset_name],
-                    "timestamp": time.time()
-                }])
-        else:
-            # There is no query path or temp query storage defined
-            pass
+            if generator_asset in self._queries:
+                raw_query = self._queries[generator_asset]
 
-        if self.engine is not None and self.inspector is not None:
-            split_data_asset_name = data_asset_name.split(".")
-            if len(split_data_asset_name) == 2:
-                schema_name = split_data_asset_name[0]
-                table_name = split_data_asset_name[1]
-            elif len(split_data_asset_name) == 1:
-                schema_name = self.inspector.default_schema_name
-                table_name = split_data_asset_name[0]
-            else:
-                raise ValueError("Table name must be of shape '[SCHEMA.]TABLE'. Passed: " + data_asset_name)
-            tables = self.inspector.get_table_names(schema=schema_name)
-            if table_name in tables:
-                return iter([
-                    {
-                        "table": table_name,
-                        "schema": schema_name,
-                        "timestamp": time.time()
-                    }
-                ])
+        return raw_query
+
+    def _get_iterator(self, generator_asset, **kwargs):
+        raw_query = self._get_raw_query(generator_asset)
+        if raw_query is None:
+            logger.warning("No query defined for generator asset: %s" % generator_asset)
+            # There is no valid query path or temp query storage defined with the generator_asset
+            return None
+
+        try:
+            substituted_query = Template(raw_query).substitute(kwargs)
+        except KeyError:
+            raise BatchKwargsError(
+                "Unable to generate batch kwargs for asset '" + generator_asset + "': "
+                "missing template key",
+                {
+                    "generator_asset": generator_asset,
+                    "query_template": raw_query
+                }
+            )
+        return iter([
+            SqlAlchemyDatasourceQueryBatchKwargs(
+                query=substituted_query
+            )])
 
     def add_query(self, data_asset_name, query):
         if self._queries_path:
@@ -106,13 +101,28 @@ class QueryGenerator(BatchGenerator):
         else:
             defined_queries = list(self._queries.keys())
 
-        tables = []
-        if self.engine is not None and self.inspector is not None:
-            for schema_name in self.inspector.get_schema_names():
-                #FIXME: create a list of names of info schemas for diff engines supported by sqlalchemy
-                if schema_name in ['information_schema']:
-                    continue
+        return set(defined_queries)
 
-                tables.extend([table_name if self.inspector.default_schema_name == schema_name else schema_name + "." + table_name for table_name in self.inspector.get_table_names(schema=schema_name)])
+    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+        """Build batch kwargs from a partition id."""
+        raw_query = self._get_raw_query(generator_asset)
+        if "$partition_id" not in raw_query and "${partition_id}" not in raw_query:
+            raise BatchKwargsError("No partition_id parameter found in the requested query.", {})
+        try:
+            substituted_query = Template(raw_query).substitute({"partition_id": partition_id})
+        except KeyError:
+            raise BatchKwargsError(
+                "Unable to generate batch kwargs for asset '" + generator_asset + "': "
+                                                                                  "missing template key",
+                {
+                    "generator_asset": generator_asset,
+                    "query_template": raw_query
+                }
+            )
+        return SqlAlchemyDatasourceQueryBatchKwargs(
+            query=substituted_query
+        )
 
-        return set(defined_queries + tables)
+    def get_available_partition_ids(self, generator_asset):
+        raise BatchKwargsError("QueryGenerator cannot identify partitions, however any asset defined with"
+                               "a single parameter can be accessed using that parameter as a partition_id.", {})

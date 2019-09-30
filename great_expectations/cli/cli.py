@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import shutil
+
 from .datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
@@ -16,7 +18,7 @@ from great_expectations.render.renderer import ProfilingResultsPageRenderer, Exp
 from great_expectations.data_context import DataContext
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
-from great_expectations.exceptions import DataContextError, ConfigNotFoundError
+import great_expectations.exceptions as ge_exceptions
 from great_expectations import __version__, read_csv
 from pyfiglet import figlet_format
 import click
@@ -191,7 +193,7 @@ def init(target_directory):
 
     try:
         context = DataContext.create(target_directory)
-    except DataContextError as err:
+    except ge_exceptions.DataContextError as err:
         logger.critical(err.message)
         sys.exit(-1)
 
@@ -218,10 +220,11 @@ def add_datasource(directory):
     """
     try:
         context = DataContext(directory)
-    except ConfigNotFoundError:
+    except ge_exceptions.ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
-
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, directory)
 
     data_source_name = add_datasource_impl(context)
 
@@ -240,7 +243,9 @@ def add_datasource(directory):
                    'If True, this will override --max_data_assets.')
 @click.option('--directory', '-d', default="./great_expectations",
               help='The root of a project directory containing a great_expectations/ config.')
-def profile(datasource_name, data_assets, profile_all_data_assets, directory):
+@click.option('--batch_kwargs', default=None,
+              help='Additional keyword arguments to be provided to get_batch when loading the data asset.')
+def profile(datasource_name, data_assets, profile_all_data_assets, directory, batch_kwargs):
     """
     Profile datasources from the specified context.
 
@@ -253,14 +258,21 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory):
     :param data_assets: if this comma-separated list of data asset names is provided, only the specified data assets will be profiled
     :param profile_all_data_assets: if provided, all data assets will be profiled
     :param directory:
+    :param batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
     :return:
     """
 
     try:
         context = DataContext(directory)
-    except ConfigNotFoundError:
+    except ge_exceptions.ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, directory)
+        return
+
+    if batch_kwargs is not None:
+        batch_kwargs = json.loads(batch_kwargs)
 
     if datasource_name is None:
         datasources = [datasource["name"] for datasource in context.list_datasources()]
@@ -268,9 +280,9 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory):
             cli_message("Error: please specify the datasource to profile. Available datasources: " + ", ".join(datasources))
             return
         else:
-            profile_datasource(context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets)
+            profile_datasource(context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets, additional_batch_kwargs=batch_kwargs)
     else:
-        profile_datasource(context, datasource_name, data_assets=data_assets, profile_all_data_assets=profile_all_data_assets)
+        profile_datasource(context, datasource_name, data_assets=data_assets, profile_all_data_assets=profile_all_data_assets, additional_batch_kwargs=batch_kwargs)
 
 
 @cli.command()
@@ -291,8 +303,11 @@ def build_documentation(directory, site_name, data_asset_name):
         
     try:
         context = DataContext(directory)
-    except ConfigNotFoundError:
+    except ge_exceptions.ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
+        return
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, directory)
         return
 
     build_documentation_impl(context, site_name=site_name, data_asset_name=data_asset_name)
@@ -313,6 +328,83 @@ def render(render_object):
     else:
         model = ExpectationSuitePageRenderer.render(raw)
     print(DefaultJinjaPageView.render(model))
+
+
+@cli.command()
+@click.option(
+    '--target_directory',
+    '-d',
+    default="./",
+    help='The root of the project directory where you want to initialize Great Expectations.'
+)
+def check_config(target_directory):
+    """Check a config for validity and help with migrations."""
+    cli_message("Checking your config files for validity...\n")
+
+    try:
+        is_config_ok, error_message = do_config_check(target_directory)
+        if is_config_ok:
+            cli_message("Your config file appears valid!")
+        else:
+            cli_message(error_message)
+            sys.exit(1)
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, target_directory)
+
+
+def _offer_to_install_new_template(err, target_directory):
+    cli_message(err.message)
+    original_filename = "great_expectations.yml"
+    archive_filename = "great_expectations.yml.archive"
+    if click.confirm(
+            "\nWould you like to install a new config file template?\n    We will move your existing `{}` to `{}`".format(
+                    original_filename, archive_filename), default=True):
+        _archive_existing_project_config(archive_filename, target_directory)
+        DataContext.write_project_template_to_disk(target_directory)
+
+        cli_message(
+            """\nOK. You now have a new yml config file in `{}`.
+
+- Please copy the relevant values from the archived file ({}) into this new
+template.
+""".format(original_filename, archive_filename)
+        )
+    else:
+        # FIXME/TODO insert doc url here
+        cli_message(
+            """\nOK. Note to run great_expectations you will need to upgrade your config file to the latest format.
+- Please see the docs here: """
+        )
+    cli_message("""- We are super sorry about this breaking change! :]
+- If you are running into any problems, please reach out on Slack and we can
+help you in realtime:https://greatexpectations.io/slack""")
+    sys.exit(0)
+
+
+def _archive_existing_project_config(archive_filename, target_directory):
+    base = os.path.join(target_directory, "great_expectations")
+    source = os.path.join(base, "great_expectations.yml")
+    destination = os.path.join(base, archive_filename)
+    shutil.move(source, destination)
+
+
+def do_config_check(target_directory):
+    try:
+        DataContext(
+            context_root_dir="{}/great_expectations/".format(target_directory)
+        )
+        return True, None
+    except (
+            ge_exceptions.InvalidConfigurationYamlError,
+            ge_exceptions.InvalidTopLevelConfigKeyError,
+            ge_exceptions.MissingTopLevelConfigKeyError,
+            ge_exceptions.InvalidConfigValueTypeError,
+            ge_exceptions.InvalidConfigVersionError,
+            ge_exceptions.UnsupportedConfigVersionError,
+            ge_exceptions.DataContextError,
+            ) as err:
+        logger.critical(err.message)
+        return False, err.message
 
 
 def main():

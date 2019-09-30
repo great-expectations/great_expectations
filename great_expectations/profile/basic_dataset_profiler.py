@@ -109,9 +109,14 @@ class BasicDatasetProfiler(DatasetProfiler):
         df.set_config_value('interactive_evaluation', False)
 
         columns = df.get_table_columns()
+
+        meta_columns = {}
+        for column in columns:
+            meta_columns[column] = {"description": ""}
+
         number_of_columns = len(columns)
         for i, column in enumerate(columns):
-            logger.info("            Preparing column {} of {}: {}".format(i, number_of_columns, column))
+            logger.info("            Preparing column {} of {}: {}".format(i+1, number_of_columns, column))
 
             # df.expect_column_to_exist(column)
 
@@ -206,4 +211,9 @@ class BasicDatasetProfiler(DatasetProfiler):
 
         df.set_config_value("interactive_evaluation", True)
         expectation_suite = df.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=False)
+        if not "meta" in expectation_suite:
+            expectation_suite["meta"] = {"columns": meta_columns}
+        else:
+            expectation_suite["meta"]["columns"] = meta_columns
+
         return expectation_suite
