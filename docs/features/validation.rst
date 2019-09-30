@@ -1,17 +1,17 @@
 .. _validation:
 
-================================================================================
+##############
 Validation
-================================================================================
+##############
 
 Once you've constructed and stored Expectations, you can use them to validate new data. Validation generates a report
 that details any specific deviations from expected values.
 
 We recommend using a :ref:`data_context` to manage expectation suites and coordinate validation across runs.
 
-
+*******************
 Validation results
-----------------------------
+*******************
 
 The report contains information about:
 
@@ -103,7 +103,7 @@ An example report looks like the following:
 
 
 Command-line validation
-------------------------------------------------------------------------------
+==============================
 
 This is especially powerful when combined with great_expectations's command line tool, which lets you validate in a one-line bash script.
 
@@ -180,8 +180,10 @@ This is especially powerful when combined with great_expectations's command line
       }
     }
 
+
+*********************
 Deployment patterns
-------------------------------------------------------------------------------
+*********************
 
 Useful deployment patterns include:
 

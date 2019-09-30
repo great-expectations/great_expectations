@@ -3,8 +3,9 @@
 .. image:: ../generic_dickens_protagonist.png
    :align: right
 
+################################
 Welcome to Great Expectations!
-==============================================================================
+################################
 
 Great Expectations a leading tool for :ref:`profiling <profiling>`, :ref:`validating <expectations>`, and
 :ref:`documenting <data_documentation>` your data to maintain quality and improve communication between teams.
@@ -21,9 +22,9 @@ Head over to the :ref:`intro` to learn more, or jump straight to our :ref:`getti
    roadmap_changelog
    module_docs
 
-Indices and tables
-------------------
+*******************
+Index
+*******************
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
