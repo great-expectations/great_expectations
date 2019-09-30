@@ -11,16 +11,14 @@ Configuration
 *************************
 
 
-Configuration
----------------
-
 The DataContext configuration file provides fine-grained control over several core features available to the
 DataContext to assist in managing resources used by Great Expectations. Key configuration areas include specifying
 datasources, data documentation, and "stores" used to manage access to resources such as expectation suites,
 validation results, profiling results, evaluation parameters and plugins.
 
 Datasources
-_____________
+=============
+
 
 The `datasources` section declares which :ref:`datasource` objects should be available in the DataContext.
 Each datasource definition should include the `class_name` of the datasource, generators, and any other relevant
@@ -65,28 +63,62 @@ represent two public datasets available from the resource.
 Note that the datasources section *includes* all defined generators as well as specifying their names.
 
 Data Documentation
-____________________
+=====================
 
 The :ref:`data_documentation` section defines how individual sites should be built and deployed. See the detailed
 documentation for more information.
 
+
 Stores
-_______
+=============
 
 Stores provide a valuable abstraction for making access to critical resources such as expectation suites, validation
 results, profiling data, data documentation, and evaluation parameters both easy to configure and to extend and
 customize. See the :ref:`stores_reference` for more information.
 
 
+.. _environment_and_secrets:
 
-Secrets
-========
+*****************************************
+Managing Environment and Secrets
+*****************************************
 
+In a DataContext configuration, values that should come from the runtime environment or secrets can be injected via
+a separate config file or using environment variables. Use the `${var}` syntax in a config file to specify a variable
+to be substituted.
 
 Config Variables File
------------------------
+========================
+
+DataContext accepts a parameter called `config_variables_file_path` which can include a file path from which variables
+to substitute should be read. The file needs to define top-level keys which are available to substitute into a
+DataContext configuration file. Keys from the config variables file can be defined to represent complex types such as
+a dictionary or list, which is often useful for configuring database access.
+
+..code-block:: yaml
+
+prod_credentials:
+  type: postgresql
+  host: secure_server
+  port: 5432
+  username: username
+  password: sensitive_password
+  database: ge
+
+dev_credentials:
+  type: postgresql
+  host: localhost
+  port: 5432
+  username: dev
+  password: dev
+  database: ge
 
 
 Environment Variable Substitution
-----------------------------------
+====================================
+
+Environment variables will be substituted into a DataContext config with higher priority than values from the
+config variables file.
+
+
 
