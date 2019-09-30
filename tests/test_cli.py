@@ -46,13 +46,13 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  add-datasource       Add a new datasource to the data context
-  build-documentation  Build data documentation for a project.
-  check-config         Check a config for validity and help with migrations.
-  init                 Initialize a new Great Expectations project.
-  profile              Profile datasources from the specified context.
-  render               Render a great expectations object to documentation.
-  validate             Validate a CSV file against an expectation suite.
+  add-datasource  Add a new datasource to the data context
+  build-docs      Build data documentation for a project.
+  check-config    Check a config for validity and help with migrations.
+  init            Initialize a new Great Expectations project.
+  profile         Profile datasources from the specified context.
+  render          Render a great expectations object to documentation.
+  validate        Validate a CSV file against an expectation suite.
 """
 
 
@@ -499,7 +499,7 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
 
     result = runner.invoke(
-        cli, ["build-documentation", "-d", project_root_dir])
+        cli, ["build-docs", "-d", project_root_dir])
 
     # print(json.dumps(not_so_empty_data_context.get_project_config()["stores"], indent=2))
     print(result.output)
@@ -533,10 +533,10 @@ def test_cli_config_not_found(tmp_path_factory):
             cli, ["profile"])
         assert "no great_expectations context configuration" in result.output
         result = runner.invoke(
-            cli, ["build-documentation", "-d", "./"])
+            cli, ["build-docs", "-d", "./"])
         assert "no great_expectations context configuration" in result.output
         result = runner.invoke(
-            cli, ["build-documentation"])
+            cli, ["build-docs"])
         assert "no great_expectations context configuration" in result.output
     except:
         raise
