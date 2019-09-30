@@ -95,7 +95,7 @@ Please install the module before trying again.
                 # committed in the repo, we will use our Variable Substitution feature to store the credentials
                 # in the credentials file (that will not be committed, since it is in the uncommitted directory)
                 # with the datasource's name as the variable name.
-                # The value of the datasource's "credntials" key in the config file (great_expectations.yml) will
+                # The value of the datasource's "credentials" key in the config file (great_expectations.yml) will
                 # be ${datasource name}.
                 # GE will replace the ${datasource name} with the value from the credentials file in runtime.
                 credentials = {

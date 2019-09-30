@@ -1,8 +1,8 @@
 # TODO: ADD TESTS ONCE GET_BATCH IS INTEGRATED!
 
 import pytest
-import json
-import copy
+
+from six import PY2
 
 from freezegun import freeze_time
 import pandas as pd
@@ -17,7 +17,7 @@ from great_expectations.data_context import (
     ConfigOnlyDataContext,
 )
 from great_expectations.data_context.types import (
-    DataContextConfig,
+    # DataContextConfig,
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -25,7 +25,8 @@ from great_expectations.data_context.types import (
 
 @pytest.fixture()
 def basic_data_context_config_for_validation_operator():
-    return DataContextConfig(**{
+    # return DataContextConfig(**{
+    return {
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name" : "evaluation_parameter_store",
         "expectations_store" : {
@@ -55,11 +56,24 @@ def basic_data_context_config_for_validation_operator():
             "sites": {}
         },
         "validation_operators" : {},
-    })
+    }
+    # })
 
 
 @freeze_time("09/26/19 13:42:41")
 def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
+
+    #####
+    #####
+    #
+    # WARNING: PY2 SUPPORT IS UNTESTED BECAUSE OF DICTIONARY ORDER ISSUES NOT YET RESOLVED
+    #
+    #####
+    #####
+    if PY2:
+        pytest.skip("skipping test_errors_warnings_validation_operator_run_slack_query in py2")
+
+
     project_path = str(tmp_path_factory.mktemp('great_expectations'))
 
     # NOTE: This setup is almost identical to test_DefaultDataContextAwareValidationOperator.

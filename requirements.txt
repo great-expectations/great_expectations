@@ -16,4 +16,5 @@ termcolor>=1.1.0
 tzlocal>=1.2
 pypandoc>=1.4
 future>=0.16
+jinja2>=2.10
 marshmallow>=2.0,<3.0
