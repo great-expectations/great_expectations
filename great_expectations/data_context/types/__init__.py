@@ -8,9 +8,9 @@ from .metrics import (
     NamespaceAwareValidationMetric
 )
 
-from .configurations import (
-    DataContextConfig
-)
+# from .configurations import (
+#     DataContextConfig
+# )
 from .base_resource_identifiers import (
     DataContextKey,
     OrderedDataContextKey,
