@@ -1,8 +1,8 @@
 .. _custom_expectations:
 
-==============================================================================
+####################################
 Custom expectations
-==============================================================================
+####################################
 
 It's common to want to extend Great Expectations with application- or domain-specific Expectations. For example:
 
@@ -18,9 +18,9 @@ Fear not! Great Expectations is designed for customization and extensibility.
 
 Side note: in future versions, Great Expectations will probably grow to include additional Expectations. If you have an Expectation that could be universally useful, please make the case on the `Great Expectations issue tracker on github <https://github.com/great-expectations/great_expectations/issues>`_.
 
-
-Types of expectations
-------------------------------------------------------------------------------
+****************************************
+Using Expectation Decorators
+****************************************
 
 Under the hood, great_expectations evaluates similar kinds of expectations using standard logic, including:
 
@@ -32,8 +32,7 @@ Adding an expectation about element counts to a set of expectations is usually t
 
 
 The easy way
---------------------------------------------------------------------------------
-
+========================================
 1. Create a subclass from the dataset class of your choice
 2. Define custom functions containing your business logic
 3. Use the `column_map_expectation` and `column_aggregate_expectation` decorators to turn them into full Expectations. Note that each dataset class implements its own versions of `@column_map_expectation` and `@column_aggregate_expectation`, so you should consult the documentation of each class to ensure you are returning the correct information to the decorator.
@@ -106,7 +105,7 @@ For SqlAlchemyDataset, the decorators work slightly differently. See the MetaSql
 
 
 The hard way
---------------------------------------------------------------------------------
+========================================
 
 1. Create a subclass from the dataset class of your choice
 2. Write the whole expectation yourself
@@ -153,7 +152,7 @@ This is more complicated, since you have to handle all the logic of additional p
                 }
 
 The quick way
---------------------------------------------------------------------------------
+========================================
 
 For rapid prototyping, you can use the following syntax to quickly iterate on the logic for expectations.
 
@@ -169,7 +168,7 @@ These functions will return output just like regular expectations. However, they
 
 
 Using custom expectations
---------------------------------------------------------------------------------
+========================================
 
 Let's suppose you've defined `CustomPandasDataset` in a module called `custom_dataset.py`. You can instantiate a dataset with your custom expectations simply by adding `dataset_class=CustomPandasDataset` in `ge.read_csv`.
 
@@ -197,9 +196,9 @@ A similar approach works for the command-line tool.
         my_expectations.json \
         dataset_class=custom_dataset.CustomPandasDataset
 
-
+**************************************************
 Using custom expectations with a DataSource
---------------------------------------------------------------------------------
+**************************************************
 
 To use custom expectations in a datasource or DataContext, you need to define the custom DataAsset in the datasource
 configuration or batch_kwargs for a specific batch. Following the same example above, let's suppose you've defined

@@ -1,9 +1,5 @@
 .. _supporting_resources:
 
-**********************************
-Supporting Resources
-**********************************
-
 Great Expectations requires a python compute environment and access to data, either locally or
 through a database or distributed cluster. In addition, developing with great expectations relies
 heavily on tools in the Python engineering ecosystem: pip, virtual environments, and jupyter notebooks.
