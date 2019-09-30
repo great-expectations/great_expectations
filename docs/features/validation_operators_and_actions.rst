@@ -45,9 +45,9 @@ The operator returns an object that contains sufficient information for the pipe
     {
         "success" : None,
         "validation_results" : {
-            "failure" : (validation result id, validation result),
-            "warning" : (validation result id, validation result),
-            "quarantine" : (validation result id, validation result)
+            "failure" : ['validation result id, validation result),
+            "warning" : [validation result id, validation result),
+            "quarantine" : [validation result id, validation result)
         },
         "data_assets" : {
             "original_batch" : ...,
@@ -73,10 +73,9 @@ The following code snippet shows how to invoke an operator, once it is configure
 .. code-block:: python
 
     results = data_context.run_validation_operator(
-        data_asset= a batch from a data asset,
-        data_asset_identifier=data_asset_identifier (if you want the operator to fetch the batch)
-        run_identifier= uniquely identifies the run,
-        validation_operator_name=name of the operator as specified in the config file,
+        assets_to_validate=asset_iterable, # An iterable consisting either of DataAsset objects or triples suitable for passing to `get_batch`
+        run_identifier=run_id,  # uniquely identifies the run,
+        validation_operator_name=operator_name  # name of the operator as specified in the config file,
     )
 
 
