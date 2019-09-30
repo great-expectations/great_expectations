@@ -25,7 +25,7 @@ Core GE Types
 **************
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    /reference/standard_arguments
    /reference/result_format
@@ -67,3 +67,13 @@ Extending Great Expectations
    /reference/extending_great_expectations
    /reference/contributing
    /reference/improving_library_documentation
+
+
+**********************************
+Supporting Resources
+**********************************
+
+.. toctree::
+   :maxdepth: 2
+
+   /reference/supporting_resources
