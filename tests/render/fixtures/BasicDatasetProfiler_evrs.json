@@ -2075,9 +2075,9 @@
     "success_percent": 84.31372549019608
   },
   "meta": {
-    "great_expectations.__version__": "0.7.3__develop",
+    "great_expectations.__version__": "0.7.11__develop",
     "data_asset_name": null,
     "expectation_suite_name": "default",
-    "run_id": "2019-07-26T205021.975202Z"
+    "run_id": "2019-09-20T205021.264760Z"
   }
 }

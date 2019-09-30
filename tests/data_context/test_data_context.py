@@ -12,6 +12,7 @@ import os
 import shutil
 import json
 from glob import glob
+from collections import OrderedDict
 
 from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import (
@@ -28,9 +29,9 @@ from great_expectations.cli.init import scaffold_directories_and_notebooks
 from great_expectations.dataset import PandasDataset
 from great_expectations.util import gen_directory_tree_str
 
-from great_expectations.data_context.types import (
-    DataContextConfig,
-)
+# from great_expectations.data_context.types import (
+#     DataContextConfig,
+# )
 from great_expectations.data_context.store import (
     BasicInMemoryStore,
     EvaluationParameterStore,
@@ -45,40 +46,11 @@ def parameterized_expectation_suite():
         return json.load(suite)
 
 
-def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv))
-    not_so_empty_data_context = empty_data_context
-
-    # we should now be able to validate, and have validations saved.
-    # assert not_so_empty_data_context._project_config["validations_store"]["local"]["base_directory"] == \
-    #     "uncommitted/validations/"
-    validations_dir = os.path.join(empty_data_context.root_directory, "uncommitted/validations/")
-    # assert gen_directory_tree_str(validations_dir) == "/\n"
-
-    # print(empty_data_context.stores.keys())
-    assert "local_validation_result_store" in not_so_empty_data_context.stores.keys()
-    assert not_so_empty_data_context.stores["local_validation_result_store"].store_backend.base_directory == \
-        "uncommitted/validations/"
-
-    my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
-    my_batch.expect_column_to_exist("a")
-
-    with mock.patch("datetime.datetime") as mock_datetime:
-        mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
-        validation_result = my_batch.validate()
-
-    print(gen_directory_tree_str(validations_dir))
-
-    with open(os.path.join(not_so_empty_data_context.root_directory, 
-            "uncommitted/validations/1955-11-05T000000Z/my_datasource/default/f1/default.json")) as infile:
-        saved_validation_result = json.load(infile)
-    
-    assert validation_result == saved_validation_result
-
-
 def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
-    empty_data_context.add_datasource("my_datasource", "pandas", base_directory= str(filesystem_csv))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv))
     available_asset_names = empty_data_context.get_available_data_asset_names()
 
     assert available_asset_names == {
@@ -108,14 +80,14 @@ def test_get_existing_data_asset_config(data_context):
 
 
 def test_get_new_data_asset_config(data_context):
-    data_asset_config = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
+    data_asset_config = data_context.create_expectation_suite('this_data_asset_config_does_not_exist', 'default')
     assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist'
     assert data_asset_config['expectation_suite_name'] == 'default'
     assert len(data_asset_config['expectations']) == 0
 
 
 def test_save_data_asset_config(data_context):
-    data_asset_config = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
+    data_asset_config = data_context.create_expectation_suite('this_data_asset_config_does_not_exist', 'default')
     assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist'
     assert data_asset_config["expectation_suite_name"] == "default"
     assert len(data_asset_config['expectations']) == 0
@@ -125,12 +97,12 @@ def test_save_data_asset_config(data_context):
                 "value": 10
             }
         })
-    data_context.set_expectation_suite(data_asset_config)
+    data_context.save_expectation_suite(data_asset_config)
     data_asset_config_saved = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
     assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
 
 
-def test_register_validation_results(data_context):
+def test_evaluation_parameter_store_methods(data_context):
     run_id = "460d61be-7266-11e9-8848-1681be663d3e"
     source_patient_data_results = {
         "meta": {
@@ -160,8 +132,13 @@ def test_register_validation_results(data_context):
         "success": True
     }
 
-    res = data_context.register_validation_results(run_id, source_patient_data_results)
-    assert res == source_patient_data_results  # results should always be returned, and in this case not modified
+    data_context._extract_and_store_parameters_from_validation_results(
+        source_patient_data_results,
+        data_asset_name=source_patient_data_results["meta"]["data_asset_name"],
+        expectation_suite_name=source_patient_data_results["meta"]["expectation_suite_name"],
+        run_id=run_id,
+    )
+
     bound_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024
@@ -196,8 +173,12 @@ def test_register_validation_results(data_context):
         "success": True
     }
 
-
-    data_context.register_validation_results(run_id, source_diabetes_data_results)
+    data_context._extract_and_store_parameters_from_validation_results(
+        source_diabetes_data_results,
+        data_asset_name=source_diabetes_data_results["meta"]["data_asset_name"],
+        expectation_suite_name=source_diabetes_data_results["meta"]["expectation_suite_name"],
+        run_id=run_id,
+    )
     bound_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024,
@@ -324,8 +305,10 @@ def test_normalize_data_asset_names_error(data_context):
 
 
 def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_csv):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv))
     data_context = empty_data_context
 
     data_context.data_asset_name_delimiter = '.'
@@ -362,8 +345,10 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     ###
     # Add a datasource
     ###
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv))
     data_context = empty_data_context
 
     # We can now reference existing or available data asset namespaces using
@@ -408,8 +393,10 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
         outfile.write("\n\n\n")
     with open(os.path.join(second_datasource_basedir, "f4.tsv"), "w") as outfile:
         outfile.write("\n\n\n")
-    data_context.add_datasource(
-        "my_second_datasource", "pandas", base_directory=second_datasource_basedir)
+    data_context.add_datasource("my_second_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=second_datasource_basedir)
 
     # We can still reference *unambiguous* data_asset_names:
     assert data_context._normalize_data_asset_name("f1") == \
@@ -448,8 +435,8 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
         NormalizedDataAssetName("my_datasource", "default", "f1")
 
     # However, if we add a data_asset that would cause that name to be ambiguous, it will then fail:
-    suite = data_context.get_expectation_suite("my_datasource/in_memory_generator/f1")
-    data_context.set_expectation_suite(suite)
+    suite = data_context.create_expectation_suite("my_datasource/in_memory_generator/f1", "default")
+    data_context.save_expectation_suite(suite)
 
     with pytest.raises(DataContextError) as exc:
         name = data_context._normalize_data_asset_name("f1")
@@ -471,34 +458,43 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
 def test_list_datasources(data_context):
     datasources = data_context.list_datasources()
 
-    assert datasources == [
-        {
-            "name": "mydatasource",
-            "type": "pandas"
-        }
-    ]
+    assert OrderedDict(datasources) == OrderedDict([
 
-    data_context.add_datasource("second_pandas_source", "pandas")
+        {
+            'name': 'mydatasource',
+            'class_name': 'PandasDatasource'
+        }
+    ])
+
+    data_context.add_datasource("second_pandas_source",
+                           module_name="great_expectations.datasource",
+                           class_name="PandasDatasource",
+                           )
 
     datasources = data_context.list_datasources()
 
-    assert datasources == [
+    assert OrderedDict(datasources) == OrderedDict([
         {
-            "name": "mydatasource",
-            "type": "pandas"
+            'name': 'mydatasource',
+            'class_name': 'PandasDatasource'
         },
         {
-            "name": "second_pandas_source",
-            "type": "pandas"
+            'name': 'second_pandas_source',
+            'class_name': 'PandasDatasource'
         }
-    ]
+    ])
 
 
 def test_data_context_result_store(titanic_data_context):
     """
     Test that validation results can be correctly fetched from the configured results store
     """
+    print(titanic_data_context.stores["local_validation_result_store"].list_keys())
+
     profiling_results = titanic_data_context.profile_datasource("mydatasource")
+
+    print(titanic_data_context.stores["local_validation_result_store"].list_keys())
+
     for profiling_result in profiling_results['results']:
         data_asset_name = profiling_result[1]['meta']['data_asset_name']
         validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
@@ -559,17 +555,16 @@ project_path/
     context = DataContext.create(project_dir)
     ge_directory = os.path.join(project_dir, "great_expectations")
     scaffold_directories_and_notebooks(ge_directory)
-    context.add_datasource(
-        "titanic",
-        "pandas",
-        base_directory=os.path.join(project_dir, "data/titanic/")
-    )
-    context.add_datasource(
-        "random",
-        "pandas",
-        base_directory=os.path.join(project_dir, "data/random/")
-    )
-    
+    context.add_datasource("titanic",
+                            module_name="great_expectations.datasource",
+                            class_name="PandasDatasource",
+                            base_directory=os.path.join(project_dir, "data/titanic/"))
+
+    context.add_datasource("random",
+                            module_name="great_expectations.datasource",
+                            class_name="PandasDatasource",
+                            base_directory=os.path.join(project_dir, "data/random/"))
+
     context.profile_datasource("titanic")
     # print(gen_directory_tree_str(project_dir))
     assert gen_directory_tree_str(project_dir) == """\
@@ -595,7 +590,7 @@ project_path/
             integrate_validation_into_pipeline.ipynb
         plugins/
         uncommitted/
-            credentials/
+            config_variables.yml
             documentation/
                 local_site/
                 team_site/
@@ -632,17 +627,18 @@ documentation/
                 default/
                     Titanic/
                         BasicDatasetProfiler.html
-        profiling/
-            random/
-                default/
-                    f1/
-                        BasicDatasetProfiler.html
-                    f2/
-                        BasicDatasetProfiler.html
-            titanic/
-                default/
-                    Titanic/
-                        BasicDatasetProfiler.html
+        validations/
+            profiling/
+                random/
+                    default/
+                        f1/
+                            BasicDatasetProfiler.html
+                        f2/
+                            BasicDatasetProfiler.html
+                titanic/
+                    default/
+                        Titanic/
+                            BasicDatasetProfiler.html
     team_site/
         index.html
         expectations/
@@ -714,9 +710,12 @@ def test_add_store(empty_data_context):
 
     assert isinstance(new_store, BasicInMemoryStore)
 
-@pytest.fixture()
+
+@pytest.fixture
 def basic_data_context_config():
-    return DataContextConfig(**{
+    # return DataContextConfig(**{
+    return {
+        "ge_config_version": 1,
         "plugins_directory": "plugins/",
         "expectations_store": {
             "class_name": "ExpectationStore",
@@ -725,7 +724,8 @@ def basic_data_context_config():
                 "base_directory": "expectations/",
             },
         },
-        "evaluation_parameter_store_name" : "evaluation_parameter_store",
+        "evaluation_parameter_store_name": "evaluation_parameter_store",
+        "profiling_store_name": "does_not_have_to_be_real",
         "datasources": {},
         "stores": {
             "evaluation_parameter_store" : {
@@ -736,7 +736,8 @@ def basic_data_context_config():
         "data_docs": {
             "sites": {}
         }
-    })
+    }
+    # })
 
 
 def test_ExplorerDataContext(titanic_data_context):
@@ -749,7 +750,9 @@ def test_ExplorerDataContext(titanic_data_context):
 def test_ExplorerDataContext_expectation_widget(titanic_data_context):
     context_root_directory = titanic_data_context.root_directory
     explorer_data_context = ExplorerDataContext(context_root_directory)
-    data_asset = explorer_data_context.get_batch('Titanic', expectation_suite_name='my_suite')
+    explorer_data_context.create_expectation_suite('Titanic', expectation_suite_name='my_suite')
+    data_asset = explorer_data_context.get_batch('Titanic', expectation_suite_name='my_suite',
+                                                 batch_kwargs=explorer_data_context.yield_batch_kwargs("Titanic"))
     widget_output = data_asset.expect_column_to_exist('test')
     print(widget_output)
     if sys.version[0:3] == '2.7':

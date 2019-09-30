@@ -88,7 +88,7 @@ class MetaSparkDFDataset(Dataset):
             else:
                 unexpected_count_limit = result_format['partial_unexpected_count']
 
-            col_df = self.spark_df.select(column) # pyspark.sql.DataFrame
+            col_df = self.spark_df.select(column)  # pyspark.sql.DataFrame
 
             # a couple of tests indicate that caching here helps performance
             col_df.cache()
@@ -96,7 +96,7 @@ class MetaSparkDFDataset(Dataset):
 
             # FIXME temporary fix for missing/ignored value
             if func.__name__ not in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
-                col_df = col_df.filter('{column} is not null'.format(column=column))
+                col_df = col_df.filter(col_df[0].isNotNull())
                 # these nonnull_counts are cached by SparkDFDataset
                 nonnull_count = self.get_column_nonnull_count(column)
             else:
@@ -212,7 +212,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         return self.spark_df.columns
 
     def get_column_nonnull_count(self, column):
-        return self.spark_df.filter('{column} is not null'.format(column=column)).count()
+        return self.spark_df.filter(col(column).isNotNull()).count()
 
     def get_column_mean(self, column):
         # TODO need to apply this logic to other such methods?
@@ -259,7 +259,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     def get_column_value_counts(self, column):
         value_counts = self.spark_df.select(column)\
-            .filter('{} is not null'.format(column))\
+            .where(col(column).isNotNull())\
             .groupBy(column)\
             .count()\
             .orderBy(column)\
@@ -438,6 +438,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def expect_column_values_to_be_between(self,
                                            column,
                                            min_value=None, max_value=None,
+                                           strict_min=False, strict_max=False,
                                            parse_strings_as_datetimes=None,
                                            output_strftime_format=None,
                                            allow_cross_type_comparisons=None,
@@ -456,14 +457,26 @@ class SparkDFDataset(MetaSparkDFDataset):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
         elif min_value is None:
-            return column.withColumn('__success', when(column[0] <= max_value, lit(True)).otherwise(lit(False)))
+            if strict_max:
+                return column.withColumn('__success', when(column[0] < max_value, lit(True)).otherwise(lit(False)))
+            else:
+                return column.withColumn('__success', when(column[0] <= max_value, lit(True)).otherwise(lit(False)))
         elif max_value is None:
-            return column.withColumn('__success', when(column[0] >= min_value, lit(True)).otherwise(lit(False)))
+            if strict_min:
+                return column.withColumn('__success', when(column[0] > min_value, lit(True)).otherwise(lit(False)))
+            else:
+                return column.withColumn('__success', when(column[0] >= min_value, lit(True)).otherwise(lit(False)))
         else:
             if min_value > max_value:
                 raise ValueError("minvalue cannot be greater than max_value")
-        
-        return column.withColumn('__success', when((min_value <= column[0]) & (column[0] <= max_value), lit(True)).otherwise(lit(False)))
+            if strict_min and strict_max:
+                return column.withColumn('__success', when((min_value < column[0]) & (column[0] < max_value), lit(True)).otherwise(lit(False)))
+            elif strict_min:
+                return column.withColumn('__success', when((min_value < column[0]) & (column[0] <= max_value), lit(True)).otherwise(lit(False)))
+            elif strict_max:
+                return column.withColumn('__success', when((min_value <= column[0]) & (column[0] < max_value), lit(True)).otherwise(lit(False)))
+            else:
+                return column.withColumn('__success', when((min_value <= column[0]) & (column[0] <= max_value), lit(True)).otherwise(lit(False)))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation

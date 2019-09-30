@@ -1,21 +1,42 @@
 # -*- coding: utf-8 -*-
 
-PROJECT_HELP_COMMENT = """# Welcome to great expectations. 
+PROJECT_HELP_COMMENT = """
+# Welcome to great expectations. 
 # This project configuration file allows you to define datasources, 
 # generators, integrations, and other configuration artifacts that
 # make it easier to use Great Expectations.
 
 # For more help configuring great expectations, 
-# see the documentation at: https://greatexpectations.io/config_file.html
+# see the documentation at: https://docs.greatexpectations.io/en/latest/core_concepts/data_context.html#configuration
 
 # NOTE: GE uses the names of configured datasources and generators to manage
 # how expectations and other configuration artifacts are stored in the 
 # expectations/ and datasources/ folders. If you need to rename an existing
 # datasource or generator, be sure to also update the paths for related artifacts.
 
+ge_config_version: 1
+
 """
 
-PROJECT_OPTIONAL_CONFIG_COMMENT = """
+CONFIG_VARIABLES_INTRO = """
+# Great Expectations config file supports variable substitution.
+
+# Variable substitution enables these two use cases:
+# 1. do not store sensitive credentials in a committed file (since the credentials file should be in 
+#    the uncommitted directory  
+# 2. allow a config parameter to take different values, depending on the environment (e.g., dev/staging/prod)
+#
+# When GE encounters the following syntax in the config file:
+#
+# my_key: ${my_value} (or $my_value)
+#
+# GE will attempt to replace the value of “my_key” with the value of env variable “my_value” or with the value of the key “my_value” read from credentials file (env variable takes precedence).
+#
+# If the replacing value comes from the config variables file, it can be a simple value or a dictionary. If it comes from an environment variable, it must be a simple value.
+"""
+
+PROJECT_OPTIONAL_CONFIG_COMMENT = CONFIG_VARIABLES_INTRO + """
+config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory is where the data_context will look for custom_data_assets.py
 # and any configured evaluation parameter store
@@ -27,6 +48,8 @@ expectations_store:
   store_backend:
     class_name: FixedLengthTupleFilesystemStoreBackend
     base_directory: expectations/
+
+profiling_store_name: local_validation_result_store
 
 evaluation_parameter_store_name: evaluation_parameter_store
 
@@ -115,10 +138,33 @@ stores:
     class_name: HtmlSiteStore
     base_directory: uncommitted/documentation/team_site/
 
+
+validation_operators:
+  # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
+  perform_action_list_operator:
+    class_name: PerformActionListValidationOperator
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreAction
+          target_store_name: local_validation_result_store
+      - name: store_evaluation_params
+        action:
+          class_name: ExtractAndStoreEvaluationParamsAction
+          target_store_name: evaluation_parameter_store
+      - name: store_evaluation_params
+        action:
+          class_name: SlackNotificationAction
+          slack_webhook: ${validation_notification_slack_webhook}
+#          notify_on: all
+          renderer:
+            module_name: great_expectations.render.renderer.slack_renderer
+            class_name: SlackRenderer
+    
 # Uncomment the lines below to enable a result callback.
 
 # result_callback:
-#   slack: https://slack.com/replace_with_your_webhook
+#   slack: ${slack_callback_url}
 
 # TODO : Remove the extra layer of yml nesting in v0.8:
 data_docs:
@@ -128,7 +174,10 @@ data_docs:
     # The site includes expectation suites and profiling and validation results from uncommitted directory. 
     # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
 
-      module_name: great_expectations.render.renderer.new_site_builder
+      # specify a whitelist here if you would like to restrict the datasources to document
+      datasource_whitelist: '*'
+
+      module_name: great_expectations.render.renderer.site_builder
       class_name: SiteBuilder
       target_store_name: local_site_html_store
       
@@ -166,9 +215,12 @@ data_docs:
     # "team_site" is meant to support the "shared source of truth for a team" use case. 
     # By default only the expectations section is enabled.
     #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3). 
-    # Reach out on Slack (https://tinyurl.com/great-expectations-slack>) if you would like to discuss the best way to configure a team site.
+    # Reach out on Slack (https://greatexpectations.io/slack>) if you would like to discuss the best way to configure a team site.
 
-      module_name: great_expectations.render.renderer.new_site_builder
+      # specify a whitelist here if you would like to restrict the datasources to document
+      datasource_whitelist: '*'
+      
+      module_name: great_expectations.render.renderer.site_builder
       class_name: SiteBuilder
       target_store_name: team_site_html_store
       
@@ -188,13 +240,6 @@ data_docs:
 
 PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + "datasources: {}\n" + PROJECT_OPTIONAL_CONFIG_COMMENT
 
-PROFILE_COMMENT = """This file stores profiles with database access credentials. 
-Do not commit this file to version control. 
+CONFIG_VARIABLES_COMMENT = CONFIG_VARIABLES_INTRO
 
-A profile can optionally have a single parameter called 
-"url" which will be passed to sqlalchemy's create_engine.
-
-Otherwise, all credential options specified here for a 
-given profile will be passed to sqlalchemy's create URL function.
-
-"""
+CONFIG_VARIABLES_FILE_TEMPLATE = CONFIG_VARIABLES_INTRO

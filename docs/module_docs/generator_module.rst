@@ -15,7 +15,7 @@ Generator Module
         :undoc-members:
 
 
-great_expectations.datasource.generator.in_memory_generator.InMemoryGenerator
+InMemoryGenerator
 -------------------------------------------------------------------------------
 
 .. autoclass:: great_expectations.datasource.generator.in_memory_generator.InMemoryGenerator
@@ -24,7 +24,7 @@ great_expectations.datasource.generator.in_memory_generator.InMemoryGenerator
     :show-inheritance:
 
 
-great_expectations.datasource.generator.query_generator.QueryGenerator
+QueryGenerator
 ------------------------------------------------------------------------
 
 .. autoclass:: great_expectations.datasource.generator.query_generator.QueryGenerator
@@ -33,25 +33,34 @@ great_expectations.datasource.generator.query_generator.QueryGenerator
     :show-inheritance:
 
 
-great_expectations.datasource.generator.filesystem_path_generator.SubdirReaderGenerator
+SubdirReaderGenerator
 ----------------------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.filesystem_path_generator.SubdirReaderGenerator
+.. autoclass:: great_expectations.datasource.generator.subdir_reader_generator.SubdirReaderGenerator
     :members:
     :undoc-members:
     :show-inheritance:
 
 
-great_expectations.datasource.generator.filesystem_path_generator.GlobReaderGenerator
+GlobReaderGenerator
 -------------------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.filesystem_path_generator.GlobReaderGenerator
+.. autoclass:: great_expectations.datasource.generator.glob_reader_generator.GlobReaderGenerator
     :members:
     :undoc-members:
     :show-inheritance:
 
 
-great_expectations.datasource.generator.databricks_generator.DatabricksTableGenerator
+S3Generator
+-------------------------------------------------------------------------------------
+
+.. autoclass:: great_expectations.datasource.generator.s3_generator.S3Generator
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+DatabricksTableGenerator
 ---------------------------------------------------------------------------------------
 
 .. autoclass:: great_expectations.datasource.generator.databricks_generator.DatabricksTableGenerator

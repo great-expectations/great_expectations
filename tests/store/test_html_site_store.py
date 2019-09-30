@@ -1,11 +1,11 @@
 import pytest
 
+from great_expectations.exceptions import MissingTopLevelConfigKeyError
 from great_expectations.util import (
     gen_directory_tree_str,
 )
 from great_expectations.data_context.types import (
     ValidationResultIdentifier,
-    ExpectationSuiteIdentifier,
     SiteSectionIdentifier,
 )
 from great_expectations.data_context.store import (
@@ -25,7 +25,7 @@ def test_HtmlSiteStore(tmp_path_factory):
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
 
-    with pytest.raises(KeyError):
+    with pytest.raises(MissingTopLevelConfigKeyError):
         my_store.get(ValidationResultIdentifier(**{}))
     
     ns_1 = SiteSectionIdentifier(
@@ -56,14 +56,15 @@ def test_HtmlSiteStore(tmp_path_factory):
     assert gen_directory_tree_str(path) == """\
 test_HtmlSiteStore_with_FixedLengthTupleFileSystemStoreBackend__dir0/
     my_store/
-        prod-100/
-            a/
-                b/
-                    c/
-                        quarantine.html
-        prod-20/
-            a/
-                b/
-                    c/
-                        quarantine.html
+        validations/
+            prod-100/
+                a/
+                    b/
+                        c/
+                            quarantine.html
+            prod-20/
+                a/
+                    b/
+                        c/
+                            quarantine.html
 """

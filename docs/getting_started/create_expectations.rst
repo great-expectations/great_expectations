@@ -3,9 +3,6 @@
 Step 2: Create Expectations
 ==============================
 
-.. toctree::
-   :maxdepth: 2
-
 This tutorial covers creating expectations for a data asset in the Jupyter notebook ``great_expectations/notebooks/create_expectations.ipynb`` that ``great_expectations init`` created in your project.
 
 We will continue the example we used in the previous section - CSV files containing the data on notable works of Charles Dickens that look like this:
@@ -63,10 +60,10 @@ Get Batch
 Datasources and generators work together closely with your pipeline infrastructure to provide Great Expectations
 batches of data to validate. The generator is responsible for identifying the ``batch_kwargs`` that a datasource will
 use to load a batch of data. For example the :class:`~great_expectations.datasource.generator.\
-filesystem_path_generator.SubdirReaderGenerator`
+subdir_reader_generator.SubdirReaderGenerator`
 generator will create batches of data based on individual files and group those batches into a single data_asset based
 on the subdirectory in which they are located. By contrast, the :class:`~great_expectations.datasource.generator.\
-filesystem_path_generator.GlobReaderGenerator`
+glob_reader_generator.GlobReaderGenerator`
 will also create batches of data based on individual files, but uses defined glob-style match patterns to group those
 batches into named data assets.
 
@@ -88,6 +85,50 @@ The following call loads one of the batches of the ``notable_works_by_charles_di
 The argument ``expectation_suite_name`` specifies the name of the expectation suite you want to create. At first this suite contains no expectations. We will add expectations to it in the next steps.
 
 .. image:: ../images/get_batch.jpg
+
+
+If you want to validate data in Pandas Dataframes or in Spark Dataframes:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* If GE listed and profiled your files correctly:
+
+.. code-block:: python
+
+    data_asset_name = CHOOSE FROM THE LIST ABOVE IN THE NOTEBOOK
+    batch = context.get_batch(data_asset_name,
+                              expectation_suite_name)
+
+* Otherwise (you want to control the logic of reading the data):
+
+.. code-block:: python
+
+    df = load the data into a dataframe, e.g., df = SparkDFDataset(spark.read.csv... or pd.read_csv(...
+    data_asset_name = COME UP WITH A NAME - THIS WILL CREATE A NEW DATA ASSET
+    batch = context.get_batch(data_asset_name,
+                              expectation_suite_name,
+                              df)
+
+
+If you want to validate data in a database:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* To validate an existing table:
+
+.. code-block:: python
+
+    data_asset_name = CHOOSE THE NAME OF YOUR TABLE FROM THE LIST OF DATA ASSETS ABOVE IN THE NOTEBOOK
+    df = context.get_batch(data_asset_name,
+                            expectation_suite_name='my_suite')
+
+* To validate a query result set:
+
+.. code-block:: python
+
+    data_asset_name = NAME YOUR QUERY (E.G., daily_users_query) - THIS WILL CREATE A NEW DATA ASSET
+    df = context.get_batch(data_asset_name,
+                            expectation_suite_name='my_suite',
+                            query='SQL FOR YOUR QUERY')
+
 
 Reader Options
 ---------------
@@ -143,7 +184,7 @@ Review and Save Expectation Suite
 
 .. code-block:: python
 
-    df.set_expectation_suite()
+    df.save_expectation_suite()
 
 Because this data asset is connected to the DataContext, GE determines the location to save the expectation suite:
 
@@ -157,9 +198,9 @@ When we call ``get_expectation_suite``, we might see this warning in the output:
 
 When we save an expectation suite, by default, GE will drop any expectation that was not successful on its last run.
 
-Sometimes we want to save an expectation even though it did not validate successfully on the current batch (e.g., we have a reason to believe that our expectation is correct and the current batch has bad entries). In this case we pass and additional argument to ``set_expectation_suite`` method:
+Sometimes we want to save an expectation even though it did not validate successfully on the current batch (e.g., we have a reason to believe that our expectation is correct and the current batch has bad entries). In this case we pass and additional argument to ``save_expectation_suite`` method:
 
 .. code-block:: python
 
-    df.set_expectation_suite(discard_failed_expectations=False)
+    df.save_expectation_suite(discard_failed_expectations=False)
 
