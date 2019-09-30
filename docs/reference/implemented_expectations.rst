@@ -2,8 +2,8 @@
 
 .. _implemented_expectations:
 
-Implemented Expectations
-========================
+Table of Expectation Implementations By Backend
+=================================================
 
 Because Great Expectations can run against different platforms, not all expectations have been implemented
 for all platforms. This table details which are implemented. Note we love pull-requests to help us fill

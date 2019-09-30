@@ -25,7 +25,7 @@ Core GE Types
 **************
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    /reference/standard_arguments
    /reference/result_format
