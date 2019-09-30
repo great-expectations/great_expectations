@@ -166,9 +166,9 @@ For rapid prototyping, you can use the following syntax to quickly iterate on th
 
 These functions will return output just like regular expectations. However, they will NOT save a copy of the expectation to the config.
 
-
+**************************************************
 Using custom expectations
-========================================
+**************************************************
 
 Let's suppose you've defined `CustomPandasDataset` in a module called `custom_dataset.py`. You can instantiate a dataset with your custom expectations simply by adding `dataset_class=CustomPandasDataset` in `ge.read_csv`.
 
@@ -196,9 +196,8 @@ A similar approach works for the command-line tool.
         my_expectations.json \
         dataset_class=custom_dataset.CustomPandasDataset
 
-**************************************************
 Using custom expectations with a DataSource
-**************************************************
+==================================================
 
 To use custom expectations in a datasource or DataContext, you need to define the custom DataAsset in the datasource
 configuration or batch_kwargs for a specific batch. Following the same example above, let's suppose you've defined
