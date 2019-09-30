@@ -1,11 +1,28 @@
+import pytest
+
+from six import PY2
+
 from freezegun import freeze_time
 
 from great_expectations.render.renderer import (
     SlackRenderer
 )
 
+
 @freeze_time("09/24/19 23:18:36")
 def test_SlackRenderer():
+
+    #####
+    #####
+    #
+    # Skipping for PY2
+    #
+    #####
+    #####
+    if PY2:
+        pytest.skip("skipping test_SlackRenderer for PY2")
+
+
     validation_result_suite = {'results': [], 'success': True,
                                'statistics': {'evaluated_expectations': 0, 'successful_expectations': 0,
                                               'unsuccessful_expectations': 0, 'success_percent': None},

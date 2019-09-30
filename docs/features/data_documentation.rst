@@ -14,6 +14,7 @@ Data Documentation is implemented in the :py:mod:`great_expectations.render` mod
 *******************
 HTML documentation
 *******************
+
 HTML documentation takes expectation suites and validation results and produces clear, functional, and self-healing
 documentation of expected and observed data characteristics. Together with profiling, it can help to rapidly create
 a clearer picture of your data, and keep your entire team on the same page as data evolves.

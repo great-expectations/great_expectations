@@ -3,9 +3,6 @@
 Step 2: Create Expectations
 ==============================
 
-.. toctree::
-   :maxdepth: 2
-
 This tutorial covers creating expectations for a data asset in the Jupyter notebook ``great_expectations/notebooks/create_expectations.ipynb`` that ``great_expectations init`` created in your project.
 
 We will continue the example we used in the previous section - CSV files containing the data on notable works of Charles Dickens that look like this:
