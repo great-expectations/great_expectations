@@ -150,10 +150,10 @@ This step adds a new block for Datasource configuration to ``great_expectations/
 
     datasources:
         data__dir:
-            type: pandas
+            class_name: PandasDataset
             generators:
                 default:
-                    type: subdir_reader
+                    class_name: SubdirReaderGenerator
                     base_directory: ../data
                     reader_options:
                         sep:
@@ -201,10 +201,10 @@ The corresponding config would be:
 
     datasources:
         my_db:
-            type: sqlalchemy
+            class_name: SqlAlchemyDatasource
             generators:
                 default:
-                    type: queries
+                    class_name: QueryGenerator
             profile: my_db
 
 Note: the CLI will also create a ``uncommitted/credentials/profiles.yml`` files to contain SQL credentials. Note that this file goes in the ``uncommitted/`` directory, which should *NOT* be committed to source control. It may also contain a Slack webhook url for notifications.
