@@ -62,6 +62,8 @@ in the process of validating other prior expectations.
 Configuration
 ~~~~~~~~~~~~~
 
+.. code-block:: yaml
+
     - name: store_evaluation_params
     action:
       class_name: ExtractAndStoreEvaluationParamsAction

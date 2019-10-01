@@ -142,8 +142,6 @@ class PerformActionListValidationOperator(ValidationOperator):
             batch_actions_results = self._run_actions(batch, expectation_suite_identifier, batch._expectation_suite, batch_validation_result, run_identifier)
             result_object[validation_result_id]["actions_results"] = batch_actions_results
 
-        # NOTE: Eugene: 2019-09-24: Need to define this result object. Discussion required!
-        print(json.dumps(result_object, indent=2))
         return result_object
 
 
