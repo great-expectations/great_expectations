@@ -6,18 +6,27 @@ import logging
 
 from six import string_types
 
-import great_expectations.dataset as dataset
-from great_expectations.data_context import DataContext
-
-
 logger = logging.getLogger(__name__)
 
 
-def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, profiler=None):
+def load_class(class_name, module_name):
+    # Get the class object itself from strings.
+    loaded_module = importlib.import_module(module_name)
+    try:
+        class_ = getattr(loaded_module, class_name)
+    except AttributeError as e:
+        raise AttributeError("Module : {} has no class named : {}".format(
+            module_name,
+            class_name,
+        ))
+    return class_
+
+
+def _convert_to_dataset_class(df, class_name, module_name, expectation_suite=None, profiler=None):
     """
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
     """
-    # TODO: Refactor this method to use the new ClassConfig (module_name and class_name convention).
+    dataset_class = load_class(class_name, module_name)
     if expectation_suite is not None:
         # Create a dataset of the new class type, and manually initialize expectations according to
         # the provided expectation suite
@@ -34,26 +43,51 @@ def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, profile
 
 def read_csv(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDataset,
+    class_name="PandasDataset",
+    module_name="great_expectations.dataset",
     expectation_suite=None,
     profiler=None,
     *args, **kwargs
 ):
-    # TODO: Refactor this method to use the new ClassConfig (module_name and class_name convention).
+    """Read a file using Pandas read_csv and return a great_expectations dataset.
+
+    Args:
+        filename (string): path to file to read
+        class_name (str): class to which to convert resulting Pandas df
+        module_name (str): dataset module from which to try to dynamically load the relevant module
+        expectation_suite (string): path to great_expectations expectation suite file
+        profiler (Profiler class): profiler to use when creating the dataset (default is None)
+
+    Returns:
+        great_expectations dataset
+    """
     df = pd.read_csv(filename, *args, **kwargs)
     df = _convert_to_dataset_class(
-        df, dataset_class, expectation_suite, profiler)
+        df, class_name, module_name, expectation_suite, profiler)
     return df
 
 
 def read_json(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDataset,
+    class_name="PandasDataset",
+    module_name="great_expectations.dataset",
     expectation_suite=None,
     accessor_func=None,
     profiler=None,
     *args, **kwargs
 ):
+    """Read a file using Pandas read_json and return a great_expectations dataset.
+
+    Args:
+        filename (string): path to file to read
+        class_name (str): class to which to convert resulting Pandas df
+        module_name (str): dataset module from which to try to dynamically load the relevant module
+        expectation_suite (string): path to great_expectations expectation suite file
+        profiler (Profiler class): profiler to use when creating the dataset (default is None)
+
+    Returns:
+        great_expectations dataset
+    """
     if accessor_func is not None:
         json_obj = json.load(open(filename, 'rb'))
         json_obj = accessor_func(json_obj)
@@ -63,13 +97,14 @@ def read_json(
         df = pd.read_json(filename, *args, **kwargs)
 
     df = _convert_to_dataset_class(
-        df, dataset_class, expectation_suite, profiler)
+        df, class_name, module_name, expectation_suite, profiler)
     return df
 
 
 def read_excel(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDataset,
+    class_name="PandasDataset",
+    module_name="great_expectations.dataset",
     expectation_suite=None,
     profiler=None,
     *args, **kwargs
@@ -78,7 +113,8 @@ def read_excel(
 
     Args:
         filename (string): path to file to read
-        dataset_class (Dataset class): class to which to convert resulting Pandas df
+        class_name (str): class to which to convert resulting Pandas df
+        module_name (str): dataset module from which to try to dynamically load the relevant module
         expectation_suite (string): path to great_expectations expectation suite file
         profiler (Profiler class): profiler to use when creating the dataset (default is None)
 
@@ -90,16 +126,17 @@ def read_excel(
     if isinstance(df, dict):
         for key in df:
             df[key] = _convert_to_dataset_class(
-                df[key], dataset_class, expectation_suite, profiler)
+                df[key], class_name, module_name, expectation_suite, profiler)
     else:
         df = _convert_to_dataset_class(
-            df, dataset_class, expectation_suite, profiler)
+            df, class_name, module_name, expectation_suite, profiler)
     return df
 
 
 def read_table(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDataset,
+    class_name="PandasDataset",
+    module_name="great_expectations.dataset",
     expectation_suite=None,
     profiler=None,
     *args, **kwargs
@@ -108,7 +145,8 @@ def read_table(
 
     Args:
         filename (string): path to file to read
-        dataset_class (Dataset class): class to which to convert resulting Pandas df
+        class_name (str): class to which to convert resulting Pandas df
+        module_name (str): dataset module from which to try to dynamically load the relevant module
         expectation_suite (string): path to great_expectations expectation suite file
         profiler (Profiler class): profiler to use when creating the dataset (default is None)
 
@@ -117,13 +155,14 @@ def read_table(
     """
     df = pd.read_table(filename, *args, **kwargs)
     df = _convert_to_dataset_class(
-        df, dataset_class, expectation_suite, profiler)
+        df, class_name, module_name, expectation_suite, profiler)
     return df
 
 
 def read_parquet(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDataset,
+    class_name="PandasDataset",
+    module_name="great_expectations.dataset",
     expectation_suite=None,
     profiler=None,
     *args, **kwargs
@@ -132,7 +171,8 @@ def read_parquet(
 
     Args:
         filename (string): path to file to read
-        dataset_class (Dataset class): class to which to convert resulting Pandas df
+        class_name (str): class to which to convert resulting Pandas df
+        module_name (str): dataset module from which to try to dynamically load the relevant module
         expectation_suite (string): path to great_expectations expectation suite file
         profiler (Profiler class): profiler to use when creating the dataset (default is None)
 
@@ -141,12 +181,13 @@ def read_parquet(
     """
     df = pd.read_parquet(filename, *args, **kwargs)
     df = _convert_to_dataset_class(
-        df, dataset_class, expectation_suite, profiler)
+        df, class_name, module_name, expectation_suite, profiler)
     return df
 
 
 def from_pandas(pandas_df,
-                dataset_class=dataset.pandas_dataset.PandasDataset,
+                class_name="PandasDataset",
+                module_name="great_expectations.dataset",
                 expectation_suite=None,
                 profiler=None
                 ):
@@ -154,8 +195,8 @@ def from_pandas(pandas_df,
 
     Args:
         pandas_df (Pandas df): Pandas data frame
-        dataset_class (Dataset class) = dataset.pandas_dataset.PandasDataset:
-            class to which to convert resulting Pandas df
+        class_name (str): class to which to convert resulting Pandas df
+        module_name (str): dataset module from which to try to dynamically load the relevant module
         expectation_suite (string) = None: path to great_expectations expectation suite file
         profiler (profiler class) = None: The profiler that should 
             be run on the dataset to establish a baseline expectation suite.
@@ -165,14 +206,23 @@ def from_pandas(pandas_df,
     """
     return _convert_to_dataset_class(
         pandas_df,
-        dataset_class,
+        class_name,
+        module_name,
         expectation_suite,
         profiler
     )
 
 
-def validate(data_asset, expectation_suite=None, data_asset_name=None, data_context=None, data_asset_type=None, *args, **kwargs):
+def validate(
+        data_asset,
+        expectation_suite=None,
+        data_asset_name=None,
+        data_context=None,
+        data_asset_type=None,
+        *args, **kwargs):
     """Validate the provided data asset using the provided expectation suite"""
+
+    import great_expectations.dataset as dataset
     if expectation_suite is None and data_context is None:
         raise ValueError(
             "Either an expectation suite or a DataContext is required for validation.")
@@ -181,6 +231,7 @@ def validate(data_asset, expectation_suite=None, data_asset_name=None, data_cont
         logger.info("Using expectation suite from DataContext.")
         # Allow data_context to be a string, and try loading it from path in that case
         if isinstance(data_context, string_types):
+            from great_expectations import DataContext
             data_context = DataContext(data_context)
         expectation_suite = data_context.get_expectation_suite(data_asset_name)
     else:
@@ -307,14 +358,3 @@ def gen_directory_tree_str(startpath):
             output_str += '{}{}\n'.format(subindent, f)
     
     return output_str
-
-def get_data_context(path=None):
-    """Given a path, try to guess where the DataContext is located.
-    """
-    pass
-
-# TODO : Deprecate this in favor of instantiate_class_from_config, once #675 is merged in.
-def get_class_from_module_name_and_class_name(module_name, class_name):
-    loaded_module = importlib.import_module(module_name)
-    loaded_class = getattr(loaded_module, class_name)
-    return loaded_class
