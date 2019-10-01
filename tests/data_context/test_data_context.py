@@ -46,7 +46,7 @@ def parameterized_expectation_suite():
         return json.load(suite)
 
 
-def test_create_expectation_suite(titanic_data_context):
+def test_create_duplicate_expectation_suite(titanic_data_context):
     # create new expectation suite
     assert titanic_data_context.create_expectation_suite(data_asset_name="titanic", expectation_suite_name="test_create_expectation_suite")
     # attempt to create expectation suite with name that already exists on data asset
