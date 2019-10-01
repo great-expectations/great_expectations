@@ -34,4 +34,3 @@ if git_directory is not None:
 else:
     logger.debug("Using default version tag.")
     __version__ = tag
-
