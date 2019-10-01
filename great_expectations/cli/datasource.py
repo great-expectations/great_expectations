@@ -382,9 +382,8 @@ of this config file: great_expectations/uncommitted/credentials/profiles.yml:
 """
 
 msg_unknown_data_source = """
-We are looking for more types of data types to support.
-Please create a GitHub issue here:
-https://github.com/great-expectations/great_expectations/issues/new
+Do we not have the type of data source you want?
+    - Please create a GitHub issue here: <blue>https://github.com/great-expectations/great_expectations/issues/new</blue>
 
 In the meantime, consider reviewing the following notebook for an example of 
 creating and saving an expectation suite for validation:

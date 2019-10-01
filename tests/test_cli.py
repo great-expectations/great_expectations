@@ -39,7 +39,6 @@ def test_cli_command_entrance():
 
     result = runner.invoke(cli)
     assert result.exit_code == 0
-    print(result.output)
     assert result.output == """Usage: cli [OPTIONS] COMMAND [ARGS]...
 
   great_expectations command-line interface

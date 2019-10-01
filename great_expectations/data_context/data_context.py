@@ -678,7 +678,7 @@ class ConfigOnlyDataContext(object):
         """
         logger.debug("Starting ConfigOnlyDataContext.add_datasource for %s" % name)
         if "generators" not in kwargs:
-            logger.warning("Adding a datasource without configuring a generator will rely on default"
+            logger.warning("Adding a datasource without configuring a generator will rely on default "
                            "generator behavior. Please add a generator.")
 
         if "type" in kwargs:
