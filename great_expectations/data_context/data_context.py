@@ -1771,9 +1771,7 @@ class DataContext(ConfigOnlyDataContext):
                 "Your configuration file is not a valid yml file likely due to a yml syntax error."
             )
         except IOError:
-            raise ge_exceptions.ConfigNotFoundError(
-                "No configuration found in %s" % str(path_to_yml)
-            )
+            raise ge_exceptions.ConfigNotFoundError()
 
         version = config_dict.get("ge_config_version", 0)
 
