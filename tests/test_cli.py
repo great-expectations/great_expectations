@@ -36,6 +36,7 @@ def test_cli_command_entrance():
 
     result = runner.invoke(cli)
     assert result.exit_code == 0
+    print(result.output)
     assert result.output == """Usage: cli [OPTIONS] COMMAND [ARGS]...
 
   great_expectations command-line interface
@@ -46,13 +47,14 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  add-datasource  Add a new datasource to the data context
-  build-docs      Build data documentation for a project.
-  check-config    Check a config for validity and help with migrations.
-  init            Initialize a new Great Expectations project.
-  profile         Profile datasources from the specified context.
-  render          Render a great expectations object to documentation.
-  validate        Validate a CSV file against an expectation suite.
+  add-datasource       Add a new datasource to the data context
+  build-docs           Build data documentation for a project.
+  build-documentation
+  check-config         Check a config for validity and help with migrations.
+  init                 Initialize a new Great Expectations project.
+  profile              Profile datasources from the specified context.
+  render               Render a great expectations object to documentation.
+  validate             Validate a CSV file against an expectation suite.
 """
 
 
