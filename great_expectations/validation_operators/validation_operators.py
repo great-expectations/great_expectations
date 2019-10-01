@@ -93,7 +93,7 @@ class PerformActionListValidationOperator(ValidationOperator):
                     "data_context": self.data_context,
                 },
                 config_defaults={
-                    "module_name": "great_expectations.actions"
+                    "module_name": "great_expectations.validation_operators"
                 }
             )
             self.actions[action_config["name"]] = new_action
@@ -143,6 +143,7 @@ class PerformActionListValidationOperator(ValidationOperator):
             result_object[validation_result_id]["actions_results"] = batch_actions_results
 
         # NOTE: Eugene: 2019-09-24: Need to define this result object. Discussion required!
+        print(json.dumps(result_object, indent=2))
         return result_object
 
 

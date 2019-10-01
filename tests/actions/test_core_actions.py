@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.actions import (
+from great_expectations.validation_operators import (
     BasicValidationAction,
     SlackNotificationAction,
     StoreAction

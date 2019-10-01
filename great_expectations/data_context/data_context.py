@@ -264,7 +264,7 @@ class ConfigOnlyDataContext(object):
                 "data_context" : self,
             },
             config_defaults={
-                "module_name" : "great_expectations.actions.validation_operators"
+                "module_name" : "great_expectations.validation_operators"
             }
         )
         self.validation_operators[validation_operator_name] = new_validation_operator
