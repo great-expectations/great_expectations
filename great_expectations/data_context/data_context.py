@@ -46,7 +46,7 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 
 from .types import (
     NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
-    DataContextConfig,
+#     DataContextConfig,
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -135,6 +135,44 @@ class ConfigOnlyDataContext(object):
         with open(file_path, "w") as template:
             template.write(PROJECT_TEMPLATE)
 
+    @classmethod
+    def validate_config(cls, project_config):
+        required_keys = {
+            # TODO next version re-introduce ge_config_version as required
+            # "ge_config_version",
+            "plugins_directory",
+            "expectations_store",
+            "profiling_store_name",
+            "evaluation_parameter_store_name",
+            "datasources",
+            "stores",
+            "data_docs",
+            # "validation_operators", # TODO: Activate!
+        }
+        for key in required_keys:
+            if key not in project_config:
+                return False
+
+        allowed_keys = {
+            "ge_config_version",
+            "result_callback",
+            "config_variables_file_path",
+            "plugins_directory",
+            "expectations_store",
+            "profiling_store_name",
+            "evaluation_parameter_store_name",
+            "datasources",
+            "stores",
+            "data_docs",  # TODO: Rename this to sites, to remove a layer of extraneous nesting
+            "validation_operators",
+        }
+        for key in project_config.keys():
+            if key not in allowed_keys:
+                return False
+
+        return True
+
+
     # TODO : Migrate to an expressive __init__ method, with the top level of configs unpacked into named arguments.
     def __init__(self, project_config, context_root_dir, data_asset_name_delimiter='/'):
         """DataContext constructor
@@ -148,14 +186,15 @@ class ConfigOnlyDataContext(object):
         Returns:
             None
         """
-        if not isinstance(project_config, DataContextConfig):
-            raise TypeError("project_config_for_writing must be an instance of DataContextConfig, not {0}".format(
-                type(project_config)
-            ))
+        # if not isinstance(project_config, DataContextConfig):
+
+        if not ConfigOnlyDataContext.validate_config(project_config):
+            raise TypeError("project_config is not valid. Try using the CLI validate-config command.")
 
 
         self._project_config = project_config
-        self._project_config_with_varibles_substituted = DataContextConfig(**self.get_config_with_variables_substituted())
+        # FIXME: This should just be a property
+        self._project_config_with_varibles_substituted = dict(**self.get_config_with_variables_substituted())
         self._context_root_directory = os.path.abspath(context_root_dir)
 
 
@@ -293,7 +332,7 @@ class ConfigOnlyDataContext(object):
     def plugins_directory(self):
         """The directory in which custom plugin modules should be placed."""
         return self._normalize_absolute_or_relative_path(
-            self._project_config_with_varibles_substituted.plugins_directory
+            self._project_config_with_varibles_substituted["plugins_directory"]
         )
 
     @property
@@ -1126,11 +1165,11 @@ class ConfigOnlyDataContext(object):
 
     @property
     def evaluation_parameter_store(self):
-        return self.stores[self._project_config_with_varibles_substituted.evaluation_parameter_store_name]
+        return self.stores[self._project_config_with_varibles_substituted["evaluation_parameter_store_name"]]
 
     @property
     def profiling_store(self):
-        return self.stores[self._project_config_with_varibles_substituted.profiling_store_name]
+        return self.stores[self._project_config_with_varibles_substituted["profiling_store_name"]]
 
     def set_parameters_in_evaluation_parameter_store_by_run_id_and_key(self, run_id, key, value):
         """Store a new validation parameter.
@@ -1763,7 +1802,8 @@ class DataContext(ConfigOnlyDataContext):
                 )
             )
 
-        return DataContextConfig(**config_dict)
+        # return DataContextConfig(**config_dict)
+        return config_dict
 
 
     # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
@@ -1773,9 +1813,8 @@ class DataContext(ConfigOnlyDataContext):
 
         config_filepath = os.path.join(self.root_directory, "great_expectations.yml")
         with open(config_filepath, "w") as data:
-            #Note: I don't know how this method preserves commenting, but it seems to work
             config = copy.deepcopy(
-                dict(self._project_config)
+                self._project_config
             )
 
             #the expectation_store shouldn't appear in the list

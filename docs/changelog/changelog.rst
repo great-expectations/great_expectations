@@ -2,14 +2,40 @@
 
 v0.8.0__develop
 -----------------
-* MAJOR CHANGE: Datasources should now be configured using the module_name and class_name syntax to support easier
-  plugin use. "type" parameter is still supported but expect it to be removed in a future release.
-* MAJOR CHANGE: Generators should now be configured using the new module_name and class_name syntax to support easier
-  plugin use. "type" parameter is still supported but expect it to be removed in a future release.
-* GlobReaderGenerator now supports additional configuration options for identifying partitions via regex. The old
-  method is still supported but is deprecated. See :class:`GlobReaderGenerator` for details.
-* INTERNAL: rename LooselyTypedDotDict to AllowedKeysDotDict and add RequiredKeysDotDict as parent
-* Major documentation reorganization with additional content to improve readability.
+
+Version 0.8.0 is a significant update to Great Expectations, with many improvements focused on configurability
+and usability.  See the :ref:`migrating_versions` guide for more details on specific changes.
+
+Highlights include:
+
+1. Validation Operators. Validation operators make it easy to integrate GE into a variety of pipeline runners. They
+   offer one-line integration that emphasizes configurability. See the :ref:`validation_operators_and_actions`
+   feature guide for more information.
+
+2. First-class support for plugins in a DataContext, with several features that make it easier to configure and
+   maintain DataContexts across common deployment patterns.
+
+   - **Environments**: A DataContext can now manage :ref:`environment_and_secrets` more easily thanks to more dynamic and
+     flexible variable substitution.
+   - **Stores**: A new internal abstraction for DataContexts, :ref:`stores_reference`, make extending GE easier by
+     consolidating logic for reading and writing resources from a database, local, or cloud storage.
+   - **Types**: Utilities configured in a DataContext are now referenced using `class_name` and `module_name` throughout
+     the DataContext configuration, making it easier to extend or supplement pre-built resources. For now, the "type"
+     parameter is still supported but expect it to be removed in a future release.
+
+3. Partitioners: Batch Kwargs are clarified and enhanced to help easily reference well-known chunks of data using a
+   partition_id. Batch ID and Batch Fingerprint help round out support for enhanced metadata around data
+   assets that GE validates. See :ref:`batch_identifiers` for more information. The `GlobReaderGenerator`,
+   `QueryGenerator`, `S3Generator`, `SubdirReaderGenerator`, and `TableGenerator` all support partition_id for
+   easily accessing data assets.
+
+4. Other Improvements:
+
+   - We're beginning a long process of some under-the-covers refactors designed to make GE more maintainable as we
+     begin adding additional features.
+   - Restructured documentation: our docs have a new structure and have been reorganized to provide space for more
+     easily adding and accessing reference material. Stay tuned for additional detail.
+   - The command build-documentation has been renamed build-docs.
 
 v0.7.11__develop
 -----------------
