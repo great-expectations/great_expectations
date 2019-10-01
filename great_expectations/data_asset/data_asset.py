@@ -15,7 +15,7 @@ from collections import (
     defaultdict
 )
 
-from great_expectations.version import __version__
+from great_expectations import __version__ as ge_version
 from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
     parse_result_format,
@@ -960,11 +960,11 @@ class DataAsset(object):
 
         # Warn if our version is different from the version in the configuration
         try:
-            if expectation_suite['meta']['great_expectations.__version__'] != __version__:
+            if expectation_suite['meta']['great_expectations.__version__'] != ge_version:
                 warnings.warn(
                     "WARNING: This configuration object was built using version %s of great_expectations, but "
                     "is currently being valided by version %s."
-                    % (expectation_suite['meta']['great_expectations.__version__'], __version__))
+                    % (expectation_suite['meta']['great_expectations.__version__'], ge_version))
         except KeyError:
             warnings.warn(
                 "WARNING: No great_expectations version found in configuration object.")
@@ -1062,7 +1062,7 @@ class DataAsset(object):
                 "success_percent": statistics.success_percent,
             },
             "meta": {
-                "great_expectations.__version__": __version__,
+                "great_expectations.__version__": ge_version,
                 "data_asset_name": data_asset_name,
                 "expectation_suite_name": expectation_suite_name
             }            
