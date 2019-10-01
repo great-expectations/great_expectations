@@ -83,7 +83,7 @@ context and validations available in the ``great_expectations/fixtures`` directo
 
 .. code-block:: bash
 
-    great_expectations build-documentation
+    great_expectations build-docs
 
 
 When called without additional arguments, this command will render all the sites specified in great_expectations.yml configuration file.
@@ -98,7 +98,7 @@ To render just one data asset (this might be useful for debugging), call
 
 .. code-block:: bash
 
-    great_expectations build-documentation --site_name SITE_NAME --data_asset_name DATA_ASSET_NAME
+    great_expectations build-docs --site_name SITE_NAME --data_asset_name DATA_ASSET_NAME
 
 
 Using the raw API
