@@ -1,5 +1,5 @@
 # This must be missing required keys
-ge_config_version: 1
+config_version: 1
 expectations_store: "foo"
 evaluation_parameter_store_name: "foo"
 datasources: "foo"

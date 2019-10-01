@@ -14,7 +14,7 @@ PROJECT_HELP_COMMENT = """
 # expectations/ and datasources/ folders. If you need to rename an existing
 # datasource or generator, be sure to also update the paths for related artifacts.
 
-ge_config_version: 1
+config_version: 1
 
 """
 

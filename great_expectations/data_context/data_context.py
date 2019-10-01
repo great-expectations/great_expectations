@@ -138,8 +138,8 @@ class ConfigOnlyDataContext(object):
     @classmethod
     def validate_config(cls, project_config):
         required_keys = {
-            # TODO next version re-introduce ge_config_version as required
-            # "ge_config_version",
+            # TODO next version re-introduce config_version as required
+            # "config_version",
             "plugins_directory",
             "expectations_store",
             "profiling_store_name",
@@ -154,7 +154,7 @@ class ConfigOnlyDataContext(object):
                 return False
 
         allowed_keys = {
-            "ge_config_version",
+            "config_version",
             "result_callback",
             "config_variables_file_path",
             "plugins_directory",
@@ -1773,11 +1773,11 @@ class DataContext(ConfigOnlyDataContext):
         except IOError:
             raise ge_exceptions.ConfigNotFoundError()
 
-        version = config_dict.get("ge_config_version", 0)
+        version = config_dict.get("config_version", 0)
 
         # TODO clean this up once type-checking configs is more robust
         if not isinstance(version, int):
-            raise ge_exceptions.InvalidConfigValueTypeError("The key `ge_config_version` must be an integer. Please check your config file.")
+            raise ge_exceptions.InvalidConfigValueTypeError("The key `config_version` must be an integer. Please check your config file.")
 
         # When migrating from 0.7.x to 0.8.0
         if version == 0 and "validations_stores" in list(config_dict.keys()):

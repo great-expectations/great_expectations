@@ -17,7 +17,7 @@ def totally_empty_data_context(tmp_path_factory):
     os.mkdir(os.path.join(project_root_dir, 'great_expectations'))
 
     config = {
-        "ge_config_version": 1,
+        "config_version": 1,
         "plugins_directory": "plugins/",
         "expectations_store": {
             "class_name": "ExpectationStore",
