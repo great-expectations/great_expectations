@@ -8,9 +8,13 @@ and usability.  See the :ref:`migrating_versions` guide for more details on spec
 
 Highlights include:
 
-1. Validation Operators. Validation operators make it easy to integrate GE into a variety of pipeline runners. They
+1. Validation Operators and Actions. Validation operators make it easy to integrate GE into a variety of pipeline runners. They
    offer one-line integration that emphasizes configurability. See the :ref:`validation_operators_and_actions`
    feature guide for more information.
+
+   - The DataContext `get_batch` method no longer treats `expectation_suite_name` or `batch_kwargs` as optional; they
+     must be explicitly specified.
+   - The top-level GE validate method allows more options for specifying the specific data_asset class to use.
 
 2. First-class support for plugins in a DataContext, with several features that make it easier to configure and
    maintain DataContexts across common deployment patterns.
