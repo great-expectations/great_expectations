@@ -4,7 +4,7 @@ import shutil
 from .datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
-    build_documentation as build_documentation_impl,
+    build_docs as build_documentation_impl,
     msg_go_to_notebook
 )
 from .init import (
