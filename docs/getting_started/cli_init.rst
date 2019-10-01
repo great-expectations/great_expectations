@@ -3,10 +3,6 @@
 Step 1: Run ``great_expectations init``
 ===============================================
 
-.. toctree::
-   :maxdepth: 2
-
-
 Video
 ------
 

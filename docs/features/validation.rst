@@ -1,17 +1,17 @@
 .. _validation:
 
-================================================================================
+##############
 Validation
-================================================================================
+##############
 
 Once you've constructed and stored Expectations, you can use them to validate new data. Validation generates a report
 that details any specific deviations from expected values.
 
 We recommend using a :ref:`data_context` to manage expectation suites and coordinate validation across runs.
 
-
+*******************
 Validation results
-----------------------------
+*******************
 
 The report contains information about:
 
@@ -103,7 +103,7 @@ An example report looks like the following:
 
 
 Command-line validation
-------------------------------------------------------------------------------
+==============================
 
 This is especially powerful when combined with great_expectations's command line tool, which lets you validate in a one-line bash script.
 
@@ -180,8 +180,9 @@ This is especially powerful when combined with great_expectations's command line
       }
     }
 
+*********************
 Validation Operators
----------------------
+*********************
 
 The example above demonstrates how to validate one batch of data against one expectation suite. The `validate` method returns a dictionary of validation results. This is sufficient when you explore your data and get to know Great Expectations.
 When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
@@ -194,8 +195,10 @@ Validation Operators are mini-applications that can be configured to implement t
 
 Read :ref:`validation_operators_and_actions` to learn more.
 
+
+*********************
 Deployment patterns
-------------------------------------------------------------------------------
+*********************
 
 Useful deployment patterns include:
 
@@ -211,4 +214,3 @@ Useful deployment patterns include:
 
 For certain deployment patterns, it may be useful to parameterize expectations, and supply evaluation parameters at \
 validation time. See :ref:`evaluation_parameters` for more information.
-

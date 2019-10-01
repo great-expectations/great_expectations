@@ -286,16 +286,21 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
 
 
 @cli.command()
+def build_documentation():
+    # TODO remove this warning
+    raise DeprecationWarning("This command has been renamed to build-docs.")
+
+
+@cli.command()
 @click.option('--directory', '-d', default="./great_expectations",
               help='The root of a project directory containing a great_expectations/ config.')
 @click.option('--site_name', '-s',
               help='The site for which to generate documentation. See data_docs section in great_expectations.yml')
 @click.option('--data_asset_name', '-dan',
               help='The data asset for which to generate documentation. Must also specify --site_name.')
-def build_documentation(directory, site_name, data_asset_name):
-    """Build data documentation for a project.
-    """
-    logger.debug("Starting cli.build_documentation")
+def build_docs(directory, site_name, data_asset_name):
+    """Build data documentation for a project."""
+    logger.debug("Starting cli.build_docs")
 
     if data_asset_name is not None and site_name is None:
         cli_message("Error: When specifying data_asset_name, must also specify site_name.")

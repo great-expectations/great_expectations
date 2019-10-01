@@ -1,6 +1,6 @@
 .. _data_asset_module:
 
-Data Asset Module
+DataAsset Module
 ==================================
 
 .. automodule:: great_expectations.data_asset.data_asset

@@ -10,7 +10,7 @@ from great_expectations.data_context import (
     DataContext,
 )
 from great_expectations.data_context.types import (
-    DataContextConfig,
+#     DataContextConfig,
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
 )
@@ -20,7 +20,8 @@ from great_expectations.util import (
 
 @pytest.fixture()
 def basic_data_context_config_for_validation_operator():
-    return DataContextConfig(**{
+    # return DataContextConfig(**{
+    return {
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name" : "evaluation_parameter_store",
         "profiling_store_name": "validation_result_store",
@@ -66,7 +67,8 @@ def basic_data_context_config_for_validation_operator():
                 }]
             }
         }
-    })
+    }
+    # })
 
 def test_PerformActionListValidationOperator(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
     project_path = str(tmp_path_factory.mktemp('great_expectations'))

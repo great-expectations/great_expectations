@@ -19,20 +19,24 @@ def test_DataContext_raises_error_on_unparsable_yaml_file():
         DataContext(local_dir)
 
 
-def test_DataContext_raises_error_on_invalid_top_level_key():
-    local_dir = file_relative_path(
-        __file__, os.path.join(BASE_DIR, "invalid_top_level_key")
-    )
-    with pytest.raises(ge_exceptions.InvalidTopLevelConfigKeyError):
-        DataContext(local_dir)
 
-
-def test_DataContext_raises_error_on_missing_top_level_key():
-    local_dir = file_relative_path(
-        __file__, os.path.join(BASE_DIR, "missing_top_level_key")
-    )
-    with pytest.raises(ge_exceptions.MissingTopLevelConfigKeyError):
-        DataContext(local_dir)
+# NOTE: 20191001 - JPC: The behavior of typed DataContextConfig is removed because it did not support
+# round trip yaml comments. Re-add appropriate tests upon development of an appropriate replacement
+# for DataContextConfig
+# def test_DataContext_raises_error_on_invalid_top_level_key():
+#     local_dir = file_relative_path(
+#         __file__, os.path.join(BASE_DIR, "invalid_top_level_key")
+#     )
+#     with pytest.raises(ge_exceptions.InvalidTopLevelConfigKeyError):
+#         DataContext(local_dir)
+#
+#
+# def test_DataContext_raises_error_on_missing_top_level_key():
+#     local_dir = file_relative_path(
+#         __file__, os.path.join(BASE_DIR, "missing_top_level_key")
+#     )
+#     with pytest.raises(ge_exceptions.MissingTopLevelConfigKeyError):
+#         DataContext(local_dir)
 
 
 def test_DataContext_raises_error_on_invalid_top_level_type():
