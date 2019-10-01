@@ -15,6 +15,9 @@ import logging
 import sys
 import re
 from ruamel.yaml import YAML
+
+from great_expectations.exceptions import ConfigNotFoundError
+
 yaml = YAML()
 yaml.default_flow_style = False
 
@@ -528,18 +531,24 @@ def test_cli_config_not_found(tmp_path_factory):
     try:
         os.chdir(tmp_dir)
         runner = CliRunner()
-        result = runner.invoke(
-            cli, ["profile", "-d", "./"])
-        assert "no great_expectations context configuration" in result.output
-        result = runner.invoke(
-            cli, ["profile"])
-        assert "no great_expectations context configuration" in result.output
-        result = runner.invoke(
-            cli, ["build-docs", "-d", "./"])
-        assert "no great_expectations context configuration" in result.output
-        result = runner.invoke(
-            cli, ["build-docs"])
-        assert "no great_expectations context configuration" in result.output
+
+        # profile
+        result = runner.invoke(cli, ["profile", "-d", "./"])
+        assert ConfigNotFoundError().message in result.output
+        result = runner.invoke(cli, ["profile"])
+        assert ConfigNotFoundError().message in result.output
+
+        # build-docs
+        result = runner.invoke(cli, ["build-docs", "-d", "./"])
+        assert ConfigNotFoundError().message in result.output
+        result = runner.invoke(cli, ["build-docs"])
+        assert ConfigNotFoundError().message in result.output
+
+        # check-config
+        result = runner.invoke(cli, ["check-config", "-d", "./"])
+        assert ConfigNotFoundError().message in result.output
+        result = runner.invoke(cli, ["check-config"])
+        assert ConfigNotFoundError().message in result.output
     except:
         raise
     finally:
