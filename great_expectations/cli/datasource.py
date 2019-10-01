@@ -63,11 +63,8 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
             import sqlalchemy
             from sqlalchemy import create_engine, MetaData
         except ImportError:
-            cli_message(
-"""
-ERROR: Unable to import sqlalchemy - exiting.
-Please install the module before trying again.
-""")
+            cli_message("""<red>ERROR: Unable to import `sqlalchemy`.</red>
+<red>   - Please install the sqlalchemy before trying again.</red>""")
             return None
 
         data_source_name = click.prompt(

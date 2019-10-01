@@ -67,7 +67,7 @@ try:
 except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
-    SQLAlchemyError = ProfilerError
+    SQLAlchemyError = ge_exceptions.ProfilerError
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
