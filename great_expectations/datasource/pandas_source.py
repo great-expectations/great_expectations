@@ -217,20 +217,30 @@ class PandasDatasource(Datasource):
         generator = None
         if isinstance(data_asset_name, (NormalizedDataAssetName, DataAssetIdentifier)):
             generator = self.get_generator(data_asset_name.generator)
+            generator_asset = data_asset_name.generator_asset
         elif len(self._datasource_config["generators"]) == 1:
             logger.info("Using only configured generator to build batch_kwargs.")
             generator_name = list(self._datasource_config["generators"].keys())[0]
             generator = self.get_generator(generator_name)
+            generator_asset = data_asset_name
 
         # Now that we know whether we can use a generator, build the kwargs
         if generator is not None:
             if len(args) == 1:  # We interpret a single argument as a partition_id
-                batch_kwargs = generator.build_batch_kwargs_from_partition_id(args[0], batch_kwargs=kwargs)
+                batch_kwargs = generator.build_batch_kwargs_from_partition_id(
+                    generator_asset=generator_asset,
+                    partition_id=args[0],
+                    batch_kwargs=kwargs
+                )
             elif len(args) > 0:
                 raise BatchKwargsError("Multiple positional arguments were provided to build_batch_kwargs, but only"
                                        "one is supported. Please provide named arguments to build_batch_kwargs.")
             elif "partition_id" in kwargs:
-                batch_kwargs = generator.build_batch_kwargs_from_partition_id(kwargs["partition_id"], batch_kwargs=kwargs)
+                batch_kwargs = generator.build_batch_kwargs_from_partition_id(
+                    generator_asset=generator_asset,
+                    partition_id=kwargs["partition_id"],
+                    batch_kwargs=kwargs
+                )
             else:
                 batch_kwargs = generator.yield_batch_kwargs(data_asset_name, kwargs)
         else:
