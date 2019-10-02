@@ -5,11 +5,6 @@ import shutil
 
 import pandas as pd
 
-import great_expectations as ge
-from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.actions.validation_operators import (
-    PerformActionListValidationOperator,
-)
 from great_expectations.data_context import (
     ConfigOnlyDataContext,
     DataContext,

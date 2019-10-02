@@ -351,8 +351,8 @@ def check_config(target_directory):
         if is_config_ok:
             cli_message("Your config file appears valid!")
         else:
-            cli_message("Unfortunately, your config appears to be invalid:")
-            cli_message(error_message)
+            cli_message("Unfortunately, your config appears to be invalid:\n")
+            cli_message("<red>{}</red>".format(error_message))
             sys.exit(1)
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         _offer_to_install_new_template(err, target_directory)

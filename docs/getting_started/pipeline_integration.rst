@@ -193,21 +193,33 @@ interactively reviewing results in a notebook or to easily display them in a das
 
 If run_id is omitted, GE will use the most recent run_id.
 
-Send Notifications
--------------------
-
-The DataContext can also send notifications using a user-provided callback function based on the validation result. GE
-includes a slack-based notification in the base package. To enable a slack notification for results, simply specify
-the slack webhook in the profiles.yml file in uncommitted/credentials/:
+Validation Operators
+--------------------
 
 .. code-block:: bash
 
-  result_callback:
-    slack: https://slack.com/your_webhook_url
+  perform_action_list_operator:
+    class_name: PerformActionListValidationOperator
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreAction
+          target_store_name: local_validation_result_store
+      - name: store_evaluation_params
+        action:
+          class_name: SlackNotificationAction
+          slack_webhook: ${validation_notification_slack_webhook}
+          renderer:
+            module_name: great_expectations.render.renderer.slack_renderer
+            class_name: SlackRenderer
+      - name: store_evaluation_params
+        action:
+          class_name: ExtractAndStoreEvaluationParamsAction
+          target_store_name: evaluation_parameter_store
 
 
 Save Validation Results
--------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 The DataContext object provides a configurable ``result_store`` where GE can store validation_result objects for
 subsequent evaluation and review. By default, the DataContext stores results in the
@@ -231,13 +243,26 @@ in the context, and will have the run_id prepended:
 Removing the result_store section from the configuration object will disable automatically storing validation_result
 objects.
 
+Send a Slack Notification
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Save Failed Batches
----------------------
+The second action in the action list of the Validation Operator above sends notifications using a user-provided callback function based on the validation result.
 
-The pandas backend also supports saving a snapshot of the batch used for validation in the event of failed snapshots,
-which can be useful especially in pipelines where GE is provided an in-memory DataFrame to validate at a midpoint in a
-data pipeline.
+.. code-block:: bash
 
-The ``data_asset_snapshot_store`` uses the same configuration structure as the result_store, so can save either to a
-local filesystem or to an s3 bucket. It will save a gzipped CSV of the dataset.
+  - name: store_evaluation_params
+    action:
+      class_name: SlackNotificationAction
+      slack_webhook: ${validation_notification_slack_webhook}
+      renderer: # this species the class that
+        module_name: great_expectations.render.renderer.slack_renderer
+        class_name: SlackRenderer
+
+GE
+includes a slack-based notification in the base package. To enable a slack notification for results, simply specify
+the slack webhook URL in the uncommitted/config_variables.yml file:
+
+.. code-block:: bash
+
+  validation_notification_slack_webhook: https://slack.com/your_webhook_url
+
