@@ -27,28 +27,45 @@ Under the hood, great_expectations evaluates similar kinds of expectations using
 * `column_map_expectations`, which apply their condition to each value in a column independently of other values
 * `column_aggregate_expectations`, which apply their condition to an aggregate value or values from the column
 
-In general, if a column is empty, a column_map_expectation will return True (vacuously), whereas a column_aggregate_expectation will return False (since no aggregate value could be computed).
-Adding an expectation about element counts to a set of expectations is usually therefore very important to ensure the overall set of expectations captures the full set of constraints you expect.
+In general, if a column is empty, a column_map_expectation will return True (vacuously), whereas a
+column_aggregate_expectation will return False (since no aggregate value could be computed).
+
+Adding an expectation about element counts to a set of expectations is usually therefore very important to ensure
+the overall set of expectations captures the full set of constraints you expect.
 
 
-The easy way
+High-level decorators
 ========================================
+High-level decorators may modify the type of arguments passed to their decorated methods and do significant
+computation or bookkeeping to augment the work done in an expectation. That makes implementing many common types of
+operations using high-level decorators very easy.
+
+To use the high-level decorators (e.g. ``column_map_expectation`` or ```column_aggregate_expectation``):
+
 1. Create a subclass from the dataset class of your choice
 2. Define custom functions containing your business logic
 3. Use the `column_map_expectation` and `column_aggregate_expectation` decorators to turn them into full Expectations. Note that each dataset class implements its own versions of `@column_map_expectation` and `@column_aggregate_expectation`, so you should consult the documentation of each class to ensure you are returning the correct information to the decorator.
 
-Note: following Great Expectations patterns for :ref:`extending_great_expectations` is highly recommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you.
+Note: following Great Expectations patterns for :ref:`extending_great_expectations` is highly recommended, but not
+strictly required. If you want to confuse yourself with bad names, the package won't stop you.
 
 For example, in Pandas:
 
-`@MetaPandasDataset.column_map_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `result_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
+`@MetaPandasDataset.column_map_expectation` decorates a custom function, wrapping it with all the business logic
+required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required
+arguments like `mostly` and `result_format`. Your custom function can focus exclusively on the business logic of
+passing or failing the expectation.
 
-To work with these decorators, your custom function must accept two arguments: `self` and `column`. When your function is called, `column` will contain all the non-null values in the given column. Your function must return a series of boolean values in the same order, with the same index.
+To work with these decorators, your custom function must accept two arguments: `self` and `column`. When your function
+is called, `column` will contain all the non-null values in the given column. Your function must return a series of
+boolean values in the same order, with the same index.
 
-`@MetaPandasDataset.column_aggregate_expectation` accepts `self` and `column`. It must return a dictionary containing a boolean `success` value, and a nested dictionary called `result` which contains an `observed_value` argument.
+`@MetaPandasDataset.column_aggregate_expectation` accepts `self` and `column`. It must return a dictionary containing
+a boolean `success` value, and a nested dictionary called `result` which contains an `observed_value` argument.
 
 Setting the _data_asset_type is not strictly necessary, but doing so allows GE to recognize that you have added
-expectations rather than simply added support for the same expectation suite on a different backend/compute environment.
+expectations rather than simply added support for the same expectation suite on a different
+backend/compute environment.
 
 .. code-block:: python
 
@@ -72,7 +89,8 @@ expectations rather than simply added support for the same expectation suite on 
                 }
             }
 
-For SqlAlchemyDataset, the decorators work slightly differently. See the MetaSqlAlchemy class docstrings for more information.
+For SqlAlchemyDataset and SparkDFDataset, the decorators work slightly differently. See the respective Meta-class
+docstrings for more information; the example below shows SqlAlchemy implementations of the same custom expectations.
 
 .. code-block:: python
 
@@ -104,16 +122,20 @@ For SqlAlchemyDataset, the decorators work slightly differently. See the MetaSql
 
 
 
-The hard way
+Using the base Expectation decorator
 ========================================
+When the high-level decorators do not provide sufficient granularity for controlling your expectation's behavior, you
+need to use the base expectation decorator, which will only handle storing and retrieving your expectation in an
+expectation suite, but will leave the declared parameters of your expectation unchanged.
 
 1. Create a subclass from the dataset class of your choice
 2. Write the whole expectation yourself
-3. Decorate it with the `@expectation` decorator
+3. Decorate it with the `@expectation` decorator, declaring the parameters you will use.
 
-This is more complicated, since you have to handle all the logic of additional parameters and output formats. Pay special attention to proper formatting of :ref:`result_format`. Malformed result objects can break Great Expectations in subtle and unanticipated ways.
+This is more complicated, since you have to handle all the logic of additional parameters and output formats.
+Pay special attention to proper formatting of :ref:`result_format`.
 
-.. code-block:: bash
+.. code-block:: python
 
     from great_expectations.data_asset import DataAsset
     from great_expectations.dataset import PandasDataset
@@ -151,10 +173,12 @@ This is more complicated, since you have to handle all the logic of additional p
                     "unexpected_index_list" : list(self.index[result==False])[:20],
                 }
 
-The quick way
+Since the base decorator is consistent across different primary DataAsset types, a similar implementation will apply.
+
+Rapid Prototyping
 ========================================
 
-For rapid prototyping, you can use the following syntax to quickly iterate on the logic for expectations.
+For rapid prototyping, the following syntax allows quick iteration on the logic for expectations.
 
 .. code-block:: bash
 
@@ -164,13 +188,15 @@ For rapid prototyping, you can use the following syntax to quickly iterate on th
     
     >> Dataset.test_column_aggregate_expectation_function(my_agg_func, column='my_column')
 
-These functions will return output just like regular expectations. However, they will NOT save a copy of the expectation to the config.
+These functions will return output just like regular expectations. However, they will NOT save a copy of the
+expectation to the current expectation suite.
 
 **************************************************
 Using custom expectations
 **************************************************
 
-Let's suppose you've defined `CustomPandasDataset` in a module called `custom_dataset.py`. You can instantiate a dataset with your custom expectations simply by adding `dataset_class=CustomPandasDataset` in `ge.read_csv`.
+Let's suppose you've defined `CustomPandasDataset` in a module called `custom_dataset.py`. You can instantiate a
+dataset with your custom expectations simply by adding `dataset_class=CustomPandasDataset` in `ge.read_csv`.
 
 Once you do this, all the functionality of your new expectations will be available for uses.
 
@@ -196,13 +222,15 @@ A similar approach works for the command-line tool.
         my_expectations.json \
         dataset_class=custom_dataset.CustomPandasDataset
 
-Using custom expectations with a DataSource
+.. _custom_expectations_in_datasource:
+
+Using custom expectations with a Datasource
 ==================================================
 
 To use custom expectations in a datasource or DataContext, you need to define the custom DataAsset in the datasource
 configuration or batch_kwargs for a specific batch. Following the same example above, let's suppose you've defined
 `CustomPandasDataset` in a module called `custom_dataset.py`. You can configure your datasource to return instances
-of your custom DataAsset type by passing in a :class:`ClassConfig <great_expectations.types.ClassConfig>` that describes your source.
+of your custom DataAsset type by declaring that as the data_asset_type for the datasource to build.
 
 If you are working a DataContext, simply placing `custom_dataset.py` in your configured plugin directory will make it
 accessible, otherwise, you need to ensure the module is on the import path.
@@ -215,13 +243,13 @@ CustomPandasDataset in a DataContext.
 
     datasources:
       my_datasource:
-        type: pandas  # class_name: PandasDatasource
+        class_name: PandasDatasource
         data_asset_type:
           module_name: custom_dataset
           class_name: CustomPandasDataset
         generators:
           default:
-            type: subdir_reader  # class_name: SubdirReaderGenerator
+            class_name: SubdirReaderGenerator
             base_directory: /data
             reader_options:
               sep: \t

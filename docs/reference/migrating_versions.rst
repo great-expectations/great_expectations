@@ -41,9 +41,11 @@ of great new features like extensibility.
 Some specific changes:
 
 - New top-level keys:
+
+  - `expectations_store_name`
   - `evaluation_parameter_store_name`
-  - `expectation_store`
   - `profiling_store_name`
+
 - Deprecation of the `type` key for configuring objects (replaced by `class_name` (and `module_name` as well when
   ambiguous).
 - Completely new `SiteBuilder` configuration. See :ref:`data_documentation_reference`.
