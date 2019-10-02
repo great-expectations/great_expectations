@@ -1,10 +1,7 @@
 import logging
-import requests
+
 logger = logging.getLogger(__name__)
 
-from ..util import (
-    get_class_from_module_name_and_class_name,
-)
 
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
