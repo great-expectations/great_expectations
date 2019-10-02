@@ -242,7 +242,13 @@ class PandasDatasource(Datasource):
                     batch_kwargs=kwargs
                 )
             else:
-                batch_kwargs = generator.yield_batch_kwargs(data_asset_name, kwargs)
+                if len(kwargs) > 0:
+                    batch_kwargs = generator.yield_batch_kwargs(data_asset_name, kwargs)
+                else:
+                    raise BatchKwargsError(
+                        "Unable to build batch_kwargs: no partition_id or base kwargs found to pass to generator.",
+                        batch_kwargs=kwargs
+                    )
         else:
             logger.warning("Unable to determine generator; building batch_kwargs using datasource default logic."
                            "Partitions will not be available. Consider using a typed data_asset_name to specify the "
