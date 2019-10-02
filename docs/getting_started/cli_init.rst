@@ -386,6 +386,8 @@ Clicking through to the second link will show you descriptive data documentation
 
 Note also that the default ``great_expectations/`` setup does NOT commit compiled docs themselves within version control. Instead, they live in ``uncommitted/documentation/``, with a subdirectory structure that mirrors the project namespace.
 
+After the init command completes, you should see the following directory structure :
+
 .. code-block:: bash
 
     great_expectations
@@ -429,4 +431,14 @@ Note also that the default ``great_expectations/`` setup does NOT commit compile
 
 
 
+Before exiting, the init command points you to the notebooks that you can use to create expectations:
 
+::
+
+    To create expectations for your data, start Jupyter and open a tutorial notebook:
+
+    To launch with jupyter notebooks:
+        jupyter notebook great_expectations/notebooks/create_expectations.ipynb
+
+    To launch with jupyter lab:
+        jupyter lab great_expectations/notebooks/create_expectations.ipynb
