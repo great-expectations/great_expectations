@@ -162,7 +162,7 @@ class PerformActionListValidationOperator(ValidationOperator):
             )
             try:
                 action_result = self.actions[action["name"]].run(
-                                                validation_result_suite_id=validation_result_id,
+                                                validation_result_suite_identifier=validation_result_id,
                                                 validation_result_suite=batch_validation_result,
                                                 data_asset=batch
                 )

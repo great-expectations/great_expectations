@@ -14,11 +14,11 @@ When deploying Great Expectations in a real data pipeline, you will typically di
 
 Validation Operators provide a convenient abstraction for both bundling the validation of multiple expectation suites and the actions that should be taken after the validation.
 
-*************************************************************
-How do you find a Validation Operator that is right for you?
-*************************************************************
+***************************************************
+Finding a Validation Operator that is right for you
+***************************************************
 
-Each Validation Operator encodes a particular set of business rules around validation. Currently, two Validation Operator implementations are currently included in the Great Expectations distribution.
+Each Validation Operator encodes a particular set of business rules around validation. Currently, two Validation Operator implementations are included in the Great Expectations distribution.
 
 The classes that implement them are in :py:mod:`great_expectations.validation_operators` module.
 
@@ -28,7 +28,7 @@ PerformActionListValidationOperator
 
 PerformActionListValidationOperator validates each batch in the list that is passed as `assets_to_validate` argument to its `run` method against the expectation suite included within that batch and then invokes a list of configured actions on every validation result.
 
-Actions are Python classes with `run` method that takes a result of validating a batch against an expectation suite and do something with it (e.g., save validation results to the disk or send a Slack notification). Classes that implement this API can be configured to be added to the list of actions for this operator (and other operators that use actions). Read more about actions here: :ref:`actions`.
+Actions are Python classes with a `run` method that takes a result of validating a batch against an expectation suite and does something with it (e.g., save validation results to the disk or send a Slack notification). Classes that implement this API can be configured to be added to the list of actions for this operator (and other operators that use actions). Read more about actions here: :ref:`actions`.
 
 An instance of this operator is included in the default configuration file `great_expectations.yml` that `great_expectations init` command creates.
 
@@ -41,19 +41,19 @@ RunWarningAndFailureExpectationSuitesValidationOperator
 
 RunWarningAndFailureExpectationSuitesValidationOperator implements a business logic pattern that many data practitioners consider useful.
 
-Group the expectations that you create about a data asset into two expectation suites. The critical expectations that you are confident that the data should meet go into the expectation suite that this operator calls "failure" (meaning, not meeting these expectations should be considered a failure in the pipeline). The rest of expectations go into the "warning" expectation suite.
+It validates each batch of data against two different expectation suites: "failure" and "warning". Group the expectations that you create about a data asset into two expectation suites. The critical expectations that you are confident that the data should meet go into the expectation suite that this operator calls "failure" (meaning, not meeting these expectations should be considered a failure in the pipeline). The rest of expectations go into the "warning" expectation suite.
 
 The failure Expectation Suite contains expectations that are considered important enough to justify stopping the pipeline when they are violated.
 
 RunWarningAndFailureExpectationSuitesValidationOperator retrieves two expectation suites for every data asset in the `assets_to_validate` argument of its `run` method.
 
-After completing all the validations, it sends a Slack notification with the success status.
+After completing all the validations, it sends a Slack notification with the success status. Note that it doesn't use an Action to send its Slack notification, because the notification has also been customized to summarize information from both suites.
 
 Read more about PerformActionListValidationOperator here: :ref:`run_warning_and_failure_expectation_suites_validation_operator`
 
-************************************************
-Can you implement your own Validation Operator?
-************************************************
+****************************************
+Implementing Custom Validation Operators
+****************************************
 
 If you wish to implement some validation handling logic that is not supported by the operators included in Great Expectations, follow these steps:
 
@@ -66,7 +66,7 @@ Once these steps are complete, your new Validation Operator can be configured an
 If you think that the business logic of your operator can be useful to other data practitioners, please consider contributing it to Great Expectations.
 
 **********************************************
-How do you start using a Validation Operator?
+Configuring and Running a Validation Operator
 **********************************************
 
 If you are using a Validation Operator that came with GE or was contributed by another developer,
@@ -82,17 +82,18 @@ All Validation Operators configuration blocks should appear under `validation_op
 
 To configure an instance of an operator in your Great Expectations context, create a key under `validation_operators`. This is the name of you will use to invoke this operator.
 
-.. code-block:: python
+.. code-block:: yaml
 
     my_operator:
         class_name: TheClassThatImplementsMyOperator
+        module_name: thefilethatyoutheclassisin
         foo: bar
 
 In the example of an operator config block above:
 
-* the `class_name` value is the name of the class that implements this operator. The key `module_name` must also be specified if the class is not in the default module.
+* the `class_name` value is the name of the class that implements this operator.
+* the key `module_name` must be specified if the class is not in the default module.
 * the `foo` key specifies the value of the `foo` argument of this class' constructor. Since every operator class might define its own constructor, the keys will vary.
-
 
 Invoking an operator
 ~~~~~~~~~~~~~~~~~~~~
@@ -107,7 +108,7 @@ This is an example of invoking an instance of a Validation Operator from Python:
         validation_operator_name="perform_action_list_operator",
     )
 
-* `assets_to_validate` - a list that specifies the data assets that the operator will validate. The members of the list can be either batches (which means that have data asset identifier, batch kwargs and expectation suite identifier) or a triple that will allow the operator to fetch the batch: (data asset identifier, batch kwargs, expectation suite identifier) using this method: :py:meth:`great_expectations.data_context.ConfigOnlyDataContext.get_batch`
+* `assets_to_validate` - an iterable that specifies the data assets that the operator will validate. The members of the list can be either batches or triples that will allow the operator to fetch the batch: (data_asset_name, expectation_suite_name, batch_kwargs) using this method: :py:meth:`~great_expectations.data_context.ConfigOnlyDataContext.get_batch`
 * run_identifier - pipeline run id, a timestamp or any other string that is meaningful to you and will help you refer to the result of this operation later
 * validation_operator_name you can instances of a class that implements a Validation Operator
 
@@ -118,15 +119,13 @@ Each operator class is free to define its own object that the `run` method retur
 Actions
 ********
 
-A class What happens inside an operator is completely up to the implementor.
-
-In practice a typical operator will invoke actions.
+The Validation Operator implementations above invoke actions.
 
 An action is a way to take an arbitrary method and make it configurable and runnable within a data context.
 
 The only requirement from an action is for it to have a take_action method.
 
-GE comes with a list of actions that we consider useful and you can reuse in your pipelines. Most of them take in validation results and do something with it.
+GE comes with a list of actions that we consider useful and you can reuse in your pipelines. Most of them take in validation results and do something with them.
 
 
 

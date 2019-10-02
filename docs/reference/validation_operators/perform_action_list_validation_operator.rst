@@ -44,12 +44,12 @@ An instance of PerformActionListValidationOperator is included in the default co
                 class_name: SlackRenderer
 
 
-Invokation
+Invocation
 -----------
 
 This is an example of invoking an instance of a Validation Operator from Python:
 
-.. code-block:: python
+::
 
     results = context.run_validation_operator(
         assets_to_validate=[batch0, batch1, ...],
@@ -57,13 +57,13 @@ This is an example of invoking an instance of a Validation Operator from Python:
         validation_operator_name="perform_action_list_operator",
     )
 
-* `assets_to_validate` - a list that specifies the data assets that the operator will validate. The members of the list can be either batches (which means that have data asset identifier, batch kwargs and expectation suite identifier) or a triple that will allow the operator to fetch the batch: (data asset identifier, batch kwargs, expectation suite identifier) using this method: :py:meth:`great_expectations.data_context.ConfigOnlyDataContext.get_batch`
+* `assets_to_validate` - an iterable that specifies the data assets that the operator will validate. The members of the list can be either batches or triples that will allow the operator to fetch the batch: (data_asset_name, expectation_suite_name, batch_kwargs) using this method: :py:meth:`~great_expectations.data_context.ConfigOnlyDataContext.get_batch`
 * run_identifier - pipeline run id, a timestamp or any other string that is meaningful to you and will help you refer to the result of this operation later
 * validation_operator_name you can instances of a class that implements a Validation Operator
 
 The `run` method returns an object that looks like this:
 
-.. code-block:: json
+::
 
     {
     :py:class:`great_expectations.data_context.types.ValidationResultIdentifier`:
