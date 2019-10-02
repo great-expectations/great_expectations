@@ -35,7 +35,7 @@ in your source control system already, right? ;-)
 Upgrading to 0.8.x
 *************************
 
-In the 0.8.0 release, our config format has changed dramatically to enable tons
+In the 0.8.0 release, our DataContext config format has changed dramatically to enable tons
 of great new features like extensibility.
 
 Some specific changes:
@@ -50,6 +50,9 @@ Some specific changes:
   ambiguous).
 - Completely new `SiteBuilder` configuration. See :ref:`data_documentation_reference`.
 
+BREAKING:
+ - **top-level `validate` has a new signature**, that offers a variety of different options for specifying the DataAsset
+   class to use during validation, including `data_asset_class_name` / `data_asset_module_name` or `data_asset_class`
 
 *************************
 Upgrading to 0.7.x

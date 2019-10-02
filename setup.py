@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+import versioneer
 
 # Parse requirements.txt
 with open('requirements.txt') as f:
@@ -17,7 +18,7 @@ config = {
     'author': 'The Great Expectations Team',
     'url': 'https://github.com/great-expectations/great_expectations',
     'author_email': 'team@greatexpectations.io',
-    'version': __version__,
+    'version': versioneer.get_version(),
     'install_requires': required,
     'extras_require': {
         'spark':  ['pyspark>=2.3.2'],
