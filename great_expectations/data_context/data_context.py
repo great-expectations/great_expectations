@@ -156,7 +156,6 @@ class ConfigOnlyDataContext(object):
 
         allowed_keys = {
             "config_version",
-            "result_callback",
             "config_variables_file_path",
             "plugins_directory",
             "expectations_store_name",
@@ -1775,7 +1774,7 @@ class DataContext(ConfigOnlyDataContext):
 
         except YAMLError as err:
             raise ge_exceptions.InvalidConfigurationYamlError(
-                "Your configuration file is not a valid yml file likely due to a yml syntax error."
+                "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(err)
             )
         except IOError:
             raise ge_exceptions.ConfigNotFoundError()
