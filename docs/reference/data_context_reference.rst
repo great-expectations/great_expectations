@@ -95,7 +95,7 @@ to substitute should be read. The file needs to define top-level keys which are 
 DataContext configuration file. Keys from the config variables file can be defined to represent complex types such as
 a dictionary or list, which is often useful for configuring database access.
 
-..code-block:: yaml
+.. code-block:: yaml
 
   prod_credentials:
     type: postgresql
