@@ -4,7 +4,7 @@ import shutil
 from .datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
-    build_documentation as build_documentation_impl,
+    build_docs as build_documentation_impl,
     msg_go_to_notebook
 )
 from .init import (
@@ -220,8 +220,8 @@ def add_datasource(directory):
     """
     try:
         context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError:
-        cli_message("Error: no great_expectations context configuration found in the specified directory.")
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
         return
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         _offer_to_install_new_template(err, directory)
@@ -264,8 +264,8 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
 
     try:
         context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError:
-        cli_message("Error: no great_expectations context configuration found in the specified directory.")
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
         return
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         _offer_to_install_new_template(err, directory)
@@ -308,8 +308,8 @@ def build_docs(directory, site_name, data_asset_name):
         
     try:
         context = DataContext(directory)
-    except ge_exceptions.ConfigNotFoundError:
-        cli_message("Error: no great_expectations context configuration found in the specified directory.")
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
         return
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         _offer_to_install_new_template(err, directory)
@@ -358,7 +358,7 @@ def check_config(target_directory):
 
 
 def _offer_to_install_new_template(err, target_directory):
-    cli_message(err.message)
+    cli_message("<red>{}</red>".format(err.message))
     original_filename = "great_expectations.yml"
     archive_filename = "great_expectations.yml.archive"
     if click.confirm(
@@ -408,7 +408,6 @@ def do_config_check(target_directory):
             ge_exceptions.UnsupportedConfigVersionError,
             ge_exceptions.DataContextError,
             ) as err:
-        logger.critical(err.message)
         return False, err.message
 
 

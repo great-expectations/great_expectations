@@ -67,7 +67,7 @@ try:
 except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
-    SQLAlchemyError = ProfilerError
+    SQLAlchemyError = ge_exceptions.ProfilerError
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -138,8 +138,8 @@ class ConfigOnlyDataContext(object):
     @classmethod
     def validate_config(cls, project_config):
         required_keys = {
-            # TODO next version re-introduce ge_config_version as required
-            # "ge_config_version",
+            # TODO next version re-introduce config_version as required
+            # "config_version",
             "plugins_directory",
             "expectations_store",
             "profiling_store_name",
@@ -154,7 +154,7 @@ class ConfigOnlyDataContext(object):
                 return False
 
         allowed_keys = {
-            "ge_config_version",
+            "config_version",
             "result_callback",
             "config_variables_file_path",
             "plugins_directory",
@@ -678,7 +678,7 @@ class ConfigOnlyDataContext(object):
         """
         logger.debug("Starting ConfigOnlyDataContext.add_datasource for %s" % name)
         if "generators" not in kwargs:
-            logger.warning("Adding a datasource without configuring a generator will rely on default"
+            logger.warning("Adding a datasource without configuring a generator will rely on default "
                            "generator behavior. Please add a generator.")
 
         if "type" in kwargs:
@@ -1771,15 +1771,13 @@ class DataContext(ConfigOnlyDataContext):
                 "Your configuration file is not a valid yml file likely due to a yml syntax error."
             )
         except IOError:
-            raise ge_exceptions.ConfigNotFoundError(
-                "No configuration found in %s" % str(path_to_yml)
-            )
+            raise ge_exceptions.ConfigNotFoundError()
 
-        version = config_dict.get("ge_config_version", 0)
+        version = config_dict.get("config_version", 0)
 
         # TODO clean this up once type-checking configs is more robust
         if not isinstance(version, int):
-            raise ge_exceptions.InvalidConfigValueTypeError("The key `ge_config_version` must be an integer. Please check your config file.")
+            raise ge_exceptions.InvalidConfigValueTypeError("The key `config_version` must be an integer. Please check your config file.")
 
         # When migrating from 0.7.x to 0.8.0
         if version == 0 and "validations_stores" in list(config_dict.keys()):
