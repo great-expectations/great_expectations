@@ -47,18 +47,21 @@ config_variables_file_path: uncommitted/config_variables.yml
 # used to override and extend Great Expectations.
 plugins_directory: plugins/
 
-expectations_store:
-  # This is where expectations are kept.
-  class_name: ExpectationStore
-  store_backend:
-    class_name: FixedLengthTupleFilesystemStoreBackend
-    base_directory: expectations/
-
+# Stores are configurable places to store things like expectations, evaluation
+# results, data docs, and more.
+# 
+# Point the required store names to the appropriate `stores` entry.
+expectations_store_name: expectations_store
 profiling_store_name: local_validation_result_store
 evaluation_parameter_store_name: evaluation_parameter_store
 
-# Stores are where things like expectations, evalutation results, etc are stored.
 stores:
+  expectations_store:
+    # This is where expectations are kept.
+    class_name: ExpectationStore
+    store_backend:
+      class_name: FixedLengthTupleFilesystemStoreBackend
+      base_directory: expectations/
 
   local_validation_result_store:
     class_name: ValidationResultStore

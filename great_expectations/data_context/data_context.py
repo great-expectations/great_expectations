@@ -142,7 +142,7 @@ class ConfigOnlyDataContext(object):
             # TODO next version re-introduce config_version as required
             # "config_version",
             "plugins_directory",
-            "expectations_store",
+            "expectations_store_name",
             "profiling_store_name",
             "evaluation_parameter_store_name",
             "datasources",
@@ -159,7 +159,7 @@ class ConfigOnlyDataContext(object):
             "result_callback",
             "config_variables_file_path",
             "plugins_directory",
-            "expectations_store",
+            "expectations_store_name",
             "profiling_store_name",
             "evaluation_parameter_store_name",
             "datasources",
@@ -187,11 +187,8 @@ class ConfigOnlyDataContext(object):
         Returns:
             None
         """
-        # if not isinstance(project_config, DataContextConfig):
-
         if not ConfigOnlyDataContext.validate_config(project_config):
-            raise TypeError("project_config is not valid. Try using the CLI check-config command.")
-
+            raise ge_exceptions.InvalidConfigError("Your project_config is not valid. Try using the CLI check-config command.")
 
         self._project_config = project_config
         # FIXME: This should just be a property
@@ -212,7 +209,7 @@ class ConfigOnlyDataContext(object):
         self._stores = DotDict()
         self.add_store(
             "expectations_store",
-            copy.deepcopy(self._project_config["expectations_store"]),
+            copy.deepcopy(self._project_config["stores"][self._project_config["expectations_store_name"]]),
         )
         self._init_stores(self._project_config_with_varibles_substituted["stores"])
 
@@ -1824,9 +1821,6 @@ class DataContext(ConfigOnlyDataContext):
             config = copy.deepcopy(
                 self._project_config
             )
-
-            #the expectation_store shouldn't appear in the list
-            del config["stores"]["expectations_store"]
 
             yaml.dump(config, data)
 

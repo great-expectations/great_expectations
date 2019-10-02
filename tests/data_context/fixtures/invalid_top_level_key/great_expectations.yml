@@ -3,7 +3,7 @@ this_is_a_wildly_invalid_top_level_key: "stuff"
 
 config_version: 1
 plugins_directory: "foo"
-expectations_store: "bar"
+expectations_store_name: expectations_store
 evaluation_parameter_store_name: "baz"
 datasources: "1"
 stores:
