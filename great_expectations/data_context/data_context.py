@@ -82,11 +82,13 @@ class ConfigOnlyDataContext(object):
     """This class implements most of the functionality of DataContext, with a few exceptions.
 
     1. ConfigOnlyDataContext does not attempt to keep its project_config in sync with a file on disc.
-    2. ConfigOnlyDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed into DataContext class.
+    2. ConfigOnlyDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
+        into DataContext class.
 
     Together, these changes make ConfigOnlyDataContext class more testable.
 
-    DataContext itself inherits from ConfigOnlyDataContext. It behaves essentially the same as the v0.7.* implementation of DataContext.
+    DataContext itself inherits from ConfigOnlyDataContext. It behaves essentially the same as the v0.7.*
+        implementation of DataContext.
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
@@ -107,7 +109,8 @@ class ConfigOnlyDataContext(object):
             DataContext
         """
         if not os.path.isdir(project_root_dir):
-            raise ge_exceptions.DataContextError("project_root_dir must be a directory in which to initialize a new DataContext")
+            raise ge_exceptions.DataContextError("project_root_dir must be a directory in which to initialize a "
+                                                 "new DataContext")
         else:
             try:
                 os.mkdir(os.path.join(project_root_dir, "great_expectations"))
@@ -149,7 +152,7 @@ class ConfigOnlyDataContext(object):
         }
         for key in required_keys:
             if key not in project_config:
-                return False
+                raise ge_exceptions.MissingTopLevelConfigKeyError("Missing top-level key %s" % key)
 
         allowed_keys = {
             "config_version",
@@ -166,7 +169,7 @@ class ConfigOnlyDataContext(object):
         }
         for key in project_config.keys():
             if key not in allowed_keys:
-                return False
+                raise ge_exceptions.InvalidTopLevelConfigKeyError("Invalid top-level config key %s" % key)
 
         return True
 
@@ -187,7 +190,7 @@ class ConfigOnlyDataContext(object):
         # if not isinstance(project_config, DataContextConfig):
 
         if not ConfigOnlyDataContext.validate_config(project_config):
-            raise TypeError("project_config is not valid. Try using the CLI validate-config command.")
+            raise TypeError("project_config is not valid. Try using the CLI check-config command.")
 
 
         self._project_config = project_config
