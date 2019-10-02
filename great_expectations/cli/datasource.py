@@ -4,7 +4,7 @@ from .util import cli_message
 from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.data_context import DataContext
 
-from great_expectations.version import __version__ as __version__
+from great_expectations.version import rtd_url_ge_version
 
 import logging
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ def add_datasource(context):
 ========== Datasources ==========
 
 See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue> for more information about datasources.
-""".format(__version__.replace(".", "_"))
+""".format(rtd_url_ge_version)
     )
     data_source_selection = click.prompt(
         msg_prompt_choose_data_source,
@@ -246,7 +246,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 ?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
 """
 
-    cli_message(msg_intro.format(data_source_name, __version__.replace(".", "_")))
+    cli_message(msg_intro.format(data_source_name, rtd_url_ge_version))
 
     if data_assets:
         data_assets = [item.strip() for item in data_assets.split(",")]
@@ -320,7 +320,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
                 break
 
 
-    cli_message(msg_data_doc_intro.format(__version__.replace(".", "_")))
+    cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
 
     if click.confirm("Build HTML documentation?", default=True):
         build_docs(context)

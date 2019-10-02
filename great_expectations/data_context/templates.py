@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from great_expectations.version import rtd_url_ge_version
 
 PROJECT_HELP_COMMENT = """
 # Welcome to Great Expectations! Always know what to expect from your data.
@@ -9,7 +10,7 @@ PROJECT_HELP_COMMENT = """
 # This file is intended to be committed to your source control repo.
 
 # For more help configuring great expectations see the documentation at:
-# https://docs.greatexpectations.io/en/latest/core_concepts/data_context.html#configuration
+# https://docs.greatexpectations.io/en/{}/core_concepts/data_context.html#configuration
 # or join our slack channel: http://greatexpectations.io/slack
 
 # NOTE: GE uses the names of configured `datasources` and `generators` to manage
@@ -19,7 +20,7 @@ PROJECT_HELP_COMMENT = """
 
 config_version: 1
 
-"""
+""".format(rtd_url_ge_version)
 
 CONFIG_VARIABLES_INTRO = """
 # This config file supports variable substitution which enables two use cases:
@@ -83,7 +84,7 @@ stores:
 
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
-    # https://docs.greatexpectations.io/en/v0.8.x/reference/evaluation_parameters.html
+    # https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/reference/evaluation_parameters.html
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore
   
@@ -106,7 +107,7 @@ stores:
 
 
 validation_operators:
-  # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
+  # Read about validation operators at: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/guides/validation_operators.html
   perform_action_list_operator:
     class_name: PerformActionListValidationOperator
     action_list:
