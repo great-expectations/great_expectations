@@ -3,10 +3,7 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 from click.testing import CliRunner
-import great_expectations.version
-from great_expectations.cli import cli
 
-import tempfile
 import pytest
 import json
 import os
@@ -31,7 +28,7 @@ from six import PY2
 from great_expectations.cli import cli
 from great_expectations.util import gen_directory_tree_str
 from great_expectations.cli.init import scaffold_directories_and_notebooks
-
+from great_expectations import __version__ as ge_version
 from .test_utils import assertDeepAlmostEqual
 
 def test_cli_command_entrance():
@@ -127,7 +124,7 @@ def test_cli_version():
     runner = CliRunner()
 
     result = runner.invoke(cli, ["--version"])
-    assert great_expectations.version.__version__ in str(result.output)
+    assert ge_version in str(result.output)
 
 
 def test_validate_basic_operation():
