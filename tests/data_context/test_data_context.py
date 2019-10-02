@@ -46,6 +46,17 @@ def parameterized_expectation_suite():
         return json.load(suite)
 
 
+def test_create_duplicate_expectation_suite(titanic_data_context):
+    # create new expectation suite
+    assert titanic_data_context.create_expectation_suite(data_asset_name="titanic", expectation_suite_name="test_create_expectation_suite")
+    # attempt to create expectation suite with name that already exists on data asset
+    with pytest.raises(DataContextError):
+        titanic_data_context.create_expectation_suite(data_asset_name="titanic",
+                                                      expectation_suite_name="test_create_expectation_suite")
+    # create expectation suite with name that already exists on data asset, but pass overwrite_existing=True
+    assert titanic_data_context.create_expectation_suite(data_asset_name="titanic", expectation_suite_name="test_create_expectation_suite", overwrite_existing=True)
+
+
 def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
     empty_data_context.add_datasource("my_datasource",
                                     module_name="great_expectations.datasource",
