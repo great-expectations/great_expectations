@@ -10,7 +10,7 @@ PROJECT_HELP_COMMENT = """
 # This file is intended to be committed to your source control repo.
 
 # For more help configuring great expectations see the documentation at:
-# https://docs.greatexpectations.io/en/{}/core_concepts/data_context.html#configuration
+# https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/core_concepts/data_context.html#configuration
 # or join our slack channel: http://greatexpectations.io/slack
 
 # NOTE: GE uses the names of configured `datasources` and `generators` to manage
@@ -20,7 +20,14 @@ PROJECT_HELP_COMMENT = """
 
 config_version: 1
 
-""".format(rtd_url_ge_version)
+# Datasources tell Great Expectations where your data lives and how to get it.
+# You can use the CLI command `great_expectations add-datasource` to help you
+# add a new datasource.
+#
+# Read more here at https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/datasource.html
+datasources: {}
+
+"""
 
 CONFIG_VARIABLES_INTRO = """
 # This config file supports variable substitution which enables two use cases:
@@ -207,7 +214,7 @@ data_docs:
 
 """
 
-PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + "datasources: {}\n" + PROJECT_OPTIONAL_CONFIG_COMMENT
+PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT
 
 CONFIG_VARIABLES_COMMENT = CONFIG_VARIABLES_INTRO
 
