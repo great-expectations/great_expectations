@@ -1,4 +1,4 @@
-ge_config_version: 9999
+config_version: 9999
 datasources:
   # For example, this one.
   mydatasource:
