@@ -1,4 +1,8 @@
 import pytest
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 from great_expectations.validation_operators import (
     BasicValidationAction,
@@ -68,7 +72,7 @@ def test_StoreAction():
 
     vr_id = "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
     action.run(
-        validation_result_suite_id=ValidationResultIdentifier(from_string=vr_id),
+        validation_result_suite_identifier=ValidationResultIdentifier(from_string=vr_id),
         validation_result_suite={},
         data_asset=None
     )
@@ -81,13 +85,14 @@ def test_StoreAction():
 
 
 def test_SlackNotificationAction(data_context):
+
     renderer = {
                     "module_name": "great_expectations.render.renderer.slack_renderer",
                     "class_name": "SlackRenderer",
                 }
     slack_webhook = "https://hooks.slack.com/services/test/slack/webhook"
     notify_on = "all"
-    
+
     slack_action = SlackNotificationAction(
         data_context=data_context,
         renderer=renderer,
@@ -102,15 +107,17 @@ def test_SlackNotificationAction(data_context):
                                         'data_asset_name': {'datasource': 'x', 'generator': 'y',
                                                             'generator_asset': 'z'},
                                         'expectation_suite_name': 'default', 'run_id': '2019-09-25T060538.829112Z'}}
-    
+
     validation_result_suite_id = ValidationResultIdentifier(**{'expectation_suite_identifier': {
         'data_asset_name': {'datasource': 'x', 'generator': 'y', 'generator_asset': 'z'},
         'expectation_suite_name': 'default'}, 'run_id': 'test_100'})
 
-    # assert slack_action.run(
-    #     validation_result_suite_id=validation_result_suite_id,
-    #     validation_result_suite=validation_result_suite
-    # ) == "Slack notification succeeded."
+    #TODO: improve this test - currently it is verifying a failed call to Slack
+    assert slack_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None
+    ) == None
 
 
 # def test_ExtractAndStoreEvaluationParamsAction():
