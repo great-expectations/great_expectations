@@ -24,9 +24,9 @@ config_version: 1
 
 CONFIG_VARIABLES_INTRO = """
 # This config file supports variable substitution which enables two use cases:
-#   1. Secrets are kept out of committed files.
-#   2. Configuration parameters can change based on the environment. For
-#      example: dev vs staging vs prod.
+#   - Secrets are kept out of committed files.
+#   - Configuration parameters can change based on the environment. For example:
+#     dev vs staging vs prod.
 #
 # When GE encounters substitution syntax (like the examples below) in the config 
 # file it will attempt to replace the value of “my_key” with the value from an 
@@ -56,7 +56,7 @@ plugins_directory: plugins/
 # and must be named here. Additional stores can be configured below and used for
 # data_docs, validation_operators or other purposes.
 #
-# Point the required store names to the appropriate `stores` entry.
+# Point the following required store names to the appropriate `stores` entry.
 
 expectations_store_name: expectations_store
 profiling_store_name: local_validation_result_store
@@ -64,7 +64,6 @@ evaluation_parameter_store_name: evaluation_parameter_store
 
 stores:
   expectations_store:
-    # This is where expectations are kept.
     class_name: ExpectationStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
@@ -139,10 +138,6 @@ validation_operators:
       #       module_name: great_expectations.render.renderer.slack_renderer
       #       class_name: SlackRenderer
     
-# Uncomment the lines below to enable a result callback.
-
-# result_callback:
-#   slack: ${slack_callback_url}
 
 # TODO : Remove the extra layer of yml nesting in v0.8:
 data_docs:
