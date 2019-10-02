@@ -346,6 +346,7 @@ def check_config(target_directory):
         if is_config_ok:
             cli_message("Your config file appears valid!")
         else:
+            cli_message("Unfortunately, your config appears to be invalid:")
             cli_message(error_message)
             sys.exit(1)
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
@@ -403,7 +404,8 @@ def do_config_check(target_directory):
             ge_exceptions.UnsupportedConfigVersionError,
             ge_exceptions.DataContextError,
             ) as err:
-        logger.critical(err.message)
+        # Since we are returning the message to be printed as an error, and the CLI enables logging, we don't log here
+        # logger.critical(err.message)
         return False, err.message
 
 
