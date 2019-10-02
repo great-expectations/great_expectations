@@ -1,12 +1,7 @@
 config_version: 1
 plugins_directory: plugins/
 
-expectations_store:
-  class_name: ExpectationStore
-  store_backend:
-    class_name: FixedLengthTupleFilesystemStoreBackend
-    base_directory: expectations/
-
+expectations_store_name: local_expectations_store
 evaluation_parameter_store_name: evaluation_parameter_store
 profiling_store_name: local_validation_result_store
 
@@ -43,6 +38,11 @@ validation_operators:
           target_store_name: evaluation_parameter_store
 
 stores:
+  local_expectations_store:
+    class_name: ExpectationStore
+    store_backend:
+      class_name: FixedLengthTupleFilesystemStoreBackend
+      base_directory: expectations/
   local_validation_result_store:
     class_name: ValidationResultStore
     store_backend:
