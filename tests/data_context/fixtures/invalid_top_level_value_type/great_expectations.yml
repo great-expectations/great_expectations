@@ -1,5 +1,5 @@
 # This must have all the required keys one with an incorrect type
-ge_config_version: "foo"
+config_version: "foo"
 plugins_directory: "foo"
 expectations_store: "foo"
 evaluation_parameter_store_name: "foo"
