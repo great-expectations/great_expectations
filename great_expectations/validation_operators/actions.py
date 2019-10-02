@@ -2,24 +2,15 @@ import logging
 import requests
 logger = logging.getLogger(__name__)
 
-from ..util import (
-    get_class_from_module_name_and_class_name,
-)
-
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
-# from .types import (
-#     ActionConfig,
-#     ActionInternalConfig,
-# )
+
 from ..data_context.types import (
     ValidationResultIdentifier
 )
 
 from .util import send_slack_notification
-
-# NOTE: Abe 2019/08/23 : This is first implementation of all these classes. Consider them UNSTABLE for now. 
 
 class BasicValidationAction(object):
     """
@@ -42,14 +33,19 @@ class NamespacedValidationAction(BasicValidationAction):
     def __init__(self, data_context):
         self.data_context = data_context
 
-    def run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
+    def run(self, validation_result_suite, validation_result_suite_identifier, data_asset ,**kwargs):
         """
 
         :param validation_result_suite:
         :param validation_result_suite_identifier:
         :param data_asset:
+        :param: kwargs - any additional arguments the child might use
         :return:
         """
+        return self._run(validation_result_suite, validation_result_suite_identifier, data_asset ,**kwargs)
+
+
+    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
         return NotImplementedError
 
 
@@ -58,7 +54,7 @@ class NoOpAction(NamespacedValidationAction):
     def __init__(self, data_context,):
         super(NoOpAction, self).__init__(data_context)
     
-    def run(self, validation_result_id, validation_result_suite, data_asset):
+    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
         print("Happily doing nothing")
 
 
@@ -105,15 +101,15 @@ class SlackNotificationAction(NamespacedValidationAction):
         assert slack_webhook, "No Slack webhook found in action config."
         self.notify_on = notify_on
         
-    def run(self, validation_result_suite_id, validation_result_suite, data_asset=None):
+    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset=None):
         logger.debug("SlackNotificationAction.run")
     
         if validation_result_suite is None:
             return
         
-        if not isinstance(validation_result_suite_id, ValidationResultIdentifier):
+        if not isinstance(validation_result_suite_identifier, ValidationResultIdentifier):
             raise TypeError("validation_result_suite_id must be of type ValidationResultIdentifier, not {0}".format(
-                type(validation_result_suite_id)
+                type(validation_result_suite_identifier)
             ))
 
         validation_success = validation_result_suite["success"]
@@ -150,19 +146,19 @@ class StoreAction(NamespacedValidationAction):
         # Unless ALL stores are compatible...
         self.target_store = data_context.stores[target_store_name]
 
-    def run(self, validation_result_suite_id, validation_result_suite, data_asset):
+    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
         logger.debug("StoreAction.run")
 
         if validation_result_suite is None:
             return
 
-        if not isinstance(validation_result_suite_id, ValidationResultIdentifier):
+        if not isinstance(validation_result_suite_identifier, ValidationResultIdentifier):
             raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
-                type(validation_result_suite_id)
+                type(validation_result_suite_identifier)
             ))
 
 
-        self.target_store.set(validation_result_suite_id, validation_result_suite)
+        self.target_store.set(validation_result_suite_identifier, validation_result_suite)
 
 
 class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
@@ -191,21 +187,21 @@ class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
         # Unless ALL stores are compatible...
         self.target_store = data_context.stores[target_store_name]
 
-    def run(self, validation_result_suite_id, validation_result_suite, data_asset):
+    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
         logger.debug("ExtractAndStoreEvaluationParamsAction.run")
 
         if validation_result_suite is None:
             return
 
-        if not isinstance(validation_result_suite_id, ValidationResultIdentifier):
+        if not isinstance(validation_result_suite_identifier, ValidationResultIdentifier):
             raise TypeError("validation_result_id must be of type ExtractAndStoreEvaluationParamsAction, not {0}".format(
-                type(validation_result_suite_id)
+                type(validation_result_suite_identifier)
             ))
 
 
         self.data_context._extract_and_store_parameters_from_validation_results(
             validation_result_suite,
-            validation_result_suite_id.expectation_suite_identifier.data_asset_name,
-            validation_result_suite_id.expectation_suite_identifier.expectation_suite_name,
-            validation_result_suite_id.run_id,
+            validation_result_suite_identifier.expectation_suite_identifier.data_asset_name,
+            validation_result_suite_identifier.expectation_suite_identifier.expectation_suite_name,
+            validation_result_suite_identifier.run_id,
         )
