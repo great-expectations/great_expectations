@@ -31,7 +31,7 @@ def test_get_metrics_basic(titanic_multibatch_data_context):
     profiler = BasicDatasetProfiler
 
     for batch_kwargs_set in all_batch_kwargs:
-        context.create_expectation_suite("titanic", "foo")
+        context.create_expectation_suite("titanic", "foo", overwrite_existing=True)
         batch = context.get_batch('titanic', "foo", batch_kwargs=batch_kwargs_set)
         expectation_suite, validation_result = profiler.profile(batch, run_id="profiling_" + BatchKwargs.build_batch_fingerprint(
             batch._batch_kwargs).fingerprint)
