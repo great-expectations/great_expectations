@@ -180,6 +180,21 @@ This is especially powerful when combined with great_expectations's command line
       }
     }
 
+*********************
+Validation Operators
+*********************
+
+The example above demonstrates how to validate one batch of data against one expectation suite. The `validate` method returns a dictionary of validation results. This is sufficient when you explore your data and get to know Great Expectations.
+When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
+
+* validating a group of batches that are logically related
+* validating a batch against several expectation suites
+* doing something with the validation results (e.g., saving them for a later review, sending notifications in case of failures, etc.).
+
+Validation Operators are mini-applications that can be configured to implement these scenarios.
+
+Read :ref:`validation_operators_and_actions` to learn more.
+
 
 *********************
 Deployment patterns
