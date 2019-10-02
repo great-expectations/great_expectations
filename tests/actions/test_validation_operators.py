@@ -8,7 +8,6 @@ from freezegun import freeze_time
 import pandas as pd
 
 import great_expectations as ge
-from great_expectations.actions.validation_operators import (
 from great_expectations.validation_operators.validation_operators import (
     PerformActionListValidationOperator,
     RunWarningAndFailureExpectationSuitesValidationOperator
