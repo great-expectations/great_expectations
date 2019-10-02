@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from great_expectations.version import rtd_url_ge_version
+from great_expectations import rtd_url_ge_version
 
 PROJECT_HELP_COMMENT = """
 # Welcome to Great Expectations! Always know what to expect from your data.
