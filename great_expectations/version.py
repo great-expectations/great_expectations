@@ -35,3 +35,4 @@ else:
     logger.debug("Using default version tag.")
     __version__ = tag
 
+rtd_url_ge_version = __version__.replace(".", "_")
