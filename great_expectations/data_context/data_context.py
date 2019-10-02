@@ -82,11 +82,13 @@ class ConfigOnlyDataContext(object):
     """This class implements most of the functionality of DataContext, with a few exceptions.
 
     1. ConfigOnlyDataContext does not attempt to keep its project_config in sync with a file on disc.
-    2. ConfigOnlyDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed into DataContext class.
+    2. ConfigOnlyDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
+        into DataContext class.
 
     Together, these changes make ConfigOnlyDataContext class more testable.
 
-    DataContext itself inherits from ConfigOnlyDataContext. It behaves essentially the same as the v0.7.* implementation of DataContext.
+    DataContext itself inherits from ConfigOnlyDataContext. It behaves essentially the same as the v0.7.*
+        implementation of DataContext.
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
@@ -107,7 +109,8 @@ class ConfigOnlyDataContext(object):
             DataContext
         """
         if not os.path.isdir(project_root_dir):
-            raise ge_exceptions.DataContextError("project_root_dir must be a directory in which to initialize a new DataContext")
+            raise ge_exceptions.DataContextError("project_root_dir must be a directory in which to initialize a "
+                                                 "new DataContext")
         else:
             try:
                 os.mkdir(os.path.join(project_root_dir, "great_expectations"))
@@ -139,7 +142,7 @@ class ConfigOnlyDataContext(object):
             # TODO next version re-introduce config_version as required
             # "config_version",
             "plugins_directory",
-            "expectations_store",
+            "expectations_store_name",
             "profiling_store_name",
             "evaluation_parameter_store_name",
             "datasources",
@@ -149,14 +152,13 @@ class ConfigOnlyDataContext(object):
         }
         for key in required_keys:
             if key not in project_config:
-                return False
+                raise ge_exceptions.MissingTopLevelConfigKeyError("Missing top-level key %s" % key)
 
         allowed_keys = {
             "config_version",
-            "result_callback",
             "config_variables_file_path",
             "plugins_directory",
-            "expectations_store",
+            "expectations_store_name",
             "profiling_store_name",
             "evaluation_parameter_store_name",
             "datasources",
@@ -166,7 +168,7 @@ class ConfigOnlyDataContext(object):
         }
         for key in project_config.keys():
             if key not in allowed_keys:
-                return False
+                raise ge_exceptions.InvalidTopLevelConfigKeyError("Invalid top-level config key %s" % key)
 
         return True
 
@@ -184,11 +186,8 @@ class ConfigOnlyDataContext(object):
         Returns:
             None
         """
-        # if not isinstance(project_config, DataContextConfig):
-
         if not ConfigOnlyDataContext.validate_config(project_config):
-            raise TypeError("project_config is not valid. Try using the CLI validate-config command.")
-
+            raise ge_exceptions.InvalidConfigError("Your project_config is not valid. Try using the CLI check-config command.")
 
         self._project_config = project_config
         # FIXME: This should just be a property
@@ -209,7 +208,7 @@ class ConfigOnlyDataContext(object):
         self._stores = DotDict()
         self.add_store(
             "expectations_store",
-            copy.deepcopy(self._project_config["expectations_store"]),
+            copy.deepcopy(self._project_config["stores"][self._project_config["expectations_store_name"]]),
         )
         self._init_stores(self._project_config_with_varibles_substituted["stores"])
 
@@ -1775,7 +1774,7 @@ class DataContext(ConfigOnlyDataContext):
 
         except YAMLError as err:
             raise ge_exceptions.InvalidConfigurationYamlError(
-                "Your configuration file is not a valid yml file likely due to a yml syntax error."
+                "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(err)
             )
         except IOError:
             raise ge_exceptions.ConfigNotFoundError()
@@ -1821,9 +1820,6 @@ class DataContext(ConfigOnlyDataContext):
             config = copy.deepcopy(
                 self._project_config
             )
-
-            #the expectation_store shouldn't appear in the list
-            del config["stores"]["expectations_store"]
 
             yaml.dump(config, data)
 

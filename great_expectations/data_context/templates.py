@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from great_expectations.version import rtd_url_ge_version
+from great_expectations import rtd_url_ge_version
 
 PROJECT_HELP_COMMENT = """
 # Welcome to Great Expectations! Always know what to expect from your data.
@@ -24,9 +24,9 @@ config_version: 1
 
 CONFIG_VARIABLES_INTRO = """
 # This config file supports variable substitution which enables two use cases:
-#   1. Secrets are kept out of committed files.
-#   2. Configuration parameters can change based on the environment. For
-#      example: dev vs staging vs prod.
+#   - Secrets are kept out of committed files.
+#   - Configuration parameters can change based on the environment. For example:
+#     dev vs staging vs prod.
 #
 # When GE encounters substitution syntaxes in the config file, like the ones
 # below it will attempt to replace the value of “my_key” with the value from an 
@@ -47,18 +47,24 @@ config_variables_file_path: uncommitted/config_variables.yml
 # used to override and extend Great Expectations.
 plugins_directory: plugins/
 
-expectations_store:
-  # This is where expectations are kept.
-  class_name: ExpectationStore
-  store_backend:
-    class_name: FixedLengthTupleFilesystemStoreBackend
-    base_directory: expectations/
-
+# Stores are configurable places to store things like expectations, evaluation
+# results, data docs, and more.
+# 
+# Three stores are required: expectations, profiling, and evaluation parameters,
+# and must be named here. Additional stores can be configured below and used for
+# data_docs, validation_operators or other purposes.
+#
+# Point the following required store names to the appropriate `stores` entry.
+expectations_store_name: expectations_store
 profiling_store_name: local_validation_result_store
 evaluation_parameter_store_name: evaluation_parameter_store
 
-# Stores are where things like expectations, evalutation results, etc are stored.
 stores:
+  expectations_store:
+    class_name: ExpectationStore
+    store_backend:
+      class_name: FixedLengthTupleFilesystemStoreBackend
+      base_directory: expectations/
 
   local_validation_result_store:
     class_name: ValidationResultStore
@@ -128,10 +134,6 @@ validation_operators:
             module_name: great_expectations.render.renderer.slack_renderer
             class_name: SlackRenderer
     
-# Uncomment the lines below to enable a result callback.
-
-# result_callback:
-#   slack: ${slack_callback_url}
 
 # TODO : Remove the extra layer of yml nesting in v0.8:
 data_docs:

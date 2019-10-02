@@ -8,6 +8,7 @@ from freezegun import freeze_time
 import pandas as pd
 
 import great_expectations as ge
+from great_expectations.actions.validation_operators import (
 from great_expectations.validation_operators.validation_operators import (
     PerformActionListValidationOperator,
     RunWarningAndFailureExpectationSuitesValidationOperator
@@ -16,28 +17,24 @@ from great_expectations.validation_operators.validation_operators import (
 from great_expectations.data_context import (
     ConfigOnlyDataContext,
 )
-from great_expectations.data_context.types import (
-    # DataContextConfig,
-    DataAssetIdentifier,
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
-)
+from great_expectations.data_context.types import DataAssetIdentifier
+
 
 @pytest.fixture()
 def basic_data_context_config_for_validation_operator():
-    # return DataContextConfig(**{
     return {
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name" : "evaluation_parameter_store",
-        "expectations_store" : {
-            "class_name": "ExpectationStore",
-            "store_backend": {
-                "class_name": "FixedLengthTupleFilesystemStoreBackend",
-                "base_directory": "expectations/",
-            }
-        },
+        "expectations_store_name": "expectations_store",
         "datasources": {},
         "stores": {
+            "expectations_store" : {
+                "class_name": "ExpectationStore",
+                "store_backend": {
+                    "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                    "base_directory": "expectations/",
+                }
+            },
             # This isn't currently used for Validation Actions, but it's required for DataContext to work.
             "evaluation_parameter_store" : {
                 "module_name": "great_expectations.data_context.store",
@@ -57,7 +54,6 @@ def basic_data_context_config_for_validation_operator():
         },
         "validation_operators" : {},
     }
-    # })
 
 
 @freeze_time("09/26/19 13:42:41")

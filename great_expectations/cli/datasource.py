@@ -4,7 +4,7 @@ from .util import cli_message
 from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.data_context import DataContext
 
-from great_expectations.version import rtd_url_ge_version
+from great_expectations import rtd_url_ge_version
 
 import logging
 logger = logging.getLogger(__name__)
