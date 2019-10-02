@@ -1,66 +1,63 @@
 # -*- coding: utf-8 -*-
+from great_expectations.version import rtd_url_ge_version
 
 PROJECT_HELP_COMMENT = """
-# Welcome to great expectations. 
-# This project configuration file allows you to define datasources, 
-# generators, integrations, and other configuration artifacts that
-# make it easier to use Great Expectations.
+# Welcome to Great Expectations! Always know what to expect from your data.
+# 
+# This project configuration file allows you to define datasources, generators,
+# integrations, and other things to help you crush pipeline debt.
+#
+# This file is intended to be committed to your source control repo.
 
-# For more help configuring great expectations, 
-# see the documentation at: https://docs.greatexpectations.io/en/latest/core_concepts/data_context.html#configuration
+# For more help configuring great expectations see the documentation at:
+# https://docs.greatexpectations.io/en/{}/core_concepts/data_context.html#configuration
+# or join our slack channel: http://greatexpectations.io/slack
 
-# NOTE: GE uses the names of configured datasources and generators to manage
-# how expectations and other configuration artifacts are stored in the 
-# expectations/ and datasources/ folders. If you need to rename an existing
-# datasource or generator, be sure to also update the paths for related artifacts.
+# NOTE: GE uses the names of configured `datasources` and `generators` to manage
+# how `expectations` and other artifacts are stored in the `expectations/` and 
+# `datasources/` folders. If you need to rename an existing `datasource` or 
+# `generator`, be sure to also update the relevant directory names.
 
-ge_config_version: 1
+config_version: 1
 
-"""
+""".format(rtd_url_ge_version)
 
 CONFIG_VARIABLES_INTRO = """
-# Great Expectations config file supports variable substitution.
-
-# Variable substitution enables these two use cases:
-# 1. do not store sensitive credentials in a committed file (since the credentials file should be in 
-#    the uncommitted directory  
-# 2. allow a config parameter to take different values, depending on the environment (e.g., dev/staging/prod)
+# This config file supports variable substitution which enables two use cases:
+#   1. Secrets are kept out of committed files.
+#   2. Configuration parameters can change based on the environment. For
+#      example: dev vs staging vs prod.
 #
-# When GE encounters the following syntax in the config file:
+# When GE encounters substitution syntaxes in the config file, like the ones
+# below it will attempt to replace the value of “my_key” with the value from an 
+# environment variable “my_value” or a corresponding key read from the file
+# specified using `config_variables_file_path`. An environment variable will
+# always take precedence.
+#   - `my_key: ${my_value}
+#   - `my_key: $my_value`
 #
-# my_key: ${my_value} (or $my_value)
-#
-# GE will attempt to replace the value of “my_key” with the value of env variable “my_value” or with the value of the key “my_value” read from credentials file (env variable takes precedence).
-#
-# If the replacing value comes from the config variables file, it can be a simple value or a dictionary. If it comes from an environment variable, it must be a simple value.
-"""
+# If the substitution value comes from the config variables file, it can be a
+# simple (non-nested) value or a nested value such as a dictionary. If it comes
+# from an environment variable, it must be a simple value."""
 
 PROJECT_OPTIONAL_CONFIG_COMMENT = CONFIG_VARIABLES_INTRO + """
 config_variables_file_path: uncommitted/config_variables.yml
 
-# The plugins_directory is where the data_context will look for custom_data_assets.py
-# and any configured evaluation parameter store
-
+# The plugins_directory will be added to your python path for custom modules
+# used to override and extend Great Expectations.
 plugins_directory: plugins/
 
 expectations_store:
+  # This is where expectations are kept.
   class_name: ExpectationStore
   store_backend:
     class_name: FixedLengthTupleFilesystemStoreBackend
     base_directory: expectations/
 
 profiling_store_name: local_validation_result_store
-
 evaluation_parameter_store_name: evaluation_parameter_store
 
-# Configure additional data context options here.
-
-# Uncomment the lines below to enable s3 as a result store. If a result store is enabled,
-# validation results will be saved in the store according to run id.
-
-# For S3, ensure that appropriate credentials or assume_role permissions are set where
-# validation happens.
-
+# Stores are where things like expectations, evalutation results, etc are stored.
 stores:
 
   local_validation_result_store:
@@ -70,6 +67,11 @@ stores:
       base_directory: uncommitted/validations/
       filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
+  # Uncomment the lines below to enable s3 as a result store. When enabled,
+  # validation results will be saved in the store according to `run id`.
+  # For S3, ensure that appropriate credentials or assume_role permissions are
+  # set where validation happens.
+  
   # s3_validation_result_store:
   #   class_name: ValidationStore
   #   store_backend:
@@ -79,55 +81,20 @@ stores:
   #     file_extension: json
   #     filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
 
-  # FIXME: These configs are temporarily commented out to facititate refactoring Stores.
 
-  # local_profiling_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: uncommitted/profiling/
-  #     serialization_type: json
-  #     file_extension: .json
-
-  # local_workbench_site_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: uncommitted/documentation/local_site
-  #     file_extension: .html
-
-  # shared_team_site_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: uncommitted/documentation/team_site
-  #     file_extension: .html
-
-  # fixture_validation_results_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: fixtures/validations
-  #     file_extension: .zzz
-
+  evaluation_parameter_store:
+    # Evaluation Parameters enable dynamic expectations. Read more here:
+    # https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/reference/evaluation_parameters.html
+    module_name: great_expectations.data_context.store
+    class_name: EvaluationParameterStore
+  
   fixture_validation_results_store:
     class_name: ValidationResultStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: fixtures/validations
       filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
-
-#  data_asset_snapshot_store:
-#    module_name: great_expectations.data_context.store
-#    class_name: S3Store
-#    store_config:
-#      bucket:
-#      key_prefix:
-
-  evaluation_parameter_store:
-    module_name: great_expectations.data_context.store
-    class_name: EvaluationParameterStore
-
+  
   local_site_html_store:
     module_name: great_expectations.data_context.store
     class_name: HtmlSiteStore
@@ -140,7 +107,7 @@ stores:
 
 
 validation_operators:
-  # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
+  # Read about validation operators at: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/guides/validation_operators.html
   perform_action_list_operator:
     class_name: PerformActionListValidationOperator
     action_list:

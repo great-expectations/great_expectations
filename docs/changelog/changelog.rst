@@ -36,7 +36,7 @@ Highlights include:
      begin adding additional features.
    - Restructured documentation: our docs have a new structure and have been reorganized to provide space for more
      easily adding and accessing reference material. Stay tuned for additional detail.
-
+   - The command build-documentation has been renamed build-docs.
 
 v0.7.11__develop
 -----------------
