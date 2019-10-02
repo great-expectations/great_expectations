@@ -2,7 +2,7 @@
 {% set identifier_list = full_data_asset_identifier.split("/") -%}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        {% if utm_medium == "validation-results-page" %}
+        {% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
           <li class="breadcrumb-item"><a href="../../../../../index.html">Home</a></li>
         {% else %}
           <li class="breadcrumb-item"><a href="../../../../index.html">Home</a></li>
