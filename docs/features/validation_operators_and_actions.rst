@@ -1,12 +1,13 @@
 .. _validation_operators_and_actions:
 
 ####################################
-Validation Operators And Actions
+Validation Operators and Actions
 ####################################
 
-When you want to validate several Expectation Suites together and take an action based on the result of this
-validation, Validation Operators provide a convenient abstraction for both bundling the validation of multiple
-expectation suites and the actions that should be taken.
+When you want to take an action based on the result of validation of one or more
+Expectation Suites, Validation Operators provide a convenient abstraction for
+both bundling the validation of multiple expectation suites and the actions that
+should be taken.
 
 If you are using a Validation Operator that came with GE or was contributed by another developer,
 you can get to a rich set of useful behaviors with very little coding. This is done by editing the operator's
