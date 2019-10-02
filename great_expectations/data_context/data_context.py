@@ -148,7 +148,7 @@ class ConfigOnlyDataContext(object):
             "datasources",
             "stores",
             "data_docs",
-            # "validation_operators", # TODO: Activate!
+            "validation_operators"
         }
         for key in required_keys:
             if key not in project_config:
@@ -1317,82 +1317,82 @@ class ConfigOnlyDataContext(object):
 
         self._compiled = True
 
-    # TDOD : Deprecate this method in favor of Stores.
-    def write_resource(
-            self,
-            resource,  # bytes
-            resource_name,  # name to be used inside namespace, e.g. "my_file.html"
-            resource_store,  # store to use to write the resource
-            resource_namespace=None,  # An arbitrary name added to the resource namespace
-            data_asset_name=None,  # A name that will be normalized by the data_context and used in the namespace
-            expectation_suite_name=None,  # A string that is part of the namespace
-            run_id=None
-    ):  # A string that is part of the namespace
-        """Writes the bytes in "resource" according to the resource_store's writing method, with a name constructed
-        as follows:
-
-        resource_namespace/run_id/data_asset_name/expectation_suite_name/resource_name
-
-        If any of those components is None, it is omitted from the namespace.
-
-        Args:
-            resource:
-            resource_name:
-            resource_store:
-            resource_namespace:
-            data_asset_name:
-            expectation_suite_name:
-            run_id:
-
-        Returns:
-            A dictionary describing how to locate the resource (specific to resource_store type)
-        """
-        logger.debug("Starting DatContext.write_resource")
-
-        if resource_store is None:
-            logger.error("No resource store specified")
-            return
-
-        resource_locator_info = {}
-
-        if resource_store['type'] == "s3":
-            raise NotImplementedError("s3 is not currently a supported resource_store type for writing")
-        elif resource_store['type'] == 'filesystem':
-            resource_store = self._normalize_store_path(resource_store)
-            path_components = [resource_store['base_directory']]
-            if resource_namespace is not None:
-                path_components.append(resource_namespace)
-            if run_id is not None:
-                path_components.append(run_id)
-            if data_asset_name is not None:
-                if not isinstance(data_asset_name, NormalizedDataAssetName):
-                    normalized_name = self._normalize_data_asset_name(data_asset_name)
-                else:
-                    normalized_name = data_asset_name
-                if expectation_suite_name is not None:
-                    path_components.append(self._get_normalized_data_asset_name_filepath(normalized_name, expectation_suite_name, base_path="", file_extension=""))
-                else:
-                    path_components.append(
-                        self._get_normalized_data_asset_name_filepath(normalized_name, "",
-                                                                      base_path="", file_extension=""))
-            else:
-                if expectation_suite_name is not None:
-                    path_components.append(expectation_suite_name)
-
-            path_components.append(resource_name)
-
-            path = os.path.join(
-                *path_components
-            )
-            safe_mmkdir(os.path.dirname(path))
-            with open(path, "w") as writer:
-                writer.write(resource)
-
-            resource_locator_info['path'] = path
-        else:
-            raise DataContextError("Unrecognized resource store type.")
-
-        return resource_locator_info
+    # # TDOD : Deprecate this method in favor of Stores.
+    # def write_resource(
+    #         self,
+    #         resource,  # bytes
+    #         resource_name,  # name to be used inside namespace, e.g. "my_file.html"
+    #         resource_store,  # store to use to write the resource
+    #         resource_namespace=None,  # An arbitrary name added to the resource namespace
+    #         data_asset_name=None,  # A name that will be normalized by the data_context and used in the namespace
+    #         expectation_suite_name=None,  # A string that is part of the namespace
+    #         run_id=None
+    # ):  # A string that is part of the namespace
+    #     """Writes the bytes in "resource" according to the resource_store's writing method, with a name constructed
+    #     as follows:
+    #
+    #     resource_namespace/run_id/data_asset_name/expectation_suite_name/resource_name
+    #
+    #     If any of those components is None, it is omitted from the namespace.
+    #
+    #     Args:
+    #         resource:
+    #         resource_name:
+    #         resource_store:
+    #         resource_namespace:
+    #         data_asset_name:
+    #         expectation_suite_name:
+    #         run_id:
+    #
+    #     Returns:
+    #         A dictionary describing how to locate the resource (specific to resource_store type)
+    #     """
+    #     logger.debug("Starting DatContext.write_resource")
+    #
+    #     if resource_store is None:
+    #         logger.error("No resource store specified")
+    #         return
+    #
+    #     resource_locator_info = {}
+    #
+    #     if resource_store['type'] == "s3":
+    #         raise NotImplementedError("s3 is not currently a supported resource_store type for writing")
+    #     elif resource_store['type'] == 'filesystem':
+    #         resource_store = self._normalize_store_path(resource_store)
+    #         path_components = [resource_store['base_directory']]
+    #         if resource_namespace is not None:
+    #             path_components.append(resource_namespace)
+    #         if run_id is not None:
+    #             path_components.append(run_id)
+    #         if data_asset_name is not None:
+    #             if not isinstance(data_asset_name, NormalizedDataAssetName):
+    #                 normalized_name = self._normalize_data_asset_name(data_asset_name)
+    #             else:
+    #                 normalized_name = data_asset_name
+    #             if expectation_suite_name is not None:
+    #                 path_components.append(self._get_normalized_data_asset_name_filepath(normalized_name, expectation_suite_name, base_path="", file_extension=""))
+    #             else:
+    #                 path_components.append(
+    #                     self._get_normalized_data_asset_name_filepath(normalized_name, "",
+    #                                                                   base_path="", file_extension=""))
+    #         else:
+    #             if expectation_suite_name is not None:
+    #                 path_components.append(expectation_suite_name)
+    #
+    #         path_components.append(resource_name)
+    #
+    #         path = os.path.join(
+    #             *path_components
+    #         )
+    #         safe_mmkdir(os.path.dirname(path))
+    #         with open(path, "w") as writer:
+    #             writer.write(resource)
+    #
+    #         resource_locator_info['path'] = path
+    #     else:
+    #         raise DataContextError("Unrecognized resource store type.")
+    #
+    #     return resource_locator_info
 
     def get_validation_result(
         self,
@@ -1854,6 +1854,7 @@ class DataContext(ConfigOnlyDataContext):
             raise ge_exceptions.DataContextError(
                 "Unable to locate context root directory. Please provide a directory name."
             )
+
 
 class ExplorerDataContext(DataContext):
 
