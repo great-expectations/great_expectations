@@ -44,7 +44,7 @@ An instance of PerformActionListValidationOperator is included in the default co
                 class_name: SlackRenderer
 
 
-Invokation
+Invocation
 -----------
 
 This is an example of invoking an instance of a Validation Operator from Python:
@@ -63,7 +63,7 @@ This is an example of invoking an instance of a Validation Operator from Python:
 
 The `run` method returns an object that looks like this:
 
-.. code-block:: json
+::
 
     {
     :py:class:`great_expectations.data_context.types.ValidationResultIdentifier`:
