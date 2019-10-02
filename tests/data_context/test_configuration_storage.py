@@ -44,7 +44,7 @@ def test_preserve_comments_in_yml_after_adding_datasource(data_context):
     # TODO The comments on lines 1,2 & 4 of the fixture exposes the bug.
     expected = """# This is a basic configuration for testing.
 # It has comments that should be preserved.
-ge_config_version: 1
+config_version: 1
 # Here's a comment between the config version and the datassources
 datasources:
   # For example, this one.
@@ -77,20 +77,21 @@ datasources:
 
 config_variables_file_path: uncommitted/config_variables.yml
 
-expectations_store:
-  class_name: ExpectationStore
-  store_backend:
-    class_name: FixedLengthTupleFilesystemStoreBackend
-    base_directory: expectations/
 
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
+expectations_store_name: expectations_store
 profiling_store_name: local_validation_result_store
 
 data_docs:
   sites:
 
 stores:
+  expectations_store:
+    class_name: ExpectationStore
+    store_backend:
+      class_name: FixedLengthTupleFilesystemStoreBackend
+      base_directory: expectations/
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore

@@ -1,14 +1,14 @@
 import os
 import click
 from .util import cli_message
-from great_expectations.render import DefaultJinjaPageView
 from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.data_context import DataContext
 
-from great_expectations.version import __version__ as __version__
+from great_expectations.version import rtd_url_ge_version
 
 import logging
 logger = logging.getLogger(__name__)
+
 
 def add_datasource(context):
     cli_message(
@@ -16,7 +16,7 @@ def add_datasource(context):
 ========== Datasources ==========
 
 See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue> for more information about datasources.
-""".format(__version__.replace(".", "_"))
+""".format(rtd_url_ge_version)
     )
     data_source_selection = click.prompt(
         msg_prompt_choose_data_source,
@@ -25,167 +25,176 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
     )
 
     cli_message(data_source_selection)
+    data_source_name = None
 
     if data_source_selection == "1":  # pandas
-        path = click.prompt(
-            msg_prompt_filesys_enter_base_path,
-            # default='/data/',
-            type=click.Path(
-                exists=True,
-                file_okay=False,
-                dir_okay=True,
-                readable=True
-            ),
-            show_default=True
-        )
-        if path.startswith("./"):
-            path = path[2:]
-
-        if path.endswith("/"):
-            basenamepath = path[:-1]
-        else:
-            basenamepath = path
-
-        default_data_source_name = os.path.basename(basenamepath) + "__dir"
-        data_source_name = click.prompt(
-            msg_prompt_datasource_name,
-            default=default_data_source_name,
-            show_default=True
-        )
-
-        context.add_datasource(data_source_name,
-                               module_name="great_expectations.datasource",
-                               class_name="PandasDatasource",
-                               base_directory=os.path.join("..", path))
-
+        data_source_name = _add_pandas_datasource(context)
     elif data_source_selection == "2":  # sqlalchemy
-        try:
-            import sqlalchemy
-            from sqlalchemy import create_engine, MetaData
-        except ImportError:
-            cli_message(
-"""
-ERROR: Unable to import sqlalchemy - exiting.
-Please install the module before trying again.
-""")
-            return None
-
-        data_source_name = click.prompt(
-            msg_prompt_datasource_name, default="mydb", show_default=True)
-
-        while True:
-            cli_message(msg_sqlalchemy_config_connection.format(
-                data_source_name))
-
-            drivername = click.prompt("What is the driver for the sqlalchemy connection?", default="postgres",
-                                      show_default=True)
-            if drivername == "postgres":
-                host = click.prompt("What is the host for the sqlalchemy connection?", default="localhost",
-                                    show_default=True)
-                port = click.prompt("What is the port for the sqlalchemy connection?", default="5432",
-                                    show_default=True)
-                username = click.prompt("What is the username for the sqlalchemy connection?", default="postgres",
-                                        show_default=True)
-                password = click.prompt("What is the password for the sqlalchemy connection?", default="",
-                                        show_default=False, hide_input=True)
-                database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
-                                        show_default=True)
-
-                # Since we don't want to save the database credentials in the config file that will be
-                # committed in the repo, we will use our Variable Substitution feature to store the credentials
-                # in the credentials file (that will not be committed, since it is in the uncommitted directory)
-                # with the datasource's name as the variable name.
-                # The value of the datasource's "credentials" key in the config file (great_expectations.yml) will
-                # be ${datasource name}.
-                # GE will replace the ${datasource name} with the value from the credentials file in runtime.
-                credentials = {
-                    "drivername": drivername,
-                    "host": host,
-                    "port": port,
-                    "username": username,
-                    "password": password,
-                    "database": database
-                }
-            else:
-                sqlalchemy_url = click.prompt(
-"""What is the url/connection string for the sqlalchemy connection?
-(reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
-""",
-                                    show_default=False)
-                credentials = {
-                    "url": sqlalchemy_url
-                }
-
-            context.save_config_variable(data_source_name, credentials)
-
-            try:
-                context.add_datasource(data_source_name,
-                                       module_name="great_expectations.datasource",
-                                       class_name="SqlAlchemyDatasource",
-                                       data_asset_type={"class_name": "SqlAlchemyDataset"},
-                                       credentials="${" + data_source_name + "}")
-                break
-            except (DatasourceInitializationError, ModuleNotFoundError) as de:
-                cli_message(
-"""
-Cannot connect to the database. Please check your environment and the configuration you provided.
-
-<red>Actual error: {0:s}</red>>
-""".format(str(de)))
-                if not click.confirm(
-"""
-Enter the credentials again?
-""".format(str(de)),
-                    default=True):
-                    cli_message(
-"""
-Exiting datasource configuration.
-You can add a datasource later by editing the great_expectations.yml file.
-""")
-                    return None
-
-
+        data_source_name = _add_sqlalchemy_datasource(context)
     elif data_source_selection == "3":  # Spark
-        path = click.prompt(
-            msg_prompt_filesys_enter_base_path,
-            default='/data/',
-            type=click.Path(
-                exists=True,
-                file_okay=False,
-                dir_okay=True,
-                readable=True
-            ),
-            show_default=True
-        )
-        if path.startswith("./"):
-            path = path[2:]
-
-        if path.endswith("/"):
-            path = path[:-1]
-        default_data_source_name = os.path.basename(path)
-        data_source_name = click.prompt(
-            msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
-
-        context.add_datasource(data_source_name,
-                               module_name="great_expectations.datasource",
-                               class_name="SparkDFDatasource",
-                               base_directory=path) # NOTE: Eugene: 2019-09-17: review the path and make sure that the logic works both for abs and rel.
-                               # base_directory=os.path.join("..", path))
-
-
+        data_source_name = _add_spark_datasource(context)
     # if data_source_selection == "5": # dbt
     #     dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
     #     log_message(msg_dbt_go_to_notebook, color="blue")
     #     context.add_datasource("dbt", "dbt", profile=dbt_profile)
     if data_source_selection == "4":  # None of the above
         cli_message(msg_unknown_data_source)
-        cli_message(
-"""
+        cli_message("""
 Skipping datasource configuration.
-You can add a datasource later by editing the great_expectations.yml file.
+    - You can add a datasource later by editing the great_expectations.yml file or
+    - ... by running `<green>great_expectations add-datasource</green>`. 
 """)
+
+    return data_source_name
+
+
+def _add_pandas_datasource(context):
+    path = click.prompt(
+        msg_prompt_filesys_enter_base_path,
+        # default='/data/',
+        type=click.Path(
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+            readable=True
+        ),
+        show_default=True
+    )
+    if path.startswith("./"):
+        path = path[2:]
+
+    if path.endswith("/"):
+        basenamepath = path[:-1]
+    else:
+        basenamepath = path
+
+    default_data_source_name = os.path.basename(basenamepath) + "__dir"
+    data_source_name = click.prompt(
+        msg_prompt_datasource_name,
+        default=default_data_source_name,
+        show_default=True
+    )
+
+    context.add_datasource(data_source_name,
+                           module_name="great_expectations.datasource",
+                           class_name="PandasDatasource",
+                           base_directory=os.path.join("..", path))
+    return data_source_name
+
+
+def _add_sqlalchemy_datasource(context):
+    try:
+        import sqlalchemy
+        from sqlalchemy import create_engine, MetaData
+    except ImportError:
+        cli_message("""<red>ERROR: Unable to import `sqlalchemy`.
+       - Please install the sqlalchemy before trying again.</red>""")
         return None
 
+    data_source_name = click.prompt(
+        msg_prompt_datasource_name, default="mydb", show_default=True)
+
+    while True:
+        cli_message(msg_sqlalchemy_config_connection.format(
+            data_source_name))
+
+        drivername = click.prompt("What is the driver for the sqlalchemy connection?", default="postgres",
+                                  show_default=True)
+        if drivername == "postgres":
+            host = click.prompt("What is the host for the sqlalchemy connection?", default="localhost",
+                                show_default=True)
+            port = click.prompt("What is the port for the sqlalchemy connection?", default="5432",
+                                show_default=True)
+            username = click.prompt("What is the username for the sqlalchemy connection?", default="postgres",
+                                show_default=True)
+            password = click.prompt("What is the password for the sqlalchemy connection?", default="",
+                                show_default=False, hide_input=True)
+            database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
+                                show_default=True)
+
+            # Since we don't want to save the database credentials in the config file that will be
+            # committed in the repo, we will use our Variable Substitution feature to store the credentials
+            # in the credentials file (that will not be committed, since it is in the uncommitted directory)
+            # with the datasource's name as the variable name.
+            # The value of the datasource's "credentials" key in the config file (great_expectations.yml) will
+            # be ${datasource name}.
+            # GE will replace the ${datasource name} with the value from the credentials file in runtime.
+            credentials = {
+                "drivername": drivername,
+                "host": host,
+                "port": port,
+                "username": username,
+                "password": password,
+                "database": database
+            }
+        else:
+            sqlalchemy_url = click.prompt(
+"""What is the url/connection string for the sqlalchemy connection?
+(reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
+""",
+                show_default=False)
+            credentials = {
+                "url": sqlalchemy_url
+            }
+
+        context.save_config_variable(data_source_name, credentials)
+
+        try:
+            context.add_datasource(data_source_name,
+                                   module_name="great_expectations.datasource",
+                                   class_name="SqlAlchemyDatasource",
+                                   data_asset_type={
+                                       "class_name": "SqlAlchemyDataset"},
+                                   credentials="${" + data_source_name + "}")
+            break
+        except (DatasourceInitializationError, ModuleNotFoundError) as de:
+            cli_message(
+                """
+                Cannot connect to the database. Please check your environment and the configuration you provided.
+
+                <red>Database Error: {0:s}</red>>
+                """.format(str(de)))
+            if not click.confirm(
+                    """
+                    Enter the credentials again?
+                    """.format(str(de)),
+                    default=True):
+                cli_message(
+                    """
+                    Exiting datasource configuration.
+                    You can add a datasource later by editing the great_expectations.yml file.
+                    """)
+                return None
+
+        return data_source_name
+
+
+def _add_spark_datasource(context):
+    path = click.prompt(
+        msg_prompt_filesys_enter_base_path,
+        default='/data/',
+        type=click.Path(
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+            readable=True
+        ),
+        show_default=True
+    )
+    if path.startswith("./"):
+        path = path[2:]
+
+    if path.endswith("/"):
+        path = path[:-1]
+    default_data_source_name = os.path.basename(path)
+    data_source_name = click.prompt(
+        msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
+
+    context.add_datasource(data_source_name,
+                           module_name="great_expectations.datasource",
+                           class_name="SparkDFDatasource",
+                           base_directory=path)  # NOTE: Eugene: 2019-09-17: review the path and make sure that the logic works both for abs and rel.
+    # base_directory=os.path.join("..", path))
     return data_source_name
 
 
@@ -237,7 +246,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 ?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
 """
 
-    cli_message(msg_intro.format(data_source_name, __version__.replace(".", "_")))
+    cli_message(msg_intro.format(data_source_name, rtd_url_ge_version))
 
     if data_assets:
         data_assets = [item.strip() for item in data_assets.split(",")]
@@ -311,22 +320,17 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
                 break
 
 
-    cli_message(msg_data_doc_intro.format(__version__.replace(".", "_")))
+    cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
 
-    if click.confirm("Build HTML documentation?",
-                     default=True
-                     ):
-        build_documentation(context)
-
+    if click.confirm("Build HTML documentation?", default=True):
+        build_docs(context)
     else:
-        cli_message(
-            "Okay, skipping HTML documentation for now."
-        )
+        cli_message("Okay, skipping HTML documentation for now.")
 
 
-def build_documentation(context, site_name=None, data_asset_name=None):
+def build_docs(context, site_name=None, data_asset_name=None):
     """Build documentation in a context"""
-    logger.debug("Starting cli.datasource.build_documentation")
+    logger.debug("Starting cli.datasource.build_docs")
 
     cli_message("\nBuilding documentation...")
 
@@ -385,9 +389,8 @@ of this config file: great_expectations/uncommitted/credentials/profiles.yml:
 """
 
 msg_unknown_data_source = """
-We are looking for more types of data types to support.
-Please create a GitHub issue here:
-https://github.com/great-expectations/great_expectations/issues/new
+Do we not have the type of data source you want?
+    - Please create a GitHub issue here: <blue>https://github.com/great-expectations/great_expectations/issues/new</blue>
 
 In the meantime, consider reviewing the following notebook for an example of 
 creating and saving an expectation suite for validation:

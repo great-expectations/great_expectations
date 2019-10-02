@@ -1,6 +1,6 @@
 # This is a basic configuration for testing.
 # It has comments that should be preserved.
-ge_config_version: 1
+config_version: 1
 datasources:
   # For example, this one.
   mydatasource:
@@ -18,20 +18,21 @@ datasources:
           engine: python
 
 
-expectations_store:
-  class_name: ExpectationStore
-  store_backend:
-    class_name: FixedLengthTupleFilesystemStoreBackend
-    base_directory: expectations/
 
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
+expectations_store_name: expectations_store
 profiling_store_name: validation_store
 
 data_docs:
   sites:
 
 stores:
+  expectations_store:
+    class_name: ExpectationStore
+    store_backend:
+      class_name: FixedLengthTupleFilesystemStoreBackend
+      base_directory: expectations/
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore

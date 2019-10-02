@@ -94,6 +94,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             for unexpected_count in result.get("partial_unexpected_counts"):
                 if unexpected_count.get("value"):
                     table_rows.append([unexpected_count.get("value"), unexpected_count.get("count")])
+                elif unexpected_count.get("value") == "":
+                    table_rows.append(["EMPTY", unexpected_count.get("count")])
                 else:
                     table_rows.append(["null", unexpected_count.get("count")])
         else:
@@ -101,6 +103,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             for unexpected_value in result.get("partial_unexpected_list"):
                 if unexpected_value:
                     table_rows.append([unexpected_value])
+                elif unexpected_value == "":
+                    table_rows.append(["EMPTY"])
                 else:
                     table_rows.append(["null"])
                     
