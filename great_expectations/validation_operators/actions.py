@@ -33,7 +33,7 @@ class NamespacedValidationAction(BasicValidationAction):
     def __init__(self, data_context):
         self.data_context = data_context
 
-    def run(self, validation_result_suite, validation_result_suite_identifier, data_asset ,**kwargs):
+    def run(self, validation_result_suite, validation_result_suite_identifier, data_asset, **kwargs):
         """
 
         :param validation_result_suite:
@@ -42,7 +42,7 @@ class NamespacedValidationAction(BasicValidationAction):
         :param: kwargs - any additional arguments the child might use
         :return:
         """
-        return self._run(validation_result_suite, validation_result_suite_identifier, data_asset ,**kwargs)
+        return self._run(validation_result_suite, validation_result_suite_identifier, data_asset, **kwargs)
 
 
     def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
