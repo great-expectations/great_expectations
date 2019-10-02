@@ -21,9 +21,7 @@ from ..types.base import DotDict
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.exceptions import DataContextError
 
-# FIXME : fully deprecate site_builder, by replacing it with new_site_builder.
 # FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers.
-# from great_expectations.render.renderer.site_builder import SiteBuilder
 
 
 try:
@@ -1010,13 +1008,15 @@ class ConfigOnlyDataContext(object):
                 .format(datasource_name=split_name[0], generator_name=split_name[1])
             )
 
-    def create_expectation_suite(self, data_asset_name, expectation_suite_name):
+    def create_expectation_suite(self, data_asset_name, expectation_suite_name, overwrite_existing=False):
         """Build a new expectation suite and save it into the data_context expectation store.
 
         Args:
             data_asset_name: The name of the data_asset for which this suite will be stored.
                 data_asset_name will be normalized if it is a string
             expectation_suite_name: The name of the expectation_suite to create
+            overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
+                already exists
 
         Returns:
             A new (empty) expectation suite.
@@ -1035,7 +1035,13 @@ class ConfigOnlyDataContext(object):
             expectation_suite_name=expectation_suite_name,
         )
 
-        self._stores["expectations_store"].set(key, expectation_suite)
+        if self._stores["expectations_store"].has_key(key) and not overwrite_existing:
+            raise DataContextError(
+                "expectation_suite with name {expectation_suite_name} already exists for data_asset {data_asset_name}.\
+                 If you would like to overwrite this expectation_suite, set overwrite_existing=True."
+            )
+        else:
+            self._stores["expectations_store"].set(key, expectation_suite)
 
         return expectation_suite
 
@@ -1613,7 +1619,8 @@ class ConfigOnlyDataContext(object):
                     expectation_suite_name = profiler.__name__
                     self.create_expectation_suite(
                         data_asset_name=normalized_data_asset_name,
-                        expectation_suite_name=expectation_suite_name
+                        expectation_suite_name=expectation_suite_name,
+                        overwrite_existing=True
                     )
                     batch_kwargs = self.yield_batch_kwargs(
                         data_asset_name=normalized_data_asset_name,
