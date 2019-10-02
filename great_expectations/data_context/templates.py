@@ -50,6 +50,10 @@ plugins_directory: plugins/
 # Stores are configurable places to store things like expectations, evaluation
 # results, data docs, and more.
 # 
+# Three stores are required: expectations, profiling, and evaluation parameters,
+# and must be named here. Additional stores can be configured below and used for
+# data_docs, validation_operators or other purposes.
+#
 # Point the required store names to the appropriate `stores` entry.
 expectations_store_name: expectations_store
 profiling_store_name: local_validation_result_store
