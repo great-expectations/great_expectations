@@ -76,18 +76,22 @@ msg_prompt_lets_begin = """
 Let's add Great Expectations to your project, by scaffolding a new great_expectations directory:
 
     great_expectations
-        ├── great_expectations.yml
-        ├── datasources
-        ├── expectations
-        ├── fixtures
-        ├── notebooks
-        ├── plugins
-        ├── uncommitted
-        │   ├── validations
-        │   ├── config_variables.yml
-        │   ├── documentation
-        │   └── samples
-        └── .gitignore
-
+    ├── .gitignore
+    ├── datasources
+    ├── expectations
+    ├── fixtures
+    ├── great_expectations.yml
+    ├── notebooks
+    │   ├── create_expectations.ipynb
+    │   └── integrate_validation_into_pipeline.ipynb
+    ├── plugins
+    └── uncommitted
+        ├── config_variables.yml
+        ├── documentation
+        │   ├── local_site
+        │   └── team_site
+        ├── samples
+        └── validations
+    
 OK to proceed?
 """
