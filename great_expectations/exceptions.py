@@ -45,13 +45,16 @@ class ProfilerError(GreatExpectationsError):
 class InvalidConfigError(DataContextError):
     def __init__(self, message):
         self.message = message
-    
+
+
 class ConfigNotFoundError(DataContextError):
-    """
-    the config file or the environments file cannot be found
-    """
-    def __init__(self, message):
-        self.message = message
+    """The great_expectations dir could not be found."""
+    def __init__(self):
+        self.message = """Error: No great_expectations directory was found here!
+    - Please check that you are in the correct directory or have specified the correct directory.
+    - If you have never run Great Expectations in this project, please run `great_expectations init` to get started.
+"""
+
 
 class ExpectationSuiteNotFoundError(GreatExpectationsError):
     def __init__(self, data_asset_name):
