@@ -21,12 +21,7 @@ datasources:
 
 
 config_variables_file_path: uncommitted/config_variables.yml
-
-expectations_store:
-  class_name: ExpectationStore
-  store_backend:
-    class_name: FixedLengthTupleFilesystemStoreBackend
-    base_directory: expectations/
+expectations_store_name: expectations_store
 
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
@@ -36,6 +31,11 @@ data_docs:
   sites:
 
 stores:
+  expectations_store:
+    class_name: ExpectationStore
+    store_backend:
+      class_name: FixedLengthTupleFilesystemStoreBackend
+      base_directory: expectations/
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore

@@ -30,14 +30,15 @@ def basic_data_context_config_for_validation_operator():
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name" : "evaluation_parameter_store",
         "profiling_store_name": "validation_result_store",
-        "expectations_store" : {
-            "class_name": "ExpectationStore",
-            "store_backend": {
-                "class_name": "InMemoryStoreBackend",
-            }
-        },
+        "expectations_store_name": "expectations_store",
         "datasources": {},
         "stores": {
+            "expectations_store" : {
+                "class_name": "ExpectationStore",
+                "store_backend": {
+                    "class_name": "InMemoryStoreBackend",
+                }
+            },
             # This isn't currently used for Validation Actions, but it's required for DataContext to work.
             "evaluation_parameter_store" : {
                 "module_name": "great_expectations.data_context.store",
