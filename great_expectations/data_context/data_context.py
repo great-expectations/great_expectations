@@ -600,7 +600,10 @@ class ConfigOnlyDataContext(object):
             kwargs.update({
                 "partition_id": partition_id
             })
-        batch_kwargs = datasource.build_batch_kwargs(data_asset_name.generator, **kwargs)
+        batch_kwargs = datasource.build_batch_kwargs(
+            data_asset_name,
+            **kwargs
+        )
 
         return batch_kwargs
 
