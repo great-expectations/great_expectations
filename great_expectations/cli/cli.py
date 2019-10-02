@@ -19,7 +19,8 @@ from great_expectations.data_context import DataContext
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import __version__, read_csv
+from great_expectations import __version__ as ge_version
+from great_expectations import read_csv
 from pyfiglet import figlet_format
 import click
 #FIXME: This prevents us from seeing a huge stack of these messages in python 2. We'll need to fix that later.
@@ -47,7 +48,6 @@ except ImportError:
 # Take over the entire GE module logging namespace when running CLI
 logger = logging.getLogger("great_expectations")
 
-
 # class NaturalOrderGroup(click.Group):
 #     def __init__(self, name=None, commands=None, **attrs):
 #         if commands is None:
@@ -64,7 +64,7 @@ logger = logging.getLogger("great_expectations")
 # TODO: consider using a specified-order supporting class for help (but wasn't working with python 2)
 # @click.group(cls=NaturalOrderGroup)
 @click.group()
-@click.version_option(version=__version__)
+@click.version_option(version=ge_version)
 @click.option('--verbose', '-v', is_flag=True, default=False,
               help='Set great_expectations to use verbose output.')
 def cli(verbose):
@@ -351,8 +351,8 @@ def check_config(target_directory):
         if is_config_ok:
             cli_message("Your config file appears valid!")
         else:
-            cli_message("Unfortunately, your config appears to be invalid:")
-            cli_message(error_message)
+            cli_message("Unfortunately, your config appears to be invalid:\n")
+            cli_message("<red>{}</red>".format(error_message))
             sys.exit(1)
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         _offer_to_install_new_template(err, target_directory)

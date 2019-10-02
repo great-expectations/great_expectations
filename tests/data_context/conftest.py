@@ -1,18 +1,11 @@
+import os
+import shutil
+
 import pytest
 
-import shutil
-import os
-import json
-import warnings
-
-import numpy as np
-import sqlalchemy as sa
-
 import great_expectations as ge
-from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.data_context.util import safe_mmkdir
 
-from ..test_utils import get_dataset
 
 @pytest.fixture()
 def data_context_without_config_variables_filepath_configured(tmp_path_factory):

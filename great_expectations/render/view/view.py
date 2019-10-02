@@ -9,7 +9,7 @@ from jinja2 import (
     Template, Environment, BaseLoader, PackageLoader, select_autoescape, contextfilter
 )
 
-from great_expectations.version import __version__
+from great_expectations import __version__ as ge_version
 from great_expectations.render.types import (
     RenderedDocumentContent,
     RenderedSectionContent,
@@ -74,7 +74,7 @@ class DefaultJinjaView(object):
         env.filters['render_styling_from_string_template'] = cls.render_styling_from_string_template
         env.filters['render_styling'] = cls.render_styling
         env.filters['render_content_block'] = cls.render_content_block
-        env.globals['ge_version'] = __version__
+        env.globals['ge_version'] = ge_version
 
         template = env.get_template(template)
         template.globals['now'] = datetime.datetime.utcnow

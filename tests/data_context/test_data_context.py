@@ -728,17 +728,18 @@ def basic_data_context_config():
     return {
         "config_version": 1,
         "plugins_directory": "plugins/",
-        "expectations_store": {
-            "class_name": "ExpectationStore",
-            "store_backend": {
-                "class_name": "FixedLengthTupleFilesystemStoreBackend",
-                "base_directory": "expectations/",
-            },
-        },
         "evaluation_parameter_store_name": "evaluation_parameter_store",
         "profiling_store_name": "does_not_have_to_be_real",
+        "expectations_store_name": "expectations_store",
         "datasources": {},
         "stores": {
+            "expectations_store": {
+                "class_name": "ExpectationStore",
+                "store_backend": {
+                    "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                    "base_directory": "expectations/",
+                },
+            },
             "evaluation_parameter_store" : {
                 "module_name": "great_expectations.data_context.store",
                 "class_name": "EvaluationParameterStore",
