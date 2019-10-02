@@ -1,7 +1,7 @@
 # This must have all the required keys and an invalid one
 this_is_a_wildly_invalid_top_level_key: "stuff"
 
-ge_config_version: 1
+config_version: 1
 plugins_directory: "foo"
 expectations_store: "bar"
 evaluation_parameter_store_name: "baz"
