@@ -4,7 +4,8 @@ v0.8.0__develop
 -----------------
 
 Version 0.8.0 is a significant update to Great Expectations, with many improvements focused on configurability
-and usability.  See the :ref:`migrating_versions` guide for more details on specific changes.
+and usability.  See the :ref:`migrating_versions` guide for more details on specific changes, which include
+several breaking changes to configs and APIs.
 
 Highlights include:
 
