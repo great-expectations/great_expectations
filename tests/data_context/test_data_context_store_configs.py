@@ -88,14 +88,14 @@ def test_config_with_default_yml(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('totally_empty_data_context'))
     context = ge.data_context.DataContext.create(project_path)
 
-    assert set(context.stores.keys()) == set(
+    assert set(context.stores.keys()) == set([
         "local_validation_result_store",
         "expectations_store",
         "evaluation_parameter_store",
         "fixture_validation_results_store",
         "local_site_html_store",
         "team_site_html_store",
-    )
+    ])
     assert "my_inmemory_store" not in context.stores.keys()
 
     context.add_store(
