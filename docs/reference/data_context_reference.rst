@@ -60,7 +60,8 @@ represent two public datasets available from the resource.
       data_asset_type:
         class_name: PandasDataset
 
-Note that the datasources section *includes* all defined generators as well as specifying their names.
+Note that the datasources section *includes* all defined generators as well as specifying their names. See
+:ref:`custom_expectations_in_datasource` for more information about configuring datasources to use custom expectations.
 
 Data Documentation
 =====================
