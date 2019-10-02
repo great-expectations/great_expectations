@@ -31,62 +31,13 @@ By default, everything in the Great Expectations deployment framework will be ex
 
 The command line interface (CLI) will scaffold and populate the configuration and other artifacts necessary to get started with Great Expectations.
 
-.. ::
 
-    $ great_expectations init
-      _____                _   
-     / ____|              | |  
-    | |  __ _ __ ___  __ _| |_ 
-    | | |_ | '__/ _ \/ _` | __|
-    | |__| | | |  __/ (_| | |_ 
-     \_____|_|  \___|\__,_|\__|
-                               
-                               
-     ______                      _        _   _                 
-    |  ____|                    | |      | | (_)                
-    | |__  __  ___ __   ___  ___| |_ __ _| |_ _  ___  _ __  ___ 
-    |  __| \ \/ / '_ \ / _ \/ __| __/ _` | __| |/ _ \| '_ \/ __|
-    | |____ >  <| |_) |  __/ (__| || (_| | |_| | (_) | | | \__ \
-    |______/_/\_\ .__/ \___|\___|\__\__,_|\__|_|\___/|_| |_|___/
-                | |                                             
-                |_|                                             
-    
-
-
-    Always know what to expect from your data.
-
-    If you're new to Great Expectations, this tutorial is a good place to start:
-
-        https://docs.greatexpectations.io/en/latest/getting_started/cli_init.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop
-
-
-    Let's add Great Expectations to your project, by scaffolding a new great_expectations directory:
-
-        great_expectations
-            ├── great_expectations.yml
-            ├── datasources
-            ├── expectations
-            ├── fixtures
-            ├── notebooks
-            ├── plugins
-            ├── uncommitted
-            │   ├── validations
-            │   ├── credentials
-            │   ├── documentation
-            │   └── samples
-            └── .gitignore
-
-    OK to proceed?
-    [Y/n]: Y
-
-    Done.
-
-
-If you inspect the ``great_expectations/`` directory at this point, it should contain:
+If you inspect the ``great_expectations/`` directory after the init command has run, it should contain:
 
 .. code-block:: bash
 
-    great_expectations/
+    great_expectations
+    ├── .gitignore
     ├── datasources
     ├── expectations
     ├── fixtures
@@ -95,14 +46,13 @@ If you inspect the ``great_expectations/`` directory at this point, it should co
     │   ├── create_expectations.ipynb
     │   └── integrate_validation_into_pipeline.ipynb
     ├── plugins
-    ├── .gitignore
     └── uncommitted
-        ├── credentials
+        ├── config_variables.yml
         ├── documentation
+        │   ├── local_site
+        │   └── team_site
         ├── samples
         └── validations
-
-    10 directories, 3 files
 
 
 Adding Datasources
@@ -149,16 +99,18 @@ This step adds a new block for Datasource configuration to ``great_expectations/
 .. code-block:: bash
 
     datasources:
-        data__dir:
-            type: pandas
-            generators:
-                default:
-                    type: subdir_reader
-                    base_directory: ../data
-                    reader_options:
-                        sep:
-                        engine: python
-
+      data-538__dir:
+        module_name: great_expectations.datasource
+        class_name: PandasDatasource
+        data_asset_type:
+          class_name: PandasDataset
+        generators:
+          default:
+            class_name: SubdirReaderGenerator
+            base_directory: ../data
+            reader_options:
+              sep:
+              engine: python
 
 For a SQL data source, configuration would look like this instead:
 
@@ -200,14 +152,17 @@ The corresponding config would be:
 .. code-block:: bash
 
     datasources:
-        my_db:
-            type: sqlalchemy
-            generators:
-                default:
-                    type: queries
-            profile: my_db
+      my_db:
+        module_name: great_expectations.datasource
+        class_name: SqlAlchemyDatasource
+        credentials: ${my_db}
+        data_asset_type:
+          class_name: SqlAlchemyDataset
+        generators:
+          default:
+            class_name: TableGenerator
 
-Note: the CLI will also create a ``uncommitted/credentials/profiles.yml`` files to contain SQL credentials. Note that this file goes in the ``uncommitted/`` directory, which should *NOT* be committed to source control. It may also contain a Slack webhook url for notifications.
+Note: the SQL credentials you entered are stored in ``uncommitted/config_variables.yml`` file. Note that this file goes in the ``uncommitted/`` directory, which should *NOT* be committed to source control. The ${my_db} variable is substituted with the credentials in runtime.
 
 Strictly speaking, a Great Expectations Datasource is not the data itself, but part of a *pointer* to a data compute environment where Expectations can be evaluated, called a `DataAsset.` Fully describing the pointer requires a 3-ple:
 
@@ -270,7 +225,8 @@ The default profiler (``BasicDatasetProfiler``) will add two JSON files in your 
 
 .. code-block:: bash
 
-    great_expectations/
+    great_expectations
+    ├── .gitignore
     ├── datasources
     ├── expectations
     │   └── data__dir
@@ -284,8 +240,10 @@ The default profiler (``BasicDatasetProfiler``) will add two JSON files in your 
     │   └── integrate_validation_into_pipeline.ipynb
     ├── plugins
     └── uncommitted
-        ├── credentials
+        ├── config_variables.yml
         ├── documentation
+        │   ├── local_site
+        │   └── team_site
         ├── samples
         └── validations
             └── 2019-07-12T090442.066278Z
@@ -293,8 +251,6 @@ The default profiler (``BasicDatasetProfiler``) will add two JSON files in your 
                     └── default
                         └── notable_works_by_charles_dickens
                             └── BasicDatasetProfiler.json
-
-    17 directories, 5 files
 
 
 We won't go into full detail on the contents of Expectation and EVR objects here. But as a quick illustration, Expectation Suite JSON objects consist mainly of Expectations like:
@@ -397,34 +353,25 @@ Within the CLI, we compile to documentation as follows:
 
     ========== Data Documentation ==========
 
-    To generate documentation from the data you just profiled, the profiling results should be moved from 
-    great_expectations/uncommitted (ignored by git) to great_expectations/fixtures.
+    Great Expectations can create data documentation from the data you just profiled.
 
-    Before committing, please make sure that this data does not contain sensitive information!
+    To learn more: https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign=0_8_0a1
 
-    To learn more: https://docs.greatexpectations.io/en/latest/reference/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop
-
-    Move the profiled data and build HTML documentation? [Y/n]: Y
-
-    Moving files...
-
-    Done.
+    Build HTML documentation? [Y/n]:
 
     Building documentation...
+        ...
 
-    To view the generated data documentation, open this file in a web browser:
-        great_expectations/uncommitted/documentation/index.html
+    The following data documentation HTML sites were generated:
+
+    local_site:
+       great_expectations/uncommitted/documentation/local_site/index.html
+
+    team_site:
+       great_expectations/uncommitted/documentation/team_site/index.html
 
 
-    To create expectations for your data, start Jupyter and open a tutorial notebook:
-
-    To launch with jupyter notebooks:
-        jupyter notebook great_expectations/notebooks/create_expectations.ipynb
-
-    To launch with jupyter lab:
-        jupyter lab great_expectations/notebooks/create_expectations.ipynb
-
-Opening `great_expectations/uncommitted/documentation/index.html` in a browser will give you a page like:
+Opening `great_expectations/uncommitted/documentation/local_site/index.html` in a browser will give you a page like:
 
 .. image:: ../images/index_render.png
 
@@ -437,25 +384,12 @@ Clicking through to the second link will show you descriptive data documentation
 .. image:: ../images/descriptive_render.png
 
 
-Note that the CLI moved our EVRs from
-
-.. code-block:: bash
-
-    uncommitted/validations/2019-07-12T090442.066278Z/data__dir/default/notable_works_by_charles_dickens/
-
-to
-
-.. code-block:: bash
-    
-    fixtures/validations/2019-07-12T090442.066278Z/data__dir/default/notable_works_by_charles_dickens/
-
-This is because this data documentation is intended to act as the source of truth for Expectations within this project: all users at the same point within the version control system (e.g. the same git hash) should be able to render exactly the same documentation from shared assets within version control.
-
 Note also that the default ``great_expectations/`` setup does NOT commit compiled docs themselves within version control. Instead, they live in ``uncommitted/documentation/``, with a subdirectory structure that mirrors the project namespace.
 
 .. code-block:: bash
 
-    great_expectations/
+    great_expectations
+    ├── .gitignore
     ├── datasources
     ├── expectations
     │   └── data__dir
@@ -463,31 +397,36 @@ Note also that the default ``great_expectations/`` setup does NOT commit compile
     │           └── notable_works_by_charles_dickens
     │               └── BasicDatasetProfiler.json
     ├── fixtures
-    │   └── validations
-    │       └── data__dir
-    │           └── default
-    │               └── notable_works_by_charles_dickens
-    │                   └── BasicDatasetProfiler.json
     ├── great_expectations.yml
     ├── notebooks
     │   ├── create_expectations.ipynb
     │   └── integrate_validation_into_pipeline.ipynb
     ├── plugins
     └── uncommitted
-        ├── credentials
+        ├── config_variables.yml
         ├── documentation
-        │   ├── data__dir
-        │   │   └── default
-        │   │       └── notable_works_by_charles_dickens
-        │   │           └── BasicDatasetProfiler.html
-        │   └── index.html
+        │   ├── local_site
+        │   │   ├── expectations
+        │   │   │   └── data__dir
+        │   │   │       └── default
+        │   │   │           ├── notable_works_by_charles_dickens
+        │   │   │           │   └── BasicDatasetProfiler.html
+        │   │   ├── index.html
+        │   │   └── validations
+        │   │       └── profiling
+        │   │           └── data__dir
+        │   │               └── default
+        │   │                   └── notable_works_by_charles_dickens
+        │   │                       └── BasicDatasetProfiler.html
+        │   └── team_site
         ├── samples
         └── validations
             └── 2019-07-12T090442.066278Z
                 └── data__dir
                     └── default
                         └── notable_works_by_charles_dickens
+                            └── BasicDatasetProfiler.json
 
-    24 directories, 7 files
+
 
 
