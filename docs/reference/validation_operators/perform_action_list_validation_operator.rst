@@ -44,7 +44,7 @@ An instance of PerformActionListValidationOperator is included in the default co
                 class_name: SlackRenderer
 
 
-Invocation
+Invokation
 -----------
 
 This is an example of invoking an instance of a Validation Operator from Python:
