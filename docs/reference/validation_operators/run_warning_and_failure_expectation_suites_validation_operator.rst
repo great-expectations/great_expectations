@@ -59,7 +59,7 @@ Below is an example of this operator's configuration:
               target_store_name: evaluation_parameter_store
 
 
-Invocation
+Invokation
 -----------
 
 This is an example of invoking an instance of a Validation Operator from Python:
