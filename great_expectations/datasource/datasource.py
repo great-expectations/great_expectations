@@ -367,6 +367,12 @@ class Datasource(object):
         """
         raise NotImplementedError
 
+    def named_generator_build_batch_kwargs(self, generator_name, generator_asset, *args, **kwargs):
+        raise NotImplementedError
+
+    def no_generator_build_batch_kwargs(self, *args, **kwargs):
+        raise NotImplementedError
+
     def get_data_context(self):
         """Getter for the currently-configured data context."""
         return self._data_context

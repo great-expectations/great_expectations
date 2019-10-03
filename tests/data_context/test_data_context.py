@@ -747,9 +747,14 @@ def basic_data_context_config():
         },
         "data_docs": {
             "sites": {}
+        },
+        "validation_operators": {
+            "default": {
+                "class_name": "PerformActionListValidationOperator",
+                "action_list": []
+            }
         }
     }
-    # })
 
 
 def test_ExplorerDataContext(titanic_data_context):
@@ -827,6 +832,7 @@ def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_conte
     context._normalize_absolute_or_relative_path("/yikes")
     assert "test__normalize_absolute_or_relative_path__dir" not in context._normalize_absolute_or_relative_path("/yikes") 
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes") 
+
 
 def test__get_normalized_data_asset_name_filepath(basic_data_context_config):
     context = ConfigOnlyDataContext(

@@ -191,6 +191,11 @@ class SqlAlchemyDatasource(Datasource):
         if len(args) > 0:
             kwargs.update({
                 "table": args[0],
-                "timestamp": time.time()
             })
         return SqlAlchemyDatasourceTableBatchKwargs(kwargs)
+
+    def named_generator_build_batch_kwargs(self, generator_name, generator_asset, *args, **kwargs):
+        raise NotImplementedError
+
+    def no_generator_build_batch_kwargs(self, *args, **kwargs):
+        raise NotImplementedError

@@ -36,8 +36,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
     datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
 
     assert datasource.get_available_data_asset_names() == {"default": {"test"}}
-    manual_batch_kwargs = datasource.build_batch_kwargs(
-        "default",
+    manual_batch_kwargs = datasource.no_generator_build_batch_kwargs(
         os.path.join(str(test_folder_connection_path), "test.csv"))
 
     # Get the default (subdir_path) generator

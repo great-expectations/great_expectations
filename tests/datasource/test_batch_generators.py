@@ -28,8 +28,6 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
 
     f1_batches = [batch_kwargs for batch_kwargs in generator.get_iterator("f1")]
     assert len(f1_batches) == 1
-    assert "timestamp" in f1_batches[0]
-    del f1_batches[0]["timestamp"]
     assert f1_batches[0] == {
             "path": os.path.join(base_dir, "f1.csv"),
             "partition_id": "f1",
@@ -180,5 +178,4 @@ def test_databricks_generator():
 
     databricks_kwargs_iterator = generator.get_iterator("foo")
     kwargs = [batch_kwargs for batch_kwargs in databricks_kwargs_iterator]
-    assert "timestamp" in kwargs[0]
     assert "select * from" in kwargs[0]["query"].lower()
