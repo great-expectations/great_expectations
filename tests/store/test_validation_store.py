@@ -1,7 +1,7 @@
 import pytest
 
 from great_expectations.data_context.store import (
-    ValidationResultStore,
+    ValidationsStore,
 )
 from great_expectations.data_context.types import (
     ValidationResultIdentifier,
@@ -13,7 +13,7 @@ from great_expectations.util import (
 
 def test_ValidationResultStore_with_InMemoryStoreBackend():
 
-    my_store = ValidationResultStore(
+    my_store = ValidationsStore(
         store_backend = {
             "module_name" : "great_expectations.data_context.store",
             "class_name" : "InMemoryStoreBackend",
@@ -54,7 +54,7 @@ def test_ValidationResultStore_with_InMemoryStoreBackend():
 
 def test_ValidationResultStore__convert_resource_identifier_to_list():
 
-    my_store = ValidationResultStore(
+    my_store = ValidationsStore(
         store_backend = {
             "module_name" : "great_expectations.data_context.store",
             "class_name" : "InMemoryStoreBackend",
@@ -71,7 +71,7 @@ def test_ValidationResultStore_with_FixedLengthTupleFileSystemStoreBackend(tmp_p
     path = str(tmp_path_factory.mktemp('test_ValidationResultStore_with_FixedLengthTupleFileSystemStoreBackend__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
 
-    my_store = ValidationResultStore(
+    my_store = ValidationsStore(
         store_backend = {
             "module_name" : "great_expectations.data_context.store",
             "class_name" : "FixedLengthTupleFilesystemStoreBackend",

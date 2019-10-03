@@ -14,10 +14,10 @@ from great_expectations.datasource.types.batch_kwargs import BatchFingerprint
 # TODO: Rename to DataAssetKey, for consistency
 class DataAssetIdentifier(OrderedDataContextKey):
 
-    # def __init__(self, *args, delimiter='/', **kwargs):
     def __init__(self, *args, **kwargs):
+        delimiter = kwargs.pop('delimiter', '/')
         super(DataAssetIdentifier, self).__init__(*args, **kwargs)
-        # self.__delimiter = delimiter
+        self.__delimiter = delimiter
 
     _key_order = [
         "datasource",
@@ -31,14 +31,17 @@ class DataAssetIdentifier(OrderedDataContextKey):
     }
     # NOTE: This pattern is kinda awkward. It would be nice to ONLY specify _key_order
     _required_keys = set(_key_order)
-    _allowed_keys = set(_key_order)  # | {"_DataAssetIdentifier__delimiter"}
+    _allowed_keys = set(_key_order) | {"_DataAssetIdentifier__delimiter"}
 
     def __str__(self):
         return self.__delimiter.join(
-            self.datasource,
-            self.generator,
-            self.generator_asset
+            (self.datasource,
+             self.generator,
+             self.generator_asset)
         )
+
+    def __repr__(self):
+        return str(self)
 
 
 # TODO: Rename to ExpectationSuiteKey, for consistency
