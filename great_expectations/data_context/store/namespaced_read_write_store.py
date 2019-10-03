@@ -116,7 +116,7 @@ class NamespacedReadWriteStore(ReadWriteStore):
             ))
 
 
-class ExpectationStore(NamespacedReadWriteStore):
+class ExpectationsStore(NamespacedReadWriteStore):
     # Note : As of 2019/09/06, this method is untested.
     # It shares virtually all of its business logic with ValidationStore, which is under test.
 
@@ -125,13 +125,13 @@ class ExpectationStore(NamespacedReadWriteStore):
 
         if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
             config_defaults = {
-                "key_length" : 4,
-                "module_name" : "great_expectations.data_context.store",
-                "filepath_template": '{0}/{1}/{2}/{3}.json',
+                "key_length": 4,
+                "module_name": "great_expectations.data_context.store",
+                "filepath_template": "{0}/{1}/{2}/{3}.json",
             }
         else:
             config_defaults = {
-                "module_name" : "great_expectations.data_context.store",
+                "module_name": "great_expectations.data_context.store",
             }
 
         return instantiate_class_from_config(
@@ -140,19 +140,21 @@ class ExpectationStore(NamespacedReadWriteStore):
             config_defaults=config_defaults,
         )
 
-class ValidationResultStore(NamespacedReadWriteStore):
+
+class ValidationsStore(NamespacedReadWriteStore):
     
     def _init_store_backend(self, store_backend_config, runtime_config):
         self.key_class = ValidationResultIdentifier
 
         if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
             config_defaults = {
-                "key_length" : 5,
-                "module_name" : "great_expectations.data_context.store",
+                "key_length": 5,
+                "module_name": "great_expectations.data_context.store",
+                "filepath_template": "{4}/{0}/{1}/{2}/{3}.json"
             }
         else:
             config_defaults = {
-                "module_name" : "great_expectations.data_context.store",
+                "module_name": "great_expectations.data_context.store",
             }
 
         return instantiate_class_from_config(
