@@ -12,7 +12,7 @@ The only requirement from an action is for it to have a take_action method.
 SlackNotificationAction
 ------------------------
 
-SlackNotificationAction is a namespeace-aware validation action that sends a Slack notification to a given webhook
+SlackNotificationAction is a namespace-aware validation action that sends a Slack notification to a given webhook
 
 Configuration
 ~~~~~~~~~~~~~
@@ -33,7 +33,7 @@ Configuration
 StoreAction
 -----------
 
-StoreAction is a namespeace-aware validation action that stores a validation result
+StoreAction is a namespace-aware validation action that stores a validation result
 in the store.
 
 Configuration
@@ -52,7 +52,7 @@ Configuration
 ExtractAndStoreEvaluationParamsAction
 -------------------------------------
 
-ExtractAndStoreEvaluationParamsAction is a namespeace-aware validation action that
+ExtractAndStoreEvaluationParamsAction is a namespace-aware validation action that
 extracts evaluation parameters from a validation result and stores them in the store
 configured for this action.
 
