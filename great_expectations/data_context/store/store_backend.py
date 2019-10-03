@@ -245,6 +245,7 @@ class FixedLengthTupleStoreBackend(StoreBackend):
             #     self.filepath_template
             # ))
 
+
 class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
     """Uses a local filepath as a store.
 

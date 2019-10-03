@@ -35,8 +35,8 @@ CONFIG_VARIABLES_INTRO = """
 #   - Configuration parameters can change based on the environment. For example:
 #     dev vs staging vs prod.
 #
-# When GE encounters substitution syntaxes in the config file, like the ones
-# below it will attempt to replace the value of “my_key” with the value from an 
+# When GE encounters substitution syntax (like the examples below) in the config 
+# file it will attempt to replace the value of “my_key” with the value from an 
 # environment variable “my_value” or a corresponding key read from the file
 # specified using `config_variables_file_path`. An environment variable will
 # always take precedence.
@@ -45,13 +45,15 @@ CONFIG_VARIABLES_INTRO = """
 #
 # If the substitution value comes from the config variables file, it can be a
 # simple (non-nested) value or a nested value such as a dictionary. If it comes
-# from an environment variable, it must be a simple value."""
+# from an environment variable, it must be a simple value.
+"""
 
 PROJECT_OPTIONAL_CONFIG_COMMENT = CONFIG_VARIABLES_INTRO + """
 config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory will be added to your python path for custom modules
 # used to override and extend Great Expectations.
+
 plugins_directory: plugins/
 
 # Stores are configurable places to store things like expectations, evaluation
@@ -62,6 +64,7 @@ plugins_directory: plugins/
 # data_docs, validation_operators or other purposes.
 #
 # Point the following required store names to the appropriate `stores` entry.
+
 expectations_store_name: expectations_store
 profiling_store_name: local_validation_result_store
 evaluation_parameter_store_name: evaluation_parameter_store
@@ -86,11 +89,11 @@ stores:
   # set where validation happens.
   
   # s3_validation_result_store:
-  #   class_name: ValidationStore
+  #   class_name: ValidationResultStore
   #   store_backend:
   #     class_name: FixedLengthTupleS3StoreBackend
-  #     bucket: ???
-  #     prefix: ???
+  #     bucket: <my_bucket>
+  #     prefix: <my_prefix>
   #     file_extension: json
   #     filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
 
@@ -121,7 +124,7 @@ stores:
 
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/guides/validation_operators.html
-  perform_action_list_operator:
+  default:
     class_name: PerformActionListValidationOperator
     action_list:
       - name: store_validation_result
@@ -132,14 +135,15 @@ validation_operators:
         action:
           class_name: ExtractAndStoreEvaluationParamsAction
           target_store_name: evaluation_parameter_store
-      - name: store_evaluation_params
-        action:
-          class_name: SlackNotificationAction
-          slack_webhook: ${validation_notification_slack_webhook}
-#          notify_on: all
-          renderer:
-            module_name: great_expectations.render.renderer.slack_renderer
-            class_name: SlackRenderer
+      # Uncomment the notify_slack action below to send notifications during evaluation
+      # - name: notify_slack
+      #   action:
+      #     class_name: SlackNotificationAction
+      #     slack_webhook: ${validation_notification_slack_webhook}
+      #     notify_on: all
+      #     renderer:
+      #       module_name: great_expectations.render.renderer.slack_renderer
+      #       class_name: SlackRenderer
     
 
 # TODO : Remove the extra layer of yml nesting in v0.8:
