@@ -206,10 +206,6 @@ class ConfigOnlyDataContext(object):
 
         # Init stores
         self._stores = DotDict()
-        self.add_store(
-            "expectations_store",
-            copy.deepcopy(self._project_config["stores"][self._project_config["expectations_store_name"]]),
-        )
         self._init_stores(self._project_config_with_varibles_substituted["stores"])
 
         # Init validation operators
@@ -341,6 +337,10 @@ class ConfigOnlyDataContext(object):
     def datasources(self):
         """A single holder for all Datasources in this context"""
         return self._datasources
+
+    @property
+    def expectations_store_name(self):
+        return self._project_config_with_varibles_substituted["expectations_store_name"]
 
     # TODO: Decide whether this stays here or moves into NamespacedStore
     @property
@@ -776,7 +776,7 @@ class ConfigOnlyDataContext(object):
         """Returns a list of available expectation suite keys
         """
 
-        keys = self.stores["expectations_store"].list_keys()
+        keys = self.stores[self.expectations_store_name].list_keys()
         return keys
 
     def list_datasources(self):
@@ -1037,13 +1037,13 @@ class ConfigOnlyDataContext(object):
             expectation_suite_name=expectation_suite_name,
         )
 
-        if self._stores["expectations_store"].has_key(key) and not overwrite_existing:
+        if self._stores[self.expectations_store_name].has_key(key) and not overwrite_existing:
             raise DataContextError(
                 "expectation_suite with name {expectation_suite_name} already exists for data_asset {data_asset_name}.\
                  If you would like to overwrite this expectation_suite, set overwrite_existing=True."
             )
         else:
-            self._stores["expectations_store"].set(key, expectation_suite)
+            self._stores[self.expectations_store_name].set(key, expectation_suite)
 
         return expectation_suite
 
@@ -1065,8 +1065,8 @@ class ConfigOnlyDataContext(object):
             expectation_suite_name=expectation_suite_name,
         )
 
-        if self.stores["expectations_store"].has_key(key):
-            return self.stores["expectations_store"].get(key)
+        if self.stores[self.expectations_store_name].has_key(key):
+            return self.stores[self.expectations_store_name].get(key)
         else:
             raise DataContextError(
                 "No expectation_suite found for data_asset_name %s and expectation_suite_name %s" %
@@ -1093,7 +1093,10 @@ class ConfigOnlyDataContext(object):
                 raise DataContextError(
                     "data_asset_name must either be specified or present in the provided expectation suite")
         else:
-            expectation_suite['data_asset_name'] = data_asset_name
+            # Note: we ensure that the suite name is a string here, until we have typed ExpectationSuite
+            # objects that will know how to read the correct type back in
+            expectation_suite['data_asset_name'] = str(data_asset_name)
+            # expectation_suite['data_asset_name'] = data_asset_name
 
         if expectation_suite_name is None:
             try:
@@ -1107,7 +1110,7 @@ class ConfigOnlyDataContext(object):
         if not isinstance(data_asset_name, NormalizedDataAssetName):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
 
-        self.stores["expectations_store"].set(ExpectationSuiteIdentifier(
+        self.stores[self.expectations_store_name].set(ExpectationSuiteIdentifier(
             data_asset_name=DataAssetIdentifier(*data_asset_name),
             expectation_suite_name=expectation_suite_name,
         ), expectation_suite)
@@ -1261,8 +1264,8 @@ class ConfigOnlyDataContext(object):
             "data_assets": {}
         }
 
-        for key in self.stores["expectations_store"].list_keys():
-            config = self.stores["expectations_store"].get(key)
+        for key in self.stores[self.expectations_store_name].list_keys():
+            config = self.stores[self.expectations_store_name].get(key)
             for expectation in config["expectations"]:
                 for _, value in expectation["kwargs"].items():
                     if isinstance(value, dict) and '$PARAMETER' in value:

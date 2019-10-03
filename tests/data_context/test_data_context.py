@@ -11,7 +11,6 @@ except ImportError:
 import os
 import shutil
 import json
-from glob import glob
 from collections import OrderedDict
 
 from great_expectations.exceptions import DataContextError
@@ -23,15 +22,10 @@ from great_expectations.data_context import (
 from great_expectations.data_context.util import safe_mmkdir
 from great_expectations.data_context.types import (
     NormalizedDataAssetName,
+    DataAssetIdentifier,
     ExpectationSuiteIdentifier,
 )
 from great_expectations.cli.init import scaffold_directories_and_notebooks
-from great_expectations.dataset import PandasDataset
-from great_expectations.util import gen_directory_tree_str
-
-# from great_expectations.data_context.types import (
-#     DataContextConfig,
-# )
 from great_expectations.data_context.store import (
     BasicInMemoryStore,
     EvaluationParameterStore,
@@ -39,6 +33,7 @@ from great_expectations.data_context.store import (
 from great_expectations.util import (
     gen_directory_tree_str,
 )
+
 
 @pytest.fixture()
 def parameterized_expectation_suite():
@@ -734,7 +729,7 @@ def basic_data_context_config():
         "datasources": {},
         "stores": {
             "expectations_store": {
-                "class_name": "ExpectationStore",
+                "class_name": "ExpectationsStore",
                 "store_backend": {
                     "class_name": "FixedLengthTupleFilesystemStoreBackend",
                     "base_directory": "expectations/",
@@ -865,3 +860,144 @@ def test_load_data_context_from_environment_variables(tmp_path_factory):
     finally:
         # Make sure we unset the environment variable we're using
         del os.environ["GE_HOME"]
+
+
+def test_data_context_updates_expectation_suite_names(data_context):
+    # A data context should update the data_asset_name and expectation_suite_name of expectation suites
+    # that it creates when it saves them.
+
+    expectation_suites = data_context.list_expectation_suite_keys()
+
+    # We should have a single expectation suite defined
+    assert len(expectation_suites) == 1
+
+    data_asset_name = expectation_suites[0]['data_asset_name']
+    expectation_suite_name = expectation_suites[0]['expectation_suite_name']
+
+    # We'll get that expectation suite and then update its name and re-save, then verify that everything
+    # has been properly updated
+    expectation_suite = data_context.get_expectation_suite(
+        data_asset_name=data_asset_name,
+        expectation_suite_name=expectation_suite_name
+    )
+
+    # Note we codify here the current behavior of having a string data_asset_name though typed ExpectationSuite objects
+    # will enable changing that
+    assert expectation_suite['data_asset_name'] == str(data_asset_name)
+    assert expectation_suite['expectation_suite_name'] == expectation_suite_name
+
+    # We will now change the data_asset_name and then save the suite in three ways:
+    #   1. Directly using the new name,
+    #   2. Using a different name that should be overwritten
+    #   3. Using the new name but having the context draw that from the suite
+
+    # Finally, we will try to save without a name (deleting it first) to demonstrate that saving will fail.
+    expectation_suite['data_asset_name'] = str(DataAssetIdentifier(
+        data_asset_name.datasource,
+        data_asset_name.generator,
+        "a_new_data_asset"
+    ))
+    expectation_suite['expectation_suite_name'] = 'a_new_suite_name'
+
+    data_context.save_expectation_suite(
+        expectation_suite=expectation_suite,
+        data_asset_name=DataAssetIdentifier(
+            data_asset_name.datasource,
+            data_asset_name.generator,
+            "a_new_data_asset"
+        ),
+        expectation_suite_name='a_new_suite_name'
+    )
+
+    fetched_expectation_suite = data_context.get_expectation_suite(
+        data_asset_name=DataAssetIdentifier(
+            data_asset_name.datasource,
+            data_asset_name.generator,
+            "a_new_data_asset"
+        ),
+        expectation_suite_name='a_new_suite_name'
+    )
+
+    assert fetched_expectation_suite['data_asset_name'] == str(
+        DataAssetIdentifier(
+            data_asset_name.datasource,
+            data_asset_name.generator,
+            "a_new_data_asset"
+        )
+    )
+    assert fetched_expectation_suite['expectation_suite_name'] == 'a_new_suite_name'
+
+    #   2. Using a different name that should be overwritten
+    data_context.save_expectation_suite(
+        expectation_suite=expectation_suite,
+        data_asset_name=DataAssetIdentifier(
+            data_asset_name.datasource,
+            data_asset_name.generator,
+            "a_new_new_data_asset"
+        ),
+        expectation_suite_name='a_new_new_suite_name'
+    )
+
+    fetched_expectation_suite = data_context.get_expectation_suite(
+        data_asset_name=DataAssetIdentifier(
+            data_asset_name.datasource,
+            data_asset_name.generator,
+            "a_new_new_data_asset"
+        ),
+        expectation_suite_name='a_new_new_suite_name'
+    )
+
+    assert fetched_expectation_suite['data_asset_name'] == str(
+        DataAssetIdentifier(
+            data_asset_name.datasource,
+            data_asset_name.generator,
+            "a_new_new_data_asset"
+        )
+    )
+    assert fetched_expectation_suite['expectation_suite_name'] == 'a_new_new_suite_name'
+
+    # Check that the saved name difference is actually persisted on disk
+    with open(os.path.join(
+                data_context.root_directory,
+                "expectations",
+                data_asset_name.datasource,
+                data_asset_name.generator,
+                "a_new_new_data_asset",
+                "a_new_new_suite_name.json"
+                ), 'r') as suite_file:
+        loaded_suite = json.load(suite_file)
+        assert loaded_suite['data_asset_name'] == str(
+            DataAssetIdentifier(
+                data_asset_name.datasource,
+                data_asset_name.generator,
+                "a_new_new_data_asset"
+            )
+        )
+        assert loaded_suite['expectation_suite_name'] == 'a_new_new_suite_name'
+
+
+    #   3. Using the new name but having the context draw that from the suite
+    expectation_suite['data_asset_name'] = str(DataAssetIdentifier(
+        data_asset_name.datasource,
+        data_asset_name.generator,
+        "a_third_name"
+    ))
+    expectation_suite['expectation_suite_name'] = "a_third_suite_name"
+    data_context.save_expectation_suite(
+        expectation_suite=expectation_suite
+    )
+
+    fetched_expectation_suite = data_context.get_expectation_suite(
+        data_asset_name=DataAssetIdentifier(
+            data_asset_name.datasource,
+            data_asset_name.generator,
+            "a_third_name"
+        ),
+        expectation_suite_name="a_third_suite_name"
+    )
+    assert fetched_expectation_suite['data_asset_name'] == str(DataAssetIdentifier(
+        data_asset_name.datasource,
+        data_asset_name.generator,
+        "a_third_name"
+    ))
+    assert fetched_expectation_suite['expectation_suite_name'] == "a_third_suite_name"
