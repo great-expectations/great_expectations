@@ -192,7 +192,6 @@ class PandasDatasource(Datasource):
             raise BatchKwargsError("Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
                                    batch_kwargs)
 
-        # FIXME: currently, batch_id and batch_kwargs are overlapping and are both included completely
         return data_asset_type(df,
                                expectation_suite=expectation_suite,
                                data_context=self._data_context,
@@ -214,53 +213,91 @@ class PandasDatasource(Datasource):
             A PandasDatasourceBatchKwargs object suitable for building a batch of data from this datasource
 
         """
-        generator = None
         if isinstance(data_asset_name, (NormalizedDataAssetName, DataAssetIdentifier)):
-            generator = self.get_generator(data_asset_name.generator)
+            generator_name = data_asset_name.generator
+            generator_asset = data_asset_name.generator_asset
         elif len(self._datasource_config["generators"]) == 1:
-            logger.info("Using only configured generator to build batch_kwargs.")
+            logger.warning("Falling back to only configured generator to build batch_kwargs; consider explicitly "
+                           "declaring the generator using named_generator_build_batch_kwargs or a DataAssetIdentifier.")
             generator_name = list(self._datasource_config["generators"].keys())[0]
-            generator = self.get_generator(generator_name)
-
-        # Now that we know whether we can use a generator, build the kwargs
-        if generator is not None:
-            if len(args) == 1:  # We interpret a single argument as a partition_id
-                batch_kwargs = generator.build_batch_kwargs_from_partition_id(args[0], batch_kwargs=kwargs)
-            elif len(args) > 0:
-                raise BatchKwargsError("Multiple positional arguments were provided to build_batch_kwargs, but only"
-                                       "one is supported. Please provide named arguments to build_batch_kwargs.")
-            elif "partition_id" in kwargs:
-                batch_kwargs = generator.build_batch_kwargs_from_partition_id(kwargs["partition_id"], batch_kwargs=kwargs)
-            else:
-                batch_kwargs = generator.yield_batch_kwargs(data_asset_name, kwargs)
+            generator_asset = data_asset_name
         else:
-            logger.warning("Unable to determine generator; building batch_kwargs using datasource default logic."
-                           "Partitions will not be available. Consider using a typed data_asset_name to specify the "
-                           "generator to use.")
+            raise BatchKwargsError(
+                "Unable to determine generator. Consider using named_generator_build_batch_kwargs or a "
+                "DataAssetIdentifier.",
+                {"args": args,
+                 "kwargs": kwargs}
+            )
 
-            if len(args) == 1:
-                if isinstance(args[0], (pd.DataFrame, pd.Series)):
-                    kwargs.update({
-                        "df": args[0]
-                    })
-                    batch_kwargs = PandasDatasourceMemoryBatchKwargs(**kwargs)
-                elif isinstance(args[0], str):
-                    kwargs.update({
-                        "path": args[0],
-                    })
-                    batch_kwargs = PathBatchKwargs(**kwargs)
-            elif len(args) > 1:
-                raise BatchKwargsError("Multiple positional arguments were provided to build_batch_kwargs, but only"
-                                       "one is supported. Please provide named arguments to build_batch_kwargs.")
+        return self.named_generator_build_batch_kwargs(
+            generator_name,
+            generator_asset,
+            *args,
+            **kwargs
+        )
+
+    def named_generator_build_batch_kwargs(self, generator_name, generator_asset, *args, **kwargs):
+        generator = self.get_generator(generator_name=generator_name)
+        if len(args) == 1:  # We interpret a single argument as a partition_id
+            batch_kwargs = generator.build_batch_kwargs_from_partition_id(
+                generator_asset=generator_asset,
+                partition_id=args[0],
+                batch_kwargs=kwargs
+            )
+        elif len(args) > 0:
+            raise BatchKwargsError("Multiple positional arguments were provided to build_batch_kwargs, but only"
+                                   "one is supported. Please provide named arguments to build_batch_kwargs.")
+        elif "partition_id" in kwargs:
+            batch_kwargs = generator.build_batch_kwargs_from_partition_id(
+                generator_asset=generator_asset,
+                partition_id=kwargs["partition_id"],
+                batch_kwargs=kwargs
+            )
+        else:
+            if len(kwargs) > 0:
+                batch_kwargs = generator.yield_batch_kwargs(generator_asset, kwargs)
             else:
-                # Only kwargs were specified
-                if "path" in kwargs and isinstance(kwargs["path"], string_types):
-                    batch_kwargs = PathBatchKwargs(**kwargs)
-                elif "df" in kwargs and isinstance(kwargs["df"], (pd.DataFrame, pd.Series)):
-                    batch_kwargs = PandasDatasourceMemoryBatchKwargs(**kwargs)
-                else:
-                    raise BatchKwargsError("Invalid kwargs provided to build_batch_kwargs: either a valid df or path"
-                                           "key must be provided.")
+                raise BatchKwargsError(
+                    "Unable to build batch_kwargs: no partition_id or base kwargs found to pass to generator.",
+                    batch_kwargs=kwargs
+                )
+
+        return batch_kwargs
+
+    def no_generator_build_batch_kwargs(self, *args, **kwargs):
+        """Build BatchKwargs for this datasource using default logic.
+
+        Args:
+            *args: args to use to build the BatchKwargs
+            **kwargs: (additional) kwargs for the BatchKwargs
+
+        Returns:
+            BatchKwargs
+        """
+        batch_kwargs = {}
+        if len(args) == 1:
+            if isinstance(args[0], (pd.DataFrame, pd.Series)):
+                kwargs.update({
+                    "df": args[0]
+                })
+                batch_kwargs = PandasDatasourceMemoryBatchKwargs(**kwargs)
+            elif isinstance(args[0], str):
+                kwargs.update({
+                    "path": args[0],
+                })
+                batch_kwargs = PathBatchKwargs(**kwargs)
+        elif len(args) > 1:
+            raise BatchKwargsError("Multiple positional arguments were provided to build_batch_kwargs, but only"
+                                   "one is supported. Please provide named arguments to build_batch_kwargs.")
+        else:
+            # Only kwargs were specified
+            if "path" in kwargs and isinstance(kwargs["path"], string_types):
+                batch_kwargs = PathBatchKwargs(**kwargs)
+            elif "df" in kwargs and isinstance(kwargs["df"], (pd.DataFrame, pd.Series)):
+                batch_kwargs = PandasDatasourceMemoryBatchKwargs(**kwargs)
+            else:
+                raise BatchKwargsError("Invalid kwargs provided to build_batch_kwargs: either a valid df or path"
+                                       "key must be provided.")
         return batch_kwargs
 
     def _get_reader_fn(self, reader_method, path, reader_options):
