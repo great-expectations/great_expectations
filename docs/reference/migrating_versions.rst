@@ -44,7 +44,7 @@ Some specific changes:
 
   - `expectations_store_name`
   - `evaluation_parameter_store_name`
-  - `profiling_store_name`
+  - `validations_store_name`
 
 - Deprecation of the `type` key for configuring objects (replaced by `class_name` (and `module_name` as well when
   ambiguous).

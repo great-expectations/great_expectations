@@ -25,7 +25,7 @@ config_variables_file_path: uncommitted/config_variables.yml
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
 expectations_store_name: expectations_store
-profiling_store_name: validations_store
+validations_store_name: validations_store
 
 data_docs_sites:
 

@@ -20,7 +20,7 @@ def totally_empty_data_context(tmp_path_factory):
         "config_version": 1,
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name": "not_a_real_store_name",
-        "profiling_store_name": "another_fake_store",
+        "validations_store_name": "another_fake_store",
         "expectations_store_name": "expectations_store",
         "datasources": {},
         "stores": {

@@ -13,5 +13,5 @@ stores:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
       filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
-profiling_store_name: "foo"
+validations_store_name: "foo"
 data_docs: "3"

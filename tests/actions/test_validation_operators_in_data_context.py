@@ -24,7 +24,7 @@ def basic_data_context_config_for_validation_operator():
     return {
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name" : "evaluation_parameter_store",
-        "profiling_store_name": "validation_result_store",
+        "validations_store_name": "validation_result_store",
         "expectations_store_name": "expectations_store",
         "datasources": {},
         "stores": {

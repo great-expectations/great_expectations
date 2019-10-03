@@ -703,7 +703,7 @@ def basic_data_context_config():
         "config_version": 1,
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name": "evaluation_parameter_store",
-        "profiling_store_name": "does_not_have_to_be_real",
+        "validations_store_name": "does_not_have_to_be_real",
         "expectations_store_name": "expectations_store",
         "datasources": {},
         "stores": {

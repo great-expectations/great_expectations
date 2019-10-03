@@ -47,7 +47,7 @@ def basic_data_context_config_for_validation_operator():
                 }
             }
         },
-        "profiling_store_name": "validation_result_store",
+        "validations_store_name": "validation_result_store",
         "data_docs_sites": {},
         "validation_operators" : {},
     }

@@ -143,7 +143,7 @@ class ConfigOnlyDataContext(object):
             # "config_version",
             "plugins_directory",
             "expectations_store_name",
-            "profiling_store_name",
+            "validations_store_name",
             "evaluation_parameter_store_name",
             "datasources",
             "stores",
@@ -159,7 +159,7 @@ class ConfigOnlyDataContext(object):
             "config_variables_file_path",
             "plugins_directory",
             "expectations_store_name",
-            "profiling_store_name",
+            "validations_store_name",
             "evaluation_parameter_store_name",
             "datasources",
             "stores",
@@ -1177,7 +1177,7 @@ class ConfigOnlyDataContext(object):
 
     @property
     def profiling_store(self):
-        return self.stores[self._project_config_with_varibles_substituted["profiling_store_name"]]
+        return self.stores[self._project_config_with_varibles_substituted["validations_store_name"]]
 
     def set_parameters_in_evaluation_parameter_store_by_run_id_and_key(self, run_id, key, value):
         """Store a new validation parameter.
