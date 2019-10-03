@@ -34,12 +34,12 @@ validation_operators:
 
 stores:
   local_expectations_store:
-    class_name: ExpectationStore
+    class_name: ExpectationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: expectations/
   local_validation_result_store:
-    class_name: ValidationResultStore
+    class_name: ValidationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
@@ -55,7 +55,7 @@ stores:
   #     filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
 
   fixture_validation_results_store:
-    class_name: ValidationResultStore
+    class_name: ValidationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: fixtures/validations

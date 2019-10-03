@@ -22,16 +22,15 @@ data_docs:
 
 stores:
   expectations_store:
-    class_name: ExpectationStore
+    class_name: ExpectationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: expectations/
   local_validation_result_store:
-    class_name: ValidationResultStore
+    class_name: ValidationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
-      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
   # These next three blocks are never used in tests.
 
@@ -58,11 +57,10 @@ stores:
   #     file_extension: .html
 
   fixture_validation_results_store:
-    class_name: ValidationResultStore
+    class_name: ValidationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: fixtures/validations
-      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
   evaluation_parameter_store:
       module_name: great_expectations.data_context.store

@@ -14,8 +14,8 @@ from .store import (
 
 from .namespaced_read_write_store import (
     NamespacedReadWriteStore,
-    ValidationResultStore,
-    ExpectationStore,
+    ValidationsStore,
+    ExpectationsStore,
     HtmlSiteStore,
 )
 

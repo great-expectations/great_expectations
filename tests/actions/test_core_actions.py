@@ -16,7 +16,7 @@ from great_expectations.validation_operators import (
 # )
 from great_expectations.data_context.store import (
     # NamespacedInMemoryStore
-    ValidationResultStore,
+    ValidationsStore,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
@@ -47,7 +47,7 @@ def test_subclass_of_BasicValidationAction():
 
 
 def test_StoreAction():
-    fake_in_memory_store = ValidationResultStore(
+    fake_in_memory_store = ValidationsStore(
         root_directory = None,
         store_backend = {
             "class_name": "InMemoryStoreBackend",
@@ -121,7 +121,7 @@ def test_SlackNotificationAction(data_context):
 
 
 # def test_ExtractAndStoreEvaluationParamsAction():
-#     fake_in_memory_store = ValidationResultStore(
+#     fake_in_memory_store = ValidationsStore(
 #         root_directory = None,
 #         store_backend = {
 #             "class_name": "InMemoryStoreBackend",
