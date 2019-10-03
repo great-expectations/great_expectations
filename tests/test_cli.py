@@ -255,7 +255,6 @@ great_expectations/
                             default/
                                 Titanic/
                                     BasicDatasetProfiler.html
-            team_site/
         samples/
         validations/
             profiling/

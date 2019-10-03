@@ -116,11 +116,6 @@ stores:
     class_name: HtmlSiteStore
     base_directory: uncommitted/documentation/local_site/
 
-  team_site_html_store:
-    module_name: great_expectations.data_context.store
-    class_name: HtmlSiteStore
-    base_directory: uncommitted/documentation/team_site/
-
 
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/guides/validation_operators.html

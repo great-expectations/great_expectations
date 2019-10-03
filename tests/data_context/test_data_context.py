@@ -601,7 +601,6 @@ project_path/
             config_variables.yml
             documentation/
                 local_site/
-                team_site/
             samples/
             validations/
                 profiling/
@@ -642,7 +641,6 @@ documentation/
                     default/
                         Titanic/
                             BasicDatasetProfiler.html
-    team_site/
 """
 
     # save documentation locally
