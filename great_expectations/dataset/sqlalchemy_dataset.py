@@ -310,14 +310,30 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 self._table)
         ).scalar()
     
-    def get_column_value_counts(self, column):
-        results = self.engine.execute(
-            sa.select([
+    def get_column_value_counts(self, column, sort="value", collate=None):
+        if sort not in ["value", "count", "none"]:
+            raise ValueError(
+                "sort must be either 'value', 'count', or 'none'"
+            )
+
+        query = sa.select([
                 sa.column(column).label("value"),
                 sa.func.count(sa.column(column)).label("count"),
             ]).where(sa.column(column) != None) \
-              .group_by(sa.column(column)) \
-              .select_from(self._table)).fetchall()
+              .group_by(sa.column(column))
+        if sort == "value":
+            # NOTE: depending on the way the underlying database collates columns,
+            # ordering can vary. postgresql collate "C" matches default sort
+            # for python and most other systems, but is not universally supported,
+            # so we use the default sort for the system
+            # query = query.order_by(sa.column(column).collate("C"))
+            if collate is not None:
+                query = query.order_by(sa.column(column).collate(collate))
+            else:
+                query = query.order_by(sa.column(column))
+        elif sort == "count":
+            query = query.order_by(sa.column("count").desc())
+        results = self.engine.execute(query.select_from(self._table)).fetchall()
         series = pd.Series(
             [row[1] for row in results],
             index=pd.Index(
@@ -326,7 +342,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ),
             name="count"
         )
-        series.sort_index(inplace=True)
         return series
 
     def get_column_mean(self, column):
