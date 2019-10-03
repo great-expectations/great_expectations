@@ -54,8 +54,7 @@ def test_subdir_reader_path_partitioning(tmp_path_factory):
         "20190102__asset_1",
         "20190103__asset_1"
     }
-    assert "timestamp" in asset_1_kwargs[0]
-    assert len(asset_1_kwargs[0].keys()) == 3
+    assert len(asset_1_kwargs[0].keys()) == 2
 
     assert len(asset_2_kwargs) == 2
     paths = set([kwargs["path"] for kwargs in asset_2_kwargs])
@@ -68,8 +67,7 @@ def test_subdir_reader_path_partitioning(tmp_path_factory):
         "20190101__asset_2",
         "20190102__asset_2"
     }
-    assert "timestamp" in asset_2_kwargs[0]
-    assert len(asset_2_kwargs[0].keys()) == 3
+    assert len(asset_2_kwargs[0].keys()) == 2
 
 
 def test_subdir_reader_file_partitioning(tmp_path_factory):
