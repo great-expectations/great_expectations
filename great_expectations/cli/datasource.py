@@ -166,7 +166,7 @@ def _add_sqlalchemy_datasource(context):
                     """)
                 return None
 
-        return data_source_name
+    return data_source_name
 
 
 def _add_spark_datasource(context):

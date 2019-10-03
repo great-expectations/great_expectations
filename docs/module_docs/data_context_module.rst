@@ -1,7 +1,7 @@
 .. _data_context_module:
 
 
-Data Context Module
+DataContext Module
 ===================
 
 .. automodule:: great_expectations.data_context
