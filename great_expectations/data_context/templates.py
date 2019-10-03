@@ -66,7 +66,7 @@ plugins_directory: plugins/
 # Point the following required store names to the appropriate `stores` entry.
 
 expectations_store_name: expectations_store
-profiling_store_name: local_validation_result_store
+profiling_store_name: validations_store
 evaluation_parameter_store_name: evaluation_parameter_store
 
 stores:
@@ -76,7 +76,7 @@ stores:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: expectations/
 
-  local_validation_result_store:
+  validations_store:
     class_name: ValidationResultStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
@@ -118,7 +118,7 @@ validation_operators:
       - name: store_validation_result
         action:
           class_name: StoreAction
-          target_store_name: local_validation_result_store
+          target_store_name: validations_store
       - name: store_evaluation_params
         action:
           class_name: ExtractAndStoreEvaluationParamsAction
@@ -161,7 +161,7 @@ data_docs_sites:
 
       validations:
         class_name: DefaultSiteSectionBuilder
-        source_store_name: local_validation_result_store
+        source_store_name: validations_store
         run_id_filter:
           ne: profiling
         renderer:
@@ -170,7 +170,7 @@ data_docs_sites:
 
       profiling:
         class_name: DefaultSiteSectionBuilder
-        source_store_name: local_validation_result_store
+        source_store_name: validations_store
         run_id_filter:
           eq: profiling
         renderer:

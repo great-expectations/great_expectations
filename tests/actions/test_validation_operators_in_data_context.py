@@ -195,12 +195,8 @@ project/
     data_context.create_expectation_suite(data_asset_name=data_asset_name, expectation_suite_name="default")
     batch = data_context.get_batch(data_asset_name=data_asset_name, expectation_suite_name="default",
                                    batch_kwargs=data_context.yield_batch_kwargs(data_asset_name))
-    # my_ge_df = ge.from_pandas(my_df)
 
-    # assert data_context.stores["local_validation_result_store"].list_keys() == []
     validation_store_path = os.path.join(project_path, "great_expectations/uncommitted/validations")
-    print(validation_store_path)
-    print(gen_directory_tree_str(validation_store_path))
     assert gen_directory_tree_str(validation_store_path) == """\
 validations/
     profiling/

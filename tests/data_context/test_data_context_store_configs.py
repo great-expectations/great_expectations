@@ -83,13 +83,13 @@ def test_config_from_absolute_zero(totally_empty_data_context):
     assert len(totally_empty_data_context.stores.keys()) == 2
 
 
-def test_default_config_adds_store(tmp_path_factory):
+def test_default_config_yml_stores(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('totally_empty_data_context'))
     context = ge.data_context.DataContext.create(project_path)
 
     assert set(context.stores.keys()) == {
             "expectations_store",
-            "local_validation_result_store",
+            "validations_store",
             "evaluation_parameter_store",
             "local_site_html_store"
         }
@@ -105,7 +105,7 @@ def test_default_config_adds_store(tmp_path_factory):
 
     assert set(context.stores.keys()) == {
             "expectations_store",
-            "local_validation_result_store",
+            "validations_store",
             "evaluation_parameter_store",
             "local_site_html_store",
             "my_new_in_memory_store"

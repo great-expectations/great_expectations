@@ -500,11 +500,7 @@ def test_data_context_result_store(titanic_data_context):
     """
     Test that validation results can be correctly fetched from the configured results store
     """
-    print(titanic_data_context.stores["local_validation_result_store"].list_keys())
-
     profiling_results = titanic_data_context.profile_datasource("mydatasource")
-
-    print(titanic_data_context.stores["local_validation_result_store"].list_keys())
 
     for profiling_result in profiling_results['results']:
         data_asset_name = profiling_result[1]['meta']['data_asset_name']

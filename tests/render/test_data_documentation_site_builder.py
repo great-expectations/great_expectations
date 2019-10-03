@@ -1,22 +1,16 @@
 import os
-import pytest
 import json
 import re
 import shutil
 
-from great_expectations.util import (
-    gen_directory_tree_str
-)
 from great_expectations.data_context.util import (
     parse_string_to_data_context_resource_identifier
 )
 from great_expectations.render.renderer.site_builder import (
     SiteBuilder,
     DefaultSiteSectionBuilder,
-    DefaultSiteIndexBuilder,
 )
 from great_expectations.data_context.types import (
-    ValidationResultIdentifier,
     SiteSectionIdentifier,
 )
 from great_expectations.data_context.util import safe_mmkdir
@@ -33,7 +27,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
             "name": "store_validation_result",
             "action": {
                 "class_name": "StoreAction",
-                "target_store_name": "local_validation_result_store",
+                "target_store_name": "validations_store",
             }
         }, {
             "name": "extract_and_store_eval_parameters",
@@ -70,8 +64,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     # set datasource_whitelist
     local_site_config['datasource_whitelist'] = ['titanic']
 
-    keys_as_strings = [x.to_string() for x in context.stores["local_validation_result_store"].list_keys()]
-    print("\n".join(keys_as_strings))
+    keys_as_strings = [x.to_string() for x in context.stores["validations_store"].list_keys()]
     assert set(keys_as_strings) == set([
         "ValidationResultIdentifier.titanic.default.Titanic.BasicDatasetProfiler.test_run_id_12345",
         "ValidationResultIdentifier.titanic.default.Titanic.BasicDatasetProfiler.profiling",
@@ -82,8 +75,6 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     res = SiteBuilder(
             data_context=context,
             **local_site_config
-            # datasource_whitelist=[],
-            # datasource_blacklist=[],
         ).build()
     index_page_locator_info = res[0]
     index_links_dict = res[1]

@@ -382,7 +382,7 @@ class ConfigOnlyDataContext(object):
                 },
                 "run_id": run_id,
             })
-        validation_result = self.stores.local_validation_result_store.get(validation_result_identifier)
+        validation_result = self.stores.validations_store.get(validation_result_identifier)
 
         self.stores.fixture_validation_results_store.set(
             validation_result_identifier,
@@ -1398,7 +1398,7 @@ class ConfigOnlyDataContext(object):
         data_asset_name,
         expectation_suite_name="default",
         run_id=None,
-        validations_store_name="local_validation_result_store",
+        validations_store_name="validations_store",
         failed_only=False,
     ):
         """Get validation results from a configured store.
