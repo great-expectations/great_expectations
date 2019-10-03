@@ -104,13 +104,6 @@ stores:
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore
   
-  fixture_validation_results_store:
-    class_name: ValidationResultStore
-    store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
-      base_directory: fixtures/validations
-      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
-  
   local_site_html_store:
     module_name: great_expectations.data_context.store
     class_name: HtmlSiteStore

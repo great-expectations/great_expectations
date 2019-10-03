@@ -91,7 +91,6 @@ def test_default_config_adds_store(tmp_path_factory):
             "expectations_store",
             "local_validation_result_store",
             "evaluation_parameter_store",
-            "fixture_validation_results_store",
             "local_site_html_store"
         }
 
@@ -108,7 +107,6 @@ def test_default_config_adds_store(tmp_path_factory):
             "expectations_store",
             "local_validation_result_store",
             "evaluation_parameter_store",
-            "fixture_validation_results_store",
             "local_site_html_store",
             "my_new_in_memory_store"
         }
