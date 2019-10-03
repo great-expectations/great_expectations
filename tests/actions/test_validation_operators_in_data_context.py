@@ -47,9 +47,7 @@ def basic_data_context_config_for_validation_operator():
                 }
             },
         },
-        "data_docs": {
-            "sites": {}
-        },
+        "data_docs_sites": {},
         "validation_operators": {
             "store_val_res_and_extract_eval_params" : {
                 "class_name" : "PerformActionListValidationOperator",

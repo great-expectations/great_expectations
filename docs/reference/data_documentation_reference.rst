@@ -21,7 +21,7 @@ Here is an example of a site configuration from great_expectations.yml:
 .. code-block:: bash
 
     data_docs:
-      sites:
+      data_docs_sites
         local_site: # site name
           type: SiteBuilder
           site_store: # where the HTML will be written to (filesystem/S3)

@@ -32,9 +32,7 @@ def totally_empty_data_context(tmp_path_factory):
                 }
             },
         },
-        "data_docs": {
-            "sites": {}
-        },
+        "data_docs_sites": {},
         "validation_operators": {}
     }
     with open(os.path.join(project_root_dir, "great_expectations/great_expectations.yml"), 'w') as config_file:

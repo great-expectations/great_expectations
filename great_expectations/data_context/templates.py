@@ -146,76 +146,48 @@ validation_operators:
       #       class_name: SlackRenderer
     
 
-# TODO : Remove the extra layer of yml nesting in v0.8:
-data_docs:
-  sites:
-    local_site: # site name
-    # “local_site” renders documentation for all the datasources in the project from GE artifacts in the local repo. 
-    # The site includes expectation suites and profiling and validation results from uncommitted directory. 
-    # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
+data_docs_sites:
+  local_site: # site name
+  # “local_site” renders documentation for all the datasources in the project from GE artifacts in the local repo. 
+  # The site includes expectation suites and profiling and validation results from uncommitted directory. 
+  # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
 
-      # specify a whitelist here if you would like to restrict the datasources to document
-      datasource_whitelist: '*'
+    # specify a whitelist here if you would like to restrict the datasources to document
+    datasource_whitelist: '*'
 
-      module_name: great_expectations.render.renderer.site_builder
-      class_name: SiteBuilder
-      target_store_name: local_site_html_store
-      
-      site_index_builder:
-        class_name: DefaultSiteIndexBuilder
-      
-      site_section_builders:
-          
-        expectations:
-          class_name: DefaultSiteSectionBuilder
-          source_store_name: expectations_store
-          renderer:
-            module_name: great_expectations.render.renderer
-            class_name: ExpectationSuitePageRenderer
+    module_name: great_expectations.render.renderer.site_builder
+    class_name: SiteBuilder
+    target_store_name: local_site_html_store
+    
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
+    
+    site_section_builders:
+        
+      expectations:
+        class_name: DefaultSiteSectionBuilder
+        source_store_name: expectations_store
+        renderer:
+          module_name: great_expectations.render.renderer
+          class_name: ExpectationSuitePageRenderer
 
-        validations:
-          class_name: DefaultSiteSectionBuilder
-          source_store_name: local_validation_result_store
-          run_id_filter:
-            ne: profiling
-          renderer:
-            module_name: great_expectations.render.renderer
-            class_name: ValidationResultsPageRenderer
+      validations:
+        class_name: DefaultSiteSectionBuilder
+        source_store_name: local_validation_result_store
+        run_id_filter:
+          ne: profiling
+        renderer:
+          module_name: great_expectations.render.renderer
+          class_name: ValidationResultsPageRenderer
 
-        profiling:
-          class_name: DefaultSiteSectionBuilder
-          source_store_name: local_validation_result_store
-          run_id_filter:
-            eq: profiling
-          renderer:
-            module_name: great_expectations.render.renderer
-            class_name: ProfilingResultsPageRenderer
-
-    team_site:
-    # "team_site" is meant to support the "shared source of truth for a team" use case. 
-    # By default only the expectations section is enabled.
-    #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3). 
-    # Reach out on Slack (https://greatexpectations.io/slack>) if you would like to discuss the best way to configure a team site.
-
-      # specify a whitelist here if you would like to restrict the datasources to document
-      datasource_whitelist: '*'
-      
-      module_name: great_expectations.render.renderer.site_builder
-      class_name: SiteBuilder
-      target_store_name: team_site_html_store
-      
-      site_index_builder:
-        class_name: DefaultSiteIndexBuilder
-      
-      site_section_builders:
-          
-        expectations:
-          class_name: DefaultSiteSectionBuilder
-          source_store_name: expectations_store
-          renderer:
-            module_name: great_expectations.render.renderer
-            class_name: ExpectationSuitePageRenderer
-
+      profiling:
+        class_name: DefaultSiteSectionBuilder
+        source_store_name: local_validation_result_store
+        run_id_filter:
+          eq: profiling
+        renderer:
+          module_name: great_expectations.render.renderer
+          class_name: ProfilingResultsPageRenderer
 """
 
 PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT

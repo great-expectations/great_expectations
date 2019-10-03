@@ -62,8 +62,8 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         validation_operator_name="validate_and_store",
     )
 
-    data_docs_config = context._project_config.get('data_docs')
-    local_site_config = data_docs_config['sites']['local_site']
+    data_docs_config = context._project_config.get('data_docs_sites')
+    local_site_config = data_docs_config['local_site']
     local_site_config.pop('module_name')
     local_site_config.pop('class_name')
 

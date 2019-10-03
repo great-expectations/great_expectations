@@ -17,8 +17,7 @@ evaluation_parameter_store_name: evaluation_parameter_store
 profiling_store_name: local_validation_result_store
 expectations_store_name: expectations_store
 
-data_docs:
-  sites:
+data_docs_sites:
 
 stores:
   expectations_store:

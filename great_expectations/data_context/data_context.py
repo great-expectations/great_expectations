@@ -147,7 +147,7 @@ class ConfigOnlyDataContext(object):
             "evaluation_parameter_store_name",
             "datasources",
             "stores",
-            "data_docs",
+            "data_docs_sites",
             "validation_operators"
         }
         for key in required_keys:
@@ -163,7 +163,7 @@ class ConfigOnlyDataContext(object):
             "evaluation_parameter_store_name",
             "datasources",
             "stores",
-            "data_docs",  # TODO: Rename this to sites, to remove a layer of extraneous nesting
+            "data_docs_sites",
             "validation_operators",
         }
         for key in project_config.keys():
@@ -1481,15 +1481,12 @@ class ConfigOnlyDataContext(object):
 
         index_page_locator_infos = {}
 
-        # construct the config (merge defaults with specifics)
-
-        data_docs_config = self._project_config_with_varibles_substituted.get('data_docs')
-        if data_docs_config:
-            logger.debug("Found data_docs_config. Building sites...")
-            sites = data_docs_config.get('sites', [])
+        sites = self._project_config_with_varibles_substituted.get('data_docs_sites', [])
+        if sites:
+            logger.debug("Found data_docs_sites. Building sites...")
 
             for site_name, site_config in sites.items():
-                logger.debug("Building site %s" % site_name,)
+                logger.debug("Building Data Docs Site %s" % site_name,)
 
                 if (site_names and site_name in site_names) or not site_names or len(site_names) == 0:
                     complete_site_config = site_config
