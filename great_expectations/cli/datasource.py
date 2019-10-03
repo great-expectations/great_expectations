@@ -394,8 +394,7 @@ Do we not have the type of data source you want?
 
 In the meantime, consider reviewing the following notebook for an example of 
 creating and saving an expectation suite for validation:
-
-    <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
+    - `<green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>`
 """
 
 msg_go_to_notebook = """
