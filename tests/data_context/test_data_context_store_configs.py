@@ -25,7 +25,7 @@ def totally_empty_data_context(tmp_path_factory):
         "datasources": {},
         "stores": {
             "expectations_store": {
-                "class_name": "ExpectationStore",
+                "class_name": "ExpectationsStore",
                 "store_backend": {
                     "class_name": "FixedLengthTupleFilesystemStoreBackend",
                     "base_directory": "expectations/"

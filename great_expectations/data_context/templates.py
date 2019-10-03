@@ -71,17 +71,16 @@ evaluation_parameter_store_name: evaluation_parameter_store
 
 stores:
   expectations_store:
-    class_name: ExpectationStore
+    class_name: ExpectationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: expectations/
 
   local_validation_result_store:
-    class_name: ValidationResultStore
+    class_name: ValidationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
-      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
   # Uncomment the lines below to enable s3 as a result store. When enabled,
   # validation results will be saved in the store according to `run id`.
@@ -89,13 +88,12 @@ stores:
   # set where validation happens.
   
   # s3_validation_result_store:
-  #   class_name: ValidationResultStore
+  #   class_name: ValidationsStore
   #   store_backend:
   #     class_name: FixedLengthTupleS3StoreBackend
   #     bucket: <my_bucket>
   #     prefix: <my_prefix>
   #     file_extension: json
-  #     filepath_template: '{4}/{0}/{1}/{2}/{3}.{file_extension}'
 
 
   evaluation_parameter_store:
@@ -105,11 +103,10 @@ stores:
     class_name: EvaluationParameterStore
   
   fixture_validation_results_store:
-    class_name: ValidationResultStore
+    class_name: ValidationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: fixtures/validations
-      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
   
   local_site_html_store:
     module_name: great_expectations.data_context.store
