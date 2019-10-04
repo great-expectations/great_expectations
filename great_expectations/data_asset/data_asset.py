@@ -8,12 +8,7 @@ import warnings
 import logging
 import datetime
 from six import PY3, string_types
-from collections import namedtuple
-
-from collections import (
-    Counter,
-    defaultdict
-)
+from collections import namedtuple, Hashable, Counter, defaultdict
 
 from great_expectations.version import __version__
 from great_expectations.data_asset.util import (
@@ -69,6 +64,9 @@ class DataAsset(object):
         self._data_context = data_context
         self._batch_kwargs = batch_kwargs
 
+        # This special state variable tracks whether a validation run is going on, which will disable
+        # saving expectation config objects
+        self._active_validation = False
         if profiler is not None:
             profiler.profile(self)
 
@@ -211,7 +209,7 @@ class DataAsset(object):
                 exception_message = None
 
                 # Finally, execute the expectation method itself
-                if self._config.get("interactive_evaluation", True):
+                if self._config.get("interactive_evaluation", True) or self._active_validation:
                     try:
                         return_obj = func(self, **evaluation_args)
                 
@@ -231,8 +229,13 @@ class DataAsset(object):
                 else:
                     return_obj = {"stored_configuration": expectation_config}
 
-                # Append the expectation to the config.
-                self._append_expectation(expectation_config)
+                # If validate has set active_validation to true, then we do not save the config to avoid
+                # saving updating expectation configs to the same suite during validation runs
+                if self._active_validation is True:
+                    pass
+                else:
+                    # Append the expectation to the config.
+                    self._append_expectation(expectation_config)
 
                 if include_config:
                     return_obj["expectation_config"] = copy.deepcopy(
@@ -906,177 +909,181 @@ class DataAsset(object):
         Raises:
            AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
-        validate__interactive_evaluation = self._config.get("interactive_evaluation")
-        if not validate__interactive_evaluation:
-            # Turn this off for an explicit call to validate
-            self._config["interactive_evaluation"] = True
-
-        # If a different validation data context was provided, override 
-        validate__data_context = self._data_context
-        if data_context is None and self._data_context is not None:
-            data_context = self._data_context
-        elif data_context is not None:
-            # temporarily set self._data_context so it is used inside the expectation decorator
-            self._data_context = data_context
-
-        results = []
-
-        if expectation_suite is None:
-            expectation_suite = self.get_expectation_suite(
-                discard_failed_expectations=False,
-                discard_result_format_kwargs=False,
-                discard_include_config_kwargs=False,
-                discard_catch_exceptions_kwargs=False,
-            )
-        elif isinstance(expectation_suite, string_types):
-            expectation_suite = json.load(open(expectation_suite, 'r'))
-
-        # Evaluation parameter priority is
-        # 1. from provided parameters
-        # 2. from expectation configuration
-        # 3. from data context
-        # So, we load them in reverse order
-
-        if data_context is not None:
-            runtime_evaluation_parameters = data_context.bind_evaluation_parameters(run_id)  # , expectation_suite)
-        else:
-            runtime_evaluation_parameters = {}
-
-        if "evaluation_parameters" in expectation_suite:
-            runtime_evaluation_parameters.update(expectation_suite["evaluation_parameters"])
-        
-        if evaluation_parameters is not None:
-            runtime_evaluation_parameters.update(evaluation_parameters)
-
-        # Convert evaluation parameters to be json-serializable
-        runtime_evaluation_parameters = recursively_convert_to_json_serializable(runtime_evaluation_parameters)
-
-        # Warn if our version is different from the version in the configuration
         try:
-            if expectation_suite['meta']['great_expectations.__version__'] != __version__:
-                warnings.warn(
-                    "WARNING: This configuration object was built using version %s of great_expectations, but "
-                    "is currently being valided by version %s."
-                    % (expectation_suite['meta']['great_expectations.__version__'], __version__))
-        except KeyError:
-            warnings.warn(
-                "WARNING: No great_expectations version found in configuration object.")
+            self._active_validation = True
 
-        ###
-        # This is an early example of what will become part of the ValidationOperator
-        # This operator would be dataset-semantic aware
-        # Adding now to simply ensure we can be slightly better at ordering our expectation evaluation
-        ###
+            # If a different validation data context was provided, override
+            validate__data_context = self._data_context
+            if data_context is None and self._data_context is not None:
+                data_context = self._data_context
+            elif data_context is not None:
+                # temporarily set self._data_context so it is used inside the expectation decorator
+                self._data_context = data_context
 
-        # Group expectations by column
-        columns = {}
+            results = []
 
-        for expectation in expectation_suite["expectations"]:
-            if "column" in expectation["kwargs"]:
-                column = expectation["kwargs"]["column"]
-            else:
-                column = "_nocolumn"
-            if column not in columns:
-                columns[column] = []
-            columns[column].append(expectation)
-
-        expectations_to_evaluate = []
-        for col in columns:
-            expectations_to_evaluate.extend(columns[col])
-
-        for expectation in expectations_to_evaluate:
-
-            try:
-                expectation_method = getattr(
-                    self, expectation['expectation_type'])
-
-                if result_format is not None:
-                    expectation['kwargs'].update({'result_format': result_format})
-
-                # A missing parameter should raise a KeyError
-                evaluation_args = self._build_evaluation_parameters(
-                    expectation['kwargs'], runtime_evaluation_parameters)
-
-                result = expectation_method(
-                    catch_exceptions=catch_exceptions,
-                    **evaluation_args
+            if expectation_suite is None:
+                expectation_suite = self.get_expectation_suite(
+                    discard_failed_expectations=False,
+                    discard_result_format_kwargs=False,
+                    discard_include_config_kwargs=False,
+                    discard_catch_exceptions_kwargs=False,
                 )
+            elif isinstance(expectation_suite, string_types):
+                expectation_suite = json.load(open(expectation_suite, 'r'))
 
-            except Exception as err:
-                if catch_exceptions:
-                    raised_exception = True
-                    exception_traceback = traceback.format_exc()
+            # Evaluation parameter priority is
+            # 1. from provided parameters
+            # 2. from expectation configuration
+            # 3. from data context
+            # So, we load them in reverse order
 
-                    result = {
-                        "success": False,
-                        "exception_info": {
-                            "raised_exception": raised_exception,
-                            "exception_traceback": exception_traceback,
-                            "exception_message": str(err)
+            if data_context is not None:
+                runtime_evaluation_parameters = data_context.bind_evaluation_parameters(run_id)  # , expectation_suite)
+            else:
+                runtime_evaluation_parameters = {}
+
+            if "evaluation_parameters" in expectation_suite:
+                runtime_evaluation_parameters.update(expectation_suite["evaluation_parameters"])
+
+            if evaluation_parameters is not None:
+                runtime_evaluation_parameters.update(evaluation_parameters)
+
+            # Convert evaluation parameters to be json-serializable
+            runtime_evaluation_parameters = recursively_convert_to_json_serializable(runtime_evaluation_parameters)
+
+            # Warn if our version is different from the version in the configuration
+            try:
+                if expectation_suite['meta']['great_expectations.__version__'] != __version__:
+                    warnings.warn(
+                        "WARNING: This configuration object was built using version %s of great_expectations, but "
+                        "is currently being valided by version %s."
+                        % (expectation_suite['meta']['great_expectations.__version__'], __version__))
+            except KeyError:
+                warnings.warn(
+                    "WARNING: No great_expectations version found in configuration object.")
+
+            ###
+            # This is an early example of what will become part of the ValidationOperator
+            # This operator would be dataset-semantic aware
+            # Adding now to simply ensure we can be slightly better at ordering our expectation evaluation
+            ###
+
+            # Group expectations by column
+            columns = {}
+
+            for expectation in expectation_suite["expectations"]:
+                if "column" in expectation["kwargs"] and isinstance(expectation["kwargs"]["column"], Hashable):
+                    column = expectation["kwargs"]["column"]
+                else:
+                    column = "_nocolumn"
+                if column not in columns:
+                    columns[column] = []
+                columns[column].append(expectation)
+
+            expectations_to_evaluate = []
+            for col in columns:
+                expectations_to_evaluate.extend(columns[col])
+
+            for expectation in expectations_to_evaluate:
+
+                try:
+                    # copy the config so we can modify it below if needed
+                    expectation = copy.deepcopy(expectation)
+
+                    expectation_method = getattr(
+                        self, expectation['expectation_type'])
+
+                    if result_format is not None:
+                        expectation['kwargs'].update({'result_format': result_format})
+
+                    # A missing parameter should raise a KeyError
+                    evaluation_args = self._build_evaluation_parameters(
+                        expectation['kwargs'], runtime_evaluation_parameters)
+
+                    result = expectation_method(
+                        catch_exceptions=catch_exceptions,
+                        **evaluation_args
+                    )
+
+                except Exception as err:
+                    if catch_exceptions:
+                        raised_exception = True
+                        exception_traceback = traceback.format_exc()
+
+                        result = {
+                            "success": False,
+                            "exception_info": {
+                                "raised_exception": raised_exception,
+                                "exception_traceback": exception_traceback,
+                                "exception_message": str(err)
+                            }
                         }
+
+                    else:
+                        raise err
+
+                # if include_config:
+                result["expectation_config"] = expectation
+
+                # Add an empty exception_info object if no exception was caught
+                if catch_exceptions and ('exception_info' not in result):
+                    result["exception_info"] = {
+                        "raised_exception": False,
+                        "exception_traceback": None,
+                        "exception_message": None
                     }
 
-                else:
-                    raise err
+                results.append(result)
 
-            # if include_config:
-            result["expectation_config"] = copy.deepcopy(expectation)
+            statistics = _calc_validation_statistics(results)
 
-            # Add an empty exception_info object if no exception was caught
-            if catch_exceptions and ('exception_info' not in result):
-                result["exception_info"] = {
-                    "raised_exception": False,
-                    "exception_traceback": None,
-                    "exception_message": None
+            if only_return_failures:
+                abbrev_results = []
+                for exp in results:
+                    if not exp["success"]:
+                        abbrev_results.append(exp)
+                results = abbrev_results
+
+            data_asset_name = expectation_suite.get("data_asset_name", None)
+            expectation_suite_name = expectation_suite.get("expectation_suite_name", "default")
+
+            result = {
+                "results": results,
+                "success": statistics.success,
+                "statistics": {
+                    "evaluated_expectations": statistics.evaluated_expectations,
+                    "successful_expectations": statistics.successful_expectations,
+                    "unsuccessful_expectations": statistics.unsuccessful_expectations,
+                    "success_percent": statistics.success_percent,
+                },
+                "meta": {
+                    "great_expectations.__version__": __version__,
+                    "data_asset_name": data_asset_name,
+                    "expectation_suite_name": expectation_suite_name
                 }
+            }
 
-            results.append(result)
+            if evaluation_parameters is not None:
+                result.update({"evaluation_parameters": runtime_evaluation_parameters})
 
-        statistics = _calc_validation_statistics(results)
+            if run_id is not None:
+                result["meta"].update({"run_id": run_id})
+            else:
+                run_id = datetime.datetime.utcnow().isoformat().replace(":", "") + "Z"
+                result["meta"].update({"run_id": run_id})
 
-        if only_return_failures:
-            abbrev_results = []
-            for exp in results:
-                if not exp["success"]:
-                    abbrev_results.append(exp)
-            results = abbrev_results
+            if self._batch_kwargs is not None:
+                result["meta"].update({"batch_kwargs": self._batch_kwargs})
 
-        data_asset_name = expectation_suite.get("data_asset_name", None)
-        expectation_suite_name = expectation_suite.get("expectation_suite_name", "default")
+            if data_context is not None:
+                result = data_context.register_validation_results(run_id, result, self)
 
-        result = {
-            "results": results,
-            "success": statistics.success,
-            "statistics": {
-                "evaluated_expectations": statistics.evaluated_expectations,
-                "successful_expectations": statistics.successful_expectations,
-                "unsuccessful_expectations": statistics.unsuccessful_expectations,
-                "success_percent": statistics.success_percent,
-            },
-            "meta": {
-                "great_expectations.__version__": __version__,
-                "data_asset_name": data_asset_name,
-                "expectation_suite_name": expectation_suite_name
-            }            
-        }
-
-        if evaluation_parameters is not None:
-            result.update({"evaluation_parameters": runtime_evaluation_parameters})
-
-        if run_id is not None:
-            result["meta"].update({"run_id": run_id})
-        else:
-            run_id = datetime.datetime.utcnow().isoformat().replace(":", "") + "Z"
-            result["meta"].update({"run_id": run_id})
-
-        if self._batch_kwargs is not None:
-            result["meta"].update({"batch_kwargs": self._batch_kwargs})
-
-        if data_context is not None:
-            result = data_context.register_validation_results(run_id, result, self)
-
-        self._data_context = validate__data_context
-        self._config["interactive_evaluation"] = validate__interactive_evaluation
+            self._data_context = validate__data_context
+        except Exception:
+            raise
+        finally:
+            self._active_validation = False
 
         return result
 
