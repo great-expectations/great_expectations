@@ -52,8 +52,7 @@ from .types import (
 
 from .templates import (
     PROJECT_TEMPLATE,
-    CONFIG_VARIABLES_COMMENT,
-    CONFIG_VARIABLES_FILE_TEMPLATE
+    CONFIG_VARIABLES_INTRO,
 )
 from .util import (
     load_class,
@@ -123,7 +122,7 @@ class ConfigOnlyDataContext(object):
 
             safe_mmkdir(os.path.join(project_root_dir, "great_expectations/uncommitted"))
             with open(os.path.join(project_root_dir, "great_expectations/uncommitted/config_variables.yml"), "w") as template:
-                template.write(CONFIG_VARIABLES_FILE_TEMPLATE)
+                template.write(CONFIG_VARIABLES_INTRO)
 
         return cls(os.path.join(project_root_dir, "great_expectations"))
 
@@ -143,11 +142,11 @@ class ConfigOnlyDataContext(object):
             # "config_version",
             "plugins_directory",
             "expectations_store_name",
-            "profiling_store_name",
+            "validations_store_name",
             "evaluation_parameter_store_name",
             "datasources",
             "stores",
-            "data_docs",
+            "data_docs_sites",
             "validation_operators"
         }
         for key in required_keys:
@@ -159,11 +158,11 @@ class ConfigOnlyDataContext(object):
             "config_variables_file_path",
             "plugins_directory",
             "expectations_store_name",
-            "profiling_store_name",
+            "validations_store_name",
             "evaluation_parameter_store_name",
             "datasources",
             "stores",
-            "data_docs",  # TODO: Rename this to sites, to remove a layer of extraneous nesting
+            "data_docs_sites",
             "validation_operators",
         }
         for key in project_config.keys():
@@ -382,7 +381,7 @@ class ConfigOnlyDataContext(object):
                 },
                 "run_id": run_id,
             })
-        validation_result = self.stores.local_validation_result_store.get(validation_result_identifier)
+        validation_result = self.stores.validations_store.get(validation_result_identifier)
 
         self.stores.fixture_validation_results_store.set(
             validation_result_identifier,
@@ -452,7 +451,7 @@ class ConfigOnlyDataContext(object):
                 logger.debug("Generating empty config variables file.")
                 # TODO this might be the comment problem?
                 base_config_variables_store = yaml.load("{}")
-                base_config_variables_store.yaml_set_start_comment(CONFIG_VARIABLES_COMMENT)
+                base_config_variables_store.yaml_set_start_comment(CONFIG_VARIABLES_INTRO)
                 return base_config_variables_store
         else:
             return {}
@@ -1179,7 +1178,7 @@ class ConfigOnlyDataContext(object):
 
     @property
     def profiling_store(self):
-        return self.stores[self._project_config_with_varibles_substituted["profiling_store_name"]]
+        return self.stores[self._project_config_with_varibles_substituted["validations_store_name"]]
 
     def set_parameters_in_evaluation_parameter_store_by_run_id_and_key(self, run_id, key, value):
         """Store a new validation parameter.
@@ -1400,7 +1399,7 @@ class ConfigOnlyDataContext(object):
         data_asset_name,
         expectation_suite_name="default",
         run_id=None,
-        validations_store_name="local_validation_result_store",
+        validations_store_name="validations_store",
         failed_only=False,
     ):
         """Get validation results from a configured store.
@@ -1483,15 +1482,12 @@ class ConfigOnlyDataContext(object):
 
         index_page_locator_infos = {}
 
-        # construct the config (merge defaults with specifics)
-
-        data_docs_config = self._project_config_with_varibles_substituted.get('data_docs')
-        if data_docs_config:
-            logger.debug("Found data_docs_config. Building sites...")
-            sites = data_docs_config.get('sites', [])
+        sites = self._project_config_with_varibles_substituted.get('data_docs_sites', [])
+        if sites:
+            logger.debug("Found data_docs_sites. Building sites...")
 
             for site_name, site_config in sites.items():
-                logger.debug("Building site %s" % site_name,)
+                logger.debug("Building Data Docs Site %s" % site_name,)
 
                 if (site_names and site_name in site_names) or not site_names or len(site_names) == 0:
                     complete_site_config = site_config

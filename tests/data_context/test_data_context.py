@@ -495,11 +495,7 @@ def test_data_context_result_store(titanic_data_context):
     """
     Test that validation results can be correctly fetched from the configured results store
     """
-    print(titanic_data_context.stores["local_validation_result_store"].list_keys())
-
     profiling_results = titanic_data_context.profile_datasource("mydatasource")
-
-    print(titanic_data_context.stores["local_validation_result_store"].list_keys())
 
     for profiling_result in profiling_results['results']:
         data_asset_name = profiling_result[1]['meta']['data_asset_name']
@@ -520,7 +516,7 @@ def test_data_context_result_store(titanic_data_context):
     assert len(failed_validation_result["results"]) == 8
 
 
-def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
+def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
 
     # TODO : Use a standard test fixture
     # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
@@ -531,14 +527,12 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
     os.makedirs(os.path.join(project_dir, "data"))
     os.makedirs(os.path.join(project_dir, "data/titanic"))
-    curdir = os.path.abspath(os.getcwd())
     shutil.copy(
         "./tests/test_sets/Titanic.csv",
         str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
     )
 
     os.makedirs(os.path.join(project_dir, "data/random"))
-    curdir = os.path.abspath(os.getcwd())
     shutil.copy(
         os.path.join(filesystem_csv_3, "f1.csv"),
         str(os.path.join(project_dir, "data/random/f1.csv"))
@@ -572,7 +566,6 @@ project_path/
                             base_directory=os.path.join(project_dir, "data/random/"))
 
     context.profile_datasource("titanic")
-    # print(gen_directory_tree_str(project_dir))
     assert gen_directory_tree_str(project_dir) == """\
 project_path/
     data/
@@ -599,7 +592,6 @@ project_path/
             config_variables.yml
             documentation/
                 local_site/
-                team_site/
             samples/
             validations/
                 profiling/
@@ -610,15 +602,10 @@ project_path/
 """
 
     context.profile_datasource("random")
-    # print(gen_directory_tree_str(project_dir))
-    
     context.build_data_documentation()
-    # print(gen_directory_tree_str(project_dir))
 
-    # Titanic
-
-    print(gen_directory_tree_str(os.path.join(project_dir, "great_expectations/uncommitted/documentation")))
-    assert gen_directory_tree_str(os.path.join(project_dir, "great_expectations/uncommitted/documentation")) == """\
+    observed = gen_directory_tree_str(os.path.join(project_dir, "great_expectations/uncommitted/documentation"))
+    assert observed == """\
 documentation/
     local_site/
         index.html
@@ -645,19 +632,6 @@ documentation/
                     default/
                         Titanic/
                             BasicDatasetProfiler.html
-    team_site/
-        index.html
-        expectations/
-            random/
-                default/
-                    f1/
-                        BasicDatasetProfiler.html
-                    f2/
-                        BasicDatasetProfiler.html
-            titanic/
-                default/
-                    Titanic/
-                        BasicDatasetProfiler.html
 """
 
     # save documentation locally
@@ -724,7 +698,7 @@ def basic_data_context_config():
         "config_version": 1,
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name": "evaluation_parameter_store",
-        "profiling_store_name": "does_not_have_to_be_real",
+        "validations_store_name": "does_not_have_to_be_real",
         "expectations_store_name": "expectations_store",
         "datasources": {},
         "stores": {
@@ -740,9 +714,7 @@ def basic_data_context_config():
                 "class_name": "EvaluationParameterStore",
             }
         },
-        "data_docs": {
-            "sites": {}
-        },
+        "data_docs_sites": {},
         "validation_operators": {
             "default": {
                 "class_name": "PerformActionListValidationOperator",

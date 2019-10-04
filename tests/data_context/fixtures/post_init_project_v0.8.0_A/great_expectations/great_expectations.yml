@@ -3,9 +3,8 @@ plugins_directory: plugins/
 
 expectations_store_name: local_expectations_store
 evaluation_parameter_store_name: evaluation_parameter_store
-profiling_store_name: local_validation_result_store
+validations_store_name: validations_store
 
-# TODO : Remove the extra layer of yml nesting in v0.8:
 datasources:
   data__dir:
     type: pandas
@@ -26,7 +25,7 @@ validation_operators:
       - name: store_validation_result
         action:
           class_name: StoreAction
-          target_store_name: local_validation_result_store
+          target_store_name: validations_store
       - name: store_evaluation_params
         action:
           class_name: ExtractAndStoreEvaluationParamsAction
@@ -38,7 +37,7 @@ stores:
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: expectations/
-  local_validation_result_store:
+  validations_store:
     class_name: ValidationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
@@ -77,42 +76,41 @@ stores:
     class_name: HtmlSiteStore
     base_directory: uncommitted/documentation/local_site/
 
-data_docs:
-  sites:
-    local_site: # site name
-    # “local_site” renders documentation for all the datasources in the project from GE artifacts in the local repo. 
-    # The site includes expectation suites and profiling and validation results from uncommitted directory. 
-    # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
+data_docs_sites:
+  local_site: # site name
+  # “local_site” renders documentation for all the datasources in the project from GE artifacts in the local repo.
+  # The site includes expectation suites and profiling and validation results from uncommitted directory.
+  # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
 
-      module_name: great_expectations.render.renderer.new_site_builder
-      class_name: SiteBuilder
-      target_store_name: local_site_html_store
+    module_name: great_expectations.render.renderer.new_site_builder
+    class_name: SiteBuilder
+    target_store_name: local_site_html_store
 
-      site_index_builder:
-        class_name: DefaultSiteIndexBuilder
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
 
-      site_section_builders:
-        expectations:
-          class_name: DefaultSiteSectionBuilder
-          source_store_name: expectations_store
-          renderer:
-            module_name: great_expectations.render.renderer
-            class_name: ExpectationSuitePageRenderer
+    site_section_builders:
+      expectations:
+        class_name: DefaultSiteSectionBuilder
+        source_store_name: expectations_store
+        renderer:
+          module_name: great_expectations.render.renderer
+          class_name: ExpectationSuitePageRenderer
 
-        validations:
-          class_name: DefaultSiteSectionBuilder
-          source_store_name: local_validation_result_store
-          run_id_filter:
-            ne: profiling
-          renderer:
-            module_name: great_expectations.render.renderer
-            class_name: ValidationResultsPageRenderer
+      validations:
+        class_name: DefaultSiteSectionBuilder
+        source_store_name: validations_store
+        run_id_filter:
+          ne: profiling
+        renderer:
+          module_name: great_expectations.render.renderer
+          class_name: ValidationResultsPageRenderer
 
-        profiling:
-          class_name: DefaultSiteSectionBuilder
-          source_store_name: local_validation_result_store
-          run_id_filter:
-            eq: profiling
-          renderer:
-            module_name: great_expectations.render.renderer
-            class_name: ProfilingResultsPageRenderer
+      profiling:
+        class_name: DefaultSiteSectionBuilder
+        source_store_name: validations_store
+        run_id_filter:
+          eq: profiling
+        renderer:
+          module_name: great_expectations.render.renderer
+          class_name: ProfilingResultsPageRenderer
