@@ -1174,11 +1174,19 @@ class ConfigOnlyDataContext(object):
 
     @property
     def evaluation_parameter_store(self):
-        return self.stores[self._project_config_with_varibles_substituted["evaluation_parameter_store_name"]]
+        return self.stores[self.evaluation_parameter_store_name]
 
     @property
-    def profiling_store(self):
-        return self.stores[self._project_config_with_varibles_substituted["validations_store_name"]]
+    def evaluation_parameter_store_name(self):
+        return self._project_config_with_varibles_substituted["evaluation_parameter_store_name"]
+
+    @property
+    def validations_store_name(self):
+        return self._project_config_with_varibles_substituted["validations_store_name"]
+
+    @property
+    def validations_store(self):
+        return self.stores[self.validations_store_name]
 
     def set_parameters_in_evaluation_parameter_store_by_run_id_and_key(self, run_id, key, value):
         """Store a new validation parameter.
@@ -1644,7 +1652,7 @@ class ConfigOnlyDataContext(object):
                     profiling_results['results'].append((expectation_suite, validation_results))
 
                     # This hack covers an uglier hack in which a hard-coded store name was used.
-                    self.profiling_store.set(
+                    self.validations_store.set(
                         key=ValidationResultIdentifier(
                             expectation_suite_identifier=ExpectationSuiteIdentifier(
                                 data_asset_name=DataAssetIdentifier(
