@@ -203,7 +203,7 @@ class Dataset(MetaDataset):
         raise NotImplementedError
 
     def get_column_value_counts(self, column, sort="value", collate=None):
-        """
+        """Get a series containing the frequency counts of unique values from the named column.
 
         Args:
             column: the column for which to obtain value_counts
@@ -211,6 +211,7 @@ class Dataset(MetaDataset):
                 - if "value" then values in the resulting partition object will be sorted lexigraphically
                 - if "count" then values will be sorted according to descending count (frequency)
                 - if "none" then values will not be sorted
+            collate (string): the collate (sort) method to be used on supported backends (SqlAlchemy only)
 
 
         Returns:

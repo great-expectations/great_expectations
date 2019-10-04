@@ -325,8 +325,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # NOTE: depending on the way the underlying database collates columns,
             # ordering can vary. postgresql collate "C" matches default sort
             # for python and most other systems, but is not universally supported,
-            # so we use the default sort for the system
-            # query = query.order_by(sa.column(column).collate("C"))
+            # so we use the default sort for the system, unless specifically overridden
             if collate is not None:
                 query = query.order_by(sa.column(column).collate(collate))
             else:
