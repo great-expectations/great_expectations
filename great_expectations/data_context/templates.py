@@ -50,17 +50,15 @@ plugins_directory: plugins/
 # stores validations and send a slack notification. To read more about
 # customizing and extending these, read: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/validation_operators_and_actions.html
 validation_operators:
-  default:
-    class_name: PerformActionListValidationOperator
+  action_list_operator:
+    class_name: ActionListValidationOperator
     action_list:
       - name: store_validation_result
         action:
           class_name: StoreAction
-          target_store_name: validations_store
       - name: store_evaluation_params
         action:
           class_name: ExtractAndStoreEvaluationParamsAction
-          target_store_name: evaluation_parameter_store
       # Uncomment the notify_slack action below to send notifications during evaluation
       # - name: notify_slack
       #   action:
