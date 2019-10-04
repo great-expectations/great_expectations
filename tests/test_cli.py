@@ -234,14 +234,13 @@ great_expectations/
             default/
                 Titanic/
                     BasicDatasetProfiler.json
-    fixtures/
     notebooks/
         create_expectations.ipynb
         integrate_validation_into_pipeline.ipynb
     plugins/
     uncommitted/
         config_variables.yml
-        documentation/
+        data_docs/
             local_site/
                 index.html
                 expectations/
@@ -281,13 +280,13 @@ great_expectations/
         assert os.path.isfile(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html")
+                "great_expectations/uncommitted/data_docs/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html")
         )
 
         assert os.path.getsize(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
+                "great_expectations/uncommitted/data_docs/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
             )
         ) > 0
         print(result)
@@ -496,7 +495,7 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
 
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,
-        "uncommitted/documentation/local_site"
+        "uncommitted/data_docs/local_site"
         )
     )
 
@@ -539,6 +538,6 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
     print(empty_directory)
 
     assert set(os.listdir(empty_directory)) == \
-           {'datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'}
+           {'datasources', 'plugins', 'expectations', '.gitignore', 'uncommitted', 'notebooks'}
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
-           {'samples', 'documentation', 'validations'}
+           {'samples', 'data_docs', 'validations'}

@@ -43,17 +43,17 @@ def script_relative_path(file_path):
 
 
 def scaffold_directories_and_notebooks(base_dir):
-    """Add basic directories for an initial, opinionated GE project."""
+    """Add project directories for a new GE project."""
 
     safe_mmkdir(base_dir, exist_ok=True)
     notebook_dir_name = "notebooks"
 
     open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
 
-    for directory in [notebook_dir_name, "expectations", "datasources", "uncommitted", "plugins", "fixtures"]:
+    for directory in [notebook_dir_name, "expectations", "datasources", "uncommitted", "plugins"]:
         safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
 
-    for uncommitted_directory in ["validations", "documentation", "samples"]:
+    for uncommitted_directory in ["validations", "data_docs", "samples"]:
         safe_mmkdir(os.path.join(base_dir, "uncommitted",
                                  uncommitted_directory), exist_ok=True)
 
@@ -77,7 +77,6 @@ that will look like this:
     ├── .gitignore
     ├── datasources
     ├── expectations
-    ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
     │   ├── create_expectations.ipynb
@@ -85,9 +84,8 @@ that will look like this:
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
-        ├── documentation
-        │   ├── local_site
-        │   └── team_site
+        ├── data_docs
+        │   └── local_site
         ├── samples
         └── validations
     

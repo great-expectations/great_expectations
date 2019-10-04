@@ -37,7 +37,7 @@ that generated it. Validation results will be saved in the ``uncommitted/validat
 The CLI will offer to move resulting validations to the
 ``fixtures/validations`` directory from which data documentation is built and to regenerate the HTML documentation.
 
-See :ref:`data_documentation` for more information.
+See :ref:`data_docs` for more information.
 
 Run From Jupyter Notebook
 ==========================
