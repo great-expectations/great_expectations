@@ -32,9 +32,9 @@ class ValidationOperator(object):
         raise NotImplementedError
 
 
-class PerformActionListValidationOperator(ValidationOperator):
+class ActionListValidationOperator(ValidationOperator):
     """
-    PerformActionListValidationOperator is a validation operator
+    ActionListValidationOperator is a validation operator
     that validates each batch in the list that is passed to its run
     method and then invokes a list of configured actions on every
     validation result.
@@ -48,7 +48,7 @@ class PerformActionListValidationOperator(ValidationOperator):
 
 
     perform_action_list_operator:
-        class_name: PerformActionListValidationOperator
+        class_name: ActionListValidationOperator
         action_list:
           - name: store_validation_result
             action:
@@ -199,9 +199,9 @@ class PerformActionListValidationOperator(ValidationOperator):
 
 
 
-class RunWarningAndFailureExpectationSuitesValidationOperator(PerformActionListValidationOperator):
+class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationOperator):
     """
-    RunWarningAndFailureExpectationSuitesValidationOperator is a validation operator
+    WarningAndFailureExpectationSuitesValidationOperator is a validation operator
     that accepts a list batches of data assets (or the information necessary to fetch these batches).
     The operator retrieves 2 expectation suites for each data asset/batch - one containing
     the critical expectations ("failure") and the other containing non-critical expectations
@@ -225,7 +225,7 @@ class RunWarningAndFailureExpectationSuitesValidationOperator(PerformActionListV
 
     Below is an example of this operator's configuration:
     run_warning_and_failure_expectation_suites:
-        class_name: RunWarningAndFailureExpectationSuitesValidationOperator
+        class_name: WarningAndFailureExpectationSuitesValidationOperator
         # put the actual webhook URL in the uncommitted/config_variables.yml file
         slack_webhook: ${validation_notification_slack_webhook}
         action_list:
@@ -274,7 +274,7 @@ class RunWarningAndFailureExpectationSuitesValidationOperator(PerformActionListV
         slack_webhook=None,
         notify_on="all"
     ):
-        super(RunWarningAndFailureExpectationSuitesValidationOperator, self).__init__(
+        super(WarningAndFailureExpectationSuitesValidationOperator, self).__init__(
             data_context,
             action_list,
         )

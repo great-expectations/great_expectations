@@ -122,16 +122,14 @@ stores:
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/guides/validation_operators.html
   default:
-    class_name: PerformActionListValidationOperator
+    class_name: ActionListValidationOperator
     action_list:
       - name: store_validation_result
         action:
           class_name: StoreAction
-          target_store_name: local_validation_result_store
       - name: store_evaluation_params
         action:
           class_name: ExtractAndStoreEvaluationParamsAction
-          target_store_name: evaluation_parameter_store
       # Uncomment the notify_slack action below to send notifications during evaluation
       # - name: notify_slack
       #   action:

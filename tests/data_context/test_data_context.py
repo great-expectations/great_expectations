@@ -745,7 +745,7 @@ def basic_data_context_config():
         },
         "validation_operators": {
             "default": {
-                "class_name": "PerformActionListValidationOperator",
+                "class_name": "ActionListValidationOperator",
                 "action_list": []
             }
         }

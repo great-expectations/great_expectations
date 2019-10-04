@@ -1,15 +1,15 @@
 .. _run_warning_and_failure_expectation_suites_validation_operator:
 
 ================================================================================
-RunWarningAndFailureExpectationSuitesValidationOperator
+WarningAndFailureExpectationSuitesValidationOperator
 ================================================================================
 
-RunWarningAndFailureExpectationSuitesValidationOperator implements a business logic pattern that many data practitioners consider useful - grouping the expectations about a data asset into two expectation suites.
+WarningAndFailureExpectationSuitesValidationOperator implements a business logic pattern that many data practitioners consider useful - grouping the expectations about a data asset into two expectation suites.
 
 The "failure" expectation suite contains expectations that are considered important enough to stop the pipeline when they are violated. The rest of the expectations go into the "warning" expectation suite.
 
 
-RunWarningAndFailureExpectationSuitesValidationOperator retrieves the two expectation suites ("failure" and "warning") for every data asset in the `assets_to_validate` argument of its `run` method. It does not require both suites to be present.
+WarningAndFailureExpectationSuitesValidationOperator retrieves the two expectation suites ("failure" and "warning") for every data asset in the `assets_to_validate` argument of its `run` method. It does not require both suites to be present.
 
 The operator invokes a list of actions on every validation result. The list is configured for the operator.
 Each action in the list must be an instance of NamespacedValidationAction
@@ -26,7 +26,7 @@ Below is an example of this operator's configuration:
 .. code-block:: yaml
 
     run_warning_and_failure_expectation_suites:
-        class_name: RunWarningAndFailureExpectationSuitesValidationOperator
+        class_name: WarningAndFailureExpectationSuitesValidationOperator
 
         # the following two properties are optional - by default the operator looks for
         # expectation suites named "failure" and "warning".
