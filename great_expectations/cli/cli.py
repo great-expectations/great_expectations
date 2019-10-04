@@ -304,7 +304,7 @@ def build_docs(directory, site_name, data_asset_name):
     cli_message("Building <green>Data Docs</green>!")
 
     if data_asset_name is not None and site_name is None:
-        cli_message("<red>Error: When specifying data_asset_name, must also specify site_name.</red>")
+        cli_message("<red>Error: When specifying `data_asset_name`, `site_name` is required.</red>")
         sys.exit(1)
         
     try:

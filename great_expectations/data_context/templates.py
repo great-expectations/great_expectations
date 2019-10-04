@@ -108,11 +108,11 @@ stores:
     base_directory: uncommitted/documentation/local_site/
 
 # Data Docs make it simple to visualize data quality in your project. These
-# include Expectations, Validations & Profiles. The are rendered for all
-# Datasources from JSON artifact in the local repo including validations &
+# include Expectations, Validations & Profiles. The are built for all
+# Datasources from JSON artifacts in the local repo including validations &
 # profiles from the uncommitted directory. 
 data_docs_sites:
-  local_site:
+  local_site: # site name
     datasource_whitelist: '*' # used to restrict the Datasources
     module_name: great_expectations.render.renderer.site_builder
     class_name: SiteBuilder
