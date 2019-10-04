@@ -1117,7 +1117,6 @@ class ConfigOnlyDataContext(object):
 
         self._compiled = False
 
-
     def _extract_and_store_parameters_from_validation_results(self, validation_results, data_asset_name, expectation_suite_name, run_id):
 
         if not self._compiled:
@@ -1844,8 +1843,15 @@ class DataContext(ConfigOnlyDataContext):
 
         return new_datasource
 
-    def find_context_root_dir(self):
-        if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
+    @staticmethod
+    def find_context_root_dir():
+        ge_home_environment = os.getenv("GE_HOME", None)
+        if ge_home_environment:
+            if os.path.isdir(ge_home_environment) and os.path.isfile(
+                os.path.join(ge_home_environment, "great_expectations.yml")
+            ):
+                return ge_home_environment
+        elif os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
             return "../"
         elif os.path.isdir("./great_expectations") and \
                 os.path.isfile("./great_expectations/great_expectations.yml"):
