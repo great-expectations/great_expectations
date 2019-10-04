@@ -22,7 +22,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     context.add_validation_operator(
         "validate_and_store",
         {
-        "class_name": "PerformActionListValidationOperator",
+        "class_name": "ActionListValidationOperator",
         "action_list": [{
             "name": "store_validation_result",
             "action": {

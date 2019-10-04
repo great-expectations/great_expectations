@@ -717,7 +717,7 @@ def basic_data_context_config():
         "data_docs_sites": {},
         "validation_operators": {
             "default": {
-                "class_name": "PerformActionListValidationOperator",
+                "class_name": "ActionListValidationOperator",
                 "action_list": []
             }
         }
