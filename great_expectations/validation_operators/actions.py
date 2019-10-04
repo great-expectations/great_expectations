@@ -132,7 +132,7 @@ class StoreAction(NamespacedValidationAction):
 
     def __init__(self,
                  data_context,
-                 target_store_name="local_validation_result_store",
+                 target_store_name="validations_store",
                  ):
         """
 
