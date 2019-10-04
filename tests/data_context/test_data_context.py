@@ -842,6 +842,26 @@ def test__get_normalized_data_asset_name_filepath(basic_data_context_config):
     ) == "my/base/path/my_db/default/my_table/default.json"
 
 
+def test_load_data_context_from_environment_variables(tmp_path_factory):
+    try:
+        project_path = str(tmp_path_factory.mktemp('data_context'))
+        context_path = os.path.join(project_path, "great_expectations")
+        safe_mmkdir(context_path)
+        shutil.copy("./tests/test_fixtures/great_expectations_basic.yml",
+                    str(os.path.join(context_path, "great_expectations.yml")))
+        with pytest.raises(DataContextError) as err:
+            DataContext.find_context_root_dir()
+            assert "Unable to locate context root directory." in err
+
+        os.environ["GE_HOME"] = context_path
+        assert DataContext.find_context_root_dir() == context_path
+    except Exception:
+        raise
+    finally:
+        # Make sure we unset the environment variable we're using
+        del os.environ["GE_HOME"]
+
+
 def test_data_context_updates_expectation_suite_names(data_context):
     # A data context should update the data_asset_name and expectation_suite_name of expectation suites
     # that it creates when it saves them.
