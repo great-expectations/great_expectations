@@ -1,0 +1,60 @@
+.. _ge_for_teams:
+
+##################
+GE for Teams
+##################
+
+Now that you've enjoyed single player mode, let's bring Great Expectations to
+your team.
+
+When you move from single user to collaborative use there are a few major things
+to consider.
+
+Where Should Expectations Live?
+===================================
+
+If you followed our best practice recommendation of committing the
+``great_expectations`` directory to your source control repository, then this
+question is already answered! Expectations live right in your repo!
+
+Where Should Validations Live?
+===================================
+
+When using the default Validation Operators, Validations are stored in your
+``great_expectations/uncommitted/validations/`` directory. Because these may
+examples of data (which could be sensitive or regulated) these Validations
+**should not** be committed to a source control system.
+
+You can configure a Store to write these to a cloud provider blob storage such
+as Amazon S3 or some other securely mounted file system. This will depend on
+your team's deployment patterns.
+
+Where Should Data Docs Live?
+===================================
+
+Similar to Validations, Data Docs are by default stored in your
+``great_expectations/uncommitted/data_docs/`` directory. Because these may
+examples of data (which could be sensitive or regulated) these Validations
+**should not** be committed to a source control system.
+
+You can configure a Store to write these to a cloud provider blob storage such
+as Amazon S3 or some other securely mounted file system. This will depend on
+your team's deployment patterns.
+
+Where Should Notifications Go?
+===================================
+
+Some teams enjoy realtime data quality alerts in Slack. We find setting up a
+channel with an obvious name like ``data-qualty-notifications`` a nice place
+to have Great Expectations post to.
+
+How Do You On-board a New Teammate?
+===================================
+
+If you have a project in a repo that includes your ``great_expectations``
+directory, onboarding is relatively simple. Your teammates will need to:
+
+1. Clone the project repo.
+2. In the ``great_expectations`` directory make a folder called ``uncommitted``.
+3. Create a file ``great_expectations/uncommitted/config_variables.yml`` that
+   contains any secrets required by your datasources.

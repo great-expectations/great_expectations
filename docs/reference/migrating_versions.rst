@@ -50,7 +50,7 @@ Some specific changes:
 
 - Deprecation of the `type` key for configuring objects (replaced by
 `class_name` (and `module_name` as well when ambiguous).
-- Completely new `SiteBuilder` configuration. See :ref:`data_documentation_reference`.
+- Completely new `SiteBuilder` configuration. See :ref:`data_docs_reference`.
 
 BREAKING:
  - **top-level `validate` has a new signature**, that offers a variety of different options for specifying the DataAsset

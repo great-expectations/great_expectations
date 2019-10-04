@@ -1470,15 +1470,15 @@ class ConfigOnlyDataContext(object):
         """
         return return_obj
 
-    def build_data_documentation(self, site_names=None, data_asset_name=None):
+    def build_data_docs(self, site_names=None, data_asset_name=None):
         """
-        TODO: Documentation needed
+        Bud
 
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
             of their index.html files as values
         """
-        logger.debug("Starting DataContext.build_data_documentation")
+        logger.debug("Starting DataContext.build_data_docs")
 
         index_page_locator_infos = {}
 

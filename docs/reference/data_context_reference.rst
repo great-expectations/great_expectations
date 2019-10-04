@@ -66,7 +66,7 @@ Note that the datasources section *includes* all defined generators as well as s
 Data Documentation
 =====================
 
-The :ref:`data_documentation` section defines how individual sites should be built and deployed. See the detailed
+The :ref:`data_docs` section defines how individual sites should be built and deployed. See the detailed
 documentation for more information.
 
 

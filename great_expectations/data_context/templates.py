@@ -105,13 +105,13 @@ stores:
   local_site_html_store:
     module_name: great_expectations.data_context.store
     class_name: HtmlSiteStore
-    base_directory: uncommitted/documentation/local_site/
+    base_directory: uncommitted/data_docs/local_site/
 
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These
   # include Expectations, Validations & Profiles. The are built for all
   # Datasources from JSON artifacts in the local repo including validations &
-  # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/data_documentation.html
+  # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/data_docs.html
   local_site: # site name
     datasource_whitelist: '*' # used to restrict the Datasources
     module_name: great_expectations.render.renderer.site_builder

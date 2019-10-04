@@ -1,4 +1,4 @@
-.. _data_documentation:
+.. _data_docs:
 
 ###################
 Data Docs
