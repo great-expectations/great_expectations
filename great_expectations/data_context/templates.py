@@ -142,7 +142,6 @@ data_docs_sites:
         run_id_filter:
           eq: profiling
         renderer:
-          module_name: great_expectations.render.renderer
           class_name: ProfilingResultsPageRenderer
 """
 
