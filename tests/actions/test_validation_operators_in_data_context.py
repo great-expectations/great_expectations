@@ -24,7 +24,7 @@ def basic_data_context_config_for_validation_operator():
     return {
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name" : "evaluation_parameter_store",
-        "profiling_store_name": "validation_result_store",
+        "validations_store_name": "validation_result_store",
         "expectations_store_name": "expectations_store",
         "datasources": {},
         "stores": {
@@ -47,9 +47,7 @@ def basic_data_context_config_for_validation_operator():
                 }
             },
         },
-        "data_docs": {
-            "sites": {}
-        },
+        "data_docs_sites": {},
         "validation_operators": {
             "store_val_res_and_extract_eval_params" : {
                 "class_name" : "PerformActionListValidationOperator",
@@ -197,12 +195,8 @@ project/
     data_context.create_expectation_suite(data_asset_name=data_asset_name, expectation_suite_name="default")
     batch = data_context.get_batch(data_asset_name=data_asset_name, expectation_suite_name="default",
                                    batch_kwargs=data_context.yield_batch_kwargs(data_asset_name))
-    # my_ge_df = ge.from_pandas(my_df)
 
-    # assert data_context.stores["local_validation_result_store"].list_keys() == []
     validation_store_path = os.path.join(project_path, "great_expectations/uncommitted/validations")
-    print(validation_store_path)
-    print(gen_directory_tree_str(validation_store_path))
     assert gen_directory_tree_str(validation_store_path) == """\
 validations/
     profiling/

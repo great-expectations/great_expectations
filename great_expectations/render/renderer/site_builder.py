@@ -351,7 +351,7 @@ class DefaultSiteIndexBuilder(object):
                 validation = self.data_context.get_validation_result(
                     data_asset_name=data_asset_name,
                     expectation_suite_name=expectation_suite_name,
-                    validations_store_name="local_validation_result_store",
+                    validations_store_name="validations_store",
                     run_id=run_id
                 )
                 

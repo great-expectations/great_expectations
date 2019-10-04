@@ -21,7 +21,7 @@ expectations_store_name: expectations_store
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
 data_docs:
-  sites:
+  data_docs_sites
 stores:
   expectations_store:
     class_name: ExpectationsStore
@@ -31,4 +31,4 @@ stores:
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore
-profiling_store_name: "foo"
+validations_store_name: "foo"
