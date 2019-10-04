@@ -298,8 +298,8 @@ great_expectations/
 
 def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_yml(tmp_path_factory):
     """
-    This is a low-key snapshot test used to sanity check some of thethe config
-    yml inline comments, and some CLI output.
+    This is a low-key snapshot test used to sanity check some of the config yml
+    inline comments, and some CLI output.
     """
     curdir = os.path.abspath(os.getcwd())
 
