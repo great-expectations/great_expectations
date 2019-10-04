@@ -1651,7 +1651,6 @@ class ConfigOnlyDataContext(object):
                     expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
                     profiling_results['results'].append((expectation_suite, validation_results))
 
-                    # This hack covers an uglier hack in which a hard-coded store name was used.
                     self.validations_store.set(
                         key=ValidationResultIdentifier(
                             expectation_suite_identifier=ExpectationSuiteIdentifier(

@@ -47,7 +47,7 @@ class ActionListValidationOperator(ValidationOperator):
     Below is an example of this operator's configuration:
 
 
-    perform_action_list_operator:
+    action_list_operator:
         class_name: ActionListValidationOperator
         action_list:
           - name: store_validation_result
