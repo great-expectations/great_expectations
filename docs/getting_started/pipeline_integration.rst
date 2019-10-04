@@ -199,7 +199,7 @@ Validation Operators
 .. code-block:: bash
 
   perform_action_list_operator:
-    class_name: PerformActionListValidationOperator
+    class_name: ActionListValidationOperator
     action_list:
       - name: store_validation_result
         action:

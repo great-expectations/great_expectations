@@ -23,10 +23,10 @@ Each Validation Operator encodes a particular set of business rules around valid
 The classes that implement them are in :py:mod:`great_expectations.validation_operators` module.
 
 
-PerformActionListValidationOperator
+ActionListValidationOperator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-PerformActionListValidationOperator validates each batch in the list that is passed as `assets_to_validate` argument to its `run` method against the expectation suite included within that batch and then invokes a list of configured actions on every validation result.
+ActionListValidationOperator validates each batch in the list that is passed as `assets_to_validate` argument to its `run` method against the expectation suite included within that batch and then invokes a list of configured actions on every validation result.
 
 Actions are Python classes with a `run` method that takes a result of validating a batch against an expectation suite and does something with it (e.g., save validation results to the disk or send a Slack notification). Classes that implement this API can be configured to be added to the list of actions for this operator (and other operators that use actions). Read more about actions here: :ref:`actions`.
 
@@ -34,22 +34,22 @@ An instance of this operator is included in the default configuration file `grea
 
 A user can choose the actions to perform in their instance of the operator.
 
-Read more about PerformActionListValidationOperator here: :ref:`perform_action_list_validation_operator`.
+Read more about ActionListValidationOperator here: :ref:`perform_action_list_validation_operator`.
 
-RunWarningAndFailureExpectationSuitesValidationOperator
+WarningAndFailureExpectationSuitesValidationOperator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-RunWarningAndFailureExpectationSuitesValidationOperator implements a business logic pattern that many data practitioners consider useful.
+WarningAndFailureExpectationSuitesValidationOperator implements a business logic pattern that many data practitioners consider useful.
 
 It validates each batch of data against two different expectation suites: "failure" and "warning". Group the expectations that you create about a data asset into two expectation suites. The critical expectations that you are confident that the data should meet go into the expectation suite that this operator calls "failure" (meaning, not meeting these expectations should be considered a failure in the pipeline). The rest of expectations go into the "warning" expectation suite.
 
 The failure Expectation Suite contains expectations that are considered important enough to justify stopping the pipeline when they are violated.
 
-RunWarningAndFailureExpectationSuitesValidationOperator retrieves two expectation suites for every data asset in the `assets_to_validate` argument of its `run` method.
+WarningAndFailureExpectationSuitesValidationOperator retrieves two expectation suites for every data asset in the `assets_to_validate` argument of its `run` method.
 
 After completing all the validations, it sends a Slack notification with the success status. Note that it doesn't use an Action to send its Slack notification, because the notification has also been customized to summarize information from both suites.
 
-Read more about PerformActionListValidationOperator here: :ref:`run_warning_and_failure_expectation_suites_validation_operator`
+Read more about ActionListValidationOperator here: :ref:`run_warning_and_failure_expectation_suites_validation_operator`
 
 ****************************************
 Implementing Custom Validation Operators

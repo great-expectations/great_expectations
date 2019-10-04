@@ -17,19 +17,19 @@ ValidationOperator
     :undoc-members:
     :show-inheritance:
 
-PerformActionListValidationOperator
+ActionListValidationOperator
 --------------------------------------------
 
-.. autoclass:: great_expectations.validation_operators.PerformActionListValidationOperator
+.. autoclass:: great_expectations.validation_operators.ActionListValidationOperator
     :members:
     :undoc-members:
     :show-inheritance:
 
 
-RunWarningAndFailureExpectationSuitesValidationOperator
+WarningAndFailureExpectationSuitesValidationOperator
 -------------------------------------------------------
 
-.. autoclass:: great_expectations.validation_operators.RunWarningAndFailureExpectationSuitesValidationOperator
+.. autoclass:: great_expectations.validation_operators.WarningAndFailureExpectationSuitesValidationOperator
     :members:
     :undoc-members:
     :show-inheritance:
