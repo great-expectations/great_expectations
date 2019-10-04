@@ -107,11 +107,11 @@ stores:
     class_name: HtmlSiteStore
     base_directory: uncommitted/documentation/local_site/
 
-# Data Docs make it simple to visualize data quality in your project. These
-# include Expectations, Validations & Profiles. The are built for all
-# Datasources from JSON artifacts in the local repo including validations &
-# profiles from the uncommitted directory. 
 data_docs_sites:
+  # Data Docs make it simple to visualize data quality in your project. These
+  # include Expectations, Validations & Profiles. The are built for all
+  # Datasources from JSON artifacts in the local repo including validations &
+  # profiles from the uncommitted directory. 
   local_site: # site name
     datasource_whitelist: '*' # used to restrict the Datasources
     module_name: great_expectations.render.renderer.site_builder
@@ -142,11 +142,8 @@ data_docs_sites:
         run_id_filter:
           eq: profiling
         renderer:
+          module_name: great_expectations.render.renderer
           class_name: ProfilingResultsPageRenderer
 """
 
 PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT
-
-CONFIG_VARIABLES_COMMENT = CONFIG_VARIABLES_INTRO
-
-CONFIG_VARIABLES_FILE_TEMPLATE = CONFIG_VARIABLES_INTRO

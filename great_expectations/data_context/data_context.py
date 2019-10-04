@@ -52,8 +52,7 @@ from .types import (
 
 from .templates import (
     PROJECT_TEMPLATE,
-    CONFIG_VARIABLES_COMMENT,
-    CONFIG_VARIABLES_FILE_TEMPLATE
+    CONFIG_VARIABLES_INTRO,
 )
 from .util import (
     load_class,
@@ -123,7 +122,7 @@ class ConfigOnlyDataContext(object):
 
             safe_mmkdir(os.path.join(project_root_dir, "great_expectations/uncommitted"))
             with open(os.path.join(project_root_dir, "great_expectations/uncommitted/config_variables.yml"), "w") as template:
-                template.write(CONFIG_VARIABLES_FILE_TEMPLATE)
+                template.write(CONFIG_VARIABLES_INTRO)
 
         return cls(os.path.join(project_root_dir, "great_expectations"))
 
@@ -452,7 +451,7 @@ class ConfigOnlyDataContext(object):
                 logger.debug("Generating empty config variables file.")
                 # TODO this might be the comment problem?
                 base_config_variables_store = yaml.load("{}")
-                base_config_variables_store.yaml_set_start_comment(CONFIG_VARIABLES_COMMENT)
+                base_config_variables_store.yaml_set_start_comment(CONFIG_VARIABLES_INTRO)
                 return base_config_variables_store
         else:
             return {}
