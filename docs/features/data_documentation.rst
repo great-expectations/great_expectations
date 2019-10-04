@@ -1,15 +1,16 @@
 .. _data_documentation:
 
 ###################
-Data Documentation
+Data Docs
 ###################
 
-Data Documentation compiles raw Great Expectations objects including expectation suites and validation reports into
-structured documents such as HTML documentation that displays key characteristics of a dataset. Together, Documentation,
-Profiling, and Validation are the three core services offered by GE.
+Data Docs compiles raw Great Expectations objects including Expectations and
+Validations into structured documents such as HTML documentation that display
+key characteristics of a dataset. Together, Data Docs, Profiling, and Validation
+are the three core services offered by GE.
 
 
-Data Documentation is implemented in the :py:mod:`great_expectations.render` module.
+Data Docs is implemented in the :py:mod:`great_expectations.render` module.
 
 *******************
 HTML documentation
@@ -53,4 +54,4 @@ Users can specify
 * where the HTML files should be written (filesystem or S3)
 * which renderer and view class should be used to render each section
 
-See the :ref:`data_documentation_reference` for more information.
+See the :ref:`data_docs_reference` for more information.

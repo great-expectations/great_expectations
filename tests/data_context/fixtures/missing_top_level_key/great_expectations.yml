@@ -4,5 +4,5 @@ expectations_store_name: expectations_store
 evaluation_parameter_store_name: "foo"
 datasources: "foo"
 stores: "foo"
-profiling_store_name: "foo"
+validations_store_name: "foo"
 data_docs: "foo"

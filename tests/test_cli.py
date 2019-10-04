@@ -47,7 +47,7 @@ Options:
 
 Commands:
   add-datasource       Add a new datasource to the data context
-  build-docs           Build data documentation for a project.
+  build-docs           Build Data Docs for a project.
   build-documentation
   check-config         Check a config for validity and help with migrations.
   init                 Initialize a new Great Expectations project.
@@ -255,13 +255,6 @@ great_expectations/
                             default/
                                 Titanic/
                                     BasicDatasetProfiler.html
-            team_site/
-                index.html
-                expectations/
-                    data__dir/
-                        default/
-                            Titanic/
-                                BasicDatasetProfiler.html
         samples/
         validations/
             profiling/
@@ -478,7 +471,6 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     print(json.dumps(not_so_empty_data_context.get_project_config(), indent=2))
 
     project_root_dir = not_so_empty_data_context.root_directory
-    # print(project_root_dir)
 
     # For some reason, even with this logging change (which is required and done in main of the cli)
     # the click cli runner does not pick up output; capsys appears to intercept it first
@@ -502,19 +494,9 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     result = runner.invoke(
         cli, ["build-docs", "-d", project_root_dir])
 
-    # print(json.dumps(not_so_empty_data_context.get_project_config()["stores"], indent=2))
-    print(result.output)
-    # print(gen_directory_tree_str(project_root_dir))
-
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,
         "uncommitted/documentation/local_site"
-        )
-    )
-
-    assert "index.html" in os.listdir(os.path.join(
-        project_root_dir,
-        "uncommitted/documentation/team_site"
         )
     )
 

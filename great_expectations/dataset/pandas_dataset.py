@@ -355,12 +355,23 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         nonnull_values = series[null_indexes == False]
         return len(nonnull_values)
 
-    def get_column_value_counts(self, column):
-        cnts =  self[column].value_counts()
-        cnts.sort_index(inplace=True)
-        cnts.name = "count"
-        cnts.index.name = "value"
-        return cnts
+    def get_column_value_counts(self, column, sort="value", collate=None):
+        if sort not in ["value", "count", "none"]:
+            raise ValueError(
+                "sort must be either 'value', 'count', or 'none'"
+            )
+        if collate is not None:
+            raise ValueError(
+                "collate parameter is not supported in PandasDataset"
+            )
+        counts = self[column].value_counts()
+        if sort == "value":
+            counts.sort_index(inplace=True)
+        elif sort == "counts":
+            counts.sort_values(inplace=True)
+        counts.name = "count"
+        counts.index.name = "value"
+        return counts
 
     def get_column_unique_count(self, column):
         return self.get_column_value_counts(column).shape[0]

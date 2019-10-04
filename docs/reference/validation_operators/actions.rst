@@ -46,7 +46,7 @@ Configuration
       class_name: StoreAction
       # name of the store where the actions will store validation results
       # the name must refer to a store that is configured in the great_expectations.yml file
-      target_store_name: local_validation_result_store
+      target_store_name: validations_store
 
 
 ExtractAndStoreEvaluationParamsAction

@@ -9,18 +9,20 @@ sometimes breaking changes are necessary to maintain our trajectory. This is
 especially true as the library has evolved from just a data quality tool to a
 slightly more opinionated framework.
 
-Great Expectations provides a warning when the currently-installed version is different from the version stored in the
-expectation suite.
+Great Expectations provides a warning when the currently-installed version is
+different from the version stored in the expectation suite.
 
-Since expectation semantics are usually consistent across versions, there is little change required when upgrading
-great expectations, with some exceptions noted here.
+Since expectation semantics are usually consistent across versions, there is
+little change required when upgrading great expectations, with some exceptions
+noted here.
 
 *********************************
 Using the check-config Command
 *********************************
 
-To facilitate this substantial config format change, starting with version 0.8.0 we have created a command
-to sanity check your config files. From your project directory, run:
+To facilitate this substantial config format change, starting with version 0.8.0
+we introduced `check-config` to sanity check your config files. From your
+project directory, run:
 
 >>> great_expectations check-config
 
@@ -35,8 +37,8 @@ in your source control system already, right? ;-)
 Upgrading to 0.8.x
 *************************
 
-In the 0.8.0 release, our DataContext config format has changed dramatically to enable tons
-of great new features like extensibility.
+In the 0.8.0 release, our DataContext config format has changed dramatically to
+enable new features including extensibility.
 
 Some specific changes:
 
@@ -44,10 +46,10 @@ Some specific changes:
 
   - `expectations_store_name`
   - `evaluation_parameter_store_name`
-  - `profiling_store_name`
+  - `validations_store_name`
 
-- Deprecation of the `type` key for configuring objects (replaced by `class_name` (and `module_name` as well when
-  ambiguous).
+- Deprecation of the `type` key for configuring objects (replaced by
+`class_name` (and `module_name` as well when ambiguous).
 - Completely new `SiteBuilder` configuration. See :ref:`data_documentation_reference`.
 
 BREAKING:

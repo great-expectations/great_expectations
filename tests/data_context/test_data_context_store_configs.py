@@ -20,7 +20,7 @@ def totally_empty_data_context(tmp_path_factory):
         "config_version": 1,
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name": "not_a_real_store_name",
-        "profiling_store_name": "another_fake_store",
+        "validations_store_name": "another_fake_store",
         "expectations_store_name": "expectations_store",
         "datasources": {},
         "stores": {
@@ -32,9 +32,7 @@ def totally_empty_data_context(tmp_path_factory):
                 }
             },
         },
-        "data_docs": {
-            "sites": {}
-        },
+        "data_docs_sites": {},
         "validation_operators": {}
     }
     with open(os.path.join(project_root_dir, "great_expectations/great_expectations.yml"), 'w') as config_file:
@@ -85,22 +83,19 @@ def test_config_from_absolute_zero(totally_empty_data_context):
     assert len(totally_empty_data_context.stores.keys()) == 2
 
 
-def test_config_with_default_yml(tmp_path_factory):
+def test_default_config_yml_stores(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('totally_empty_data_context'))
     context = ge.data_context.DataContext.create(project_path)
 
-    assert set(context.stores.keys()) == set([
-        "local_validation_result_store",
-        "expectations_store",
-        "evaluation_parameter_store",
-        "fixture_validation_results_store",
-        "local_site_html_store",
-        "team_site_html_store",
-    ])
-    assert "my_inmemory_store" not in context.stores.keys()
+    assert set(context.stores.keys()) == {
+            "expectations_store",
+            "validations_store",
+            "evaluation_parameter_store",
+            "local_site_html_store"
+        }
 
     context.add_store(
-        "my_inmemory_store",
+        "my_new_in_memory_store",
         {
             "module_name": "great_expectations.data_context.store",
             "class_name": "BasicInMemoryStore",
@@ -108,5 +103,10 @@ def test_config_with_default_yml(tmp_path_factory):
         }
     )
 
-    assert len(context.stores.keys()) == 7
-    assert "my_inmemory_store" in context.stores.keys()
+    assert set(context.stores.keys()) == {
+            "expectations_store",
+            "validations_store",
+            "evaluation_parameter_store",
+            "local_site_html_store",
+            "my_new_in_memory_store"
+        }

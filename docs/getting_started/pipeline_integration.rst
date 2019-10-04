@@ -204,7 +204,7 @@ Validation Operators
       - name: store_validation_result
         action:
           class_name: StoreAction
-          target_store_name: local_validation_result_store
+          target_store_name: validations_store
       - name: store_evaluation_params
         action:
           class_name: SlackNotificationAction
