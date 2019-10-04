@@ -85,17 +85,16 @@ evaluation_parameter_store_name: evaluation_parameter_store
 
 stores:
   expectations_store:
-    class_name: ExpectationStore
+    class_name: ExpectationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: expectations/
 
   validations_store:
-    class_name: ValidationResultStore
+    class_name: ValidationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
-      filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:

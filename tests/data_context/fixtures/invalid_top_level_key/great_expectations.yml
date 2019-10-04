@@ -8,7 +8,7 @@ evaluation_parameter_store_name: "baz"
 datasources: "1"
 stores:
   validations_store:
-    class_name: ValidationResultStore
+    class_name: ValidationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/

@@ -426,7 +426,7 @@ class RunWarningAndFailureExpectationSuitesValidationOperator(PerformActionListV
 
             failure_expectation_suite = None
             try:
-                failure_expectation_suite = self.data_context.stores["expectations_store"].get(
+                failure_expectation_suite = self.data_context.stores[self.data_context.expectations_store_name].get(
                     failure_expectation_suite_identifier
                 )
 
@@ -460,7 +460,7 @@ class RunWarningAndFailureExpectationSuitesValidationOperator(PerformActionListV
 
             warning_expectation_suite = None
             try:
-                warning_expectation_suite = self.data_context.stores["expectations_store"].get(
+                warning_expectation_suite = self.data_context.stores[self.data_context.expectations_store_name].get(
                     warning_expectation_suite_identifier
                 )
             except Exception as e:

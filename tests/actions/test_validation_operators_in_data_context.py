@@ -29,7 +29,7 @@ def basic_data_context_config_for_validation_operator():
         "datasources": {},
         "stores": {
             "expectations_store" : {
-                "class_name": "ExpectationStore",
+                "class_name": "ExpectationsStore",
                 "store_backend": {
                     "class_name": "InMemoryStoreBackend",
                 }
@@ -41,7 +41,7 @@ def basic_data_context_config_for_validation_operator():
             },
             "validation_result_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "ValidationResultStore",
+                "class_name": "ValidationsStore",
                 "store_backend": {
                     "class_name": "InMemoryStoreBackend",
                 }

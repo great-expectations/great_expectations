@@ -28,7 +28,7 @@ def basic_data_context_config_for_validation_operator():
         "datasources": {},
         "stores": {
             "expectations_store" : {
-                "class_name": "ExpectationStore",
+                "class_name": "ExpectationsStore",
                 "store_backend": {
                     "class_name": "FixedLengthTupleFilesystemStoreBackend",
                     "base_directory": "expectations/",
@@ -41,7 +41,7 @@ def basic_data_context_config_for_validation_operator():
             },
             "validation_result_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "ValidationResultStore",
+                "class_name": "ValidationsStore",
                 "store_backend": {
                     "class_name": "InMemoryStoreBackend",
                 }
@@ -141,9 +141,9 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
                                        {'type': 'divider'},
                                        {'type': 'section', 'text': {'type': 'mrkdwn', 'text': '*Status*: Failed :x:'}},
                                        {'type': 'section', 'text': {'type': 'mrkdwn',
-                                                                    'text': "*Data Asset List:* [{'datasource': 'my_datasource', 'generator': 'default', 'generator_asset': 'f1'}, {'datasource': 'my_datasource', 'generator': 'default', 'generator_asset': 'f2'}, {'datasource': 'my_datasource', 'generator': 'default', 'generator_asset': 'f3'}]"}},
+                                                                    'text': '*Data Asset List:* [my_datasource/default/f1, my_datasource/default/f2, my_datasource/default/f3]'}},
                                        {'type': 'section', 'text': {'type': 'mrkdwn',
-                                                                    'text': "*Failed Data Assets:* [{'datasource': 'my_datasource', 'generator': 'default', 'generator_asset': 'f2'}]"}},
+                                                                    'text': '*Failed Data Assets:* [my_datasource/default/f2]'}},
                                        {'type': 'section', 'text': {'type': 'mrkdwn', 'text': '*Run ID:* test_100'}},
                                        {'type': 'section',
                                         'text': {'type': 'mrkdwn', 'text': '*Timestamp:* 09/26/19 13:42:41'}},
