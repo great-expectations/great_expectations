@@ -263,23 +263,103 @@ def non_numeric_high_card_dataset(request):
             "pIX0vhOzql5c6Z6NpLbzc8MvYiONyT54", "nvyCo3MkIK4tS6rkuL4Yw1RgGKwhm4c2", "prQGAOvQbB8fQIrp8xaLXmGwcxDcCnqt",
             "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "mty9rQJBeTsBQ7ra8vWRbBaWulzhWRSG", "JL38Vw7yERPC4gBplBaixlbpDg8V7gC6",
             "MylTvGl5L1tzosEcgGCQPjIRN6bCUwtI", "hmr0LNyYObqe5sURs408IhRb50Lnek5K"
+        ],
+        # Built from highcardnonnum using the following:
+        # vals = pd.Series(data["highcardnonnum"])
+        # sample_vals = vals.sample(n=10, random_state=42)
+        # weights = np.random.RandomState(42).rand(10)
+        # weights = weights / np.sum(weights)
+        # new_vals = sample_vals.sample(n=200, weights=weights, replace=True, random_state=11)
+        "medcardnonnum": [
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'mS2AVcLFp6i36sX7yAUrdfM0g0RB2X4D', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'NfX4KfEompMbbKloFq8NQpdXtk5PjaPe',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'NfX4KfEompMbbKloFq8NQpdXtk5PjaPe', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'NfX4KfEompMbbKloFq8NQpdXtk5PjaPe', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'NfX4KfEompMbbKloFq8NQpdXtk5PjaPe', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ'
         ]
     }
     schemas = {
         "pandas": {
             "highcardnonnum": "str",
+            "medcardnonnum": "str",
         },
         "postgresql": {
             "highcardnonnum": "TEXT",
+            "medcardnonnum": "TEXT",
         },
         "sqlite": {
             "highcardnonnum": "VARCHAR",
+            "medcardnonnum": "VARCHAR",
         },
         "mysql": {
             "highcardnonnum": "TEXT",
+            "medcardnonnum": "TEXT",
         },
         "spark": {
             "highcardnonnum": "StringType",
+            "medcardnonnum": "StringType",
         }
     }
     return get_dataset(request.param, data, schemas=schemas)
