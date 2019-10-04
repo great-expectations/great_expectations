@@ -22,8 +22,8 @@ Where Should Validations Live?
 
 When using the default Validation Operators, Validations are stored in your
 ``great_expectations/uncommitted/validations/`` directory. Because these may
-examples of data (which could be sensitive or regulated) these Validations
-**should not** be committed to a source control system.
+include examples of data (which could be sensitive or regulated) these
+Validations **should not** be committed to a source control system.
 
 You can configure a Store to write these to a cloud provider blob storage such
 as Amazon S3 or some other securely mounted file system. This will depend on
@@ -34,7 +34,7 @@ Where Should Data Docs Live?
 
 Similar to Validations, Data Docs are by default stored in your
 ``great_expectations/uncommitted/data_docs/`` directory. Because these may
-examples of data (which could be sensitive or regulated) these Validations
+include examples of data (which could be sensitive or regulated) these
 **should not** be committed to a source control system.
 
 You can configure a Store to write these to a cloud provider blob storage such
