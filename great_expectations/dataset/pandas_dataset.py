@@ -468,6 +468,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
             # existing expectation, but it should be definitely kept in sync
 
+            # We do not need this bookkeeping if we are in an active validation:
+            if self._active_validation:
+                return res
+
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
             existing_expectations = self.find_expectation_indexes(
@@ -491,6 +495,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             )
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
             # existing expectation, but it should be definitely kept in sync
+
+            # We do not need this bookkeeping if we are in an active validation:
+            if self._active_validation:
+                return res
 
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
@@ -652,6 +660,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
             # existing expectation, but it should be definitely kept in sync
 
+            # We do not need this bookkeeping if we are in an active validation:
+            if self._active_validation:
+                return res
+
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
             existing_expectations = self.find_expectation_indexes(
@@ -673,6 +685,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             )
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
             # existing expectation, but it should be definitely kept in sync
+
+            # We do not need this bookkeeping if we are in an active validation:
+            if self._active_validation:
+                return res
 
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
