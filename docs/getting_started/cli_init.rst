@@ -336,7 +336,7 @@ EVRs contain Expectations, *plus* validation results from a evaluation against a
 
 The full Expectation Suite and EVR are JSON objects that also contain additional metadata, which we won't go into here. For more information about these objects please see :ref:`validation_result`.
 
-Data documentation
+Data Docs
 ----------------------------------------------------------
 
 Expectation Suites and EVR's contain a huge amount of useful information about your data, but they aren't very easy to consume as JSON objects. To make them more accessible, Great Expectations provides tools to render Expectation Suites and EVRs to documentation.
@@ -351,11 +351,11 @@ Within the CLI, we compile to documentation as follows:
 
 .. code-block:: bash
 
-    ========== Data Documentation ==========
+    ========== Data Docs ==========
 
     Great Expectations can create data documentation from the data you just profiled.
 
-    To learn more: https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign=0_8_0a1
+    To learn more: https://docs.greatexpectations.io/en/latest/guides/data_docs.html?utm_source=cli&utm_medium=init&utm_campaign=0_8_0a1
 
     Build HTML documentation? [Y/n]:
 
@@ -365,13 +365,13 @@ Within the CLI, we compile to documentation as follows:
     The following data documentation HTML sites were generated:
 
     local_site:
-       great_expectations/uncommitted/documentation/local_site/index.html
+       great_expectations/uncommitted/data_docs/local_site/index.html
 
     team_site:
-       great_expectations/uncommitted/documentation/team_site/index.html
+       great_expectations/uncommitted/data_docs/team_site/index.html
 
 
-Opening `great_expectations/uncommitted/documentation/local_site/index.html` in a browser will give you a page like:
+Opening `great_expectations/uncommitted/data_docs/local_site/index.html` in a browser will give you a page like:
 
 .. image:: ../images/index_render.png
 
@@ -384,7 +384,7 @@ Clicking through to the second link will show you descriptive data documentation
 .. image:: ../images/descriptive_render.png
 
 
-Note also that the default ``great_expectations/`` setup does NOT commit compiled docs themselves within version control. Instead, they live in ``uncommitted/documentation/``, with a subdirectory structure that mirrors the project namespace.
+Note also that the default ``great_expectations/`` setup does NOT commit compiled docs themselves within version control. Instead, they live in ``uncommitted/data_docs/``, with a subdirectory structure that mirrors the project namespace.
 
 After the init command completes, you should see the following directory structure :
 

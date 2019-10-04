@@ -7,7 +7,7 @@ Profiling
 Profiling evaluates a data asset and summarizes its observed characteristics. By computing the observed properties of
 data, Profiling helps to reason about the data's expected properties when creating expectation suites.
 
-Profiling results are usually rendered into HTML - see :ref:`data_documentation`.
+Profiling results are usually rendered into HTML - see :ref:`data_docs`.
 GE ships with the default BasicDatasetProfiler, which will produce an expectation_suite and so validation_results
 that compile to a page for each table or DataFrame including an overview section:
 

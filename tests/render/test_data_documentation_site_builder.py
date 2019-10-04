@@ -80,7 +80,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     index_links_dict = res[1]
 
     print( json.dumps(index_page_locator_info, indent=2) )
-    assert index_page_locator_info == context.root_directory + '/uncommitted/documentation/local_site/index.html'
+    assert index_page_locator_info == context.root_directory + '/uncommitted/data_docs/local_site/index.html'
 
     print( json.dumps(index_links_dict, indent=2) )
     assert json.loads(json.dumps(index_links_dict)) == json.loads("""\
@@ -147,7 +147,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     shutil.copytree(
         os.path.join(
             site_builder_data_context_with_html_store_titanic_random.root_directory,
-            "uncommitted/documentation/"
+            "uncommitted/data_docs/"
         ),
         "./tests/render/output/documentation"
     )
