@@ -6,7 +6,7 @@ PROJECT_HELP_COMMENT = """
 # 
 # Here you can define datasources, generators, integrations and more. This file
 # is intended to be committed to your repo. For help with configuration please:
-#   - Read our docs: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/core_concepts/data_context.html#configuration
+#   - Read our docs: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/reference/data_context_reference.html#configuration
 #   - Join our slack channel: http://greatexpectations.io/slack
 #
 # NOTE: GE uses the names of configured `datasources` and `generators` to manage
@@ -45,10 +45,10 @@ config_variables_file_path: uncommitted/config_variables.yml
 # used to override and extend Great Expectations.
 plugins_directory: plugins/
 
-# Validation Operators are customizable workflows that do things after you 
-# validate data. The example below stores validations and send a slack
-# notification. To read more about customizing and extending these, read:
-# https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/guides/validation_operators.html
+# Validation Operators are customizable workflows that bundle the validation of
+# one or more expectation suites and subsequent actions. The example below
+# stores validations and send a slack notification. To read more about
+# customizing and extending these, read: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/validation_operators_and_actions.html
 validation_operators:
   default:
     class_name: PerformActionListValidationOperator
@@ -111,7 +111,7 @@ data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These
   # include Expectations, Validations & Profiles. The are built for all
   # Datasources from JSON artifacts in the local repo including validations &
-  # profiles from the uncommitted directory. 
+  # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/data_documentation.html
   local_site: # site name
     datasource_whitelist: '*' # used to restrict the Datasources
     module_name: great_expectations.render.renderer.site_builder
