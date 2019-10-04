@@ -233,7 +233,7 @@ def test_full_oobe_flow():
 
 #     print(movielens_project_dir)
 
-#     with open(os.path.join(movielens_project_dir, "uncommitted/documentation/mydb/default/movies/BasicDatasetProfiler.html")) as f:
+#     with open(os.path.join(movielens_project_dir, "uncommitted/data_docs/mydb/default/movies/BasicDatasetProfiler.html")) as f:
 #         html = f.read()
 #         assert html != ""
 #         assert "This Expectation suite currently contains 19 total Expectations across 3 columns." in html

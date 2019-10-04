@@ -40,7 +40,7 @@ Configuration Guides
    :maxdepth: 2
 
    /reference/data_context_reference
-   /reference/data_documentation_reference
+   /reference/data_docs_reference
    /reference/profiling_reference
    /reference/migrating_versions
 

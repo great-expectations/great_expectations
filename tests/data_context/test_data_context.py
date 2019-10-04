@@ -583,14 +583,13 @@ project_path/
                 default/
                     Titanic/
                         BasicDatasetProfiler.json
-        fixtures/
         notebooks/
             create_expectations.ipynb
             integrate_validation_into_pipeline.ipynb
         plugins/
         uncommitted/
             config_variables.yml
-            documentation/
+            data_docs/
                 local_site/
             samples/
             validations/
@@ -602,11 +601,13 @@ project_path/
 """
 
     context.profile_datasource("random")
-    context.build_data_documentation()
+    context.build_data_docs()
 
-    observed = gen_directory_tree_str(os.path.join(project_dir, "great_expectations/uncommitted/documentation"))
+    data_docs_dir = os.path.join(project_dir, "great_expectations/uncommitted/data_docs")
+    observed = gen_directory_tree_str(data_docs_dir)
+    print(observed)
     assert observed == """\
-documentation/
+data_docs/
     local_site/
         index.html
         expectations/
@@ -634,18 +635,18 @@ documentation/
                             BasicDatasetProfiler.html
 """
 
-    # save documentation locally
+    # save data_docs locally
     safe_mmkdir("./tests/data_context/output")
-    safe_mmkdir("./tests/data_context/output/documentation")
+    safe_mmkdir("./tests/data_context/output/data_docs")
     
-    if os.path.isdir("./tests/data_context/output/documentation"):
-        shutil.rmtree("./tests/data_context/output/documentation")
+    if os.path.isdir("./tests/data_context/output/data_docs"):
+        shutil.rmtree("./tests/data_context/output/data_docs")
     shutil.copytree(
         os.path.join(
             ge_directory,
-            "uncommitted/documentation/"
+            "uncommitted/data_docs/"
         ),
-        "./tests/data_context/output/documentation"
+        "./tests/data_context/output/data_docs"
     )
 
 
@@ -717,7 +718,7 @@ def basic_data_context_config():
         "data_docs_sites": {},
         "validation_operators": {
             "default": {
-                "class_name": "PerformActionListValidationOperator",
+                "class_name": "ActionListValidationOperator",
                 "action_list": []
             }
         }

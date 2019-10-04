@@ -50,7 +50,7 @@ def basic_data_context_config_for_validation_operator():
         "data_docs_sites": {},
         "validation_operators": {
             "store_val_res_and_extract_eval_params" : {
-                "class_name" : "PerformActionListValidationOperator",
+                "class_name" : "ActionListValidationOperator",
                 "action_list" : [{
                     "name": "store_validation_result",
                     "action" : {
@@ -69,7 +69,7 @@ def basic_data_context_config_for_validation_operator():
     }
     # })
 
-def test_PerformActionListValidationOperator(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
+def test_ActionListValidationOperator(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
     project_path = str(tmp_path_factory.mktemp('great_expectations'))
 
     data_context = ConfigOnlyDataContext(
@@ -125,7 +125,7 @@ def test_PerformActionListValidationOperator(basic_data_context_config_for_valid
     assert data_context.stores["validation_result_store"].get(validation_result_store_keys[0])["success"] is True
 
 
-def test_RunWarningAndFailureExpectationSuitesValidationOperator_with_file_structure(tmp_path_factory):
+def test_WarningAndFailureExpectationSuitesValidationOperator_with_file_structure(tmp_path_factory):
     base_path = str(tmp_path_factory.mktemp('test_DefaultDataContextAwareValidationOperator_with_file_structure__dir'))
     project_path = os.path.join( base_path, "project")
     print(os.getcwd())
