@@ -1472,7 +1472,12 @@ class ConfigOnlyDataContext(object):
 
     def build_data_docs(self, site_names=None, data_asset_name=None):
         """
-        Bud
+        Build Data Docs for your project.
+
+        These make it simple to visualize data quality in your project. These
+        include Expectations, Validations & Profiles. The are built for all
+        Datasources from JSON artifacts in the local repo including validations
+        & profiles from the uncommitted directory.
 
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
