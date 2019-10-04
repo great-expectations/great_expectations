@@ -3,6 +3,59 @@ import numpy as np
 import unittest
 
 import great_expectations as ge
+from great_expectations.dataset.util import build_categorical_partition_object
+
+
+def test_build_categorical_partition(non_numeric_high_card_dataset):
+
+    # Verify that we can build expected categorical partition objects
+    # Note that this relies on the underlying sort behavior of the system in question
+    # For weights, that will be unambiguous, but for values, it could depend on locale
+
+    partition = build_categorical_partition_object(
+        non_numeric_high_card_dataset,
+        "medcardnonnum",
+        sort="count")
+
+    assert partition == {
+        'values': ['hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+                   '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+                   'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+                   'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'NfX4KfEompMbbKloFq8NQpdXtk5PjaPe',
+                   'mS2AVcLFp6i36sX7yAUrdfM0g0RB2X4D'],
+        'weights': [0.18, 0.17, 0.16, 0.145, 0.125, 0.11, 0.085, 0.02, 0.005]
+    }
+
+    partition = build_categorical_partition_object(
+        non_numeric_high_card_dataset,
+        "medcardnonnum",
+        sort="value")
+
+    try:
+        assert partition == {
+            'values': ['2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'NfX4KfEompMbbKloFq8NQpdXtk5PjaPe',
+                       'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+                       'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+                       'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'mS2AVcLFp6i36sX7yAUrdfM0g0RB2X4D',
+                       'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ'],
+            'weights': [0.16, 0.02, 0.125, 0.17, 0.085, 0.18, 0.145, 0.005, 0.11]
+        }
+    except AssertionError:
+        # Postgres uses a lexigraphical sort that differs from the one used in python natively
+        # Since we *want* to preserve the underlying system's ability to do compute (and the user
+        # can override if desired), we allow this explicitly.
+        assert partition == {
+            'values': ['2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+                       'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3',
+                       'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+                       'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+                       'mS2AVcLFp6i36sX7yAUrdfM0g0RB2X4D',
+                       'NfX4KfEompMbbKloFq8NQpdXtk5PjaPe',
+                       'NhTsracusfp5V6zVeWqLZnychDl7jjO4',
+                       'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+                       'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP'],
+            'weights': [0.16, 0.085, 0.18, 0.145, 0.005, 0.02, 0.125, 0.11, 0.17]
+        }
 
 
 class TestUtilMethods(unittest.TestCase):
