@@ -1,11 +1,11 @@
 .. _perform_action_list_validation_operator:
 
 ================================================================================
-PerformActionListValidationOperator
+ActionListValidationOperator
 ================================================================================
 
 
-PerformActionListValidationOperator validates each batch in its `run` method's `assets_to_validate` argument against the expectation suite included within that batch.
+ActionListValidationOperator validates each batch in its `run` method's `assets_to_validate` argument against the expectation suite included within that batch.
 
 Then it invokes a list of configured actions on every validation result.
 
@@ -18,12 +18,12 @@ The init command includes this operator in the default configuration file.
 Configuration
 --------------
 
-An instance of PerformActionListValidationOperator is included in the default configuration file `great_expectations.yml` that `great_expectations init` command creates.
+An instance of ActionListValidationOperator is included in the default configuration file `great_expectations.yml` that `great_expectations init` command creates.
 
 .. code-block:: yaml
 
     perform_action_list_operator: # this is the name you will use when you invoke the operator
-        class_name: PerformActionListValidationOperator
+        class_name: ActionListValidationOperator
 
         # the operator will call the following actions on each validation result
         # you can remove or add actions to this list. See the details in the actions

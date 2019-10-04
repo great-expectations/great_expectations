@@ -20,7 +20,7 @@ datasources:
 
 validation_operators:
   errors_and_warnings_validation_operator:
-    class_name: RunWarningAndFailureExpectationSuitesValidationOperator
+    class_name: WarningAndFailureExpectationSuitesValidationOperator
     action_list:
       - name: store_validation_result
         action:
@@ -74,7 +74,7 @@ stores:
   local_site_html_store:
     module_name: great_expectations.data_context.store
     class_name: HtmlSiteStore
-    base_directory: uncommitted/documentation/local_site/
+    base_directory: uncommitted/data_docs/local_site/
 
 data_docs_sites:
   local_site: # site name

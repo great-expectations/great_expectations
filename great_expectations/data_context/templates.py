@@ -50,17 +50,15 @@ plugins_directory: plugins/
 # stores validations and send a slack notification. To read more about
 # customizing and extending these, read: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/validation_operators_and_actions.html
 validation_operators:
-  default:
-    class_name: PerformActionListValidationOperator
+  action_list_operator:
+    class_name: ActionListValidationOperator
     action_list:
       - name: store_validation_result
         action:
           class_name: StoreAction
-          target_store_name: validations_store
       - name: store_evaluation_params
         action:
           class_name: ExtractAndStoreEvaluationParamsAction
-          target_store_name: evaluation_parameter_store
       # Uncomment the notify_slack action below to send notifications during evaluation
       # - name: notify_slack
       #   action:
@@ -105,13 +103,13 @@ stores:
   local_site_html_store:
     module_name: great_expectations.data_context.store
     class_name: HtmlSiteStore
-    base_directory: uncommitted/documentation/local_site/
+    base_directory: uncommitted/data_docs/local_site/
 
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These
   # include Expectations, Validations & Profiles. The are built for all
   # Datasources from JSON artifacts in the local repo including validations &
-  # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/data_documentation.html
+  # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/data_docs.html
   local_site: # site name
     datasource_whitelist: '*' # used to restrict the Datasources
     module_name: great_expectations.render.renderer.site_builder

@@ -31,7 +31,7 @@ stores:
   local_site_html_store:
     module_name: great_expectations.data_context.store
     class_name: HtmlSiteStore
-    base_directory: uncommitted/documentation/local_site/
+    base_directory: uncommitted/data_docs/local_site/
 
   # These next three blocks are never used in tests.
 
@@ -47,14 +47,14 @@ stores:
   #   module_name: great_expectations.data_context.store
   #   class_name: FilesystemStore
   #   store_config:
-  #     base_directory: uncommitted/documentation/local_site
+  #     base_directory: uncommitted/data_docs/local_site
   #     file_extension: .html
 
   # shared_team_site_store:
   #   module_name: great_expectations.data_context.store
   #   class_name: FilesystemStore
   #   store_config:
-  #     base_directory: uncommitted/documentation/team_site
+  #     base_directory: uncommitted/data_docs/team_site
   #     file_extension: .html
 
   fixture_validation_results_store:
@@ -109,7 +109,7 @@ data_docs_sites:
   team_site:
   # "team_site" is meant to support the "shared source of truth for a team" use case.
   # By default only the expectations section is enabled.
-  #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3).
+  #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and validations_store attributes based on the team's decisions where these are stored (a local filesystem or S3).
   # Reach out on Slack (https://greatexpectations.io/slack>) if you would like to discuss the best way to configure a team site.
 
     module_name: great_expectations.render.renderer.site_builder
@@ -130,7 +130,7 @@ data_docs_sites:
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
   default:
-    class_name: PerformActionListValidationOperator
+    class_name: ActionListValidationOperator
     action_list:
       - name: store_validation_result
         action:
