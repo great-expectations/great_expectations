@@ -50,7 +50,7 @@ plugins_directory: plugins/
 # stores validations and send a slack notification. To read more about
 # customizing and extending these, read: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/validation_operators_and_actions.html
 validation_operators:
-  default:
+  action_list_operator:
     class_name: ActionListValidationOperator
     action_list:
       - name: store_validation_result
