@@ -27,8 +27,8 @@ from six import PY2
 
 from great_expectations.cli import cli
 from great_expectations.util import gen_directory_tree_str
-from great_expectations.cli.init import scaffold_directories_and_notebooks
-from great_expectations import __version__ as ge_version
+from great_expectations.cli.init import scaffold_directories, scaffold_notebooks
+from great_expectations import __version__ as ge_version, DataContext
 from .test_utils import assertDeepAlmostEqual
 
 def test_cli_command_entrance():
@@ -189,7 +189,7 @@ def test_cli_evaluation_parameters():
     assert json_result['evaluation_parameters'] == expected_evaluation_parameters
 
 
-def test_cli_init(tmp_path_factory, filesystem_csv_2):
+def test_cli_init_on_new_project(tmp_path_factory, filesystem_csv_2):
     try:
         basedir = tmp_path_factory.mktemp("test_cli_init_diff")
         basedir = str(basedir)
@@ -289,6 +289,66 @@ great_expectations/
                 "great_expectations/uncommitted/data_docs/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
             )
         ) > 0
+        print(result)
+    except:
+        raise
+    finally:
+        os.chdir(curdir)
+
+
+def existing_project(tmp_path_factory):
+    basedir = tmp_path_factory.mktemp("test_cli_init_existing_project")
+    context = DataContext.create(basedir)
+    project_root_dir = context.root_directory
+    scaffold_directories(project_root_dir)
+    scaffold_notebooks(project_root_dir)
+    uncommitted_dir = os.path.join(basedir, "great_expectations/uncommitted")
+    shutil.rmtree(uncommitted_dir)
+    assert not os.path.isdir(uncommitted_dir)
+    return basedir
+
+
+def test_cli_init_on_exiting_project_with_no_uncommitted_directory(tmp_path_factory):
+    basedir = existing_project(tmp_path_factory)
+    print(basedir)
+    curdir = os.path.abspath(os.getcwd())
+
+    try:
+        uncommitted_dir = os.path.join(basedir, "great_expectations/uncommitted")
+        assert not os.path.isdir(uncommitted_dir)
+
+        os.chdir(basedir)
+        runner = CliRunner()
+        result = runner.invoke(cli, ["init"], input="Y\n4\n")
+
+        print(result.output)
+        print("result.output length:", len(result.output))
+
+        assert os.path.isdir(uncommitted_dir), "No uncommitted directory created"
+        obs = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+
+        print(obs)
+        assert obs == """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    datasources/
+    expectations/
+        data__dir/
+            default/
+                Titanic/
+                    BasicDatasetProfiler.json
+    notebooks/
+        create_expectations.ipynb
+        integrate_validation_into_pipeline.ipynb
+    plugins/
+    uncommitted/
+        config_variables.yml
+        data_docs/
+            local_site/
+        samples/
+        validations/
+"""
         print(result)
     except:
         raise
@@ -576,10 +636,15 @@ def test_cli_config_not_found(tmp_path_factory):
 
 def test_scaffold_directories_and_notebooks(tmp_path_factory):
     empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks"))
-    scaffold_directories_and_notebooks(empty_directory)
+    scaffold_directories(empty_directory)
+    scaffold_notebooks(empty_directory)
     print(empty_directory)
 
     assert set(os.listdir(empty_directory)) == \
            {'datasources', 'plugins', 'expectations', '.gitignore', 'uncommitted', 'notebooks'}
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
            {'samples', 'data_docs', 'validations'}
+    assert set(os.listdir(os.path.join(empty_directory, "notebooks"))) == {
+        "create_expectations.ipynb",
+        "integrate_validation_into_pipeline.ipynb"
+    }

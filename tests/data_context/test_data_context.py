@@ -25,7 +25,7 @@ from great_expectations.data_context.types import (
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
 )
-from great_expectations.cli.init import scaffold_directories_and_notebooks
+from great_expectations.cli.init import scaffold_directories, scaffold_notebooks
 from great_expectations.data_context.store import (
     BasicInMemoryStore,
     InMemoryEvaluationParameterStore,
@@ -562,7 +562,8 @@ project_path/
 
     context = DataContext.create(project_dir)
     ge_directory = os.path.join(project_dir, "great_expectations")
-    scaffold_directories_and_notebooks(ge_directory)
+    scaffold_directories(ge_directory)
+    scaffold_notebooks(ge_directory)
     context.add_datasource("titanic",
                             module_name="great_expectations.datasource",
                             class_name="PandasDatasource",
