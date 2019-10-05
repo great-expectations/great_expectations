@@ -42,25 +42,27 @@ def script_relative_path(file_path):
     return os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(scriptdir)), file_path))
 
 
-def scaffold_directories_and_notebooks(base_dir):
-    """Add project directories for a new GE project."""
+def scaffold_directories(base_dir):
+    """Create GE directories for a new project."""
 
     safe_mmkdir(base_dir, exist_ok=True)
-    notebook_dir_name = "notebooks"
-
     open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
 
-    for directory in [notebook_dir_name, "expectations", "datasources", "uncommitted", "plugins"]:
+    for directory in ["notebooks", "expectations", "datasources", "uncommitted",
+                      "plugins"]:
         safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
 
     for uncommitted_directory in ["validations", "data_docs", "samples"]:
         safe_mmkdir(os.path.join(base_dir, "uncommitted",
                                  uncommitted_directory), exist_ok=True)
 
+
+def scaffold_notebooks(base_dir):
+    """Copy template notebooks into the notebooks directory for a project."""
     for notebook in glob.glob(file_relative_path(__file__, "../init_notebooks/*.ipynb")):
         notebook_name = os.path.basename(notebook)
-        shutil.copyfile(notebook, os.path.join(
-            base_dir, notebook_dir_name, notebook_name))
+        destination_path = os.path.join(base_dir, "notebooks", notebook_name)
+        shutil.copyfile(notebook, destination_path)
 
 
 # !!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
