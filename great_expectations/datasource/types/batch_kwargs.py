@@ -82,6 +82,7 @@ class BatchKwargs(RequiredKeysDotDict):
             logger.warning("Unable to build BatchKwargs from provided dictionary.")
             return None
 
+
 class BatchId(BatchKwargs):
     """A BatchId is a special type of BatchKwargs (so that it has a batch_fingerprint) but it generally does
     NOT require specific keys and instead captures information about the OUTPUT of a datasource's fetch
