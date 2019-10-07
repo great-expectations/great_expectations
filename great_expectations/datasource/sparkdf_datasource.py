@@ -176,27 +176,3 @@ class SparkDFDatasource(Datasource):
                                data_context=self._data_context,
                                batch_kwargs=batch_kwargs,
                                caching=caching)
-
-    def build_batch_kwargs(self, data_asset_name, *args, **kwargs):
-        if len(args) > 0:
-            if isinstance(args[0], (DataFrame, SparkDFDataset)):
-                kwargs.update({
-                    "df": args[0],
-                    "timestamp": time.time()
-                })
-            elif isinstance(args[0], string_types):
-                kwargs.update({
-                    "path": args[0],
-                    "timestamp": time.time()
-                })
-        else:
-            kwargs.update({
-                "timestamp": time.time()
-            })
-        return kwargs
-
-    def named_generator_build_batch_kwargs(self, generator_name, generator_asset, *args, **kwargs):
-        raise NotImplementedError
-
-    def no_generator_build_batch_kwargs(self, *args, **kwargs):
-        raise NotImplementedError
