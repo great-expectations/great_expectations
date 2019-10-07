@@ -1502,14 +1502,16 @@ class ConfigOnlyDataContext(object):
             for site_name, site_config in sites.items():
                 logger.debug("Building Data Docs Site %s" % site_name,)
 
-                if (site_names and site_name in site_names) or not site_names or len(site_names) == 0:
+                if (site_names and site_name in site_names) or not site_names:  #  or len(site_names) == 0: # JPC - removed this option 20191007 (specifying zero length should be error, not silently ok)
                     complete_site_config = site_config
                     site_builder = instantiate_class_from_config(
                         config=complete_site_config,
                         runtime_config={
                             "data_context": self,
                         },
-                        config_defaults={}
+                        config_defaults={
+                            "module_name": "great_expectations.render.renderer.site_builder"
+                        }
                     )
                     # TODO : Re-implement data_asset_name
                     index_page_locator_info = site_builder.build()[0]

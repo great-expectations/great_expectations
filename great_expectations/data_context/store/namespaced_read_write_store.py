@@ -21,6 +21,8 @@ from great_expectations.data_context.util import (
     load_class,
     instantiate_class_from_config
 )
+from great_expectations.exceptions import DataContextError
+
 
 logger = logging.getLogger(__name__)
 
@@ -176,14 +178,18 @@ class HtmlSiteStore(NamespacedReadWriteStore):
     def __init__(self,
         root_directory,
         serialization_type=None,
-        store_backend=None,
-        **kwargs
+        store_backend=None
     ):
-        store_backend_module_name = store_backend.pop("module_name", "great_expectations.data_context.store")
-        store_backend_class_name = store_backend.pop("class_name", "FixedLengthTupleFilesystemStoreBackend")
+        store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
+        store_backend_class_name = store_backend.get("class_name", "FixedLengthTupleFilesystemStoreBackend")
         store_class = load_class(store_backend_class_name, store_backend_module_name)
-        if not isinstance(store_class, FixedLengthTupleStoreBackend):
-            raise
+
+        if not issubclass(store_class, FixedLengthTupleStoreBackend):
+            raise DataContextError("Invalid configuration: HtmlSiteStore needs a FixedLengthTupleStoreBackend")
+        if "filepath_template" in store_backend or "key_length" in store_backend:
+            logger.warning("Configuring a filepath_template or key_length is not supported in SiteBuilder: "
+                           "filepaths will be selected based on the type of asset rendered.")
+
 
         # Each key type gets its own backend.
         # If backends were DB connections, this could be inefficient, but it doesn't much matter for filepaths.
@@ -191,34 +197,42 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         # If several types are being writtten to overlapping directories, we could get collisions.
         self.store_backends = {
             ExpectationSuiteIdentifier: instantiate_class_from_config(
-                config = {
-                    "module_name": store_backend_module_name,
-                    "class_name": store_backend_class_name,
-                    "key_length": 4,
-                    "base_directory": base_directory,
-                    "filepath_template": 'expectations/{0}/{1}/{2}/{3}.html',
-                },
+                config=store_backend,
                 runtime_config={
                     "root_directory": root_directory
+                },
+                config_defaults={
+                    "module_name": "great_expectations.data_context.store",
+                    "key_length": 4,
+                    "filepath_template": 'expectations/{0}/{1}/{2}/{3}.html',
                 }
             ),
             ValidationResultIdentifier: instantiate_class_from_config(
-                config = {
-                    "module_name": store_backend_module_name,
-                    "class_name": store_backend_class_name,
-                    "key_length": 5,
-                    "base_directory": base_directory,
-                    "filepath_template": 'validations/{4}/{0}/{1}/{2}/{3}.html',
-                },
+                config=store_backend,
                 runtime_config={
                     "root_directory": root_directory
+                },
+                config_defaults={
+                    "module_name": "great_expectations.data_context.store",
+                    "key_length": 4,
+                    "filepath_template": 'expectations/{0}/{1}/{2}/{3}.html',
+                }
+            ),
+            "index_page":  instantiate_class_from_config(
+                config=store_backend,
+                runtime_config={
+                    "root_directory": root_directory
+                },
+                config_defaults={
+                    "module_name": "great_expectations.data_context.store",
+                    "key_length": 0,
+                    "filepath_template": 'index.html',
                 }
             ),
         }
 
         self.root_directory = root_directory
         self.serialization_type = serialization_type
-        self.base_directory = base_directory
 
         # NOTE: Instead of using the filesystem as the source of record for keys,
         # this class trackes keys separately in an internal set.
@@ -270,14 +284,16 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         return list(self.keys)
 
     def write_index_page(self, page):
-        # NOTE: This method is a temporary hack.
-        # Status as of 2019/09/09: this method is backward compatible against the previous implementation of site_builder
-        # However, it doesn't support backend pluggability---only implementation in a local filesystem.
-        # Also, if/when we want to support index pages at multiple levels of nesting, we'll need to extend.
-        # 
-        # Properly speaking, what we need is a class of BackendStore that can accomodate this...
-        # It's tricky with the current stores, sbecause the core get/set logic depends so strongly on fixed-length keys.
-        index_page_path = os.path.join(self.root_directory, self.base_directory, "index.html")
-        with open(index_page_path, "w") as file_:
-            file_.write(page)
-        return index_page_path
+        return self.store_backends["index_page"].set((), page)
+
+        # # NOTE: This method is a temporary hack.
+        # # Status as of 2019/09/09: this method is backward compatible against the previous implementation of site_builder
+        # # However, it doesn't support backend pluggability---only implementation in a local filesystem.
+        # # Also, if/when we want to support index pages at multiple levels of nesting, we'll need to extend.
+        # #
+        # # Properly speaking, what we need is a class of BackendStore that can accomodate this...
+        # # It's tricky with the current stores, sbecause the core get/set logic depends so strongly on fixed-length keys.
+        # index_page_path = os.path.join(self.root_directory, self.base_directory, "index.html")
+        # with open(index_page_path, "w") as file_:
+        #     file_.write(page)
+        # return index_page_path

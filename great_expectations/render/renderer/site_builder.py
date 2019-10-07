@@ -22,6 +22,7 @@ from great_expectations.data_context.util import (
 )
 
 from great_expectations.data_context.store.namespaced_read_write_store import (
+    HtmlSiteStore,
     SiteSectionIdentifier,
 )
 
@@ -33,58 +34,69 @@ class SiteBuilder(object):
 
     The exact behavior of SiteBuilder is controlled by configuration in the DataContext's great_expectations.yml file.
 
-    Users can specify
-    * which datasources to document (by default, all)
-    * whether to include expectations, validations and profiling results sections
-    * where the expectations and validations should be read from (filesystem or S3)
-    * where the HTML files should be written (filesystem or S3)
-    * which renderer and view class should be used to render each section
+    Users can specify:
 
-    Here is an example of config for a site:
+        * which datasources to document (by default, all)
+        * whether to include expectations, validations and profiling results sections (by default, all)
+        * where the expectations and validations should be read from (filesystem or S3)
+        * where the HTML files should be written (filesystem or S3)
+        * which renderer and view class should be used to render each section
 
-    local_site:
-        
-        class_name: SiteBuilder
-        target_store_name: local_site_html_store
+    Here is an example of a minimal configuration for a site::
 
-        site_index_builder:
-            class_name: DefaultSiteIndexBuilder
+        local_site:
+            class_name: SiteBuilder
+            store_backend:
+                class_name: FixedLengthTupleS3StoreBackend
+                bucket: data_docs.my_company.com
+                prefix: /data_docs/
 
-        # Verbose version:
-        # index_builder:
-        #     module_name: great_expectations.render.builder
-        #     class_name: DefaultSiteIndexBuilder
-        #     renderer:
-        #         module_name: great_expectations.render.renderer
-        #         class_name: SiteIndexPageRenderer
-        #     view:
-        #         module_name: great_expectations.render.view
-        #         class_name: DefaultJinjaIndexPageView
 
-        site_section_builders:
-            # Minimal specification
-            expectations:
-                class_name: DefaultSiteSectionBuilder
-                source_store_name: expectation_store
-            renderer:
-                module_name: great_expectations.render.renderer
-                class_name: ExpectationSuitePageRenderer
-                    
-            # More verbose specification with optional arguments
-            validations:
-                module_name: great_expectations.data_context.render
-                class_name: DefaultSiteSectionBuilder
-                source_store_name: local_validation_store
+    A more verbose configuration can also control individual sections and override renderers, views, and stores::
+
+        local_site:
+            class_name: SiteBuilder
+            store_backend:
+                class_name: FixedLengthTupleS3StoreBackend
+                bucket: data_docs.my_company.com
+                prefix: /data_docs/
+            datasource_whitelist:
+              - my_source
+              - my_second_source
+            site_index_builder:
+                class_name: DefaultSiteIndexBuilder
+
+            # Verbose version:
+            # index_builder:
+            #     module_name: great_expectations.render.builder
+            #     class_name: DefaultSiteIndexBuilder
+            #     renderer:
+            #         module_name: great_expectations.render.renderer
+            #         class_name: SiteIndexPageRenderer
+            #     view:
+            #         module_name: great_expectations.render.view
+            #         class_name: DefaultJinjaIndexPageView
+
+            site_section_builders:
+                # Minimal specification
+                expectations:
+                    class_name: DefaultSiteSectionBuilder
+                    source_store_name: expectation_store
                 renderer:
                     module_name: great_expectations.render.renderer
-                    class_name: SiteIndexPageRenderer
-                view:
-                    module_name: great_expectations.render.view
-                    class_name: DefaultJinjaIndexPageView
+                    class_name: ExpectationSuitePageRenderer
 
-        # specify a whitelist here if you would like to restrict the datasources to document
-        datasource_whitelist:
-
+                # More verbose specification with optional arguments
+                validations:
+                    module_name: great_expectations.data_context.render
+                    class_name: DefaultSiteSectionBuilder
+                    source_store_name: local_validation_store
+                    renderer:
+                        module_name: great_expectations.render.renderer
+                        class_name: SiteIndexPageRenderer
+                    view:
+                        module_name: great_expectations.render.view
+                        class_name: DefaultJinjaIndexPageView
     """
 
     def __init__(self,
@@ -96,14 +108,14 @@ class SiteBuilder(object):
     ):
         self.data_context = data_context
 
-        backend_store = instantiate_class_from_config(
-            config=store_backend,
-            runtime_config={
-                "data_context": data_context,
-                "root_directory": data_context.root
-            }
+        # The site builder is essentially a frontend store. We'll open up three types of backends using the base
+        # type of the configuration defined in the store_backend section
+
+        target_store = HtmlSiteStore(
+            root_directory=data_context.root_directory,
+            serialization_type=None,
+            store_backend=store_backend
         )
-        self.target_store_name = target_store_name
 
         # the site config may specify the list of datasource names to document.
         # if the config property is absent or is *, treat as "all"
@@ -111,11 +123,15 @@ class SiteBuilder(object):
         if not self.datasource_whitelist or self.datasource_whitelist == '*':
             self.datasource_whitelist = [datasource['name'] for datasource in data_context.list_datasources()]
 
+        if site_index_builder is None:
+            site_index_builder = {
+                "class_name": "DefaultSiteIndexBuilder"
+            }
         self.site_index_builder = instantiate_class_from_config(
             config=site_index_builder,
             runtime_config={
                 "data_context": data_context,
-                "target_store_name": target_store_name,
+                "target_store": target_store,
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -123,13 +139,43 @@ class SiteBuilder(object):
             }
         )
 
+        if site_section_builders is None:
+            site_section_builders = {
+                "expectations": {
+                    "class_name": "DefaultSiteSectionBuilder",
+                    "source_store_name": "expectations_store",
+                    "renderer": {
+                        "class_name": "ExpectationSuitePageRenderer"
+                    }
+                },
+                "validations": {
+                    "class_name": "DefaultSiteSectionBuilder",
+                    "source_store_name": "validations_store",
+                    "run_id_filter": {
+                        "ne": "profiling"
+                    },
+                    "renderer": {
+                        "class_name": "ValidationResultsPageRenderer"
+                    }
+                },
+                "profiling": {
+                    "class_name": "DefaultSiteSectionBuilder",
+                    "source_store_name": "validations_store",
+                    "run_id_filter": {
+                        "eq": "profiling"
+                    },
+                    "renderer": {
+                        "class_name": "ProfilingResultsPageRenderer"
+                    }
+                }
+            }
         self.site_section_builders = {}
         for site_section_name, site_section_config in site_section_builders.items():
             self.site_section_builders[site_section_name] = instantiate_class_from_config(
                 config=site_section_config,
                 runtime_config={
                     "data_context": data_context,
-                    "target_store_name": target_store_name,
+                    "target_store": target_store
                 },
                 config_defaults={
                     "name": site_section_name,
@@ -149,7 +195,7 @@ class DefaultSiteSectionBuilder(object):
     def __init__(self,
         name,
         data_context,
-        target_store_name,
+        target_store,
         source_store_name,
         run_id_filter=None, #NOTE: Ideally, this would allow specification of ANY element (or combination of elements) within an ID key
         renderer=None,
@@ -157,7 +203,7 @@ class DefaultSiteSectionBuilder(object):
     ):
         self.name = name
         self.source_store = data_context.stores[source_store_name]
-        self.target_store = data_context.stores[target_store_name]
+        self.target_store = target_store
         self.run_id_filter = run_id_filter
 
         # TODO : Push conventions for configurability down to renderers and views.
@@ -167,7 +213,7 @@ class DefaultSiteSectionBuilder(object):
                 "module_name": "great_expectations.render.renderer",
                 # "class_name": "SiteIndexPageRenderer",
             }
-        renderer_module = importlib.import_module(renderer.pop("module_name"))
+        renderer_module = importlib.import_module(renderer.pop("module_name", "great_expectations.render.renderer"))
         self.renderer_class = getattr(renderer_module, renderer.pop("class_name"))
 
         if view == None:
@@ -175,7 +221,7 @@ class DefaultSiteSectionBuilder(object):
                 "module_name": "great_expectations.render.view",
                 "class_name": "DefaultJinjaPageView",
             }
-        view_module = importlib.import_module(view.pop("module_name"))
+        view_module = importlib.import_module(view.pop("module_name", "great_expectations.render.view"))
         self.view_class = getattr(view_module, view.pop("class_name"))
 
     def build(self, datasource_whitelist):
@@ -247,14 +293,14 @@ class DefaultSiteIndexBuilder(object):
     def __init__(self,
         name,
         data_context,
-        target_store_name,
+        target_store,
         renderer=None,
         view=None,
     ):
         # NOTE: This method is almost idenitcal to DefaultSiteSectionBuilder
         self.name = name
         self.data_context = data_context
-        self.target_store = data_context.stores[target_store_name]
+        self.target_store = target_store
 
         # TODO : Push conventions for configurability down to renderers and views.
         # Until then, they won't be configurable, and defaults will be hard.
@@ -263,7 +309,7 @@ class DefaultSiteIndexBuilder(object):
                 "module_name": "great_expectations.render.renderer",
                 "class_name": "SiteIndexPageRenderer",
             }
-        renderer_module = importlib.import_module(renderer.pop("module_name"))
+        renderer_module = importlib.import_module(renderer.pop("module_name", "great_expectations.render.renderer"))
         self.renderer_class = getattr(renderer_module, renderer.pop("class_name"))
 
         if view == None:
@@ -271,7 +317,7 @@ class DefaultSiteIndexBuilder(object):
                 "module_name" : "great_expectations.render.view",
                 "class_name" : "DefaultJinjaIndexPageView",
             }
-        view_module = importlib.import_module(view.pop("module_name"))
+        view_module = importlib.import_module(view.pop("module_name", "great_expectations.render.view"))
         self.view_class = getattr(view_module, view.pop("class_name"))
 
     def add_resource_info_to_index_links_dict(self,

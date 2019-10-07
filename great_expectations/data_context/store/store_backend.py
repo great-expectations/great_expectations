@@ -51,7 +51,8 @@ class StoreBackend(object):
     def set(self, key, value):
         self._validate_key(key)
         self._validate_value(value)
-        self._set(key, value)
+        # Allow the implementing setter to return something (e.g. a path used for its key)
+        return self._set(key, value)
 
     def has_key(self, key):
         self._validate_key(key)
@@ -302,6 +303,8 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
         safe_mmkdir(str(path))
         with open(filepath, "w") as outfile:
             outfile.write(value)
+        return filepath
+
 
     def list_keys(self):
         key_list = []
@@ -382,7 +385,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         s3 = boto3.resource('s3')
         result_s3 = s3.Object(self.bucket, s3_object_key)
         result_s3.put(Body=value.encode('utf-8'))
-
+        return s3_object_key
 
     def list_keys(self):
         key_list = []
