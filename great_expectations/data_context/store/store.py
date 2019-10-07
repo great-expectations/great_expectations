@@ -43,7 +43,7 @@ class WriteOnlyStore(object):
                 self.serialization_type)
 
         serialized_value = serialization_method(value)
-        self._set(key, serialized_value)
+        return self._set(key, serialized_value)
 
 
     # NOTE : Abe 2019/09/06 : It's unclear whether this serialization logic belongs here,
