@@ -1502,7 +1502,8 @@ class ConfigOnlyDataContext(object):
             for site_name, site_config in sites.items():
                 logger.debug("Building Data Docs Site %s" % site_name,)
 
-                if (site_names and site_name in site_names) or not site_names:  #  or len(site_names) == 0: # JPC - removed this option 20191007 (specifying zero length should be error, not silently ok)
+                # NOTE: 20191007 - JPC: removed condition that zero-length site_names mean build all sites
+                if (site_names and site_name in site_names) or not site_names:
                     complete_site_config = site_config
                     site_builder = instantiate_class_from_config(
                         config=complete_site_config,

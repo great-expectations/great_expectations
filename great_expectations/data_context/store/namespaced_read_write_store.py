@@ -176,10 +176,10 @@ class ValidationsStore(NamespacedReadWriteStore):
 class HtmlSiteStore(NamespacedReadWriteStore):
 
     def __init__(self,
-        root_directory,
-        serialization_type=None,
-        store_backend=None
-    ):
+                 root_directory,
+                 serialization_type=None,
+                 store_backend=None
+                 ):
         store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
         store_backend_class_name = store_backend.get("class_name", "FixedLengthTupleFilesystemStoreBackend")
         store_class = load_class(store_backend_class_name, store_backend_module_name)
@@ -189,7 +189,6 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         if "filepath_template" in store_backend or "key_length" in store_backend:
             logger.warning("Configuring a filepath_template or key_length is not supported in SiteBuilder: "
                            "filepaths will be selected based on the type of asset rendered.")
-
 
         # Each key type gets its own backend.
         # If backends were DB connections, this could be inefficient, but it doesn't much matter for filepaths.
