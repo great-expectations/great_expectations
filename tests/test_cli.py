@@ -15,8 +15,6 @@ from ruamel.yaml import YAML
 
 from great_expectations.exceptions import ConfigNotFoundError
 
-yaml = YAML()
-yaml.default_flow_style = False
 
 try:
     from unittest import mock
@@ -33,6 +31,8 @@ from great_expectations.data_context.util import (
 )
 from great_expectations import __version__ as ge_version
 from .test_utils import assertDeepAlmostEqual
+yaml = YAML()
+yaml.default_flow_style = False
 
 
 def test_cli_command_entrance():
