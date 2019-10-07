@@ -308,7 +308,11 @@ def build_docs(directory, site_name, data_asset_name):
         
     try:
         context = DataContext(directory)
-        build_documentation_impl(context, site_name=site_name, data_asset_name=data_asset_name)
+        build_documentation_impl(
+            context,
+            site_name=site_name,
+            data_asset_name=data_asset_name
+        )
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
