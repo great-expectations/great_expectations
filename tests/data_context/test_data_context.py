@@ -28,7 +28,7 @@ from great_expectations.data_context.types import (
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 from great_expectations.data_context.store import (
     BasicInMemoryStore,
-    EvaluationParameterStore,
+    InMemoryEvaluationParameterStore,
 )
 from great_expectations.util import (
     gen_directory_tree_str,
@@ -279,7 +279,11 @@ def test_compile(data_context):
             'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value'
             }, 
         'data_assets': {
-            'mydatasource/mygenerator/source_diabetes_data': {
+            DataAssetIdentifier(
+                datasource='mydatasource',
+                generator='mygenerator',
+                generator_asset='source_diabetes_data'
+            ): {
                 'default': {
                     'expect_column_unique_value_count_to_be_between': {
                         'columns': {
@@ -292,7 +296,11 @@ def test_compile(data_context):
                     }
                 }
             }, 
-            'mydatasource/mygenerator/source_patient_data': {
+            DataAssetIdentifier(
+                datasource='mydatasource',
+                generator='mygenerator',
+                generator_asset='source_patient_data'
+            ): {
                 'default': {
                     'expect_table_row_count_to_equal': {
                         'result': {
@@ -495,11 +503,7 @@ def test_data_context_result_store(titanic_data_context):
     """
     Test that validation results can be correctly fetched from the configured results store
     """
-    print(titanic_data_context.stores["local_validation_result_store"].list_keys())
-
     profiling_results = titanic_data_context.profile_datasource("mydatasource")
-
-    print(titanic_data_context.stores["local_validation_result_store"].list_keys())
 
     for profiling_result in profiling_results['results']:
         data_asset_name = profiling_result[1]['meta']['data_asset_name']
@@ -520,7 +524,7 @@ def test_data_context_result_store(titanic_data_context):
     assert len(failed_validation_result["results"]) == 8
 
 
-def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
+def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
 
     # TODO : Use a standard test fixture
     # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
@@ -531,14 +535,12 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
     os.makedirs(os.path.join(project_dir, "data"))
     os.makedirs(os.path.join(project_dir, "data/titanic"))
-    curdir = os.path.abspath(os.getcwd())
     shutil.copy(
         "./tests/test_sets/Titanic.csv",
         str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
     )
 
     os.makedirs(os.path.join(project_dir, "data/random"))
-    curdir = os.path.abspath(os.getcwd())
     shutil.copy(
         os.path.join(filesystem_csv_3, "f1.csv"),
         str(os.path.join(project_dir, "data/random/f1.csv"))
@@ -572,7 +574,6 @@ project_path/
                             base_directory=os.path.join(project_dir, "data/random/"))
 
     context.profile_datasource("titanic")
-    # print(gen_directory_tree_str(project_dir))
     assert gen_directory_tree_str(project_dir) == """\
 project_path/
     data/
@@ -590,16 +591,13 @@ project_path/
                 default/
                     Titanic/
                         BasicDatasetProfiler.json
-        fixtures/
         notebooks/
             create_expectations.ipynb
             integrate_validation_into_pipeline.ipynb
         plugins/
         uncommitted/
             config_variables.yml
-            documentation/
-                local_site/
-                team_site/
+            data_docs/
             samples/
             validations/
                 profiling/
@@ -610,16 +608,13 @@ project_path/
 """
 
     context.profile_datasource("random")
-    # print(gen_directory_tree_str(project_dir))
-    
-    context.build_data_documentation()
-    # print(gen_directory_tree_str(project_dir))
+    context.build_data_docs()
 
-    # Titanic
-
-    print(gen_directory_tree_str(os.path.join(project_dir, "great_expectations/uncommitted/documentation")))
-    assert gen_directory_tree_str(os.path.join(project_dir, "great_expectations/uncommitted/documentation")) == """\
-documentation/
+    data_docs_dir = os.path.join(project_dir, "great_expectations/uncommitted/data_docs")
+    observed = gen_directory_tree_str(data_docs_dir)
+    print(observed)
+    assert observed == """\
+data_docs/
     local_site/
         index.html
         expectations/
@@ -645,33 +640,20 @@ documentation/
                     default/
                         Titanic/
                             BasicDatasetProfiler.html
-    team_site/
-        index.html
-        expectations/
-            random/
-                default/
-                    f1/
-                        BasicDatasetProfiler.html
-                    f2/
-                        BasicDatasetProfiler.html
-            titanic/
-                default/
-                    Titanic/
-                        BasicDatasetProfiler.html
 """
 
-    # save documentation locally
+    # save data_docs locally
     safe_mmkdir("./tests/data_context/output")
-    safe_mmkdir("./tests/data_context/output/documentation")
+    safe_mmkdir("./tests/data_context/output/data_docs")
     
-    if os.path.isdir("./tests/data_context/output/documentation"):
-        shutil.rmtree("./tests/data_context/output/documentation")
+    if os.path.isdir("./tests/data_context/output/data_docs"):
+        shutil.rmtree("./tests/data_context/output/data_docs")
     shutil.copytree(
         os.path.join(
             ge_directory,
-            "uncommitted/documentation/"
+            "uncommitted/data_docs/"
         ),
-        "./tests/data_context/output/documentation"
+        "./tests/data_context/output/data_docs"
     )
 
 
@@ -724,7 +706,7 @@ def basic_data_context_config():
         "config_version": 1,
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name": "evaluation_parameter_store",
-        "profiling_store_name": "does_not_have_to_be_real",
+        "validations_store_name": "does_not_have_to_be_real",
         "expectations_store_name": "expectations_store",
         "datasources": {},
         "stores": {
@@ -737,15 +719,13 @@ def basic_data_context_config():
             },
             "evaluation_parameter_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "EvaluationParameterStore",
+                "class_name": "InMemoryEvaluationParameterStore",
             }
         },
-        "data_docs": {
-            "sites": {}
-        },
+        "data_docs_sites": {},
         "validation_operators": {
             "default": {
-                "class_name": "PerformActionListValidationOperator",
+                "class_name": "ActionListValidationOperator",
                 "action_list": []
             }
         }
@@ -791,7 +771,7 @@ def test_evaluation_parameter_store_methods(basic_data_context_config):
         "testing",
     )
 
-    assert isinstance(context.evaluation_parameter_store, EvaluationParameterStore)
+    assert isinstance(context.evaluation_parameter_store, InMemoryEvaluationParameterStore)
 
     assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {}
     context.set_parameters_in_evaluation_parameter_store_by_run_id_and_key("foo", "bar", "baz")
@@ -840,6 +820,26 @@ def test__get_normalized_data_asset_name_filepath(basic_data_context_config):
         "my/base/path",
         ".json"
     ) == "my/base/path/my_db/default/my_table/default.json"
+
+
+def test_load_data_context_from_environment_variables(tmp_path_factory):
+    try:
+        project_path = str(tmp_path_factory.mktemp('data_context'))
+        context_path = os.path.join(project_path, "great_expectations")
+        safe_mmkdir(context_path)
+        shutil.copy("./tests/test_fixtures/great_expectations_basic.yml",
+                    str(os.path.join(context_path, "great_expectations.yml")))
+        with pytest.raises(DataContextError) as err:
+            DataContext.find_context_root_dir()
+            assert "Unable to locate context root directory." in err
+
+        os.environ["GE_HOME"] = context_path
+        assert DataContext.find_context_root_dir() == context_path
+    except Exception:
+        raise
+    finally:
+        # Make sure we unset the environment variable we're using
+        del os.environ["GE_HOME"]
 
 
 def test_data_context_updates_expectation_suite_names(data_context):

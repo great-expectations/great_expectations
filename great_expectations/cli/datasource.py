@@ -238,12 +238,11 @@ later by running `great_expectations profile`.
 """
 
     msg_data_doc_intro = """
-========== Data Documentation ==========
+========== Data Docs ==========
 
 Great Expectations can create data documentation from the data you just profiled.
 
-To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_documentation.html\
-?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_docs.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
 """
 
     cli_message(msg_intro.format(data_source_name, rtd_url_ge_version))
@@ -332,14 +331,14 @@ def build_docs(context, site_name=None, data_asset_name=None):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 
-    cli_message("\nBuilding documentation...")
+    cli_message("Building <green>Data Docs</green>...")
 
     if site_name is not None:
         site_names = [site_name]
     else:
         site_names=None
 
-    index_page_locator_infos = context.build_data_documentation(site_names=site_names, data_asset_name=data_asset_name)
+    index_page_locator_infos = context.build_data_docs(site_names=site_names, data_asset_name=data_asset_name)
 
     msg = """
 The following data documentation HTML sites were generated:
@@ -394,8 +393,7 @@ Do we not have the type of data source you want?
 
 In the meantime, consider reviewing the following notebook for an example of 
 creating and saving an expectation suite for validation:
-
-    <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
+    - `<green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>`
 """
 
 msg_go_to_notebook = """

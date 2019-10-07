@@ -85,7 +85,7 @@ config_variables_file_path: uncommitted/config_variables.yml
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
 expectations_store_name: expectations_store
-profiling_store_name: local_validation_result_store
+validations_store_name: validations_store
 
 data_docs:
   sites:
@@ -98,20 +98,20 @@ stores:
       base_directory: expectations/
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
-    class_name: EvaluationParameterStore
+    class_name: InMemoryEvaluationParameterStore
 
-  local_validation_result_store:
+  validations_store:
     class_name: BasicInMemoryStore
     
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
   default:
-    class_name: PerformActionListValidationOperator
+    class_name: ActionListValidationOperator
     action_list:
       - name: store_validation_result
         action:
           class_name: StoreAction
-          target_store_name: local_validation_result_store
+          target_store_name: validations_store
       # Uncomment the notify_slack action below to send notifications during evaluation
       # - name: notify_slack
       #   action:

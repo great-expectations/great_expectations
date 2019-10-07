@@ -14,7 +14,7 @@ and our `blog <https://greatexpectations.io/blog>`__ for more information on how
    /features/expectations
    /features/validation
    /features/profiling
-   /features/data_documentation
+   /features/data_docs
    /features/data_context
    /features/validation_operators_and_actions
    /features/datasource

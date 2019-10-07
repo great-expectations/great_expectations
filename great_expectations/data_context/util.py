@@ -1,14 +1,16 @@
-import requests
-import datetime
 import logging
 import os
-import json
 import errno
 import six
 import importlib
 import copy
 import re
 from collections import OrderedDict
+
+from great_expectations.exceptions import (
+    PluginModuleNotFoundError,
+    PluginClassNotFoundError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,15 +47,24 @@ def parse_string_to_data_context_resource_identifier(string, separator="."):
 
 
 def load_class(class_name, module_name):
-    # Get the class object itself from strings.
-    loaded_module = importlib.import_module(module_name)
+    """Dynamically load a class from strings or raise a helpful error."""
+
+    # TODO remove this nasty python 2 hack
     try:
+        ModuleNotFoundError
+    except NameError:
+        ModuleNotFoundError = ImportError
+
+    try:
+        loaded_module = importlib.import_module(module_name)
         class_ = getattr(loaded_module, class_name)
+    except ModuleNotFoundError as e:
+        raise PluginModuleNotFoundError(module_name=module_name)
     except AttributeError as e:
-        raise AttributeError("Module : {} has no class named : {}".format(
-            module_name,
-            class_name,
-        ))
+        raise PluginClassNotFoundError(
+            module_name=module_name,
+            class_name=class_name
+        )
     return class_
 
 
@@ -82,7 +93,8 @@ def instantiate_class_from_config(config, runtime_config, config_defaults=None):
 
     class_name = config.pop("class_name", None)
     if class_name is None:
-    # TODO : Trap this error and throw an informative message
+        logger.warning("Instantiating class from config without an explicit class_name is dangerous. Consider adding "
+                       "an explicit class_name for %s" % config.get("name"))
         try:
             class_name = config_defaults.pop("class_name")
         except KeyError as e:

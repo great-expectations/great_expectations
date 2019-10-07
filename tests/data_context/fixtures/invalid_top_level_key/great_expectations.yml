@@ -7,11 +7,11 @@ expectations_store_name: expectations_store
 evaluation_parameter_store_name: "baz"
 datasources: "1"
 stores:
-  local_validation_result_store:
+  validations_store:
     class_name: ValidationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
       filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
-profiling_store_name: "foo"
+validations_store_name: "foo"
 data_docs: "3"
