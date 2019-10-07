@@ -59,7 +59,8 @@ class ConfigNotFoundError(DataContextError):
 class PluginModuleNotFoundError(GreatExpectationsError):
     """A module import failed."""
     def __init__(self, module_name):
-        template = """Error: No module named `{}` could be found in your plugins directory.
+        template = """\
+Error: No module named `{}` could be found in your plugins directory.
     - Please verify your plugins directory is configured correctly.
     - Please verify you have a module named `{}` in your plugins directory.
 """

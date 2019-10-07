@@ -47,7 +47,7 @@ def parse_string_to_data_context_resource_identifier(string, separator="."):
 
 
 def load_class(class_name, module_name):
-    """Dynamically load a class object from strings or raise a helpful error."""
+    """Dynamically load a class from strings or raise a helpful error."""
     try:
         loaded_module = importlib.import_module(module_name)
         class_ = getattr(loaded_module, class_name)
