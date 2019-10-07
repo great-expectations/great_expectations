@@ -1,6 +1,5 @@
 import pytest
 
-from datetime import datetime
 import sys
 from freezegun import freeze_time
 try:
@@ -25,7 +24,6 @@ from great_expectations.data_context.types import (
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
 )
-from great_expectations.cli.init import scaffold_directories, scaffold_notebooks
 from great_expectations.data_context.store import (
     BasicInMemoryStore,
     InMemoryEvaluationParameterStore,
@@ -562,8 +560,6 @@ project_path/
 
     context = DataContext.create(project_dir)
     ge_directory = os.path.join(project_dir, "great_expectations")
-    scaffold_directories(ge_directory)
-    scaffold_notebooks(ge_directory)
     context.add_datasource("titanic",
                             module_name="great_expectations.datasource",
                             class_name="PandasDatasource",
@@ -982,3 +978,79 @@ def test_data_context_updates_expectation_suite_names(data_context):
         "a_third_name"
     ))
     assert fetched_expectation_suite['expectation_suite_name'] == "a_third_suite_name"
+
+
+def test_data_context_create_does_not_raise_error_or_warning_if_ge_dir_exists(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp('data_context'))
+    DataContext.create(project_path)
+
+
+def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp('data_context'))
+    DataContext.create(project_path)
+    ge_yml = os.path.join(
+        project_path,
+        "great_expectations/great_expectations.yml"
+    )
+    with open(ge_yml, "a") as ff:
+        ff.write("# LOOK I WAS MODIFIED")
+
+    with pytest.warns(UserWarning):
+        DataContext.create(project_path)
+
+    with open(ge_yml, "r") as ff:
+        obs = ff.read()
+    assert "# LOOK I WAS MODIFIED" in obs
+
+
+def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp('data_context'))
+    DataContext.create(project_path)
+
+    # mangle the existing setup
+    ge_dir = os.path.join(project_path, "great_expectations")
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+    shutil.rmtree(uncommitted_dir)
+
+    # re-run create to simulate onboarding
+    DataContext.create(project_path)
+    obs = gen_directory_tree_str(ge_dir)
+
+    assert os.path.isdir(uncommitted_dir), "No uncommitted directory created"
+    assert obs == """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    datasources/
+    expectations/
+    notebooks/
+        create_expectations.ipynb
+        integrate_validation_into_pipeline.ipynb
+    plugins/
+    uncommitted/
+        config_variables.yml
+        data_docs/
+        samples/
+        validations/
+"""
+
+
+def test_data_context_create_does_not_overwrite_existing_config_variables_yml(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp('data_context'))
+    DataContext.create(project_path)
+    ge_dir = os.path.join(project_path, "great_expectations")
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+    config_vars_yml = os.path.join(uncommitted_dir, "config_variables.yml")
+
+    # modify config variables
+    with open(config_vars_yml, "a") as ff:
+        ff.write("# LOOK I WAS MODIFIED")
+
+    # re-run create to simulate onboarding
+    with pytest.warns(UserWarning):
+         DataContext.create(project_path)
+
+    with open(config_vars_yml, "r") as ff:
+        obs = ff.read()
+    print(obs)
+    assert "# LOOK I WAS MODIFIED" in obs
