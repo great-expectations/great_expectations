@@ -9,8 +9,8 @@ import pandas as pd
 
 import great_expectations as ge
 from great_expectations.validation_operators.validation_operators import (
-    PerformActionListValidationOperator,
-    RunWarningAndFailureExpectationSuitesValidationOperator
+    ActionListValidationOperator,
+    WarningAndFailureExpectationSuitesValidationOperator
 )
 
 from great_expectations.data_context import (
@@ -47,10 +47,8 @@ def basic_data_context_config_for_validation_operator():
                 }
             }
         },
-        "profiling_store_name": "validation_result_store",
-        "data_docs": {
-            "sites": {}
-        },
+        "validations_store_name": "validation_result_store",
+        "data_docs_sites": {},
         "validation_operators" : {},
     }
 
@@ -111,7 +109,7 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
                                         expectation_suite_name="warning")
 
 
-    vo = RunWarningAndFailureExpectationSuitesValidationOperator(
+    vo = WarningAndFailureExpectationSuitesValidationOperator(
         data_context=data_context,
         action_list = [],
         slack_webhook="https://hooks.slack.com/services/test/slack/webhook"

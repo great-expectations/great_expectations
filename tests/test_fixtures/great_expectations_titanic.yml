@@ -14,11 +14,10 @@ plugins_directory: plugins/
 
 
 evaluation_parameter_store_name: evaluation_parameter_store
-profiling_store_name: local_validation_result_store
+validations_store_name: validations_store
 expectations_store_name: expectations_store
 
-data_docs:
-  sites:
+data_docs_sites:
 
 stores:
   expectations_store:
@@ -26,7 +25,7 @@ stores:
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: expectations/
-  local_validation_result_store:
+  validations_store:
     class_name: ValidationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
@@ -46,14 +45,14 @@ stores:
   #   module_name: great_expectations.data_context.store
   #   class_name: FilesystemStore
   #   store_config:
-  #     base_directory: uncommitted/documentation/local_site
+  #     base_directory: uncommitted/data_docs/local_site
   #     file_extension: .html
 
   # shared_team_site_store:
   #   module_name: great_expectations.data_context.store
   #   class_name: FilesystemStore
   #   store_config:
-  #     base_directory: uncommitted/documentation/team_site
+  #     base_directory: uncommitted/data_docs/team_site
   #     file_extension: .html
 
   fixture_validation_results_store:
@@ -69,12 +68,12 @@ stores:
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
   default:
-    class_name: PerformActionListValidationOperator
+    class_name: ActionListValidationOperator
     action_list:
       - name: store_validation_result
         action:
           class_name: StoreAction
-          target_store_name: local_validation_result_store
+          target_store_name: validations_store
       - name: store_evaluation_params
         action:
           class_name: ExtractAndStoreEvaluationParamsAction

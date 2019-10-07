@@ -25,10 +25,9 @@ expectations_store_name: expectations_store
 
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
-profiling_store_name: validation_store
+validations_store_name: validation_store
 
-data_docs:
-  sites:
+data_docs_sites:
 
 stores:
   expectations_store:
@@ -45,7 +44,7 @@ stores:
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
   default:
-    class_name: PerformActionListValidationOperator
+    class_name: ActionListValidationOperator
     action_list:
       - name: store_validation_result
         action:

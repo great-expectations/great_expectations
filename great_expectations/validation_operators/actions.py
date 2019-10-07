@@ -132,7 +132,7 @@ class StoreAction(NamespacedValidationAction):
 
     def __init__(self,
                  data_context,
-                 target_store_name,
+                 target_store_name=None,
                  ):
         """
 
@@ -145,7 +145,10 @@ class StoreAction(NamespacedValidationAction):
 
         # NOTE: Eventually, we probably need a check to verify that this store is compatible with validation_result_suite_identifiers.
         # Unless ALL stores are compatible...
-        self.target_store = data_context.stores[target_store_name]
+        if target_store_name is None:
+            self.target_store = data_context.stores[data_context.validations_store_name]
+        else:
+            self.target_store = data_context.stores[target_store_name]
 
     def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
         logger.debug("StoreAction.run")
@@ -174,7 +177,7 @@ class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
 
     def __init__(self,
                  data_context,
-                 target_store_name,
+                 target_store_name=None,
                  ):
         """
 
@@ -184,9 +187,10 @@ class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
         """
         super(ExtractAndStoreEvaluationParamsAction, self).__init__(data_context)
 
-        # NOTE: Eventually, we probably need a check to verify that this store is compatible with validation_result_suite_identifiers.
-        # Unless ALL stores are compatible...
-        self.target_store = data_context.stores[target_store_name]
+        if target_store_name is None:
+            self.target_store = data_context.stores[data_context.evaluation_parameter_store_name]
+        else:
+            self.target_store = data_context.stores[target_store_name]
 
     def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
         logger.debug("ExtractAndStoreEvaluationParamsAction.run")

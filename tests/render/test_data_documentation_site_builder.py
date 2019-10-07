@@ -1,22 +1,16 @@
 import os
-import pytest
 import json
 import re
 import shutil
 
-from great_expectations.util import (
-    gen_directory_tree_str
-)
 from great_expectations.data_context.util import (
     parse_string_to_data_context_resource_identifier
 )
 from great_expectations.render.renderer.site_builder import (
     SiteBuilder,
     DefaultSiteSectionBuilder,
-    DefaultSiteIndexBuilder,
 )
 from great_expectations.data_context.types import (
-    ValidationResultIdentifier,
     SiteSectionIdentifier,
 )
 from great_expectations.data_context.util import safe_mmkdir
@@ -28,12 +22,12 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     context.add_validation_operator(
         "validate_and_store",
         {
-        "class_name": "PerformActionListValidationOperator",
+        "class_name": "ActionListValidationOperator",
         "action_list": [{
             "name": "store_validation_result",
             "action": {
                 "class_name": "StoreAction",
-                "target_store_name": "local_validation_result_store",
+                "target_store_name": "validations_store",
             }
         }, {
             "name": "extract_and_store_eval_parameters",
@@ -62,16 +56,15 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         validation_operator_name="validate_and_store",
     )
 
-    data_docs_config = context._project_config.get('data_docs')
-    local_site_config = data_docs_config['sites']['local_site']
+    data_docs_config = context._project_config.get('data_docs_sites')
+    local_site_config = data_docs_config['local_site']
     local_site_config.pop('module_name')
     local_site_config.pop('class_name')
 
     # set datasource_whitelist
     local_site_config['datasource_whitelist'] = ['titanic']
 
-    keys_as_strings = [x.to_string() for x in context.stores["local_validation_result_store"].list_keys()]
-    print("\n".join(keys_as_strings))
+    keys_as_strings = [x.to_string() for x in context.stores["validations_store"].list_keys()]
     assert set(keys_as_strings) == set([
         "ValidationResultIdentifier.titanic.default.Titanic.BasicDatasetProfiler.test_run_id_12345",
         "ValidationResultIdentifier.titanic.default.Titanic.BasicDatasetProfiler.profiling",
@@ -82,14 +75,12 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     res = SiteBuilder(
             data_context=context,
             **local_site_config
-            # datasource_whitelist=[],
-            # datasource_blacklist=[],
         ).build()
     index_page_locator_info = res[0]
     index_links_dict = res[1]
 
     print( json.dumps(index_page_locator_info, indent=2) )
-    assert index_page_locator_info == context.root_directory + '/uncommitted/documentation/local_site/index.html'
+    assert index_page_locator_info == context.root_directory + '/uncommitted/data_docs/local_site/index.html'
 
     print( json.dumps(index_links_dict, indent=2) )
     assert json.loads(json.dumps(index_links_dict)) == json.loads("""\
@@ -156,7 +147,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     shutil.copytree(
         os.path.join(
             site_builder_data_context_with_html_store_titanic_random.root_directory,
-            "uncommitted/documentation/"
+            "uncommitted/data_docs/"
         ),
         "./tests/render/output/documentation"
     )

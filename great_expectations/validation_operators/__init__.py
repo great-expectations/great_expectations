@@ -9,8 +9,8 @@ from .actions import (
 
 from .validation_operators import (
     ValidationOperator,
-    PerformActionListValidationOperator,
-    RunWarningAndFailureExpectationSuitesValidationOperator
+    ActionListValidationOperator,
+    WarningAndFailureExpectationSuitesValidationOperator
 )
 
 from .util import *
