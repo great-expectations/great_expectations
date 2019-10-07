@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class GlobReaderGenerator(BatchGenerator):
-    """GlobReaderGenerator processes files in a directory according to glob patterns to produce batches of data.
+    r"""GlobReaderGenerator processes files in a directory according to glob patterns to produce batches of data.
 
     A more interesting asset_glob might look like the following::
 
