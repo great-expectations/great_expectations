@@ -10,8 +10,6 @@ from .datasource import (
 from .init import (
     greeting_1,
     msg_prompt_lets_begin,
-    scaffold_notebooks,
-    scaffold_directories,
 )
 from .util import cli_message
 from great_expectations.render.view import DefaultJinjaPageView
@@ -198,9 +196,6 @@ def init(target_directory):
         logger.critical(err.message)
         sys.exit(-1)
 
-    base_dir = context.root_directory
-    scaffold_directories(base_dir)
-    scaffold_notebooks(base_dir)
     cli_message("\nDone.",)
 
     data_source_name = add_datasource_impl(context)

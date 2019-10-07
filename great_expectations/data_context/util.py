@@ -1,6 +1,8 @@
+import glob
 import logging
 import os
 import errno
+import shutil
 import six
 import importlib
 import copy
@@ -11,6 +13,7 @@ from great_expectations.exceptions import (
     PluginModuleNotFoundError,
     PluginClassNotFoundError,
 )
+from great_expectations.util import file_relative_path
 
 logger = logging.getLogger(__name__)
 
@@ -179,3 +182,34 @@ def substitute_all_config_variables(data, replace_variables_dict):
     elif isinstance(data, list):
         return [substitute_all_config_variables(v, replace_variables_dict) for v in data]
     return substitute_config_variable(data, replace_variables_dict)
+
+
+def scaffold_directories(base_dir):
+    """Safely create GE directories for a new project."""
+    safe_mmkdir(base_dir, exist_ok=True)
+    open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
+
+    for directory in [
+        "datasources",
+        "expectations",
+        "notebooks",
+        "plugins",
+        "uncommitted",
+    ]:
+        safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
+        uncommitted_dir = os.path.join(base_dir, "uncommitted")
+
+    for new_directory in ["data_docs", "samples", "validations"]:
+        safe_mmkdir(
+            os.path.join(uncommitted_dir, new_directory),
+            exist_ok=True
+        )
+
+
+def scaffold_notebooks(base_dir):
+    """Copy template notebooks into the notebooks directory for a project."""
+    template_dir = file_relative_path(__file__, "../init_notebooks/*.ipynb")
+    for notebook in glob.glob(template_dir):
+        notebook_name = os.path.basename(notebook)
+        destination_path = os.path.join(base_dir, "notebooks", notebook_name)
+        shutil.copyfile(notebook, destination_path)

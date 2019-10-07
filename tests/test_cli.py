@@ -27,9 +27,13 @@ from six import PY2
 
 from great_expectations.cli import cli
 from great_expectations.util import gen_directory_tree_str
-from great_expectations.cli.init import scaffold_directories, scaffold_notebooks
-from great_expectations import __version__ as ge_version, DataContext
+from great_expectations.data_context.util import (
+    scaffold_directories,
+    scaffold_notebooks,
+)
+from great_expectations import __version__ as ge_version
 from .test_utils import assertDeepAlmostEqual
+
 
 def test_cli_command_entrance():
     runner = CliRunner()
@@ -289,66 +293,6 @@ great_expectations/
                 "great_expectations/uncommitted/data_docs/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
             )
         ) > 0
-        print(result)
-    except:
-        raise
-    finally:
-        os.chdir(curdir)
-
-
-def existing_project(tmp_path_factory):
-    basedir = tmp_path_factory.mktemp("test_cli_init_existing_project")
-    context = DataContext.create(basedir)
-    project_root_dir = context.root_directory
-    scaffold_directories(project_root_dir)
-    scaffold_notebooks(project_root_dir)
-    uncommitted_dir = os.path.join(basedir, "great_expectations/uncommitted")
-    shutil.rmtree(uncommitted_dir)
-    assert not os.path.isdir(uncommitted_dir)
-    return basedir
-
-
-def test_cli_init_on_exiting_project_with_no_uncommitted_directory(tmp_path_factory):
-    basedir = existing_project(tmp_path_factory)
-    print(basedir)
-    curdir = os.path.abspath(os.getcwd())
-
-    try:
-        uncommitted_dir = os.path.join(basedir, "great_expectations/uncommitted")
-        assert not os.path.isdir(uncommitted_dir)
-
-        os.chdir(basedir)
-        runner = CliRunner()
-        result = runner.invoke(cli, ["init"], input="Y\n4\n")
-
-        print(result.output)
-        print("result.output length:", len(result.output))
-
-        assert os.path.isdir(uncommitted_dir), "No uncommitted directory created"
-        obs = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
-
-        print(obs)
-        assert obs == """\
-great_expectations/
-    .gitignore
-    great_expectations.yml
-    datasources/
-    expectations/
-        data__dir/
-            default/
-                Titanic/
-                    BasicDatasetProfiler.json
-    notebooks/
-        create_expectations.ipynb
-        integrate_validation_into_pipeline.ipynb
-    plugins/
-    uncommitted/
-        config_variables.yml
-        data_docs/
-            local_site/
-        samples/
-        validations/
-"""
         print(result)
     except:
         raise
