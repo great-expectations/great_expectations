@@ -11,8 +11,10 @@ from six import string_types
 import datetime
 import warnings
 
-from great_expectations.data_context.util import scaffold_directories, \
-    scaffold_notebooks
+from great_expectations.data_context.util import (
+    scaffold_directories,
+    scaffold_notebooks,
+)
 from .util import safe_mmkdir, substitute_all_config_variables
 from ..types.base import DotDict
 
@@ -134,8 +136,6 @@ class ConfigOnlyDataContext(object):
             cls.write_config_variables_template_to_disk(uncommitted_dir)
 
         return cls(ge_dir)
-
-
 
     @classmethod
     def write_config_variables_template_to_disk(cls, uncommitted_dir):

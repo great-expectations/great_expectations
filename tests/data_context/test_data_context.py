@@ -1048,7 +1048,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(tm
 
     # re-run create to simulate onboarding
     with pytest.warns(UserWarning):
-         DataContext.create(project_path)
+        DataContext.create(project_path)
 
     with open(config_vars_yml, "r") as ff:
         obs = ff.read()
