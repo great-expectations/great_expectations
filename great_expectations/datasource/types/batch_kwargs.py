@@ -144,26 +144,26 @@ class S3BatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
     }
 
 
-class MemoryBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
+class InMemoryBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
     _required_keys = {
-        "df"
+        "dataset"
     }
 
 
-class PandasDatasourceMemoryBatchKwargs(MemoryBatchKwargs):
+class PandasDatasourceMemoryBatchKwargs(InMemoryBatchKwargs):
     _key_types = {
-        "df": pd.DataFrame
+        "dataset": pd.DataFrame
     }
 
 
-class SparkDFDatasourceMemoryBatchKwargs(MemoryBatchKwargs):
+class SparkDFDatasourceMemoryBatchKwargs(InMemoryBatchKwargs):
     try:
         _key_types = {
-            "df": pyspark.sql.DataFrame
+            "dataset": pyspark.sql.DataFrame
         }
     except AttributeError:
         _key_types = {
-            "df": None  # If we were unable to import pyspark, these are invalid
+            "dataset": None  # If we were unable to import pyspark, these are invalid
         }
 
 

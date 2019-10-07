@@ -161,8 +161,8 @@ class SparkDFDatasource(Datasource):
         elif "query" in batch_kwargs:
             df = self.spark.sql(batch_kwargs["query"])
 
-        elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (DataFrame, SparkDFDataset)):
-            df = batch_kwargs.pop("df")  # We don't want to store the actual DataFrame in kwargs
+        elif "dataset" in batch_kwargs and isinstance(batch_kwargs["dataset"], (DataFrame, SparkDFDataset)):
+            df = batch_kwargs.pop("dataset")  # We don't want to store the actual DataFrame in kwargs
             if isinstance(df, SparkDFDataset):
                 # Grab just the spark_df reference, since we want to override everything else
                 df = df.spark_df
