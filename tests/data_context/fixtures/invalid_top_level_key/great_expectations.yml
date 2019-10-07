@@ -4,6 +4,7 @@ this_is_a_wildly_invalid_top_level_key: "stuff"
 config_version: 1
 plugins_directory: "foo"
 expectations_store_name: expectations_store
+validations_store_name: "foo"
 evaluation_parameter_store_name: "baz"
 datasources: "1"
 stores:
@@ -13,5 +14,4 @@ stores:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
       filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
-validations_store_name: "foo"
-data_docs: "3"
+data_docs_sites: not_a_real_configuration
