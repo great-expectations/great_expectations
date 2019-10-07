@@ -125,8 +125,8 @@ docstrings for more information; the example below shows SqlAlchemy implementati
 Using the base Expectation decorator
 ========================================
 When the high-level decorators do not provide sufficient granularity for controlling your expectation's behavior, you
-need to use the base expectation decorator, which will only handle storing and retrieving your expectation in an
-expectation suite, but will leave the declared parameters of your expectation unchanged.
+need to use the base expectation decorator, which will handle storing and retrieving your expectation in an
+expectation suite, and facilitate validation using your expectation. You will need to explicitly declare the parameters.
 
 1. Create a subclass from the dataset class of your choice
 2. Write the whole expectation yourself
@@ -173,7 +173,54 @@ Pay special attention to proper formatting of :ref:`result_format`.
                     "unexpected_index_list" : list(self.index[result==False])[:20],
                 }
 
-Since the base decorator is consistent across different primary DataAsset types, a similar implementation will apply.
+
+A similar implementation for SqlAlchemy would also import the base decorator:
+
+.. code-block:: python
+
+    import sqlalchemy as sa
+    from great_expectations.dataset import SqlAlchemyDataset
+
+    import scipy.stats as stats
+
+    class CustomSqlAlchemyDataset(SqlAlchemyDataset):
+
+        _data_asset_type = "CustomSqlAlchemyDataset"
+
+        @DataAsset.expectation(["column_A", "column_B", "p_value"])
+        def expect_column_pair_histogram_ks_2samp_test_p_value_to_be_greater_than(
+                column_A,
+                column_B,
+                p_value,
+                already_sorted=False
+        ):
+        """Our very nice docstring."""
+            # We will assume that these are already HISTOGRAMS created as a check_dataset
+            rows = sa.select([
+                sa.column(column_A).label("col_A_weights"),
+                sa.column(column_B).label("col_B_weights")
+            ]).select_from(self._table).fetchall()
+
+            cols = [col for col in zip(*rows)]
+
+            if not already_sorted:
+                v0 = sorted(cols[0])
+                v1 = sorted(cols[1])
+            else:
+                v0 = cols[0]
+                v1 = cols[1]
+
+            stat_, pval = stats.fancy_test(v0, v1)
+
+            return {
+                "success": pval < p_value,
+                "result": {
+                    "observed_value": pval,
+                    "details": {
+                        "fancy_stat": stat_
+                    }
+                }
+            }
 
 Rapid Prototyping
 ========================================
