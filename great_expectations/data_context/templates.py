@@ -93,7 +93,6 @@ stores:
   #     class_name: FixedLengthTupleS3StoreBackend
   #     bucket: <my_bucket>
   #     prefix: <my_prefix>
-  #     file_extension: json
 
 
   evaluation_parameter_store:

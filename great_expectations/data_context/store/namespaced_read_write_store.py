@@ -1,13 +1,7 @@
 import logging
-logger = logging.getLogger(__name__)
 
-import importlib
-from six import string_types
 import copy
-import json
 import os
-
-import pandas as pd
 
 from ..types.base_resource_identifiers import (
     DataContextKey,
@@ -20,9 +14,16 @@ from great_expectations.data_context.types.resource_identifiers import (
 from .store import (
     ReadWriteStore,
 )
+from .store_backend import (
+    FixedLengthTupleStoreBackend
+)
 from great_expectations.data_context.util import (
+    load_class,
     instantiate_class_from_config
 )
+
+logger = logging.getLogger(__name__)
+
 
 class NamespacedReadWriteStore(ReadWriteStore):
     
@@ -146,7 +147,13 @@ class ValidationsStore(NamespacedReadWriteStore):
     def _init_store_backend(self, store_backend_config, runtime_config):
         self.key_class = ValidationResultIdentifier
 
-        if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
+        store_backend_class_name = store_backend_config.get("class_name", "FixedLengthTupleFilesystemStoreBackend")
+        store_backend_module_name = store_backend_config.get("module_name", "great_expectations.data_context.store")
+        store_backend_class = load_class(
+            class_name=store_backend_class_name,
+            module_name=store_backend_module_name
+        )
+        if issubclass(store_backend_class, FixedLengthTupleStoreBackend):
             config_defaults = {
                 "key_length": 5,
                 "module_name": "great_expectations.data_context.store",
@@ -168,33 +175,40 @@ class HtmlSiteStore(NamespacedReadWriteStore):
 
     def __init__(self,
         root_directory,
-        base_directory,
         serialization_type=None,
+        store_backend=None,
+        **kwargs
     ):
+        store_backend_module_name = store_backend.pop("module_name", "great_expectations.data_context.store")
+        store_backend_class_name = store_backend.pop("class_name", "FixedLengthTupleFilesystemStoreBackend")
+        store_class = load_class(store_backend_class_name, store_backend_module_name)
+        if not isinstance(store_class, FixedLengthTupleStoreBackend):
+            raise
+
         # Each key type gets its own backend.
         # If backends were DB connections, this could be inefficient, but it doesn't much matter for filepaths.
         # One thing to watch for is reversibility of keys.
         # If several types are being writtten to overlapping directories, we could get collisions.
         self.store_backends = {
-            ExpectationSuiteIdentifier : instantiate_class_from_config(
+            ExpectationSuiteIdentifier: instantiate_class_from_config(
                 config = {
-                    "module_name" : "great_expectations.data_context.store",
-                    "class_name" : "FixedLengthTupleFilesystemStoreBackend",
-                    "key_length" : 4,
-                    "base_directory" : base_directory,
-                    "filepath_template" : 'expectations/{0}/{1}/{2}/{3}.html',
+                    "module_name": store_backend_module_name,
+                    "class_name": store_backend_class_name,
+                    "key_length": 4,
+                    "base_directory": base_directory,
+                    "filepath_template": 'expectations/{0}/{1}/{2}/{3}.html',
                 },
                 runtime_config={
                     "root_directory": root_directory
                 }
             ),
-            ValidationResultIdentifier : instantiate_class_from_config(
+            ValidationResultIdentifier: instantiate_class_from_config(
                 config = {
-                    "module_name" : "great_expectations.data_context.store",
-                    "class_name" : "FixedLengthTupleFilesystemStoreBackend",
-                    "key_length" : 5,
-                    "base_directory" : base_directory,
-                    "filepath_template" : 'validations/{4}/{0}/{1}/{2}/{3}.html',
+                    "module_name": store_backend_module_name,
+                    "class_name": store_backend_class_name,
+                    "key_length": 5,
+                    "base_directory": base_directory,
+                    "filepath_template": 'validations/{4}/{0}/{1}/{2}/{3}.html',
                 },
                 runtime_config={
                     "root_directory": root_directory

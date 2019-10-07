@@ -89,12 +89,20 @@ class SiteBuilder(object):
 
     def __init__(self,
         data_context,
-        target_store_name,
-        site_index_builder,
-        site_section_builders,
+        store_backend,
+        site_index_builder=None,
+        site_section_builders=None,
         datasource_whitelist=None
     ):
         self.data_context = data_context
+
+        backend_store = instantiate_class_from_config(
+            config=store_backend,
+            runtime_config={
+                "data_context": data_context,
+                "root_directory": data_context.root
+            }
+        )
         self.target_store_name = target_store_name
 
         # the site config may specify the list of datasource names to document.
