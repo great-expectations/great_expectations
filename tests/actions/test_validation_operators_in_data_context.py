@@ -24,7 +24,7 @@ def basic_data_context_config_for_validation_operator():
     return {
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name" : "evaluation_parameter_store",
-        "profiling_store_name": "validation_result_store",
+        "validations_store_name": "validation_result_store",
         "expectations_store_name": "expectations_store",
         "datasources": {},
         "stores": {
@@ -37,7 +37,7 @@ def basic_data_context_config_for_validation_operator():
             # This isn't currently used for Validation Actions, but it's required for DataContext to work.
             "evaluation_parameter_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "EvaluationParameterStore",
+                "class_name": "InMemoryEvaluationParameterStore",
             },
             "validation_result_store" : {
                 "module_name": "great_expectations.data_context.store",
@@ -47,12 +47,10 @@ def basic_data_context_config_for_validation_operator():
                 }
             },
         },
-        "data_docs": {
-            "sites": {}
-        },
+        "data_docs_sites": {},
         "validation_operators": {
             "store_val_res_and_extract_eval_params" : {
-                "class_name" : "PerformActionListValidationOperator",
+                "class_name" : "ActionListValidationOperator",
                 "action_list" : [{
                     "name": "store_validation_result",
                     "action" : {
@@ -71,7 +69,7 @@ def basic_data_context_config_for_validation_operator():
     }
     # })
 
-def test_PerformActionListValidationOperator(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
+def test_ActionListValidationOperator(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
     project_path = str(tmp_path_factory.mktemp('great_expectations'))
 
     data_context = ConfigOnlyDataContext(
@@ -127,7 +125,7 @@ def test_PerformActionListValidationOperator(basic_data_context_config_for_valid
     assert data_context.stores["validation_result_store"].get(validation_result_store_keys[0])["success"] is True
 
 
-def test_RunWarningAndFailureExpectationSuitesValidationOperator_with_file_structure(tmp_path_factory):
+def test_WarningAndFailureExpectationSuitesValidationOperator_with_file_structure(tmp_path_factory):
     base_path = str(tmp_path_factory.mktemp('test_DefaultDataContextAwareValidationOperator_with_file_structure__dir'))
     project_path = os.path.join( base_path, "project")
     print(os.getcwd())
@@ -137,7 +135,7 @@ def test_RunWarningAndFailureExpectationSuitesValidationOperator_with_file_struc
     )
     print(gen_directory_tree_str(project_path))
 
-    assert gen_directory_tree_str(project_path) =="""\
+    assert gen_directory_tree_str(project_path) == """\
 project/
     data/
         bob-ross/
@@ -197,12 +195,8 @@ project/
     data_context.create_expectation_suite(data_asset_name=data_asset_name, expectation_suite_name="default")
     batch = data_context.get_batch(data_asset_name=data_asset_name, expectation_suite_name="default",
                                    batch_kwargs=data_context.yield_batch_kwargs(data_asset_name))
-    # my_ge_df = ge.from_pandas(my_df)
 
-    # assert data_context.stores["local_validation_result_store"].list_keys() == []
     validation_store_path = os.path.join(project_path, "great_expectations/uncommitted/validations")
-    print(validation_store_path)
-    print(gen_directory_tree_str(validation_store_path))
     assert gen_directory_tree_str(validation_store_path) == """\
 validations/
     profiling/

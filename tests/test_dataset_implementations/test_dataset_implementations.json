@@ -181,6 +181,33 @@
             "func": "get_column_value_counts",
             "dataset": "d2",
             "kwargs": {
+                "column": "b",
+                "sort": "value"
+            },
+            "expected": [
+                {
+                    "value": "d",
+                    "count": 4
+                },
+                {
+                    "value": "c",
+                    "count": 3
+                },
+                {
+                    "value": "b",
+                    "count": 2
+                },
+                {
+                    "value": "a",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "_note": "this test tests the value of this method *after serialization* see python test_get_column_value_counts for series test",
+            "func": "get_column_value_counts",
+            "dataset": "d2",
+            "kwargs": {
                 "column": "c"
             },
             "expected": [

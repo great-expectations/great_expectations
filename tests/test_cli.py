@@ -47,7 +47,7 @@ Options:
 
 Commands:
   add-datasource       Add a new datasource to the data context
-  build-docs           Build data documentation for a project.
+  build-docs           Build Data Docs for a project.
   build-documentation
   check-config         Check a config for validity and help with migrations.
   init                 Initialize a new Great Expectations project.
@@ -234,14 +234,13 @@ great_expectations/
             default/
                 Titanic/
                     BasicDatasetProfiler.json
-    fixtures/
     notebooks/
         create_expectations.ipynb
         integrate_validation_into_pipeline.ipynb
     plugins/
     uncommitted/
         config_variables.yml
-        documentation/
+        data_docs/
             local_site/
                 index.html
                 expectations/
@@ -255,13 +254,6 @@ great_expectations/
                             default/
                                 Titanic/
                                     BasicDatasetProfiler.html
-            team_site/
-                index.html
-                expectations/
-                    data__dir/
-                        default/
-                            Titanic/
-                                BasicDatasetProfiler.html
         samples/
         validations/
             profiling/
@@ -288,13 +280,13 @@ great_expectations/
         assert os.path.isfile(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html")
+                "great_expectations/uncommitted/data_docs/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html")
         )
 
         assert os.path.getsize(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
+                "great_expectations/uncommitted/data_docs/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
             )
         ) > 0
         print(result)
@@ -302,6 +294,48 @@ great_expectations/
         raise
     finally:
         os.chdir(curdir)
+
+
+def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_yml(tmp_path_factory):
+    """
+    This is a low-key snapshot test used to sanity check some of the config yml
+    inline comments, and some CLI output.
+    """
+    curdir = os.path.abspath(os.getcwd())
+
+    try:
+        basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
+        os.chdir(basedir)
+        runner = CliRunner()
+        result = runner.invoke(cli, ["init"], input="Y\n4\n")
+
+        assert "Skipping datasource configuration." in result.output
+        print(result.output)
+
+        assert os.path.isdir(os.path.join(basedir, "great_expectations"))
+        config_file_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
+        assert os.path.isfile(config_file_path)
+        with open(config_file_path, "r") as f:
+            observed_config = f.read()
+
+        assert """# Welcome to Great Expectations! Always know what to expect from your data.""" in observed_config
+        assert """# Datasources tell Great Expectations where your data lives and how to get it.
+# You can use the CLI command `great_expectations add-datasource` to help you""" in observed_config
+        assert """# The plugins_directory will be added to your python path for custom modules
+# used to override and extend Great Expectations.""" in observed_config
+        assert """# Stores are configurable places to store things like Expectations, Validations
+# Data Docs, and more. These are for advanced users only - most users can simply
+# leave this section alone.
+# 
+# Three stores are required: expectations, validations, and
+# evaluation_parameters, and must exist with a valid store entry. Additional
+# stores can be configured for uses such as data_docs, validation_operators, etc.""" in observed_config
+        assert """# Data Docs make it simple to visualize data quality in your project. These""" in observed_config
+    except:
+        raise
+    finally:
+        os.chdir(curdir)
+
 
 def test_cli_add_datasource(empty_data_context, filesystem_csv_2, capsys):
     runner = CliRunner()
@@ -478,7 +512,6 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     print(json.dumps(not_so_empty_data_context.get_project_config(), indent=2))
 
     project_root_dir = not_so_empty_data_context.root_directory
-    # print(project_root_dir)
 
     # For some reason, even with this logging change (which is required and done in main of the cli)
     # the click cli runner does not pick up output; capsys appears to intercept it first
@@ -502,19 +535,9 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     result = runner.invoke(
         cli, ["build-docs", "-d", project_root_dir])
 
-    # print(json.dumps(not_so_empty_data_context.get_project_config()["stores"], indent=2))
-    print(result.output)
-    # print(gen_directory_tree_str(project_root_dir))
-
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,
-        "uncommitted/documentation/local_site"
-        )
-    )
-
-    assert "index.html" in os.listdir(os.path.join(
-        project_root_dir,
-        "uncommitted/documentation/team_site"
+        "uncommitted/data_docs/local_site"
         )
     )
 
@@ -557,6 +580,6 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
     print(empty_directory)
 
     assert set(os.listdir(empty_directory)) == \
-           {'datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'}
+           {'datasources', 'plugins', 'expectations', '.gitignore', 'uncommitted', 'notebooks'}
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
-           {'samples', 'documentation', 'validations'}
+           {'samples', 'data_docs', 'validations'}

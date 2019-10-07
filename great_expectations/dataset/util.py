@@ -212,6 +212,33 @@ def build_continuous_partition_object(dataset, column, bins='auto', n_bins=10):
     return partition_object
 
 
+def build_categorical_partition_object(dataset, column, sort="value"):
+    """Convenience method for building a partition object on categorical data from a dataset and column
+
+    Args:
+        dataset (GE Dataset): the dataset for which to compute the partition
+        column (string): The name of the column for which to construct the estimate.
+        sort (string): must be one of "value", "count", or "none".
+            - if "value" then values in the resulting partition object will be sorted lexigraphically
+            - if "count" then values will be sorted according to descending count (frequency)
+            - if "none" then values will not be sorted
+
+    Returns:
+        A new partition_object::
+
+        {
+            "values": (list) the categorical values for which each weight applies,
+            "weights": (list) The densities of the values implied by the partition.
+        }
+        See :ref:`partition_object`.
+    """
+    counts = dataset.get_column_value_counts(column, sort)
+    return {
+        'values': list(counts.index),
+        'weights': list(np.array(counts) / dataset.get_column_nonnull_count(column))
+    }
+
+
 def infer_distribution_parameters(data, distribution, params=None):
     """Convenience method for determining the shape parameters of a given distribution
 

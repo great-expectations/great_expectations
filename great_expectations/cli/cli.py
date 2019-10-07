@@ -299,23 +299,33 @@ def build_documentation():
 @click.option('--data_asset_name', '-dan',
               help='The data asset for which to generate documentation. Must also specify --site_name.')
 def build_docs(directory, site_name, data_asset_name):
-    """Build data documentation for a project."""
+    """Build Data Docs for a project. for a project."""
     logger.debug("Starting cli.build_docs")
 
     if data_asset_name is not None and site_name is None:
-        cli_message("Error: When specifying data_asset_name, must also specify site_name.")
-        return
+        cli_message("<red>Error: When specifying `data_asset_name`, `site_name` is required.</red>")
+        sys.exit(1)
         
     try:
         context = DataContext(directory)
+        build_documentation_impl(
+            context,
+            site_name=site_name,
+            data_asset_name=data_asset_name
+        )
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
-        return
+        sys.exit(1)
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         _offer_to_install_new_template(err, directory)
         return
+    except ge_exceptions.PluginModuleNotFoundError as err:
+        cli_message(err.cli_colored_message)
+        sys.exit(1)
+    except ge_exceptions.PluginClassNotFoundError as err:
+        cli_message(err.cli_colored_message)
+        sys.exit(1)
 
-    build_documentation_impl(context, site_name=site_name, data_asset_name=data_asset_name)
 
 
 @cli.command()

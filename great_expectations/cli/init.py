@@ -43,17 +43,17 @@ def script_relative_path(file_path):
 
 
 def scaffold_directories_and_notebooks(base_dir):
-    """Add basic directories for an initial, opinionated GE project."""
+    """Add project directories for a new GE project."""
 
     safe_mmkdir(base_dir, exist_ok=True)
     notebook_dir_name = "notebooks"
 
     open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
 
-    for directory in [notebook_dir_name, "expectations", "datasources", "uncommitted", "plugins", "fixtures"]:
+    for directory in [notebook_dir_name, "expectations", "datasources", "uncommitted", "plugins"]:
         safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
 
-    for uncommitted_directory in ["validations", "documentation", "samples"]:
+    for uncommitted_directory in ["validations", "data_docs", "samples"]:
         safe_mmkdir(os.path.join(base_dir, "uncommitted",
                                  uncommitted_directory), exist_ok=True)
 
@@ -64,22 +64,19 @@ def scaffold_directories_and_notebooks(base_dir):
 
 
 # !!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
-greeting_1 = """
-Always know what to expect from your data.
+greeting_1 = """     -- Always know what to expect from your data. --
 
 If you're new to Great Expectations, this tutorial is a good place to start:
-
-    <blue>https://docs.greatexpectations.io/en/latest/getting_started/cli_init.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+- <blue>https://docs.greatexpectations.io/en/latest/getting_started/cli_init.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
 """.format(ge_version.replace(".", "_"))
 
-msg_prompt_lets_begin = """
-Let's add Great Expectations to your project, by scaffolding a new great_expectations directory:
+msg_prompt_lets_begin = """Let's add Great Expectations to your project, by scaffolding a new great_expectations directory
+that will look like this:
 
     great_expectations
     ├── .gitignore
     ├── datasources
     ├── expectations
-    ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
     │   ├── create_expectations.ipynb
@@ -87,9 +84,8 @@ Let's add Great Expectations to your project, by scaffolding a new great_expecta
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
-        ├── documentation
-        │   ├── local_site
-        │   └── team_site
+        ├── data_docs
+        │   └── local_site
         ├── samples
         └── validations
     
