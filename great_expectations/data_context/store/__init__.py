@@ -20,5 +20,5 @@ from .namespaced_read_write_store import (
 )
 
 from .evaluation_parameter_store import (
-    EvaluationParameterStore,
+    InMemoryEvaluationParameterStore,
 )

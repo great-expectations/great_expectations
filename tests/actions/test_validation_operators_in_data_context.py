@@ -37,7 +37,7 @@ def basic_data_context_config_for_validation_operator():
             # This isn't currently used for Validation Actions, but it's required for DataContext to work.
             "evaluation_parameter_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "EvaluationParameterStore",
+                "class_name": "InMemoryEvaluationParameterStore",
             },
             "validation_result_store" : {
                 "module_name": "great_expectations.data_context.store",
@@ -135,7 +135,7 @@ def test_WarningAndFailureExpectationSuitesValidationOperator_with_file_structur
     )
     print(gen_directory_tree_str(project_path))
 
-    assert gen_directory_tree_str(project_path) =="""\
+    assert gen_directory_tree_str(project_path) == """\
 project/
     data/
         bob-ross/

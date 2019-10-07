@@ -58,7 +58,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     data_docs_config = context._project_config.get('data_docs_sites')
     local_site_config = data_docs_config['local_site']
-    local_site_config.pop('module_name')
+    # local_site_config.pop('module_name')  # This isn't necessary
     local_site_config.pop('class_name')
 
     # set datasource_whitelist
@@ -151,39 +151,3 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         ),
         "./tests/render/output/documentation"
     )
-    
-
-def test_SiteSectionBuilder(site_builder_data_context_with_html_store_titanic_random):
-    context = site_builder_data_context_with_html_store_titanic_random
-
-    my_site_section_builders = DefaultSiteSectionBuilder(
-        "test_name",
-        context,
-        source_store_name="expectations_store",
-        target_store_name="local_site_html_store",
-        renderer={
-            "module_name": "great_expectations.render.renderer",
-            "class_name": "ExpectationSuitePageRenderer",
-        },
-    )
-
-    datasource_whitelist = ['titanic']
-    my_site_section_builders.build(datasource_whitelist)
-
-    print(context.stores["local_site_html_store"].list_keys())
-    assert len(context.stores["local_site_html_store"].list_keys()) == 1
-
-    first_key = context.stores["local_site_html_store"].list_keys()[0]
-    print(first_key)
-    print(type(first_key.resource_identifier))
-    assert first_key == SiteSectionIdentifier(
-        site_section_name="test_name",
-        resource_identifier=parse_string_to_data_context_resource_identifier(
-            "ExpectationSuiteIdentifier.titanic.default.Titanic.BasicDatasetProfiler"
-        ),
-    )
-
-    content = context.stores["local_site_html_store"].get(first_key)
-    assert len(re.findall("<div.*>", content)) > 20  # Ah! Then it MUST be HTML!
-    with open('./tests/render/output/test_SiteSectionBuilder.html', 'w') as f:
-        f.write(content)

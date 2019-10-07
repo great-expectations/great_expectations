@@ -82,7 +82,8 @@ def instantiate_class_from_config(config, runtime_config, config_defaults=None):
 
     class_name = config.pop("class_name", None)
     if class_name is None:
-    # TODO : Trap this error and throw an informative message
+        logger.warning("Instantiating class from config without an explicit class_name is dangerous. Consider adding "
+                       "an explicit class_name for %s" % config.get("name"))
         try:
             class_name = config_defaults.pop("class_name")
         except KeyError as e:
