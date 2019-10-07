@@ -98,7 +98,7 @@ stores:
       base_directory: expectations/
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
-    class_name: EvaluationParameterStore
+    class_name: InMemoryEvaluationParameterStore
 
   validations_store:
     class_name: BasicInMemoryStore
