@@ -1297,6 +1297,11 @@ class ConfigOnlyDataContext(object):
                                 logger.warning("Invalid parameter urn (not enough parts): %s" % parameter)
                                 continue
 
+                            normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+
+                            data_asset_name = DataAssetIdentifier(normalized_data_asset_name.datasource,
+                                                                  normalized_data_asset_name.generator,
+                                                                  normalized_data_asset_name.generator_asset)
                             if data_asset_name not in self._compiled_parameters["data_assets"]:
                                 self._compiled_parameters["data_assets"][data_asset_name] = {}
 

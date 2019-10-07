@@ -70,13 +70,13 @@ one of the following structures to be recognized by the Great Expectations DataC
 
 ::
 
-  urn:great_expectations:validations:<data_asset_name>:expectations:<expectation_name>:columns:<column_name>:result:<result_key>
-  urn:great_expectations:validations:<data_asset_name>:expectations:<expectation_name>:columns:<column_name>:details:<details_key>
-  urn:great_expectations:validations:<data_asset_name>:expectations:<expectation_name>:result:<result_key>
-  urn:great_expectations:validations:<data_asset_name>:expectations:<expectation_name>:details:<details_key>
+  urn:great_expectations:validations:<data_asset_name>:<expectation_suite_name>:expectations:<expectation_name>:columns:<column_name>:result:<result_key>
+  urn:great_expectations:validations:<data_asset_name>:<expectation_suite_name>:expectations:<expectation_name>:columns:<column_name>:details:<details_key>
+  urn:great_expectations:validations:<data_asset_name>:<expectation_suite_name>:expectations:<expectation_name>:result:<result_key>
+  urn:great_expectations:validations:<data_asset_name>:<expectation_suite_name>:expectations:<expectation_name>:details:<details_key>
 
 Replace names in ``<>`` with the desired name. For example:
 
 ::
 
-  urn:great_expectations:validations:my_source/default/notable_works_by_charles_dickens:expectations:expect_column_proportion_of_unique_values_to_be_between:columns:Title:result:observed_value
+  urn:great_expectations:validations:my_source/default/notable_works_by_charles_dickens:my_suite:expectations:expect_column_proportion_of_unique_values_to_be_between:columns:Title:result:observed_value
