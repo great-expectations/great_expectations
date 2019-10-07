@@ -144,7 +144,10 @@ class TableGenerator(BatchGenerator):
             for schema_name in self.inspector.get_schema_names():
                 known_information_schemas = [
                     "INFORMATION_SCHEMA",  # snowflake, mssql, mysql, oracle
-                    "information_schema",  # postgres, redshift
+                    "information_schema",  # postgres, redshift, mysql
+                    "performance_schema",  # mysql
+                    "sys",                 # mysql
+                    "mysql",               # mysql
                 ]
                 known_system_tables = [
                     "sqlite_master"  # sqlite

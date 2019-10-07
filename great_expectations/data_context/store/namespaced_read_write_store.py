@@ -269,8 +269,12 @@ class HtmlSiteStore(NamespacedReadWriteStore):
             ))
 
         for key_class in self.store_backends.keys():
-            if isinstance(key.resource_identifier, key_class):
-                return
+            try:
+                if isinstance(key.resource_identifier, key_class):
+                    return
+            except TypeError:
+                # it's ok to have a key that is not a type (e.g. the string "index_page")
+                continue
 
         # The key's resource_identifier didn't match any known key_class
         raise TypeError("resource_identifier in key: {!r} must one of {}, not {!r}".format(
