@@ -301,7 +301,6 @@ def build_documentation():
 def build_docs(directory, site_name, data_asset_name):
     """Build Data Docs for a project. for a project."""
     logger.debug("Starting cli.build_docs")
-    cli_message("Building <green>Data Docs</green>!")
 
     if data_asset_name is not None and site_name is None:
         cli_message("<red>Error: When specifying `data_asset_name`, `site_name` is required.</red>")
@@ -309,14 +308,20 @@ def build_docs(directory, site_name, data_asset_name):
         
     try:
         context = DataContext(directory)
+        build_documentation_impl(context, site_name=site_name, data_asset_name=data_asset_name)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         _offer_to_install_new_template(err, directory)
         return
+    except ge_exceptions.PluginModuleNotFoundError as err:
+        cli_message(err.cli_colored_message)
+        sys.exit(1)
+    except ge_exceptions.PluginClassNotFoundError as err:
+        cli_message(err.cli_colored_message)
+        sys.exit(1)
 
-    build_documentation_impl(context, site_name=site_name, data_asset_name=data_asset_name)
 
 
 @cli.command()
