@@ -48,6 +48,13 @@ def parse_string_to_data_context_resource_identifier(string, separator="."):
 
 def load_class(class_name, module_name):
     """Dynamically load a class from strings or raise a helpful error."""
+
+    # TODO remove this nasty python 2 hack
+    try:
+        ModuleNotFoundError
+    except NameError:
+        ModuleNotFoundError = ImportError
+
     try:
         loaded_module = importlib.import_module(module_name)
         class_ = getattr(loaded_module, class_name)
