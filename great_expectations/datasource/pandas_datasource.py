@@ -177,8 +177,8 @@ class PandasDatasource(Datasource):
             except IOError:
                 raise
 
-        elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (pd.DataFrame, pd.Series)):
-            df = batch_kwargs.pop("df")  # We don't want to store the actual dataframe in kwargs
+        elif "dataset" in batch_kwargs and isinstance(batch_kwargs["dataset"], (pd.DataFrame, pd.Series)):
+            df = batch_kwargs.pop("dataset")  # We don't want to store the actual dataframe in kwargs
             # Record this in the kwargs *and* the id
             batch_kwargs["PandasInMemoryDF"] = True
             batch_id["PandasInMemoryDF"] = True
