@@ -279,7 +279,11 @@ def test_compile(data_context):
             'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value'
             }, 
         'data_assets': {
-            'mydatasource/mygenerator/source_diabetes_data': {
+            DataAssetIdentifier(
+                datasource='mydatasource',
+                generator='mygenerator',
+                generator_asset='source_diabetes_data'
+            ): {
                 'default': {
                     'expect_column_unique_value_count_to_be_between': {
                         'columns': {
@@ -292,7 +296,11 @@ def test_compile(data_context):
                     }
                 }
             }, 
-            'mydatasource/mygenerator/source_patient_data': {
+            DataAssetIdentifier(
+                datasource='mydatasource',
+                generator='mygenerator',
+                generator_asset='source_patient_data'
+            ): {
                 'default': {
                     'expect_table_row_count_to_equal': {
                         'result': {
