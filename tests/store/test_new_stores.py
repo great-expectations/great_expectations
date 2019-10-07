@@ -8,7 +8,7 @@ from great_expectations.data_context.store import (
     # NamespacedReadWriteStoreConfig,
     BasicInMemoryStore,
     # BasicInMemoryStoreConfig,
-    EvaluationParameterStore,
+    InMemoryEvaluationParameterStore,
 )
 from great_expectations.data_context.types import (
     DataAssetIdentifier,
@@ -217,7 +217,7 @@ def test_BasicInMemoryStore():
     assert my_store.list_keys() == ["A", "B"]
 
 def test_EvaluationParameterStore():
-    my_store = EvaluationParameterStore()
+    my_store = InMemoryEvaluationParameterStore()
 
     my_key = "A"
     with pytest.raises(KeyError):

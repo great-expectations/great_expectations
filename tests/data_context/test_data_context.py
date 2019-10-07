@@ -28,7 +28,7 @@ from great_expectations.data_context.types import (
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 from great_expectations.data_context.store import (
     BasicInMemoryStore,
-    EvaluationParameterStore,
+    InMemoryEvaluationParameterStore,
 )
 from great_expectations.util import (
     gen_directory_tree_str,
@@ -590,7 +590,6 @@ project_path/
         uncommitted/
             config_variables.yml
             data_docs/
-                local_site/
             samples/
             validations/
                 profiling/
@@ -712,7 +711,7 @@ def basic_data_context_config():
             },
             "evaluation_parameter_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "EvaluationParameterStore",
+                "class_name": "InMemoryEvaluationParameterStore",
             }
         },
         "data_docs_sites": {},
@@ -764,7 +763,7 @@ def test_evaluation_parameter_store_methods(basic_data_context_config):
         "testing",
     )
 
-    assert isinstance(context.evaluation_parameter_store, EvaluationParameterStore)
+    assert isinstance(context.evaluation_parameter_store, InMemoryEvaluationParameterStore)
 
     assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {}
     context.set_parameters_in_evaluation_parameter_store_by_run_id_and_key("foo", "bar", "baz")

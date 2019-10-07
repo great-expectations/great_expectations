@@ -213,8 +213,8 @@ class HtmlSiteStore(NamespacedReadWriteStore):
                 },
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
-                    "key_length": 4,
-                    "filepath_template": 'expectations/{0}/{1}/{2}/{3}.html',
+                    "key_length": 5,
+                    "filepath_template": 'validations/{4}/{0}/{1}/{2}/{3}.html',
                 }
             ),
             "index_page":  instantiate_class_from_config(

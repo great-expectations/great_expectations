@@ -97,13 +97,7 @@ stores:
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/reference/evaluation_parameters.html
-    module_name: great_expectations.data_context.store
-    class_name: EvaluationParameterStore
-  # 
-  # local_site_html_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: HtmlSiteStore
-  #   base_directory: uncommitted/data_docs/local_site/
+    class_name: InMemoryEvaluationParameterStore
 
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These
@@ -115,38 +109,6 @@ data_docs_sites:
     store_backend:
         class_name: FixedLengthTupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
-  # local_site: # site name
-  #   datasource_whitelist: '*' # used to restrict the Datasources
-  #   module_name: great_expectations.render.renderer.site_builder
-  #   class_name: SiteBuilder
-  #   target_store_name: local_site_html_store   
-  #   site_index_builder:
-  #     class_name: DefaultSiteIndexBuilder
-  #   site_section_builders:
-  #     expectations:
-  #       class_name: DefaultSiteSectionBuilder
-  #       source_store_name: expectations_store
-  #       renderer:
-  #         module_name: great_expectations.render.renderer
-  #         class_name: ExpectationSuitePageRenderer
-  # 
-  #     validations:
-  #       class_name: DefaultSiteSectionBuilder
-  #       source_store_name: validations_store
-  #       run_id_filter:
-  #         ne: profiling
-  #       renderer:
-  #         module_name: great_expectations.render.renderer
-  #         class_name: ValidationResultsPageRenderer
-  # 
-  #     profiling:
-  #       class_name: DefaultSiteSectionBuilder
-  #       source_store_name: validations_store
-  #       run_id_filter:
-  #         eq: profiling
-  #       renderer:
-  #         module_name: great_expectations.render.renderer
-  #         class_name: ProfilingResultsPageRenderer
 """
 
 PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT
