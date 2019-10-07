@@ -100,11 +100,11 @@ class SiteBuilder(object):
     """
 
     def __init__(self,
-        data_context,
-        store_backend,
-        site_index_builder=None,
-        site_section_builders=None,
-        datasource_whitelist=None
+                 data_context,
+                 store_backend,
+                 site_index_builder=None,
+                 site_section_builders=None,
+                 datasource_whitelist=None
     ):
         self.data_context = data_context
 
@@ -193,13 +193,14 @@ class SiteBuilder(object):
 class DefaultSiteSectionBuilder(object):
 
     def __init__(self,
-        name,
-        data_context,
-        target_store,
-        source_store_name,
-        run_id_filter=None, #NOTE: Ideally, this would allow specification of ANY element (or combination of elements) within an ID key
-        renderer=None,
-        view=None,
+                 name,
+                 data_context,
+                 target_store,
+                 source_store_name,
+                 # NOTE: Consider allowing specification of ANY element (or combination of elements) within an ID key?
+                 run_id_filter=None,
+                 renderer=None,
+                 view=None,
     ):
         self.name = name
         self.source_store = data_context.stores[source_store_name]
@@ -208,7 +209,7 @@ class DefaultSiteSectionBuilder(object):
 
         # TODO : Push conventions for configurability down to renderers and views.
         # Until then, they won't be configurable, and defaults will be hard.
-        if renderer == None:
+        if renderer is None:
             renderer = {
                 "module_name": "great_expectations.render.renderer",
                 # "class_name": "SiteIndexPageRenderer",
@@ -216,7 +217,7 @@ class DefaultSiteSectionBuilder(object):
         renderer_module = importlib.import_module(renderer.pop("module_name", "great_expectations.render.renderer"))
         self.renderer_class = getattr(renderer_module, renderer.pop("class_name"))
 
-        if view == None:
+        if view is None:
             view = {
                 "module_name": "great_expectations.render.view",
                 "class_name": "DefaultJinjaPageView",

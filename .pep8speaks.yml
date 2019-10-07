@@ -36,5 +36,5 @@ message:  # Customize the comment made by the bot
         footer: ""
     updated:  # Messages when a PR is updated
         header: "Thank you for submitting to Great Expectations!"
-        footer: "This has been updated based on the most recent commit."
+        footer: "This linter comment has been updated based on the most recent commit."
     no_errors: "There are currently no PEP 8 issues detected in this Pull Request. Cheers! :beers: "

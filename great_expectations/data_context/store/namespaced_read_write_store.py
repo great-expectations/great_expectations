@@ -283,16 +283,5 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         return list(self.keys)
 
     def write_index_page(self, page):
+        """This third store has a special method, which uses a zero-length tuple as a key."""
         return self.store_backends["index_page"].set((), page)
-
-        # # NOTE: This method is a temporary hack.
-        # # Status as of 2019/09/09: this method is backward compatible against the previous implementation of site_builder
-        # # However, it doesn't support backend pluggability---only implementation in a local filesystem.
-        # # Also, if/when we want to support index pages at multiple levels of nesting, we'll need to extend.
-        # #
-        # # Properly speaking, what we need is a class of BackendStore that can accomodate this...
-        # # It's tricky with the current stores, sbecause the core get/set logic depends so strongly on fixed-length keys.
-        # index_page_path = os.path.join(self.root_directory, self.base_directory, "index.html")
-        # with open(index_page_path, "w") as file_:
-        #     file_.write(page)
-        # return index_page_path
