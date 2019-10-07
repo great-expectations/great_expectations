@@ -68,13 +68,7 @@ stores:
 #      key_prefix:
 
   evaluation_parameter_store:
-    module_name: great_expectations.data_context.store
-    class_name: EvaluationParameterStore
-
-  local_site_html_store:
-    module_name: great_expectations.data_context.store
-    class_name: HtmlSiteStore
-    base_directory: uncommitted/data_docs/local_site/
+    class_name: InMemoryEvaluationParameterStore
 
 data_docs_sites:
   local_site: # site name
@@ -84,7 +78,9 @@ data_docs_sites:
 
     module_name: great_expectations.render.renderer.new_site_builder
     class_name: SiteBuilder
-    target_store_name: local_site_html_store
+    store_backend:
+      class_name: HtmlSiteStore
+      base_directory: uncommitted/data_docs/local_site/
 
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
