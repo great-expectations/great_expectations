@@ -179,45 +179,146 @@ A similar implementation for SqlAlchemy would also import the base decorator:
 .. code-block:: python
 
     import sqlalchemy as sa
+    from great_expectations.data_asset import DataAsset
     from great_expectations.dataset import SqlAlchemyDataset
 
+    import numpy as np
     import scipy.stats as stats
+    import scipy.special as special
+
+    if sys.version_info.major >= 3 and sys.version_info.minor >= 5:
+        from math import gcd
+    else:
+        from fractions import gcd
 
     class CustomSqlAlchemyDataset(SqlAlchemyDataset):
 
         _data_asset_type = "CustomSqlAlchemyDataset"
 
-        @DataAsset.expectation(["column_A", "column_B", "p_value"])
+        @DataAsset.expectation(["column_A", "column_B", "p_value", "mode"])
         def expect_column_pair_histogram_ks_2samp_test_p_value_to_be_greater_than(
+                self,
                 column_A,
                 column_B,
-                p_value,
-                already_sorted=False
+                p_value=0.05,
+                mode='auto'
         ):
-        """Our very nice docstring."""
+            """Execute the two sample KS test on two columns of data that are expected to be **histograms** with
+            aligned values/points on the CDF. ."""
+            LARGE_N = 10000  # 'auto' will attempt to be exact if n1,n2 <= LARGE_N
+
             # We will assume that these are already HISTOGRAMS created as a check_dataset
+            # either of binned values or of (ordered) value counts
             rows = sa.select([
-                sa.column(column_A).label("col_A_weights"),
-                sa.column(column_B).label("col_B_weights")
+                sa.column(column_A).label("col_A_counts"),
+                sa.column(column_B).label("col_B_counts")
             ]).select_from(self._table).fetchall()
 
             cols = [col for col in zip(*rows)]
+            cdf1 = np.array(cols[0])
+            cdf2 = np.array(cols[1])
+            n1 = cdf1.sum()
+            n2 = cdf2.sum()
+            cdf1 = cdf1 / n1
+            cdf2 = cdf2 / n2
 
-            if not already_sorted:
-                v0 = sorted(cols[0])
-                v1 = sorted(cols[1])
-            else:
-                v0 = cols[0]
-                v1 = cols[1]
+            # This code is taken verbatim from scipy implementation,
+            # skipping the searchsorted (using sqlalchemy check asset as a view)
+            # https://github.com/scipy/scipy/blob/v1.3.1/scipy/stats/stats.py#L5385-L5573
+            cddiffs = cdf1 - cdf2
+            minS = -np.min(cddiffs)
+            maxS = np.max(cddiffs)
+            alt2Dvalue = {'less': minS, 'greater': maxS, 'two-sided': max(minS, maxS)}
+            d = alt2Dvalue[alternative]
+            g = gcd(n1, n2)
+            n1g = n1 // g
+            n2g = n2 // g
+            prob = -np.inf
+            original_mode = mode
+            if mode == 'auto':
+                if max(n1, n2) <= LARGE_N:
+                    mode = 'exact'
+                else:
+                    mode = 'asymp'
+            elif mode == 'exact':
+                # If lcm(n1, n2) is too big, switch from exact to asymp
+                if n1g >= np.iinfo(np.int).max / n2g:
+                    mode = 'asymp'
+                    warnings.warn(
+                        "Exact ks_2samp calculation not possible with samples sizes "
+                        "%d and %d. Switching to 'asymp' " % (n1, n2), RuntimeWarning)
 
-            stat_, pval = stats.fancy_test(v0, v1)
+            saw_fp_error = False
+            if mode == 'exact':
+                lcm = (n1 // g) * n2
+                h = int(np.round(d * lcm))
+                d = h * 1.0 / lcm
+                if h == 0:
+                    prob = 1.0
+                else:
+                    try:
+                        if alternative == 'two-sided':
+                            if n1 == n2:
+                                prob = stats._compute_prob_outside_square(n1, h)
+                            else:
+                                prob = 1 - stats._compute_prob_inside_method(n1, n2, g, h)
+                        else:
+                            if n1 == n2:
+                                # prob = binom(2n, n-h) / binom(2n, n)
+                                # Evaluating in that form incurs roundoff errors
+                                # from special.binom. Instead calculate directly
+                                prob = 1.0
+                                for j in range(h):
+                                    prob = (n1 - j) * prob / (n1 + j + 1)
+                            else:
+                                num_paths = stats._count_paths_outside_method(n1, n2, g, h)
+                                bin = special.binom(n1 + n2, n1)
+                                if not np.isfinite(bin) or not np.isfinite(num_paths) or num_paths > bin:
+                                    raise FloatingPointError()
+                                prob = num_paths / bin
+
+                    except FloatingPointError:
+                        # Switch mode
+                        mode = 'asymp'
+                        saw_fp_error = True
+                        # Can't raise warning here, inside the try
+                    finally:
+                        if saw_fp_error:
+                            if original_mode == 'exact':
+                                warnings.warn(
+                                    "ks_2samp: Exact calculation overflowed. "
+                                    "Switching to mode=%s" % mode, RuntimeWarning)
+                        else:
+                            if prob > 1 or prob < 0:
+                                mode = 'asymp'
+                                if original_mode == 'exact':
+                                    warnings.warn(
+                                        "ks_2samp: Exact calculation incurred large"
+                                        " rounding error. Switching to mode=%s" % mode,
+                                        RuntimeWarning)
+
+            if mode == 'asymp':
+                # The product n1*n2 is large.  Use Smirnov's asymptoptic formula.
+                if alternative == 'two-sided':
+                    en = np.sqrt(n1 * n2 / (n1 + n2))
+                    # Switch to using kstwo.sf() when it becomes available.
+                    # prob = distributions.kstwo.sf(d, int(np.round(en)))
+                    prob = distributions.kstwobign.sf(en * d)
+                else:
+                    m, n = max(n1, n2), min(n1, n2)
+                    z = np.sqrt(m*n/(m+n)) * d
+                    # Use Hodges' suggested approximation Eqn 5.3
+                    expt = -2 * z**2 - 2 * z * (m + 2*n)/np.sqrt(m*n*(m+n))/3.0
+                    prob = np.exp(expt)
+
+            prob = (0 if prob < 0 else (1 if prob > 1 else prob))
 
             return {
-                "success": pval < p_value,
+                "success": prob > p_value,
                 "result": {
-                    "observed_value": pval,
+                    "observed_value": prob,
                     "details": {
-                        "fancy_stat": stat_
+                        "ks_2samp_statistic": d
                     }
                 }
             }
@@ -284,7 +385,7 @@ accessible, otherwise, you need to ensure the module is on the import path.
 
 Once you do this, all the functionality of your new expectations will be available for use. For example, you could use
 the datasource snippet below to configure a PandasDatasource that will produce instances of your new
-CustomPandasDataset in a DataContext.
+CustomPandasDataset in a DataContext. Note the use of standard python dot notation to import.
 
 .. code-block:: yaml
 
@@ -292,7 +393,7 @@ CustomPandasDataset in a DataContext.
       my_datasource:
         class_name: PandasDatasource
         data_asset_type:
-          module_name: custom_dataset
+          module_name: custom_module.custom_dataset
           class_name: CustomPandasDataset
         generators:
           default:
@@ -300,6 +401,31 @@ CustomPandasDataset in a DataContext.
             base_directory: /data
             reader_options:
               sep: \t
+
+Note that we need to have added our **custom_dataset.py** to a directory called **custom_module** as in the directory
+structure below.
+
+.. code-block:: bash
+
+    great_expectations
+    ├── .gitignore
+    ├── datasources
+    ├── expectations
+    ├── great_expectations.yml
+    ├── notebooks
+    │   ├── create_expectations.ipynb
+    │   └── integrate_validation_into_pipeline.ipynb
+    ├── plugins
+    │   └── custom_module
+    │       └── custom_dataset.py
+    └── uncommitted
+        ├── config_variables.yml
+        ├── data_docs
+        │   └── local_site
+        ├── samples
+        └── validations
+
+
 
 .. code-block:: bash
 
