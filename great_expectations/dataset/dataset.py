@@ -331,7 +331,7 @@ class Dataset(MetaDataset):
             define custom classes, etc. To use developed expectations from the command-line tool, you'll still need to \
             define custom classes, etc.
 
-            Check out :ref:`custom_expectations` for more information.
+            Check out :ref:`custom_expectations_reference` for more information.
         """
 
         new_function = self.column_map_expectation(function)
@@ -353,7 +353,7 @@ class Dataset(MetaDataset):
             define custom classes, etc. To use developed expectations from the command-line tool, you'll still need to \
             define custom classes, etc.
 
-            Check out :ref:`custom_expectations` for more information.
+            Check out :ref:`custom_expectations_reference` for more information.
         """
 
         new_function = self.column_aggregate_expectation(function)
