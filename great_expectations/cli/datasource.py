@@ -42,7 +42,7 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
         cli_message("""
 Skipping datasource configuration.
     - Add one by running `<green>great_expectations add-datasource</green>` or
-    - ... by editing the great_expectations.yml file 
+    - ... by editing the great_expectations.yml file
 """)
 
     return data_source_name

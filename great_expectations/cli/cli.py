@@ -198,7 +198,7 @@ def init(target_directory):
             exit(0)
 
         context, data_source_name = _create_new_project(target_directory)
-        if not data_source_name: # no datasource was created
+        if not data_source_name:  # no datasource was created
             return
 
         profile_datasource(context, data_source_name)
