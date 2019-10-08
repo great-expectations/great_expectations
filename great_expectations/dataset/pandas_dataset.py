@@ -328,6 +328,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def get_row_count(self):
         return self.shape[0]
 
+    def get_column_count(self):
+        return self.shape[1]
+
     def get_table_columns(self):
         return list(self.columns)
 

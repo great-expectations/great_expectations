@@ -268,6 +268,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self._table)
         return self.engine.execute(count_query).scalar()
 
+    def get_column_count(self):
+        return len(self.columns)
+
     def get_table_columns(self):
         return [col['name'] for col in self.columns]
 
