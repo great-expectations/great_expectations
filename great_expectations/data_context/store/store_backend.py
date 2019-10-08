@@ -48,11 +48,11 @@ class StoreBackend(object):
         value = self._get(key)
         return value
 
-    def set(self, key, value):
+    def set(self, key, value, **kwargs):
         self._validate_key(key)
         self._validate_value(value)
         # Allow the implementing setter to return something (e.g. a path used for its key)
-        return self._set(key, value)
+        return self._set(key, value, **kwargs)
 
     def has_key(self, key):
         self._validate_key(key)
@@ -80,7 +80,7 @@ class StoreBackend(object):
     def _get(self, key):
         raise NotImplementedError
 
-    def _set(self, key, value):
+    def _set(self, key, value, **kwargs):
         raise NotImplementedError
 
     def list_keys(self):
@@ -108,7 +108,7 @@ class InMemoryStoreBackend(StoreBackend):
     def _get(self, key):
         return self.store[self._convert_tuple_to_string(key)]
 
-    def _set(self, key, value):
+    def _set(self, key, value, **kwargs):
         self.store[self._convert_tuple_to_string(key)] = value
 
     def _validate_key(self, key):
@@ -293,7 +293,7 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
         with open(filepath) as infile:
             return infile.read()
 
-    def _set(self, key, value):
+    def _set(self, key, value, **kwargs):
         filepath = os.path.join(
             self.full_base_directory,
             self._convert_key_to_filepath(key)
@@ -304,7 +304,6 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
         with open(filepath, "w") as outfile:
             outfile.write(value)
         return filepath
-
 
     def list_keys(self):
         key_list = []
@@ -375,7 +374,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
         return s3_response_object['Body'].read()
 
-    def _set(self, key, value):
+    def _set(self, key, value, content_encoding='utf-8', content_type='application/json'):
         s3_object_key = os.path.join(
             self.prefix,
             self._convert_key_to_filepath(key)
@@ -384,7 +383,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         import boto3
         s3 = boto3.resource('s3')
         result_s3 = s3.Object(self.bucket, s3_object_key)
-        result_s3.put(Body=value.encode('utf-8'))
+        result_s3.put(Body=value.encode(content_encoding), ContentEncoding=content_encoding, ContentType=content_type)
         return s3_object_key
 
     def list_keys(self):

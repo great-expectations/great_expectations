@@ -189,13 +189,16 @@ def test_FixedLengthTupleS3StoreBackend():
     my_store = FixedLengthTupleS3StoreBackend(
         root_directory=os.path.abspath(path), # NOTE: Eugene: 2019-09-06: root_directory should be removed from the base class
         key_length=1,
-        filepath_template= "my_file_{0}",
+        filepath_template="my_file_{0}",
         bucket=bucket,
         prefix=prefix,
     )
 
     my_store.set(("AAA",), "aaa")
     assert my_store.get(("AAA",)) == b'aaa'
+
+    # We should have set the raw data content type since we encode as utf-8
+    object = boto3.client('s3').get_object(Bucket=bucket, Key=prefix + "/my_file_AAA")
 
     my_store.set(("BBB",), "bbb")
     assert my_store.get(("BBB",)) == b'bbb'
