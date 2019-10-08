@@ -690,8 +690,8 @@ def evr_failed():
         "missing_count": 0,
         "missing_percent": 0.0,
         "unexpected_count": 3,
-        "unexpected_percent": 0.002284843869002285,
-        "unexpected_percent_nonmissing": 0.002284843869002285,
+        "unexpected_percent": 0.2284843869002285,
+        "unexpected_percent_nonmissing": 0.2284843869002285,
         "partial_unexpected_list": [
           "Daly, Mr Peter Denis ",
           "Barber, Ms ",
