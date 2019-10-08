@@ -17,6 +17,12 @@ def cli_message(string):
         flags=flags
     )
     mod_string = re.sub(
+        "<cyan>(.*?)</cyan>",
+        colored("\g<1>", "cyan"),
+        mod_string,
+        flags=flags
+    )
+    mod_string = re.sub(
         "<green>(.*?)</green>",
         colored("\g<1>", "green"),
         mod_string,

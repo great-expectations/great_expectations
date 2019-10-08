@@ -162,6 +162,9 @@ validate the data.
     sys.exit(result['statistics']['unsuccessful_expectations'])
 
 
+RUN_AGAIN_ANYTIME_MESSAGE = "OK - Feel free to run <green>great_expectations init</green> again any time!"
+
+
 @cli.command()
 @click.option(
     '--target_directory',
@@ -170,9 +173,11 @@ validate the data.
     help='The root of the project directory where you want to initialize Great Expectations.'
 )
 def init(target_directory):
-    """Initialize a new Great Expectations project.
+    """
+    Create a new project and help with onboarding.
 
-    This guided input walks the user through setting up a project.
+    This guided input walks the user through setting up a new project and also
+    onboards a new developer in an existing project.
 
     It scaffolds directories, sets up notebooks, creates a project file, and
     appends to a `.gitignore` file.
@@ -181,31 +186,64 @@ def init(target_directory):
         figlet_format("Great Expectations", font="big"),
         color="cyan"
     ))
-
     cli_message(greeting_1)
+    ge_dir = os.path.join(target_directory, "great_expectations")
+    ge_yml = os.path.join(ge_dir, "great_expectations.yml")
 
-    if not click.confirm(msg_prompt_lets_begin, default=True):
-        cli_message(
-            "OK - run great_expectations init again when ready. Exiting..."
-        )
-        exit(0)
+    if os.path.isfile(ge_yml):
+        _onboard_to_existing_project(ge_dir)
+    else:
+        if not click.confirm(msg_prompt_lets_begin, default=True):
+            cli_message(RUN_AGAIN_ANYTIME_MESSAGE)
+            exit(0)
 
+        context, data_source_name = _create_new_project(target_directory)
+        if not data_source_name: # no datasource was created
+            return
+
+        profile_datasource(context, data_source_name)
+    cli_message(msg_go_to_notebook)
+
+
+def _create_new_project(target_directory):
     try:
         context = DataContext.create(target_directory)
+        data_source_name = add_datasource_impl(context)
+        return context, data_source_name
     except ge_exceptions.DataContextError as err:
         logger.critical(err.message)
         sys.exit(-1)
 
-    cli_message("\nDone.",)
 
-    data_source_name = add_datasource_impl(context)
+def _onboard_to_existing_project(ge_dir):
+    cli_message(
+        """<green>This looks like an existing project!</green> Let's continue your onboarding!
+- An existing `<yellow>great_expectations.yml</yellow>` was found here: <yellow>{}</yellow>. It will not be touched.
+""".format(ge_dir)
+    )
+    if click.confirm(
+        """Great Expectations needs some directories that are not in source control.
+- Would you like to create any that are missing?
+""",
+        default=True
+    ):
+        DataContext.scaffold_directories(ge_dir)
+        cli_message(
+            """\nDone. You may see new directories in `<yellow>great_expectations/uncommitted</yellow>`.
+- Now add secrets to <yellow>great_expectations/uncommitted/config_variables.yml</yellow> to finish onboarding.
+"""
+        )
+    else:
+        cli_message(RUN_AGAIN_ANYTIME_MESSAGE)
 
-    if not data_source_name: # no datasource was created
-        return
+    # TODO if expectations are found, offer to build docs to get to the magic moment!
+    cli_message(
+        """Some other things you may want to do:
+- Run '<green>great_expectations build-docs</green>` to see your teammates Expectations!
+- Run '<green>great_expectations add-datasource</green>` to add a new datasource.
+- Run '<green>great_expectations profile</green>` to profile some data."""
+    )
 
-    profile_datasource(context, data_source_name)
-
-    cli_message(msg_go_to_notebook)
 
 @cli.command()
 @click.option('--directory', '-d', default="./great_expectations",
@@ -278,12 +316,6 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
             profile_datasource(context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets, additional_batch_kwargs=batch_kwargs)
     else:
         profile_datasource(context, datasource_name, data_assets=data_assets, profile_all_data_assets=profile_all_data_assets, additional_batch_kwargs=batch_kwargs)
-
-
-@cli.command()
-def build_documentation():
-    # TODO remove this warning
-    raise DeprecationWarning("This command has been renamed to build-docs.")
 
 
 @cli.command()

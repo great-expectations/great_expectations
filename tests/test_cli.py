@@ -25,10 +25,6 @@ from six import PY2
 
 from great_expectations.cli import cli
 from great_expectations.util import gen_directory_tree_str
-from great_expectations.data_context.util import (
-    scaffold_directories,
-    scaffold_notebooks,
-)
 from great_expectations import __version__ as ge_version
 from .test_utils import assertDeepAlmostEqual
 yaml = YAML()
@@ -50,14 +46,13 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  add-datasource       Add a new datasource to the data context
-  build-docs           Build Data Docs for a project.
-  build-documentation
-  check-config         Check a config for validity and help with migrations.
-  init                 Initialize a new Great Expectations project.
-  profile              Profile datasources from the specified context.
-  render               Render a great expectations object to documentation.
-  validate             Validate a CSV file against an expectation suite.
+  add-datasource  Add a new datasource to the data context
+  build-docs      Build Data Docs for a project.
+  check-config    Check a config for validity and help with migrations.
+  init            Create a new project and help with onboarding.
+  profile         Profile datasources from the specified context.
+  render          Render a great expectations object to documentation.
+  validate        Validate a CSV file against an expectation suite.
 """
 
 
@@ -576,19 +571,3 @@ def test_cli_config_not_found(tmp_path_factory):
         raise
     finally:
         os.chdir(curdir)
-
-
-def test_scaffold_directories_and_notebooks(tmp_path_factory):
-    empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks"))
-    scaffold_directories(empty_directory)
-    scaffold_notebooks(empty_directory)
-    print(empty_directory)
-
-    assert set(os.listdir(empty_directory)) == \
-           {'datasources', 'plugins', 'expectations', '.gitignore', 'uncommitted', 'notebooks'}
-    assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
-           {'samples', 'data_docs', 'validations'}
-    assert set(os.listdir(os.path.join(empty_directory, "notebooks"))) == {
-        "create_expectations.ipynb",
-        "integrate_validation_into_pipeline.ipynb"
-    }

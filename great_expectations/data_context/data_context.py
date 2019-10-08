@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+import glob
 import os
 import json
 import logging
+import shutil
 
 from ruamel.yaml import YAML, YAMLError
 import sys
@@ -11,10 +13,7 @@ from six import string_types
 import datetime
 import warnings
 
-from great_expectations.data_context.util import (
-    scaffold_directories,
-    scaffold_notebooks,
-)
+from great_expectations.util import file_relative_path
 from .util import safe_mmkdir, substitute_all_config_variables
 from ..types.base import DotDict
 
@@ -111,7 +110,7 @@ class ConfigOnlyDataContext(object):
 
         ge_dir = os.path.join(project_root_dir, "great_expectations")
         safe_mmkdir(ge_dir, exist_ok=True)
-        scaffold_directories(ge_dir)
+        cls.scaffold_directories(ge_dir)
 
         if os.path.isfile(os.path.join(ge_dir, "great_expectations.yml")):
             message = """Warning. An existing `great_expectations.yml` was found here: {}.
@@ -125,7 +124,7 @@ class ConfigOnlyDataContext(object):
     - No action was taken.""".format(ge_dir)
             warnings.warn(message)
         else:
-            scaffold_notebooks(ge_dir)
+            cls.scaffold_notebooks(ge_dir)
 
         uncommitted_dir = os.path.join(ge_dir, "uncommitted")
         if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
@@ -152,6 +151,38 @@ class ConfigOnlyDataContext(object):
         )
         with open(file_path, "w") as template:
             template.write(PROJECT_TEMPLATE)
+
+    @classmethod
+    def scaffold_directories(cls, base_dir):
+        """Safely create GE directories for a new project."""
+        safe_mmkdir(base_dir, exist_ok=True)
+        open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
+
+        for directory in [
+            "datasources",
+            "expectations",
+            "notebooks",
+            "plugins",
+            "uncommitted",
+        ]:
+            safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
+            uncommitted_dir = os.path.join(base_dir, "uncommitted")
+
+        for new_directory in ["data_docs", "samples", "validations"]:
+            safe_mmkdir(
+                os.path.join(uncommitted_dir, new_directory),
+                exist_ok=True
+            )
+
+    @classmethod
+    def scaffold_notebooks(cls, base_dir):
+        """Copy template notebooks into the notebooks directory for a project."""
+        template_dir = file_relative_path(__file__, "../init_notebooks/*.ipynb")
+        for notebook in glob.glob(template_dir):
+            notebook_name = os.path.basename(notebook)
+            destination_path = os.path.join(base_dir, "notebooks",
+                                            notebook_name)
+            shutil.copyfile(notebook, destination_path)
 
     @classmethod
     def validate_config(cls, project_config):
