@@ -116,7 +116,7 @@ def test_file_format_map_output():
                                                                               result_format="BASIC")
     expected_result = {"success":None,
                        "result":{"element_count": 11, "missing_count": 11,
-                                 "missing_percent": 1, "unexpected_count": 0,
+                                 "missing_percent": 100.0, "unexpected_count": 0,
                                  "unexpected_percent": 0, "unexpected_percent_nonmissing": None,
                                  "partial_unexpected_list": []
                                 }
@@ -132,9 +132,9 @@ def test_file_format_map_output():
 
     expected_result = {"success":False,
                        "result":{"element_count": 9, "missing_count": 2,
-                                 "missing_percent": 2/9, "unexpected_count": 3,
-                                 "unexpected_percent": 3/9,
-                                 "unexpected_percent_nonmissing": 3/7,
+                                 "missing_percent": (2/9 * 100), "unexpected_count": 3,
+                                 "unexpected_percent": (3/9 * 100),
+                                 "unexpected_percent_nonmissing": (3/7 * 100),
                                  "partial_unexpected_list": ['A,C,1\n', 'B,1,4\n', 'A,1,4\n'],
                                  "partial_unexpected_counts": [{"value": 'A,1,4\n', "count": 1},
                                                               {"value": 'A,C,1\n', "count": 1},

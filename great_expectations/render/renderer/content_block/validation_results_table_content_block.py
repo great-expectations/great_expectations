@@ -143,7 +143,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return None
         else:
             unexpected_count = result["unexpected_count"]
-            unexpected_percent = "%.2f%%" % (result["unexpected_percent"] * 100.0)
+            unexpected_percent = "%.2f%%" % (result["unexpected_percent"])
             element_count = result["element_count"]
             
             template_str = "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows."
