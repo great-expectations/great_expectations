@@ -1054,3 +1054,27 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(tm
         obs = ff.read()
     print(obs)
     assert "# LOOK I WAS MODIFIED" in obs
+
+
+def test_scaffold_directories_and_notebooks(tmp_path_factory):
+    empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks"))
+    DataContext.scaffold_directories(empty_directory)
+    DataContext.scaffold_notebooks(empty_directory)
+
+    assert set(os.listdir(empty_directory)) == {
+        'datasources',
+        'plugins',
+        'expectations',
+        '.gitignore',
+        'uncommitted',
+        'notebooks'
+    }
+    assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == {
+        'samples',
+        'data_docs',
+        'validations'
+    }
+    assert set(os.listdir(os.path.join(empty_directory, "notebooks"))) == {
+        "create_expectations.ipynb",
+        "integrate_validation_into_pipeline.ipynb"
+    }
