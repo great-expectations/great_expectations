@@ -1,25 +1,23 @@
 # -*- coding: utf-8 -*-
-
+import glob
 import os
 import json
 import logging
+import shutil
+
 from ruamel.yaml import YAML, YAMLError
 import sys
 import copy
 import errno
-from six import (
-    string_types,
-    PY2,
-    PY3
-)
+from six import string_types
 import datetime
 import warnings
 
+from great_expectations.util import file_relative_path
 from .util import safe_mmkdir, substitute_all_config_variables
 from ..types.base import DotDict
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.exceptions import DataContextError
 
 # FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers.
 
@@ -37,14 +35,10 @@ from great_expectations.datasource import (
     SparkDFDatasource,
     DBTDatasource
 )
-from great_expectations.data_asset import (
-    DataAsset
-)
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
 from .types import (
     NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
-#     DataContextConfig,
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -92,6 +86,7 @@ class ConfigOnlyDataContext(object):
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
+    UNCOMMITTED_DIRECTORIES = ["data_docs", "samples", "validations"]
 
     # TODO: Consider moving this to DataContext, instead of ConfigOnlyDataContext, since it writes to disc.
     @classmethod
@@ -107,24 +102,57 @@ class ConfigOnlyDataContext(object):
         Returns:
             DataContext
         """
-        if not os.path.isdir(project_root_dir):
-            raise ge_exceptions.DataContextError("project_root_dir must be a directory in which to initialize a "
-                                                 "new DataContext")
-        else:
-            try:
-                os.mkdir(os.path.join(project_root_dir, "great_expectations"))
-            except (FileExistsError, OSError):
-                raise ge_exceptions.DataContextError(
-                    "Cannot create a DataContext object when a great_expectations directory "
-                    "already exists at the provided root directory.")
 
+        if not os.path.isdir(project_root_dir):
+            raise ge_exceptions.DataContextError(
+                "The project_root_dir must be an existing directory in which "
+                "to initialize a new DataContext"
+            )
+
+        ge_dir = os.path.join(project_root_dir, "great_expectations")
+        safe_mmkdir(ge_dir, exist_ok=True)
+        cls.scaffold_directories(ge_dir)
+
+        if os.path.isfile(os.path.join(ge_dir, "great_expectations.yml")):
+            message = """Warning. An existing `great_expectations.yml` was found here: {}.
+    - No action was taken.""".format(ge_dir)
+            warnings.warn(message)
+        else:
             cls.write_project_template_to_disk(project_root_dir)
 
-            safe_mmkdir(os.path.join(project_root_dir, "great_expectations/uncommitted"))
-            with open(os.path.join(project_root_dir, "great_expectations/uncommitted/config_variables.yml"), "w") as template:
-                template.write(CONFIG_VARIABLES_INTRO)
+        if os.path.isfile(os.path.join(ge_dir, "notebooks")):
+            message = """Warning. An existing `notebooks` directory was found here: {}.
+    - No action was taken.""".format(ge_dir)
+            warnings.warn(message)
+        else:
+            cls.scaffold_notebooks(ge_dir)
 
-        return cls(os.path.join(project_root_dir, "great_expectations"))
+        uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+        if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
+            message = """Warning. An existing `config_variables.yml` was found here: {}.
+    - No action was taken.""".format(uncommitted_dir)
+            warnings.warn(message)
+        else:
+            cls.write_config_variables_template_to_disk(uncommitted_dir)
+
+        return cls(ge_dir)
+
+    @classmethod
+    def do_all_uncommitted_directories_exist(cls, ge_dir):
+        """Check if all uncommitted direcotries exist."""
+        uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+        for directory in cls.UNCOMMITTED_DIRECTORIES:
+            if not os.path.isdir(os.path.join(uncommitted_dir, directory)):
+                return False
+
+        return True
+
+    @classmethod
+    def write_config_variables_template_to_disk(cls, uncommitted_dir):
+        safe_mmkdir(uncommitted_dir)
+        config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
+        with open(config_var_file, "w") as template:
+            template.write(CONFIG_VARIABLES_INTRO)
 
     @classmethod
     def write_project_template_to_disk(cls, project_root_dir):
@@ -134,6 +162,38 @@ class ConfigOnlyDataContext(object):
         )
         with open(file_path, "w") as template:
             template.write(PROJECT_TEMPLATE)
+
+    @classmethod
+    def scaffold_directories(cls, base_dir):
+        """Safely create GE directories for a new project."""
+        safe_mmkdir(base_dir, exist_ok=True)
+        open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
+
+        for directory in [
+            "datasources",
+            "expectations",
+            "notebooks",
+            "plugins",
+            "uncommitted",
+        ]:
+            safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
+            uncommitted_dir = os.path.join(base_dir, "uncommitted")
+
+        for new_directory in cls.UNCOMMITTED_DIRECTORIES:
+            safe_mmkdir(
+                os.path.join(uncommitted_dir, new_directory),
+                exist_ok=True
+            )
+
+    @classmethod
+    def scaffold_notebooks(cls, base_dir):
+        """Copy template notebooks into the notebooks directory for a project."""
+        template_dir = file_relative_path(__file__, "../init_notebooks/*.ipynb")
+        for notebook in glob.glob(template_dir):
+            notebook_name = os.path.basename(notebook)
+            destination_path = os.path.join(base_dir, "notebooks",
+                                            notebook_name)
+            shutil.copyfile(notebook, destination_path)
 
     @classmethod
     def validate_config(cls, project_config):
@@ -223,7 +283,7 @@ class ConfigOnlyDataContext(object):
         self._compiled = False
 
         if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
-            raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
+            raise ge_exceptions.DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
 
 
@@ -426,7 +486,7 @@ class ConfigOnlyDataContext(object):
                 relative_path.replace("/", "__")
                 relative_path = relative_path.replace(self.data_asset_name_delimiter, "/")
         else:
-            raise DataContextError("data_assset_name must be a NormalizedDataAssetName or string")
+            raise ge_exceptions.DataContextError("data_assset_name must be a NormalizedDataAssetName or string")
 
         expectation_suite_name += file_extension
 
@@ -628,7 +688,7 @@ class ConfigOnlyDataContext(object):
 
         datasource = self.get_datasource(normalized_data_asset_name.datasource)
         if not datasource:
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "Can't find datasource {0:s} in the config - please check your great_expectations.yml"
             )
 
@@ -850,7 +910,7 @@ class ConfigOnlyDataContext(object):
             )
 
         if len(split_name) > 3:
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "Invalid data_asset_name '{data_asset_name}': found too many components using delimiter '{delimiter}'"
                 .format(
                         data_asset_name=data_asset_name,
@@ -881,7 +941,7 @@ class ConfigOnlyDataContext(object):
             #     return provider_names[0]
             #
             # elif len(provider_names) > 1:
-            #     raise DataContextError(
+            #     raise ge_exceptions.DataContextError(
             #         "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
             #         .format(data_asset_name=data_asset_name, provider_names=provider_names)
             #     )
@@ -899,7 +959,7 @@ class ConfigOnlyDataContext(object):
                 return provider_names.pop()
 
             elif len(provider_names) > 1:
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
                     .format(data_asset_name=data_asset_name, provider_names=provider_names)
                 )
@@ -917,11 +977,11 @@ class ConfigOnlyDataContext(object):
                 )
 
             if len(available_names.keys()) == 0:
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "No datasource configured: a datasource is required to normalize an incomplete data_asset_name"
                 )
 
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "Ambiguous data_asset_name: no existing data_asset has the provided name, no generator provides it, "
                 " and there are multiple datasources and/or generators configured."
             )
@@ -949,7 +1009,7 @@ class ConfigOnlyDataContext(object):
             #     return provider_names[0]
             #
             # elif len(provider_names) > 1:
-            #     raise DataContextError(
+            #     raise ge_exceptions.DataContextError(
             #         "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
             #         .format(data_asset_name=data_asset_name, provider_names=provider_names)
             #     )
@@ -965,7 +1025,7 @@ class ConfigOnlyDataContext(object):
                 return provider_names.pop()
             
             elif len(provider_names) > 1:
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
                     .format(data_asset_name=data_asset_name, provider_names=provider_names)
                 )
@@ -982,11 +1042,11 @@ class ConfigOnlyDataContext(object):
                 )
 
             if len(available_names.keys()) == 0:
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "No datasource configured: a datasource is required to normalize an incomplete data_asset_name"
                 )
 
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "No generator available to produce data_asset_name '{data_asset_name}' "
                 "with datasource '{datasource_name}'"
                 .format(data_asset_name=data_asset_name, datasource_name=datasource_name)
@@ -1003,7 +1063,7 @@ class ConfigOnlyDataContext(object):
                 if split_name[1] in generators:
                     return NormalizedDataAssetName(*split_name)
 
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "Invalid data_asset_name: no configured datasource '{datasource_name}' "
                 "with generator '{generator_name}'"
                 .format(datasource_name=split_name[0], generator_name=split_name[1])
@@ -1037,7 +1097,7 @@ class ConfigOnlyDataContext(object):
         )
 
         if self._stores[self.expectations_store_name].has_key(key) and not overwrite_existing:
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "expectation_suite with name {expectation_suite_name} already exists for data_asset {data_asset_name}.\
                  If you would like to overwrite this expectation_suite, set overwrite_existing=True."
             )
@@ -1067,7 +1127,7 @@ class ConfigOnlyDataContext(object):
         if self.stores[self.expectations_store_name].has_key(key):
             return self.stores[self.expectations_store_name].get(key)
         else:
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "No expectation_suite found for data_asset_name %s and expectation_suite_name %s" %
                 (data_asset_name, expectation_suite_name)
             )
@@ -1089,7 +1149,7 @@ class ConfigOnlyDataContext(object):
             try:
                 data_asset_name = expectation_suite['data_asset_name']
             except KeyError:
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "data_asset_name must either be specified or present in the provided expectation suite")
         else:
             # Note: we ensure that the suite name is a string here, until we have typed ExpectationSuite
@@ -1101,7 +1161,7 @@ class ConfigOnlyDataContext(object):
             try:
                 expectation_suite_name = expectation_suite['expectation_suite_name']
             except KeyError:
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "expectation_suite_name must either be specified or present in the provided expectation suite")
         else:
             expectation_suite['expectation_suite_name'] = expectation_suite_name
@@ -1403,7 +1463,7 @@ class ConfigOnlyDataContext(object):
     #
     #         resource_locator_info['path'] = path
     #     else:
-    #         raise DataContextError("Unrecognized resource store type.")
+    #         raise ge_exceptions.DataContextError("Unrecognized resource store type.")
     #
     #     return resource_locator_info
 

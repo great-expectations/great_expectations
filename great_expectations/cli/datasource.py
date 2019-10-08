@@ -41,8 +41,8 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
         cli_message(msg_unknown_data_source)
         cli_message("""
 Skipping datasource configuration.
-    - You can add a datasource later by editing the great_expectations.yml file or
-    - ... by running `<green>great_expectations add-datasource</green>`. 
+    - Add one by running `<green>great_expectations add-datasource</green>` or
+    - ... by editing the great_expectations.yml file
 """)
 
     return data_source_name
@@ -149,10 +149,9 @@ def _add_sqlalchemy_datasource(context):
             break
         except (DatasourceInitializationError, ModuleNotFoundError) as de:
             cli_message(
-                """
-                Cannot connect to the database. Please check your environment and the configuration you provided.
-
-                <red>Database Error: {0:s}</red>>
+                """<red>Cannot connect to the database.
+    - Please check your environment and the configuration you provided.
+    - Database Error: {0:s}</red>>
                 """.format(str(de)))
             if not click.confirm(
                     """
@@ -396,12 +395,9 @@ creating and saving an expectation suite for validation:
     - `<green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>`
 """
 
-msg_go_to_notebook = """
-To create expectations for your data, start Jupyter and open a tutorial notebook:
-
-To launch with jupyter notebooks:
-    <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
-
-To launch with jupyter lab:
-    <green>jupyter lab great_expectations/notebooks/create_expectations.ipynb</green>
+MSG_GO_TO_NOTEBOOK = """    - To create expectations for your data, start Jupyter and open a tutorial notebook:
+        - To launch with jupyter notebooks:
+            <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
+        - To launch with jupyter lab:
+            <green>jupyter lab great_expectations/notebooks/create_expectations.ipynb</green>
 """

@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 import shutil
 
+from great_expectations.cli.init_messages import (
+    CONTINUE_ONBOARDING,
+    DIRS_FIXED,
+    FIX_MISSING_DIRS_PROMPT,
+    GREETING,
+    LETS_BEGIN_PROMPT,
+    PROJECT_IS_COMPLETE,
+    SUGGESTED_ACTIONS,
+)
 from .datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
     build_docs as build_documentation_impl,
-    msg_go_to_notebook
-)
-from .init import (
-    scaffold_directories_and_notebooks,
-    greeting_1,
-    msg_prompt_lets_begin,
+    MSG_GO_TO_NOTEBOOK,
 )
 from .util import cli_message
 from great_expectations.render.view import DefaultJinjaPageView
@@ -163,6 +167,9 @@ validate the data.
     sys.exit(result['statistics']['unsuccessful_expectations'])
 
 
+RUN_INIT_ANYTIME = "OK - Feel free to run <green>great_expectations init</green> again any time!"
+
+
 @cli.command()
 @click.option(
     '--target_directory',
@@ -171,53 +178,73 @@ validate the data.
     help='The root of the project directory where you want to initialize Great Expectations.'
 )
 def init(target_directory):
-    """Initialize a new Great Expectations project.
+    """
+    Create a new project and help with onboarding.
 
-    This guided input walks the user through setting up a project.
+    This guided input walks the user through setting up a new project and also
+    onboards a new developer in an existing project.
 
     It scaffolds directories, sets up notebooks, creates a project file, and
     appends to a `.gitignore` file.
     """
+    target_directory = os.path.abspath(target_directory)
+    ge_dir = os.path.join(target_directory, "great_expectations")
+    ge_yml = os.path.join(ge_dir, "great_expectations.yml")
+
     six.print_(colored(
         figlet_format("Great Expectations", font="big"),
         color="cyan"
     ))
+    cli_message(GREETING)
 
-    cli_message(greeting_1)
+    # TODO this should be a property
+    if os.path.isfile(ge_yml):
+        if DataContext.do_all_uncommitted_directories_exist(ge_dir):
+            cli_message(PROJECT_IS_COMPLETE)
+        else:
+            _complete_onboarding(ge_dir)
 
-    if not click.confirm(msg_prompt_lets_begin, default=True):
-        cli_message(
-            "OK - run great_expectations init again when ready. Exiting..."
-        )
-        exit(0)
+        # TODO if expectations are found, offer to build docs to get to the magic moment!
 
+        cli_message(SUGGESTED_ACTIONS)
+    else:
+        if not click.confirm(LETS_BEGIN_PROMPT, default=True):
+            cli_message(RUN_INIT_ANYTIME)
+            exit(0)
+        else:
+            context, data_source_name = _create_new_project(target_directory)
+            if not data_source_name:  # no datasource was created
+                return
+
+            profile_datasource(context, data_source_name)
+    cli_message(MSG_GO_TO_NOTEBOOK)
+
+
+def _create_new_project(target_directory):
     try:
         context = DataContext.create(target_directory)
+        data_source_name = add_datasource_impl(context)
+        return context, data_source_name
     except ge_exceptions.DataContextError as err:
         logger.critical(err.message)
         sys.exit(-1)
 
-    base_dir = context.root_directory
-    scaffold_directories_and_notebooks(base_dir)
-    cli_message(
-        "\nDone.",
-    )
 
-    data_source_name = add_datasource_impl(context)
+def _complete_onboarding(ge_dir):
+    cli_message(CONTINUE_ONBOARDING.format(ge_dir))
 
-    if not data_source_name: # no datasource was created
-        return
+    if click.confirm(FIX_MISSING_DIRS_PROMPT, default=True):
+        DataContext.scaffold_directories(ge_dir)
+        cli_message(DIRS_FIXED)
+    else:
+        cli_message(RUN_INIT_ANYTIME)
 
-    profile_datasource(context, data_source_name)
-
-    cli_message(msg_go_to_notebook)
 
 @cli.command()
 @click.option('--directory', '-d', default="./great_expectations",
               help='The root of a project directory containing a great_expectations/ config.')
 def add_datasource(directory):
-    """Add a new datasource to the data context
-    """
+    """Add a new datasource to the data context."""
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
@@ -283,12 +310,6 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
             profile_datasource(context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets, additional_batch_kwargs=batch_kwargs)
     else:
         profile_datasource(context, datasource_name, data_assets=data_assets, profile_all_data_assets=profile_all_data_assets, additional_batch_kwargs=batch_kwargs)
-
-
-@cli.command()
-def build_documentation():
-    # TODO remove this warning
-    raise DeprecationWarning("This command has been renamed to build-docs.")
 
 
 @cli.command()
