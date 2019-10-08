@@ -194,11 +194,13 @@ def test_FixedLengthTupleS3StoreBackend():
         prefix=prefix,
     )
 
-    my_store.set(("AAA",), "aaa")
+    my_store.set(("AAA",), "aaa", content_type='text/html')
     assert my_store.get(("AAA",)) == b'aaa'
 
     # We should have set the raw data content type since we encode as utf-8
     object = boto3.client('s3').get_object(Bucket=bucket, Key=prefix + "/my_file_AAA")
+    assert object["ContentType"] == 'text/html'
+    assert object["ContentEncoding"] == 'utf-8'
 
     my_store.set(("BBB",), "bbb")
     assert my_store.get(("BBB",)) == b'bbb'
