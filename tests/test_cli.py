@@ -213,6 +213,8 @@ def test_cli_init_on_new_project(tmp_path_factory, filesystem_csv_2):
             "{", result.output)) < 100, "CLI contains way more '{' than we would reasonably expect."
 
         assert """Always know what to expect from your data.""" in result.output
+        assert """Let's add Great Expectations to your project""" in result.output
+        assert """open a tutorial notebook""" in result.output
 
         assert os.path.isdir(os.path.join(basedir, "great_expectations"))
         assert os.path.isfile(os.path.join(
@@ -567,6 +569,23 @@ def test_cli_config_not_found(tmp_path_factory):
         assert ConfigNotFoundError().message in result.output
         result = runner.invoke(cli, ["check-config"])
         assert ConfigNotFoundError().message in result.output
+    except:
+        raise
+    finally:
+        os.chdir(curdir)
+
+
+def test_cli_init_on_existing_ge_yml(tmp_path_factory):
+    tmp_dir = str(tmp_path_factory.mktemp("test_cli_init_on_existing_ge_yml"))
+    curdir = os.path.abspath(os.getcwd())
+    os.chdir(tmp_dir)
+    runner = CliRunner()
+    runner.invoke(cli, ["init"], input="Y\n4\n")
+
+    try:
+        result = runner.invoke(cli, ["init"], input="Y\n4\n")
+        assert "This looks like an existing project!" in result.output
+        assert "open a tutorial notebook" in result.output
     except:
         raise
     finally:
