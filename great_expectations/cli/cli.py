@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
 import shutil
 
+from great_expectations.cli.init_messages import (
+    CONTINUE_ONBOARDING,
+    DIRS_FIXED,
+    FIX_MISSING_DIRS_PROMPT,
+    GREETING,
+    LETS_BEGIN_PROMPT,
+    PROJECT_IS_COMPLETE,
+    SUGGESTED_ACTIONS,
+)
 from .datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
     build_docs as build_documentation_impl,
-    msg_go_to_notebook
-)
-from .init import (
-    greeting_1,
-    msg_prompt_lets_begin,
+    MSG_GO_TO_NOTEBOOK,
 )
 from .util import cli_message
 from great_expectations.render.view import DefaultJinjaPageView
@@ -162,7 +167,7 @@ validate the data.
     sys.exit(result['statistics']['unsuccessful_expectations'])
 
 
-RUN_AGAIN_ANYTIME_MESSAGE = "OK - Feel free to run <green>great_expectations init</green> again any time!"
+RUN_INIT_ANYTIME = "OK - Feel free to run <green>great_expectations init</green> again any time!"
 
 
 @cli.command()
@@ -182,27 +187,37 @@ def init(target_directory):
     It scaffolds directories, sets up notebooks, creates a project file, and
     appends to a `.gitignore` file.
     """
+    target_directory = os.path.abspath(target_directory)
+    ge_dir = os.path.join(target_directory, "great_expectations")
+    ge_yml = os.path.join(ge_dir, "great_expectations.yml")
+
     six.print_(colored(
         figlet_format("Great Expectations", font="big"),
         color="cyan"
     ))
-    cli_message(greeting_1)
-    ge_dir = os.path.join(target_directory, "great_expectations")
-    ge_yml = os.path.join(ge_dir, "great_expectations.yml")
+    cli_message(GREETING)
 
+    # TODO this should be a property
     if os.path.isfile(ge_yml):
-        _onboard_to_existing_project(ge_dir)
+        if DataContext.do_all_uncommitted_directories_exist(ge_dir):
+            cli_message(PROJECT_IS_COMPLETE)
+        else:
+            _complete_onboarding(ge_dir)
+
+        # TODO if expectations are found, offer to build docs to get to the magic moment!
+
+        cli_message(SUGGESTED_ACTIONS)
     else:
-        if not click.confirm(msg_prompt_lets_begin, default=True):
-            cli_message(RUN_AGAIN_ANYTIME_MESSAGE)
+        if not click.confirm(LETS_BEGIN_PROMPT, default=True):
+            cli_message(RUN_INIT_ANYTIME)
             exit(0)
+        else:
+            context, data_source_name = _create_new_project(target_directory)
+            if not data_source_name:  # no datasource was created
+                return
 
-        context, data_source_name = _create_new_project(target_directory)
-        if not data_source_name:  # no datasource was created
-            return
-
-        profile_datasource(context, data_source_name)
-    cli_message(msg_go_to_notebook)
+            profile_datasource(context, data_source_name)
+    cli_message(MSG_GO_TO_NOTEBOOK)
 
 
 def _create_new_project(target_directory):
@@ -215,42 +230,21 @@ def _create_new_project(target_directory):
         sys.exit(-1)
 
 
-def _onboard_to_existing_project(ge_dir):
-    cli_message(
-        """<green>This looks like an existing project!</green> Let's continue your onboarding!
-- An existing `<yellow>great_expectations.yml</yellow>` was found here: <yellow>{}</yellow>. It will not be touched.
-""".format(ge_dir)
-    )
-    if click.confirm(
-        """Great Expectations needs some directories that are not in source control.
-- Would you like to create any that are missing?
-""",
-        default=True
-    ):
-        DataContext.scaffold_directories(ge_dir)
-        cli_message(
-            """\nDone. You may see new directories in `<yellow>great_expectations/uncommitted</yellow>`.
-- Now add secrets to <yellow>great_expectations/uncommitted/config_variables.yml</yellow> to finish onboarding.
-"""
-        )
-    else:
-        cli_message(RUN_AGAIN_ANYTIME_MESSAGE)
+def _complete_onboarding(ge_dir):
+    cli_message(CONTINUE_ONBOARDING.format(ge_dir))
 
-    # TODO if expectations are found, offer to build docs to get to the magic moment!
-    cli_message(
-        """Some other things you may want to do:
-- Run '<green>great_expectations build-docs</green>` to see your teammates Expectations!
-- Run '<green>great_expectations add-datasource</green>` to add a new datasource.
-- Run '<green>great_expectations profile</green>` to profile some data."""
-    )
+    if click.confirm(FIX_MISSING_DIRS_PROMPT, default=True):
+        DataContext.scaffold_directories(ge_dir)
+        cli_message(DIRS_FIXED)
+    else:
+        cli_message(RUN_INIT_ANYTIME)
 
 
 @cli.command()
 @click.option('--directory', '-d', default="./great_expectations",
               help='The root of a project directory containing a great_expectations/ config.')
 def add_datasource(directory):
-    """Add a new datasource to the data context
-    """
+    """Add a new datasource to the data context."""
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:

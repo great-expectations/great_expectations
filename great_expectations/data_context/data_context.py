@@ -86,6 +86,7 @@ class ConfigOnlyDataContext(object):
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
+    UNCOMMITTED_DIRECTORIES = ["data_docs", "samples", "validations"]
 
     # TODO: Consider moving this to DataContext, instead of ConfigOnlyDataContext, since it writes to disc.
     @classmethod
@@ -137,6 +138,16 @@ class ConfigOnlyDataContext(object):
         return cls(ge_dir)
 
     @classmethod
+    def do_all_uncommitted_directories_exist(cls, ge_dir):
+        """Check if all uncommitted direcotries exist."""
+        uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+        for directory in cls.UNCOMMITTED_DIRECTORIES:
+            if not os.path.isdir(os.path.join(uncommitted_dir, directory)):
+                return False
+
+        return True
+
+    @classmethod
     def write_config_variables_template_to_disk(cls, uncommitted_dir):
         safe_mmkdir(uncommitted_dir)
         config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
@@ -168,7 +179,7 @@ class ConfigOnlyDataContext(object):
             safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
             uncommitted_dir = os.path.join(base_dir, "uncommitted")
 
-        for new_directory in ["data_docs", "samples", "validations"]:
+        for new_directory in cls.UNCOMMITTED_DIRECTORIES:
             safe_mmkdir(
                 os.path.join(uncommitted_dir, new_directory),
                 exist_ok=True

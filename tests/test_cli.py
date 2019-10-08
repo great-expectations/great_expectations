@@ -46,7 +46,7 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  add-datasource  Add a new datasource to the data context
+  add-datasource  Add a new datasource to the data context.
   build-docs      Build Data Docs for a project.
   check-config    Check a config for validity and help with migrations.
   init            Create a new project and help with onboarding.
@@ -575,7 +575,35 @@ def test_cli_config_not_found(tmp_path_factory):
         os.chdir(curdir)
 
 
-def test_cli_init_on_existing_ge_yml(tmp_path_factory):
+def test_cli_init_on_existing_ge_yml_with_some_missing_uncommitted_dirs(tmp_path_factory):
+    """
+    This test walks through the onboarding experience.
+
+    The user just checked an existing project out of source control and does
+    not yet have an uncommitted directory.
+    """
+    tmp_dir = str(tmp_path_factory.mktemp("test_cli_init_on_existing_ge_yml"))
+    curdir = os.path.abspath(os.getcwd())
+    os.chdir(tmp_dir)
+    runner = CliRunner()
+    runner.invoke(cli, ["init"], input="Y\n4\n")
+    shutil.rmtree(os.path.join(tmp_dir, "great_expectations/uncommitted"))
+
+    try:
+        result = runner.invoke(cli, ["init"], input="Y\n4\n")
+        obs = result.output
+        assert "This looks like an existing project" in obs
+        assert "Let's continue your onboarding" in obs
+        assert "open a tutorial notebook" in obs
+        assert "Let's add Great Expectations to your project, by scaffolding" not in obs
+    except:
+        raise
+    finally:
+        os.chdir(curdir)
+
+
+def test_cli_init_does_not_prompt_to_fix_if_all_uncommitted_dirs_exist(tmp_path_factory):
+    """This test walks through an already onboarded project."""
     tmp_dir = str(tmp_path_factory.mktemp("test_cli_init_on_existing_ge_yml"))
     curdir = os.path.abspath(os.getcwd())
     os.chdir(tmp_dir)
@@ -583,9 +611,20 @@ def test_cli_init_on_existing_ge_yml(tmp_path_factory):
     runner.invoke(cli, ["init"], input="Y\n4\n")
 
     try:
-        result = runner.invoke(cli, ["init"], input="Y\n4\n")
-        assert "This looks like an existing project!" in result.output
-        assert "open a tutorial notebook" in result.output
+        result = runner.invoke(cli, ["init"])
+        assert result.exit_code == 0
+        obs = result.output
+
+        # Users should see:
+        assert "This looks like an existing project" in obs
+        assert "appears complete" in obs
+        assert "ready to roll." in obs
+        assert "open a tutorial notebook" in obs
+
+        # Users should NOT see:
+        assert "Great Expectations needs some directories that are not in source control." not in obs
+        assert "You may see new directories in" not in obs
+        assert "Let's add Great Expectations to your project, by scaffolding" not in obs
     except:
         raise
     finally:
