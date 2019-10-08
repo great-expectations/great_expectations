@@ -164,6 +164,7 @@ class Dataset(MetaDataset):
         'get_column_unique_count',
         'get_column_value_counts',
         'get_row_count',
+        'get_column_count',
         'get_table_columns',
         'get_column_count_in_range',
     ]
@@ -188,6 +189,10 @@ class Dataset(MetaDataset):
 
     def get_row_count(self):
         """Returns: int, table row count"""
+        raise NotImplementedError
+
+    def get_column_count(self):
+        """Returns: int, table column count"""
         raise NotImplementedError
 
     def get_table_columns(self):
@@ -485,6 +490,160 @@ class Dataset(MetaDataset):
                     }
                 }
             }
+
+    # noinspection PyUnusedLocal
+    @DocInherit
+    @DataAsset.expectation(['min_value', 'max_value'])
+    def expect_table_column_count_to_be_between(
+        self,
+        min_value=None, max_value=None,
+        strict_min=False, strict_max=False,
+        result_format=None, include_config=False, catch_exceptions=None,
+        meta=None,
+    ):
+        """Expect the number of columns to be between two values.
+
+        expect_table_column_count_to_be_between is a :func:`expectation \
+        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        ``column_map_expectation`` or ``column_aggregate_expectation``.
+
+        Keyword Args:
+            min_value (int or None): \
+                The minimum number of columns, inclusive unless strict_min=True.
+            max_value (int or None): \
+                The maximum number of columns, inclusive unless strict_max=True.
+            strict_min (boolean):
+                If True, the table column count must be strictly larger than min_value.
+            strict_max (boolean):
+                If True, the table column count be strictly smaller than max_value.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable columns has \
+              no minimum.
+            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable columns has \
+              no maximum.
+
+        See Also:
+            expect_table_column_count_to_equal
+        """
+        try:
+            if min_value is not None:
+                if not float(min_value).is_integer():
+                    raise ValueError("min_value must be integer")
+            if max_value is not None:
+                if not float(max_value).is_integer():
+                    raise ValueError("max_value must be integer")
+        except ValueError:
+            raise ValueError("min_value and max_value must be integers")
+
+        # check that min_value or max_value is set
+        # if min_value is None and max_value is None:
+        #     raise Exception('Must specify either or both of min_value and max_value')
+
+        column_count = self.get_column_count()
+
+        if min_value is not None:
+            if strict_min:
+                above_min = column_count > min_value
+            else:
+                above_min = column_count >= min_value
+        else:
+            above_min = True
+
+        if max_value is not None:
+            if strict_max:
+                below_max = column_count < max_value
+            else:
+                below_max = column_count <= max_value
+        else:
+            below_max = True
+
+        outcome = above_min and below_max
+
+        return {
+            'success': outcome,
+            'result': {
+                'observed_value': column_count
+            }
+        }
+
+    # noinspection PyUnusedLocal
+    @DocInherit
+    @DataAsset.expectation(['value'])
+    def expect_table_column_count_to_equal(
+            self,
+            value,
+            result_format=None, include_config=False, catch_exceptions=None,
+            meta=None
+    ):
+        """Expect the number of columns to equal a value.
+
+        expect_table_column_count_to_equal is a :func:`expectation \
+        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        ``column_map_expectation`` or ``column_aggregate_expectation``.
+
+        Args:
+            value (int): \
+                The expected number of columns.
+
+        Other Parameters:
+            result_format (string or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        See Also:
+            expect_table_column_count_to_be_between
+        """
+        try:
+            if not float(value).is_integer():
+                raise ValueError("value must be an integer")
+        except ValueError:
+            raise ValueError("value must be an integer")
+
+        column_count = self.get_column_count()
+
+        return {
+            'success': column_count == value,
+            'result': {
+                'observed_value': column_count
+            }
+        }
 
     # noinspection PyUnusedLocal
     @DocInherit

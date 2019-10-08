@@ -209,8 +209,11 @@ class SparkDFDataset(MetaSparkDFDataset):
     def get_row_count(self):
         return self.spark_df.count()
 
+    def get_column_count(self):
+        pass
+
     def get_table_columns(self):
-        return self.spark_df.columns
+        return len(self.spark_df.columns)
 
     def get_column_nonnull_count(self, column):
         return self.spark_df.filter(col(column).isNotNull()).count()
