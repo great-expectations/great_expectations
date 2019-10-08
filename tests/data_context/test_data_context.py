@@ -6,7 +6,7 @@ try:
     from unittest import mock
 except ImportError:
     import mock
-    
+
 import os
 import shutil
 import json
@@ -247,7 +247,7 @@ def test_evaluation_parameter_store_methods(data_context):
 #         }
 #     )
 #     # print(json.dumps(data_context._project_config, indent=2))
-    
+
 #     #The snapshot directory shouldn't contain any files
 #     # assert len(glob(snapshot_dir+"/*/*/*/*/*.csv.gz")) == 0
 #     print(gen_directory_tree_str(snapshot_dir))
@@ -258,7 +258,7 @@ def test_evaluation_parameter_store_methods(data_context):
 #         source_patient_data_results,
 #         data_asset=data_asset
 #     )
-    
+
 #     #This snapshot directory should now exist
 #     assert os.path.isdir(snapshot_dir)
 
@@ -275,7 +275,7 @@ def test_compile(data_context):
         'raw': {
             'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value',
             'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value'
-            }, 
+            },
         'data_assets': {
             DataAssetIdentifier(
                 datasource='mydatasource',
@@ -293,7 +293,7 @@ def test_compile(data_context):
                         }
                     }
                 }
-            }, 
+            },
             DataAssetIdentifier(
                 datasource='mydatasource',
                 generator='mygenerator',
@@ -342,15 +342,15 @@ def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_cs
 
 def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_csv, tmp_path_factory):
     # If no datasource is configured, nothing should be allowed to normalize:
-    with pytest.raises(DataContextError) as exc:    
+    with pytest.raises(DataContextError) as exc:
         empty_data_context._normalize_data_asset_name("f1")
         assert "No datasource configured" in exc.message
 
-    with pytest.raises(DataContextError) as exc:    
+    with pytest.raises(DataContextError) as exc:
         empty_data_context._normalize_data_asset_name("my_datasource/f1")
         assert "No datasource configured" in exc.message
 
-    with pytest.raises(DataContextError) as exc:    
+    with pytest.raises(DataContextError) as exc:
         empty_data_context._normalize_data_asset_name("my_datasource/default/f1")
         assert "No datasource configured" in exc.message
 
@@ -391,11 +391,11 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     with pytest.raises(DataContextError) as exc:
         data_context._normalize_data_asset_name("my_fake_datasource/default/f7")
         assert "no configured datasource 'my_fake_datasource' with generator 'default'" in exc.message
-    
+
     with pytest.raises(DataContextError) as exc:
         data_context._normalize_data_asset_name("my_datasource/my_fake_generator/f7")
         assert "no configured datasource 'my_datasource' with generator 'my_fake_generator'" in exc.message
-    
+
     ###
     # Add a second datasource
     ###
@@ -413,7 +413,7 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     # We can still reference *unambiguous* data_asset_names:
     assert data_context._normalize_data_asset_name("f1") == \
         NormalizedDataAssetName("my_datasource", "default", "f1")
-    
+
     assert data_context._normalize_data_asset_name("f4") == \
         NormalizedDataAssetName("my_second_datasource", "default", "f4")
 
@@ -425,7 +425,7 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     # Two-name resolution still works since generators are not ambiguous in that case
     assert data_context._normalize_data_asset_name("my_datasource/f3") == \
         NormalizedDataAssetName("my_datasource", "default", "f3")
-    
+
     # We can also create new namespaces using only two components since that is not ambiguous
     assert data_context._normalize_data_asset_name("my_datasource/f9") == \
         NormalizedDataAssetName("my_datasource", "default", "f9")
@@ -642,7 +642,7 @@ data_docs/
     # save data_docs locally
     safe_mmkdir("./tests/data_context/output")
     safe_mmkdir("./tests/data_context/output/data_docs")
-    
+
     if os.path.isdir("./tests/data_context/output/data_docs"):
         shutil.rmtree("./tests/data_context/output/data_docs")
     shutil.copytree(
@@ -733,7 +733,7 @@ def test_ExplorerDataContext(titanic_data_context):
     context_root_directory = titanic_data_context.root_directory
     explorer_data_context = ExplorerDataContext(context_root_directory)
     assert explorer_data_context._expectation_explorer_manager
-    
+
 
 @freeze_time("2012-01-14")
 def test_ExplorerDataContext_expectation_widget(titanic_data_context):
@@ -799,11 +799,11 @@ def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_conte
     )
 
     print(context._normalize_absolute_or_relative_path("yikes"))
-    assert "test__normalize_absolute_or_relative_path__dir0/yikes" in context._normalize_absolute_or_relative_path("yikes") 
+    assert "test__normalize_absolute_or_relative_path__dir0/yikes" in context._normalize_absolute_or_relative_path("yikes")
 
     context._normalize_absolute_or_relative_path("/yikes")
-    assert "test__normalize_absolute_or_relative_path__dir" not in context._normalize_absolute_or_relative_path("/yikes") 
-    assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes") 
+    assert "test__normalize_absolute_or_relative_path__dir" not in context._normalize_absolute_or_relative_path("/yikes")
+    assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
 def test__get_normalized_data_asset_name_filepath(basic_data_context_config):
@@ -1033,6 +1033,63 @@ great_expectations/
         samples/
         validations/
 """
+
+
+def test_data_context_create_does_nothing_if_all_uncommitted_dirs_exist(tmp_path_factory):
+    expected = """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    datasources/
+    expectations/
+    notebooks/
+        create_expectations.ipynb
+        integrate_validation_into_pipeline.ipynb
+    plugins/
+    uncommitted/
+        config_variables.yml
+        data_docs/
+        samples/
+        validations/
+"""
+    project_path = str(tmp_path_factory.mktemp('stuff'))
+    ge_dir = os.path.join(project_path, "great_expectations")
+
+    DataContext.create(project_path)
+    fixture = gen_directory_tree_str(ge_dir)
+    assert fixture == expected
+
+    # re-run create to simulate onboarding
+    DataContext.create(project_path)
+
+    obs = gen_directory_tree_str(ge_dir)
+    assert obs == expected
+
+
+def test_data_context_do_all_uncommitted_dirs_exist(tmp_path_factory):
+    expected = """\
+uncommitted/
+    config_variables.yml
+    data_docs/
+    samples/
+    validations/
+"""
+    project_path = str(tmp_path_factory.mktemp('stuff'))
+    ge_dir = os.path.join(project_path, "great_expectations")
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+    DataContext.create(project_path)
+    fixture = gen_directory_tree_str(uncommitted_dir)
+    assert fixture == expected
+
+    # Test that all exist
+    assert DataContext.do_all_uncommitted_directories_exist(ge_dir)
+
+    # remove a few
+    shutil.rmtree(os.path.join(uncommitted_dir, "data_docs"))
+    shutil.rmtree(os.path.join(uncommitted_dir, "validations"))
+
+    # Test that not all exist
+    assert not DataContext.do_all_uncommitted_directories_exist(project_path)
 
 
 def test_data_context_create_does_not_overwrite_existing_config_variables_yml(tmp_path_factory):

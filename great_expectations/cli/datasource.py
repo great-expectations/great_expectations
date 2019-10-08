@@ -395,7 +395,7 @@ creating and saving an expectation suite for validation:
     - `<green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>`
 """
 
-msg_go_to_notebook = """    - To create expectations for your data, start Jupyter and open a tutorial notebook:
+MSG_GO_TO_NOTEBOOK = """    - To create expectations for your data, start Jupyter and open a tutorial notebook:
         - To launch with jupyter notebooks:
             <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
         - To launch with jupyter lab:
