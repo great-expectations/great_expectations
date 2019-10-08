@@ -16,13 +16,13 @@ logger = logging.getLogger(__name__)
 
 
 class GlobReaderGenerator(BatchGenerator):
-    """GlobReaderGenerator processes files in a directory according to glob patterns to produce batches of data.
+    r"""GlobReaderGenerator processes files in a directory according to glob patterns to produce batches of data.
 
-    A more interesting asset_glob might look like the following:
+    A more interesting asset_glob might look like the following::
 
-    daily_logs:
-      glob: daily_logs/*.csv
-      partition_regex: daily_logs/((19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01]))_(.*)\.csv
+        daily_logs:
+          glob: daily_logs/*.csv
+          partition_regex: daily_logs/((19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01]))_(.*)\.csv
 
 
     The "glob" key ensures that every csv file in the daily_logs directory is considered a batch for this data asset.
