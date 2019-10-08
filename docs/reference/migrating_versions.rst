@@ -60,6 +60,8 @@ BREAKING:
    - ValidationsStore
    - ExpectationsStore
    - ActionListValidationOperator
+ - Several modules are now refactored into different names including all datasources
+ - InMemoryBatchKwargs use the key dataset instead of df to be more explicit
 
 *************************
 Upgrading to 0.7.x
