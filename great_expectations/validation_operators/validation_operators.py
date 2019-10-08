@@ -115,7 +115,10 @@ class ActionListValidationOperator(ValidationOperator):
         return batch
 
     def run(self, assets_to_validate, run_identifier):
-        result_object = {}
+        result_object = {
+            "success": None,
+            "details": {}
+        }
 
         for item in assets_to_validate:
             batch = self._build_batch_from_item(item)
@@ -129,11 +132,13 @@ class ActionListValidationOperator(ValidationOperator):
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_identifier,
             )
-            result_object[validation_result_id] = {}
+            result_object["details"][expectation_suite_identifier] = {}
             batch_validation_result = batch.validate(run_id=run_identifier)
-            result_object[validation_result_id]["validation_result"] = batch_validation_result
+            result_object["details"][expectation_suite_identifier]["validation_result"] = batch_validation_result
             batch_actions_results = self._run_actions(batch, expectation_suite_identifier, batch._expectation_suite, batch_validation_result, run_identifier)
-            result_object[validation_result_id]["actions_results"] = batch_actions_results
+            result_object["details"][expectation_suite_identifier]["actions_results"] = batch_actions_results
+
+        result_object["success"] = all([val["validation_result"]["success"] for val in result_object["details"].values()])
 
         return result_object
 
