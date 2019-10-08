@@ -4,3 +4,4 @@ from .subdir_reader_generator import SubdirReaderGenerator
 from .in_memory_generator import InMemoryGenerator
 from .query_generator import QueryGenerator
 from .table_generator import TableGenerator
+from .s3_generator import S3Generator
