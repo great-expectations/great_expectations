@@ -125,8 +125,6 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": []
@@ -405,8 +403,6 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": []
@@ -707,8 +703,6 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": []
@@ -965,8 +959,6 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 557,
         "unexpected_percent": 42.42193450114242,
         "partial_unexpected_list": []
@@ -1474,8 +1466,6 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": []
@@ -1716,8 +1706,6 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": []
@@ -1931,8 +1919,6 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": []

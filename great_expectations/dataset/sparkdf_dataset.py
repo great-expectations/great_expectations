@@ -163,6 +163,8 @@ class MetaSparkDFDataset(Dataset):
             # FIXME Temp fix for result format
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 del return_obj['result']['unexpected_percent_nonmissing']
+                del return_obj['result']['missing_count']
+                del return_obj['result']['missing_percent']
                 try:
                     del return_obj['result']['partial_unexpected_counts']
                 except KeyError:
