@@ -14,7 +14,7 @@ from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource.types.batch_kwargs import (
     PathBatchKwargs,
-    PathBatchId,
+    BatchId,
     BatchFingerprint
 )
 from great_expectations.dataset import PandasDataset
@@ -36,8 +36,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
     datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
 
     assert datasource.get_available_data_asset_names() == {"default": {"test"}}
-    manual_batch_kwargs = datasource.no_generator_build_batch_kwargs(
-        os.path.join(str(test_folder_connection_path), "test.csv"))
+    manual_batch_kwargs = PathBatchKwargs(path=os.path.join(str(test_folder_connection_path), "test.csv"))
 
     # Get the default (subdir_path) generator
     generator = datasource.get_generator()
@@ -55,7 +54,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
 
     ## A datasource should always return an object with a typed batch_id
     assert isinstance(dataset.batch_kwargs, PathBatchKwargs)
-    assert isinstance(dataset.batch_id, PathBatchId)
+    assert isinstance(dataset.batch_id, BatchId)
     assert isinstance(dataset.batch_fingerprint, BatchFingerprint)
 
 
