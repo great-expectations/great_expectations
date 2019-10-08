@@ -7,7 +7,7 @@ import logging
 
 from ruamel.yaml import YAML
 
-from ..data_context.types import NormalizedDataAssetName
+from ..data_context.types import NormalizedDataAssetName, DataAssetIdentifier
 from great_expectations.data_context.util import (
     load_class,
     instantiate_class_from_config
@@ -351,27 +351,70 @@ class Datasource(object):
 
     def build_batch_kwargs(self, data_asset_name, *args, **kwargs):
         """
-        Datasource-specific logic that can handle translation of in-line batch identification information to
-        batch_kwargs understandable by the provided datasource.
-
-        For example, a PandasDatasource may construct a filesystem path from positional arguments to provide
-        an easy way of specifying the batch needed by the user.
+        Build batch kwargs for a requested data_asset. Try to use a generator where possible to support partitioning,
+        but fall back to datasource-default behavior if the generator cannot be identified.
 
         Args:
-            data_asset_name (NormalizedDataAssetName): the data_asset_name for which to build batch_kwargs
-            *args: positional arguments used by the datasource
-            **kwargs: key-value pairs used by the datasource
+            data_asset_name: the data asset for which to build batch_kwargs; if a normalized name is provided,
+                use the named generator.
+            *args: at most exactly one positional argument can be provided from which to build kwargs
+            **kwargs: additional keyword arguments to be used to build the batch_kwargs
 
         Returns:
-            a batch_kwargs object understandable by the datasource
+            A PandasDatasourceBatchKwargs object suitable for building a batch of data from this datasource
+
         """
-        raise NotImplementedError
+        if isinstance(data_asset_name, (NormalizedDataAssetName, DataAssetIdentifier)):
+            generator_name = data_asset_name.generator
+            generator_asset = data_asset_name.generator_asset
+        elif len(self._datasource_config["generators"]) == 1:
+            logger.warning("Falling back to only configured generator to build batch_kwargs; consider explicitly "
+                           "declaring the generator using named_generator_build_batch_kwargs or a DataAssetIdentifier.")
+            generator_name = list(self._datasource_config["generators"].keys())[0]
+            generator_asset = data_asset_name
+        else:
+            raise BatchKwargsError(
+                "Unable to determine generator. Consider using named_generator_build_batch_kwargs or a "
+                "DataAssetIdentifier.",
+                {"args": args,
+                 "kwargs": kwargs}
+            )
+
+        return self.named_generator_build_batch_kwargs(
+            generator_name,
+            generator_asset,
+            *args,
+            **kwargs
+        )
 
     def named_generator_build_batch_kwargs(self, generator_name, generator_asset, *args, **kwargs):
-        raise NotImplementedError
+        """Use the named generator to build batch_kwargs"""
+        generator = self.get_generator(generator_name=generator_name)
+        if len(args) == 1:  # We interpret a single argument as a partition_id
+            batch_kwargs = generator.build_batch_kwargs_from_partition_id(
+                generator_asset=generator_asset,
+                partition_id=args[0],
+                batch_kwargs=kwargs
+            )
+        elif len(args) > 0:
+            raise BatchKwargsError("Multiple positional arguments were provided to build_batch_kwargs, but only"
+                                   "one is supported. Please provide named arguments to build_batch_kwargs.")
+        elif "partition_id" in kwargs:
+            batch_kwargs = generator.build_batch_kwargs_from_partition_id(
+                generator_asset=generator_asset,
+                partition_id=kwargs["partition_id"],
+                batch_kwargs=kwargs
+            )
+        else:
+            if len(kwargs) > 0:
+                batch_kwargs = generator.yield_batch_kwargs(generator_asset, kwargs)
+            else:
+                raise BatchKwargsError(
+                    "Unable to build batch_kwargs: no partition_id or base kwargs found to pass to generator.",
+                    batch_kwargs=kwargs
+                )
 
-    def no_generator_build_batch_kwargs(self, *args, **kwargs):
-        raise NotImplementedError
+        return batch_kwargs
 
     def get_data_context(self):
         """Getter for the currently-configured data context."""
