@@ -55,6 +55,13 @@ Some specific changes:
 BREAKING:
  - **top-level `validate` has a new signature**, that offers a variety of different options for specifying the DataAsset
    class to use during validation, including `data_asset_class_name` / `data_asset_module_name` or `data_asset_class`
+ - Internal class name changes between alpha versions:
+   - InMemoryEvaluationParameterStore
+   - ValidationsStore
+   - ExpectationsStore
+   - ActionListValidationOperator
+ - Several modules are now refactored into different names including all datasources
+ - InMemoryBatchKwargs use the key dataset instead of df to be more explicit
 
 *************************
 Upgrading to 0.7.x

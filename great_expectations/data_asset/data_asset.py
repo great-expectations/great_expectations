@@ -1328,7 +1328,7 @@ class DataAsset(object):
             define custom classes, etc. To use developed expectations from the command-line tool, you will still need \
             to define custom classes, etc.
 
-            Check out :ref:`custom_expectations` for more information.
+            Check out :ref:`custom_expectations_reference` for more information.
         """
 
         if PY3:

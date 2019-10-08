@@ -3,10 +3,15 @@ import logging
 from string import Template
 
 from great_expectations.datasource import Datasource
-from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
+from great_expectations.datasource.types import (
+    SqlAlchemyDatasourceQueryBatchKwargs,
+    SqlAlchemyDatasourceTableBatchKwargs,
+    BatchId
+)
+from great_expectations.data_context.types import NormalizedDataAssetName, DataAssetIdentifier
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
 from .generator.query_generator import QueryGenerator
-from great_expectations.exceptions import DatasourceInitializationError
+from great_expectations.exceptions import DatasourceInitializationError, BatchKwargsError
 from great_expectations.types import ClassConfig
 
 logger = logging.getLogger(__name__)
@@ -160,6 +165,11 @@ class SqlAlchemyDatasource(Datasource):
             raise ValueError("SqlAlchemyDatasource cannot instantiate batch with data_asset_type: '%s'. It "
                              "must be a subclass of SqlAlchemyDataset." % data_asset_type.__name__)
 
+        # We need to build a batch_id to be used in the dataframe
+        batch_id = BatchId({
+            "timestamp": time.time()
+        })
+
         if "schema" in batch_kwargs:
             schema = batch_kwargs["schema"]
         else:
@@ -172,7 +182,9 @@ class SqlAlchemyDatasource(Datasource):
                 schema=schema,
                 data_context=self._data_context,
                 expectation_suite=expectation_suite,
-                batch_kwargs=batch_kwargs)
+                batch_kwargs=batch_kwargs,
+                batch_id=batch_id
+            )
 
         elif "query" in batch_kwargs:
             query = Template(batch_kwargs["query"]).safe_substitute(**kwargs)
@@ -181,21 +193,9 @@ class SqlAlchemyDatasource(Datasource):
                 engine=self.engine,
                 data_context=self._data_context,
                 expectation_suite=expectation_suite,
-                batch_kwargs=batch_kwargs)
+                batch_kwargs=batch_kwargs,
+                batch_id=batch_id
+            )
     
         else:
             raise ValueError("Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified")
-
-    def build_batch_kwargs(self, data_asset_name, *args, **kwargs):
-        """Magically build batch_kwargs by guessing that the first non-keyword argument is a table name"""
-        if len(args) > 0:
-            kwargs.update({
-                "table": args[0],
-            })
-        return SqlAlchemyDatasourceTableBatchKwargs(kwargs)
-
-    def named_generator_build_batch_kwargs(self, generator_name, generator_asset, *args, **kwargs):
-        raise NotImplementedError
-
-    def no_generator_build_batch_kwargs(self, *args, **kwargs):
-        raise NotImplementedError

@@ -18,6 +18,8 @@
 #
 import os
 import sys
+import sphinx_rtd_theme
+
 sys.path.insert(0, os.path.abspath('../'))
 
 
@@ -31,11 +33,12 @@ sys.path.insert(0, os.path.abspath('../'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx_rtd_theme',
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     # 'sphinx.ext.mathjax'
-    'sphinxcontrib.napoleon'
+    'sphinx.ext.napoleon'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -205,7 +208,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'great_expectations', u'great_expectations Documentation',
-     author, 'great_expectations', 'One line description of project.',
+     author, 'great_expectations', 'Always know what to expect from your data.',
      'Miscellaneous'),
 ]
 
