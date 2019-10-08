@@ -1,22 +1,12 @@
-.. _custom_expectations:
+.. _custom_expectations_reference:
 
 ####################################
-Custom expectations
+Building Custom Expectations
 ####################################
 
-It's common to want to extend Great Expectations with application- or domain-specific Expectations. For example:
-
-.. code-block:: bash
-
-    expect_column_text_to_be_in_english
-    expect_column_value_to_be_valid_medical_diagnosis_code
-    expect_column_value_to_be_be_unicode_encodable
-
-These Expectations aren't included in the default set, but could be very useful for specific applications.
-
-Fear not! Great Expectations is designed for customization and extensibility.
-
-Side note: in future versions, Great Expectations will probably grow to include additional Expectations. If you have an Expectation that could be universally useful, please make the case on the `Great Expectations issue tracker on github <https://github.com/great-expectations/great_expectations/issues>`_.
+This document provides examples that walk through several methods for building and deploying custom expectations.
+Most of the core Great Expectations expectations are built using expectation decorators, and using decorators on
+existing logic can make bringing custom integrations into your pipeline tests easy.
 
 ****************************************
 Using Expectation Decorators
