@@ -539,10 +539,10 @@ class Dataset(MetaDataset):
 
         Notes:
             * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
-            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable columns has \
-              no minimum.
-            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable columns has \
-              no maximum.
+            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable columns \
+              has no minimum.
+            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable columns \
+              has no maximum.
 
         See Also:
             expect_table_column_count_to_equal
