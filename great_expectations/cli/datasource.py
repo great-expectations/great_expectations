@@ -39,11 +39,13 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
     #     context.add_datasource("dbt", "dbt", profile=dbt_profile)
     if data_source_selection == "4":  # None of the above
         cli_message(msg_unknown_data_source)
-        cli_message("""
+        cli_message(
+            """
 Skipping datasource configuration.
-    - You can add a datasource later by editing the great_expectations.yml file or
-    - ... by running `<green>great_expectations add-datasource</green>`. 
-""")
+    - Add one by running `<green>great_expectations add-datasource</green>` or
+    - ... by editing the `{}` file
+""".format(DataContext.GE_YML)
+        )
 
     return data_source_name
 
@@ -149,21 +151,19 @@ def _add_sqlalchemy_datasource(context):
             break
         except (DatasourceInitializationError, ModuleNotFoundError) as de:
             cli_message(
-                """
-                Cannot connect to the database. Please check your environment and the configuration you provided.
-
-                <red>Database Error: {0:s}</red>>
+                """<red>Cannot connect to the database.
+  - Please check your environment and the configuration you provided.
+  - Database Error: {0:s}</red>>
                 """.format(str(de)))
             if not click.confirm(
-                    """
-                    Enter the credentials again?
-                    """.format(str(de)),
-                    default=True):
+                    "Enter the credentials again?".format(str(de)),
+                    default=True
+            ):
                 cli_message(
-                    """
-                    Exiting datasource configuration.
-                    You can add a datasource later by editing the great_expectations.yml file.
-                    """)
+                    """You can add a datasource later by:
+  - Running <green>great_expectations add-datasource</green>
+  - Editing the {} file.
+""".format(DataContext.GE_YML))
                 return None
 
     return data_source_name
@@ -200,7 +200,7 @@ def _add_spark_datasource(context):
 
 def profile_datasource(context, data_source_name, data_assets=None, profile_all_data_assets=False, max_data_assets=20,additional_batch_kwargs=None):
     """"Profile a named datasource using the specified context"""
-
+    # TODO candidates language is a little obscure
     msg_intro = """
 ========== Profiling ==========
 
@@ -218,12 +218,11 @@ To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/
 Would you like to profile '{0:s}'?
 """
 
-    msg_skipping = """Okay, skipping profiling for now. You can always do this
-later by running `great_expectations profile`.
-    """
+    msg_skipping = "Skipping profiling for now. You can always do this later " \
+                   "by running `<green>great_expectations profile</green>`."
 
     msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
-    """
+"""
 
     msg_too_many_data_assets = """There are {0:d} data assets in {1:s}. Profiling all of them might take too long.    
 """
@@ -232,9 +231,9 @@ later by running `great_expectations profile`.
 """
 
     msg_options = """Choose how to proceed:
-    1. Specify a list of the data assets to profile
-    2. Exit and profile later
-    3. Profile ALL data assets (this might take a while)
+  1. Specify a list of the data assets to profile
+  2. Exit and profile later
+  3. Profile ALL data assets (this might take a while)
 """
 
     msg_data_doc_intro = """
@@ -396,12 +395,9 @@ creating and saving an expectation suite for validation:
     - `<green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>`
 """
 
-msg_go_to_notebook = """
-To create expectations for your data, start Jupyter and open a tutorial notebook:
-
-To launch with jupyter notebooks:
-    <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
-
-To launch with jupyter lab:
-    <green>jupyter lab great_expectations/notebooks/create_expectations.ipynb</green>
+MSG_GO_TO_NOTEBOOK = """    - To create expectations for your data, start Jupyter and open a tutorial notebook:
+        - To launch with jupyter notebooks:
+            <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
+        - To launch with jupyter lab:
+            <green>jupyter lab great_expectations/notebooks/create_expectations.ipynb</green>
 """
