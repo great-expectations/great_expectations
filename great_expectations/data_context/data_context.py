@@ -1111,8 +1111,12 @@ class ConfigOnlyDataContext(object):
 
         if self._stores[self.expectations_store_name].has_key(key) and not overwrite_existing:
             raise ge_exceptions.DataContextError(
-                "expectation_suite with name {expectation_suite_name} already exists for data_asset {data_asset_name}.\
-                 If you would like to overwrite this expectation_suite, set overwrite_existing=True."
+                "expectation_suite with name {} already exists for data_asset "\
+                "{}. If you would like to overwrite this expectation_suite, "\
+                "set overwrite_existing=True.".format(
+                    expectation_suite_name,
+                    data_asset_name
+                )
             )
         else:
             self._stores[self.expectations_store_name].set(key, expectation_suite)
