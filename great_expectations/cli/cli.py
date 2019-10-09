@@ -459,6 +459,7 @@ def do_config_check(target_directory):
             ge_exceptions.InvalidConfigVersionError,
             ge_exceptions.UnsupportedConfigVersionError,
             ge_exceptions.DataContextError,
+            ge_exceptions.PluginClassNotFoundError
             ) as err:
         return False, err.message
 

@@ -1209,11 +1209,11 @@ class DataAsset(object):
         missing_count = element_count - nonnull_count
 
         if element_count > 0:
-            unexpected_percent = unexpected_count / element_count
-            missing_percent = missing_count / element_count
+            unexpected_percent = unexpected_count / element_count * 100
+            missing_percent = missing_count / element_count * 100
 
             if nonnull_count > 0:
-                unexpected_percent_nonmissing = unexpected_count / nonnull_count
+                unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
             else:
                 unexpected_percent_nonmissing = None
 
@@ -1282,7 +1282,7 @@ class DataAsset(object):
             nonnull_count (int): \
                 The number of nonnull values in the column
             mostly (float or None): \
-                A value between 0 and 1 (or None), indicating the percentage of successes required to pass the \
+                A value between 0 and 1 (or None), indicating the fraction of successes required to pass the \
                 expectation as a whole. If mostly=None, then all values must succeed in order for the expectation as \
                 a whole to succeed.
 
@@ -1328,7 +1328,7 @@ class DataAsset(object):
             define custom classes, etc. To use developed expectations from the command-line tool, you will still need \
             to define custom classes, etc.
 
-            Check out :ref:`custom_expectations` for more information.
+            Check out :ref:`custom_expectations_reference` for more information.
         """
 
         if PY3:

@@ -133,7 +133,7 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
             my_ge_df_2,
             my_ge_df_3
         ],
-        run_identifier="test_100"
+        run_id="test_100"
     )
     slack_query = vo._build_slack_query(return_obj)
     expected_slack_query = {'blocks': [{'type': 'divider'}, {'type': 'section', 'text': {'type': 'mrkdwn',
