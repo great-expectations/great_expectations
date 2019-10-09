@@ -231,9 +231,9 @@ Would you like to profile '{0:s}'?
 """
 
     msg_options = """Choose how to proceed:
-    1. Specify a list of the data assets to profile
-    2. Exit and profile later
-    3. Profile ALL data assets (this might take a while)
+  1. Specify a list of the data assets to profile
+  2. Exit and profile later
+  3. Profile ALL data assets (this might take a while)
 """
 
     msg_data_doc_intro = """

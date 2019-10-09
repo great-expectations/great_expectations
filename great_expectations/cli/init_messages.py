@@ -64,3 +64,7 @@ NEW_TEMPLATE_PROMPT = """\nWould you like to install a new config file template?
 NEW_TEMPLATE_INSTALLED = """\nOK. You now have a new config file: `{}`.
   - Please copy the relevant values from the archived file ({}) into this new template.
 """
+
+NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please add one by:
+  - running `<green>great_expectations add-datasource</green>` or
+  - by editing the great_expectations.yml file"""
