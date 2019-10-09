@@ -23,9 +23,7 @@ class ValidationResultsPageRenderer(Renderer):
                 "class_name": "ValidationResultsColumnSectionRenderer"
             }
         self._column_section_renderer = instantiate_class_from_config(
-            config={
-                "class_name": column_section_renderer.get("class_name"),
-            },
+            config=column_section_renderer,
             runtime_config={},
             config_defaults={
                 "module_name": column_section_renderer.get(
@@ -169,9 +167,7 @@ class ExpectationSuitePageRenderer(Renderer):
                 "class_name": "ExpectationSuiteColumnSectionRenderer"
             }
         self._column_section_renderer = instantiate_class_from_config(
-            config={
-                "class_name": column_section_renderer.get("class_name"),
-            },
+            config=column_section_renderer,
             runtime_config={},
             config_defaults={
                 "module_name": column_section_renderer.get(
@@ -365,9 +361,7 @@ class ProfilingResultsPageRenderer(Renderer):
                 "class_name": "ProfilingResultsColumnSectionRenderer"
             }
         self._overview_section_renderer = instantiate_class_from_config(
-            config={
-                "class_name": overview_section_renderer.get("class_name"),
-            },
+            config=overview_section_renderer,
             runtime_config={},
             config_defaults={
                 "module_name": overview_section_renderer.get(
@@ -375,9 +369,7 @@ class ProfilingResultsPageRenderer(Renderer):
             }
         )
         self._column_section_renderer = instantiate_class_from_config(
-            config={
-                "class_name": column_section_renderer.get("class_name"),
-            },
+            config=column_section_renderer,
             runtime_config={},
             config_defaults={
                 "module_name": column_section_renderer.get(
