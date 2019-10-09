@@ -36,7 +36,7 @@
           "Jacobsohn Mr Samuel",
           "Seman Master Betros"
         ],
-        "unexpected_percent": 0.002284843869002285,
+        "unexpected_percent": 0.2284843869002285,
         "element_count": 1313,
         "missing_percent": 0.0,
         "partial_unexpected_counts": [
@@ -58,7 +58,7 @@
           "Jacobsohn Mr Samuel",
           "Seman Master Betros"
         ],
-        "unexpected_percent_nonmissing": 0.002284843869002285,
+        "unexpected_percent_nonmissing": 0.2284843869002285,
         "missing_count": 0,
         "unexpected_index_list": [
           394,
@@ -97,7 +97,7 @@
         "unexpected_list": [
           "*"
         ],
-        "unexpected_percent": 0.0007616146230007616,
+        "unexpected_percent": 0.07616146230007616,
         "element_count": 1313,
         "missing_percent": 0.0,
         "partial_unexpected_counts": [
@@ -109,7 +109,7 @@
         "partial_unexpected_list": [
           "*"
         ],
-        "unexpected_percent_nonmissing": 0.0007616146230007616,
+        "unexpected_percent_nonmissing": 0.07616146230007616,
         "missing_count": 0,
         "unexpected_index_list": [
           456
@@ -139,7 +139,7 @@
         "observed_value": 30.397989417989418,
         "element_count": 1313,
         "missing_count": 557,
-        "missing_percent": 0.4242193450114242
+        "missing_percent": 42.42193450114242
       }
     },
     {
@@ -158,7 +158,7 @@
         "unexpected_list": [],
         "unexpected_percent": 0.0,
         "element_count": 1313,
-        "missing_percent": 0.4242193450114242,
+        "missing_percent": 42.42193450114242,
         "partial_unexpected_counts": [],
         "partial_unexpected_list": [],
         "unexpected_percent_nonmissing": 0.0,

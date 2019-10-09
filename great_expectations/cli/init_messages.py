@@ -1,12 +1,27 @@
 # -*- coding: utf-8 -*-
-from great_expectations import __version__ as ge_version
+from great_expectations import rtd_url_ge_version
 
 # !!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
-GREETING = """      <cyan>~ Always know what to expect from your data. ~</cyan>
-
-If you're new to Great Expectations, this tutorial is a good place to start:
+GREETING = """<cyan>
+                            _____                _   
+                           / ____|              | |  
+                          | |  __ _ __ ___  __ _| |_ 
+                          | | |_ | '__/ _ \/ _` | __|
+                          | |__| | | |  __/ (_| | |_ 
+                           \_____|_|  \___|\__,_|\__|
+           ______                      _        _   _                 
+          |  ____|                    | |      | | (_)                
+          | |__  __  ___ __   ___  ___| |_ __ _| |_ _  ___  _ __  ___ 
+          |  __| \ \/ / '_ \ / _ \/ __| __/ _` | __| |/ _ \| '_ \/ __|
+          | |____ >  <| |_) |  __/ (__| || (_| | |_| | (_) | | | \__ \ 
+          |______/_/\_\ .__/ \___|\___|\__\__,_|\__|_|\___/|_| |_|___/
+                      | |                                             
+                      |_|                                             
+                  ~ Always know what to expect from your data ~
+</cyan>
+New to Great Expectations? Start with this tutorial!
   - <blue>https://docs.greatexpectations.io/en/latest/getting_started/cli_init.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
-""".format(ge_version.replace(".", "_"))
+""".format(rtd_url_ge_version)
 
 LETS_BEGIN_PROMPT = """Let's add Great Expectations to your project, by scaffolding a new great_expectations directory
 that will look like this:
@@ -23,7 +38,6 @@ that will look like this:
     └── uncommitted
         ├── config_variables.yml
         ├── data_docs
-        │   └── local_site
         ├── samples
         └── validations
     
@@ -32,18 +46,21 @@ OK to proceed?
 
 PROJECT_IS_COMPLETE = "This looks like an existing project that <green>appears complete!</green> You are <green>ready to roll.</green>\n"
 
-CONTINUE_ONBOARDING = """This looks like an existing project that is not quite ready. <green>Let's continue your onboarding!</green>
-  - The existing <yellow>{}great_expectations.yml</yellow> will not be modified.
-"""
+RUN_INIT_AGAIN = "OK. You must run <green>great_expectations init</green> to fix the missing files!"
 
-FIX_MISSING_DIRS_PROMPT = """Great Expectations needs some directories that are not in source control.
-  - Would you like to create any that are missing?
-"""
-DIRS_FIXED = """\nDone. You may see new directories in `<yellow>great_expectations/uncommitted</yellow>`.
+COMPLETE_ONBOARDING_PROMPT = """To run locally, we need some files that are not in source control.
+  - Anything existing will not be modified.
+  - Would you like to fix this automatically?"""
+
+ONBOARDING_COMPLETE = """\nDone. You may see new files in `<yellow>great_expectations/uncommitted</yellow>`.
   - Now add secrets to <yellow>great_expectations/uncommitted/config_variables.yml</yellow> to finish onboarding.
 """
-SUGGESTED_ACTIONS = """Some other things you may want to do:
-  - Run '<green>great_expectations build-docs</green>` to see your teammates Expectations!
-  - Run '<green>great_expectations add-datasource</green>` to add a new datasource.
-  - Run '<green>great_expectations profile</green>` to profile some data."""
 
+BUILD_DOCS_PROMPT = "Would you like to build & view this project's Data Docs!?"
+
+NEW_TEMPLATE_PROMPT = """\nWould you like to install a new config file template?
+  - We will move your existing `{}` to `{}`"""
+
+NEW_TEMPLATE_INSTALLED = """\nOK. You now have a new config file: `{}`.
+  - Please copy the relevant values from the archived file ({}) into this new template.
+"""

@@ -125,8 +125,6 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": []
@@ -152,8 +150,8 @@
         "missing_count": 0,
         "missing_percent": 0.0,
         "unexpected_count": 1313,
-        "unexpected_percent": 1.0,
-        "unexpected_percent_nonmissing": 1.0,
+        "unexpected_percent": 100.0,
+        "unexpected_percent_nonmissing": 100.0,
         "partial_unexpected_list": [
           1,
           2,
@@ -405,8 +403,6 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": []
@@ -432,8 +428,8 @@
         "missing_count": 0,
         "missing_percent": 0.0,
         "unexpected_count": 1313,
-        "unexpected_percent": 1.0,
-        "unexpected_percent_nonmissing": 1.0,
+        "unexpected_percent": 100.0,
+        "unexpected_percent_nonmissing": 100.0,
         "partial_unexpected_list": [
           "Allen, Miss Elisabeth Walton",
           "Allison, Miss Helen Loraine",
@@ -582,8 +578,8 @@
         "missing_count": 0,
         "missing_percent": 0.0,
         "unexpected_count": 3,
-        "unexpected_percent": 0.002284843869002285,
-        "unexpected_percent_nonmissing": 0.002284843869002285,
+        "unexpected_percent": 0.2284843869002285,
+        "unexpected_percent_nonmissing": 0.2284843869002285,
         "partial_unexpected_list": [
           "Daly, Mr Peter Denis ",
           "Barber, Ms ",
@@ -707,8 +703,6 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": []
@@ -734,8 +728,8 @@
         "missing_count": 0,
         "missing_percent": 0.0,
         "unexpected_count": 1313,
-        "unexpected_percent": 1.0,
-        "unexpected_percent_nonmissing": 1.0,
+        "unexpected_percent": 100.0,
+        "unexpected_percent_nonmissing": 100.0,
         "partial_unexpected_list": [
           "1st",
           "1st",
@@ -921,7 +915,7 @@
         "observed_value": 75,
         "element_count": 1313,
         "missing_count": 557,
-        "missing_percent": 0.4242193450114242
+        "missing_percent": 42.42193450114242
       },
       "exception_info": {
         "raised_exception": false,
@@ -944,7 +938,7 @@
         "observed_value": 0.0992063492063492,
         "element_count": 1313,
         "missing_count": 557,
-        "missing_percent": 0.4242193450114242
+        "missing_percent": 42.42193450114242
       },
       "exception_info": {
         "raised_exception": false,
@@ -965,10 +959,8 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 557,
-        "unexpected_percent": 0.4242193450114242,
+        "unexpected_percent": 42.42193450114242,
         "partial_unexpected_list": []
       },
       "exception_info": {
@@ -990,10 +982,10 @@
       "result": {
         "element_count": 1313,
         "missing_count": 557,
-        "missing_percent": 0.4242193450114242,
+        "missing_percent": 42.42193450114242,
         "unexpected_count": 756,
-        "unexpected_percent": 0.5757806549885758,
-        "unexpected_percent_nonmissing": 1.0,
+        "unexpected_percent": 57.57806549885758,
+        "unexpected_percent_nonmissing": 100.0,
         "partial_unexpected_list": [
           29.0,
           2.0,
@@ -1141,7 +1133,7 @@
         "observed_value": 0.17,
         "element_count": 1313,
         "missing_count": 557,
-        "missing_percent": 0.4242193450114242
+        "missing_percent": 42.42193450114242
       },
       "exception_info": {
         "raised_exception": false,
@@ -1164,7 +1156,7 @@
         "observed_value": 71.0,
         "element_count": 1313,
         "missing_count": 557,
-        "missing_percent": 0.4242193450114242
+        "missing_percent": 42.42193450114242
       },
       "exception_info": {
         "raised_exception": false,
@@ -1187,7 +1179,7 @@
         "observed_value": 30.397989417989418,
         "element_count": 1313,
         "missing_count": 557,
-        "missing_percent": 0.4242193450114242
+        "missing_percent": 42.42193450114242
       },
       "exception_info": {
         "raised_exception": false,
@@ -1210,7 +1202,7 @@
         "observed_value": 28.0,
         "element_count": 1313,
         "missing_count": 557,
-        "missing_percent": 0.4242193450114242
+        "missing_percent": 42.42193450114242
       },
       "exception_info": {
         "raised_exception": false,
@@ -1248,7 +1240,7 @@
         },
         "element_count": 1313,
         "missing_count": 557,
-        "missing_percent": 0.4242193450114242,
+        "missing_percent": 42.42193450114242,
         "details": {
           "success_details": [
             true,
@@ -1309,7 +1301,7 @@
         "observed_value": 0.0,
         "element_count": 1313,
         "missing_count": 557,
-        "missing_percent": 0.4242193450114242,
+        "missing_percent": 42.42193450114242,
         "details": {
           "observed_partition": {
             "bins": [
@@ -1474,8 +1466,6 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": []
@@ -1501,8 +1491,8 @@
         "missing_count": 0,
         "missing_percent": 0.0,
         "unexpected_count": 1313,
-        "unexpected_percent": 1.0,
-        "unexpected_percent_nonmissing": 1.0,
+        "unexpected_percent": 100.0,
+        "unexpected_percent_nonmissing": 100.0,
         "partial_unexpected_list": [
           "female",
           "female",
@@ -1716,8 +1706,6 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": []
@@ -1743,8 +1731,8 @@
         "missing_count": 0,
         "missing_percent": 0.0,
         "unexpected_count": 1313,
-        "unexpected_percent": 1.0,
-        "unexpected_percent_nonmissing": 1.0,
+        "unexpected_percent": 100.0,
+        "unexpected_percent_nonmissing": 100.0,
         "partial_unexpected_list": [
           1,
           0,
@@ -1931,8 +1919,6 @@
       "success": true,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": []
@@ -1958,8 +1944,8 @@
         "missing_count": 0,
         "missing_percent": 0.0,
         "unexpected_count": 1313,
-        "unexpected_percent": 1.0,
-        "unexpected_percent_nonmissing": 1.0,
+        "unexpected_percent": 100.0,
+        "unexpected_percent_nonmissing": 100.0,
         "partial_unexpected_list": [
           1,
           1,

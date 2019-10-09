@@ -252,10 +252,10 @@ class TestValidation(unittest.TestCase):
                                        "exception_traceback": None,
                                        "raised_exception": False},
                     "result": {"partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
-                               "unexpected_percent": 0.0007616146230007616, "element_count": 1313,
+                               "unexpected_percent": 0.07616146230007616, "element_count": 1313,
                                "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],
                                "partial_unexpected_list": ["*"],
-                               "unexpected_percent_nonmissing": 0.0007616146230007616, "missing_count": 0,
+                               "unexpected_percent_nonmissing": 0.07616146230007616, "missing_count": 0,
                                "unexpected_index_list": [456]}}
             ],
                 "success": expected_results["success"],  # unaffected
