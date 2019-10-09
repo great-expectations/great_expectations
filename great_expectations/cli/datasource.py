@@ -150,19 +150,18 @@ def _add_sqlalchemy_datasource(context):
         except (DatasourceInitializationError, ModuleNotFoundError) as de:
             cli_message(
                 """<red>Cannot connect to the database.
-    - Please check your environment and the configuration you provided.
-    - Database Error: {0:s}</red>>
+  - Please check your environment and the configuration you provided.
+  - Database Error: {0:s}</red>>
                 """.format(str(de)))
             if not click.confirm(
-                    """
-                    Enter the credentials again?
-                    """.format(str(de)),
-                    default=True):
+                    "Enter the credentials again?".format(str(de)),
+                    default=True
+            ):
                 cli_message(
-                    """
-                    Exiting datasource configuration.
-                    You can add a datasource later by editing the great_expectations.yml file.
-                    """)
+                    """You can add a datasource later by:
+  - Running <green>great_expectations add-datasource</green>
+  - Editing the great_expectations.yml file.
+""")
                 return None
 
     return data_source_name

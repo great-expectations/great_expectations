@@ -46,19 +46,21 @@ OK to proceed?
 
 PROJECT_IS_COMPLETE = "This looks like an existing project that <green>appears complete!</green> You are <green>ready to roll.</green>\n"
 
-CONTINUE_ONBOARDING = """This looks like an existing project that is not quite ready. <green>Let's continue your onboarding!</green>
-  - The existing <yellow>{}great_expectations.yml</yellow> will not be modified.
-"""
-
 RUN_INIT_AGAIN = "OK. You must run <green>great_expectations init</green> to fix the missing files!"
 
-COMPLETE_ONBOARDING_PROMPT = """Great Expectations needs some files that are not in source control.
-  - Would you like to fix this automatically?
-"""
+COMPLETE_ONBOARDING_PROMPT = """To run locally, we need some files that are not in source control.
+  - Anything existing will not be modified.
+  - Would you like to fix this automatically?"""
 
 ONBOARDING_COMPLETE = """\nDone. You may see new files in `<yellow>great_expectations/uncommitted</yellow>`.
   - Now add secrets to <yellow>great_expectations/uncommitted/config_variables.yml</yellow> to finish onboarding.
 """
 
-BUILD_DOCS_PROMPT = "Good news - someone built some expectations. " \
-                    "Would you like to build and view Data Docs!?"
+BUILD_DOCS_PROMPT = "Would you like to build & view this project's Data Docs!?"
+
+NEW_TEMPLATE_PROMPT = """\nWould you like to install a new config file template?
+  - We will move your existing `{}` to `{}`"""
+
+NEW_TEMPLATE_INSTALLED = """\nOK. You now have a new config file: `{}`.
+  - Please copy the relevant values from the archived file ({}) into this new template.
+"""

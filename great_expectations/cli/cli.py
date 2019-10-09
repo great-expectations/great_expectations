@@ -9,13 +9,14 @@ import warnings
 import webbrowser
 
 from great_expectations.cli.init_messages import (
-    CONTINUE_ONBOARDING,
-    ONBOARDING_COMPLETE,
+    BUILD_DOCS_PROMPT,
     COMPLETE_ONBOARDING_PROMPT,
     GREETING,
     LETS_BEGIN_PROMPT,
+    NEW_TEMPLATE_INSTALLED,
+    NEW_TEMPLATE_PROMPT,
+    ONBOARDING_COMPLETE,
     PROJECT_IS_COMPLETE,
-    BUILD_DOCS_PROMPT,
     RUN_INIT_AGAIN,
 )
 from .datasource import (
@@ -205,7 +206,7 @@ def init(target_directory):
             # if expectations exist, offer to build docs
             context = DataContext(ge_dir)
             if context.list_expectation_suite_keys():
-                if click.confirm(cli_message(BUILD_DOCS_PROMPT), default=True):
+                if click.confirm(BUILD_DOCS_PROMPT, default=True):
                     context.build_data_docs()
                     _open_data_docs_in_browser(ge_dir)
         except ge_exceptions.DataContextError as e:
@@ -242,9 +243,6 @@ def _create_new_project(target_directory):
 
 
 def _complete_onboarding(target_dir):
-    ge_dir = os.path.join(target_dir, "great_expectations")
-    cli_message(CONTINUE_ONBOARDING.format(ge_dir))
-
     if click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True):
         DataContext.create(target_dir)
         cli_message(ONBOARDING_COMPLETE)
@@ -411,30 +409,26 @@ def check_config(target_directory):
 
 def _offer_to_install_new_template(err, target_directory):
     cli_message("<red>{}</red>".format(err.message))
-    original_filename = "great_expectations.yml"
-    archive_filename = "great_expectations.yml.archive"
+    ge_yml = "great_expectations.yml"
+    archived_yml = "great_expectations.yml.archive"
     if click.confirm(
-            "\nWould you like to install a new config file template?\n    We will move your existing `{}` to `{}`".format(
-                    original_filename, archive_filename), default=True):
-        _archive_existing_project_config(archive_filename, target_directory)
+        NEW_TEMPLATE_PROMPT.format(ge_yml, archived_yml),
+        default=True
+    ):
+        _archive_existing_project_config(archived_yml, target_directory)
         DataContext.write_project_template_to_disk(target_directory)
 
         cli_message(
-            """\nOK. You now have a new yml config file in `{}`.
-
-- Please copy the relevant values from the archived file ({}) into this new
-template.
-""".format(original_filename, archive_filename)
+            NEW_TEMPLATE_INSTALLED.format(ge_yml, archived_yml)
         )
     else:
         # FIXME/TODO insert doc url here
         cli_message(
-            """\nOK. Note to run great_expectations you will need to upgrade your config file to the latest format.
-- Please see the docs here: """
-        )
-    cli_message("""- We are super sorry about this breaking change! :]
-- If you are running into any problems, please reach out on Slack and we can
-help you in realtime:https://greatexpectations.io/slack""")
+            """\nOK. To continue, you will need to upgrade your config file to the latest format.
+  - Please see the docs here:
+  - We are super sorry about this breaking change! :]
+  - If you are running into any problems, please reach out on Slack and we can
+    help you in realtime: https://greatexpectations.io/slack""")
     sys.exit(0)
 
 
