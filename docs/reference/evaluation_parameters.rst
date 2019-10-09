@@ -29,7 +29,7 @@ expectation_suite to be available to multiple expectations or while declaring ad
 .. code-block:: python
 
     >> my_df.set_evaluation_parameter("upstream_row_count", 10)
-    >> my_df.get_evaluation_parameter("upstream_row_count)
+    >> my_df.get_evaluation_parameter("upstream_row_count")
 
 If a parameter has been stored, then it does not need to be provided for a new expectation to be declared:
 
