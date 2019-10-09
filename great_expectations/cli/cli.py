@@ -189,15 +189,15 @@ def init(target_directory):
     appends to a `.gitignore` file.
     """
     target_directory = os.path.abspath(target_directory)
-    ge_dir = os.path.join(target_directory, "great_expectations")
-    ge_yml = os.path.join(ge_dir, "great_expectations.yml")
+    ge_dir = _get_full_path_to_ge_dir(target_directory)
+    ge_yml = os.path.join(ge_dir, DataContext.GE_YML)
 
     cli_message(GREETING)
 
     # TODO this should be a property
     if os.path.isfile(ge_yml):
-        if DataContext.do_all_uncommitted_directories_exist(ge_dir) and \
-                DataContext.does_config_variables_yml_exist(ge_dir):
+        if DataContext.all_uncommitted_directories_exist(ge_dir) and \
+                DataContext.config_variables_yml_exist(ge_dir):
             cli_message(PROJECT_IS_COMPLETE)
         else:
             _complete_onboarding(target_directory)
@@ -222,6 +222,10 @@ def init(target_directory):
 
             profile_datasource(context, data_source_name)
             cli_message(MSG_GO_TO_NOTEBOOK)
+
+
+def _get_full_path_to_ge_dir(target_directory):
+    return os.path.abspath(os.path.join(target_directory, DataContext.GE_DIR))
 
 
 def _open_data_docs_in_browser(ge_dir):
@@ -251,8 +255,12 @@ def _complete_onboarding(target_dir):
 
 
 @cli.command()
-@click.option('--directory', '-d', default="./great_expectations",
-              help='The root of a project directory containing a great_expectations/ config.')
+@click.option(
+    '--directory',
+    '-d',
+    default="./great_expectations",
+    help="The project's great_expectations directory."
+)
 def add_datasource(directory):
     """Add a new datasource to the data context."""
     try:
@@ -278,8 +286,12 @@ def add_datasource(directory):
 @click.option('--profile_all_data_assets', '-A', is_flag=True, default=False,
               help='Profile ALL data assets within the target data source. '
                    'If True, this will override --max_data_assets.')
-@click.option('--directory', '-d', default="./great_expectations",
-              help='The root of a project directory containing a great_expectations/ config.')
+@click.option(
+    "--directory",
+    "-d",
+    default="./great_expectations",
+    help="The project's great_expectations directory."
+)
 @click.option('--batch_kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset.')
 def profile(datasource_name, data_assets, profile_all_data_assets, directory, batch_kwargs):
@@ -323,8 +335,12 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
 
 
 @cli.command()
-@click.option('--directory', '-d', default="./great_expectations",
-              help='The root of a project directory containing a great_expectations/ config.')
+@click.option(
+    '--directory',
+    '-d',
+    default="./great_expectations",
+    help="The project's great_expectations directory."
+)
 @click.option('--site_name', '-s',
               help='The site for which to generate documentation. See data_docs section in great_expectations.yml')
 @click.option('--data_asset_name', '-dan',
@@ -338,10 +354,11 @@ def build_docs(directory, site_name, data_asset_name, view=True):
     """Build Data Docs for a project."""
     logger.debug("Starting cli.build_docs")
 
+    directory = os.path.abspath(directory)
     if data_asset_name is not None and site_name is None:
         cli_message("<red>Error: When specifying `data_asset_name`, `site_name` is required.</red>")
         sys.exit(1)
-        
+
     try:
         context = DataContext(directory)
         build_documentation_impl(
@@ -350,8 +367,7 @@ def build_docs(directory, site_name, data_asset_name, view=True):
             data_asset_name=data_asset_name
         )
         if view:
-            ge_dir = os.path.abspath(directory)
-            _open_data_docs_in_browser(ge_dir)
+            _open_data_docs_in_browser(directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
@@ -386,41 +402,42 @@ def render(render_object):
 
 @cli.command()
 @click.option(
-    '--target_directory',
+    '--directory',
     '-d',
-    default="./",
-    help='The root of the project directory where you want to initialize Great Expectations.'
+    default="./great_expectations",
+    help="The project's great_expectations directory."
 )
-def check_config(target_directory):
+def check_config(directory):
     """Check a config for validity and help with migrations."""
     cli_message("Checking your config files for validity...\n")
 
     try:
-        is_config_ok, error_message = do_config_check(target_directory)
+        is_config_ok, error_message = do_config_check(directory)
         if is_config_ok:
-            cli_message("Your config file appears valid!")
+            cli_message("<green>Your config file appears valid!</green>")
         else:
             cli_message("Unfortunately, your config appears to be invalid:\n")
             cli_message("<red>{}</red>".format(error_message))
             sys.exit(1)
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, target_directory)
+        _offer_to_install_new_template(err, directory)
 
 
-def _offer_to_install_new_template(err, target_directory):
+def _offer_to_install_new_template(err, ge_dir):
+    ge_dir = os.path.abspath(ge_dir)
     cli_message("<red>{}</red>".format(err.message))
-    ge_yml = "great_expectations.yml"
-    archived_yml = "great_expectations.yml.archive"
+    ge_yml = os.path.join(ge_dir, DataContext.GE_YML)
+    archived_yml = ge_yml + ".archive"
+
     if click.confirm(
         NEW_TEMPLATE_PROMPT.format(ge_yml, archived_yml),
         default=True
     ):
-        _archive_existing_project_config(archived_yml, target_directory)
-        DataContext.write_project_template_to_disk(target_directory)
+        # archive existing project config
+        shutil.move(ge_yml, archived_yml)
+        DataContext.write_project_template_to_disk(ge_dir)
 
-        cli_message(
-            NEW_TEMPLATE_INSTALLED.format(ge_yml, archived_yml)
-        )
+        cli_message(NEW_TEMPLATE_INSTALLED.format(ge_yml, archived_yml))
     else:
         # FIXME/TODO insert doc url here
         cli_message(
@@ -432,18 +449,9 @@ def _offer_to_install_new_template(err, target_directory):
     sys.exit(0)
 
 
-def _archive_existing_project_config(archive_filename, target_directory):
-    base = os.path.join(target_directory, "great_expectations")
-    source = os.path.join(base, "great_expectations.yml")
-    destination = os.path.join(base, archive_filename)
-    shutil.move(source, destination)
-
-
 def do_config_check(target_directory):
     try:
-        DataContext(
-            context_root_dir="{}/great_expectations/".format(target_directory)
-        )
+        DataContext(context_root_dir=target_directory)
         return True, None
     except (
             ge_exceptions.InvalidConfigurationYamlError,
