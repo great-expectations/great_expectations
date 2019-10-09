@@ -48,7 +48,7 @@ def scaffold_directories_and_notebooks(base_dir):
     safe_mmkdir(base_dir, exist_ok=True)
     notebook_dir_name = "notebooks"
 
-    open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
+    open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/\n.ipynb_checkpoints/")
 
     for directory in [notebook_dir_name, "expectations", "datasources", "uncommitted", "plugins"]:
         safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
