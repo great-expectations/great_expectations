@@ -151,23 +151,34 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             })
 
         success = evr["success"]
-        try:
-            result = evr["result"]
-        except KeyError:
-            if evr.get("expectation_config") and \
-                    (evr.get("expectation_config").get("expectation_type") in ["expect_column_to_exist"]):
-                # This expectation never returns a result object, but that's OK
-                return None
+        result = evr.get("result", {})
+
+        if ("expectation_config" in evr and
+                "exception_info" in evr and
+                evr["exception_info"]["raised_exception"] is True):
+            template_str = "\n\n$expectation_type raised an exception:\n$exception_message"
+            
             return RenderedComponentContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": "Expectation failed to execute.",
-                    "params": {},
+                    "template": template_str,
+                    "params": {
+                        "expectation_type": evr["expectation_config"]["expectation_type"],
+                        "exception_message": evr["exception_info"]["exception_message"]
+                    },
                     "tag": "strong",
                     "styling": {
-                        "classes": ["text-warning"]
+                        "classes": ["text-danger"],
+                        "params": {
+                            "exception_message": {
+                                "tag": "code"
+                            },
+                            "expectation_type": {
+                                "classes": ["badge", "badge-danger", "mb-2"]
+                            }
+                        }
                     }
-                }
+                },
             })
 
         if success or not result.get("unexpected_count"):
