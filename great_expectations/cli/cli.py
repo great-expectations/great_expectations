@@ -212,8 +212,9 @@ def init(target_directory):
 
     cli_message(msg_go_to_notebook)
 
+
 @cli.command()
-@click.option('--directory', '-d', default="./great_expectations",
+@click.option('--directory', '-d', default=None,
               help='The root of a project directory containing a great_expectations/ config.')
 def add_datasource(directory):
     """Add a new datasource to the data context
@@ -241,7 +242,7 @@ def add_datasource(directory):
 @click.option('--profile_all_data_assets', '-A', is_flag=True, default=False,
               help='Profile ALL data assets within the target data source. '
                    'If True, this will override --max_data_assets.')
-@click.option('--directory', '-d', default="./great_expectations",
+@click.option('--directory', '-d', default=None,
               help='The root of a project directory containing a great_expectations/ config.')
 @click.option('--batch_kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset.')
@@ -292,7 +293,7 @@ def build_documentation():
 
 
 @cli.command()
-@click.option('--directory', '-d', default="./great_expectations",
+@click.option('--directory', '-d', default=None,
               help='The root of a project directory containing a great_expectations/ config.')
 @click.option('--site_name', '-s',
               help='The site for which to generate documentation. See data_docs section in great_expectations.yml')
