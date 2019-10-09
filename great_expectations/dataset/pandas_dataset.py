@@ -1010,8 +1010,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_value_lengths_to_be_between(self, column,
                                                   min_value=None,
                                                   max_value=None,
-                                                  strict_min=False,
-                                                  strict_max=False,
                                                   mostly=None,
                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
