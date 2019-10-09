@@ -497,7 +497,6 @@ class Dataset(MetaDataset):
     def expect_table_column_count_to_be_between(
         self,
         min_value=None, max_value=None,
-        strict_min=False, strict_max=False,
         result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
@@ -509,13 +508,9 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             min_value (int or None): \
-                The minimum number of columns, inclusive unless strict_min=True.
+                The minimum number of columns, inclusive.
             max_value (int or None): \
-                The maximum number of columns, inclusive unless strict_max=True.
-            strict_min (boolean):
-                If True, the table column count must be strictly larger than min_value.
-            strict_max (boolean):
-                If True, the table column count be strictly smaller than max_value.
+                The maximum number of columns, inclusive.
 
         Other Parameters:
             result_format (str or None): \
@@ -538,7 +533,7 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         Notes:
-            * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+            * min_value and max_value are both inclusive.
             * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable columns \
               has no minimum.
             * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable columns \
@@ -564,18 +559,12 @@ class Dataset(MetaDataset):
         column_count = self.get_column_count()
 
         if min_value is not None:
-            if strict_min:
-                above_min = column_count > min_value
-            else:
-                above_min = column_count >= min_value
+            above_min = column_count >= min_value
         else:
             above_min = True
 
         if max_value is not None:
-            if strict_max:
-                below_max = column_count < max_value
-            else:
-                below_max = column_count <= max_value
+            below_max = column_count <= max_value
         else:
             below_max = True
 
@@ -651,7 +640,6 @@ class Dataset(MetaDataset):
     def expect_table_row_count_to_be_between(
         self,
         min_value=None, max_value=None,
-        strict_min=False, strict_max=False,
         result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
@@ -663,13 +651,9 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             min_value (int or None): \
-                The minimum number of rows, inclusive unless strict_min=True.
+                The minimum number of rows, inclusive.
             max_value (int or None): \
-                The maximum number of rows, inclusive unless strict_max=True.
-            strict_min (boolean):
-                If True, the table row count must be strictly larger than min_value.
-            strict_max (boolean):
-                If True, the table row count be strictly smaller than max_value.
+                The maximum number of rows, inclusive.
 
         Other Parameters:
             result_format (str or None): \
@@ -692,7 +676,7 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         Notes:
-            * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+            * min_value and max_value are both inclusive.
             * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has \
               no minimum.
             * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has \
@@ -718,18 +702,12 @@ class Dataset(MetaDataset):
         row_count = self.get_row_count()
 
         if min_value is not None:
-            if strict_min:
-                above_min = row_count > min_value
-            else:
-                above_min = row_count >= min_value
+            above_min = row_count >= min_value
         else:
             above_min = True
 
         if max_value is not None:
-            if strict_max:
-                below_max = row_count < max_value
-            else:
-                below_max = row_count <= max_value
+            below_max = row_count <= max_value
         else:
             below_max = True
 
@@ -1416,8 +1394,6 @@ class Dataset(MetaDataset):
             column,
             min_value=None,
             max_value=None,
-            strict_min=False,
-            strict_max=False,
             mostly=None,
             result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
@@ -1440,10 +1416,6 @@ class Dataset(MetaDataset):
             mostly (None or a float between 0 and 1): \
                 Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
-            strict_min (boolean):
-                If True, value lengths must be strictly larger than min_value, default=False
-            strict_max (boolean):
-                If True, value lengths must be strictly smaller than max_value, default=False
 
         Other Parameters:
             result_format (str or None): \
@@ -1466,7 +1438,7 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         Notes:
-            * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+            * min_value and max_value are both inclusive.
             * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has \
               no minimum.
             * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has \
@@ -2776,7 +2748,6 @@ class Dataset(MetaDataset):
         self,
         column,
         min_value=None, max_value=None,
-        strict_min=False, strict_max=False,
         result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
@@ -2792,10 +2763,6 @@ class Dataset(MetaDataset):
                 The minimum number of unique values allowed.
             max_value (int or None): \
                 The maximum number of unique values allowed.
-            strict_min (boolean):
-                If True, the number of unique values must be strictly larger than min_value, default=False
-            strict_max (boolean):
-                If True, the number of unique values must be strictly smaller than max_value, default=False
 
         Other Parameters:
             result_format (str or None): \
@@ -2825,7 +2792,7 @@ class Dataset(MetaDataset):
                     "observed_value": (int) The number of unique values in the column
                 }
 
-            * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+            * min_value and max_value are both inclusive.
             * If min_value is None, then max_value is treated as an upper bound
             * If max_value is None, then min_value is treated as a lower bound
 
@@ -2845,18 +2812,12 @@ class Dataset(MetaDataset):
             }
 
         if min_value is not None:
-            if strict_min:
-                above_min = unique_value_count > min_value
-            else:
-                above_min = unique_value_count >= min_value
+            above_min = unique_value_count >= min_value
         else:
             above_min = True
 
         if max_value is not None:
-            if strict_max:
-                below_max = unique_value_count < max_value
-            else:
-                below_max = unique_value_count <= max_value
+            below_max = unique_value_count <= max_value
         else:
             below_max = True
 
