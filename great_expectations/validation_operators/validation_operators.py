@@ -28,7 +28,7 @@ class ValidationOperator(object):
     of validation operator classes that will be the descendants of this base class.
     """
 
-    def run(self, assets_to_validate, run_identifier):
+    def run(self, assets_to_validate, run_id):
         raise NotImplementedError
 
 
@@ -76,8 +76,8 @@ class ActionListValidationOperator(ValidationOperator):
         self.actions = {}
         for action_config in action_list:
             assert isinstance(action_config, dict)
-            #NOTE: Eugene: 2019-09-23: need a better way to validation action config:
-            if not set(action_config.keys()) == set(["name", "action"]):
+            #NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
+            if not set(action_config.keys()) == {"name", "action"}:
                 raise KeyError('Action config keys must be ("name", "action"). Instead got {}'.format(action_config.keys()))
 
             new_action = instantiate_class_from_config(
@@ -114,7 +114,7 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch
 
-    def run(self, assets_to_validate, run_identifier):
+    def run(self, assets_to_validate, run_id):
         result_object = {}
 
         for item in assets_to_validate:
@@ -127,18 +127,23 @@ class ActionListValidationOperator(ValidationOperator):
             )
             validation_result_id = ValidationResultIdentifier(
                 expectation_suite_identifier=expectation_suite_identifier,
-                run_id=run_identifier,
+                run_id=run_id,
             )
             result_object[validation_result_id] = {}
-            batch_validation_result = batch.validate(run_id=run_identifier)
+            batch_validation_result = batch.validate(run_id=run_id)
             result_object[validation_result_id]["validation_result"] = batch_validation_result
-            batch_actions_results = self._run_actions(batch, expectation_suite_identifier, batch._expectation_suite, batch_validation_result, run_identifier)
+            batch_actions_results = self._run_actions(
+                batch,
+                expectation_suite_identifier,
+                batch._expectation_suite,
+                batch_validation_result,
+                run_id
+            )
             result_object[validation_result_id]["actions_results"] = batch_actions_results
 
         return result_object
 
-
-    def _run_actions(self, batch, expectation_suite_identifier, expectation_suite, batch_validation_result, run_identifier):
+    def _run_actions(self, batch, expectation_suite_identifier, expectation_suite, batch_validation_result, run_id):
         """
         Runs all actions configured for this operator on the result of validating one
         batch against one expectation suite.
@@ -148,7 +153,7 @@ class ActionListValidationOperator(ValidationOperator):
         :param batch:
         :param expectation_suite:
         :param batch_validation_result:
-        :param run_identifier:
+        :param run_id:
         :return: a dictionary: {action name -> result returned by the action}
         """
         batch_actions_results = {}
@@ -158,7 +163,7 @@ class ActionListValidationOperator(ValidationOperator):
 
             validation_result_id = ValidationResultIdentifier(
                 expectation_suite_identifier=expectation_suite_identifier,
-                run_id=run_identifier,
+                run_id=run_id,
             )
             try:
                 action_result = self.actions[action["name"]].run(
@@ -186,12 +191,12 @@ class ActionListValidationOperator(ValidationOperator):
             )
             validation_result_id = ValidationResultIdentifier(
                 expectation_suite_identifier=expectation_suite_identifier,
-                run_id=run_identifier,
+                run_id=run_id,
             )
             result_object[validation_result_id] = {}
             batch_validation_result = batch.validate()
             result_object[validation_result_id]["validation_result"] = batch_validation_result
-            batch_actions_results = self._run_actions(batch, batch._expectation_suite, batch_validation_result, run_identifier)
+            batch_actions_results = self._run_actions(batch, batch._expectation_suite, batch_validation_result, run_id)
             result_object[validation_result_id]["actions_results"] = batch_actions_results
 
         # NOTE: Eugene: 2019-09-24: Need to define this result object. Discussion required!
@@ -381,7 +386,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         
         return query
 
-    def run(self, assets_to_validate, run_identifier):
+    def run(self, assets_to_validate, run_id):
         # NOTE : Abe 2019/09/12: We should consider typing this object, since it's passed between classes.
         # Maybe use a Store, since it's a key-value thing...?
         # For now, I'm NOT typing it until we gain more practical experience with operators and actions.
@@ -390,7 +395,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             "success": None,
             "failure": {},
             "warning": {},
-            "run_id": run_identifier
+            "run_id": run_id
         }
 
         for item in assets_to_validate:
@@ -402,7 +407,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                     batch._expectation_suite["data_asset_name"]
                 )
             )
-            run_id = run_identifier
+            run_id = run_id
 
             assert not data_asset_identifier is None
             assert not run_id is None
@@ -441,7 +446,13 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                 return_obj["failure"][failure_validation_result_id] = {}
                 failure_validation_result = batch.validate(failure_expectation_suite)
                 return_obj["failure"][failure_validation_result_id]["validation_result"] = failure_validation_result
-                failure_actions_results = self._run_actions(batch, failure_expectation_suite_identifier, failure_expectation_suite, failure_validation_result, run_identifier)
+                failure_actions_results = self._run_actions(
+                    batch,
+                    failure_expectation_suite_identifier,
+                    failure_expectation_suite,
+                    failure_validation_result,
+                    run_id
+                )
                 return_obj["failure"][failure_validation_result_id]["actions_results"] = failure_actions_results
 
                 if not failure_validation_result["success"] and self.stop_on_first_error:
@@ -470,11 +481,16 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                 return_obj["warning"][warning_validation_result_id] = {}
                 warning_validation_result = batch.validate(warning_expectation_suite)
                 return_obj["warning"][warning_validation_result_id]["validation_result"] = warning_validation_result
-                warning_actions_results = self._run_actions(batch, warning_expectation_suite_identifier, warning_expectation_suite, warning_validation_result, run_identifier)
+                warning_actions_results = self._run_actions(
+                    batch,
+                    warning_expectation_suite_identifier,
+                    warning_expectation_suite,
+                    warning_validation_result,
+                    run_id
+                )
                 return_obj["warning"][warning_validation_result_id]["actions_results"] = warning_actions_results
 
-
-        return_obj["success"] = all([val["validation_result"]["success"] for val in return_obj["failure"].values()]) #or len(return_obj["success"]) == 0
+        return_obj["success"] = all([val["validation_result"]["success"] for val in return_obj["failure"].values()])
 
         # NOTE: Eugene: 2019-09-24: Update the data doc sites?
         if self.slack_webhook:
