@@ -79,20 +79,6 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _get_unexpected_table(cls, evr):
-        if evr["exception_info"]["raised_exception"]:
-            unexpected_table_content_block = RenderedComponentContent(**{
-                "content_block_type": "table",
-                "table": [evr["exception_info"]["exception_message"]],
-                "header_row": ["Exception Message"],
-                "styling": {
-                    "body": {
-                        "classes": ["table-bordered", "table-sm", "mt-3"]
-                    }
-                }
-            })
-
-            return unexpected_table_content_block
-
         try:
             result = evr["result"]
         except KeyError:
@@ -137,19 +123,6 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _get_unexpected_statement(cls, evr):
-        if evr["exception_info"]["raised_exception"]:
-            return RenderedComponentContent(**{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "Expectation raised exception.",
-                    "params": {},
-                    "tag": "strong",
-                    "styling": {
-                        "classes": ["text-warning"]
-                    }
-                }
-            })
-
         success = evr["success"]
         try:
             result = evr["result"]
