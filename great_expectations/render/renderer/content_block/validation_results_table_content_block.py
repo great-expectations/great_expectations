@@ -226,9 +226,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
-        expectation_string_fn = getattr(ExpectationStringRenderer, expectation_type, None)
+        expectation_string_fn = getattr(cls, expectation_type, None)
         if expectation_string_fn is None:
-            expectation_string_fn = getattr(ExpectationStringRenderer, "_missing_content_block_fn")
+            expectation_string_fn = getattr(cls, "_missing_content_block_fn")
 
         #This function wraps expect_* methods from ExpectationStringRenderer to generate table classes
         def row_generator_fn(evr, styling=None, include_column_name=True):
