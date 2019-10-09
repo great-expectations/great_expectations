@@ -6,7 +6,6 @@ import altair as alt
 import pandas as pd
 
 from .renderer import Renderer
-from .content_block import TableContentBlockRenderer
 from great_expectations.util import load_class
 from .content_block import ExceptionListContentBlockRenderer
 
@@ -44,6 +43,16 @@ class ColumnSectionRenderer(Renderer):
 
 
 class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
+
+    def __init__(self, overview_table_renderer=None):
+        if overview_table_renderer is None:
+            overview_table_renderer = {
+                "class_name": "ProfilingOverviewTableContentBlockRenderer"
+            }
+        self._overview_table_renderer = load_class(
+            class_name=overview_table_renderer.get("class_name"),
+            module_name=overview_table_renderer.get("module_name", "great_expectations.render.renderer.content_block")
+        )
 
     #Note: Seems awkward to pass section_name and column_type into this renderer.
     #Can't we figure that out internally?
@@ -176,24 +185,23 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             },
         }))
 
-    @classmethod
-    def _render_overview_table(cls, evrs):
-        unique_n = cls._find_evr_by_type(
+    def _render_overview_table(self, evrs):
+        unique_n = self._find_evr_by_type(
             evrs,
             "expect_column_unique_value_count_to_be_between"
         )
-        unique_proportion = cls._find_evr_by_type(
+        unique_proportion = self._find_evr_by_type(
             evrs,
             "expect_column_proportion_of_unique_values_to_be_between"
         )
-        null_evr = cls._find_evr_by_type(
+        null_evr = self._find_evr_by_type(
             evrs,
             "expect_column_values_to_not_be_null"
         )
         evrs = [evr for evr in [unique_n, unique_proportion, null_evr] if (evr is not None and "result" in evr)]
 
         if len(evrs) > 0:
-            new_content_block = TableContentBlockRenderer.render(evrs)
+            new_content_block = self._overview_table_renderer.render(evrs)
             new_content_block["header"] = "Properties"
             new_content_block["styling"] = {
                 "classes": ["col-4", ],
