@@ -592,8 +592,7 @@ def test_cli_init_on_existing_ge_yml_with_some_missing_uncommitted_dirs(tmp_path
         result = runner.invoke(cli, ["init"], input="Y\n4\n")
         obs = result.output
         # Users should see
-        assert "This looks like an existing project" in obs
-        assert "Let's continue your onboarding" in obs
+        assert "To run locally, we need some files that are not in source control." in obs
         assert "You may see new files in" in obs
         assert "Let's add Great Expectations to your project, by scaffolding" not in obs
         # Users should not see
@@ -652,8 +651,7 @@ great_expectations/
 
         # Check CLI output
         obs = result.output
-        assert "This looks like an existing project" in obs
-        assert "Let's continue your onboarding" in obs
+        assert "To run locally, we need some files that are not in source control." in obs
         assert "You may see new files in" in obs
         assert "Let's add Great Expectations to your project, by scaffolding" not in obs
 
