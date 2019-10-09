@@ -49,7 +49,7 @@ class MetaDataset(DataAsset):
         Notes:
             column_map_expectation intercepts and takes action based on the following parameters:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
             column_map_expectation *excludes null values* from being passed to the function
@@ -125,7 +125,7 @@ class MetaDataset(DataAsset):
                 'observed_value': evaluation_result['result']['observed_value'],
                 "element_count": element_count,
                 "missing_count": null_count,
-                "missing_percent": null_count * 1.0 / element_count if element_count > 0 else None
+                "missing_percent": null_count * 100.0 / element_count if element_count > 0 else None
             }
 
             if result_format['result_format'] == 'BASIC':
@@ -656,7 +656,7 @@ class Dataset(MetaDataset):
         This expectation detects duplicates. All duplicated values are counted as exceptions.
 
         For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `result.exceptions_list`, with \
-        `unexpected_percent = 0.6`.
+        `unexpected_percent = 60.0`.
 
         expect_column_values_to_be_unique is a \
         :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
@@ -667,7 +667,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -711,7 +711,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -757,7 +757,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -819,7 +819,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -878,7 +878,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -936,8 +936,8 @@ class Dataset(MetaDataset):
               "success": false
               "result": {
                 "unexpected_count": 1
-                "unexpected_percent": 0.16666666666666666,
-                "unexpected_percent_nonmissing": 0.16666666666666666,
+                "unexpected_percent": 16.66666666666666666,
+                "unexpected_percent_nonmissing": 16.66666666666666666,
                 "partial_unexpected_list": [
                   1
                 ],
@@ -955,7 +955,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
             parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
                 datetimes before making comparisons.
@@ -1009,8 +1009,8 @@ class Dataset(MetaDataset):
               "success": false
               "result": {
                 "unexpected_count": 3
-                "unexpected_percent": 0.5,
-                "unexpected_percent_nonmissing": 0.5,
+                "unexpected_percent": 50.0,
+                "unexpected_percent_nonmissing": 50.0,
                 "partial_unexpected_list": [
                   1, 2, 2
                 ],
@@ -1028,7 +1028,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1095,7 +1095,7 @@ class Dataset(MetaDataset):
                 A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
 
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1158,7 +1158,7 @@ class Dataset(MetaDataset):
             parse_strings_as_datetimes (boolean or None) : \
                 If True, all non-null column values to datetimes before making comparisons
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1216,7 +1216,7 @@ class Dataset(MetaDataset):
             parse_strings_as_datetimes (boolean or None) : \
                 If True, all non-null column values to datetimes before making comparisons
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1279,7 +1279,7 @@ class Dataset(MetaDataset):
             max_value (int or None): \
                 The maximum value for a column entry length.
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
             strict_min (boolean):
                 If True, value lengths must be strictly larger than min_value, default=False
@@ -1341,7 +1341,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1392,7 +1392,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1447,7 +1447,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1504,7 +1504,7 @@ class Dataset(MetaDataset):
                 Use "any" if the value should match at least one regular expression in the list.
                 Use "all" if it should match each regular expression in the list.
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1557,7 +1557,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1613,7 +1613,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1656,7 +1656,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1699,7 +1699,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1747,7 +1747,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:

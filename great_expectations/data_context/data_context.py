@@ -148,6 +148,18 @@ class ConfigOnlyDataContext(object):
         return True
 
     @classmethod
+    def does_config_variables_yml_exist(cls, ge_dir):
+        """Check if all config_variables.yml exists."""
+        path_to_yml = os.path.join(ge_dir, "great_expectations.yml")
+
+        # TODO this is so brittle and gross
+        with open(path_to_yml, "r") as f:
+            config = yaml.load(f)
+        config_var_path = config.get("config_variables_file_path")
+        config_var_path = os.path.join(ge_dir, config_var_path)
+        return os.path.isfile(config_var_path)
+
+    @classmethod
     def write_config_variables_template_to_disk(cls, uncommitted_dir):
         safe_mmkdir(uncommitted_dir)
         config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
@@ -698,12 +710,11 @@ class ConfigOnlyDataContext(object):
                                           **kwargs)
         return data_asset
 
-    # TODO: In the future, we should expand this to allow it to take n data_assets.
-    # Currently, it can accept 0 or 1.
-    def run_validation_operator(self,
-        validation_operator_name,
-        assets_to_validate,
-        run_identifier=None,
+    def run_validation_operator(
+            self,
+            validation_operator_name,
+            assets_to_validate,
+            run_id=None,
     ):
         """
         Run a validation operator to validate data assets and to perform the business logic around
@@ -715,13 +726,13 @@ class ConfigOnlyDataContext(object):
                                     data asset identifier, batch kwargs and expectation suite identifier)
                                     or a triple that will allow the operator to fetch the batch:
                                     (data asset identifier, batch kwargs, expectation suite identifier)
-        :param run_identifier: run id - this is set by the caller and should correspond to something
+        :param run_id: run id - this is set by the caller and should correspond to something
                                 meaningful to the user (e.g., pipeline run id or timestamp)
         :return: A result object that is defined by the class of the operator that is invoked.
         """
         return self.validation_operators[validation_operator_name].run(
             assets_to_validate=assets_to_validate,
-            run_identifier=run_identifier,
+            run_id=run_id,
         )
 
     def add_datasource(self, name, **kwargs):
@@ -832,9 +843,7 @@ class ConfigOnlyDataContext(object):
         return datasource
             
     def list_expectation_suite_keys(self):
-        """Returns a list of available expectation suite keys
-        """
-
+        """Return a list of available expectation suite keys."""
         keys = self.stores[self.expectations_store_name].list_keys()
         return keys
 

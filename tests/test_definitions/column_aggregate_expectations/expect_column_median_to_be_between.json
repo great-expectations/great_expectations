@@ -137,7 +137,7 @@
               "observed_value": 6.0,
               "element_count": 4,
               "missing_count": 1,
-              "missing_percent": 0.25
+              "missing_percent": 25.0
             }
           }
         },

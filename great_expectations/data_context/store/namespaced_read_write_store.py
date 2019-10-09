@@ -259,7 +259,7 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         key_tuple = self._convert_resource_identifier_to_tuple(key.resource_identifier)
         return self.store_backends[
             type(key.resource_identifier)
-        ].set(key_tuple, serialized_value)
+        ].set(key_tuple, serialized_value, content_encoding='utf-8', content_type='text/html')
 
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
@@ -288,4 +288,4 @@ class HtmlSiteStore(NamespacedReadWriteStore):
 
     def write_index_page(self, page):
         """This third store has a special method, which uses a zero-length tuple as a key."""
-        return self.store_backends["index_page"].set((), page)
+        return self.store_backends["index_page"].set((), page, content_encoding='utf-8', content_type='text/html')

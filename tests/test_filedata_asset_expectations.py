@@ -74,7 +74,7 @@ def test_expect_file_line_regex_match_count_to_be_between():
                                                                            skip=1)
 
     assert not fail_trial["success"]
-    assert fail_trial['result']['unexpected_percent'] == 1
+    assert fail_trial['result']['unexpected_percent'] == 100
     assert fail_trial['result']['missing_percent'] == 0
 
     #Count does fall in range
@@ -117,9 +117,9 @@ def test_expect_file_line_regex_match_count_to_equal():
                                                                                  skip=1)
 
     assert not fail_trial["success"]
-    assert fail_trial['result']['unexpected_percent'] == 3/9
-    assert fail_trial['result']['missing_percent'] == 2/9
-    assert fail_trial['result']['unexpected_percent_nonmissing'] == 3/7
+    assert fail_trial['result']['unexpected_percent'] == (3/9 * 100)
+    assert fail_trial['result']['missing_percent'] == (2/9 * 100)
+    assert fail_trial['result']['unexpected_percent_nonmissing'] == (3/7 * 100)
 
     #Mostly success
     mostly_trial = file_incomplete_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",

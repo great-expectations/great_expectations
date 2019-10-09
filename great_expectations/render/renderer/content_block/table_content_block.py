@@ -112,7 +112,7 @@ class TableContentBlockRenderer(ContentBlockRenderer):
                         }
                     }
                 }),
-                "%.1f%%" % (ge_object["result"]["unexpected_percent"] * 100.0) if "unexpected_percent" in ge_object["result"] and ge_object["result"]["unexpected_percent"] is not None else "--",
+                "%.1f%%" % ge_object["result"]["unexpected_percent"] if "unexpected_percent" in ge_object["result"] and ge_object["result"]["unexpected_percent"] is not None else "--",
             ]
         ]
 
