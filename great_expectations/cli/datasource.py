@@ -39,11 +39,13 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
     #     context.add_datasource("dbt", "dbt", profile=dbt_profile)
     if data_source_selection == "4":  # None of the above
         cli_message(msg_unknown_data_source)
-        cli_message("""
+        cli_message(
+            """
 Skipping datasource configuration.
     - Add one by running `<green>great_expectations add-datasource</green>` or
-    - ... by editing the great_expectations.yml file
-""")
+    - ... by editing the `{}` file
+""".format(DataContext.GE_YML)
+        )
 
     return data_source_name
 
@@ -160,8 +162,8 @@ def _add_sqlalchemy_datasource(context):
                 cli_message(
                     """You can add a datasource later by:
   - Running <green>great_expectations add-datasource</green>
-  - Editing the great_expectations.yml file.
-""")
+  - Editing the {} file.
+""".format(DataContext.GE_YML))
                 return None
 
     return data_source_name
