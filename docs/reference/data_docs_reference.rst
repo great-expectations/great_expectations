@@ -138,11 +138,17 @@ suites available to the configured context and validations available in the
     great_expectations build-docs
 
 
-When called without additional arguments, this command will render all the sites specified in great_expectations.yml configuration file.
+When called without additional arguments, this command will render all the Data
+Docs sites specified in great_expectations.yml configuration file into HTML and
+open them in a web browser.
 
-After building, the HTML documentation can be viewed in a web browser. The command will print out the locations of index.html file for each site.
+The command will print out the locations of index.html file for each site.
 
-The sites will not automatically pick up new entities (e.g., a new expectation suite that was added after the last time the site was rendered) - `documentation` command must be called to refresh the site.
+The sites will not automatically pick up new entities (e.g., a new expectation
+suite that was added after the last time the site was rendered) -
+`documentation` command must be called to refresh the site.
+
+To disable the web browser opening behavior use `--no-view` option.
 
 To render just one site, use `--site_name SITE_NAME` option.
 
