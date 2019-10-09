@@ -51,6 +51,8 @@ plugins_directory: plugins/
 # customizing and extending these, read: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/validation_operators_and_actions.html
 validation_operators:
   action_list_operator:
+    # To learn how to configure sending Slack notifications during evaluation
+    # (and other customizations), read: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/reference/validation_operators/perform_action_list_validation_operator.html
     class_name: ActionListValidationOperator
     action_list:
       - name: store_validation_result
@@ -59,17 +61,8 @@ validation_operators:
       - name: store_evaluation_params
         action:
           class_name: ExtractAndStoreEvaluationParamsAction
-      # Uncomment the notify_slack action below to send notifications during evaluation
-      # - name: notify_slack
-      #   action:
-      #     class_name: SlackNotificationAction
-      #     slack_webhook: ${validation_notification_slack_webhook}
-      #     notify_on: all
-      #     renderer:
-      #       module_name: great_expectations.render.renderer.slack_renderer
-      #       class_name: SlackRenderer
     
-
+stores:
 # Stores are configurable places to store things like Expectations, Validations
 # Data Docs, and more. These are for advanced users only - most users can simply
 # leave this section alone.
@@ -77,11 +70,6 @@ validation_operators:
 # Three stores are required: expectations, validations, and
 # evaluation_parameters, and must exist with a valid store entry. Additional
 # stores can be configured for uses such as data_docs, validation_operators, etc.
-expectations_store_name: expectations_store
-validations_store_name: validations_store
-evaluation_parameter_store_name: evaluation_parameter_store
-
-stores:
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
@@ -98,6 +86,10 @@ stores:
     # Evaluation Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/reference/evaluation_parameters.html
     class_name: InMemoryEvaluationParameterStore
+
+expectations_store_name: expectations_store
+validations_store_name: validations_store
+evaluation_parameter_store_name: evaluation_parameter_store
 
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These
