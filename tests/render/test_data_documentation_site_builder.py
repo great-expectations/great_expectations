@@ -52,7 +52,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     run_id = "test_run_id_12345"
     context.run_validation_operator(
         assets_to_validate=[batch],
-        run_identifier=run_id,
+        run_id=run_id,
         validation_operator_name="validate_and_store",
     )
 

@@ -643,7 +643,7 @@ class ConfigOnlyDataContext(object):
     def run_validation_operator(self,
         validation_operator_name,
         assets_to_validate,
-        run_identifier=None,
+        run_id=None,
     ):
         """
         Run a validation operator to validate data assets and to perform the business logic around
@@ -655,13 +655,13 @@ class ConfigOnlyDataContext(object):
                                     data asset identifier, batch kwargs and expectation suite identifier)
                                     or a triple that will allow the operator to fetch the batch:
                                     (data asset identifier, batch kwargs, expectation suite identifier)
-        :param run_identifier: run id - this is set by the caller and should correspond to something
+        :param run_id: run id - this is set by the caller and should correspond to something
                                 meaningful to the user (e.g., pipeline run id or timestamp)
         :return: A result object that is defined by the class of the operator that is invoked.
         """
         return self.validation_operators[validation_operator_name].run(
             assets_to_validate=assets_to_validate,
-            run_identifier=run_identifier,
+            run_id=run_id,
         )
 
     def add_datasource(self, name, **kwargs):
