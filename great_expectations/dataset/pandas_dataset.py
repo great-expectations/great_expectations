@@ -330,6 +330,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def get_row_count(self):
         return self.shape[0]
 
+    def get_column_count(self):
+        return self.shape[1]
+
     def get_table_columns(self):
         return list(self.columns)
 
@@ -1009,8 +1012,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_value_lengths_to_be_between(self, column,
                                                   min_value=None,
                                                   max_value=None,
-                                                  strict_min=False,
-                                                  strict_max=False,
                                                   mostly=None,
                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
