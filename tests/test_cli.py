@@ -13,10 +13,9 @@ import sys
 import re
 from ruamel.yaml import YAML
 
+from great_expectations.data_context.templates import CONFIG_VARIABLES_INTRO
 from great_expectations.exceptions import ConfigNotFoundError
 
-yaml = YAML()
-yaml.default_flow_style = False
 
 try:
     from unittest import mock
@@ -27,9 +26,11 @@ from six import PY2
 
 from great_expectations.cli import cli
 from great_expectations.util import gen_directory_tree_str
-from great_expectations.cli.init import scaffold_directories_and_notebooks
 from great_expectations import __version__ as ge_version
 from .test_utils import assertDeepAlmostEqual
+yaml = YAML()
+yaml.default_flow_style = False
+
 
 def test_cli_command_entrance():
     runner = CliRunner()
@@ -46,14 +47,13 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  add-datasource       Add a new datasource to the data context
-  build-docs           Build Data Docs for a project.
-  build-documentation
-  check-config         Check a config for validity and help with migrations.
-  init                 Initialize a new Great Expectations project.
-  profile              Profile datasources from the specified context.
-  render               Render a great expectations object to documentation.
-  validate             Validate a CSV file against an expectation suite.
+  add-datasource  Add a new datasource to the data context.
+  build-docs      Build Data Docs for a project.
+  check-config    Check a config for validity and help with migrations.
+  init            Create a new project and help with onboarding.
+  profile         Profile datasources from the specified context.
+  render          Render a great expectations object to documentation.
+  validate        Validate a CSV file against an expectation suite.
 """
 
 
@@ -189,7 +189,7 @@ def test_cli_evaluation_parameters():
     assert json_result['evaluation_parameters'] == expected_evaluation_parameters
 
 
-def test_cli_init(tmp_path_factory, filesystem_csv_2):
+def test_cli_init_on_new_project(tmp_path_factory, filesystem_csv_2):
     try:
         basedir = tmp_path_factory.mktemp("test_cli_init_diff")
         basedir = str(basedir)
@@ -213,7 +213,9 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
         assert len(re.findall(
             "{", result.output)) < 100, "CLI contains way more '{' than we would reasonably expect."
 
-        assert """Always know what to expect from your data.""" in result.output
+        assert """Always know what to expect from your data""" in result.output
+        assert """Let's add Great Expectations to your project""" in result.output
+        assert """open a tutorial notebook""" in result.output
 
         assert os.path.isdir(os.path.join(basedir, "great_expectations"))
         assert os.path.isfile(os.path.join(
@@ -524,16 +526,14 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     logger.setLevel(logging.DEBUG)
 
     runner = CliRunner()
-    result = runner.invoke(
-        cli, ["profile", "my_datasource", "-d", project_root_dir])
+    _ = runner.invoke(cli, ["profile", "my_datasource", "-d", project_root_dir])
 
     captured = capsys.readouterr()
 
     assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
 
-    result = runner.invoke(
-        cli, ["build-docs", "-d", project_root_dir])
+    _ = runner.invoke(cli, ["build-docs", "-d", project_root_dir, "--no-view"])
 
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,
@@ -558,9 +558,9 @@ def test_cli_config_not_found(tmp_path_factory):
         assert ConfigNotFoundError().message in result.output
 
         # build-docs
-        result = runner.invoke(cli, ["build-docs", "-d", "./"])
+        result = runner.invoke(cli, ["build-docs", "-d", "./", "--no-view"])
         assert ConfigNotFoundError().message in result.output
-        result = runner.invoke(cli, ["build-docs"])
+        result = runner.invoke(cli, ["build-docs", "--no-view"])
         assert ConfigNotFoundError().message in result.output
 
         # check-config
@@ -574,12 +574,118 @@ def test_cli_config_not_found(tmp_path_factory):
         os.chdir(curdir)
 
 
-def test_scaffold_directories_and_notebooks(tmp_path_factory):
-    empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks"))
-    scaffold_directories_and_notebooks(empty_directory)
-    print(empty_directory)
+def test_cli_init_on_existing_ge_yml_with_some_missing_uncommitted_dirs(tmp_path_factory):
+    """
+    This test walks through the onboarding experience.
 
-    assert set(os.listdir(empty_directory)) == \
-           {'datasources', 'plugins', 'expectations', '.gitignore', 'uncommitted', 'notebooks'}
-    assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
-           {'samples', 'data_docs', 'validations'}
+    The user just checked an existing project out of source control and does
+    not yet have an uncommitted directory.
+    """
+    tmp_dir = str(tmp_path_factory.mktemp("test_cli_init_on_existing_ge_yml"))
+    curdir = os.path.abspath(os.getcwd())
+    os.chdir(tmp_dir)
+    runner = CliRunner()
+    runner.invoke(cli, ["init"], input="Y\n4\n")
+    shutil.rmtree(os.path.join(tmp_dir, "great_expectations/uncommitted"))
+
+    try:
+        result = runner.invoke(cli, ["init"], input="Y\n4\n")
+        obs = result.output
+        # Users should see
+        assert "To run locally, we need some files that are not in source control." in obs
+        assert "You may see new files in" in obs
+        assert "Let's add Great Expectations to your project, by scaffolding" not in obs
+        # Users should not see
+        assert "open a tutorial notebook" not in obs
+    except:
+        raise
+    finally:
+        os.chdir(curdir)
+
+
+def test_cli_init_on_existing_ge_yml_with_missing_uncommitted_dirs_and_missing_config_variables_yml(tmp_path_factory):
+    """
+    This test walks through an onboarding experience.
+
+    The user just is missing some uncommitted dirs and is missing
+    config_variables.yml
+    """
+    tmp_dir = str(tmp_path_factory.mktemp("more_stuff"))
+    ge_dir = os.path.join(tmp_dir, "great_expectations")
+    curdir = os.path.abspath(os.getcwd())
+    os.chdir(tmp_dir)
+    runner = CliRunner()
+    runner.invoke(cli, ["init"], input="Y\n4\n")
+    # mangle setup
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+    shutil.rmtree(os.path.join(uncommitted_dir, "data_docs"))
+    config_var_path = os.path.join(uncommitted_dir, "config_variables.yml")
+    os.remove(config_var_path)
+    # sanity check
+    assert not os.path.isfile(config_var_path)
+
+    try:
+        result = runner.invoke(cli, ["init"], input="Y\n")
+
+        # check dir structure
+        assert gen_directory_tree_str(ge_dir) == """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    datasources/
+    expectations/
+    notebooks/
+        create_expectations.ipynb
+        integrate_validation_into_pipeline.ipynb
+    plugins/
+    uncommitted/
+        config_variables.yml
+        data_docs/
+        samples/
+        validations/
+"""
+        # check config_variables.yml
+        with open(config_var_path, 'r') as f:
+            obs_yml = f.read()
+        assert obs_yml == CONFIG_VARIABLES_INTRO
+
+        # Check CLI output
+        obs = result.output
+        assert "To run locally, we need some files that are not in source control." in obs
+        assert "You may see new files in" in obs
+        assert "Let's add Great Expectations to your project, by scaffolding" not in obs
+
+        assert "open a tutorial notebook" not in obs
+    except:
+        raise
+    finally:
+        os.chdir(curdir)
+
+
+def test_cli_init_does_not_prompt_to_fix_if_all_uncommitted_dirs_exist(tmp_path_factory):
+    """This test walks through an already onboarded project."""
+    tmp_dir = str(tmp_path_factory.mktemp("test_cli_init_on_existing_ge_yml"))
+    curdir = os.path.abspath(os.getcwd())
+    os.chdir(tmp_dir)
+    runner = CliRunner()
+    runner.invoke(cli, ["init"], input="Y\n4\n")
+
+    try:
+        result = runner.invoke(cli, ["init"])
+        assert result.exit_code == 0
+        obs = result.output
+
+        # Users should see:
+        assert "This looks like an existing project" in obs
+        assert "appears complete" in obs
+        assert "ready to roll." in obs
+
+        # Users should NOT see:
+        assert "Great Expectations needs some directories that are not in source control." not in obs
+        assert "You may see new directories in" not in obs
+        assert "Let's add Great Expectations to your project, by scaffolding" not in obs
+        assert "open a tutorial notebook" not in obs
+    except:
+        raise
+    finally:
+        os.chdir(curdir)

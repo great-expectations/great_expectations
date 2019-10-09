@@ -12,7 +12,6 @@ import sqlalchemy as sa
 import great_expectations as ge
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.data_context.util import safe_mmkdir
-from great_expectations.cli.init import scaffold_directories_and_notebooks
 
 from .test_utils import get_dataset
 
@@ -500,7 +499,6 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
                 str(os.path.join(project_dir, "great_expectations.yml")))
     context = ge.data_context.DataContext.create(project_dir)
 
-    scaffold_directories_and_notebooks(ge_directory)
     context.add_datasource(
         "titanic",
         type="pandas",
