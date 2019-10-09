@@ -1,4 +1,4 @@
-from .table_content_block import TableContentBlockRenderer
+from .profiling_overview_table_content_block import ProfilingOverviewTableContentBlockRenderer
 from .bullet_list_content_block import (
     ExpectationSuiteBulletListContentBlockRenderer
 )

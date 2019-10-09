@@ -130,7 +130,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 "exception_info" in evr and
                 evr["exception_info"]["raised_exception"] is True):
             template_str = "\n\n$expectation_type raised an exception:\n$exception_message"
-            
+
             return RenderedComponentContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
@@ -162,7 +162,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             element_count = result["element_count"]
             
             template_str = "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows."
-            
+
             return RenderedComponentContent(**{
                 "content_block_type": "string_template",
                 "string_template": {

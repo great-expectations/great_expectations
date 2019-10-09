@@ -4,7 +4,7 @@ from great_expectations.render.types import (
 )
 
 
-class TableContentBlockRenderer(ContentBlockRenderer):
+class ProfilingOverviewTableContentBlockRenderer(ContentBlockRenderer):
 
     @classmethod
     def render(cls, ge_object, header_row=[]):
