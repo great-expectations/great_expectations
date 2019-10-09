@@ -1,8 +1,6 @@
 from .content_block import ContentBlockRenderer
 from great_expectations.render.types import (
-    RenderedComponentContent,
-    RenderedSectionContent,
-    RenderedComponentContentWrapper,
+    RenderedComponentContent
 )
 
 

@@ -127,6 +127,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         try:
             result = evr["result"]
         except KeyError:
+            if evr.get("expectation_config").get("expectation_type") in ["expect_column_to_exist"]:
+                # This expectation never returns a result object, but that's OK
+                return None
             return RenderedComponentContent(**{
                 "content_block_type": "string_template",
                 "string_template": {

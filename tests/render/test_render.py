@@ -17,7 +17,7 @@ from great_expectations.render.renderer import (
     ValidationResultsColumnSectionRenderer
 )
 from great_expectations.render.view import DefaultJinjaPageView
-from great_expectations.render.renderer.content_block import ValueListContentBlockRenderer
+from great_expectations.render.renderer.content_block import ValidationResultsTableContentBlockRenderer
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
 from great_expectations.data_context.util import safe_mmkdir
@@ -134,7 +134,7 @@ def test_render_expectation_suite_column_section_renderer(titanic_profiled_expec
 
 
 def test_content_block_list_available_expectations():
-    available_expectations = ValueListContentBlockRenderer.list_available_expectations()
+    available_expectations = ValidationResultsTableContentBlockRenderer.list_available_expectations()
     assert available_expectations == ['expect_column_values_to_be_in_set']
 
 
