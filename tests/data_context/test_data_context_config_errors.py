@@ -1,7 +1,7 @@
 import pytest
 import os
 from great_expectations.data_context import DataContext
-from great_expectations.cli.init import file_relative_path
+from great_expectations.util import file_relative_path
 import great_expectations.exceptions as ge_exceptions
 
 BASE_DIR = "fixtures"
