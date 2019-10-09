@@ -399,7 +399,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         'success': True,
         'result': {
             'observed_value': True,
-            'element_count': 162, 'missing_count': 153, 'missing_percent': 0.9444444444444444
+            'element_count': 162, 'missing_count': 153, 'missing_percent': 94.44444444444444
         },
         'exception_info': {
             'raised_exception': False, 'exception_message': None, 'exception_traceback': None

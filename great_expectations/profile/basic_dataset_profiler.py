@@ -1,7 +1,5 @@
 import logging
-import warnings
 from .base import DatasetProfiler
-from great_expectations.dataset.dataset import Dataset
 
 logger = logging.getLogger(__name__)
 

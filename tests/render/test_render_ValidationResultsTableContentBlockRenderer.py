@@ -278,8 +278,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
             "element_count": 1313,
             "missing_count": 0,
             "missing_percent": 0.0,
-            "unexpected_percent": 0.002284843869002285,
-            "unexpected_percent_nonmissing": 0.002284843869002285,
+            "unexpected_percent": 0.2284843869002285,
+            "unexpected_percent_nonmissing": 0.2284843869002285,
             "partial_unexpected_list": [
                 "Daly, Mr Peter Denis ",
                 "Barber, Ms ",
@@ -394,8 +394,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "missing_count": 0,
             "missing_percent": 0.0,
             "unexpected_count": 1313,
-            "unexpected_percent": 1.0,
-            "unexpected_percent_nonmissing": 1.0,
+            "unexpected_percent": 100.0,
+            "unexpected_percent_nonmissing": 100.0,
         },
         "exception_info": {
             "raised_exception": False,
@@ -419,8 +419,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "missing_count": 0,
             "missing_percent": 0.0,
             "unexpected_count": 1313,
-            "unexpected_percent": 1.0,
-            "unexpected_percent_nonmissing": 1.0,
+            "unexpected_percent": 100.0,
+            "unexpected_percent_nonmissing": 100.0,
             "partial_unexpected_list": [
                 1,
                 2,
@@ -466,8 +466,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "missing_count": 0,
             "missing_percent": 0.0,
             "unexpected_count": 1313,
-            "unexpected_percent": 1.0,
-            "unexpected_percent_nonmissing": 1.0,
+            "unexpected_percent": 100.0,
+            "unexpected_percent_nonmissing": 100.0,
             "partial_unexpected_list": [
                 1,
                 2,
