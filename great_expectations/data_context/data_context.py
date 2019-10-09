@@ -148,6 +148,18 @@ class ConfigOnlyDataContext(object):
         return True
 
     @classmethod
+    def does_config_variables_yml_exist(cls, ge_dir):
+        """Check if all config_variables.yml exists."""
+        path_to_yml = os.path.join(ge_dir, "great_expectations.yml")
+
+        # TODO this is so brittle and gross
+        with open(path_to_yml, "r") as f:
+            config = yaml.load(f)
+        config_var_path = config.get("config_variables_file_path")
+        config_var_path = os.path.join(ge_dir, config_var_path)
+        return os.path.isfile(config_var_path)
+
+    @classmethod
     def write_config_variables_template_to_disk(cls, uncommitted_dir):
         safe_mmkdir(uncommitted_dir)
         config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
@@ -832,9 +844,7 @@ class ConfigOnlyDataContext(object):
         return datasource
             
     def list_expectation_suite_keys(self):
-        """Returns a list of available expectation suite keys
-        """
-
+        """Return a list of available expectation suite keys."""
         keys = self.stores[self.expectations_store_name].list_keys()
         return keys
 

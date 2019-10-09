@@ -2,9 +2,24 @@
 from great_expectations import __version__ as ge_version
 
 # !!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
-GREETING = """      <cyan>~ Always know what to expect from your data. ~</cyan>
-
-If you're new to Great Expectations, this tutorial is a good place to start:
+GREETING = """<cyan>
+                            _____                _   
+                           / ____|              | |  
+                          | |  __ _ __ ___  __ _| |_ 
+                          | | |_ | '__/ _ \/ _` | __|
+                          | |__| | | |  __/ (_| | |_ 
+                           \_____|_|  \___|\__,_|\__|
+           ______                      _        _   _                 
+          |  ____|                    | |      | | (_)                
+          | |__  __  ___ __   ___  ___| |_ __ _| |_ _  ___  _ __  ___ 
+          |  __| \ \/ / '_ \ / _ \/ __| __/ _` | __| |/ _ \| '_ \/ __|
+          | |____ >  <| |_) |  __/ (__| || (_| | |_| | (_) | | | \__ \ 
+          |______/_/\_\ .__/ \___|\___|\__\__,_|\__|_|\___/|_| |_|___/
+                      | |                                             
+                      |_|                                             
+                  ~ Always know what to expect from your data ~
+</cyan>
+New to Great Expectations? Start with this tutorial!
   - <blue>https://docs.greatexpectations.io/en/latest/getting_started/cli_init.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
 """.format(ge_version.replace(".", "_"))
 
@@ -36,14 +51,15 @@ CONTINUE_ONBOARDING = """This looks like an existing project that is not quite r
   - The existing <yellow>{}great_expectations.yml</yellow> will not be modified.
 """
 
-FIX_MISSING_DIRS_PROMPT = """Great Expectations needs some directories that are not in source control.
-  - Would you like to create any that are missing?
+RUN_INIT_AGAIN = "OK. You must run <green>great_expectations init</green> to fix the missing files!"
+
+COMPLETE_ONBOARDING_PROMPT = """Great Expectations needs some files that are not in source control.
+  - Would you like to fix this automatically?
 """
-DIRS_FIXED = """\nDone. You may see new directories in `<yellow>great_expectations/uncommitted</yellow>`.
+
+ONBOARDING_COMPLETE = """\nDone. You may see new files in `<yellow>great_expectations/uncommitted</yellow>`.
   - Now add secrets to <yellow>great_expectations/uncommitted/config_variables.yml</yellow> to finish onboarding.
 """
-SUGGESTED_ACTIONS = """Some other things you may want to do:
-  - Run '<green>great_expectations build-docs</green>` to see your teammates Expectations!
-  - Run '<green>great_expectations add-datasource</green>` to add a new datasource.
-  - Run '<green>great_expectations profile</green>` to profile some data."""
 
+BUILD_DOCS_PROMPT = "Good news - someone built some expectations. " \
+                    "Would you like to build and view Data Docs!?"
