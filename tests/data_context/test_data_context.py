@@ -1082,14 +1082,14 @@ uncommitted/
     assert fixture == expected
 
     # Test that all exist
-    assert DataContext.do_all_uncommitted_directories_exist(ge_dir)
+    assert DataContext.all_uncommitted_directories_exist(ge_dir)
 
     # remove a few
     shutil.rmtree(os.path.join(uncommitted_dir, "data_docs"))
     shutil.rmtree(os.path.join(uncommitted_dir, "validations"))
 
     # Test that not all exist
-    assert not DataContext.do_all_uncommitted_directories_exist(project_path)
+    assert not DataContext.all_uncommitted_directories_exist(project_path)
 
 
 def test_data_context_create_does_not_overwrite_existing_config_variables_yml(tmp_path_factory):

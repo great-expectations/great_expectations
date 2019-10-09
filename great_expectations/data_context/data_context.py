@@ -72,7 +72,8 @@ MINIMUM_SUPPORTED_CONFIG_VERSION = 1
 
 
 class ConfigOnlyDataContext(object):
-    """This class implements most of the functionality of DataContext, with a few exceptions.
+    """
+    This class implements most of the functionality of DataContext, with a few exceptions.
 
     1. ConfigOnlyDataContext does not attempt to keep its project_config in sync with a file on disc.
     2. ConfigOnlyDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
@@ -87,11 +88,14 @@ class ConfigOnlyDataContext(object):
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
     UNCOMMITTED_DIRECTORIES = ["data_docs", "samples", "validations"]
+    GE_DIR = "great_expectations"
+    GE_YML = "great_expectations.yml"
 
     # TODO: Consider moving this to DataContext, instead of ConfigOnlyDataContext, since it writes to disc.
     @classmethod
     def create(cls, project_root_dir=None):
-        """Build a new great_expectations directory and DataContext object in the provided project_root_dir.
+        """
+        Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
         `create` will not create a new "great_expectations" directory in the provided folder, provided one does not
         already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
@@ -109,16 +113,16 @@ class ConfigOnlyDataContext(object):
                 "to initialize a new DataContext"
             )
 
-        ge_dir = os.path.join(project_root_dir, "great_expectations")
+        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
         safe_mmkdir(ge_dir, exist_ok=True)
         cls.scaffold_directories(ge_dir)
 
-        if os.path.isfile(os.path.join(ge_dir, "great_expectations.yml")):
-            message = """Warning. An existing `great_expectations.yml` was found here: {}.
-    - No action was taken.""".format(ge_dir)
+        if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
+            message = """Warning. An existing `{}` was found here: {}.
+    - No action was taken.""".format(cls.GE_YML, ge_dir)
             warnings.warn(message)
         else:
-            cls.write_project_template_to_disk(project_root_dir)
+            cls.write_project_template_to_disk(ge_dir)
 
         if os.path.isfile(os.path.join(ge_dir, "notebooks")):
             message = """Warning. An existing `notebooks` directory was found here: {}.
@@ -138,7 +142,7 @@ class ConfigOnlyDataContext(object):
         return cls(ge_dir)
 
     @classmethod
-    def do_all_uncommitted_directories_exist(cls, ge_dir):
+    def all_uncommitted_directories_exist(cls, ge_dir):
         """Check if all uncommitted direcotries exist."""
         uncommitted_dir = os.path.join(ge_dir, "uncommitted")
         for directory in cls.UNCOMMITTED_DIRECTORIES:
@@ -148,9 +152,9 @@ class ConfigOnlyDataContext(object):
         return True
 
     @classmethod
-    def does_config_variables_yml_exist(cls, ge_dir):
+    def config_variables_yml_exist(cls, ge_dir):
         """Check if all config_variables.yml exists."""
-        path_to_yml = os.path.join(ge_dir, "great_expectations.yml")
+        path_to_yml = os.path.join(ge_dir, cls.GE_YML)
 
         # TODO this is so brittle and gross
         with open(path_to_yml, "r") as f:
@@ -167,11 +171,8 @@ class ConfigOnlyDataContext(object):
             template.write(CONFIG_VARIABLES_INTRO)
 
     @classmethod
-    def write_project_template_to_disk(cls, project_root_dir):
-        file_path = os.path.join(
-            project_root_dir,
-            "great_expectations/great_expectations.yml"
-        )
+    def write_project_template_to_disk(cls, ge_dir):
+        file_path = os.path.join(ge_dir, cls.GE_YML)
         with open(file_path, "w") as template:
             template.write(PROJECT_TEMPLATE)
 
@@ -701,7 +702,10 @@ class ConfigOnlyDataContext(object):
         datasource = self.get_datasource(normalized_data_asset_name.datasource)
         if not datasource:
             raise ge_exceptions.DataContextError(
-                "Can't find datasource {0:s} in the config - please check your great_expectations.yml"
+                "Can't find datasource {} in the config - please check your {}".format(
+                    normalized_data_asset_name,
+                    self.GE_YML
+                )
             )
 
         data_asset = datasource.get_batch(normalized_data_asset_name,
@@ -1857,7 +1861,7 @@ class DataContext(ConfigOnlyDataContext):
 
         :return: the configuration object read from the file
         """
-        path_to_yml = os.path.join(self.root_directory, "great_expectations.yml")
+        path_to_yml = os.path.join(self.root_directory, self.GE_YML)
         try:
             with open(path_to_yml, "r") as data:
                 config_dict = yaml.load(data)
@@ -1905,7 +1909,7 @@ class DataContext(ConfigOnlyDataContext):
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
 
-        config_filepath = os.path.join(self.root_directory, "great_expectations.yml")
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)
         with open(config_filepath, "w") as data:
             config = copy.deepcopy(
                 self._project_config
