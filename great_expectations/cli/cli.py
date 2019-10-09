@@ -15,6 +15,7 @@ from great_expectations.cli.init_messages import (
     LETS_BEGIN_PROMPT,
     NEW_TEMPLATE_INSTALLED,
     NEW_TEMPLATE_PROMPT,
+    NO_DATASOURCES_FOUND,
     ONBOARDING_COMPLETE,
     PROJECT_IS_COMPLETE,
     RUN_INIT_AGAIN,
@@ -313,9 +314,15 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
 
     if datasource_name is None:
         datasources = [datasource["name"] for datasource in context.list_datasources()]
-        if len(datasources) > 1:
-            cli_message("Error: please specify the datasource to profile. Available datasources: " + ", ".join(datasources))
-            return
+        if not datasources:
+            cli_message(NO_DATASOURCES_FOUND)
+            sys.exit(-1)
+        elif len(datasources) > 1:
+            cli_message(
+                "<red>Error: please specify the datasource to profile. "\
+                "Available datasources: " + ", ".join(datasources) + "</red>"
+            )
+            sys.exit(-1)
         else:
             profile_datasource(context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets, additional_batch_kwargs=batch_kwargs)
     else:
