@@ -638,12 +638,11 @@ class ConfigOnlyDataContext(object):
                                           **kwargs)
         return data_asset
 
-    # TODO: In the future, we should expand this to allow it to take n data_assets.
-    # Currently, it can accept 0 or 1.
-    def run_validation_operator(self,
-        validation_operator_name,
-        assets_to_validate,
-        run_id=None,
+    def run_validation_operator(
+            self,
+            validation_operator_name,
+            assets_to_validate,
+            run_id=None,
     ):
         """
         Run a validation operator to validate data assets and to perform the business logic around
