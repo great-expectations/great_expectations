@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from great_expectations import __version__ as ge_version
+from great_expectations import rtd_url_ge_version
 
 # !!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
 GREETING = """<cyan>
@@ -21,7 +21,7 @@ GREETING = """<cyan>
 </cyan>
 New to Great Expectations? Start with this tutorial!
   - <blue>https://docs.greatexpectations.io/en/latest/getting_started/cli_init.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
-""".format(ge_version.replace(".", "_"))
+""".format(rtd_url_ge_version)
 
 LETS_BEGIN_PROMPT = """Let's add Great Expectations to your project, by scaffolding a new great_expectations directory
 that will look like this:
@@ -38,7 +38,6 @@ that will look like this:
     └── uncommitted
         ├── config_variables.yml
         ├── data_docs
-        │   └── local_site
         ├── samples
         └── validations
     
