@@ -7,8 +7,7 @@ import pandas as pd
 
 from .renderer import Renderer
 from .content_block import TableContentBlockRenderer
-from .content_block import (ExpectationSuiteBulletListContentBlockRenderer)
-from great_expectations.render.renderer.content_block import ValidationResultsTableContentBlockRenderer
+from great_expectations.util import load_class
 from .content_block import ExceptionListContentBlockRenderer
 
 from ..types import RenderedSectionContent
@@ -412,7 +411,6 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         return new_block
 
-
     @classmethod
     def _render_histogram(cls, evrs):
         # NOTE: This code is very brittle
@@ -473,7 +471,6 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 }
             }
         })
-
 
     @classmethod
     def _render_bar_chart_table(cls, evrs):
@@ -571,6 +568,17 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
 
 class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
+
+    def __init__(self, table_renderer=None):
+        if table_renderer is None:
+            table_renderer = {
+                "class_name": "ValidationResultsTableContentBlockRenderer"
+            }
+        self._table_renderer = load_class(
+            class_name=table_renderer.get("class_name"),
+            module_name=table_renderer.get("module_name", "great_expectations.render.renderer.content_block")
+        )
+
     @classmethod
     def _render_header(cls, validation_results):
         column = cls._get_column_name(validation_results)
@@ -588,22 +596,20 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         
         return validation_results, new_block
     
-    @classmethod
-    def _render_table(cls, validation_results):
-        new_block = ValidationResultsTableContentBlockRenderer.render(
+    def _render_table(self, validation_results):
+        new_block = self._table_renderer.render(
             validation_results,
             include_column_name=False
         )
         
         return [], new_block
     
-    @classmethod
-    def render(cls, validation_results={}):
-        column = cls._get_column_name(validation_results)
+    def render(self, validation_results={}):
+        column = self._get_column_name(validation_results)
         content_blocks = []
-        remaining_evrs, content_block = cls._render_header(validation_results)
+        remaining_evrs, content_block = self._render_header(validation_results)
         content_blocks.append(content_block)
-        remaining_evrs, content_block = cls._render_table(remaining_evrs)
+        remaining_evrs, content_block = self._render_table(remaining_evrs)
         content_blocks.append(content_block)
 
         return RenderedSectionContent(**{
@@ -613,6 +619,16 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
 
 
 class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
+
+    def __init__(self, bullet_list_renderer=None):
+        if bullet_list_renderer is None:
+            bullet_list_renderer = {
+                "class_name": "ExpectationSuiteBulletListContentBlockRenderer"
+            }
+        self._bullet_list_renderer = load_class(
+            class_name=bullet_list_renderer.get("class_name"),
+            module_name=bullet_list_renderer.get("module_name", "great_expectations.render.renderer.content_block")
+        )
 
     @classmethod
     def _render_header(cls, expectations):
@@ -631,25 +647,24 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
 
         return expectations, new_block
 
-    @classmethod
-    def _render_bullet_list(cls, expectations):
-        new_block = ExpectationSuiteBulletListContentBlockRenderer.render(
+    def _render_bullet_list(self, expectations):
+
+        new_block = self._bullet_list_renderer.render(
             expectations,
             include_column_name=False,
         )
 
         return [], new_block
 
-    @classmethod
-    def render(cls, expectations={}):
-        column = cls._get_column_name(expectations)
+    def render(self, expectations={}):
+        column = self._get_column_name(expectations)
 
         content_blocks = []
-        remaining_expectations, header_block = cls._render_header(expectations)
+        remaining_expectations, header_block = self._render_header(expectations)
         content_blocks.append(header_block)
         # remaining_expectations, content_blocks = cls._render_column_type(
         # remaining_expectations, content_blocks)
-        remaining_expectations, bullet_block = cls._render_bullet_list(remaining_expectations)
+        remaining_expectations, bullet_block = self._render_bullet_list(remaining_expectations)
         content_blocks.append(bullet_block)
 
         # NOTE : Some render* functions return None so we filter them out

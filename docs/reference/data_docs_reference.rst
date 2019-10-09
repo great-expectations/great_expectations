@@ -66,6 +66,16 @@ be specified for ``filesystem`` stores. The optional ``run_id_filter`` attribute
 allows to include (``eq`` for exact match) or exclude (``ne``) validation
 results with a particular run id.
 
+
+More advanced configuration
+============================
+
+It is possible to extend validation objects and replace renderers at any level. For example::
+
+.. code-block:: yaml
+
+
+
 *************************
 Building Data Docs
 *************************
