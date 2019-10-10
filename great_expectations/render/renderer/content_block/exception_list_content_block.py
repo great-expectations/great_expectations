@@ -4,6 +4,7 @@ from great_expectations.render.types import (
     RenderedComponentContent,
 )
 
+
 class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     """Render a bullet list of exception messages raised for provided EVRs"""
 
