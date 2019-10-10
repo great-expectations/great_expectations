@@ -68,7 +68,63 @@ be specified for ``filesystem`` stores. The optional ``run_id_filter`` attribute
 allows to include (``eq`` for exact match) or exclude (``ne``) validation
 results with a particular run id.
 
-*********************
+
+More advanced configuration
+============================
+
+It is possible to extend renderers and views and customize the particular class used to render any of the objects
+in your documentation. In this more advanced configuration, a "CustomTableContentBlockRenderer" is used only for
+the validations renderer, and no profiling results are rendered at all.
+
+.. code-block:: yaml
+
+    data_docs_sites:
+      # Data Docs make it simple to visualize data quality in your project. These
+      # include Expectations, Validations & Profiles. The are built for all
+      # Datasources from JSON artifacts in the local repo including validations &
+      # profiles from the uncommitted directory. Read more at
+      # https://docs.greatexpectations.io/en/latestfeatures/data_docs.html
+      local_site:
+        class_name: SiteBuilder
+        store_backend:
+          class_name: FixedLengthTupleFilesystemStoreBackend
+          base_directory: uncommitted/data_docs/local_site/
+        site_section_builders:
+          expectations:
+            class_name: DefaultSiteSectionBuilder
+            source_store_name: expectations_store
+            renderer:
+              module_name: great_expectations.render.renderer
+              class_name: ExpectationSuitePageRenderer
+
+          validations:
+            class_name: DefaultSiteSectionBuilder
+            source_store_name: validations_store
+            run_id_filter:
+              ne: profiling
+            renderer:
+              module_name: great_expectations.render.renderer
+              class_name: ValidationResultsPageRenderer
+              column_section_renderer:
+                class_name: ValidationResultsColumnSectionRenderer
+                table_renderer:
+                  module_name: custom_renderers.custom_table_content_block
+                  class_name: CustomTableContentBlockRenderer
+
+To support that custom renderer, we need to ensure the implementation is available in our plugins/ directory.
+Note that we can use a subdirectory and standard python submodule notation, but that we need to include an __init__.py
+file in our custom_renderers package.
+
+.. code-block:: bash
+
+    plugins/
+    ├── custom_renderers
+    │   ├── __init__.py
+    │   └── custom_table_content_block.py
+    └── additional_ge_plugin.py
+
+
+*************************
 Building Data Docs
 *********************
 
@@ -128,10 +184,10 @@ for how to profile a single batch of data and build documentation from the valid
   batch = context.get_batch('ratings')
 
   # run the profiler on the batch - this returns an expectation suite and validation results for this suite
-  expectation_suite, validation_result = BasicDatasetProfiler.profile(batch)
+  expectation_suite, validation_result = BasicDatasetProfiler().profile(batch)
 
   # use a renderer to produce a document model from the validation results
-  document_model = ProfilingResultsPageRenderer.render(validation_result)
+  document_model = ProfilingResultsPageRenderer().render(validation_result)
 
   # use a view to render the document model (produced by the renderer) into a HTML document
   safe_mmkdir(os.path.dirname(profiling_html_filepath))
