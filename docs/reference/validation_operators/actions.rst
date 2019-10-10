@@ -75,7 +75,7 @@ Configuration
 UpdateDataDocsAction
 --------------------
 
-UpdateDataDocsAction is a namespeace-aware validation action that
+UpdateDataDocsAction is a validation action that
 notifies the site builders of all the data docs sites of the data context
 that a validation result should be added to the data docs.
 
