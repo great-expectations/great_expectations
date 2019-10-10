@@ -56,23 +56,22 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
     #Note: Seems awkward to pass section_name and column_type into this renderer.
     #Can't we figure that out internally?
-    @classmethod
-    def render(cls, evrs, section_name=None, column_type=None):
+    def render(self, evrs, section_name=None, column_type=None):
         if section_name is None:
-            column = cls._get_column_name(evrs)
+            column = self._get_column_name(evrs)
         else:
             column = section_name
 
         content_blocks = []
 
-        content_blocks.append(cls._render_header(evrs, column_type))
+        content_blocks.append(self._render_header(evrs, column_type))
         # content_blocks.append(cls._render_column_type(evrs))
-        content_blocks.append(cls._render_overview_table(evrs))
-        content_blocks.append(cls._render_quantile_table(evrs))
-        content_blocks.append(cls._render_stats_table(evrs))
-        content_blocks.append(cls._render_histogram(evrs))
-        content_blocks.append(cls._render_values_set(evrs))
-        content_blocks.append(cls._render_bar_chart_table(evrs))
+        content_blocks.append(self._render_overview_table(evrs))
+        content_blocks.append(self._render_quantile_table(evrs))
+        content_blocks.append(self._render_stats_table(evrs))
+        content_blocks.append(self._render_histogram(evrs))
+        content_blocks.append(self._render_values_set(evrs))
+        content_blocks.append(self._render_bar_chart_table(evrs))
 
         # content_blocks.append(cls._render_statistics(evrs))
         # content_blocks.append(cls._render_common_values(evrs))
@@ -82,7 +81,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         # content_blocks.append(cls._render_expectation_types(evrs))
         # content_blocks.append(cls._render_unrecognized(evrs))
 
-        content_blocks.append(cls._render_failed(evrs))
+        content_blocks.append(self._render_failed(evrs))
         # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))
 
