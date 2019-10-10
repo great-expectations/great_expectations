@@ -19,6 +19,7 @@ from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     build_continuous_partition_object,
+    build_categorical_partition_object,
     is_valid_partition_object,
     is_valid_categorical_partition_object
 )
@@ -3592,6 +3593,7 @@ class Dataset(MetaDataset):
         threshold=None,
         tail_weight_holdout=0,
         internal_weight_holdout=0,
+        bucketize_data=True,
         result_format=None, include_config=False, catch_exceptions=None,
         meta=None
     ):
@@ -3632,6 +3634,10 @@ class Dataset(MetaDataset):
                 values observed in the data that are not present in the partition. With no tail_weight_holdout, \
                 any value observed outside the provided partition_object will cause KL divergence to rise to +Infinity.\
                 Defaults to 0.
+            bucketize_data (boolean): If True, then continuous data will be bucketized before evaluation. Setting
+                this parameter to false allows evaluation of KL divergence with a None partition object for profiling
+                against discrete data.
+
 
         Other Parameters:
             result_format (str or None): \
@@ -3700,7 +3706,10 @@ class Dataset(MetaDataset):
 
         """
         if partition_object is None:
-            partition_object = build_continuous_partition_object(dataset=self, column=column, bins='uniform')
+            if bucketize_data:
+                partition_object = build_continuous_partition_object(dataset=self, column=column, bins='auto')
+            else:
+                partition_object = build_categorical_partitino_object(dataset=self, column=column)
 
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
@@ -3784,6 +3793,11 @@ class Dataset(MetaDataset):
 
         else:
             # Data are expected to be continuous; discretize first
+            if bucketize_data is False:
+                raise ValueError(
+                    "KL Divergence cannot be computed with a continuous partition object and the bucketize_data "
+                    "parameter set to false."
+                )
             # Build the histogram first using expected bins so that the largest bin is >=
             hist = np.array(self.get_column_hist(column, tuple(partition_object['bins'])))
             # np.histogram(column, partition_object['bins'], density=False)
