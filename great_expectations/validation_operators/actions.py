@@ -218,15 +218,9 @@ class UpdateDataDocsAction(NamespacedValidationAction):
     that a validation result should be added to the data docs.
     """
 
-    def __init__(self,
-                 data_context,
-                 target_store_name=None,
-                 ):
+    def __init__(self, data_context):
         """
-
         :param data_context: data context
-        :param target_store_name: the name of the store in the data context which
-                should be used to store the validation result
         """
         super(UpdateDataDocsAction, self).__init__(data_context)
 
