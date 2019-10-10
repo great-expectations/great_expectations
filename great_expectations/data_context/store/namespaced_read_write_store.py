@@ -191,43 +191,43 @@ class HtmlSiteStore(NamespacedReadWriteStore):
             logger.warning("Configuring a filepath_template or key_length is not supported in SiteBuilder: "
                            "filepaths will be selected based on the type of asset rendered.")
 
-        # Each key type gets its own backend.
-        # If backends were DB connections, this could be inefficient, but it doesn't much matter for filepaths.
-        # One thing to watch for is reversibility of keys.
-        # If several types are being writtten to overlapping directories, we could get collisions.
-        expectations_backend_config = copy.deepcopy(store_backend)
-        if "base_directory" in expectations_backend_config:
-            expectations_backend_config["base_directory"] = os.path.join(expectations_backend_config["base_directory"], "expectations")
-        elif "prefix" in expectations_backend_config:
-            expectations_backend_config["prefix"] = os.path.join(expectations_backend_config["prefix"], "expectations")
-
-        validations_backend_config = copy.deepcopy(store_backend)
-        if "base_directory" in validations_backend_config:
-            validations_backend_config["base_directory"] = os.path.join(validations_backend_config["base_directory"], "validations")
-        elif "prefix" in validations_backend_config:
-            validations_backend_config["prefix"] = os.path.join(validations_backend_config["prefix"], "validations")
+        # # Each key type gets its own backend.
+        # # If backends were DB connections, this could be inefficient, but it doesn't much matter for filepaths.
+        # # One thing to watch for is reversibility of keys.
+        # # If several types are being writtten to overlapping directories, we could get collisions.
+        # expectations_backend_config = copy.deepcopy(store_backend)
+        # if "base_directory" in expectations_backend_config:
+        #     expectations_backend_config["base_directory"] = os.path.join(expectations_backend_config["base_directory"], "expectations")
+        # elif "prefix" in expectations_backend_config:
+        #     expectations_backend_config["prefix"] = os.path.join(expectations_backend_config["prefix"], "expectations")
+        #
+        # validations_backend_config = copy.deepcopy(store_backend)
+        # if "base_directory" in validations_backend_config:
+        #     validations_backend_config["base_directory"] = os.path.join(validations_backend_config["base_directory"], "validations")
+        # elif "prefix" in validations_backend_config:
+        #     validations_backend_config["prefix"] = os.path.join(validations_backend_config["prefix"], "validations")
 
         self.store_backends = {
             ExpectationSuiteIdentifier: instantiate_class_from_config(
-                config=expectations_backend_config,
+                config=store_backend,
                 runtime_config={
                     "root_directory": root_directory
                 },
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
                     "key_length": 4,
-                    "filepath_template": '{0}/{1}/{2}/{3}.html',
+                    "filepath_template": 'expectations/{0}/{1}/{2}/{3}.html',
                 }
             ),
             ValidationResultIdentifier: instantiate_class_from_config(
-                config=validations_backend_config,
+                config=store_backend,
                 runtime_config={
                     "root_directory": root_directory
                 },
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
                     "key_length": 5,
-                    "filepath_template": '{4}/{0}/{1}/{2}/{3}.html',
+                    "filepath_template": 'validations/{4}/{0}/{1}/{2}/{3}.html',
                 }
             ),
             "index_page":  instantiate_class_from_config(
