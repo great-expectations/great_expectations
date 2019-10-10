@@ -161,7 +161,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     # the operator does not have an StoreAction action configured, so the site
     # will not be updated without our call to site builder
 
-    ts_last_mod_0 = os.path.getmtime(os.path.join(site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory, "test_run_id_12345/titanic/default/Titanic/BasicDatasetProfiler.html"))
+    ts_last_mod_0 = os.path.getmtime(os.path.join(site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory, "validations/test_run_id_12345/titanic/default/Titanic/BasicDatasetProfiler.html"))
 
     run_id = "test_run_id_12346"
     operator_result = context.run_validation_operator(
@@ -183,7 +183,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory
 
     # verify that the validation result HTML file rendered in the previous run was NOT updated
-    ts_last_mod_1 = os.path.getmtime(os.path.join(site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory, "test_run_id_12345/titanic/default/Titanic/BasicDatasetProfiler.html"))
+    ts_last_mod_1 = os.path.getmtime(os.path.join(site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory, "validations/test_run_id_12345/titanic/default/Titanic/BasicDatasetProfiler.html"))
 
     assert ts_last_mod_0 == ts_last_mod_1
 
