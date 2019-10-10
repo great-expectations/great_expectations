@@ -298,6 +298,50 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         }]
+
+    @classmethod
+    def expect_table_column_count_to_equal(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["value"]
+        )
+    
+        template_str = "Must have exactly $value columns."
+    
+        return [{
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
+        }]
+
+    @classmethod
+    def expect_table_column_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["min_value", "max_value"]
+        )
+    
+        if params["min_value"] is None and params["max_value"] is None:
+            template_str = "May have any number of columns."
+        else:
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = "Must have between $min_value and $max_value columns."
+            elif params["min_value"] is None:
+                template_str = "Must have less than than $max_value columns."
+            elif params["max_value"] is None:
+                template_str = "Must have more than $min_value columns."
+    
+        return [{
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
+        }]
     
     @classmethod
     def expect_table_row_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
