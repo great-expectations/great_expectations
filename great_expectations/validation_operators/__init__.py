@@ -4,7 +4,8 @@ from .actions import (
     NoOpAction,
     StoreAction,
     ExtractAndStoreEvaluationParamsAction,
-    SlackNotificationAction
+    SlackNotificationAction,
+    UpdateDataDocsAction
 )
 
 from .validation_operators import (

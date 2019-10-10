@@ -209,6 +209,8 @@ class FixedLengthTupleStoreBackend(StoreBackend):
 
         # Apply the regex to the filepath
         matches = re.compile(filepath_regex).match(filepath)
+        if matches is None:
+            return None
 
         #Map key elements into the appropriate parts of the tuple
         # TODO: A common configuration error is for the key length to not match the number of elements in the filepath_template. We should trap this error and add a more informative message.
@@ -322,9 +324,9 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
                         file_name
                     )
 
-                key_list.append(
-                    self._convert_filepath_to_key(filepath)
-                )
+                key = self._convert_filepath_to_key(filepath)
+                if key:
+                    key_list.append(key)
 
         return key_list
 
@@ -399,9 +401,9 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
                 self.prefix,
             )
 
-            key_list.append(
-                self._convert_filepath_to_key(s3_object_key)
-            )
+            key = self._convert_filepath_to_key(s3_object_key)
+            if key:
+                key_list.append(key)
 
         return key_list
 

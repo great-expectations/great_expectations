@@ -10,12 +10,12 @@ Validation Operators
 *************************************************************
 ActionListValidationOperator
 *************************************************************
-:ref:`perform_action_list_validation_operator`
+:ref:`action_list_validation_operator`
 
 *************************************************************
 WarningAndFailureExpectationSuitesValidationOperator
 *************************************************************
-:ref:`run_warning_and_failure_expectation_suites_validation_operator`
+:ref:`warning_and_failure_expectation_suites_validation_operator`
 
 *************************************************************
 Actions
