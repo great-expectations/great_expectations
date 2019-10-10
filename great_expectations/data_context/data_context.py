@@ -1960,9 +1960,7 @@ class DataContext(ConfigOnlyDataContext):
         elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
             return "./"
         else:
-            raise ge_exceptions.DataContextError(
-                "Unable to locate context root directory. Please provide a directory name."
-            )
+            raise ge_exceptions.ConfigNotFoundError()
 
 
 class ExplorerDataContext(DataContext):

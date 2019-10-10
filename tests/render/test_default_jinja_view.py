@@ -49,7 +49,7 @@ def test_render_DefaultJinjaPageView_meta_info():
             }
         }
     }
-    document = ProfilingResultsPageRenderer.render(validation_results)
+    document = ProfilingResultsPageRenderer().render(validation_results)
     html = DefaultJinjaPageView.render(document)
     print(html)
     # TODO: Use above print to set up snapshot test once we like the result
