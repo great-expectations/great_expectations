@@ -66,15 +66,18 @@ The `run` method returns an object that looks like this:
 ::
 
     {
-    :py:class:`great_expectations.data_context.types.ValidationResultIdentifier`:
-        {
-        'validation_result': :ref:validation_result
-        'actions_results':
-            {
-            'action_0_name': action result object (defined by the action),
-            'action_1_name': action result object (defined by the action),
-            ...
-            'action_n_name`: action result object (defined by the action)
-            }
+        'success: True/False, (True if all validations are successful)
+        'details': {
+            great_expectations.data_context.types.ExpectationSuiteIdentifier: 
+                {
+                'validation_result': :ref:validation_result
+                'actions_results':
+                    {
+                    'action_0_name': action result object (defined by the action),
+                    'action_1_name': action result object (defined by the action),
+                    ...
+                    'action_n_name`: action result object (defined by the action)
+                    }
+                }
         }
     }
