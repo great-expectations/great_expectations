@@ -327,7 +327,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
         cli_message("Okay, skipping HTML documentation for now.")
 
 
-def build_docs(context, site_name=None, data_asset_name=None):
+def build_docs(context, site_name=None):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 
@@ -338,7 +338,7 @@ def build_docs(context, site_name=None, data_asset_name=None):
     else:
         site_names=None
 
-    index_page_locator_infos = context.build_data_docs(site_names=site_names, data_asset_name=data_asset_name)
+    index_page_locator_infos = context.build_data_docs(site_names=site_names)
 
     msg = """
 The following data documentation HTML sites were generated:

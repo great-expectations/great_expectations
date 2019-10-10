@@ -37,7 +37,7 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
         my_store.get(ValidationResultIdentifier(**{}))
     
     ns_1 = SiteSectionIdentifier(
-        site_section_name="my_site_section",
+        site_section_name="validations",
         resource_identifier=ValidationResultIdentifier(
             from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100"
         )
@@ -46,7 +46,7 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
     # assert my_store.get(ns_1) == "aaa"
 
     ns_2 = SiteSectionIdentifier(
-        site_section_name="my_site_section",
+        site_section_name="validations",
         resource_identifier=ValidationResultIdentifier(
             from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-20"
         )

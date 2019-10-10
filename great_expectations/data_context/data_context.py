@@ -1482,7 +1482,7 @@ class ConfigOnlyDataContext(object):
         """
         return return_obj
 
-    def build_data_docs(self, site_names=None, data_asset_name=None):
+    def build_data_docs(self, site_names=None, resource_identifiers=None):
         """
         Build Data Docs for your project.
 
@@ -1490,6 +1490,15 @@ class ConfigOnlyDataContext(object):
         include Expectations, Validations & Profiles. The are built for all
         Datasources from JSON artifacts in the local repo including validations
         & profiles from the uncommitted directory.
+
+        :param site_names: if specified, build data docs only for these sites, otherwise,
+                            build all the sites specified in the context's config
+        :param resource_identifiers: a list of resource identifiers (ExpectationSuiteIdentifier,
+                            ValidationResultIdentifier). If specified, rebuild HTML
+                            (or other views the data docs sites are rendering) only for
+                            the resources in this list. This supports incremental build
+                            of data docs sites (e.g., when a new validation result is created)
+                            and avoids full rebuild.
 
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
@@ -1519,7 +1528,7 @@ class ConfigOnlyDataContext(object):
                         }
                     )
                     # TODO : Re-implement data_asset_name
-                    index_page_locator_info = site_builder.build()[0]
+                    index_page_locator_info = site_builder.build(resource_identifiers)[0]
 
                     if index_page_locator_info:
                         index_page_locator_infos[site_name] = index_page_locator_info

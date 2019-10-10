@@ -296,22 +296,15 @@ def build_documentation():
               help='The root of a project directory containing a great_expectations/ config.')
 @click.option('--site_name', '-s',
               help='The site for which to generate documentation. See data_docs section in great_expectations.yml')
-@click.option('--data_asset_name', '-dan',
-              help='The data asset for which to generate documentation. Must also specify --site_name.')
-def build_docs(directory, site_name, data_asset_name):
+def build_docs(directory, site_name):
     """Build Data Docs for a project. for a project."""
     logger.debug("Starting cli.build_docs")
 
-    if data_asset_name is not None and site_name is None:
-        cli_message("<red>Error: When specifying `data_asset_name`, `site_name` is required.</red>")
-        sys.exit(1)
-        
     try:
         context = DataContext(directory)
         build_documentation_impl(
             context,
-            site_name=site_name,
-            data_asset_name=data_asset_name
+            site_name=site_name
         )
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
