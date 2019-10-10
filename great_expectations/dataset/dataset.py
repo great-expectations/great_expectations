@@ -3623,7 +3623,7 @@ class Dataset(MetaDataset):
         Keyword Args:
             internal_weight_holdout (float between 0 and 1 or None): \
                 The amount of weight to split uniformly among zero-weighted partition bins. internal_weight_holdout \
-                provides a mechanims to make the test less strict by assigning positive weights to values observed in \
+                provides a mechanisms to make the test less strict by assigning positive weights to values observed in \
                 the data for which the partition explicitly expected zero weight. With no internal_weight_holdout, \
                 any value observed in such a region will cause KL divergence to rise to +Infinity.\
                 Defaults to 0.
@@ -3709,7 +3709,7 @@ class Dataset(MetaDataset):
             if bucketize_data:
                 partition_object = build_continuous_partition_object(dataset=self, column=column, bins='auto')
             else:
-                partition_object = build_categorical_partitino_object(dataset=self, column=column)
+                partition_object = build_categorical_partition_object(dataset=self, column=column)
 
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
