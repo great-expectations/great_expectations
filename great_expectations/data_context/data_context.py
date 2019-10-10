@@ -1605,7 +1605,6 @@ class ConfigOnlyDataContext(object):
                             "module_name": "great_expectations.render.renderer.site_builder"
                         }
                     )
-                    # TODO : Re-implement data_asset_name
                     index_page_locator_info = site_builder.build(resource_identifiers)[0]
 
                     if index_page_locator_info:
