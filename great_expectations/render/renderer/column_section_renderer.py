@@ -590,6 +590,9 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
     def _render_header(cls, validation_results):
         column = cls._get_column_name(validation_results)
         
+        if not column:
+            column = "Table-Level Expectations"
+        
         new_block = RenderedComponentContent(**{
             "content_block_type": "header",
             "header": convert_to_string_and_escape(column),
