@@ -206,10 +206,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
       "success": True,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
+        "unexpected_count": 1050,
+        "unexpected_percent": 79.96953541508,
         "partial_unexpected_list": []
       },
       "exception_info": {
@@ -231,8 +229,6 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
         "success": True,
         "result": {
             "element_count": 1313,
-            "missing_count": 0,
-            "missing_percent": 0.0,
             "unexpected_count": 0,
             "unexpected_percent": 0.0,
             "partial_unexpected_list": []
@@ -263,12 +259,12 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     # test _get_observed_value for expect_column_values_to_not_be_null expectation type
     output_3 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_not_be_null)
     print(output_3)
-    assert(output_3) == "0 null"
+    assert(output_3) == "20.0305% not null"
     # test _get_observed_value for expect_column_values_to_be_null expectation type
     output_4 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_be_null)
     print(output_4)
-    assert output_4 == "1313 null"
-    
+    assert output_4 == "100.0000% null"
+
     
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr_success, evr_failed):
     evr_no_result = {
