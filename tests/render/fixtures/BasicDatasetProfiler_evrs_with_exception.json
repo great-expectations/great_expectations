@@ -2026,6 +2026,6 @@
     "great_expectations.__version__": "__fixture__",
     "data_asset_name": null,
     "expectation_suite_name": "default",
-    "run_id": "2019-07-03T215114.517299Z"
+    "run_id": "__run_id_fixture__"
   }
 }
