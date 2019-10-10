@@ -161,7 +161,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             unexpected_percent = "%.2f%%" % (result["unexpected_percent"])
             element_count = result["element_count"]
             
-            template_str = "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows."
+            template_str = "\n\n$unexpected_count unexpected values found. " \
+                           "$unexpected_percent of $element_count total rows."
 
             return RenderedComponentContent(**{
                 "content_block_type": "string_template",
@@ -192,12 +193,14 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return result.get("observed_value")
         elif expectation_type == "expect_column_values_to_be_null":
             element_count = result["element_count"]
-            unexpected_count = result["unexpected_count"]
-            null_count = element_count - unexpected_count
-            return "{null_count} null".format(null_count=null_count)
+            unexpected_percent = result["unexpected_percent"]
+            null_percent = 1 - unexpected_percent
+            return "{null_percent:.4f}% null".format(null_percent=null_percent)
         elif expectation_type == "expect_column_values_to_not_be_null":
-            null_count = result["unexpected_count"]
-            return "{null_count} null".format(null_count=null_count)
+            null_percent = result["unexpected_percent"]
+            return "{null_percent:.4f}% null".format(null_percent=null_percent)
+        elif result.get("unexpected_percent"):
+            return "{:.4f}% unexpected".format(round(result.get("unexpected_percent"), 4))
         else:
             return "--"
 
