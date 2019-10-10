@@ -234,16 +234,16 @@ def test_BasicDatasetProfiler_on_titanic():
     print(json.dumps(suite["meta"], indent=2))
     assert "columns" in suite["meta"]
     for k,v in suite["meta"]["columns"].items():
-        assert v == {"description":""}
+        assert v == {"description": ""}
 
     # Note: the above already produces an EVR; rerunning isn't strictly necessary just for EVRs
     evrs = df.validate(result_format="SUMMARY")  # ["results"]
 
     # with open('tests/test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json', 'w+') as file:
-    #     file.write(json.dumps(evrs))
+    #     file.write(json.dumps(evrs, indent=2))
     #
     # with open('tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'w+') as file:
-    #     file.write(json.dumps(evrs))
+    #     file.write(json.dumps(evrs, indent=2))
 
     with open('tests/test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json', 'r') as file:
         expected_evrs = json.load(file, object_pairs_hook=OrderedDict)
