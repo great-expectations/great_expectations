@@ -1,12 +1,10 @@
 from .content_block import ContentBlockRenderer
 from great_expectations.render.types import (
-    RenderedComponentContent,
-    RenderedSectionContent,
-    RenderedComponentContentWrapper,
+    RenderedComponentContent
 )
 
 
-class TableContentBlockRenderer(ContentBlockRenderer):
+class ProfilingOverviewTableContentBlockRenderer(ContentBlockRenderer):
 
     @classmethod
     def render(cls, ge_object, header_row=[]):

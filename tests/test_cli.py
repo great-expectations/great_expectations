@@ -52,7 +52,6 @@ Commands:
   check-config    Check a config for validity and help with migrations.
   init            Create a new project and help with onboarding.
   profile         Profile datasources from the specified context.
-  render          Render a great expectations object to documentation.
   validate        Validate a CSV file against an expectation suite.
 """
 

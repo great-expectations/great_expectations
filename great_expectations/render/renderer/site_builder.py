@@ -1,30 +1,22 @@
 import logging
-logger = logging.getLogger(__name__)
 
-import json
-import importlib
 from collections import OrderedDict
 
-from great_expectations.render.renderer import (
-    SiteIndexPageRenderer
-)
-from great_expectations.render.view import (
-    DefaultJinjaIndexPageView,
-)
 from great_expectations.data_context.types import (
     ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
-    DataAssetIdentifier,
-    NormalizedDataAssetName,
-)
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-)
 
+)
 from great_expectations.data_context.store.namespaced_read_write_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
 )
+
+from great_expectations.data_context.util import instantiate_class_from_config
+import great_expectations.exceptions as exceptions
+
+logger = logging.getLogger(__name__)
+
 
 class SiteBuilder(object):
     """SiteBuilder builds data documentation for the project defined by a DataContext.
@@ -207,23 +199,30 @@ class DefaultSiteSectionBuilder(object):
         self.target_store = target_store
         self.run_id_filter = run_id_filter
 
-        # TODO : Push conventions for configurability down to renderers and views.
-        # Until then, they won't be configurable, and defaults will be hard.
         if renderer is None:
-            renderer = {
-                "module_name": "great_expectations.render.renderer",
-                # "class_name": "SiteIndexPageRenderer",
+            raise exceptions.InvalidConfigError(
+                "SiteSectionBuilder requires a renderer configuration with a class_name key."
+            )
+        self.renderer_class = instantiate_class_from_config(
+            config=renderer,
+            runtime_config={},
+            config_defaults={
+                "module_name": "great_expectations.render.renderer"
             }
-        renderer_module = importlib.import_module(renderer.pop("module_name", "great_expectations.render.renderer"))
-        self.renderer_class = getattr(renderer_module, renderer.pop("class_name"))
-
+        )
         if view is None:
             view = {
                 "module_name": "great_expectations.render.view",
                 "class_name": "DefaultJinjaPageView",
             }
-        view_module = importlib.import_module(view.pop("module_name", "great_expectations.render.view"))
-        self.view_class = getattr(view_module, view.pop("class_name"))
+
+        self.view_class = instantiate_class_from_config(
+            config=view,
+            runtime_config={},
+            config_defaults={
+                "module_name": "great_expectations.render.view"
+            }
+        )
 
     def build(self, datasource_whitelist):
         for resource_key in self.source_store.list_keys():
@@ -257,7 +256,6 @@ class DefaultSiteSectionBuilder(object):
                                                                                                               expectation_suite_name,
                                                                                                               data_asset_name))
 
-            # TODO : Typing resources is SUPER important for usability now that we're slapping configurable renders together with arbitrary stores.
             rendered_content = self.renderer_class.render(resource)
             viewable_content = self.view_class.render(rendered_content)
 
@@ -291,35 +289,44 @@ class DefaultSiteSectionBuilder(object):
 
 class DefaultSiteIndexBuilder(object):
 
-    def __init__(self,
-        name,
-        data_context,
-        target_store,
-        renderer=None,
-        view=None,
+    def __init__(
+            self,
+            name,
+            data_context,
+            target_store,
+            renderer=None,
+            view=None
     ):
-        # NOTE: This method is almost idenitcal to DefaultSiteSectionBuilder
+        # NOTE: This method is almost identical to DefaultSiteSectionBuilder
         self.name = name
         self.data_context = data_context
         self.target_store = target_store
 
-        # TODO : Push conventions for configurability down to renderers and views.
-        # Until then, they won't be configurable, and defaults will be hard.
-        if renderer == None:
+        if renderer is None:
             renderer = {
                 "module_name": "great_expectations.render.renderer",
                 "class_name": "SiteIndexPageRenderer",
             }
-        renderer_module = importlib.import_module(renderer.pop("module_name", "great_expectations.render.renderer"))
-        self.renderer_class = getattr(renderer_module, renderer.pop("class_name"))
-
-        if view == None:
-            view = {
-                "module_name" : "great_expectations.render.view",
-                "class_name" : "DefaultJinjaIndexPageView",
+        self.renderer_class = instantiate_class_from_config(
+            config=renderer,
+            runtime_config={},
+            config_defaults={
+                "module_name": "great_expectations.render.renderer"
             }
-        view_module = importlib.import_module(view.pop("module_name", "great_expectations.render.view"))
-        self.view_class = getattr(view_module, view.pop("class_name"))
+        )
+
+        if view is None:
+            view = {
+                "module_name": "great_expectations.render.view",
+                "class_name": "DefaultJinjaIndexPageView",
+            }
+        self.view_class = instantiate_class_from_config(
+            config=view,
+            runtime_config={},
+            config_defaults={
+                "module_name": "great_expectations.render.view"
+            }
+        )
 
     def add_resource_info_to_index_links_dict(self,
                                               data_context,

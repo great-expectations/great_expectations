@@ -161,8 +161,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             unexpected_percent = "%.2f%%" % (result["unexpected_percent"])
             element_count = result["element_count"]
             
-            template_str = "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows."
-            
+            template_str = "\n\n$unexpected_count unexpected values found. " \
+                           "$unexpected_percent of $element_count total rows."
+
             return RenderedComponentContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
@@ -191,13 +192,13 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         if result.get("observed_value"):
             return result.get("observed_value")
         elif expectation_type == "expect_column_values_to_be_null":
-            element_count = result["element_count"]
-            unexpected_count = result["unexpected_count"]
-            null_count = element_count - unexpected_count
-            return "{null_count} null".format(null_count=null_count)
+            notnull_percent = result["unexpected_percent"]
+            return "{null_percent:.4f}% null".format(null_percent=(100-notnull_percent))
         elif expectation_type == "expect_column_values_to_not_be_null":
-            null_count = result["unexpected_count"]
-            return "{null_count} null".format(null_count=null_count)
+            null_percent = result["unexpected_percent"]
+            return "{filled_percent:.4f}% not null".format(filled_percent=(100-null_percent))
+        elif result.get("unexpected_percent") is not None:
+            return "{:.4f}% unexpected".format(round(result.get("unexpected_percent"), 4))
         else:
             return "--"
 
@@ -210,16 +211,15 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
-        expectation_string_fn = getattr(ExpectationStringRenderer, expectation_type, None)
+        expectation_string_fn = getattr(cls, expectation_type, None)
         if expectation_string_fn is None:
-            expectation_string_fn = getattr(ExpectationStringRenderer, "_missing_content_block_fn")
+            expectation_string_fn = getattr(cls, "_missing_content_block_fn")
 
         #This function wraps expect_* methods from ExpectationStringRenderer to generate table classes
         def row_generator_fn(evr, styling=None, include_column_name=True):
             expectation = evr["expectation_config"]
             expectation_string_obj = expectation_string_fn(expectation, styling, include_column_name)
 
-            # if expectation["exception_info"]["raised_exception"] == True:
             status_cell = [cls._get_status_icon(evr)]
             unexpected_statement = cls._get_unexpected_statement(evr)
             unexpected_table = cls._get_unexpected_table(evr)
