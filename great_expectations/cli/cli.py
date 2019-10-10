@@ -209,7 +209,7 @@ def init(target_directory):
             if context.list_expectation_suite_keys():
                 if click.confirm(BUILD_DOCS_PROMPT, default=True):
                     context.build_data_docs()
-                    _open_data_docs_in_browser(ge_dir)
+                    _open_data_docs_in_browser(context.root_directory)
         except ge_exceptions.DataContextError as e:
             cli_message("<red>{}</red>".format(e))
     else:
@@ -233,8 +233,9 @@ def _open_data_docs_in_browser(ge_dir):
     """A stdlib cross-platform way to open a file in a browser."""
     ge_dir = os.path.abspath(ge_dir)
     data_docs_index = "file://{}/uncommitted/data_docs/local_site/index.html".format(ge_dir)
-    cli_message("Opening Data Docs found here: {}".format(data_docs_index))
-    webbrowser.open(data_docs_index)
+    if os.path.isfile(data_docs_index):
+        cli_message("Opening Data Docs found here: {}".format(data_docs_index))
+        webbrowser.open(data_docs_index)
 
 
 def _create_new_project(target_directory):
@@ -255,11 +256,12 @@ def _complete_onboarding(target_dir):
         cli_message(RUN_INIT_AGAIN)
 
 
+
 @cli.command()
 @click.option(
     '--directory',
     '-d',
-    default="./great_expectations",
+    default=None,
     help="The project's great_expectations directory."
 )
 def add_datasource(directory):
@@ -270,11 +272,11 @@ def add_datasource(directory):
         cli_message("<red>{}</red>".format(err.message))
         return
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, directory)
+        _offer_to_install_new_template(err, context.root_directory)
 
     data_source_name = add_datasource_impl(context)
 
-    if not data_source_name: # no datasource was created
+    if not data_source_name:  # no datasource was created
         return
 
     profile_datasource(context, data_source_name)
@@ -290,7 +292,7 @@ def add_datasource(directory):
 @click.option(
     "--directory",
     "-d",
-    default="./great_expectations",
+    default=None,
     help="The project's great_expectations directory."
 )
 @click.option('--batch_kwargs', default=None,
@@ -318,7 +320,7 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
         cli_message("<red>{}</red>".format(err.message))
         return
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, directory)
+        _offer_to_install_new_template(err, context.root_directory)
         return
 
     if batch_kwargs is not None:
@@ -345,7 +347,7 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
 @click.option(
     '--directory',
     '-d',
-    default="./great_expectations",
+    default=None,
     help="The project's great_expectations directory."
 )
 @click.option('--site_name', '-s',
@@ -359,8 +361,6 @@ def build_docs(directory, site_name, view=True):
     """Build Data Docs for a project."""
     logger.debug("Starting cli.build_docs")
 
-    directory = os.path.abspath(directory)
-
     try:
         context = DataContext(directory)
         build_documentation_impl(
@@ -368,12 +368,12 @@ def build_docs(directory, site_name, view=True):
             site_name=site_name
         )
         if view:
-            _open_data_docs_in_browser(directory)
+            _open_data_docs_in_browser(context.root_directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, directory)
+        _offer_to_install_new_template(err, context.root_directory)
         return
     except ge_exceptions.PluginModuleNotFoundError as err:
         cli_message(err.cli_colored_message)
@@ -381,24 +381,6 @@ def build_docs(directory, site_name, view=True):
     except ge_exceptions.PluginClassNotFoundError as err:
         cli_message(err.cli_colored_message)
         sys.exit(1)
-
-
-
-@cli.command()
-@click.argument('render_object')
-def render(render_object):
-    """Render a great expectations object to documentation.
-
-    RENDER_OBJECT: path to a GE object to render
-    """
-    with open(render_object, "r") as infile:
-        raw = json.load(infile)
-
-    if "results" in raw:
-        model = ProfilingResultsPageRenderer.render(raw)
-    else:
-        model = ExpectationSuitePageRenderer.render(raw)
-    print(DefaultJinjaPageView.render(model))
 
 
 @cli.command()

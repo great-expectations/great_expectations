@@ -206,10 +206,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
       "success": True,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
+        "unexpected_count": 1050,
+        "unexpected_percent": 79.96953541508,
         "partial_unexpected_list": []
       },
       "exception_info": {
@@ -231,8 +229,6 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
         "success": True,
         "result": {
             "element_count": 1313,
-            "missing_count": 0,
-            "missing_percent": 0.0,
             "unexpected_count": 0,
             "unexpected_percent": 0.0,
             "partial_unexpected_list": []
@@ -263,12 +259,12 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     # test _get_observed_value for expect_column_values_to_not_be_null expectation type
     output_3 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_not_be_null)
     print(output_3)
-    assert(output_3) == "0 null"
+    assert(output_3) == "20.0305% not null"
     # test _get_observed_value for expect_column_values_to_be_null expectation type
     output_4 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_be_null)
     print(output_4)
-    assert output_4 == "1313 null"
-    
+    assert output_4 == "100.0000% null"
+
     
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr_success, evr_failed):
     evr_no_result = {
@@ -370,6 +366,45 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
     output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed_no_unexpected_count)
     print(output_4)
     assert output_4 is None
+
+    # test for evr with exception
+    evr_failed_exception = {
+        "success": False,
+        "exception_info": {
+            "raised_exception": True,
+            "exception_message": "Unrecognized column: not_a_real_column",
+            "exception_traceback": "Traceback (most recent call last):\n...more_traceback..."
+        },
+        "expectation_config": {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Name",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            }
+        }
+    }
+
+    output_5 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed_exception)
+    assert output_5 == {
+        'content_block_type': 'string_template',
+        'string_template': {
+            'template': '\n\n$expectation_type raised an exception:\n$exception_message',
+            'params': {
+                'expectation_type': 'expect_column_values_to_not_match_regex',
+                'exception_message': 'Unrecognized column: not_a_real_column'},
+            'tag': 'strong',
+            'styling': {
+                'classes': ['text-danger'],
+                'params': {
+                    'exception_message': {'tag': 'code'},
+                    'expectation_type': {
+                        'classes': ['badge', 'badge-danger', 'mb-2']
+                    }
+                }
+            }
+        }
+    }
 
 
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_success):

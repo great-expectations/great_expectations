@@ -66,7 +66,11 @@ class SlackRenderer(Renderer):
                     },
                 }
                 query["blocks"].append(dataset_element)
-    
+
+        custom_blocks = self._custom_blocks(evr=validation_json)
+        if custom_blocks:
+            query["blocks"].append(custom_blocks)
+
         documentation_url = "https://docs.greatexpectations.io/en/latest/guides/reviewing_validation_results.html"
         footer_section = {
             "type": "context",
@@ -80,3 +84,6 @@ class SlackRenderer(Renderer):
         query["blocks"].append(divider_block)
         query["blocks"].append(footer_section)
         return query
+
+    def _custom_blocks(self, evr):
+        return None

@@ -42,7 +42,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
     for column in evrs.keys():
         with open('./tests/render/output/test_render_profiling_results_column_section_renderer__' + column + '.json', 'w') \
                 as outfile:
-            json.dump(ProfilingResultsColumnSectionRenderer.render(evrs[column]), outfile, indent=2)
+            json.dump(ProfilingResultsColumnSectionRenderer().render(evrs[column]), outfile, indent=2)
 
 
 @pytest.mark.smoketest
@@ -62,12 +62,12 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     for column in exp_groups.keys():
         with open('./tests/render/output/test_render_expectation_suite_column_section_renderer' + column + '.json', 'w') \
                 as outfile:
-            json.dump(ExpectationSuiteColumnSectionRenderer.render(exp_groups[column]), outfile, indent=2)
+            json.dump(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]), outfile, indent=2)
 
     # # This can be used for regression testing
     # for column in exp_groups.keys():
     #     with open('./tests/render/output/test_render_expectation_suite_column_section_renderer' + column + '.json') as infile:
-    #         assert json.dumps(ExpectationSuiteColumnSectionRenderer.render(exp_groups[column]), indent=2) == infile
+    #         assert json.dumps(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]), indent=2) == infile
 
 
 def test_ProfilingResultsColumnSectionRenderer_render(titanic_profiled_evrs_1, titanic_profiled_name_column_evrs):
@@ -299,7 +299,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
 
 
 def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profiled_name_column_expectations):
-    remaining_expectations, content_block = ExpectationSuiteColumnSectionRenderer._render_bullet_list(
+    remaining_expectations, content_block = ExpectationSuiteColumnSectionRenderer()._render_bullet_list(
         titanic_profiled_name_column_expectations,#["expectations"],
     )
 
@@ -374,7 +374,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped
 
 # noinspection PyPep8Naming
 def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_name_column_evrs):
-    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_table(
+    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer()._render_table(
         validation_results=titanic_profiled_name_column_evrs,
     )
 
@@ -516,7 +516,7 @@ def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
         ]
     }
 
-    result = ProfilingResultsOverviewSectionRenderer.render(validation)
+    result = ProfilingResultsOverviewSectionRenderer().render(validation)
 
     # Find the variable types content block:
     types_table = [
