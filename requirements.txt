@@ -11,7 +11,6 @@ ruamel.yaml>=0.15.24
 ipywidgets>=7.4.2
 requests>=2.20
 Click>=7.0
-pyfiglet>=0.8
 termcolor>=1.1.0
 tzlocal>=1.2
 pypandoc>=1.4

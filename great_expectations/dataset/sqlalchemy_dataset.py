@@ -169,6 +169,8 @@ class MetaSqlAlchemyDataset(Dataset):
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 # These results are unnecessary for the above expectations
                 del return_obj['result']['unexpected_percent_nonmissing']
+                del return_obj['result']['missing_count']
+                del return_obj['result']['missing_percent']
                 try:
                     del return_obj['result']['partial_unexpected_counts']
                     del return_obj['result']['partial_unexpected_list']
@@ -267,6 +269,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         count_query = sa.select([sa.func.count()]).select_from(
             self._table)
         return self.engine.execute(count_query).scalar()
+
+    def get_column_count(self):
+        return len(self.columns)
 
     def get_table_columns(self):
         return [col['name'] for col in self.columns]

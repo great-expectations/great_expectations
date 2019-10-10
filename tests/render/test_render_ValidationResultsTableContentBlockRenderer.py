@@ -12,92 +12,107 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
     result = ValidationResultsTableContentBlockRenderer.render([evr_failed_with_exception])
     print(json.dumps(result, indent=2))
     assert result == {
-        "content_block_type": "table",
-        "table": [
-            [
-            {
-                "content_block_type": "string_template",
-                "string_template": {
-                "template": "$icon",
+      "content_block_type": "table",
+      "table": [
+        [
+          {
+            "content_block_type": "string_template",
+            "string_template": {
+              "template": "$icon",
+              "params": {
+                "icon": ""
+              },
+              "styling": {
                 "params": {
-                    "icon": ""
+                  "icon": {
+                    "classes": [
+                      "fas",
+                      "fa-exclamation-triangle",
+                      "text-warning"
+                    ],
+                    "tag": "i"
+                  }
+                }
+              }
+            }
+          },
+          [
+            {
+              "content_block_type": "string_template",
+              "string_template": {
+                "template": "$column Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a provided threshold but no distribution was specified.",
+                "params": {
+                  "column": "live",
+                  "partition_object": None,
+                  "threshold": None,
+                  "result_format": "SUMMARY"
                 },
                 "styling": {
-                    "params": {
-                    "icon": {
-                        "classes": [
-                        "fas",
-                        "fa-exclamation-triangle",
-                        "text-warning"
-                        ],
-                        "tag": "i"
-                    }
-                    }
-                }
-                }
-            },
-            [
-                {
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "$column Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a provided threshold but no distribution was specified.",
-                    "params": {
-                    "column": "live",
-                    "partition_object": None,
-                    "threshold": None,
-                    "result_format": "SUMMARY"
-                    },
-                    "styling": {
-                    "default": {
-                        "classes": [
-                        "badge",
-                        "badge-secondary"
-                        ]
-                    },
-                    "params": {
-                        "sparklines_histogram": {
-                        "styles": {
-                            "font-family": "serif !important"
-                        }
-                        }
-                    }
-                    }
-                }
-                },
-                {
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "Expectation failed to execute.",
-                    "params": {},
-                    "tag": "strong",
-                    "styling": {
+                  "default": {
                     "classes": [
-                        "text-warning"
+                      "badge",
+                      "badge-secondary"
                     ]
+                  },
+                  "params": {
+                    "sparklines_histogram": {
+                      "styles": {
+                        "font-family": "serif !important"
+                      }
                     }
+                  }
                 }
-                },
-                None
-            ],
-            "--"
-            ]
-        ],
-        "styling": {
-            "body": {
-            "classes": [
-                "table"
-            ]
+              }
             },
-            "classes": [
-            "m-3",
-            "table-responsive"
-            ]
-        },
-        "header_row": [
-            "Status",
-            "Expectation",
-            "Observed Value"
+            {
+              "content_block_type": "string_template",
+              "string_template": {
+                "template": "\n\n$expectation_type raised an exception:\n$exception_message",
+                "params": {
+                  "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+                  "exception_message": "Invalid partition object."
+                },
+                "tag": "strong",
+                "styling": {
+                  "classes": [
+                    "text-danger"
+                  ],
+                  "params": {
+                    "exception_message": {
+                      "tag": "code"
+                    },
+                    "expectation_type": {
+                      "classes": [
+                        "badge",
+                        "badge-danger",
+                        "mb-2"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            None
+          ],
+          "--"
         ]
+      ],
+      "styling": {
+        "body": {
+          "classes": [
+            "table"
+          ]
+        },
+        "classes": [
+          "m-3",
+          "table-responsive"
+        ]
+      },
+      "header_row": [
+        "Status",
+        "Expectation",
+        "Observed Value"
+      ]
     }
     
     
@@ -278,8 +293,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
             "element_count": 1313,
             "missing_count": 0,
             "missing_percent": 0.0,
-            "unexpected_percent": 0.002284843869002285,
-            "unexpected_percent_nonmissing": 0.002284843869002285,
+            "unexpected_percent": 0.2284843869002285,
+            "unexpected_percent_nonmissing": 0.2284843869002285,
             "partial_unexpected_list": [
                 "Daly, Mr Peter Denis ",
                 "Barber, Ms ",
@@ -349,19 +364,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
     # test for evr with no "result" key
     output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_no_result)
     print(json.dumps(output_3, indent=2))
-    assert output_3 == {
-      "content_block_type": "string_template",
-      "string_template": {
-        "template": "Expectation failed to execute.",
-        "params": {},
-        "tag": "strong",
-        "styling": {
-          "classes": [
-            "text-warning"
-          ]
-        }
-      }
-    }
+    assert output_3 == None
     
     # test for evr with no unexpected count
     output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed_no_unexpected_count)
@@ -394,8 +397,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "missing_count": 0,
             "missing_percent": 0.0,
             "unexpected_count": 1313,
-            "unexpected_percent": 1.0,
-            "unexpected_percent_nonmissing": 1.0,
+            "unexpected_percent": 100.0,
+            "unexpected_percent_nonmissing": 100.0,
         },
         "exception_info": {
             "raised_exception": False,
@@ -419,8 +422,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "missing_count": 0,
             "missing_percent": 0.0,
             "unexpected_count": 1313,
-            "unexpected_percent": 1.0,
-            "unexpected_percent_nonmissing": 1.0,
+            "unexpected_percent": 100.0,
+            "unexpected_percent_nonmissing": 100.0,
             "partial_unexpected_list": [
                 1,
                 2,
@@ -466,8 +469,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "missing_count": 0,
             "missing_percent": 0.0,
             "unexpected_count": 1313,
-            "unexpected_percent": 1.0,
-            "unexpected_percent_nonmissing": 1.0,
+            "unexpected_percent": 100.0,
+            "unexpected_percent_nonmissing": 100.0,
             "partial_unexpected_list": [
                 1,
                 2,

@@ -123,6 +123,8 @@ class MetaPandasDataset(Dataset):
             # FIXME Temp fix for result format
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 del return_obj['result']['unexpected_percent_nonmissing']
+                del return_obj['result']['missing_count']
+                del return_obj['result']['missing_percent']
                 try:
                     del return_obj['result']['partial_unexpected_counts']
                     del return_obj['result']['partial_unexpected_list']
@@ -327,6 +329,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     def get_row_count(self):
         return self.shape[0]
+
+    def get_column_count(self):
+        return self.shape[1]
 
     def get_table_columns(self):
         return list(self.columns)
@@ -1007,8 +1012,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_value_lengths_to_be_between(self, column,
                                                   min_value=None,
                                                   max_value=None,
-                                                  strict_min=False,
-                                                  strict_max=False,
                                                   mostly=None,
                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
 

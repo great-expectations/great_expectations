@@ -29,7 +29,9 @@ By default, everything in the Great Expectations deployment framework will be ex
 
     great_expectations init
 
-The command line interface (CLI) will scaffold and populate the configuration and other artifacts necessary to get started with Great Expectations.
+The command line interface (CLI) will scaffold and populate the configuration
+and other artifacts necessary to get started with Great Expectations. This can
+be run to start a new project and to onboard a teammate to an existing project.
 
 
 If you inspect the ``great_expectations/`` directory after the init command has run, it should contain:
@@ -49,8 +51,7 @@ If you inspect the ``great_expectations/`` directory after the init command has 
     └── uncommitted
         ├── config_variables.yml
         ├── documentation
-        │   ├── local_site
-        │   └── team_site
+        │   └── local_site
         ├── samples
         └── validations
 
@@ -359,7 +360,7 @@ Within the CLI, we compile to documentation as follows:
 
     Build HTML documentation? [Y/n]:
 
-    Building documentation...
+    Building Data Docs...
         ...
 
     The following data documentation HTML sites were generated:

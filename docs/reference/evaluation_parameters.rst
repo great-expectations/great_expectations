@@ -29,7 +29,7 @@ expectation_suite to be available to multiple expectations or while declaring ad
 .. code-block:: python
 
     >> my_df.set_evaluation_parameter("upstream_row_count", 10)
-    >> my_df.get_evaluation_parameter("upstream_row_count)
+    >> my_df.get_evaluation_parameter("upstream_row_count")
 
 If a parameter has been stored, then it does not need to be provided for a new expectation to be declared:
 
@@ -70,13 +70,13 @@ one of the following structures to be recognized by the Great Expectations DataC
 
 ::
 
-  urn:great_expectations:validations:<data_asset_name>:expectations:<expectation_name>:columns:<column_name>:result:<result_key>
-  urn:great_expectations:validations:<data_asset_name>:expectations:<expectation_name>:columns:<column_name>:details:<details_key>
-  urn:great_expectations:validations:<data_asset_name>:expectations:<expectation_name>:result:<result_key>
-  urn:great_expectations:validations:<data_asset_name>:expectations:<expectation_name>:details:<details_key>
+  urn:great_expectations:validations:<data_asset_name>:<expectation_suite_name>:expectations:<expectation_name>:columns:<column_name>:result:<result_key>
+  urn:great_expectations:validations:<data_asset_name>:<expectation_suite_name>:expectations:<expectation_name>:columns:<column_name>:details:<details_key>
+  urn:great_expectations:validations:<data_asset_name>:<expectation_suite_name>:expectations:<expectation_name>:result:<result_key>
+  urn:great_expectations:validations:<data_asset_name>:<expectation_suite_name>:expectations:<expectation_name>:details:<details_key>
 
 Replace names in ``<>`` with the desired name. For example:
 
 ::
 
-  urn:great_expectations:validations:my_source/default/notable_works_by_charles_dickens:expectations:expect_column_proportion_of_unique_values_to_be_between:columns:Title:result:observed_value
+  urn:great_expectations:validations:my_source/default/notable_works_by_charles_dickens:my_suite:expectations:expect_column_proportion_of_unique_values_to_be_between:columns:Title:result:observed_value

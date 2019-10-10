@@ -54,10 +54,10 @@
         "result": {
           "element_count": 10,
           "missing_count": 1,
-          "missing_percent": 0.1,
+          "missing_percent": 10.0,
           "unexpected_count": 5,
-          "unexpected_percent": 0.5,
-          "unexpected_percent_nonmissing": 0.5555555555555556,
+          "unexpected_percent": 50.0,
+          "unexpected_percent_nonmissing": 55.55555555555556,
           "partial_unexpected_list": [
             {
               "a": 1.0,
