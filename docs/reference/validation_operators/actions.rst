@@ -12,7 +12,7 @@ The only requirement from an action is for it to have a take_action method.
 SlackNotificationAction
 ------------------------
 
-SlackNotificationAction is a namespace-aware validation action that sends a Slack notification to a given webhook
+SlackNotificationAction is a validation action that sends a Slack notification to a given webhook
 
 Configuration
 ~~~~~~~~~~~~~
@@ -24,7 +24,8 @@ Configuration
       class_name: SlackNotificationAction
       # put the actual webhook URL in the uncommitted/config_variables.yml file
       slack_webhook: ${validation_notification_slack_webhook}
-     notify_on: all # possible values: "all", "failure", "success"
+notify_on: all # possible values: "all", "failure", "success"
+
       renderer:
         module_name: great_expectations.render.renderer.slack_renderer
         class_name: SlackRenderer
@@ -70,3 +71,27 @@ Configuration
       # name of the store where the action will store the parameters
       # the name must refer to a store that is configured in the great_expectations.yml file
       target_store_name: evaluation_parameter_store
+
+UpdateDataDocsAction
+--------------------
+
+UpdateDataDocsAction is a namespeace-aware validation action that
+notifies the site builders of all the data docs sites of the data context
+that a validation result should be added to the data docs.
+
+Configuration
+~~~~~~~~~~~~~
+
+.. code-block:: yaml
+
+    - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      # this action has no additional configuration properties
+
+
+Dependencies
+~~~~~~~~~~~~
+
+When configured inside action_list of an operator, StoreAction action has to be configured before this action,
+since the building of data docs fetches validation results from the store.
