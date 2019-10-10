@@ -49,7 +49,7 @@ WarningAndFailureExpectationSuitesValidationOperator retrieves two expectation s
 
 After completing all the validations, it sends a Slack notification with the success status. Note that it doesn't use an Action to send its Slack notification, because the notification has also been customized to summarize information from both suites.
 
-Read more about ActionListValidationOperator here: :ref:`warning_and_failure_expectation_suites_validation_operator`
+Read more about WarningAndFailureExpectationSuitesValidationOperator here: :ref:`warning_and_failure_expectation_suites_validation_operator`
 
 ****************************************
 Implementing Custom Validation Operators
