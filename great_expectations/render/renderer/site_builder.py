@@ -242,7 +242,7 @@ class DefaultSiteSectionBuilder(object):
         for resource_key in self.source_store.list_keys():
 
             # if no resource_identifiers are passed, the section builder will build
-            # the views for all keys in its configured store.
+            # a page for every keys in its source store.
             # if the caller did pass resource_identifiers, the section builder
             # will build pages only for the specified resources
             if resource_identifiers and resource_key not in resource_identifiers:
