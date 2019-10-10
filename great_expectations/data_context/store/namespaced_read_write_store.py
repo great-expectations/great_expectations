@@ -180,6 +180,7 @@ class HtmlSiteStore(NamespacedReadWriteStore):
                  serialization_type=None,
                  store_backend=None
                  ):
+        self.key_class = SiteSectionIdentifier
         store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
         store_backend_class_name = store_backend.get("class_name", "FixedLengthTupleFilesystemStoreBackend")
         store_class = load_class(store_backend_class_name, store_backend_module_name)
@@ -194,27 +195,39 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         # If backends were DB connections, this could be inefficient, but it doesn't much matter for filepaths.
         # One thing to watch for is reversibility of keys.
         # If several types are being writtten to overlapping directories, we could get collisions.
+        expectations_backend_config = copy.deepcopy(store_backend)
+        if "base_directory" in expectations_backend_config:
+            expectations_backend_config["base_directory"] = os.path.join(expectations_backend_config["base_directory"], "expectations")
+        elif "prefix" in expectations_backend_config:
+            expectations_backend_config["prefix"] = os.path.join(expectations_backend_config["prefix"], "expectations")
+
+        validations_backend_config = copy.deepcopy(store_backend)
+        if "base_directory" in validations_backend_config:
+            validations_backend_config["base_directory"] = os.path.join(validations_backend_config["base_directory"], "validations")
+        elif "prefix" in validations_backend_config:
+            validations_backend_config["prefix"] = os.path.join(validations_backend_config["prefix"], "validations")
+
         self.store_backends = {
             ExpectationSuiteIdentifier: instantiate_class_from_config(
-                config=store_backend,
+                config=expectations_backend_config,
                 runtime_config={
                     "root_directory": root_directory
                 },
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
                     "key_length": 4,
-                    "filepath_template": 'expectations/{0}/{1}/{2}/{3}.html',
+                    "filepath_template": '{0}/{1}/{2}/{3}.html',
                 }
             ),
             ValidationResultIdentifier: instantiate_class_from_config(
-                config=store_backend,
+                config=validations_backend_config,
                 runtime_config={
                     "root_directory": root_directory
                 },
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
                     "key_length": 5,
-                    "filepath_template": 'validations/{4}/{0}/{1}/{2}/{3}.html',
+                    "filepath_template": '{4}/{0}/{1}/{2}/{3}.html',
                 }
             ),
             "index_page":  instantiate_class_from_config(
@@ -242,6 +255,16 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         # It's a pretty reasonable way for HtmlSiteStore to do its job---you just ahve to remember that it
         # can't necessarily set and list_keys like most other Stores.
         self.keys = set()
+
+    def _convert_tuple_to_resource_identifier(self, tuple_):
+        if tuple_[0] == "expectations":
+            resource_identifier = ExpectationSuiteIdentifier(*tuple_[1])
+        elif tuple_[0] == "validations":
+            resource_identifier = ValidationResultIdentifier(*tuple_[1])
+        else:
+            raise Exception("unknown section name: " + tuple_[0])
+        new_identifier = SiteSectionIdentifier(site_section_name=tuple_[0], resource_identifier=resource_identifier)
+        return new_identifier
 
     def _get(self, key):
         self._validate_key(key)
@@ -284,7 +307,9 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         ))
 
     def list_keys(self):
-        return list(self.keys)
+        return [self._convert_tuple_to_resource_identifier(("expectations", key)) for key in self.store_backends[ExpectationSuiteIdentifier].list_keys()] + \
+               [self._convert_tuple_to_resource_identifier(("validations", key)) for key in self.store_backends[ValidationResultIdentifier].list_keys()]
+
 
     def write_index_page(self, page):
         """This third store has a special method, which uses a zero-length tuple as a key."""

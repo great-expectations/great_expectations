@@ -199,7 +199,7 @@ class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
             return
 
         if not isinstance(validation_result_suite_identifier, ValidationResultIdentifier):
-            raise TypeError("validation_result_id must be of type ExtractAndStoreEvaluationParamsAction, not {0}".format(
+            raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
                 type(validation_result_suite_identifier)
             ))
 
@@ -209,4 +209,39 @@ class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
             validation_result_suite_identifier.expectation_suite_identifier.data_asset_name,
             validation_result_suite_identifier.expectation_suite_identifier.expectation_suite_name,
             validation_result_suite_identifier.run_id,
+        )
+
+class UpdateDataDocsAction(NamespacedValidationAction):
+    """
+    UpdateDataDocsAction is a namespeace-aware validation action that
+    notifies the site builders of all the data docs sites of the data context
+    that a validation result should be added to the data docs.
+    """
+
+    def __init__(self,
+                 data_context,
+                 target_store_name=None,
+                 ):
+        """
+
+        :param data_context: data context
+        :param target_store_name: the name of the store in the data context which
+                should be used to store the validation result
+        """
+        super(UpdateDataDocsAction, self).__init__(data_context)
+
+
+    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
+        logger.debug("UpdateDataDocsAction.run")
+
+        if validation_result_suite is None:
+            return
+
+        if not isinstance(validation_result_suite_identifier, ValidationResultIdentifier):
+            raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                type(validation_result_suite_identifier)
+            ))
+
+        self.data_context.build_data_docs(
+            resource_identifiers=[validation_result_suite_identifier]
         )
