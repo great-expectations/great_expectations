@@ -61,6 +61,9 @@ validation_operators:
       - name: store_evaluation_params
         action:
           class_name: ExtractAndStoreEvaluationParamsAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
     
 stores:
 # Stores are configurable places to store things like Expectations, Validations

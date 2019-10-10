@@ -352,27 +352,20 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
 )
 @click.option('--site_name', '-s',
               help='The site for which to generate documentation. See data_docs section in great_expectations.yml')
-@click.option('--data_asset_name', '-dan',
-              help='The data asset for which to generate documentation. Must also specify --site_name.')
 @click.option(
     "--view/--no-view",
     help="By default open in browser unless you specify the --no-view flag",
     default=True
 )
-def build_docs(directory, site_name, data_asset_name, view=True):
+def build_docs(directory, site_name, view=True):
     """Build Data Docs for a project."""
     logger.debug("Starting cli.build_docs")
-
-    if data_asset_name is not None and site_name is None:
-        cli_message("<red>Error: When specifying `data_asset_name`, `site_name` is required.</red>")
-        sys.exit(1)
 
     try:
         context = DataContext(directory)
         build_documentation_impl(
             context,
-            site_name=site_name,
-            data_asset_name=data_asset_name
+            site_name=site_name
         )
         if view:
             _open_data_docs_in_browser(context.root_directory)
