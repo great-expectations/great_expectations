@@ -197,7 +197,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         elif expectation_type == "expect_column_values_to_not_be_null":
             null_percent = result["unexpected_percent"]
             return "{filled_percent:.4f}% not null".format(filled_percent=(100-null_percent))
-        elif result.get("unexpected_percent"):
+        elif result.get("unexpected_percent") is not None:
             return "{:.4f}% unexpected".format(round(result.get("unexpected_percent"), 4))
         else:
             return "--"
