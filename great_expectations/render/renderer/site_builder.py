@@ -244,7 +244,7 @@ class DefaultSiteSectionBuilder(object):
             # if no resource_identifiers are passed, the section builder will build
             # the views for all keys in its configured store.
             # if the caller did pass resource_identifiers, the section builder
-            # will build views only for the resources in this list
+            # will build pages only for the specified resources
             if resource_identifiers and resource_key not in resource_identifiers:
                 continue
 
