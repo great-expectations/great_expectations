@@ -24,7 +24,7 @@ Configuration
       class_name: SlackNotificationAction
       # put the actual webhook URL in the uncommitted/config_variables.yml file
       slack_webhook: ${validation_notification_slack_webhook}
-notify_on: all # possible values: "all", "failure", "success"
+      notify_on: all # possible values: "all", "failure", "success"
 
       renderer:
         module_name: great_expectations.render.renderer.slack_renderer
