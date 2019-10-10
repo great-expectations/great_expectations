@@ -209,7 +209,7 @@ def init(target_directory):
             if context.list_expectation_suite_keys():
                 if click.confirm(BUILD_DOCS_PROMPT, default=True):
                     context.build_data_docs()
-                    _open_data_docs_in_browser(ge_dir)
+                    _open_data_docs_in_browser(context.root_directory)
         except ge_exceptions.DataContextError as e:
             cli_message("<red>{}</red>".format(e))
     else:
@@ -233,8 +233,9 @@ def _open_data_docs_in_browser(ge_dir):
     """A stdlib cross-platform way to open a file in a browser."""
     ge_dir = os.path.abspath(ge_dir)
     data_docs_index = "file://{}/uncommitted/data_docs/local_site/index.html".format(ge_dir)
-    cli_message("Opening Data Docs found here: {}".format(data_docs_index))
-    webbrowser.open(data_docs_index)
+    if os.path.isfile(data_docs_index):
+        cli_message("Opening Data Docs found here: {}".format(data_docs_index))
+        webbrowser.open(data_docs_index)
 
 
 def _create_new_project(target_directory):
@@ -271,11 +272,11 @@ def add_datasource(directory):
         cli_message("<red>{}</red>".format(err.message))
         return
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, directory)
+        _offer_to_install_new_template(err, context.root_directory)
 
     data_source_name = add_datasource_impl(context)
 
-    if not data_source_name: # no datasource was created
+    if not data_source_name:  # no datasource was created
         return
 
     profile_datasource(context, data_source_name)
@@ -319,7 +320,7 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
         cli_message("<red>{}</red>".format(err.message))
         return
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, directory)
+        _offer_to_install_new_template(err, context.root_directory)
         return
 
     if batch_kwargs is not None:
@@ -374,12 +375,12 @@ def build_docs(directory, site_name, data_asset_name, view=True):
             data_asset_name=data_asset_name
         )
         if view:
-            _open_data_docs_in_browser(directory)
+            _open_data_docs_in_browser(context.root_directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, directory)
+        _offer_to_install_new_template(err, context.root_directory)
         return
     except ge_exceptions.PluginModuleNotFoundError as err:
         cli_message(err.cli_colored_message)
