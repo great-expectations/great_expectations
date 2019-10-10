@@ -371,6 +371,45 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
     print(output_4)
     assert output_4 is None
 
+    # test for evr with exception
+    evr_failed_exception = {
+        "success": False,
+        "exception_info": {
+            "raised_exception": True,
+            "exception_message": "Unrecognized column: not_a_real_column",
+            "exception_traceback": "Traceback (most recent call last):\n...more_traceback..."
+        },
+        "expectation_config": {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Name",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            }
+        }
+    }
+
+    output_5 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed_exception)
+    assert output_5 == {
+        'content_block_type': 'string_template',
+        'string_template': {
+            'template': '\n\n$expectation_type raised an exception:\n$exception_message',
+            'params': {
+                'expectation_type': 'expect_column_values_to_not_match_regex',
+                'exception_message': 'Unrecognized column: not_a_real_column'},
+            'tag': 'strong',
+            'styling': {
+                'classes': ['text-danger'],
+                'params': {
+                    'exception_message': {'tag': 'code'},
+                    'expectation_type': {
+                        'classes': ['badge', 'badge-danger', 'mb-2']
+                    }
+                }
+            }
+        }
+    }
+
 
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_success):
     evr_failed_no_result = {
