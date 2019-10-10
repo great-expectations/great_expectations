@@ -83,6 +83,11 @@ class BatchGenerator(object):
         raise NotImplementedError
 
     def get_available_data_asset_names(self):
+        """Return the list of asset names known by this generator.
+
+        Returns:
+            available names (set)
+        """
         raise NotImplementedError
 
     def get_available_partition_ids(self, generator_asset):

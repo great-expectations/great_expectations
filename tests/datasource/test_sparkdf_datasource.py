@@ -10,6 +10,7 @@ import pandas as pd
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource import SparkDFDatasource
 from great_expectations.dataset import SparkDFDataset
+from great_expectations.datasource.types import InMemoryBatchKwargs
 
 yaml = YAML(typ='safe')
 
@@ -172,10 +173,11 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
     # datasource built in a data context
     # Our dataset fixture is parameterized by all backends. The spark source should only accept a spark dataset
     data_context.create_expectation_suite("spark_source/passthrough/new_asset", "new_suite")
+    batch_kwargs = InMemoryBatchKwargs(dataset=dataset)
 
     if isinstance(dataset, SparkDFDataset):
         # We should be smart enough to figure out this is a batch:
-        batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", dataset)
+        batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", batch_kwargs)
         res = batch.expect_column_to_exist("infinities")
         assert res["success"] is True
         res = batch.expect_column_to_exist("not_a_column")
@@ -189,7 +191,7 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
     else:
         with pytest.raises(BatchKwargsError) as exc:
             # noinspection PyUnusedLocal
-            batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", dataset)
+            batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", batch_kwargs)
             assert "Unrecognized batch_kwargs for spark_source" in exc.message
 
 

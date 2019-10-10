@@ -161,8 +161,8 @@ class SparkDFDatasource(Datasource):
         elif "query" in batch_kwargs:
             df = self.spark.sql(batch_kwargs["query"])
 
-        elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (DataFrame, SparkDFDataset)):
-            df = batch_kwargs.pop("df")  # We don't want to store the actual DataFrame in kwargs
+        elif "dataset" in batch_kwargs and isinstance(batch_kwargs["dataset"], (DataFrame, SparkDFDataset)):
+            df = batch_kwargs.pop("dataset")  # We don't want to store the actual DataFrame in kwargs
             if isinstance(df, SparkDFDataset):
                 # Grab just the spark_df reference, since we want to override everything else
                 df = df.spark_df
@@ -176,27 +176,3 @@ class SparkDFDatasource(Datasource):
                                data_context=self._data_context,
                                batch_kwargs=batch_kwargs,
                                caching=caching)
-
-    def build_batch_kwargs(self, data_asset_name, *args, **kwargs):
-        if len(args) > 0:
-            if isinstance(args[0], (DataFrame, SparkDFDataset)):
-                kwargs.update({
-                    "df": args[0],
-                    "timestamp": time.time()
-                })
-            elif isinstance(args[0], string_types):
-                kwargs.update({
-                    "path": args[0],
-                    "timestamp": time.time()
-                })
-        else:
-            kwargs.update({
-                "timestamp": time.time()
-            })
-        return kwargs
-
-    def named_generator_build_batch_kwargs(self, generator_name, generator_asset, *args, **kwargs):
-        raise NotImplementedError
-
-    def no_generator_build_batch_kwargs(self, *args, **kwargs):
-        raise NotImplementedError

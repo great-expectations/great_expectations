@@ -110,7 +110,7 @@ def test_ActionListValidationOperator(basic_data_context_config_for_validation_o
     # a tuple of parameters for get_batch
     operator_result = data_context.run_validation_operator(
         assets_to_validate=[batch, ("my_datasource/default/f1", "warning", validator_batch_kwargs)],
-        run_identifier="test-100",
+        run_id="test-100",
         validation_operator_name="store_val_res_and_extract_eval_params",
     )
     # results = data_context.run_validation_operator(my_ge_df)
@@ -118,7 +118,8 @@ def test_ActionListValidationOperator(basic_data_context_config_for_validation_o
     validation_result_store_keys = data_context.stores["validation_result_store"].list_keys()
     print(validation_result_store_keys)
     assert len(validation_result_store_keys) == 2
-    assert len(operator_result.keys()) == 2
+    assert operator_result['success']
+    assert len(operator_result['details'].keys()) == 2
 
     first_validation_result = data_context.stores["validation_result_store"].get(validation_result_store_keys[0])
     print(json.dumps(first_validation_result, indent=2))
@@ -209,7 +210,7 @@ validations/
     data_asset_identifier = DataAssetIdentifier("data__dir", "default", "bob-ross")
     results = data_context.run_validation_operator(
         assets_to_validate=[batch],
-        run_identifier="test-100",
+        run_id="test-100",
         validation_operator_name="errors_and_warnings_validation_operator",
     )
 

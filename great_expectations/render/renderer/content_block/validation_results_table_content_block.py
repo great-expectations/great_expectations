@@ -124,26 +124,41 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     @classmethod
     def _get_unexpected_statement(cls, evr):
         success = evr["success"]
-        try:
-            result = evr["result"]
-        except KeyError:
+        result = evr.get("result", {})
+
+        if ("expectation_config" in evr and
+                "exception_info" in evr and
+                evr["exception_info"]["raised_exception"] is True):
+            template_str = "\n\n$expectation_type raised an exception:\n$exception_message"
+
             return RenderedComponentContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": "Expectation failed to execute.",
-                    "params": {},
+                    "template": template_str,
+                    "params": {
+                        "expectation_type": evr["expectation_config"]["expectation_type"],
+                        "exception_message": evr["exception_info"]["exception_message"]
+                    },
                     "tag": "strong",
                     "styling": {
-                        "classes": ["text-warning"]
+                        "classes": ["text-danger"],
+                        "params": {
+                            "exception_message": {
+                                "tag": "code"
+                            },
+                            "expectation_type": {
+                                "classes": ["badge", "badge-danger", "mb-2"]
+                            }
+                        }
                     }
-                }
+                },
             })
 
         if success or not result.get("unexpected_count"):
             return None
         else:
             unexpected_count = result["unexpected_count"]
-            unexpected_percent = "%.2f%%" % (result["unexpected_percent"] * 100.0)
+            unexpected_percent = "%.2f%%" % (result["unexpected_percent"])
             element_count = result["element_count"]
             
             template_str = "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows."

@@ -259,7 +259,7 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         key_tuple = self._convert_resource_identifier_to_tuple(key.resource_identifier)
         return self.store_backends[
             type(key.resource_identifier)
-        ].set(key_tuple, serialized_value)
+        ].set(key_tuple, serialized_value, content_encoding='utf-8', content_type='text/html')
 
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
@@ -269,8 +269,12 @@ class HtmlSiteStore(NamespacedReadWriteStore):
             ))
 
         for key_class in self.store_backends.keys():
-            if isinstance(key.resource_identifier, key_class):
-                return
+            try:
+                if isinstance(key.resource_identifier, key_class):
+                    return
+            except TypeError:
+                # it's ok to have a key that is not a type (e.g. the string "index_page")
+                continue
 
         # The key's resource_identifier didn't match any known key_class
         raise TypeError("resource_identifier in key: {!r} must one of {}, not {!r}".format(
@@ -284,4 +288,4 @@ class HtmlSiteStore(NamespacedReadWriteStore):
 
     def write_index_page(self, page):
         """This third store has a special method, which uses a zero-length tuple as a key."""
-        return self.store_backends["index_page"].set((), page)
+        return self.store_backends["index_page"].set((), page, content_encoding='utf-8', content_type='text/html')
