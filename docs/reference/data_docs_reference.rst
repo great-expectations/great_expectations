@@ -182,10 +182,10 @@ for how to profile a single batch of data and build documentation from the valid
   batch = context.get_batch('ratings')
 
   # run the profiler on the batch - this returns an expectation suite and validation results for this suite
-  expectation_suite, validation_result = BasicDatasetProfiler.profile(batch)
+  expectation_suite, validation_result = BasicDatasetProfiler().profile(batch)
 
   # use a renderer to produce a document model from the validation results
-  document_model = ProfilingResultsPageRenderer.render(validation_result)
+  document_model = ProfilingResultsPageRenderer().render(validation_result)
 
   # use a view to render the document model (produced by the renderer) into a HTML document
   safe_mmkdir(os.path.dirname(profiling_html_filepath))

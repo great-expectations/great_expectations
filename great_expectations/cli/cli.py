@@ -362,7 +362,6 @@ def build_docs(directory, site_name, data_asset_name, view=True):
     """Build Data Docs for a project."""
     logger.debug("Starting cli.build_docs")
 
-    directory = os.path.abspath(directory)
     if data_asset_name is not None and site_name is None:
         cli_message("<red>Error: When specifying `data_asset_name`, `site_name` is required.</red>")
         sys.exit(1)
@@ -388,24 +387,6 @@ def build_docs(directory, site_name, data_asset_name, view=True):
     except ge_exceptions.PluginClassNotFoundError as err:
         cli_message(err.cli_colored_message)
         sys.exit(1)
-
-
-
-@cli.command()
-@click.argument('render_object')
-def render(render_object):
-    """Render a great expectations object to documentation.
-
-    RENDER_OBJECT: path to a GE object to render
-    """
-    with open(render_object, "r") as infile:
-        raw = json.load(infile)
-
-    if "results" in raw:
-        model = ProfilingResultsPageRenderer.render(raw)
-    else:
-        model = ExpectationSuitePageRenderer.render(raw)
-    print(DefaultJinjaPageView.render(model))
 
 
 @cli.command()
