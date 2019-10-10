@@ -219,7 +219,6 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             expectation = evr["expectation_config"]
             expectation_string_obj = expectation_string_fn(expectation, styling, include_column_name)
 
-            # if expectation["exception_info"]["raised_exception"] == True:
             status_cell = [cls._get_status_icon(evr)]
             unexpected_statement = cls._get_unexpected_statement(evr)
             unexpected_table = cls._get_unexpected_table(evr)
