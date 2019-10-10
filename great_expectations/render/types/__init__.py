@@ -18,9 +18,7 @@ class RenderedComponentContent(RenderedContent):
     _allowed_keys = set([
         "content_block_type",
         "header",
-        #TODO: There can be only one!
         "subheader",
-        "sub_header",
         "styling",
 
         "string_template",
