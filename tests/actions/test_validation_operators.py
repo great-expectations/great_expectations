@@ -136,6 +136,7 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
         run_id="test_100"
     )
     slack_query = vo._build_slack_query(return_obj)
+    print(slack_query)
     expected_slack_query = {'blocks': [{'type': 'divider'}, {'type': 'section', 'text': {'type': 'mrkdwn',
                                                                                          'text': '*FailureVsWarning Validation Operator Completed.*'}},
                                        {'type': 'divider'},
@@ -148,6 +149,6 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
                                        {'type': 'section',
                                         'text': {'type': 'mrkdwn', 'text': '*Timestamp:* 09/26/19 13:42:41'}},
                                        {'type': 'divider'}, {'type': 'context', 'elements': [{'type': 'mrkdwn',
-                                                                                              'text': 'Learn about FailureVsWarning Validation Operators at https://docs.greatexpectations.io/en/latest/guides/failure_vs_warning_validation_operator.html'}]}]}
+                                                                                              'text': 'Learn about FailureVsWarning Validation Operators at https://docs.greatexpectations.io/en/latest/reference/validation_operators/warning_and_failure_expectation_suites_validation_operator.html'}]}]}
 
     assert slack_query == expected_slack_query
