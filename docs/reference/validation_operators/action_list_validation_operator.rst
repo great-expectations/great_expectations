@@ -1,4 +1,4 @@
-.. _perform_action_list_validation_operator:
+.. _action_list_validation_operator:
 
 ================================================================================
 ActionListValidationOperator
@@ -42,6 +42,9 @@ An instance of ActionListValidationOperator is included in the default configura
               renderer:
                 module_name: great_expectations.render.renderer.slack_renderer
                 class_name: SlackRenderer
+          - name: update_data_docs
+            action:
+              class_name: UpdateDataDocsAction
 
 
 Invocation
