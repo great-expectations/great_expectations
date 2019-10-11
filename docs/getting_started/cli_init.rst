@@ -432,6 +432,24 @@ After the init command completes, you should see the following directory structu
 
 
 
+Configuring Slack Notifications
+----------------------------------------
+
+Great Expectations can post messages to a Slack channel when a new dataset is validated. This helps teams to monitor data quality in their pipeline in real time. Here is what these messages look like:
+
+.. image:: ../images/validation_result_slack_message_example.jpg
+    :width: 400px
+
+`great_expectations init` command prompts you to enter a Slack webhook URL to enable this functionality.
+
+Obtaining this URL is easy. This article walks you through the steps: `Incoming Webhooks For Slack <https://slack.com/help/articles/115005265063-incoming-webhooks-for-slack>`_
+
+Since Slack webhook URLs are security credentials, we store them in the `uncommitted/config_variables.yml` file that will not be checked in into your source control. The config property name is `validation_notification_slack_webhook`
+
+
+Next Steps
+-----------
+
 Before exiting, the init command points you to the notebooks that you can use to create expectations:
 
 ::
