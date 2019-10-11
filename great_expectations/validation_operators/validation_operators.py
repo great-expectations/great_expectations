@@ -371,7 +371,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         query["blocks"].append(timestamp_element)
         query["blocks"].append(divider_block)
 
-        documentation_url = "https://docs.greatexpectations.io/en/latest/guides/failure_vs_warning_validation_operator.html"
+        documentation_url = "https://docs.greatexpectations.io/en/latest/reference/validation_operators/warning_and_failure_expectation_suites_validation_operator.html"
         footer_section = {
             "type": "context",
             "elements": [
