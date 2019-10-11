@@ -446,6 +446,7 @@ Obtaining this URL is easy. This article walks you through the steps: `Incoming 
 
 Since Slack webhook URLs are security credentials, we store them in the `uncommitted/config_variables.yml` file that will not be checked in into your source control. The config property name is `validation_notification_slack_webhook`
 
+If you don't have a Slack webhook URL right now, you can decline the `init` command's prompt and configure this feature later.
 
 Next Steps
 -----------
