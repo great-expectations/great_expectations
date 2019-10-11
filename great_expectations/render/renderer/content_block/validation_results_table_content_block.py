@@ -193,12 +193,15 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return result.get("observed_value")
         elif expectation_type == "expect_column_values_to_be_null":
             notnull_percent = result["unexpected_percent"]
-            return ("{null_percent:.8f}% null".format(null_percent=(100-notnull_percent))).rstrip('0').rstrip('.')
+            return ("{null_percent:.8f}%".format(null_percent=(100-notnull_percent)).rstrip('0').rstrip('.') +
+                    " null")
         elif expectation_type == "expect_column_values_to_not_be_null":
             null_percent = result["unexpected_percent"]
-            return ("{filled_percent:.8f}% not null".format(filled_percent=(100-null_percent))).rstrip('0').rstrip('.')
+            return ("{filled_percent:.8f}%".format(filled_percent=(100-null_percent)).rstrip('0').rstrip('.')
+                    + " not null")
         elif result.get("unexpected_percent") is not None:
-            return ("{:.8f}% unexpected".format(round(result.get("unexpected_percent"), 4))).rstrip('0').rstrip('.')
+            return ("{:.8f}%".format(round(result.get("unexpected_percent"), 4)).rstrip('0').rstrip('.')
+                    + " unexpected")
         else:
             return "--"
 
