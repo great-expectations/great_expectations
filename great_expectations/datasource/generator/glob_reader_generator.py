@@ -89,23 +89,23 @@ class GlobReaderGenerator(BatchGenerator):
             return os.path.join(self._datasource.get_data_context().root_directory, self._base_directory)
 
     def get_available_data_asset_names(self):
-        known_assets = set()
+        known_assets = []
         if not os.path.isdir(self.base_directory):
             return known_assets
         for generator_asset in self.asset_globs.keys():
             batch_paths = self._get_generator_asset_paths(generator_asset)
-            if len(batch_paths) > 0:
-                known_assets.add(generator_asset)
+            if len(batch_paths) > 0 and generator_asset not in known_assets:
+                known_assets.append(generator_asset)
 
         return known_assets
 
     def get_available_partition_ids(self, generator_asset):
         glob_config = self._get_generator_asset_config(generator_asset)
         batch_paths = self._get_generator_asset_paths(generator_asset)
-        partition_ids = set([
+        partition_ids = [
             self._partitioner(path, glob_config) for path in batch_paths
             if self._partitioner(path, glob_config) is not None
-        ])
+        ]
         return partition_ids
 
     def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):

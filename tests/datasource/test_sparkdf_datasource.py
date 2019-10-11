@@ -130,7 +130,7 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
     datasource = SparkDFDatasource('SparkParquet', base_directory=test_parquet_folder_connection_path)
 
     assert datasource.get_available_data_asset_names() == {
-        "default": set(['test'])
+        "default": ['test']
     }
     dataset = datasource.get_batch('test',
                                    expectation_suite_name="default",
@@ -147,7 +147,7 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path):
     pyspark_skip = pytest.importorskip("pyspark")
     datasource = SparkDFDatasource('SparkParquet', base_directory=test_folder_connection_path)
     assert datasource.get_available_data_asset_names() == {
-        "default": set(['test'])
+        "default": ['test']
     }
     dataset = datasource.get_batch('test',
                                    expectation_suite_name="default",
