@@ -146,19 +146,17 @@ open them in a web browser.
 
 The command will print out the locations of index.html file for each site.
 
-The sites will not automatically pick up new entities (e.g., a new expectation
-suite that was added after the last time the site was rendered) -
-`documentation` command must be called to refresh the site.
-
 To disable the web browser opening behavior use `--no-view` option.
 
 To render just one site, use `--site_name SITE_NAME` option.
 
-To render just one data asset (this might be useful for debugging), call
+Here is when the `build-docs` command should be called:
 
-.. code-block:: bash
+* when you want to fully rebuild a Data Docs site
+* after a new expectation suite is added or an existing one is edited
+* after new data is profiled (only if you declined the prompt to build data docs when running the profiling command)
 
-    great_expectations build-docs --site_name SITE_NAME --data_asset_name DATA_ASSET_NAME
+When a new validation result is generated after running a Validation Operator, the Data Docs sites will add this result automatically if the operator has the UpdateDataDocsAction action configured (read :ref:`actions`).
 
 
 Using the raw API

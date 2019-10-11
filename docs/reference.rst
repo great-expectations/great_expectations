@@ -44,6 +44,15 @@ Configuration Guides
    /reference/profiling_reference
    /reference/migrating_versions
 
+************************
+Integrations
+************************
+
+.. toctree::
+   :maxdepth: 2
+
+   /reference/integrations/redshift
+
 ******************
 Advanced Features
 ******************

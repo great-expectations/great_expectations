@@ -1,4 +1,4 @@
-.. _run_warning_and_failure_expectation_suites_validation_operator:
+.. _warning_and_failure_expectation_suites_validation_operator:
 
 ================================================================================
 WarningAndFailureExpectationSuitesValidationOperator
@@ -42,7 +42,7 @@ Below is an example of this operator's configuration:
 
         # put the actual webhook URL in the uncommitted/config_variables.yml file
         slack_webhook: ${validation_notification_slack_webhook}
-        # optional - if "all" - notify always, "success" - notify only on success, "failure" - notify only on faulure
+        # optional - if "all" - notify always, "success" - notify only on success, "failure" - notify only on failure
         notify_on="all"
 
         # the operator will call the following actions on each validation result

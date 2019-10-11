@@ -1,6 +1,7 @@
 import pytest
 import os
 from great_expectations.exceptions import InvalidConfigError
+from great_expectations.data_context.util import substitute_config_variable
 
 
 def test_config_variables_on_context_without_config_variables_filepath_configured(data_context_without_config_variables_filepath_configured):
@@ -52,3 +53,16 @@ def test_setting_config_variables_is_visible_immediately(data_context_with_varia
                "reader_options"]["test_variable_sub1"] == "value_from_env_var"
 
 
+def test_substitute_config_variable():
+    config_variables_dict = {
+        "arg0": "val_of_arg_0",
+        "arg2": {
+            "v1": 2
+        }
+    }
+    assert substitute_config_variable("abc${arg0}", config_variables_dict) == "abcval_of_arg_0"
+    assert substitute_config_variable("abc$arg0", config_variables_dict) == "abcval_of_arg_0"
+    assert substitute_config_variable("${arg0}", config_variables_dict) == "val_of_arg_0"
+    assert substitute_config_variable("hhhhhhh", config_variables_dict) == "hhhhhhh"
+    assert substitute_config_variable("abc${arg1}", config_variables_dict) == "abc${arg1}"
+    assert substitute_config_variable("${arg2}", config_variables_dict) == config_variables_dict["arg2"]
