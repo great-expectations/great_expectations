@@ -12,6 +12,7 @@ from great_expectations.cli.init_messages import (
     BUILD_DOCS_PROMPT,
     COMPLETE_ONBOARDING_PROMPT,
     GREETING,
+    INVALID_SLACK_WEBHOOK_PROMPT,
     LETS_BEGIN_PROMPT,
     NEW_TEMPLATE_INSTALLED,
     NEW_TEMPLATE_PROMPT,
@@ -19,6 +20,11 @@ from great_expectations.cli.init_messages import (
     ONBOARDING_COMPLETE,
     PROJECT_IS_COMPLETE,
     RUN_INIT_AGAIN,
+    SLACK_LATER,
+    SLACK_SETUP_INTRO,
+    SLACK_SETUP_COMPLETE,
+    SLACK_SETUP_PROMPT,
+    SLACK_WEBHOOK_PROMPT,
 )
 from .datasource import (
     add_datasource as add_datasource_impl,
@@ -27,11 +33,6 @@ from .datasource import (
     MSG_GO_TO_NOTEBOOK,
 )
 from great_expectations.cli.util import cli_message
-from great_expectations.render.view import DefaultJinjaPageView
-from great_expectations.render.renderer import (
-    ProfilingResultsPageRenderer,
-    ExpectationSuitePageRenderer,
-)
 from great_expectations.data_context import DataContext
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
@@ -44,7 +45,6 @@ from great_expectations import read_csv
 #     cli, ["profile", "my_datasource", "-d", project_root_dir])
 click.disable_unicode_literals_warning = True
 
-# from collections import OrderedDict
 
 warnings.filterwarnings('ignore')
 
@@ -216,13 +216,41 @@ def init(target_directory):
         if not click.confirm(LETS_BEGIN_PROMPT, default=True):
             cli_message(RUN_INIT_AGAIN)
             exit(0)
-        else:
-            context, data_source_name = _create_new_project(target_directory)
-            if not data_source_name:  # no datasource was created
-                return
 
-            profile_datasource(context, data_source_name)
-            cli_message(MSG_GO_TO_NOTEBOOK)
+        context, data_source_name = _create_new_project(target_directory)
+        if not data_source_name:  # no datasource was created
+            return
+
+        context = _slack_setup(context)
+
+        profile_datasource(context, data_source_name)
+        cli_message(MSG_GO_TO_NOTEBOOK)
+
+
+def _is_sane_slack_webhook(url):
+    """Really basic sanity checking."""
+    if url is None:
+        return False
+
+    return "https://hooks.slack.com/" in url.strip()
+
+
+def _slack_setup(context):
+    webhook_url = None
+    cli_message(SLACK_SETUP_INTRO)
+    if not click.confirm(SLACK_SETUP_PROMPT, default=True):
+        cli_message(SLACK_LATER)
+        return context
+    else:
+        webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default="")
+
+    while not _is_sane_slack_webhook(webhook_url):
+        webhook_url = click.prompt(INVALID_SLACK_WEBHOOK_PROMPT)
+
+    context.save_config_variable("validation_notification_slack_webhook", webhook_url)
+    cli_message(SLACK_SETUP_COMPLETE)
+
+    return context
 
 
 def _get_full_path_to_ge_dir(target_directory):
@@ -232,10 +260,13 @@ def _get_full_path_to_ge_dir(target_directory):
 def _open_data_docs_in_browser(ge_dir):
     """A stdlib cross-platform way to open a file in a browser."""
     ge_dir = os.path.abspath(ge_dir)
-    data_docs_index = "file://{}/uncommitted/data_docs/local_site/index.html".format(ge_dir)
+    data_docs_index = os.path.join(
+        ge_dir,
+        "uncommitted/data_docs/local_site/index.html"
+    )
     if os.path.isfile(data_docs_index):
         cli_message("Opening Data Docs found here: {}".format(data_docs_index))
-        webbrowser.open(data_docs_index)
+        webbrowser.open("file://" + data_docs_index)
 
 
 def _create_new_project(target_directory):
@@ -352,27 +383,20 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
 )
 @click.option('--site_name', '-s',
               help='The site for which to generate documentation. See data_docs section in great_expectations.yml')
-@click.option('--data_asset_name', '-dan',
-              help='The data asset for which to generate documentation. Must also specify --site_name.')
 @click.option(
     "--view/--no-view",
     help="By default open in browser unless you specify the --no-view flag",
     default=True
 )
-def build_docs(directory, site_name, data_asset_name, view=True):
+def build_docs(directory, site_name, view=True):
     """Build Data Docs for a project."""
     logger.debug("Starting cli.build_docs")
-
-    if data_asset_name is not None and site_name is None:
-        cli_message("<red>Error: When specifying `data_asset_name`, `site_name` is required.</red>")
-        sys.exit(1)
 
     try:
         context = DataContext(directory)
         build_documentation_impl(
             context,
-            site_name=site_name,
-            data_asset_name=data_asset_name
+            site_name=site_name
         )
         if view:
             _open_data_docs_in_browser(context.root_directory)

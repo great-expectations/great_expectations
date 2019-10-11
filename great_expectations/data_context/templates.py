@@ -38,6 +38,9 @@ CONFIG_VARIABLES_INTRO = """
 # from an environment variable, it must be a simple value. Read more at:
 # https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/reference/data_context_reference.html#managing-environment-and-secrets"""
 
+# This junky fake key keeps ruaml.yml from nuking the important comment block
+CONFIG_VARIABLES_TEMPLATE = "ge_comment_preservation_key: 1" + CONFIG_VARIABLES_INTRO
+
 PROJECT_OPTIONAL_CONFIG_COMMENT = CONFIG_VARIABLES_INTRO + """
 config_variables_file_path: uncommitted/config_variables.yml
 
@@ -61,6 +64,18 @@ validation_operators:
       - name: store_evaluation_params
         action:
           class_name: ExtractAndStoreEvaluationParamsAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+      - name: send_slack_notification_on_validation_result
+        action:
+          class_name: SlackNotificationAction
+          # put the actual webhook URL in the uncommitted/config_variables.yml file
+          slack_webhook: ${validation_notification_slack_webhook}
+          notify_on: all # possible values: "all", "failure", "success"
+          renderer:
+            module_name: great_expectations.render.renderer.slack_renderer
+            class_name: SlackRenderer
     
 stores:
 # Stores are configurable places to store things like Expectations, Validations

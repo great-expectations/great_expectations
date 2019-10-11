@@ -15,7 +15,7 @@ def add_datasource(context):
         """
 ========== Datasources ==========
 
-See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue> for more information about datasources.
+See <blue>https://docs.greatexpectations.io/en/latest/features/datasource.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue> for more information about datasources.
 """.format(rtd_url_ge_version)
     )
     data_source_selection = click.prompt(
@@ -89,16 +89,15 @@ def _add_sqlalchemy_datasource(context):
         import sqlalchemy
         from sqlalchemy import create_engine, MetaData
     except ImportError:
-        cli_message("""<red>ERROR: Unable to import `sqlalchemy`.
-       - Please install the sqlalchemy before trying again.</red>""")
+        cli_message("""<red>ERROR: Unable find `sqlalchemy`</red>.
+  - Please `pip install sqlalchemy` before trying again.""")
         return None
 
     data_source_name = click.prompt(
         msg_prompt_datasource_name, default="mydb", show_default=True)
 
     while True:
-        cli_message(msg_sqlalchemy_config_connection.format(
-            data_source_name))
+        cli_message(msg_sqlalchemy_config_connection.format(data_source_name))
 
         drivername = click.prompt("What is the driver for the sqlalchemy connection?", default="postgres",
                                   show_default=True)
@@ -141,6 +140,10 @@ def _add_sqlalchemy_datasource(context):
 
         context.save_config_variable(data_source_name, credentials)
 
+        message = """
+<red>Cannot connect to the database.</red>
+  - Please check your environment and the configuration you provided.
+  - Database Error: {0:s}"""
         try:
             context.add_datasource(data_source_name,
                                    module_name="great_expectations.datasource",
@@ -149,12 +152,13 @@ def _add_sqlalchemy_datasource(context):
                                        "class_name": "SqlAlchemyDataset"},
                                    credentials="${" + data_source_name + "}")
             break
-        except (DatasourceInitializationError, ModuleNotFoundError) as de:
-            cli_message(
-                """<red>Cannot connect to the database.
-  - Please check your environment and the configuration you provided.
-  - Database Error: {0:s}</red>>
-                """.format(str(de)))
+        except ModuleNotFoundError as de:
+            message = message + "\n  - Please `pip install psycopg2` and try again"
+            cli_message(message.format(str(de)))
+            return None
+
+        except DatasourceInitializationError as de:
+            cli_message(message.format(str(de)))
             if not click.confirm(
                     "Enter the credentials again?".format(str(de)),
                     default=True
@@ -210,7 +214,7 @@ Please note: Profiling is still a beta feature in Great Expectations.  The curre
 data source (without sampling), which may be very time consuming. 
 As a rule of thumb, we recommend starting with data smaller than 100MB.
 
-To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/guides/profiling.html\
+To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/features/profiling.html\
 ?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
 """
 
@@ -241,7 +245,7 @@ Would you like to profile '{0:s}'?
 
 Great Expectations can create data documentation from the data you just profiled.
 
-To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_docs.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_docs.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
 """
 
     cli_message(msg_intro.format(data_source_name, rtd_url_ge_version))
@@ -326,7 +330,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
         cli_message("Okay, skipping HTML documentation for now.")
 
 
-def build_docs(context, site_name=None, data_asset_name=None):
+def build_docs(context, site_name=None):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 
@@ -337,7 +341,7 @@ def build_docs(context, site_name=None, data_asset_name=None):
     else:
         site_names=None
 
-    index_page_locator_infos = context.build_data_docs(site_names=site_names, data_asset_name=data_asset_name)
+    index_page_locator_infos = context.build_data_docs(site_names=site_names)
 
     msg = """
 The following data documentation HTML sites were generated:

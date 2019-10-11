@@ -175,10 +175,23 @@ class SiteBuilder(object):
                 }
             )
 
-    def build(self):
+    def build(self, resource_identifiers=None):
+        """
+
+        :param resource_identifiers: a list of resource identifiers (ExpectationSuiteIdentifier,
+                            ValidationResultIdentifier). If specified, rebuild HTML
+                            (or other views the data docs site renders) only for
+                            the resources in this list. This supports incremental build
+                            of data docs sites (e.g., when a new validation result is created)
+                            and avoids full rebuild.
+        :return:
+        """
+
         for site_section, site_section_builder in self.site_section_builders.items():
-            site_section_builder.build(datasource_whitelist=self.datasource_whitelist)
-        
+            site_section_builder.build(datasource_whitelist=self.datasource_whitelist,
+                                       resource_identifiers=resource_identifiers
+                                       )
+
         return self.site_index_builder.build()
 
 
@@ -224,8 +237,15 @@ class DefaultSiteSectionBuilder(object):
             }
         )
 
-    def build(self, datasource_whitelist):
+    def build(self, datasource_whitelist, resource_identifiers=None):
         for resource_key in self.source_store.list_keys():
+
+            # if no resource_identifiers are passed, the section builder will build
+            # a page for every keys in its source store.
+            # if the caller did pass resource_identifiers, the section builder
+            # will build pages only for the specified resources
+            if resource_identifiers and resource_key not in resource_identifiers:
+                continue
 
             if self.run_id_filter:
                 if not self._resource_key_passes_run_id_filter(resource_key):
@@ -410,6 +430,10 @@ class DefaultSiteIndexBuilder(object):
                     )
                 expectation_suite_name = key_resource_identifier.expectation_suite_identifier.expectation_suite_name
                 run_id = key_resource_identifier.run_id
+                if run_id == "profiling":
+                    section_name = "profiling"
+                else:
+                    section_name = "validations"
                 validation = self.data_context.get_validation_result(
                     data_asset_name=data_asset_name,
                     expectation_suite_name=expectation_suite_name,
@@ -430,7 +454,7 @@ class DefaultSiteIndexBuilder(object):
                     generator=key_resource_identifier.expectation_suite_identifier.data_asset_name.generator,
                     generator_asset=key_resource_identifier.expectation_suite_identifier.data_asset_name.generator_asset,
                     expectation_suite_name=expectation_suite_name,
-                    section_name=key.site_section_name,
+                    section_name=section_name,
                     run_id=run_id,
                     validation_success=validation_success
                 )

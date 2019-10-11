@@ -12,7 +12,9 @@ from great_expectations.render.renderer.site_builder import (
 )
 from great_expectations.data_context.types import (
     SiteSectionIdentifier,
+    ValidationResultIdentifier,
 )
+
 from great_expectations.data_context.util import safe_mmkdir
 
 
@@ -72,10 +74,12 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         "ValidationResultIdentifier.random.default.f1.BasicDatasetProfiler.profiling",
     ])
 
-    res = SiteBuilder(
+    site_builder = SiteBuilder(
             data_context=context,
             **local_site_config
-        ).build()
+        )
+    res = site_builder.build()
+
     index_page_locator_info = res[0]
     index_links_dict = res[1]
 
@@ -151,3 +155,37 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         ),
         "./tests/render/output/documentation"
     )
+
+    # let's create another validation result and run the site builder to add it
+    # to the data docs
+    # the operator does not have an StoreAction action configured, so the site
+    # will not be updated without our call to site builder
+
+    ts_last_mod_0 = os.path.getmtime(os.path.join(site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory, "validations/test_run_id_12345/titanic/default/Titanic/BasicDatasetProfiler.html"))
+
+    run_id = "test_run_id_12346"
+    operator_result = context.run_validation_operator(
+        assets_to_validate=[batch],
+        run_id=run_id,
+        validation_operator_name="validate_and_store",
+    )
+
+    validation_result_id = ValidationResultIdentifier(
+        expectation_suite_identifier=[key for key in operator_result["details"].keys()][0],
+        run_id=run_id)
+    res = site_builder.build(resource_identifiers=[validation_result_id])
+
+    index_links_dict = res[1]
+
+    # verify that an additional validation result HTML file was generated
+    assert len(index_links_dict["titanic"]["default"]["Titanic"]["validations_links"]) == 2
+
+    site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory
+
+    # verify that the validation result HTML file rendered in the previous run was NOT updated
+    ts_last_mod_1 = os.path.getmtime(os.path.join(site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory, "validations/test_run_id_12345/titanic/default/Titanic/BasicDatasetProfiler.html"))
+
+    assert ts_last_mod_0 == ts_last_mod_1
+
+    print("mmm")
+
