@@ -220,7 +220,7 @@ def init(target_directory):
         if not data_source_name:  # no datasource was created
             return
 
-        _slack_setup()
+        context = _slack_setup(context)
 
         profile_datasource(context, data_source_name)
         cli_message(MSG_GO_TO_NOTEBOOK)
@@ -234,19 +234,21 @@ def _is_sane_slack_webhook(url):
     return "https://hooks.slack.com/" in url.strip()
 
 
-def _slack_setup():
+def _slack_setup(context):
     webhook_url = None
     if not click.confirm(SLACK_SETUP_PROMPT, default=True):
         cli_message(SLACK_LATER)
-        return
+        return context
     else:
         webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default="")
 
     while not _is_sane_slack_webhook(webhook_url):
         webhook_url = click.prompt(INVALID_SLACK_WEBHOOK_PROMPT)
-        # TODO modify config
-        # TODO modify config vars
+
+    context.save_config_variable("validation_notification_slack_webhook", webhook_url)
     cli_message(SLACK_SETUP_COMPLETE)
+
+    return context
 
 
 def _get_full_path_to_ge_dir(target_directory):
