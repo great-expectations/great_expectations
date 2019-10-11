@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from great_expectations import rtd_url_ge_version
+from great_expectations import rtd_url_ge_version, DataContext
 
 # !!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
 GREETING = """<cyan>
@@ -67,4 +67,9 @@ NEW_TEMPLATE_INSTALLED = """\nOK. You now have a new config file: `{}`.
 
 NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please add one by:
   - running `<green>great_expectations add-datasource</green>` or
-  - by editing the great_expectations.yml file"""
+  - by editing the {} file""".format(DataContext.GE_YML)
+
+NO_DATASOURCES_FOUND = """You can add add one by:
+  - running `<green>great_expectations add-datasource</green>` or
+  - by editing the {} file""".format(DataContext.GE_YML)
+
