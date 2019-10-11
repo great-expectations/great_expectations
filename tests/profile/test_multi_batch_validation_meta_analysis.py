@@ -5,7 +5,7 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.profile.multi_batch_validation_meta_analysis import MultiBatchValidationMetaAnalysis
 from great_expectations.datasource.types import BatchKwargs
 from great_expectations.data_context.types.metrics import (
-    NamespaceAwareValidationMetric,
+    ValidationMetric,
     MultiBatchNamespaceAwareValidationMetric,
     NamespaceAwareExpectationDefinedValidationMetric,
     MultiBatchNamespaceAwareExpectationDefinedValidationMetric,

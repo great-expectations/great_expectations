@@ -30,6 +30,18 @@ class InvalidConfigVersionError(GreatExpectationsError):
     pass
 
 
+class InvalidBatchKwargsError(GreatExpectationsError):
+    pass
+
+
+class InvalidBatchIdError(GreatExpectationsError):
+    pass
+
+
+class InvalidDataContextKeyError(DataContextError):
+    pass
+
+
 class UnsupportedConfigVersionError(GreatExpectationsError):
     pass
 

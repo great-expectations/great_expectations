@@ -3,10 +3,10 @@ from functools import reduce
 import operator
 from collections import defaultdict
 from great_expectations.data_context.types.metrics import (
-NamespaceAwareValidationMetric,
-MultiBatchNamespaceAwareValidationMetric,
-NamespaceAwareExpectationDefinedValidationMetric,
-MultiBatchNamespaceAwareExpectationDefinedValidationMetric,
+    ValidationMetric,
+    MultiBatchNamespaceAwareValidationMetric,
+    NamespaceAwareExpectationDefinedValidationMetric,
+    MultiBatchNamespaceAwareExpectationDefinedValidationMetric,
 )
 
 
@@ -24,7 +24,7 @@ class MetricsStore(object):
         metric_kwargs,
         metric_value):
 
-        new_metric = NamespaceAwareValidationMetric(
+        new_metric = ValidationMetric(
             data_asset_name=data_asset_name,
             batch_fingerprint=batch_fingerprint,
             metric_name=metric_name,
@@ -121,7 +121,7 @@ class MetricsStore(object):
         """
         first_non_null_single_batch_metric = [item for item in single_batch_metric_list if item is not None][0]
 
-        if 'NamespaceAwareValidationMetric' == single_batch_metric_name:
+        if 'ValidationMetric' == single_batch_metric_name:
                 mb_metric = MultiBatchNamespaceAwareValidationMetric(
                     data_asset_name=first_non_null_single_batch_metric.data_asset_name,
                     metric_name=first_non_null_single_batch_metric.metric_name,
