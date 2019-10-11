@@ -47,6 +47,7 @@ from .types import (
 from .templates import (
     PROJECT_TEMPLATE,
     CONFIG_VARIABLES_INTRO,
+    CONFIG_VARIABLES_TEMPLATE,
 )
 from .util import (
     load_class,
@@ -168,7 +169,7 @@ class ConfigOnlyDataContext(object):
         safe_mmkdir(uncommitted_dir)
         config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
         with open(config_var_file, "w") as template:
-            template.write(CONFIG_VARIABLES_INTRO)
+            template.write(CONFIG_VARIABLES_TEMPLATE)
 
     @classmethod
     def write_project_template_to_disk(cls, ge_dir):

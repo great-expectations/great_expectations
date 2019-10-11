@@ -5,6 +5,7 @@ import json
 from great_expectations.render.renderer.content_block.content_block import ContentBlockRenderer
 from great_expectations.render.util import ordinal
 
+
 def substitute_none_for_missing(kwargs, kwarg_list):
     """Utility function to plug Nones in when optional parameters are not specified in expectation kwargs.
 
@@ -1330,13 +1331,19 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     def expect_column_values_to_be_unique(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
-            ["column", ],
+            ["column", "mostly"],
         )
-        
+
         if include_column_name:
-            template_str = "$column values must be unique."
+            template_str = "$column values must be unique"
         else:
-            template_str = "values must be unique."
+            template_str = "values must be unique"
+
+        if params["mostly"] is not None:
+            params["mostly_pct"] = ("%.8f" % (params["mostly"] * 100,)).rstrip('0').rstrip('.')
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
         
         return [{
             "content_block_type": "string_template",
