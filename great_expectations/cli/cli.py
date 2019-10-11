@@ -21,8 +21,9 @@ from great_expectations.cli.init_messages import (
     PROJECT_IS_COMPLETE,
     RUN_INIT_AGAIN,
     SLACK_LATER,
-    SLACK_SETUP_PROMPT,
+    SLACK_SETUP_INTRO,
     SLACK_SETUP_COMPLETE,
+    SLACK_SETUP_PROMPT,
     SLACK_WEBHOOK_PROMPT,
 )
 from .datasource import (
@@ -236,6 +237,7 @@ def _is_sane_slack_webhook(url):
 
 def _slack_setup(context):
     webhook_url = None
+    cli_message(SLACK_SETUP_INTRO)
     if not click.confirm(SLACK_SETUP_PROMPT, default=True):
         cli_message(SLACK_LATER)
         return context
