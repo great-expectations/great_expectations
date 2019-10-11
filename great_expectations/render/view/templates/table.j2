@@ -19,12 +19,13 @@
         <tr>
         {% set rowloop = loop -%}
         {% for cell in row -%}
+            {%- set content_block_id = content_block_id ~ "-cell-" ~ rowloop.index ~ "-" ~ loop.index -%}
             {% if cell is mapping and "styling" in cell -%}
                 {% set cell_styling = cell["styling"].get("parent", {}) | render_styling | replace("{{section_id}}", section_id) | replace("{{content_block_id}}", content_block_id) -%}
             {% else -%}
                 {% set cell_styling = "" -%}
             {% endif -%}
-            <td id="{{content_block_id}}-cell-{{ rowloop.index }}-{{ loop.index }}" {{ cell_styling }}>{{ cell | render_content_block }}</td>
+            <td id="{{content_block_id}}" {{ cell_styling }}>{{ cell | render_content_block }}</td>
         {%- endfor -%}
         </tr>
     {%- endfor -%}
