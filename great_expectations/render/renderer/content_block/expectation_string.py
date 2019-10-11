@@ -310,7 +310,6 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             ["value"]
         )
         template_str = "Must have exactly $value columns."
-    
         return [{
             "content_block_type": "string_template",
             "string_template": {
@@ -326,7 +325,6 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["min_value", "max_value"]
         )
-    
         if params["min_value"] is None and params["max_value"] is None:
             template_str = "May have any number of columns."
         else:
@@ -336,7 +334,6 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "Must have less than than $max_value columns."
             elif params["max_value"] is None:
                 template_str = "Must have more than $min_value columns."
-    
         return [{
             "content_block_type": "string_template",
             "string_template": {
