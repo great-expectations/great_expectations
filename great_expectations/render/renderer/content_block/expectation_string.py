@@ -309,7 +309,6 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["value"]
         )
-    
         template_str = "Must have exactly $value columns."
     
         return [{
@@ -379,7 +378,6 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["value"]
         )
-        
         template_str = "Must have exactly $value rows."
         
         return [{
