@@ -99,9 +99,6 @@ def test_HtmlSiteStore_S3_backend():
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
 
-    with pytest.raises(MissingTopLevelConfigKeyError):
-        my_store.get(ValidationResultIdentifier(**{}))
-
     ns_1 = SiteSectionIdentifier(
         site_section_name="validations",
         resource_identifier=ValidationResultIdentifier(

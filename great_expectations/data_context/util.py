@@ -32,18 +32,18 @@ def safe_mmkdir(directory, exist_ok=True):
             raise
 
 
-# TODO : Consider moving this into types.resource_identifiers.DataContextKey.
-# NOTE : We **don't** want to encourage stringification of keys, other than in tests, etc.
-# TODO : Rename to parse_string_to_data_context_key
-def parse_string_to_data_context_resource_identifier(string, separator="."):
-    string_elements = string.split(separator)
-
-    loaded_module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
-    class_ = getattr(loaded_module, string_elements[0])
-
-    class_instance = class_(*(string_elements[1:]))
-
-    return class_instance
+# # TODO : Consider moving this into types.resource_identifiers.DataContextKey.
+# # NOTE : We **don't** want to encourage stringification of keys, other than in tests, etc.
+# # TODO : Rename to parse_string_to_data_context_key
+# def parse_string_to_data_context_resource_identifier(string, separator="."):
+#     string_elements = string.split(separator)
+#
+#     loaded_module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
+#     class_ = getattr(loaded_module, string_elements[0])
+#
+#     class_instance = class_(*(string_elements[1:]))
+#
+#     return class_instance
 
 
 def load_class(class_name, module_name):

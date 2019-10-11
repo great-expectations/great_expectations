@@ -124,7 +124,7 @@ class ActionListValidationOperator(ValidationOperator):
             batch = self._build_batch_from_item(item)
             expectation_suite_identifier = ExpectationSuiteIdentifier(
                 data_asset_name=DataAssetIdentifier(
-                    *self.data_context._normalize_data_asset_name(batch._expectation_suite["data_asset_name"])
+                    *self.data_context.normalize_data_asset_name(batch._expectation_suite["data_asset_name"])
                 ),
                 expectation_suite_name=batch._expectation_suite.expectation_suite_name
             )
@@ -304,7 +304,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         
         if run_return_obj.get("failure"):
             failed_data_assets = [
-                validation_result_identifier["expectation_suite_identifier"]["data_asset_name"] for validation_result_identifier, value in run_return_obj.get("failure").items() \
+                validation_result_identifier.expectation_suite_identifier.data_asset_name for validation_result_identifier, value in run_return_obj.get("failure").items() \
                 if not value["validation_result"]["success"]
             ]
     
@@ -402,7 +402,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
             # TODO : We should be using typed batch
             data_asset_identifier = DataAssetIdentifier(
-                *self.data_context._normalize_data_asset_name(
+                *self.data_context.normalize_data_asset_name(
                     batch._expectation_suite["data_asset_name"]
                 )
             )

@@ -21,6 +21,7 @@ from great_expectations.data_context.store import (
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
+    DataAssetIdentifier
 )
 from great_expectations.data_context.types import (
     ValidationResultIdentifier
@@ -70,18 +71,33 @@ def test_StoreAction():
     )
     assert fake_in_memory_store.list_keys() == []
 
-    vr_id = "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
     action.run(
-        validation_result_suite_identifier=ValidationResultIdentifier(from_string=vr_id),
-        validation_result_suite={},
+        validation_result_suite_identifier=ValidationResultIdentifier(
+            expectation_suite_identifier=ExpectationSuiteIdentifier(
+                data_asset_name=DataAssetIdentifier("my_db", "default_generator", "my_table"),
+                expectation_suite_name="default_expectations"
+            ),
+            run_id="prod_20190801"
+        ),
+        validation_result_suite={"test": "value"},
         data_asset=None
     )
 
     assert len(fake_in_memory_store.list_keys()) == 1
-    assert fake_in_memory_store.list_keys()[0].to_string() == "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
+    stored_identifier = fake_in_memory_store.list_keys()[0]
+    assert stored_identifier.expectation_suite_identifier.data_asset_name.datasource == "my_db"
+    assert stored_identifier.expectation_suite_identifier.data_asset_name.generator == "default_generator"
+    assert stored_identifier.expectation_suite_identifier.data_asset_name.generator_asset == "my_table"
+    assert stored_identifier.expectation_suite_identifier.expectation_suite_name == "default_expectations"
+    assert stored_identifier.run_id == "prod_20190801"
+
     assert fake_in_memory_store.get(ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
-    )) == {}
+            expectation_suite_identifier=ExpectationSuiteIdentifier(
+                data_asset_name=DataAssetIdentifier("my_db", "default_generator", "my_table"),
+                expectation_suite_name="default_expectations"
+            ),
+            run_id="prod_20190801"
+        )) == {"test": "value"}
 
 
 def test_SlackNotificationAction(data_context):

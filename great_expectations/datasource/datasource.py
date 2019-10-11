@@ -7,12 +7,13 @@ import logging
 
 from ruamel.yaml import YAML
 
-from ..data_context.types import NormalizedDataAssetName, DataAssetIdentifier
+from ..data_context.types.base import NormalizedDataAssetName
+from ..data_context.types.resource_identifiers import DataAssetIdentifier
 from great_expectations.data_context.util import (
     load_class,
     instantiate_class_from_config
 )
-from great_expectations.data_asset.util import get_empty_expectation_suite
+from great_expectations.expectation_suite import get_empty_expectation_suite
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource.types import ReaderMethods
 from great_expectations.types import ClassConfig

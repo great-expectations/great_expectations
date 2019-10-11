@@ -14,9 +14,8 @@ from great_expectations import __version__ as ge_version
 from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
     parse_result_format,
-    get_empty_expectation_suite
 )
-from great_expectations.types import DotDict
+from great_expectations.expectation_suite import ExpectationSuite, ExpectationConfiguration, get_empty_expectation_suite
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -204,14 +203,11 @@ class DataAsset(object):
                         expectation_args, None)
 
                 # Construct the expectation_config object
-                expectation_config = DotDict({
-                    "expectation_type": method_name,
-                    "kwargs": expectation_args
-                })
-
-                # Add meta to our expectation_config
-                if meta is not None:
-                    expectation_config["meta"] = meta
+                expectation_config = ExpectationConfiguration(
+                    expectation_type="method_name",
+                    kwargs=expectation_args,
+                    meta=meta
+                )
 
                 raised_exception = False
                 exception_traceback = None
@@ -306,7 +302,7 @@ class DataAsset(object):
         """
         if expectation_suite is not None:
             # TODO: validate the incoming expectation_suite with jsonschema here
-            self._expectation_suite = DotDict(copy.deepcopy(expectation_suite))
+            self._expectation_suite = copy.deepcopy(expectation_suite)
 
             if data_asset_name is not None:
                 if self._expectation_suite["data_asset_name"] != data_asset_name:

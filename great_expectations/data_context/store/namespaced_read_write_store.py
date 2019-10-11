@@ -1,10 +1,10 @@
 import logging
 
 import copy
-import os
 
 from ..types.base_resource_identifiers import (
-    DataContextKey,
+    # DataContextKey,
+    DataContextKey
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -87,27 +87,30 @@ class NamespacedReadWriteStore(ReadWriteStore):
     def _convert_resource_identifier_to_tuple(self, key):
         # TODO : Optionally prepend a source_id (the frontend Store name) to the tuple.
 
+        if isinstance(key, DataContextKey):
+            return key.to_tuple()
+
         list_ = []
         list_ += self._convert_resource_identifier_to_list(key)
 
         return tuple(list_)
 
-    def _convert_resource_identifier_to_list(self, key):
-        # The logic in this function is recursive, so it can't return a tuple
-
-        list_ = []
-        #Fetch keys in _key_order to guarantee tuple ordering in both python 2 and 3
-        for key_name in key._key_order:
-            key_element = key[key_name]
-            if isinstance( key_element, DataContextKey ):
-                list_ += self._convert_resource_identifier_to_list(key_element)
-            else:
-                list_.append(key_element)
-
-        return list_
+    # def _convert_resource_identifier_to_list(self, key):
+    #     # The logic in this function is recursive, so it can't return a tuple
+    #     list_ = []
+    #
+    #     #Fetch keys in _key_order to guarantee tuple ordering in both python 2 and 3
+    #     for key_name in key._key_order:
+    #         key_element = key[key_name]
+    #         if isinstance( key_element, DataContextKey ):
+    #             list_ += self._convert_resource_identifier_to_list(key_element)
+    #         else:
+    #             list_.append(key_element)
+    #
+    #     return list_
 
     def _convert_tuple_to_resource_identifier(self, tuple_):
-        new_identifier = self.key_class(*tuple_)
+        new_identifier = self.key_class.from_tuple(tuple_)
         return new_identifier
 
     def _validate_key(self, key):

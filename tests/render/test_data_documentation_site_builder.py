@@ -1,17 +1,10 @@
 import os
 import json
-import re
 import shutil
 
-from great_expectations.data_context.util import (
-    parse_string_to_data_context_resource_identifier
-)
-from great_expectations.render.renderer.site_builder import (
-    SiteBuilder,
-    DefaultSiteSectionBuilder,
-)
+from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.data_context.types import (
-    SiteSectionIdentifier,
+    ValidationResultIdentifier, ExpectationSuiteIdentifier, DataAssetIdentifier
 )
 from great_expectations.data_context.util import safe_mmkdir
 
@@ -64,13 +57,36 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     # set datasource_whitelist
     local_site_config['datasource_whitelist'] = ['titanic']
 
-    keys_as_strings = [x.to_string() for x in context.stores["validations_store"].list_keys()]
-    assert set(keys_as_strings) == set([
-        "ValidationResultIdentifier.titanic.default.Titanic.BasicDatasetProfiler.test_run_id_12345",
-        "ValidationResultIdentifier.titanic.default.Titanic.BasicDatasetProfiler.profiling",
-        "ValidationResultIdentifier.random.default.f2.BasicDatasetProfiler.profiling",
-        "ValidationResultIdentifier.random.default.f1.BasicDatasetProfiler.profiling",
-    ])
+    validations_set = set(context.stores["validations_store"].list_keys())
+    assert len(validations_set) == 4
+    assert ValidationResultIdentifier(
+        expectation_suite_identifier=ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier("titanic", "default", "Titanic"),
+            expectation_suite_name="BasicDatasetProfiler"
+        ),
+        run_id="test_run_id_12345"
+    ) in validations_set
+    assert ValidationResultIdentifier(
+        expectation_suite_identifier=ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier("titanic", "default", "Titanic"),
+            expectation_suite_name="BasicDatasetProfiler"
+        ),
+        run_id="profiling"
+    ) in validations_set
+    assert ValidationResultIdentifier(
+        expectation_suite_identifier=ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier("random", "default", "f1"),
+            expectation_suite_name="BasicDatasetProfiler"
+        ),
+        run_id="profiling"
+    ) in validations_set
+    assert ValidationResultIdentifier(
+        expectation_suite_identifier=ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier("random", "default", "f2"),
+            expectation_suite_name="BasicDatasetProfiler"
+        ),
+        run_id="profiling"
+    ) in validations_set
 
     res = SiteBuilder(
             data_context=context,

@@ -27,7 +27,7 @@ try:
 except ImportError:
     from urlparse import urlparse
 
-from great_expectations.data_asset.util import get_empty_expectation_suite
+from great_expectations.expectation_suite import get_empty_expectation_suite
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     PandasDatasource,
@@ -444,7 +444,7 @@ class ConfigOnlyDataContext(object):
         """
 
         # NOTE : Once we start consistently generating DataContextKeys at the source, all this packing/unpacking nonsense will vanish like a dream.
-        normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+        normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
         validation_result_identifier = ValidationResultIdentifier(
             coerce_types=True,
             **{
@@ -467,47 +467,49 @@ class ConfigOnlyDataContext(object):
     #
     #####
 
-    # TODO : This method should be deprecated in favor of NamespaceReadWriteStore.
-    def _get_normalized_data_asset_name_filepath(self, data_asset_name,
-                                                 expectation_suite_name,
-                                                 base_path=None,
-                                                 file_extension=".json"):
-        """Get the path where the project-normalized data_asset_name expectations are stored. This method is used
-        internally for constructing all absolute and relative paths for asset_name-based paths.
-
-        Args:
-            data_asset_name: name of data asset for which to construct the path
-            expectation_suite_name: name of expectation suite for which to construct the path
-            base_path: base path from which to construct the path. If None, uses the DataContext root directory
-            file_extension: the file extension to append to the path
-
-        Returns:
-            path (str): path for the requsted object.
-        """
-        if base_path is None:
-            base_path = os.path.join(self.root_directory, "expectations")
-
-        # We need to ensure data_asset_name is a valid filepath no matter its current state
-        if isinstance(data_asset_name, NormalizedDataAssetName):
-            name_parts = [name_part.replace("/", "__") for name_part in data_asset_name]
-            relative_path = "/".join(name_parts)
-        elif isinstance(data_asset_name, string_types):
-            # if our delimiter is not '/', we need to first replace any slashes that exist in the name
-            # to avoid extra layers of nesting (e.g. for dbt models)
-            relative_path = data_asset_name
-            if self.data_asset_name_delimiter != "/":
-                relative_path.replace("/", "__")
-                relative_path = relative_path.replace(self.data_asset_name_delimiter, "/")
-        else:
-            raise ge_exceptions.DataContextError("data_assset_name must be a NormalizedDataAssetName or string")
-
-        expectation_suite_name += file_extension
-
-        return os.path.join(
-            base_path,
-            relative_path,
-            expectation_suite_name
-        )
+    # # TODO : This method should be deprecated in favor of NamespaceReadWriteStore.
+    # def _get_normalized_data_asset_name_filepath(self, data_asset_name,
+    #                                              expectation_suite_name,
+    #                                              base_path=None,
+    #                                              file_extension=".json"):
+    #     """Get the path where the project-normalized data_asset_name expectations are stored. This method is used
+    #     internally for constructing all absolute and relative paths for asset_name-based paths.
+    #
+    #     Args:
+    #         data_asset_name: name of data asset for which to construct the path
+    #         expectation_suite_name: name of expectation suite for which to construct the path
+    #         base_path: base path from which to construct the path. If None, uses the DataContext root directory
+    #         file_extension: the file extension to append to the path
+    #
+    #     Returns:
+    #         path (str): path for the requsted object.
+    #     """
+    #     if base_path is None:
+    #         base_path = os.path.join(self.root_directory, "expectations")
+    #
+    #     # We need to ensure data_asset_name is a valid filepath no matter its current state
+    #     if isinstance(data_asset_name, DataAssetIdentifier):
+    #         relative_path = data_asset_name.to_path()
+    #     elif isinstance(data_asset_name, NormalizedDataAssetName):
+    #         name_parts = [name_part.replace("/", "__") for name_part in data_asset_name]
+    #         relative_path = "/".join(name_parts)
+    #     elif isinstance(data_asset_name, string_types):
+    #         # if our delimiter is not '/', we need to first replace any slashes that exist in the name
+    #         # to avoid extra layers of nesting (e.g. for dbt models)
+    #         relative_path = data_asset_name
+    #         if self.data_asset_name_delimiter != "/":
+    #             relative_path.replace("/", "__")
+    #             relative_path = relative_path.replace(self.data_asset_name_delimiter, "/")
+    #     else:
+    #         raise ge_exceptions.DataContextError("data_assset_name must be a NormalizedDataAssetName or string")
+    #
+    #     expectation_suite_name += file_extension
+    #
+    #     return os.path.join(
+    #         base_path,
+    #         relative_path,
+    #         expectation_suite_name
+    #     )
 
     def _load_config_variables_file(self):
         """Get all config variables from the default location."""
@@ -634,7 +636,7 @@ class ConfigOnlyDataContext(object):
 
         """
         if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(data_asset_name.datasource)
         generator = datasource.get_generator(data_asset_name.generator)
@@ -659,7 +661,7 @@ class ConfigOnlyDataContext(object):
 
         """
         if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(data_asset_name.datasource)
         if partition_id is not None:
@@ -687,7 +689,7 @@ class ConfigOnlyDataContext(object):
 
         Args:
             data_asset_name: name of the data asset. The name will be normalized. \
-                (See :py:meth:`_normalize_data_asset_name` )
+                (See :py:meth:`normalize_data_asset_name` )
             expectation_suite_name: name of the expectation suite to attach to the data_asset returned
             batch_kwargs: key-value pairs describing the batch of data the datasource should fetch. \
                 (See :class:`BatchGenerator` ) If no batch_kwargs are specified, then the context will get the next
@@ -697,7 +699,7 @@ class ConfigOnlyDataContext(object):
         Returns:
             Great Expectations data_asset with attached expectation_suite and DataContext
         """
-        normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+        normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(normalized_data_asset_name.datasource)
         if not datasource:
@@ -874,7 +876,7 @@ class ConfigOnlyDataContext(object):
                 })
         return datasources
 
-    def _normalize_data_asset_name(self, data_asset_name):
+    def normalize_data_asset_name(self, data_asset_name):
         """Normalizes data_asset_names for a data context.
         
         A data_asset_name is defined per-project and consists of three components that together define a "namespace"
@@ -1096,7 +1098,7 @@ class ConfigOnlyDataContext(object):
             A new (empty) expectation suite.
         """
         if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         expectation_suite = get_empty_expectation_suite(
             # FIXME: For now, we just cast this to a string to be close to the old behavior
@@ -1134,7 +1136,7 @@ class ConfigOnlyDataContext(object):
             expectation_suite
         """
         if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         key = ExpectationSuiteIdentifier(
             data_asset_name=DataAssetIdentifier(*data_asset_name),
@@ -1184,7 +1186,7 @@ class ConfigOnlyDataContext(object):
             expectation_suite['expectation_suite_name'] = expectation_suite_name
 
         if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         self.stores[self.expectations_store_name].set(ExpectationSuiteIdentifier(
             data_asset_name=DataAssetIdentifier(*data_asset_name),
@@ -1374,7 +1376,7 @@ class ConfigOnlyDataContext(object):
                                 logger.warning("Invalid parameter urn (not enough parts): %s" % parameter)
                                 continue
 
-                            normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+                            normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
                             data_asset_name = DataAssetIdentifier(normalized_data_asset_name.datasource,
                                                                   normalized_data_asset_name.generator,
@@ -1456,7 +1458,7 @@ class ConfigOnlyDataContext(object):
     #             path_components.append(run_id)
     #         if data_asset_name is not None:
     #             if not isinstance(data_asset_name, NormalizedDataAssetName):
-    #                 normalized_name = self._normalize_data_asset_name(data_asset_name)
+    #                 normalized_name = self.normalize_data_asset_name(data_asset_name)
     #             else:
     #                 normalized_name = data_asset_name
     #             if expectation_suite_name is not None:
@@ -1489,7 +1491,7 @@ class ConfigOnlyDataContext(object):
         data_asset_name,
         expectation_suite_name="default",
         run_id=None,
-        validations_store_name="validations_store",
+        validations_store_name=None,
         failed_only=False,
     ):
         """Get validation results from a configured store.
@@ -1505,10 +1507,11 @@ class ConfigOnlyDataContext(object):
             validation_result
 
         """
-
+        if validations_store_name is None:
+            validations_store_name = self.validations_store_name
         selected_store = self.stores[validations_store_name]
         if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         if not isinstance(data_asset_name, DataAssetIdentifier):
             data_asset_name = DataAssetIdentifier(
@@ -1713,7 +1716,7 @@ class ConfigOnlyDataContext(object):
                     if additional_batch_kwargs is None:
                         additional_batch_kwargs = {}
 
-                    normalized_data_asset_name = self._normalize_data_asset_name(name)
+                    normalized_data_asset_name = self.normalize_data_asset_name(name)
                     expectation_suite_name = profiler.__name__
                     self.create_expectation_suite(
                         data_asset_name=normalized_data_asset_name,
