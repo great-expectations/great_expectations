@@ -5,6 +5,10 @@ import json
 from great_expectations.render.renderer.content_block.content_block import ContentBlockRenderer
 from great_expectations.render.util import ordinal
 
+import pandas as pd
+import altair as alt
+
+
 def substitute_none_for_missing(kwargs, kwarg_list):
     """Utility function to plug Nones in when optional parameters are not specified in expectation kwargs.
 
@@ -1338,37 +1342,87 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "partition_object", "threshold"]
         )
+        
+        expected_distribution = None
+        if not params.get("partition_object"):
+            template_str = "Column can match any distribution."
+        else:
+            template_str = "Kullback-Leibler (KL) divergence with respect to the following distribution must be " \
+                           "lower than $threshold:\n\n"
 
-        hist_styling = copy.deepcopy(styling)
-        hist_styling.update({
-            "params": {
-                "sparklines_histogram": {
+            weights = params["partition_object"]["weights"]
+            if len(weights) <= 10:
+                height = 200
+                width = 200
+                col_width = 4
+            else:
+                height = 300
+                width = 300
+                col_width = 6
+                
+            if params["partition_object"].get("bins"):
+                bins = params["partition_object"]["bins"]
+                bins_x1 = [round(value, 1) for value in bins[:-1]]
+                bins_x2 = [round(value, 1) for value in bins[1:]]
+    
+                df = pd.DataFrame({
+                    "bin_min": bins_x1,
+                    "bin_max": bins_x2,
+                    "weights": weights,
+                })
+                df.weights *= 100
+    
+                bars = alt.Chart(df).mark_bar().encode(
+                    x='bin_min:O',
+                    x2='bin_max:O',
+                    y="weights:Q"
+                ).properties(width=width, height=height, autosize="fit")
+    
+                chart = bars.to_json()
+            elif params["partition_object"].get("values"):
+                values = params["partition_object"]["values"]
+                
+                df = pd.DataFrame({
+                    "values": values,
+                    "weights": weights
+                })
+                df.weights *= 100
+
+                bars = alt.Chart(df).mark_bar().encode(
+                    x='values:N',
+                    y="weights:Q"
+                ).properties(width=width, height=height, autosize="fit")
+                chart = bars.to_json()
+
+            expected_distribution = {
+                "content_block_type": "graph",
+                "graph": chart,
+                "styling": {
+                    "classes": ["col-" + str(col_width)],
                     "styles": {
-                        "font-family": "serif !important"
+                        "margin-top": "20px",
                     }
                 }
             }
-        })
-        
-        if not params.get("partition_object"):
-            template_str = "Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a " \
-                "provided threshold but no distribution was specified."
-        else:
-            params["sparklines_histogram"] = cls.sparkline(params.get("partition_object")["weights"])[0]
-            template_str = "Kullback-Leibler (KL) divergence with respect to the following distribution must be " \
-                           "lower than $threshold: $sparklines_histogram"
 
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        expectation_string_obj = {
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
-                "params": params,
-                "styling": hist_styling,
+                "params": params
             }
-        }]
+        }
+        
+        if expected_distribution:
+            return [
+                expectation_string_obj,
+                expected_distribution
+            ]
+        else:
+            return [expectation_string_obj]
     
     @classmethod
     def expect_column_values_to_be_unique(cls, expectation, styling=None, include_column_name=True):
