@@ -260,10 +260,13 @@ def _get_full_path_to_ge_dir(target_directory):
 def _open_data_docs_in_browser(ge_dir):
     """A stdlib cross-platform way to open a file in a browser."""
     ge_dir = os.path.abspath(ge_dir)
-    data_docs_index = "file://{}/uncommitted/data_docs/local_site/index.html".format(ge_dir)
+    data_docs_index = os.path.join(
+        ge_dir,
+        "uncommitted/data_docs/local_site/index.html"
+    )
     if os.path.isfile(data_docs_index):
         cli_message("Opening Data Docs found here: {}".format(data_docs_index))
-        webbrowser.open(data_docs_index)
+        webbrowser.open("file://" + data_docs_index)
 
 
 def _create_new_project(target_directory):
