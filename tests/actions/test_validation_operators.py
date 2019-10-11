@@ -136,7 +136,6 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
         run_id="test_100"
     )
     slack_query = vo._build_slack_query(return_obj)
-    print(slack_query)
     expected_slack_query = {'blocks': [{'type': 'divider'}, {'type': 'section', 'text': {'type': 'mrkdwn',
                                                                                          'text': '*FailureVsWarning Validation Operator Completed.*'}},
                                        {'type': 'divider'},
