@@ -453,13 +453,13 @@ def _offer_to_install_new_template(err, ge_dir):
 
         cli_message(NEW_TEMPLATE_INSTALLED.format(ge_yml, archived_yml))
     else:
-        # FIXME/TODO insert doc url here
         cli_message(
             """\nOK. To continue, you will need to upgrade your config file to the latest format.
-  - Please see the docs here:
+  - Please see the docs here: <blue>https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html</blue>
   - We are super sorry about this breaking change! :]
   - If you are running into any problems, please reach out on Slack and we can
-    help you in realtime: https://greatexpectations.io/slack""")
+    help you in realtime: https://greatexpectations.io/slack"""
+        )
     sys.exit(0)
 
 
