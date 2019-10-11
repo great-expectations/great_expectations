@@ -308,11 +308,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     def __finalize__(self, other, method=None, **kwargs):
         if isinstance(other, PandasDataset):
-            self._initialize_expectations(other.get_expectation_suite(
-                discard_failed_expectations=False,
-                discard_result_format_kwargs=False,
-                discard_include_config_kwargs=False,
-                discard_catch_exceptions_kwargs=False))
+            self._initialize_expectations(other._expectation_suite)
             # If other was coerced to be a PandasDataset (e.g. via _constructor call during self.copy() operation)
             # then it may not have discard_subset_failing_expectations set. Default to self value
             self.discard_subset_failing_expectations = getattr(other, "discard_subset_failing_expectations",
