@@ -54,8 +54,7 @@ COMPLETE_ONBOARDING_PROMPT = """To run locally, we need some files that are not 
 
 SLACK_SETUP_PROMPT = "\nWould you like to set up Slack data quality notifications?"
 
-# TODO doc link here
-SLACK_DOC_LINK = "\n  - Getting one is easy: https:DOC LINK GOES HERE!"
+SLACK_DOC_LINK = "\n  - Getting one is easy: http://docs.greatexpectations.io/en/latest/getting_started/cli_init.html#configuring-slack-notifications"
 
 SLACK_WEBHOOK_PROMPT = "Please paste in your Slack webhook url." + SLACK_DOC_LINK
 
