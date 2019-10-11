@@ -133,7 +133,7 @@ class ActionListValidationOperator(ValidationOperator):
                 run_id=run_id,
             )
             result_object["details"][expectation_suite_identifier] = {}
-            batch_validation_result = batch.validate(run_id=run_id)
+            batch_validation_result = batch.validate(run_id=run_id, result_format="SUMMARY")
             result_object["details"][expectation_suite_identifier]["validation_result"] = batch_validation_result
             batch_actions_results = self._run_actions(batch, expectation_suite_identifier, batch._expectation_suite, batch_validation_result, run_id)
             result_object["details"][expectation_suite_identifier]["actions_results"] = batch_actions_results
@@ -193,7 +193,7 @@ class ActionListValidationOperator(ValidationOperator):
                 run_id=run_id,
             )
             result_object[validation_result_id] = {}
-            batch_validation_result = batch.validate()
+            batch_validation_result = batch.validate(result_format="SUMMARY")
             result_object[validation_result_id]["validation_result"] = batch_validation_result
             batch_actions_results = self._run_actions(batch, batch._expectation_suite, batch_validation_result, run_id)
             result_object[validation_result_id]["actions_results"] = batch_actions_results
@@ -443,7 +443,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
             if failure_expectation_suite:
                 return_obj["failure"][failure_validation_result_id] = {}
-                failure_validation_result = batch.validate(failure_expectation_suite)
+                failure_validation_result = batch.validate(failure_expectation_suite, result_format="SUMMARY")
                 return_obj["failure"][failure_validation_result_id]["validation_result"] = failure_validation_result
                 failure_actions_results = self._run_actions(
                     batch,
@@ -478,7 +478,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
             if warning_expectation_suite:
                 return_obj["warning"][warning_validation_result_id] = {}
-                warning_validation_result = batch.validate(warning_expectation_suite)
+                warning_validation_result = batch.validate(warning_expectation_suite, result_format="SUMMARY")
                 return_obj["warning"][warning_validation_result_id]["validation_result"] = warning_validation_result
                 warning_actions_results = self._run_actions(
                     batch,
