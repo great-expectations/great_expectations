@@ -15,7 +15,7 @@ def add_datasource(context):
         """
 ========== Datasources ==========
 
-See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue> for more information about datasources.
+See <blue>https://docs.greatexpectations.io/en/latest/features/datasource.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue> for more information about datasources.
 """.format(rtd_url_ge_version)
     )
     data_source_selection = click.prompt(
@@ -214,7 +214,7 @@ Please note: Profiling is still a beta feature in Great Expectations.  The curre
 data source (without sampling), which may be very time consuming. 
 As a rule of thumb, we recommend starting with data smaller than 100MB.
 
-To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/guides/profiling.html\
+To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/features/profiling.html\
 ?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
 """
 
@@ -245,7 +245,7 @@ Would you like to profile '{0:s}'?
 
 Great Expectations can create data documentation from the data you just profiled.
 
-To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_docs.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_docs.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
 """
 
     cli_message(msg_intro.format(data_source_name, rtd_url_ge_version))
