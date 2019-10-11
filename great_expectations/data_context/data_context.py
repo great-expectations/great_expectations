@@ -600,7 +600,7 @@ class ConfigOnlyDataContext(object):
         if generator_names is not None:
             if isinstance(generator_names, string_types):
                 generator_names = [generator_names]
-            if len(generator_names) == len(datasource_names): # Iterate over both together
+            if len(generator_names) == len(datasource_names):  # Iterate over both together
                 for idx, datasource_name in enumerate(datasource_names):
                     datasource = self.get_datasource(datasource_name)
                     data_asset_names[datasource_name] = \

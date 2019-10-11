@@ -105,7 +105,8 @@ def test_glob_reader_generator_partitioning():
         mock_glob.return_value = mock_glob_match
         is_dir.return_value = True
         names = glob_generator.get_available_data_asset_names()
-        assert names == {"asset1", "asset2", "no_partition_asset1", "no_partition_asset2"}
+        # Use set in test to avoid order issues
+        assert set(names) == {"asset1", "asset2", "no_partition_asset1", "no_partition_asset2"}
 
     with mock.patch("glob.glob") as mock_glob, mock.patch("os.path.isdir") as is_dir:
         mock_glob_match = [
@@ -118,7 +119,8 @@ def test_glob_reader_generator_partitioning():
         mock_glob.return_value = mock_glob_match
         is_dir.return_value = True
         partitions = glob_generator.get_available_partition_ids("asset1")
-        assert partitions == {
+        # Use set in test to avoid order issues
+        assert set(partitions) == {
             "20190101",
             "20190102",
             "20190103",
@@ -142,7 +144,8 @@ def test_glob_reader_generator_partitioning():
         mock_glob.return_value = mock_glob_match
         is_dir.return_value = True
         partitions = glob_generator.get_available_partition_ids("no_partition_asset1")
-        assert partitions == {
+        # Use set in test to avoid order issues
+        assert set(partitions) == {
             'no_partition_asset1/this_is_a_batch_of_data.csv',
             'no_partition_asset1/this_is_another_batch_of_data.csv'
         }
