@@ -3,6 +3,9 @@ from great_expectations.render.types import (
     RenderedComponentContent
 )
 
+import pandas as pd
+import altair as alt
+
 
 class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     _content_block_type = "table"
@@ -189,8 +192,66 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             
         expectation_type = evr["expectation_config"]["expectation_type"]
 
+        if expectation_type == "expect_column_kl_divergence_to_be_less_than":
+            if not evr["result"].get("details"):
+                return "--"
+
+            weights = evr["result"]["details"]["observed_partition"]["weights"]
+            if len(weights) <= 10:
+                height = 200
+                width = 200
+                col_width = 4
+            else:
+                height = 300
+                width = 300
+                col_width = 6
+                
+            if evr["result"]["details"]["observed_partition"].get("bins"):
+                bins = evr["result"]["details"]["observed_partition"]["bins"]
+                bins_x1 = [round(value, 1) for value in bins[:-1]]
+                bins_x2 = [round(value, 1) for value in bins[1:]]
+        
+                df = pd.DataFrame({
+                    "bin_min": bins_x1,
+                    "bin_max": bins_x2,
+                    "weights": weights,
+                })
+                df.weights *= 100
+        
+                bars = alt.Chart(df).mark_bar().encode(
+                    x='bin_min:O',
+                    x2='bin_max:O',
+                    y="weights:Q"
+                ).properties(width=width, height=height, autosize="fit")
+                chart = bars.to_json()
+            elif evr["result"]["details"]["observed_partition"].get("values"):
+                values = evr["result"]["details"]["observed_partition"]["values"]
+    
+                df = pd.DataFrame({
+                    "values": values,
+                    "weights": weights
+                })
+                df.weights *= 100
+    
+                bars = alt.Chart(df).mark_bar().encode(
+                    x='values:N',
+                    y="weights:Q"
+                ).properties(width=width, height=height, autosize="fit")
+                chart = bars.to_json()
+            
+            return {
+                "content_block_type": "graph",
+                "graph": chart,
+                "styling": {
+                    "classes": ["col-" + str(col_width)],
+                    "styles": {
+                        "margin-top": "20px",
+                    }
+                }
+            }
+
         if result.get("observed_value"):
-            return result.get("observed_value")
+            return str(result.get("observed_value"))
         elif expectation_type == "expect_column_values_to_be_null":
             notnull_percent = result["unexpected_percent"]
             return "{null_percent:.4f}% null".format(null_percent=(100-notnull_percent))
@@ -218,21 +279,21 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         #This function wraps expect_* methods from ExpectationStringRenderer to generate table classes
         def row_generator_fn(evr, styling=None, include_column_name=True):
             expectation = evr["expectation_config"]
-            expectation_string_obj = expectation_string_fn(expectation, styling, include_column_name)
+            expectation_string_cell = expectation_string_fn(expectation, styling, include_column_name)
 
             status_cell = [cls._get_status_icon(evr)]
             unexpected_statement = cls._get_unexpected_statement(evr)
             unexpected_table = cls._get_unexpected_table(evr)
-            expectation_cell = expectation_string_obj
-            observed_value = [str(cls._get_observed_value(evr))]
+            observed_value = [cls._get_observed_value(evr)]
 
             #If the expectation has some unexpected values...:
             if unexpected_statement or unexpected_table:
-                expectation_string_obj.append(unexpected_statement)
-                expectation_string_obj.append(unexpected_table)
-                return [status_cell + [expectation_cell] + observed_value]
-
+                expectation_string_cell.append(unexpected_statement)
+                expectation_string_cell.append(unexpected_table)
+            
+            if len(expectation_string_cell) > 1:
+                return [status_cell + [expectation_string_cell] + observed_value]
             else:
-                return [status_cell + expectation_cell + observed_value]
+                return [status_cell + expectation_string_cell + observed_value]
         
         return row_generator_fn
