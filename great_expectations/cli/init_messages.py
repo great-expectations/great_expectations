@@ -52,6 +52,19 @@ COMPLETE_ONBOARDING_PROMPT = """To run locally, we need some files that are not 
   - Anything existing will not be modified.
   - Would you like to fix this automatically?"""
 
+SLACK_SETUP_PROMPT = "\nWould you like to set up Slack data quality notifications?"
+
+# TODO doc link here
+SLACK_DOC_LINK = "\n  - Getting one is easy: https:DOC LINK GOES HERE!"
+
+SLACK_WEBHOOK_PROMPT = "Please paste in your Slack webhook url." + SLACK_DOC_LINK
+
+INVALID_SLACK_WEBHOOK_PROMPT = "Please paste in a valid Slack webhook url here:" + SLACK_DOC_LINK
+
+SLACK_LATER = "To setup Slack later please see this guide:" + SLACK_DOC_LINK
+
+SLACK_SETUP_COMPLETE = "OK. <green>Slack is set up.</green> To modify this in the future please see:" + SLACK_DOC_LINK
+
 ONBOARDING_COMPLETE = """\nDone. You may see new files in `<yellow>great_expectations/uncommitted</yellow>`.
   - Now add secrets to <yellow>great_expectations/uncommitted/config_variables.yml</yellow> to finish onboarding.
 """
