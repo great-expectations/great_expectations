@@ -130,8 +130,9 @@ def format_dict_for_error_message(dict_):
 
 def substitute_config_variable(template_str, config_variables_dict):
     """
-    This method takes a string, and if it is of the form ${SOME_VARIABLE} or $SOME_VARIABLE,
-    returns the value of SOME_VARIABLE, otherwise returns the string unchanged.
+    This method takes a string, and if it contains a pattern ${SOME_VARIABLE} or $SOME_VARIABLE,
+    returns a string where the pattern is replaced with the value of SOME_VARIABLE,
+    otherwise returns the string unchanged.
 
     If the environment variable SOME_VARIABLE is set, the method uses its value for substitution.
     If it is not set, the value of SOME_VARIABLE is looked up in the config variables store (file).
@@ -145,22 +146,29 @@ def substitute_config_variable(template_str, config_variables_dict):
     """
     if template_str is None:
         return template_str
+
     try:
-        match = re.search(r'^\$\{(.*?)\}$', template_str) or re.search(r'^\$([_a-z][_a-z0-9]*)$', template_str)
+        match = re.search(r'\$\{(.*?)\}', template_str) or re.search(r'\$([_a-z][_a-z0-9]*)', template_str)
     except TypeError:
         # If the value is not a string (e.g., a boolean), we should return it as is
         return template_str
+
+    ret = template_str
 
     if match:
         config_variable_value = os.getenv(match.group(1))
         if not config_variable_value:
             config_variable_value = config_variables_dict.get(match.group(1))
-            if not config_variable_value:
-                config_variable_value = template_str
-    else:
-        config_variable_value = template_str
 
-    return config_variable_value
+        if config_variable_value:
+                if match.start() == 0 and match.end() == len(template_str):
+                    ret = config_variable_value
+                else:
+                    ret = template_str[:match.start()] + config_variable_value + template_str[match.end():]
+
+    return ret
+
+
 
 
 def substitute_all_config_variables(data, replace_variables_dict):
