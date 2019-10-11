@@ -83,18 +83,18 @@ class DefaultJinjaView(object):
 
     @classmethod
     @contextfilter
-    def render_content_block(cls, context, content_block):
+    def render_content_block(cls, context, content_block, index=None):
         if type(content_block) is str:
             return "<span>{content_block}</span>".format(content_block=content_block)
         elif content_block is None:
             return ""
         elif type(content_block) is list:
-            return "".join([cls.render_content_block(context, content_block_el) for content_block_el in content_block])
+            return "".join([cls.render_content_block(context, content_block_el, idx) for idx, content_block_el in enumerate(content_block)])
         elif not isinstance(content_block, (dict, OrderedDict)):
             return content_block
         content_block_type = content_block.get("content_block_type")
         template = cls._get_template(template="{content_block_type}.j2".format(content_block_type=content_block_type))
-        return template.render(context, content_block=content_block)
+        return template.render(context, content_block=content_block, index=index)
 
     @classmethod
     def render_styling(cls, styling):
