@@ -13,7 +13,7 @@ import sys
 import re
 from ruamel.yaml import YAML
 
-from great_expectations.data_context.templates import CONFIG_VARIABLES_INTRO
+from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.exceptions import ConfigNotFoundError
 
 
@@ -202,7 +202,7 @@ def test_cli_init_on_new_project(tmp_path_factory, filesystem_csv_2):
         os.chdir(basedir)
 
         runner = CliRunner()
-        result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\n" % str(
+        result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\nn\n\n" % str(
             os.path.join(basedir, "data")))
 
         print(result.output)
@@ -646,7 +646,7 @@ great_expectations/
         # check config_variables.yml
         with open(config_var_path, 'r') as f:
             obs_yml = f.read()
-        assert obs_yml == CONFIG_VARIABLES_INTRO
+        assert obs_yml == CONFIG_VARIABLES_TEMPLATE
 
         # Check CLI output
         obs = result.output
