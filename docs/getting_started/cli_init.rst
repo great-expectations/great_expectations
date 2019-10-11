@@ -435,7 +435,7 @@ After the init command completes, you should see the following directory structu
 Configuring Slack Notifications
 ----------------------------------------
 
-Great Expectations can post messages to a Slack channel when a new dataset is validated. This helps teams to monitor data quality in their pipeline in real time. Here is what these messages look like:
+Great Expectations can post messages to a Slack channel each time a dataset is validated. This helps teams to monitor data quality in their pipeline in real time. Here is what these messages look like:
 
 .. image:: ../images/validation_result_slack_message_example.jpg
     :width: 400px
