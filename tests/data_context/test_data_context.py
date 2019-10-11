@@ -325,11 +325,11 @@ def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_cs
 
     data_context.data_asset_name_delimiter = '.'
     assert data_context.normalize_data_asset_name("my_datasource.default.f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     data_context.data_asset_name_delimiter = '/'
     assert data_context.normalize_data_asset_name("my_datasource/default/f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     with pytest.raises(DataContextError) as exc:
         data_context.data_asset_name_delimiter = "$"
@@ -367,25 +367,25 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     # a the data_asset_name; the datasource name and data_asset_name or all
     # three components of the normalized data asset name
     assert data_context.normalize_data_asset_name("f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     assert data_context.normalize_data_asset_name("my_datasource/f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     assert data_context.normalize_data_asset_name("my_datasource/default/f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     # With only one datasource and generator configured, we
     # can create new namespaces at the generator asset level easily:
     assert data_context.normalize_data_asset_name("f5") == \
-           NormalizedDataAssetName("my_datasource", "default", "f5")
+        NormalizedDataAssetName("my_datasource", "default", "f5")
 
     # We can also be more explicit in creating new namespaces at the generator asset level:
     assert data_context.normalize_data_asset_name("my_datasource/f6") == \
-           NormalizedDataAssetName("my_datasource", "default", "f6")
+        NormalizedDataAssetName("my_datasource", "default", "f6")
 
     assert data_context.normalize_data_asset_name("my_datasource/default/f7") == \
-           NormalizedDataAssetName("my_datasource", "default", "f7")
+        NormalizedDataAssetName("my_datasource", "default", "f7")
 
     # However, we cannot create against nonexisting datasources or generators:
     with pytest.raises(DataContextError) as exc:
@@ -412,10 +412,10 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
 
     # We can still reference *unambiguous* data_asset_names:
     assert data_context.normalize_data_asset_name("f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     assert data_context.normalize_data_asset_name("f4") == \
-           NormalizedDataAssetName("my_second_datasource", "default", "f4")
+        NormalizedDataAssetName("my_second_datasource", "default", "f4")
 
     # However, single-name resolution will fail with ambiguous entries
     with pytest.raises(DataContextError) as exc:
@@ -424,11 +424,11 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
 
     # Two-name resolution still works since generators are not ambiguous in that case
     assert data_context.normalize_data_asset_name("my_datasource/f3") == \
-           NormalizedDataAssetName("my_datasource", "default", "f3")
+        NormalizedDataAssetName("my_datasource", "default", "f3")
 
     # We can also create new namespaces using only two components since that is not ambiguous
     assert data_context.normalize_data_asset_name("my_datasource/f9") == \
-           NormalizedDataAssetName("my_datasource", "default", "f9")
+        NormalizedDataAssetName("my_datasource", "default", "f9")
 
     # However, we cannot create new names using only a single component
     with pytest.raises(DataContextError) as exc:
@@ -444,7 +444,7 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     # We've chosen an interesting case: in_memory_generator does not by default provide its own names
     # so we can still get some names if there is no ambiguity about the namespace
     assert data_context.normalize_data_asset_name("f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     # However, if we add a data_asset that would cause that name to be ambiguous, it will then fail:
     suite = data_context.create_expectation_suite("my_datasource/in_memory_generator/f1", "default")
@@ -461,10 +461,10 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
 
     # But we can get the asset using all three components
     assert data_context.normalize_data_asset_name("my_datasource/default/f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     assert data_context.normalize_data_asset_name("my_datasource/in_memory_generator/f1") == \
-           NormalizedDataAssetName("my_datasource", "in_memory_generator", "f1")
+        NormalizedDataAssetName("my_datasource", "in_memory_generator", "f1")
 
 
 def test_list_datasources(data_context):
