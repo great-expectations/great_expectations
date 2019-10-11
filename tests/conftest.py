@@ -7,7 +7,6 @@ import warnings
 
 import pandas as pd
 import numpy as np
-import sqlalchemy as sa
 
 import great_expectations as ge
 from great_expectations.dataset.pandas_dataset import PandasDataset

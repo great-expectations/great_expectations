@@ -709,7 +709,7 @@ class ConfigOnlyDataContext(object):
             )
 
         if batch_kwargs is None:
-            batch_kwargs = self.build_batch_kwargs(data_asset_name.datasource, data_asset_name.generator, **kwargs)
+            batch_kwargs = self.build_batch_kwargs(data_asset_name, **kwargs)
 
         data_asset = datasource.get_batch(normalized_data_asset_name,
                                           expectation_suite_name,
