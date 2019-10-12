@@ -154,7 +154,7 @@ class MultiBatchValidationMetaAnalysis(object):
             # that object will have data_asset_name property method that will
             # return a NormalizedDataAssetName. Until then we are constructing
             # a NormalizedDataAssetName from the string that we fetch from the dictionary
-            normalized_data_asset_name = data_context._normalize_data_asset_name(
+            normalized_data_asset_name = data_context.normalize_data_asset_name(
                 one_batch_validation_results['meta']['data_asset_name'])
             for i, result in enumerate(one_batch_validation_results['results']):
                 cls.add_metrics_from_single_expectation_validation_result(result,

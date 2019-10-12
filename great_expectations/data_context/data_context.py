@@ -445,7 +445,7 @@ class ConfigOnlyDataContext(object):
         """
 
         # NOTE : Once we start consistently generating DataContextKeys at the source, all this packing/unpacking nonsense will vanish like a dream.
-        normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+        normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
         validation_result_identifier = ValidationResultIdentifier(
             coerce_types=True,
             **{
@@ -601,7 +601,7 @@ class ConfigOnlyDataContext(object):
         if generator_names is not None:
             if isinstance(generator_names, string_types):
                 generator_names = [generator_names]
-            if len(generator_names) == len(datasource_names): # Iterate over both together
+            if len(generator_names) == len(datasource_names):  # Iterate over both together
                 for idx, datasource_name in enumerate(datasource_names):
                     datasource = self.get_datasource(datasource_name)
                     data_asset_names[datasource_name] = \
@@ -635,7 +635,7 @@ class ConfigOnlyDataContext(object):
 
         """
         if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(data_asset_name.datasource)
         generator = datasource.get_generator(data_asset_name.generator)
@@ -659,27 +659,27 @@ class ConfigOnlyDataContext(object):
             BatchKwargs
 
         """
-        if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+        if not isinstance(data_asset_name, NormalizedDataAssetName, DataAssetIdentifier):
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(data_asset_name.datasource)
         if partition_id is not None:
             kwargs.update({
                 "partition_id": partition_id
             })
-        batch_kwargs = datasource.build_batch_kwargs(
-            data_asset_name,
+        batch_kwargs = datasource.named_generator_build_batch_kwargs(
+            data_asset_name.generator,
+            data_asset_name.generator_asset,
             **kwargs
         )
 
         return batch_kwargs
 
-    def get_batch(self, data_asset_name, expectation_suite_name, batch_kwargs, **kwargs):
+    def get_batch(self, data_asset_name, expectation_suite_name, batch_kwargs=None, **kwargs):
         """
         Get a batch of data, using the namespace of the provided data_asset_name.
 
-        get_batch constructs its batch by first normalizing the data_asset_name (if not already normalized into either
-        a DataAssetName) and then:
+        get_batch constructs its batch by first normalizing the data_asset_name (if not already normalized) and then:
           (1) getting data using the provided batch_kwargs; and
           (2) attaching the named expectation suite
 
@@ -688,7 +688,7 @@ class ConfigOnlyDataContext(object):
 
         Args:
             data_asset_name: name of the data asset. The name will be normalized. \
-                (See :py:meth:`_normalize_data_asset_name` )
+                (See :py:meth:`normalize_data_asset_name` )
             expectation_suite_name: name of the expectation suite to attach to the data_asset returned
             batch_kwargs: key-value pairs describing the batch of data the datasource should fetch. \
                 (See :class:`BatchGenerator` ) If no batch_kwargs are specified, then the context will get the next
@@ -698,7 +698,7 @@ class ConfigOnlyDataContext(object):
         Returns:
             Great Expectations data_asset with attached expectation_suite and DataContext
         """
-        normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+        normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(normalized_data_asset_name.datasource)
         if not datasource:
@@ -708,6 +708,9 @@ class ConfigOnlyDataContext(object):
                     self.GE_YML
                 )
             )
+
+        if batch_kwargs is None:
+            batch_kwargs = self.build_batch_kwargs(data_asset_name, **kwargs)
 
         data_asset = datasource.get_batch(normalized_data_asset_name,
                                           expectation_suite_name,
@@ -875,7 +878,7 @@ class ConfigOnlyDataContext(object):
                 })
         return datasources
 
-    def _normalize_data_asset_name(self, data_asset_name):
+    def normalize_data_asset_name(self, data_asset_name):
         """Normalizes data_asset_names for a data context.
         
         A data_asset_name is defined per-project and consists of three components that together define a "namespace"
@@ -983,7 +986,6 @@ class ConfigOnlyDataContext(object):
             # namespace.
             if (len(available_names.keys()) == 1 and  # in this case, we know that the datasource name is valid
                     len(available_names[datasource].keys()) == 1):
-                logger.info("Normalizing to a new generator name.")
                 return NormalizedDataAssetName(
                     datasource,
                     generator,
@@ -1097,7 +1099,7 @@ class ConfigOnlyDataContext(object):
             A new (empty) expectation suite.
         """
         if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         expectation_suite = get_empty_expectation_suite(
             # FIXME: For now, we just cast this to a string to be close to the old behavior
@@ -1135,7 +1137,7 @@ class ConfigOnlyDataContext(object):
             expectation_suite
         """
         if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         key = ExpectationSuiteIdentifier(
             data_asset_name=DataAssetIdentifier(*data_asset_name),
@@ -1185,7 +1187,7 @@ class ConfigOnlyDataContext(object):
             expectation_suite['expectation_suite_name'] = expectation_suite_name
 
         if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         self.stores[self.expectations_store_name].set(ExpectationSuiteIdentifier(
             data_asset_name=DataAssetIdentifier(*data_asset_name),
@@ -1375,7 +1377,7 @@ class ConfigOnlyDataContext(object):
                                 logger.warning("Invalid parameter urn (not enough parts): %s" % parameter)
                                 continue
 
-                            normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+                            normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
                             data_asset_name = DataAssetIdentifier(normalized_data_asset_name.datasource,
                                                                   normalized_data_asset_name.generator,
@@ -1457,7 +1459,7 @@ class ConfigOnlyDataContext(object):
     #             path_components.append(run_id)
     #         if data_asset_name is not None:
     #             if not isinstance(data_asset_name, NormalizedDataAssetName):
-    #                 normalized_name = self._normalize_data_asset_name(data_asset_name)
+    #                 normalized_name = self.normalize_data_asset_name(data_asset_name)
     #             else:
     #                 normalized_name = data_asset_name
     #             if expectation_suite_name is not None:
@@ -1509,7 +1511,7 @@ class ConfigOnlyDataContext(object):
 
         selected_store = self.stores[validations_store_name]
         if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         if not isinstance(data_asset_name, DataAssetIdentifier):
             data_asset_name = DataAssetIdentifier(
@@ -1722,7 +1724,7 @@ class ConfigOnlyDataContext(object):
                     if additional_batch_kwargs is None:
                         additional_batch_kwargs = {}
 
-                    normalized_data_asset_name = self._normalize_data_asset_name(name)
+                    normalized_data_asset_name = self.normalize_data_asset_name(name)
                     expectation_suite_name = profiler.__name__
                     self.create_expectation_suite(
                         data_asset_name=normalized_data_asset_name,
@@ -1852,7 +1854,7 @@ class DataContext(ConfigOnlyDataContext):
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
             context_root_dir = self.find_context_root_dir()
-        context_root_directory = os.path.abspath(context_root_dir)
+        context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
         self._context_root_directory = context_root_directory
 
         self.active_environment_name = active_environment_name
@@ -1949,6 +1951,7 @@ class DataContext(ConfigOnlyDataContext):
     def find_context_root_dir():
         ge_home_environment = os.getenv("GE_HOME", None)
         if ge_home_environment:
+            ge_home_environment = os.path.expanduser(ge_home_environment)
             if os.path.isdir(ge_home_environment) and os.path.isfile(
                 os.path.join(ge_home_environment, "great_expectations.yml")
             ):

@@ -19,14 +19,14 @@ class InMemoryGenerator(BatchGenerator):
         logger.warning(
             "InMemoryGenerator cannot identify data_asset_names, but can accept any object as a valid data_asset."
         )
-        return set()
+        return []
 
     def get_available_partition_ids(self, generator_asset):
         logger.warning(
             "InMemoryGenerator cannot identify partition_ids, but can accept partition_id together with a valid GE "
             "object."
         )
-        return set()
+        return []
 
     def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
         kwargs.update(batch_kwargs)
