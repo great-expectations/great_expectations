@@ -20,4 +20,4 @@ and our `blog <https://greatexpectations.io/blog>`__ for more information on how
    /features/validation_operators_and_actions
    /features/datasource
    /features/batch_generator
-   /features/ge_for_teams
+   /features/ge_on_teams
