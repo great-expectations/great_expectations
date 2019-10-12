@@ -40,27 +40,12 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
             {
               "content_block_type": "string_template",
               "string_template": {
-                "template": "$column Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a provided threshold but no distribution was specified.",
+                "template": "$column Column can match any distribution.",
                 "params": {
                   "column": "live",
                   "partition_object": None,
                   "threshold": None,
                   "result_format": "SUMMARY"
-                },
-                "styling": {
-                  "default": {
-                    "classes": [
-                      "badge",
-                      "badge-secondary"
-                    ]
-                  },
-                  "params": {
-                    "sparklines_histogram": {
-                      "styles": {
-                        "font-family": "serif !important"
-                      }
-                    }
-                  }
                 }
               }
             },
@@ -251,7 +236,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     # test _get_observed_value when evr["result"]["observed_value"] exists
     output_1 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_success)
     print(output_1)
-    assert output_1 == 1313
+    assert output_1 == "1313"
     # test _get_observed_value when evr["result"] does not exist
     output_2 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_no_result_key)
     print(output_2)
