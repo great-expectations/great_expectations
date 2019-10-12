@@ -99,7 +99,25 @@ like this:
 Note that the datasources section *includes* all defined generators as well as specifying their names. See
 :ref:`custom_expectations_in_datasource` for more information about configuring datasources to use custom expectations.
 
-Data Docs
+
+Data Asset Names
+===================
+
+Data asset names consist of three parts, a datasource, generator, and generator asset. DataContext functions will
+attempt to "normalize" a data_asset_name if they are provided with only a string, by splitting on the delimiter
+character (by default '/') and then attempting to identify an unambiguous name. DataContext searches through
+names that already have expectation suites first, then considers names provided by generators.
+
+For example:
+
+.. code-block:: python
+
+    # Returns a normalized name with string representation my_datasource/my_generator/my_asset if
+    # my_datasource and my_generator uniquely provide an asset called my_asset
+    context.normalize_data_asset_name("my_asset")
+
+
+Data Documentation
 =====================
 
 The :ref:`data_docs` section defines how individual sites should be built and deployed. See the detailed

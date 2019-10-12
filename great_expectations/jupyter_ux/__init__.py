@@ -101,6 +101,7 @@ def setup_notebook_logging(logger=None):
 
     if not logger:
         logger = logging.getLogger("great_expectations")
+
     chandler = logging.StreamHandler(stream=sys.stdout)
     chandler.setLevel(logging.DEBUG)
     # chandler.setFormatter(Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
@@ -125,11 +126,11 @@ def list_available_data_asset_names(context, data_source_name=None):
     for datasource in datasources:
         if data_source_name and datasource['name'] != data_source_name:
             continue
-        print('data_source: {0:s} ({1:s})'.format(datasource['name'], datasource['class_name']))
+        print('datasource: {0:s} ({1:s})'.format(datasource['name'], datasource['class_name']))
         ds = context.get_datasource(datasource['name'])
         generators = ds.list_generators()
         for generator_info in generators:
-            print('  generator_name: {0:s} ({1:s})'.format(generator_info['name'], generator_info['class_name']))
+            print('  generator: {0:s} ({1:s})'.format(generator_info['name'], generator_info['class_name']))
             generator = ds.get_generator(generator_info['name'])
             data_asset_names = generator.get_available_data_asset_names()
             if len(data_asset_names) > 0:

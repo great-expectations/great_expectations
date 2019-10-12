@@ -19,7 +19,7 @@ See <blue>https://docs.greatexpectations.io/en/latest/features/datasource.html?u
 """.format(rtd_url_ge_version)
     )
     data_source_selection = click.prompt(
-        msg_prompt_choose_data_source,
+        msg_prompt_choose_datasource,
         type=click.Choice(["1", "2", "3", "4"]),
         show_choices=False
     )
@@ -354,7 +354,7 @@ The following data documentation HTML sites were generated:
     cli_message(msg)
 
 
-msg_prompt_choose_data_source = """
+msg_prompt_choose_datasource = """
 Configure a datasource:
     1. Pandas DataFrame
     2. Relational database (SQL)
