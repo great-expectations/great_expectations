@@ -101,9 +101,22 @@ An example report looks like the following:
       }
     }
 
+*****************************
+Reviewing Validation Results
+*****************************
+
+The easiest way to review Validation Results is to view them from your local Data Docs site, where you can also conveniently
+view Profiling Results and Expectation Suites. Out of the box, Great Expectations Data Docs is configured to compile a local
+data documentation site when you start a new project by running ``great_expectations init``. By default, this local site is
+saved to the ``uncommitted/data_docs/local_site/`` directory of your project.
+
+If you would like to review the raw validation results in JSON format, the default Validation Results directory is ``uncommitted/validations/``.
+Note that by default, Data Docs will only compile Validation Results located in this directory.
+
+To learn more about setting up Great Expectations for your team read :ref:`using_ge_on_teams`.
 
 Command-line validation
-==============================
+========================
 
 This is especially powerful when combined with great_expectations's command line tool, which lets you validate in a one-line bash script.
 
