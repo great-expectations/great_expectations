@@ -20,7 +20,18 @@ as needed.
 Data Docs Site Configuration
 ***************************************
 
-Here is an example of a site configuration from great_expectations.yml:
+The default Data Docs site configuration looks like this:
+
+.. code-block:: yaml
+
+  data_docs_sites:
+    local_site:
+      class_name: SiteBuilder
+      store_backend:
+        class_name: FixedLengthTupleFilesystemStoreBackend
+        base_directory: uncommitted/data_docs/local_site/
+
+Here is an example of a site configuration from great_expectations.yml with defaults defined explicitly:
 
 .. code-block:: yaml
 

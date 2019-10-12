@@ -2083,6 +2083,76 @@
         "exception_message": null,
         "exception_traceback": null
       }
+    },
+        {
+      "success": true,
+      "result": {
+        "observed_value": 15
+      },
+      "expectation_config": {
+        "expectation_type": "expect_table_column_count_to_be_between",
+        "kwargs": {
+          "min_value": 0,
+          "max_value": 23
+        }
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      }
+    },
+    {
+      "success": false,
+      "result": {
+        "observed_value": 1794
+      },
+      "expectation_config": {
+        "expectation_type": "expect_table_row_count_to_be_between",
+        "kwargs": {
+          "min_value": 0,
+          "max_value": 2
+        }
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "observed_value": 15
+      },
+      "expectation_config": {
+        "expectation_type": "expect_table_column_count_to_equal",
+        "kwargs": {
+          "value": 15
+        }
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "observed_value": 1794
+      },
+      "expectation_config": {
+        "expectation_type": "expect_table_row_count_to_equal",
+        "kwargs": {
+          "value": 1794
+        }
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      }
     }
   ],
   "success": false,

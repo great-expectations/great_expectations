@@ -279,7 +279,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 discard_include_config_kwargs=False
             )
         )
-    
+
     def get_row_count(self):
         count_query = sa.select([sa.func.count()]).select_from(
             self._table)
