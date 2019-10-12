@@ -71,7 +71,7 @@ class SlackRenderer(Renderer):
         if custom_blocks:
             query["blocks"].append(custom_blocks)
 
-        documentation_url = "https://docs.greatexpectations.io/en/latest/guides/reviewing_validation_results.html"
+        documentation_url = "https://docs.greatexpectations.io/en/latest/features/validation.html#reviewing-validation-results"
         footer_section = {
             "type": "context",
             "elements": [
