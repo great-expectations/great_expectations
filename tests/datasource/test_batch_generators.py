@@ -24,7 +24,8 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
     generator = datasource.get_generator("default")
     known_data_asset_names = datasource.get_available_data_asset_names()
 
-    assert known_data_asset_names["default"] == {"f1", "f2", "f3"}
+    # Use set to avoid order dependency
+    assert set(known_data_asset_names["default"]) == {"f1", "f2", "f3"}
 
     f1_batches = [batch_kwargs for batch_kwargs in generator.get_iterator("f1")]
     assert len(f1_batches) == 1
@@ -100,7 +101,8 @@ def test_glob_reader_generator(tmp_path_factory):
     })
 
     g2_assets = g2.get_available_data_asset_names()
-    assert g2_assets == {"blargs", "fs"}
+    # Use set in test to avoid order issues
+    assert set(g2_assets) == {"blargs", "fs"}
 
     with pytest.warns(DeprecationWarning):
         # This is an old style of asset_globs configuration that should raise a deprecationwarning
@@ -109,7 +111,7 @@ def test_glob_reader_generator(tmp_path_factory):
             "fs": "f*"
         })
         g2_assets = g2.get_available_data_asset_names()
-        assert g2_assets == {"blargs", "fs"}
+        assert set(g2_assets) == {"blargs", "fs"}
 
     blargs_kwargs = [x["path"] for x in g2.get_iterator("blargs")]
     real_blargs = [
@@ -166,7 +168,8 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     g1 = SubdirReaderGenerator(base_directory=basedir)
 
     g1_assets = g1.get_available_data_asset_names()
-    assert g1_assets == {"f2", "f4", "f6", "f7", "f8", "f9", "f0"}
+    # Use set in test to avoid order issues
+    assert set(g1_assets) == {"f2", "f4", "f6", "f7", "f8", "f9", "f0"}
 
 
 def test_databricks_generator():
@@ -174,7 +177,7 @@ def test_databricks_generator():
     available_assets = generator.get_available_data_asset_names()
 
     # We have no tables available
-    assert available_assets == set()
+    assert available_assets == []
 
     databricks_kwargs_iterator = generator.get_iterator("foo")
     kwargs = [batch_kwargs for batch_kwargs in databricks_kwargs_iterator]

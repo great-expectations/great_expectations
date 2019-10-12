@@ -101,7 +101,7 @@ class QueryGenerator(BatchGenerator):
         else:
             defined_queries = list(self._queries.keys())
 
-        return set(defined_queries)
+        return defined_queries
 
     def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
         """Build batch kwargs from a partition id."""

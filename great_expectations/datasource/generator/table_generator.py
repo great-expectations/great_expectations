@@ -160,7 +160,7 @@ class TableGenerator(BatchGenerator):
                      schema_name + "." + table_name
                      for table_name in self.inspector.get_table_names(schema=schema_name)
                      if table_name not in known_system_tables
-                    ]
+                     ]
                 )
                 tables.extend(
                     [table_name if self.inspector.default_schema_name == schema_name else
@@ -170,7 +170,7 @@ class TableGenerator(BatchGenerator):
                      ]
                 )
 
-        return set(defined_assets + tables)
+        return defined_assets + tables
 
     def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
         all_the_kwargs = batch_kwargs.copy()

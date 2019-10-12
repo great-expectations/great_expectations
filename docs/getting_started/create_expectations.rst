@@ -58,7 +58,7 @@ Get Batch
 ----------
 
 Datasources and generators work together closely with your pipeline infrastructure to provide Great Expectations
-batches of data to validate. The generator is responsible for identifying the ``batch_kwargs`` that a datasource will
+batches of data to validate. The generator can help identifying the ``batch_kwargs`` that a datasource will
 use to load a batch of data. For example the :class:`~great_expectations.datasource.generator.\
 subdir_reader_generator.SubdirReaderGenerator`
 generator will create batches of data based on individual files and group those batches into a single data_asset based
@@ -73,16 +73,17 @@ batches into named data assets.
 
   {
     "path": "/data/staging/user_actions/20190710T034323_user_actions.csv",
-    "timestamp": 1562770986.6800103,
     "sep": null,
     "engine": "python"
   }
 
-The easiest way to create an expectation suite for a data asset in Python is to load a sample batch of that data asset and then call ``expect*`` methods on it.
+The easiest way to create an expectation suite for a data asset in Python is to load a sample batch of that data asset
+and then call ``expect*`` methods on it.
 
 The following call loads one of the batches of the ``notable_works_by_charles_dickens`` data asset (one of the files).
 
-The argument ``expectation_suite_name`` specifies the name of the expectation suite you want to create. At first this suite contains no expectations. We will add expectations to it in the next steps.
+The argument ``expectation_suite_name`` specifies the name of the expectation suite you want to create. At first this
+suite contains no expectations. We will add expectations to it in the next steps.
 
 .. image:: ../images/get_batch.jpg
 
