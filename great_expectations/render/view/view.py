@@ -9,7 +9,7 @@ from jinja2 import (
     Template, Environment, BaseLoader, PackageLoader, select_autoescape, contextfilter
 )
 
-from great_expectations.version import __version__
+from great_expectations import __version__ as ge_version
 from great_expectations.render.types import (
     RenderedDocumentContent,
     RenderedSectionContent,
@@ -74,7 +74,7 @@ class DefaultJinjaView(object):
         env.filters['render_styling_from_string_template'] = cls.render_styling_from_string_template
         env.filters['render_styling'] = cls.render_styling
         env.filters['render_content_block'] = cls.render_content_block
-        env.globals['ge_version'] = __version__
+        env.globals['ge_version'] = ge_version
 
         template = env.get_template(template)
         template.globals['now'] = datetime.datetime.utcnow
@@ -83,18 +83,18 @@ class DefaultJinjaView(object):
 
     @classmethod
     @contextfilter
-    def render_content_block(cls, context, content_block):
+    def render_content_block(cls, context, content_block, index=None):
         if type(content_block) is str:
             return "<span>{content_block}</span>".format(content_block=content_block)
         elif content_block is None:
             return ""
         elif type(content_block) is list:
-            return "".join([cls.render_content_block(context, content_block_el) for content_block_el in content_block])
+            return "".join([cls.render_content_block(context, content_block_el, idx) for idx, content_block_el in enumerate(content_block)])
         elif not isinstance(content_block, (dict, OrderedDict)):
             return content_block
         content_block_type = content_block.get("content_block_type")
         template = cls._get_template(template="{content_block_type}.j2".format(content_block_type=content_block_type))
-        return template.render(context, content_block=content_block)
+        return template.render(context, content_block=content_block, index=index)
 
     @classmethod
     def render_styling(cls, styling):

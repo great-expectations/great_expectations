@@ -101,6 +101,7 @@ def setup_notebook_logging(logger=None):
 
     if not logger:
         logger = logging.getLogger("great_expectations")
+
     chandler = logging.StreamHandler(stream=sys.stdout)
     chandler.setLevel(logging.DEBUG)
     # chandler.setFormatter(Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
@@ -119,22 +120,29 @@ def list_available_data_asset_names(context, data_source_name=None):
     TODO: Needs a docstring and tests.
     """
 
+    expectation_suite_keys = context.list_expectation_suite_keys()
+
     datasources = context.list_datasources()
     for datasource in datasources:
         if data_source_name and datasource['name'] != data_source_name:
             continue
-        print('data_source: {0:s} ({1:s})'.format(datasource['name'], datasource['type']))
+        print('datasource: {0:s} ({1:s})'.format(datasource['name'], datasource['class_name']))
         ds = context.get_datasource(datasource['name'])
         generators = ds.list_generators()
         for generator_info in generators:
-            print('  generator_name: {0:s} ({1:s})'.format(generator_info['name'], generator_info['type']))
+            print('  generator: {0:s} ({1:s})'.format(generator_info['name'], generator_info['class_name']))
             generator = ds.get_generator(generator_info['name'])
             data_asset_names = sorted(generator.get_available_data_asset_names())
             if len(data_asset_names) > 0:
                 for data_asset_name in data_asset_names:
-                    # print('    data asset: {0:s}. Full name: {1:s}/{2:s}/{0:s}'. \
-                    print('    generator_asset: {0:s}'. \
-                    format(data_asset_name))
+                    print('    generator_asset: {0:s}'.format(data_asset_name))
+                    data_asset_expectation_suite_keys = [es_key for es_key in expectation_suite_keys if \
+                                                         es_key.data_asset_name.datasource == datasource['name'] and \
+                                                         es_key.data_asset_name.generator == generator_info['name'] and \
+                                                         es_key.data_asset_name.generator_asset == data_asset_name]
+                    if len(data_asset_expectation_suite_keys) > 0:
+                        for es_key in data_asset_expectation_suite_keys:
+                            print('      expectation suite: {0:s}'.format(es_key.expectation_suite_name))
             else:
                 display(HTML("""
                 <p>
@@ -204,8 +212,6 @@ cooltip_style_element = """<style type="text/css">
 def display_column_expectations_as_section(
     expectation_suite,
     column,
-    section_renderer=render.renderer.column_section_renderer.ExpectationSuiteColumnSectionRenderer,
-    view_renderer=render.view.view.DefaultJinjaSectionView,
     include_styling=True,
     return_without_displaying=False,
 ):
@@ -224,7 +230,7 @@ def display_column_expectations_as_section(
 
     #TODO: Handle the case where zero evrs match the column name
 
-    document = render.renderer.ExpectationSuiteColumnSectionRenderer.render(column_expectation_list)
+    document = render.renderer.ExpectationSuiteColumnSectionRenderer().render(column_expectation_list)
     view = render.view.DefaultJinjaSectionView.render(
         render.types.RenderedComponentContentWrapper(**{
             "section": document,
@@ -246,8 +252,6 @@ def display_column_expectations_as_section(
 def display_column_evrs_as_section(
     evrs,
     column,
-    section_renderer=render.renderer.column_section_renderer.ProfilingResultsColumnSectionRenderer,
-    view_renderer=render.view.view.DefaultJinjaSectionView,
     include_styling=True,
     return_without_displaying=False,
 ):
@@ -265,7 +269,7 @@ def display_column_evrs_as_section(
 
     #TODO: Handle the case where zero evrs match the column name
 
-    document = render.renderer.ProfilingResultsColumnSectionRenderer.render(column_evr_list)
+    document = render.renderer.ProfilingResultsColumnSectionRenderer().render(column_evr_list)
     view = render.view.DefaultJinjaSectionView.render(
         render.types.RenderedComponentContentWrapper(**{
             "section": document,

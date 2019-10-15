@@ -4,3 +4,5 @@ include great_expectations/init_notebooks/*.ipynb
 include great_expectations/render/view/templates/*.j2
 graft tests
 global-exclude *.py[co]
+include versioneer.py
+include great_expectations/_version.py

@@ -3,18 +3,17 @@
 from __future__ import division
 
 import decimal
+import sys
+import datetime
 
 from six import string_types, integer_types
 
 import pandas as pd
 import numpy as np
-import sys
-import copy
-import datetime
 
 from functools import wraps
 
-from great_expectations.version import __version__ as __version__
+from great_expectations import __version__ as ge_version
 from great_expectations.types import DotDict
 
 
@@ -190,12 +189,13 @@ def recursively_convert_to_json_serializable(test_obj):
         raise TypeError('%s is of type %s which cannot be serialized.' % (
             str(test_obj), type(test_obj).__name__))
 
+
 def get_empty_expectation_suite(data_asset_name=None, expectation_suite_name="default"):
     return DotDict({
         'data_asset_name': data_asset_name,
         'expectation_suite_name': expectation_suite_name,
         'meta': {
-            'great_expectations.__version__': __version__
+            'great_expectations.__version__': ge_version
         },
         'expectations': []
     })

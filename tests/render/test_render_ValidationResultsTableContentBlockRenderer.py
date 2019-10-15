@@ -12,92 +12,92 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
     result = ValidationResultsTableContentBlockRenderer.render([evr_failed_with_exception])
     print(json.dumps(result, indent=2))
     assert result == {
-        "content_block_type": "table",
-        "table": [
-            [
-            {
-                "content_block_type": "string_template",
-                "string_template": {
-                "template": "$icon",
+      "content_block_type": "table",
+      "table": [
+        [
+          {
+            "content_block_type": "string_template",
+            "string_template": {
+              "template": "$icon",
+              "params": {
+                "icon": ""
+              },
+              "styling": {
                 "params": {
-                    "icon": ""
-                },
-                "styling": {
-                    "params": {
-                    "icon": {
-                        "classes": [
-                        "fas",
-                        "fa-exclamation-triangle",
-                        "text-warning"
-                        ],
-                        "tag": "i"
-                    }
-                    }
-                }
-                }
-            },
-            [
-                {
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "$column Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a provided threshold but no distribution was specified.",
-                    "params": {
-                    "column": "live",
-                    "partition_object": None,
-                    "threshold": None,
-                    "result_format": "SUMMARY"
-                    },
-                    "styling": {
-                    "default": {
-                        "classes": [
-                        "badge",
-                        "badge-secondary"
-                        ]
-                    },
-                    "params": {
-                        "sparklines_histogram": {
-                        "styles": {
-                            "font-family": "serif !important"
-                        }
-                        }
-                    }
-                    }
-                }
-                },
-                {
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "Expectation failed to execute.",
-                    "params": {},
-                    "tag": "strong",
-                    "styling": {
+                  "icon": {
                     "classes": [
-                        "text-warning"
-                    ]
-                    }
+                      "fas",
+                      "fa-exclamation-triangle",
+                      "text-warning"
+                    ],
+                    "tag": "i"
+                  }
                 }
-                },
-                None
-            ],
-            "--"
-            ]
-        ],
-        "styling": {
-            "body": {
-            "classes": [
-                "table"
-            ]
+              }
+            }
+          },
+          [
+            {
+              "content_block_type": "string_template",
+              "string_template": {
+                "template": "$column Column can match any distribution.",
+                "params": {
+                  "column": "live",
+                  "partition_object": None,
+                  "threshold": None,
+                  "result_format": "SUMMARY"
+                }
+              }
             },
-            "classes": [
-            "m-3",
-            "table-responsive"
-            ]
-        },
-        "header_row": [
-            "Status",
-            "Expectation",
-            "Observed Value"
+            {
+              "content_block_type": "string_template",
+              "string_template": {
+                "template": "\n\n$expectation_type raised an exception:\n$exception_message",
+                "params": {
+                  "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+                  "exception_message": "Invalid partition object."
+                },
+                "tag": "strong",
+                "styling": {
+                  "classes": [
+                    "text-danger"
+                  ],
+                  "params": {
+                    "exception_message": {
+                      "tag": "code"
+                    },
+                    "expectation_type": {
+                      "classes": [
+                        "badge",
+                        "badge-danger",
+                        "mb-2"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            None
+          ],
+          "--"
         ]
+      ],
+      "styling": {
+        "body": {
+          "classes": [
+            "table"
+          ]
+        },
+        "classes": [
+          "m-3",
+          "table-responsive"
+        ]
+      },
+      "header_row": [
+        "Status",
+        "Expectation",
+        "Observed Value"
+      ]
     }
     
     
@@ -191,10 +191,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
       "success": True,
       "result": {
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
+        "unexpected_count": 1050,
+        "unexpected_percent": 79.96953541508,
         "partial_unexpected_list": []
       },
       "exception_info": {
@@ -216,8 +214,6 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
         "success": True,
         "result": {
             "element_count": 1313,
-            "missing_count": 0,
-            "missing_percent": 0.0,
             "unexpected_count": 0,
             "unexpected_percent": 0.0,
             "partial_unexpected_list": []
@@ -240,7 +236,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     # test _get_observed_value when evr["result"]["observed_value"] exists
     output_1 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_success)
     print(output_1)
-    assert output_1 == 1313
+    assert output_1 == "1313"
     # test _get_observed_value when evr["result"] does not exist
     output_2 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_no_result_key)
     print(output_2)
@@ -248,12 +244,12 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     # test _get_observed_value for expect_column_values_to_not_be_null expectation type
     output_3 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_not_be_null)
     print(output_3)
-    assert(output_3) == "0 null"
+    assert output_3 == "20.03046458% not null"
     # test _get_observed_value for expect_column_values_to_be_null expectation type
     output_4 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_be_null)
     print(output_4)
-    assert output_4 == "1313 null"
-    
+    assert output_4 == "100% null"
+
     
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr_success, evr_failed):
     evr_no_result = {
@@ -278,8 +274,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
             "element_count": 1313,
             "missing_count": 0,
             "missing_percent": 0.0,
-            "unexpected_percent": 0.002284843869002285,
-            "unexpected_percent_nonmissing": 0.002284843869002285,
+            "unexpected_percent": 0.2284843869002285,
+            "unexpected_percent_nonmissing": 0.2284843869002285,
             "partial_unexpected_list": [
                 "Daly, Mr Peter Denis ",
                 "Barber, Ms ",
@@ -349,24 +345,51 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
     # test for evr with no "result" key
     output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_no_result)
     print(json.dumps(output_3, indent=2))
-    assert output_3 == {
-      "content_block_type": "string_template",
-      "string_template": {
-        "template": "Expectation failed to execute.",
-        "params": {},
-        "tag": "strong",
-        "styling": {
-          "classes": [
-            "text-warning"
-          ]
-        }
-      }
-    }
+    assert output_3 == None
     
     # test for evr with no unexpected count
     output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed_no_unexpected_count)
     print(output_4)
     assert output_4 is None
+
+    # test for evr with exception
+    evr_failed_exception = {
+        "success": False,
+        "exception_info": {
+            "raised_exception": True,
+            "exception_message": "Unrecognized column: not_a_real_column",
+            "exception_traceback": "Traceback (most recent call last):\n...more_traceback..."
+        },
+        "expectation_config": {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Name",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            }
+        }
+    }
+
+    output_5 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed_exception)
+    assert output_5 == {
+        'content_block_type': 'string_template',
+        'string_template': {
+            'template': '\n\n$expectation_type raised an exception:\n$exception_message',
+            'params': {
+                'expectation_type': 'expect_column_values_to_not_match_regex',
+                'exception_message': 'Unrecognized column: not_a_real_column'},
+            'tag': 'strong',
+            'styling': {
+                'classes': ['text-danger'],
+                'params': {
+                    'exception_message': {'tag': 'code'},
+                    'expectation_type': {
+                        'classes': ['badge', 'badge-danger', 'mb-2']
+                    }
+                }
+            }
+        }
+    }
 
 
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_success):
@@ -394,8 +417,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "missing_count": 0,
             "missing_percent": 0.0,
             "unexpected_count": 1313,
-            "unexpected_percent": 1.0,
-            "unexpected_percent_nonmissing": 1.0,
+            "unexpected_percent": 100.0,
+            "unexpected_percent_nonmissing": 100.0,
         },
         "exception_info": {
             "raised_exception": False,
@@ -419,8 +442,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "missing_count": 0,
             "missing_percent": 0.0,
             "unexpected_count": 1313,
-            "unexpected_percent": 1.0,
-            "unexpected_percent_nonmissing": 1.0,
+            "unexpected_percent": 100.0,
+            "unexpected_percent_nonmissing": 100.0,
             "partial_unexpected_list": [
                 1,
                 2,
@@ -466,8 +489,8 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "missing_count": 0,
             "missing_percent": 0.0,
             "unexpected_count": 1313,
-            "unexpected_percent": 1.0,
-            "unexpected_percent_nonmissing": 1.0,
+            "unexpected_percent": 100.0,
+            "unexpected_percent_nonmissing": 100.0,
             "partial_unexpected_list": [
                 1,
                 2,

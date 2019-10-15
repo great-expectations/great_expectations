@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 from click.testing import CliRunner
-import great_expectations.version
-from great_expectations.cli import cli
+
 import pytest
 import json
 import os
@@ -13,8 +12,10 @@ import logging
 import sys
 import re
 from ruamel.yaml import YAML
-yaml = YAML()
-yaml.default_flow_style = False
+
+from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
+from great_expectations.exceptions import ConfigNotFoundError
+
 
 try:
     from unittest import mock
@@ -23,9 +24,13 @@ except ImportError:
 
 from six import PY2
 
-from great_expectations.cli.init import scaffold_directories_and_notebooks
-
+from great_expectations.cli import cli
+from great_expectations.util import gen_directory_tree_str
+from great_expectations import __version__ as ge_version
 from .test_utils import assertDeepAlmostEqual
+yaml = YAML()
+yaml.default_flow_style = False
+
 
 def test_cli_command_entrance():
     runner = CliRunner()
@@ -42,19 +47,19 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  add-datasource       Add a new datasource to the data context
-  build-documentation  Build data documentation for a project.
-  init                 Initialize a new Great Expectations project.
-  profile              Profile datasources from the specified context.
-  render               Render a great expectations object to documentation.
-  validate             Validate a CSV file against an expectation suite.
+  add-datasource  Add a new datasource to the data context.
+  build-docs      Build Data Docs for a project.
+  check-config    Check a config for validity and help with migrations.
+  init            Create a new project and help with onboarding.
+  profile         Profile datasources from the specified context.
+  validate        Validate a CSV file against an expectation suite.
 """
 
 
 def test_cli_command_bad_command():
     runner = CliRunner()
 
-    result = runner.invoke(cli, ["blarg"])
+    result = runner.invoke(cli, [u"blarg"])
     assert result.exit_code == 2
     assert result.output == """Usage: cli [OPTIONS] COMMAND [ARGS]...
 Try "cli --help" for help.
@@ -118,7 +123,7 @@ def test_cli_version():
     runner = CliRunner()
 
     result = runner.invoke(cli, ["--version"])
-    assert great_expectations.version.__version__ in str(result.output)
+    assert ge_version in str(result.output)
 
 
 def test_validate_basic_operation():
@@ -183,7 +188,7 @@ def test_cli_evaluation_parameters():
     assert json_result['evaluation_parameters'] == expected_evaluation_parameters
 
 
-def test_cli_init(tmp_path_factory, filesystem_csv_2):
+def test_cli_init_on_new_project(tmp_path_factory, filesystem_csv_2):
     try:
         basedir = tmp_path_factory.mktemp("test_cli_init_diff")
         basedir = str(basedir)
@@ -197,7 +202,7 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
         os.chdir(basedir)
 
         runner = CliRunner()
-        result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\n" % str(
+        result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\nn\n\n" % str(
             os.path.join(basedir, "data")))
 
         print(result.output)
@@ -207,14 +212,57 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
         assert len(re.findall(
             "{", result.output)) < 100, "CLI contains way more '{' than we would reasonably expect."
 
-        assert """Always know what to expect from your data.""" in result.output
+        assert """Always know what to expect from your data""" in result.output
+        assert """Let's add Great Expectations to your project""" in result.output
+        assert """open a tutorial notebook""" in result.output
 
         assert os.path.isdir(os.path.join(basedir, "great_expectations"))
         assert os.path.isfile(os.path.join(
             basedir, "great_expectations/great_expectations.yml"))
         config = yaml.load(
             open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
-        assert config["datasources"]["data__dir"]["type"] == "pandas"
+        assert config["datasources"]["data__dir"]["class_name"] == "PandasDatasource"
+
+
+        print(gen_directory_tree_str(os.path.join(basedir, "great_expectations")))
+        assert gen_directory_tree_str(os.path.join(basedir, "great_expectations")) == """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    datasources/
+    expectations/
+        data__dir/
+            default/
+                Titanic/
+                    BasicDatasetProfiler.json
+    notebooks/
+        create_expectations.ipynb
+        integrate_validation_into_pipeline.ipynb
+    plugins/
+    uncommitted/
+        config_variables.yml
+        data_docs/
+            local_site/
+                index.html
+                expectations/
+                    data__dir/
+                        default/
+                            Titanic/
+                                BasicDatasetProfiler.html
+                validations/
+                    profiling/
+                        data__dir/
+                            default/
+                                Titanic/
+                                    BasicDatasetProfiler.html
+        samples/
+        validations/
+            profiling/
+                data__dir/
+                    default/
+                        Titanic/
+                            BasicDatasetProfiler.json
+"""
 
         assert os.path.isfile(
             os.path.join(
@@ -223,22 +271,23 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
             )
         )
 
-        assert os.path.isfile(
-            os.path.join(
-                basedir,
-                "great_expectations/uncommitted/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.json")
-        )
+        fnames = []
+        path = os.path.join(basedir, "great_expectations/uncommitted/validations/profiling/data__dir/default/Titanic")
+        for (dirpath, dirnames, filenames) in os.walk(path):
+            for filename in filenames:
+                fnames.append(filename)
+        assert fnames == ["BasicDatasetProfiler.json"]
 
         assert os.path.isfile(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/local_site/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html")
+                "great_expectations/uncommitted/data_docs/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html")
         )
 
         assert os.path.getsize(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/local_site/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
+                "great_expectations/uncommitted/data_docs/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
             )
         ) > 0
         print(result)
@@ -246,6 +295,48 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
         raise
     finally:
         os.chdir(curdir)
+
+
+def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_yml(tmp_path_factory):
+    """
+    This is a low-key snapshot test used to sanity check some of the config yml
+    inline comments, and some CLI output.
+    """
+    curdir = os.path.abspath(os.getcwd())
+
+    try:
+        basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
+        os.chdir(basedir)
+        runner = CliRunner()
+        result = runner.invoke(cli, ["init"], input="Y\n4\n")
+
+        assert "Skipping datasource configuration." in result.output
+        print(result.output)
+
+        assert os.path.isdir(os.path.join(basedir, "great_expectations"))
+        config_file_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
+        assert os.path.isfile(config_file_path)
+        with open(config_file_path, "r") as f:
+            observed_config = f.read()
+
+        assert """# Welcome to Great Expectations! Always know what to expect from your data.""" in observed_config
+        assert """# Datasources tell Great Expectations where your data lives and how to get it.
+# You can use the CLI command `great_expectations add-datasource` to help you""" in observed_config
+        assert """# The plugins_directory will be added to your python path for custom modules
+# used to override and extend Great Expectations.""" in observed_config
+        assert """# Stores are configurable places to store things like Expectations, Validations
+# Data Docs, and more. These are for advanced users only - most users can simply
+# leave this section alone.
+# 
+# Three stores are required: expectations, validations, and
+# evaluation_parameters, and must exist with a valid store entry. Additional
+# stores can be configured for uses such as data_docs, validation_operators, etc.""" in observed_config
+        assert """# Data Docs make it simple to visualize data quality in your project. These""" in observed_config
+    except:
+        raise
+    finally:
+        os.chdir(curdir)
+
 
 def test_cli_add_datasource(empty_data_context, filesystem_csv_2, capsys):
     runner = CliRunner()
@@ -279,8 +370,12 @@ def test_cli_add_datasource(empty_data_context, filesystem_csv_2, capsys):
 
 
 def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
+
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -306,8 +401,10 @@ def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, c
     logger.removeHandler(handler)
 
 def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -334,7 +431,9 @@ def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
 
 def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+        "my_datasource",
+        class_name="PandasDatasource",
+        base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -348,8 +447,10 @@ def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem
     assert evr["meta"]["batch_kwargs"]["sep"] == ","
 
 def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -375,8 +476,10 @@ def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_cs
     logger.removeHandler(handler)
 
 def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -401,12 +504,15 @@ def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_
     logger.removeHandler(handler)
 
 def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.add_datasource("my_datasource",
+                                    module_name="great_expectations.datasource",
+                                    class_name="PandasDatasource",
+                                    base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
+    print(json.dumps(not_so_empty_data_context.get_project_config(), indent=2))
+
     project_root_dir = not_so_empty_data_context.root_directory
-    # print(project_root_dir)
 
     # For some reason, even with this logging change (which is required and done in main of the cli)
     # the click cli runner does not pick up output; capsys appears to intercept it first
@@ -416,28 +522,21 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
         '%(levelname)s %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
+
     runner = CliRunner()
-    result = runner.invoke(
-        cli, ["profile", "my_datasource", "-d", project_root_dir])
+    _ = runner.invoke(cli, ["profile", "my_datasource", "-d", project_root_dir])
 
     captured = capsys.readouterr()
 
     assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
 
-    result = runner.invoke(
-        cli, ["build-documentation", "-d", project_root_dir])
+    _ = runner.invoke(cli, ["build-docs", "-d", project_root_dir, "--no-view"])
 
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,
-        "uncommitted/documentation/local_site"
-        )
-    )
-
-    assert "index.html" in os.listdir(os.path.join(
-        project_root_dir,
-        "uncommitted/documentation/team_site"
+        "uncommitted/data_docs/local_site"
         )
     )
 
@@ -450,30 +549,142 @@ def test_cli_config_not_found(tmp_path_factory):
     try:
         os.chdir(tmp_dir)
         runner = CliRunner()
-        result = runner.invoke(
-            cli, ["profile", "-d", "./"])
-        assert "no great_expectations context configuration" in result.output
-        result = runner.invoke(
-            cli, ["profile"])
-        assert "no great_expectations context configuration" in result.output
-        result = runner.invoke(
-            cli, ["build-documentation", "-d", "./"])
-        assert "no great_expectations context configuration" in result.output
-        result = runner.invoke(
-            cli, ["build-documentation"])
-        assert "no great_expectations context configuration" in result.output
+
+        # profile
+        result = runner.invoke(cli, ["profile", "-d", "./"])
+        assert ConfigNotFoundError().message in result.output
+        result = runner.invoke(cli, ["profile"])
+        assert ConfigNotFoundError().message in result.output
+
+        # build-docs
+        result = runner.invoke(cli, ["build-docs", "-d", "./", "--no-view"])
+        assert ConfigNotFoundError().message in result.output
+        result = runner.invoke(cli, ["build-docs", "--no-view"])
+        assert ConfigNotFoundError().message in result.output
+
+        # check-config
+        result = runner.invoke(cli, ["check-config", "-d", "./"])
+        assert ConfigNotFoundError().message in result.output
+        result = runner.invoke(cli, ["check-config"])
+        assert ConfigNotFoundError().message in result.output
     except:
         raise
     finally:
         os.chdir(curdir)
 
 
-def test_scaffold_directories_and_notebooks(tmp_path_factory):
-    empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks"))
-    scaffold_directories_and_notebooks(empty_directory)
-    print(empty_directory)
+def test_cli_init_on_existing_ge_yml_with_some_missing_uncommitted_dirs(tmp_path_factory):
+    """
+    This test walks through the onboarding experience.
 
-    assert set(os.listdir(empty_directory)) == \
-           {'datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'}
-    assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
-           {'samples', 'documentation', 'validations', 'credentials'}
+    The user just checked an existing project out of source control and does
+    not yet have an uncommitted directory.
+    """
+    tmp_dir = str(tmp_path_factory.mktemp("test_cli_init_on_existing_ge_yml"))
+    curdir = os.path.abspath(os.getcwd())
+    os.chdir(tmp_dir)
+    runner = CliRunner()
+    runner.invoke(cli, ["init"], input="Y\n4\n")
+    shutil.rmtree(os.path.join(tmp_dir, "great_expectations/uncommitted"))
+
+    try:
+        result = runner.invoke(cli, ["init"], input="Y\n4\n")
+        obs = result.output
+        # Users should see
+        assert "To run locally, we need some files that are not in source control." in obs
+        assert "You may see new files in" in obs
+        assert "Let's add Great Expectations to your project, by scaffolding" not in obs
+        # Users should not see
+        assert "open a tutorial notebook" not in obs
+    except:
+        raise
+    finally:
+        os.chdir(curdir)
+
+
+def test_cli_init_on_existing_ge_yml_with_missing_uncommitted_dirs_and_missing_config_variables_yml(tmp_path_factory):
+    """
+    This test walks through an onboarding experience.
+
+    The user just is missing some uncommitted dirs and is missing
+    config_variables.yml
+    """
+    tmp_dir = str(tmp_path_factory.mktemp("more_stuff"))
+    ge_dir = os.path.join(tmp_dir, "great_expectations")
+    curdir = os.path.abspath(os.getcwd())
+    os.chdir(tmp_dir)
+    runner = CliRunner()
+    runner.invoke(cli, ["init"], input="Y\n4\n")
+    # mangle setup
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+    shutil.rmtree(os.path.join(uncommitted_dir, "data_docs"))
+    config_var_path = os.path.join(uncommitted_dir, "config_variables.yml")
+    os.remove(config_var_path)
+    # sanity check
+    assert not os.path.isfile(config_var_path)
+
+    try:
+        result = runner.invoke(cli, ["init"], input="Y\n")
+
+        # check dir structure
+        assert gen_directory_tree_str(ge_dir) == """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    datasources/
+    expectations/
+    notebooks/
+        create_expectations.ipynb
+        integrate_validation_into_pipeline.ipynb
+    plugins/
+    uncommitted/
+        config_variables.yml
+        data_docs/
+        samples/
+        validations/
+"""
+        # check config_variables.yml
+        with open(config_var_path, 'r') as f:
+            obs_yml = f.read()
+        assert obs_yml == CONFIG_VARIABLES_TEMPLATE
+
+        # Check CLI output
+        obs = result.output
+        assert "To run locally, we need some files that are not in source control." in obs
+        assert "You may see new files in" in obs
+        assert "Let's add Great Expectations to your project, by scaffolding" not in obs
+
+        assert "open a tutorial notebook" not in obs
+    except:
+        raise
+    finally:
+        os.chdir(curdir)
+
+
+def test_cli_init_does_not_prompt_to_fix_if_all_uncommitted_dirs_exist(tmp_path_factory):
+    """This test walks through an already onboarded project."""
+    tmp_dir = str(tmp_path_factory.mktemp("test_cli_init_on_existing_ge_yml"))
+    curdir = os.path.abspath(os.getcwd())
+    os.chdir(tmp_dir)
+    runner = CliRunner()
+    runner.invoke(cli, ["init"], input="Y\n4\n")
+
+    try:
+        result = runner.invoke(cli, ["init"])
+        assert result.exit_code == 0
+        obs = result.output
+
+        # Users should see:
+        assert "This looks like an existing project" in obs
+        assert "appears complete" in obs
+        assert "ready to roll." in obs
+
+        # Users should NOT see:
+        assert "Great Expectations needs some directories that are not in source control." not in obs
+        assert "You may see new directories in" not in obs
+        assert "Let's add Great Expectations to your project, by scaffolding" not in obs
+        assert "open a tutorial notebook" not in obs
+    except:
+        raise
+    finally:
+        os.chdir(curdir)

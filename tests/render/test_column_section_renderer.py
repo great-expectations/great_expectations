@@ -42,7 +42,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
     for column in evrs.keys():
         with open('./tests/render/output/test_render_profiling_results_column_section_renderer__' + column + '.json', 'w') \
                 as outfile:
-            json.dump(ProfilingResultsColumnSectionRenderer.render(evrs[column]), outfile, indent=2)
+            json.dump(ProfilingResultsColumnSectionRenderer().render(evrs[column]), outfile, indent=2)
 
 
 @pytest.mark.smoketest
@@ -62,12 +62,12 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     for column in exp_groups.keys():
         with open('./tests/render/output/test_render_expectation_suite_column_section_renderer' + column + '.json', 'w') \
                 as outfile:
-            json.dump(ExpectationSuiteColumnSectionRenderer.render(exp_groups[column]), outfile, indent=2)
+            json.dump(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]), outfile, indent=2)
 
     # # This can be used for regression testing
     # for column in exp_groups.keys():
     #     with open('./tests/render/output/test_render_expectation_suite_column_section_renderer' + column + '.json') as infile:
-    #         assert json.dumps(ExpectationSuiteColumnSectionRenderer.render(exp_groups[column]), indent=2) == infile
+    #         assert json.dumps(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]), indent=2) == infile
 
 
 def test_ProfilingResultsColumnSectionRenderer_render(titanic_profiled_evrs_1, titanic_profiled_name_column_evrs):
@@ -100,17 +100,11 @@ def test_ProfilingResultsColumnSectionRenderer_render(titanic_profiled_evrs_1, t
 
 
 def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
-    content_blocks = []
-    # print(titanic_profiled_name_column_evrs)
-    ProfilingResultsColumnSectionRenderer()._render_header(
-        titanic_profiled_name_column_evrs,
-        content_blocks,
+    content_block = ProfilingResultsColumnSectionRenderer()._render_header(
+        evrs=titanic_profiled_name_column_evrs,
         column_type = None
     )
-    # print(json.dumps(content_blocks, indent=2))
-    
-    assert len(content_blocks) == 1
-    content_block = content_blocks[0]
+
     assert content_block["content_block_type"] == "header"
     assert content_block["header"] == {
         "template": "Name",
@@ -126,6 +120,8 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
         }
     }
 
+
+def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_dollar_sign(titanic_profiled_name_column_evrs):
     evr_with_unescaped_dollar_sign = {
         "success": True,
         "result": {
@@ -159,14 +155,12 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
             }
         }
     }
-    content_blocks = []
-    ProfilingResultsColumnSectionRenderer._render_header(
+
+    content_block = ProfilingResultsColumnSectionRenderer._render_header(
         [evr_with_unescaped_dollar_sign],
-        content_blocks=content_blocks,
         column_type=[],
     )
-    print(content_blocks)
-    assert content_blocks[0] == {
+    assert content_block == {
         'content_block_type': 'header',
         'header': {
             'template': 'Car Insurance Premiums ($$)',
@@ -200,8 +194,8 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
 #     evrs = {}
 #     ProfilingResultsColumnSectionRenderer()._render_values_set(evrs, content_blocks)
 
-def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_profiled_evrs_1):
 
+def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_profiled_evrs_1):
     print(titanic_profiled_evrs_1["results"][0])
     distinct_values_evrs = [evr for evr in titanic_profiled_evrs_1["results"] if evr["expectation_config"]["expectation_type"] == "expect_column_distinct_values_to_be_in_set"]
     
@@ -209,11 +203,9 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_pr
 
     content_blocks = []
     for evr in distinct_values_evrs:
-        ProfilingResultsColumnSectionRenderer()._render_bar_chart_table(
-            distinct_values_evrs,
-            content_blocks,
+        content_blocks.append(
+            ProfilingResultsColumnSectionRenderer()._render_bar_chart_table(distinct_values_evrs)
         )
-    print(json.dumps(content_blocks, indent=2))
 
     assert len(content_blocks) == 4
 
@@ -255,12 +247,9 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_pr
 def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_name_column_expectations):
     remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_header(
         titanic_profiled_name_column_expectations,#["expectations"],
-        [],
     )
 
-    print(json.dumps(content_blocks, indent=2))
-    assert content_blocks == [
-        RenderedComponentContent(**{
+    assert content_blocks == RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Name",
             "styling": {
@@ -275,7 +264,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
             }
             }
         })
-    ]
+
 
     expectation_with_unescaped_dollar_sign = {
       "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -301,10 +290,8 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
     }
     remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_header(
         [expectation_with_unescaped_dollar_sign],
-        []
     )
-    print(content_blocks)
-    assert content_blocks[0] == {
+    assert content_blocks == {
         'content_block_type': 'header',
         'header': 'Car Insurance Premiums ($$)',
         'styling': {'classes': ['col-12'], 'header': {'classes': ['alert', 'alert-secondary']}}
@@ -312,16 +299,10 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
 
 
 def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profiled_name_column_expectations):
-    remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_bullet_list(
+    remaining_expectations, content_block = ExpectationSuiteColumnSectionRenderer()._render_bullet_list(
         titanic_profiled_name_column_expectations,#["expectations"],
-        [],
     )
 
-    print(json.dumps(content_blocks, indent=2))
-
-    assert len(content_blocks) == 1
-
-    content_block = content_blocks[0]
     assert content_block["content_block_type"] == "bullet_list"
     assert len(content_block["bullet_list"]) == 4
     assert "value types must belong to this set" in json.dumps(content_block)
@@ -331,15 +312,11 @@ def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profil
     
     
 def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
-    remaining_evrs, content_blocks = ValidationResultsColumnSectionRenderer._render_header(
+    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_header(
         validation_results=titanic_profiled_name_column_evrs,
-        content_blocks=[]
     )
-    
-    print(json.dumps(content_blocks, indent=2))
-    
-    assert content_blocks == [
-        {
+
+    assert content_block == {
             'content_block_type': 'header',
             'header': 'Name',
             'styling': {
@@ -349,8 +326,9 @@ def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_n
                 }
             }
         }
-    ]
-    
+
+
+def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped_dollar_sign(titanic_profiled_name_column_evrs):
     evr_with_unescaped_dollar_sign = {
         'success': True,
         'result': {
@@ -378,16 +356,11 @@ def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_n
             }
         }
     }
-    
-    remaining_evrs, content_blocks = ValidationResultsColumnSectionRenderer._render_header(
+
+    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_header(
         validation_results=[evr_with_unescaped_dollar_sign],
-        content_blocks=[]
     )
-
-    print(json.dumps(content_blocks, indent=2))
-
-    assert content_blocks == [
-        {
+    assert content_block == {
             'content_block_type': 'header',
             'header': 'Name ($$)',
             'styling': {
@@ -397,21 +370,16 @@ def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_n
                 }
             }
         }
-    ]
 
 
 # noinspection PyPep8Naming
 def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_name_column_evrs):
-    remaining_evrs, content_blocks = ValidationResultsColumnSectionRenderer._render_table(
+    remaining_evrs, content_block = ValidationResultsColumnSectionRenderer()._render_table(
         validation_results=titanic_profiled_name_column_evrs,
-        content_blocks=[]
     )
-    print(json.dumps(content_blocks, indent=2))
-    
-    content_block = content_blocks[0]
+
     content_block_stringified = json.dumps(content_block)
-    
-    assert len(content_blocks) == 1
+
     assert content_block["content_block_type"] == "table"
     assert len(content_block["table"]) == 6
     assert content_block_stringified.count("$icon") == 6
@@ -431,7 +399,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         'success': True,
         'result': {
             'observed_value': True,
-            'element_count': 162, 'missing_count': 153, 'missing_percent': 0.9444444444444444
+            'element_count': 162, 'missing_count': 153, 'missing_percent': 94.44444444444444
         },
         'exception_info': {
             'raised_exception': False, 'exception_message': None, 'exception_traceback': None
@@ -548,7 +516,7 @@ def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
         ]
     }
 
-    result = ProfilingResultsOverviewSectionRenderer.render(validation)
+    result = ProfilingResultsOverviewSectionRenderer().render(validation)
 
     # Find the variable types content block:
     types_table = [

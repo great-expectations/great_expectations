@@ -1,5 +1,5 @@
 import re
-
+import datetime
 import logging
 
 try:
@@ -7,10 +7,12 @@ try:
 except ImportError:
     boto3 = None
 
-logger = logging.getLogger(__name__)
-
+from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.datasource.generator.batch_generator import BatchGenerator
+from great_expectations.datasource.types import ReaderMethods, S3BatchKwargs
 from great_expectations.exceptions import BatchKwargsError
+
+logger = logging.getLogger(__name__)
 
 
 class S3Generator(BatchGenerator):
@@ -26,8 +28,9 @@ class S3Generator(BatchGenerator):
             ...
             generators:
               my_s3_generator:
-                type: s3
+                class_name: S3Generator
                 bucket: my_bucket.my_organization.priv
+                reader_method: parquet  # This will be automatically inferred from suffix where possible, but can be explicitly specified as well
                 reader_options:  # Note that reader options can be specified globally or per-asset
                   sep: ","
                 delimiter: "/"  # Note that this is the delimiter for the BUCKET KEYS. By default it is "/"
@@ -43,6 +46,7 @@ class S3Generator(BatchGenerator):
                     max_keys: 100
     """
 
+    # FIXME add tests for new partitioner functionality
     def __init__(self,
                  name="default",
                  datasource=None,
@@ -50,6 +54,7 @@ class S3Generator(BatchGenerator):
                  reader_options=None,
                  assets=None,
                  delimiter="/",
+                 reader_method=None,
                  max_keys=1000):
         """Initialize a new S3Generator
 
@@ -62,7 +67,7 @@ class S3Generator(BatchGenerator):
             delimiter: the BUCKET KEY delimiter
             max_keys: the maximum number of keys to fetch in a single list_objects request to s3
         """
-        super(S3Generator, self).__init__(name, type_="s3", datasource=datasource)
+        super(S3Generator, self).__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = {}
 
@@ -75,6 +80,7 @@ class S3Generator(BatchGenerator):
             }
 
         self._bucket = bucket
+        self._reader_method = reader_method
         self._reader_options = reader_options
         self._assets = assets
         self._delimiter = delimiter
@@ -98,7 +104,7 @@ class S3Generator(BatchGenerator):
         return self._bucket
 
     def get_available_data_asset_names(self):
-        return set(self._assets.keys())
+        return self._assets.keys()
 
     def _get_iterator(self, generator_asset, **kwargs):
         logger.debug("Beginning S3Generator _get_iterator for generator_asset: %s" % generator_asset)
@@ -124,16 +130,50 @@ class S3Generator(BatchGenerator):
         for path in path_list:
             yield self._build_batch_kwargs(path)
 
-    def _build_batch_kwargs(self, key, asset_reader_options=None):
+    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+        try:
+            asset_config = self._assets[generator_asset]
+        except KeyError:
+            raise GreatExpectationsError(
+                "No asset config found for asset %s" % generator_asset
+            )
+        if generator_asset not in self._iterators:
+            self._iterators[generator_asset] = {}
+
+        iterator_dict = self._iterators[generator_asset]
+        new_kwargs = None
+        for key in self._get_asset_options(generator_asset, iterator_dict):
+            if self._partitioner(key=key, asset_config=asset_config) == partition_id:
+                new_kwargs = self._build_batch_kwargs(key=key, asset_config=asset_config)
+
+        if new_kwargs is None:
+            raise BatchKwargsError(
+                "Unable to identify partition %s for asset %s" % (partition_id, generator_asset),
+               {
+                    generator_asset: generator_asset,
+                    partition_id: partition_id
+                }
+            )
+        if batch_kwargs is not None:
+            kwargs.update(batch_kwargs)
+        if kwargs is not None:
+            new_kwargs.update(kwargs)
+        return new_kwargs
+
+    def _build_batch_kwargs(self, key, asset_config=None):
         batch_kwargs = {
             "s3": "s3a://" + self.bucket + "/" + key,
         }
         batch_kwargs.update(self.reader_options)
-        if asset_reader_options is not None:
-            batch_kwargs.update(asset_reader_options)
-        return batch_kwargs
+        if self._reader_method is not None:
+            batch_kwargs["reader_method"] = ReaderMethods(self._reader_method)
+        if asset_config.get("reader_options") is not None:
+            batch_kwargs.update(asset_config.get("reader_options"))
+        if asset_config.get("reader_method") is not None:
+            batch_kwargs.update(ReaderMethods(asset_config.get("reader_method")))
+        return S3BatchKwargs(batch_kwargs)
 
-    def _build_asset_iterator(self, asset_config, iterator_dict):
+    def _get_asset_options(self, asset_config, iterator_dict):
         query_options = {
             "Bucket": self.bucket,
             "Delimiter": asset_config.get("delimiter", self._delimiter),
@@ -158,17 +198,59 @@ class S3Generator(BatchGenerator):
                     "common_prefixes": asset_options["CommonPrefixes"] if "CommonPrefixes" in asset_options else None
                 }
             )
-
+        # FIXME: provide mechanism to choose to return directory keys
         keys = [item["Key"] for item in asset_options["Contents"] if item["Size"] > 0]
         keys = [key for key in filter(lambda x: re.match(asset_config.get("regex_filter", ".*"), x) is not None, keys)]
         for key in keys:
-            yield self._build_batch_kwargs(
-                key,
-                asset_config.get("reader_options", {})
-            )
+            yield key
 
         if asset_options["IsTruncated"]:
             iterator_dict["continuation_token"] = asset_options["NextContinuationToken"]
             # Recursively fetch more
-            for batch_kwargs in self._build_asset_iterator(asset_config, iterator_dict):
-                yield batch_kwargs
+            for key in self._get_asset_options(asset_config, iterator_dict):
+                yield key
+        elif "continuation_token" in iterator_dict:
+            # Make sure we clear the token once we've gotten fully through
+            del iterator_dict["continuation_token"]
+
+    def _build_asset_iterator(self, asset_config, iterator_dict):
+        for key in self._get_asset_options(asset_config, iterator_dict):
+            yield self._build_batch_kwargs(
+                key,
+                asset_config
+            )
+
+    def get_available_partition_ids(self, generator_asset):
+        if generator_asset not in self._iterators:
+            self._iterators[generator_asset] = {}
+        iterator_dict = self._iterators[generator_asset]
+        asset_config = self._assets[generator_asset]
+        available_ids = [
+            self._partitioner(key=key, asset_config=asset_config)
+            for key in self._get_asset_options(generator_asset, iterator_dict)
+        ]
+        return available_ids
+
+    def _partitioner(self, key, asset_config):
+        if "partition_regex" in asset_config:
+            match_group_id = asset_config.get("match_group_id", 1)
+            matches = re.match(asset_config["partition_regex"], key)
+            # In the case that there is a defined regex, the user *wanted* a partition. But it didn't match.
+            # So, we'll add a *sortable* id
+            if matches is None:
+                logger.warning("No match found for key: %s" % key)
+                return datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ") + "__unmatched"
+            else:
+                try:
+                    return matches.group(match_group_id)
+                except IndexError:
+                    logger.warning("No match group %d in key %s" % (match_group_id, key))
+                    return datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ") + "__no_match_group"
+
+        # If there is no partitioner defined, fall back on using the path as a partition_id
+        else:
+            prefix = asset_config.get("prefix", "")
+            if key.startswith(prefix):
+                key = key[len(prefix):]
+            return key
+

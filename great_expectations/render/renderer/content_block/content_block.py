@@ -57,7 +57,6 @@ class ContentBlockRenderer(Renderer):
                 content_block = RenderedComponentContent(**{
                     "content_block_type": cls._content_block_type,
                     cls._content_block_type: blocks,
-                    # TODO: This should probably be overridable via a parameter
                     "styling": cls._get_content_block_styling(),
                 })
                 cls._process_content_block(content_block)
@@ -67,12 +66,13 @@ class ContentBlockRenderer(Renderer):
             else:
                 return None
         else:
-            # TODO: Styling is not currently applied to non-list objects. It should be.
             expectation_type = cls._get_expectation_type(render_object)
 
             content_block_fn = getattr(cls, expectation_type, None)
             if content_block_fn is not None:
-                return content_block_fn(render_object, **kwargs)
+                return content_block_fn(render_object,
+                                        styling=cls._get_element_styling(),
+                                        **kwargs)
             else:
                 return None
 

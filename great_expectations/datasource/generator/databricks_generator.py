@@ -18,7 +18,7 @@ class DatabricksTableGenerator(BatchGenerator):
     def __init__(self, name="default",
                  datasource=None,
                  database="default"):
-        super(DatabricksTableGenerator, self).__init__(name, type_="databricks", datasource=datasource)
+        super(DatabricksTableGenerator, self).__init__(name, datasource=datasource)
         self.database = database
         try:
             self.spark = SparkSession.builder.getOrCreate()
@@ -32,7 +32,7 @@ class DatabricksTableGenerator(BatchGenerator):
             return set()
 
         tables = self.spark.sql('show tables in {}'.format(self.database))
-        return set([row.tableName for row in tables.collect()])
+        return [row.tableName for row in tables.collect()]
 
     def _get_iterator(self, data_asset_name, **kwargs):
         query = 'select * from {}.{}'.format(self.database, data_asset_name)

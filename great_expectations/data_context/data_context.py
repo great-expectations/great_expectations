@@ -1,22 +1,26 @@
 # -*- coding: utf-8 -*-
-
+import glob
 import os
 import json
 import logging
-from ruamel.yaml import YAML
+import shutil
+
+from ruamel.yaml import YAML, YAMLError
 import sys
 import copy
 import errno
-from glob import glob
 from six import string_types
 import datetime
-import shutil
+import warnings
 
-from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
+from great_expectations.util import file_relative_path
+from .util import safe_mmkdir, substitute_all_config_variables
+from ..types.base import DotDict
 
-from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
+import great_expectations.exceptions as ge_exceptions
 
-from great_expectations.render.renderer.site_builder import SiteBuilder
+# FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers.
+
 
 try:
     from urllib.parse import urlparse
@@ -24,7 +28,7 @@ except ImportError:
     from urlparse import urlparse
 
 from great_expectations.data_asset.util import get_empty_expectation_suite
-from great_expectations.dataset import Dataset, PandasDataset
+from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     PandasDatasource,
     SqlAlchemyDatasource,
@@ -33,59 +37,66 @@ from great_expectations.datasource import (
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
+from .types import (
+    NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
+    DataAssetIdentifier,
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
+
+from .templates import (
+    PROJECT_TEMPLATE,
+    CONFIG_VARIABLES_INTRO,
+    CONFIG_VARIABLES_TEMPLATE,
+)
+from .util import (
+    load_class,
+    instantiate_class_from_config
+)
+
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
+    # just fall through
+    SQLAlchemyError = ge_exceptions.ProfilerError
+
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 ALLOWED_DELIMITERS = ['.', '/']
-PROFILE_PATH = "uncommitted/credentials/profiles.yml"
+
+CURRENT_CONFIG_VERSION = 1
+MINIMUM_SUPPORTED_CONFIG_VERSION = 1
 
 
-class DataContext(object):
-    """A DataContext represents a Great Expectations project. It organizes storage and access for
-    expectation suites, datasources, notification settings, and data fixtures.
+class ConfigOnlyDataContext(object):
+    """
+    This class implements most of the functionality of DataContext, with a few exceptions.
 
-    The DataContext is configured via a yml file stored in a directory called great_expectations; the configuration file
-    as well as managed expectation suites should be stored in version control.
+    1. ConfigOnlyDataContext does not attempt to keep its project_config in sync with a file on disc.
+    2. ConfigOnlyDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
+        into DataContext class.
 
-    Use the `create` classmethod to create a new empty config, or instantiate the DataContext
-    by passing the path to an existing data context root directory.
+    Together, these changes make ConfigOnlyDataContext class more testable.
 
-    DataContexts use data sources you're already familiar with. Generators help introspect data stores and data execution
-    frameworks (such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
-    enables fetching, validation, profiling, and documentation of  your data in a way that is meaningful within your
-    existing infrastructure and work environment.
-
-    DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
-    normalized *data_asset_name*, consisting of *datasource/generator/generator_asset*.
-
-    - The datasource actually connects to a source of materialized data and returns Great Expectations DataAssets \
-      connected to a compute environment and ready for validation.
-
-    - The Generator knows how to introspect datasources and produce identifying "batch_kwargs" that define \
-      particular slices of data.
-
-    - The generator_asset is a specific name -- often a table name or other name familiar to users -- that \
-      generators can slice into batches.
-
-    An expectation suite is a collection of expectations ready to be applied to a batch of data. Since
-    in many projects it is useful to have different expectations evaluate in different contexts--profiling
-    vs. testing; warning vs. error; high vs. low compute; ML model or dashboard--suites provide a namespace
-    option for selecting which expectations a DataContext returns.
-
-    In many simple projects, the datasource or generator name may be omitted and the DataContext will infer
-    the correct name when there is no ambiguity.
-
-    Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
+    DataContext itself inherits from ConfigOnlyDataContext. It behaves essentially the same as the v0.7.*
+        implementation of DataContext.
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
+    UNCOMMITTED_DIRECTORIES = ["data_docs", "samples", "validations"]
+    GE_DIR = "great_expectations"
+    GE_YML = "great_expectations.yml"
 
+    # TODO: Consider moving this to DataContext, instead of ConfigOnlyDataContext, since it writes to disc.
     @classmethod
     def create(cls, project_root_dir=None):
-        """Build a new great_expectations directory and DataContext object in the provided project_root_dir.
+        """
+        Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
         `create` will not create a new "great_expectations" directory in the provided folder, provided one does not
         already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
@@ -96,97 +107,280 @@ class DataContext(object):
         Returns:
             DataContext
         """
+
         if not os.path.isdir(project_root_dir):
-            raise DataContextError("project_root_dir must be a directory in which to initialize a new DataContext")
+            raise ge_exceptions.DataContextError(
+                "The project_root_dir must be an existing directory in which "
+                "to initialize a new DataContext"
+            )
+
+        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
+        safe_mmkdir(ge_dir, exist_ok=True)
+        cls.scaffold_directories(ge_dir)
+
+        if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
+            message = """Warning. An existing `{}` was found here: {}.
+    - No action was taken.""".format(cls.GE_YML, ge_dir)
+            warnings.warn(message)
         else:
-            try:
-                os.mkdir(os.path.join(project_root_dir, "great_expectations"))
-            except (FileExistsError, OSError):
-                raise DataContextError(
-                    "Cannot create a DataContext object when a great_expectations directory "
-                    "already exists at the provided root directory.")
+            cls.write_project_template_to_disk(ge_dir)
 
-            with open(os.path.join(project_root_dir, "great_expectations/great_expectations.yml"), "w") as template:
-                template.write(PROJECT_TEMPLATE)
+        if os.path.isfile(os.path.join(ge_dir, "notebooks")):
+            message = """Warning. An existing `notebooks` directory was found here: {}.
+    - No action was taken.""".format(ge_dir)
+            warnings.warn(message)
+        else:
+            cls.scaffold_notebooks(ge_dir)
 
-        return cls(os.path.join(project_root_dir, "great_expectations"))
-            
-    def __init__(self, context_root_dir=None, expectation_explorer=False, data_asset_name_delimiter='/'):
+        uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+        if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
+            message = """Warning. An existing `config_variables.yml` was found here: {}.
+    - No action was taken.""".format(uncommitted_dir)
+            warnings.warn(message)
+        else:
+            cls.write_config_variables_template_to_disk(uncommitted_dir)
+
+        return cls(ge_dir)
+
+    @classmethod
+    def all_uncommitted_directories_exist(cls, ge_dir):
+        """Check if all uncommitted direcotries exist."""
+        uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+        for directory in cls.UNCOMMITTED_DIRECTORIES:
+            if not os.path.isdir(os.path.join(uncommitted_dir, directory)):
+                return False
+
+        return True
+
+    @classmethod
+    def config_variables_yml_exist(cls, ge_dir):
+        """Check if all config_variables.yml exists."""
+        path_to_yml = os.path.join(ge_dir, cls.GE_YML)
+
+        # TODO this is so brittle and gross
+        with open(path_to_yml, "r") as f:
+            config = yaml.load(f)
+        config_var_path = config.get("config_variables_file_path")
+        config_var_path = os.path.join(ge_dir, config_var_path)
+        return os.path.isfile(config_var_path)
+
+    @classmethod
+    def write_config_variables_template_to_disk(cls, uncommitted_dir):
+        safe_mmkdir(uncommitted_dir)
+        config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
+        with open(config_var_file, "w") as template:
+            template.write(CONFIG_VARIABLES_TEMPLATE)
+
+    @classmethod
+    def write_project_template_to_disk(cls, ge_dir):
+        file_path = os.path.join(ge_dir, cls.GE_YML)
+        with open(file_path, "w") as template:
+            template.write(PROJECT_TEMPLATE)
+
+    @classmethod
+    def scaffold_directories(cls, base_dir):
+        """Safely create GE directories for a new project."""
+        safe_mmkdir(base_dir, exist_ok=True)
+        open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
+
+        for directory in [
+            "datasources",
+            "expectations",
+            "notebooks",
+            "plugins",
+            "uncommitted",
+        ]:
+            safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
+            uncommitted_dir = os.path.join(base_dir, "uncommitted")
+
+        for new_directory in cls.UNCOMMITTED_DIRECTORIES:
+            safe_mmkdir(
+                os.path.join(uncommitted_dir, new_directory),
+                exist_ok=True
+            )
+
+    @classmethod
+    def scaffold_notebooks(cls, base_dir):
+        """Copy template notebooks into the notebooks directory for a project."""
+        template_dir = file_relative_path(__file__, "../init_notebooks/*.ipynb")
+        for notebook in glob.glob(template_dir):
+            notebook_name = os.path.basename(notebook)
+            destination_path = os.path.join(base_dir, "notebooks",
+                                            notebook_name)
+            shutil.copyfile(notebook, destination_path)
+
+    @classmethod
+    def validate_config(cls, project_config):
+        required_keys = {
+            # TODO next version re-introduce config_version as required
+            # "config_version",
+            "plugins_directory",
+            "expectations_store_name",
+            "validations_store_name",
+            "evaluation_parameter_store_name",
+            "datasources",
+            "stores",
+            "data_docs_sites",
+            "validation_operators"
+        }
+        for key in required_keys:
+            if key not in project_config:
+                raise ge_exceptions.MissingTopLevelConfigKeyError("Missing top-level key %s" % key)
+
+        allowed_keys = {
+            "config_version",
+            "config_variables_file_path",
+            "plugins_directory",
+            "expectations_store_name",
+            "validations_store_name",
+            "evaluation_parameter_store_name",
+            "datasources",
+            "stores",
+            "data_docs_sites",
+            "validation_operators",
+        }
+        for key in project_config.keys():
+            if key not in allowed_keys:
+                raise ge_exceptions.InvalidTopLevelConfigKeyError("Invalid top-level config key %s" % key)
+
+        return True
+
+
+    # TODO : Migrate to an expressive __init__ method, with the top level of configs unpacked into named arguments.
+    def __init__(self, project_config, context_root_dir, data_asset_name_delimiter='/'):
         """DataContext constructor
 
         Args:
             context_root_dir: location to look for the ``great_expectations.yml`` file. If None, searches for the file \
             based on conventions for project subdirectories.
-            expectation_explorer: If True, load the expectation explorer manager, which will modify GE return objects \
-            to include ipython notebook widgets.
             data_asset_name_delimiter: the delimiter character to use when parsing data_asset_name parameters. \
             Defaults to '/'
 
         Returns:
             None
         """
-        self._expectation_explorer = expectation_explorer
-        self._datasources = {}
-        if expectation_explorer:
-            from great_expectations.jupyter_ux.expectation_explorer import ExpectationExplorer
-            self._expectation_explorer_manager = ExpectationExplorer()
+        if not ConfigOnlyDataContext.validate_config(project_config):
+            raise ge_exceptions.InvalidConfigError("Your project_config is not valid. Try using the CLI check-config command.")
 
-        # determine the "context root directory" - this is the parent of "great_expectations" dir
-        if context_root_dir is None:
-            if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
-                context_root_dir = "../"
-            elif os.path.isdir("./great_expectations") and \
-                    os.path.isfile("./great_expectations/great_expectations.yml"):
-                context_root_dir = "./great_expectations"
-            elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
-                context_root_dir = "./"
-            else:
-                raise DataContextError(
-                    "Unable to locate context root directory. Please provide a directory name."
-                )
-
+        self._project_config = project_config
+        # FIXME: This should just be a property
+        self._project_config_with_varibles_substituted = dict(**self.get_config_with_variables_substituted())
         self._context_root_directory = os.path.abspath(context_root_dir)
 
-        # TODO: these paths should be configurable
-        self.fixtures_validations_directory = os.path.join(self.root_directory, "fixtures/validations")
-        self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
 
-        self._project_config = self._load_project_config()
+        # Init plugins
+        sys.path.append(self.plugins_directory)
 
-        if not self._project_config.get("datasources"):
-            self._project_config["datasources"] = {}
-        for datasource in self._project_config["datasources"].keys():
+
+        # Init data sources
+        self._datasources = {}
+        for datasource in self._project_config_with_varibles_substituted["datasources"].keys():
             self.get_datasource(datasource)
 
-        plugins_directory = self._project_config.get("plugins_directory", "plugins/")
-        if not os.path.isabs(plugins_directory):
-            self._plugins_directory = os.path.join(self.root_directory, plugins_directory)
-        else:
-            self._plugins_directory = plugins_directory
-        sys.path.append(self._plugins_directory)
+        # Init stores
+        self._stores = DotDict()
+        self._init_stores(self._project_config_with_varibles_substituted["stores"])
 
-        expectations_directory = self._project_config.get("expectations_directory", "expectations")
-        if not os.path.isabs(expectations_directory):
-            self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
-        else:
-            self._expectations_directory = expectations_directory
+        # Init validation operators
+        self.validation_operators = {}
+        # TODO : This key should NOT be optional in the project config.
+        # It can be empty, but not missing.
+        # However, for now, I'm adding this check, to avoid having to migrate all the test fixtures
+        # while still experimenting with the workings of validation operators and actions.
+        if "validation_operators" in self._project_config:
+            for validation_operator_name, validation_operator_config in self._project_config_with_varibles_substituted["validation_operators"].items():
+                self.add_validation_operator(
+                    validation_operator_name,
+                    validation_operator_config,
+                )
 
-        validations_stores = self._project_config.get("validations_stores", {
-            "local": {
-                "type": "filesystem",
-                "base_directory": "uncommitted/validations"
-            }
-        })
-        # Normalize paths as appropriate
-        for validations_store_name in validations_stores:
-            validations_stores[validations_store_name] = self._normalize_store_path(validations_stores[validations_store_name])
-        self._validations_stores = validations_stores
-
-        self._load_evaluation_parameter_store()
         self._compiled = False
+
         if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
-            raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
+            raise ge_exceptions.DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
+
+
+    def _init_stores(self, store_configs):
+        """Initialize all Stores for this DataContext.
+
+        Stores are a good fit for reading/writing objects that:
+            1. follow a clear key-value pattern, and
+            2. are usually edited programmatically, using the Context
+
+        In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
+        As of 9/21/2019, the following Stores had not yet been implemented
+            * great_expectations.yml
+            * expectations
+            * data documentation
+            * config_variables
+            * anything accessed via write_resource
+
+        Note that stores do NOT manage plugins.
+        """
+
+        for store_name, store_config in store_configs.items():
+            self.add_store(
+                store_name,
+                store_config
+            )
+
+    def add_store(self, store_name, store_config):
+        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
+
+        Args:
+            store_name (str): a key for the new Store in in self._stores
+            store_config (dict): a config for the Store to add
+
+        Returns:
+            store (Store)
+        """
+
+        self._project_config["stores"][store_name] = store_config
+        self._project_config_with_varibles_substituted["stores"][store_name] = self.get_config_with_variables_substituted(config=store_config)
+        new_store = instantiate_class_from_config(
+            config=self._project_config_with_varibles_substituted["stores"][store_name],
+            runtime_config={
+                "root_directory" : self.root_directory,
+            },
+            config_defaults={
+                "module_name" : "great_expectations.data_context.store"
+            }
+        )
+        self._stores[store_name] = new_store
+        return new_store
+
+    def add_validation_operator(self, validation_operator_name, validation_operator_config):
+        """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
+
+        Args:
+            validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
+            validation_operator_config (dict): a config for the ValidationOperator to add
+
+        Returns:
+            validation_operator (ValidationOperator)
+        """
+
+        self._project_config["validation_operators"][validation_operator_name] = validation_operator_config
+        self._project_config_with_varibles_substituted["validation_operators"][validation_operator_name] = self.get_config_with_variables_substituted(config=validation_operator_config)
+        new_validation_operator = instantiate_class_from_config(
+            config=self._project_config_with_varibles_substituted["validation_operators"][validation_operator_name],
+            runtime_config={
+                "data_context" : self,
+            },
+            config_defaults={
+                "module_name" : "great_expectations.validation_operators"
+            }
+        )
+        self.validation_operators[validation_operator_name] = new_validation_operator
+        return new_validation_operator
+
+
+    def _normalize_absolute_or_relative_path(self, path):
+        if os.path.isabs(path):
+            return path
+        else:
+            return os.path.join(self.root_directory, path)
 
     def _normalize_store_path(self, resource_store):
         if resource_store["type"] == "filesystem":
@@ -203,27 +397,25 @@ class DataContext(object):
     @property
     def plugins_directory(self):
         """The directory in which custom plugin modules should be placed."""
-        return self._plugins_directory
+        return self._normalize_absolute_or_relative_path(
+            self._project_config_with_varibles_substituted["plugins_directory"]
+        )
 
     @property
-    def expectations_directory(self):
-        """The directory in which custom plugin modules should be placed."""
-        return self._expectations_directory
+    def stores(self):
+        """A single holder for all Stores in this context"""
+        return self._stores
 
     @property
-    def validations_store(self):
-        """The configuration for the store where validations should be stored"""
-        # TODO: support multiple stores choices and/or ensure abs paths when appropriate
-        return self._validations_stores[list(self._validations_stores.keys())[0]]
+    def datasources(self):
+        """A single holder for all Datasources in this context"""
+        return self._datasources
 
-    def _load_project_config(self):
-        """Loads the project configuration file."""
-        try:
-            with open(os.path.join(self.root_directory, "great_expectations.yml"), "r") as data:
-                return yaml.load(data)
-        except IOError:
-            raise ConfigNotFoundError(self.root_directory)
+    @property
+    def expectations_store_name(self):
+        return self._project_config_with_varibles_substituted["expectations_store_name"]
 
+    # TODO: Decide whether this stays here or moves into NamespacedStore
     @property
     def data_asset_name_delimiter(self):
         """Configurable delimiter character used to parse data asset name strings into \
@@ -234,147 +426,9 @@ class DataContext(object):
     def data_asset_name_delimiter(self, new_delimiter):
         """data_asset_name_delimiter property setter method"""
         if new_delimiter not in ALLOWED_DELIMITERS:
-            raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
+            raise ge_exceptions.DataContextError("Invalid delimiter: delimiter must be one of: {}".format(ALLOWED_DELIMITERS))
         else:
             self._data_asset_name_delimiter = new_delimiter
-
-    def get_validation_location(self, data_asset_name, expectation_suite_name, run_id, validations_store=None):
-        """Get the local path where a validation result is stored, given full asset name and run id
-
-        Args:
-            data_asset_name: name of data asset for which to get validation location
-            expectation_suite_name: name of expectation suite for which to get validation location
-            run_id: run_id of validation to get. If no run_id is specified, fetch the latest run_id according to \
-                alphanumeric sort (by default, the latest run_id if using ISO 8601 formatted timestamps for run_id
-            validations_store: the store in which validations are located
-
-        Returns:
-            path (str): path to the validation location for the specified data_asset, expectation_suite and run_id
-        """
-        result = {}
-
-        data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        if validations_store is None:
-            validations_store = self.validations_store
-
-        if validations_store["type"] == "filesystem":
-            if "base_directory" not in validations_store:
-                raise DataContextError(
-                    "Invalid validations_store configuration: 'base_directory' is required for a filesystem store.")
-
-            base_directory = validations_store["base_directory"]
-            if not os.path.isabs(base_directory):
-                base_directory = os.path.join(self.root_directory, base_directory)
-
-            if run_id is None:  # Get most recent run_id
-                runs = [name for name in os.listdir(base_directory) if
-                        os.path.isdir(os.path.join(base_directory, name))]
-                run_id = sorted(runs)[-1]
-
-            validation_path = os.path.join(
-                base_directory,
-                run_id,
-                self._get_normalized_data_asset_name_filepath(
-                    data_asset_name, 
-                    expectation_suite_name,
-                    base_path=""
-                )
-            )
-
-            result['filepath'] = validation_path
-
-        elif validations_store["type"] == "s3":
-            # FIXME: this code is untested
-            if "bucket" not in validations_store or "key_prefix" not in validations_store:
-                raise DataContextError(
-                    "Invalid validations_store configuration: 'bucket' and 'key_prefix' are required for an s3 store.")
-
-            try:
-                import boto3
-                s3 = boto3.client('s3')
-            except ImportError:
-                raise ImportError("boto3 is required for retrieving a dataset from s3")
-
-            bucket = validations_store["bucket"]
-            key_prefix = validations_store["key_prefix"]
-
-            if run_id is None:  # Get most recent run_id
-                all_objects = s3.list_objects(Bucket=bucket)
-                # Remove the key_prefix and first slash from the name
-                validations = [
-                    name[len(key_prefix) + 1:] 
-                    for name in all_objects 
-                    if name.startswith(key_prefix) and len(name) > len(key_prefix) + 1
-                ]
-                # run id is the first section after the word "validations"
-                runs = [validation.split('/')[1] for validation in validations]
-                run_id = sorted(runs)[-1]
-
-            key = os.path.join(
-                key_prefix,
-                "validations",
-                run_id,
-                self._get_normalized_data_asset_name_filepath(
-                    data_asset_name,
-                    expectation_suite_name,
-                    base_path=""
-                )
-            )
-
-            result['bucket'] = bucket
-            result['key'] = key
-
-        else:
-            raise DataContextError("Invalid validations_store configuration: only 'filesystem' and 's3' are supported.")
-
-        return result
-
-    def get_validation_doc_filepath(self, data_asset_name, expectation_suite_name):
-        """Get the local path where a the rendered html doc for a validation result is stored, given full asset name.
-
-        Args:
-            data_asset_name: name of data asset for which to get documentation filepath
-            expectation_suite_name: name of expectation suite for which to get validation location
-
-        Returns:
-            path (str): Path to the location
-
-        """
-        # TODO: this path should be configurable or parameterized to support descriptive and prescriptive docs
-        validation_filepath = self._get_normalized_data_asset_name_filepath(
-            data_asset_name,
-            expectation_suite_name,
-            base_path=self.data_doc_directory,
-            file_extension=".html"
-        )
-
-        return validation_filepath
-
-    def move_validation_to_fixtures(self, data_asset_name, expectation_suite_name, run_id):
-        """
-        Move validation results from uncommitted to fixtures/validations to make available for the data doc renderer
-
-        Args:
-            data_asset_name: name of data asset for which to get documentation filepath
-            expectation_suite_name: name of expectation suite for which to get validation location
-            run_id: run_id of validation to get. If no run_id is specified, fetch the latest run_id according to \
-            alphanumeric sort (by default, the latest run_id if using ISO 8601 formatted timestamps for run_id
-
-
-        Returns:
-            None
-        """
-        source_filepath = self.get_validation_location(data_asset_name, expectation_suite_name, run_id)['filepath']
-
-        destination_filepath = self._get_normalized_data_asset_name_filepath(
-            data_asset_name,
-            expectation_suite_name,
-            base_path=self.fixtures_validations_directory,
-            file_extension=".json"
-        )
-
-        safe_mmkdir(os.path.dirname(destination_filepath))
-        shutil.move(source_filepath, destination_filepath)
 
     #####
     #
@@ -382,6 +436,7 @@ class DataContext(object):
     #
     #####
 
+    # TODO : This method should be deprecated in favor of NamespaceReadWriteStore.
     def _get_normalized_data_asset_name_filepath(self, data_asset_name,
                                                  expectation_suite_name,
                                                  base_path=None,
@@ -413,7 +468,7 @@ class DataContext(object):
                 relative_path.replace("/", "__")
                 relative_path = relative_path.replace(self.data_asset_name_delimiter, "/")
         else:
-            raise DataContextError("data_assset_name must be a NormalizedDataAssetName or string")
+            raise ge_exceptions.DataContextError("data_assset_name must be a NormalizedDataAssetName or string")
 
         expectation_suite_name += file_extension
 
@@ -423,113 +478,62 @@ class DataContext(object):
             expectation_suite_name
         )
 
-    def _save_project_config(self):
-        """Save the current project to disk."""
-        with open(os.path.join(self.root_directory, "great_expectations.yml"), "w") as data:
-            yaml.dump(self._project_config, data)
+    def _load_config_variables_file(self):
+        """Get all config variables from the default location."""
+        # TODO: support stores
 
-    def _get_all_profile_credentials(self):
-        """Get all profile credentials from the default location."""
-
-        # TODO: support parameterized additional store locations
-        try:
-            with open(os.path.join(self.root_directory, PROFILE_PATH), "r") as profiles_file:
-                return yaml.load(profiles_file) or {}
-        except IOError as e:
-            if e.errno != errno.ENOENT:
-                raise
-            logger.debug("Generating empty profile store.")
-            base_profile_store = yaml.load("{}")
-            base_profile_store.yaml_set_start_comment(PROFILE_COMMENT)
-            return base_profile_store
-
-    def get_project_config(self):
-        return self._project_config
-
-    def get_profile_credentials(self, profile_name):
-        """Get named profile credentials.
-
-        Args:
-            profile_name (str): name of the profile for which to get credentials
-
-        Returns:
-            credentials (dict): dictionary of credentials
-        """
-        profiles = self._get_all_profile_credentials()
-        if profile_name in profiles:
-            return profiles[profile_name]
+        config_variables_file_path = self.get_project_config().get("config_variables_file_path")
+        if config_variables_file_path:
+            try:
+                with open(os.path.join(self.root_directory, config_variables_file_path), "r") as config_variables_file:
+                    return yaml.load(config_variables_file) or {}
+            except IOError as e:
+                if e.errno != errno.ENOENT:
+                    raise
+                logger.debug("Generating empty config variables file.")
+                # TODO this might be the comment problem?
+                base_config_variables_store = yaml.load("{}")
+                base_config_variables_store.yaml_set_start_comment(CONFIG_VARIABLES_INTRO)
+                return base_config_variables_store
         else:
             return {}
 
-    def add_profile_credentials(self, profile_name, **kwargs):
-        """Add named profile credentials.
+    def get_project_config(self):
+        project_config = self._project_config
+
+        return project_config
+
+    def get_config_with_variables_substituted(self, config=None):
+        if not config:
+            config = self._project_config
+
+        return substitute_all_config_variables(config, self._load_config_variables_file())
+
+    def save_config_variable(self, config_variable_name, value):
+        """Save config variable value
 
         Args:
-            profile_name: name of the profile for which to add credentials
-            **kwargs: credential key-value pairs
+            property_name: name of the property
+            **value: the value to save
 
         Returns:
             None
         """
-        profiles = self._get_all_profile_credentials()
-        profiles[profile_name] = dict(**kwargs)
-        profiles_filepath = os.path.join(self.root_directory, PROFILE_PATH)
-        safe_mmkdir(os.path.dirname(profiles_filepath), exist_ok=True)
-        if not os.path.isfile(profiles_filepath):
-            logger.info("Creating new profiles store at {profiles_filepath}".format(
-                profiles_filepath=profiles_filepath)
+        config_variables = self._load_config_variables_file()
+        config_variables[config_variable_name] = value
+        config_variables_filepath = self.get_project_config().get("config_variables_file_path")
+        if not config_variables_filepath:
+            raise ge_exceptions.InvalidConfigError("'config_variables_file_path' property is not found in config - setting it is required to use this feature")
+
+        config_variables_filepath = os.path.join(self.root_directory, config_variables_filepath)
+
+        safe_mmkdir(os.path.dirname(config_variables_filepath), exist_ok=True)
+        if not os.path.isfile(config_variables_filepath):
+            logger.info("Creating new substitution_variables file at {config_variables_filepath}".format(
+                config_variables_filepath=config_variables_filepath)
             )
-        with open(profiles_filepath, "w") as profiles_file:
-            yaml.dump(profiles, profiles_file)
-
-    def get_datasource_config(self, datasource_name):
-        """Get the configuration for a configured datasource
-
-        Args:
-            datasource_name: The datasource for which to get the config
-
-        Returns:
-            datasource_config (dict): dictionary containing datasource configuration
-        """
-
-        # TODO: Review logic, once described below but not implemented in datasource save, for splitting configuration
-        # We allow a datasource to be defined in any combination of the following ways:
-
-        # 1. It may be fully specified in the datasources section of the great_expectations.yml file
-        # 2. It may be stored in a file by convention located in `datasources/<datasource_name>/config.yml`
-        # 3. It may be listed in the great_expectations.yml file with a config_file key that provides a relative \
-        # path to a different yml config file
-
-        # Any key duplicated across configs will be updated by the last key read (in the order above)
-        datasource_config = {}
-        defined_config_path = None
-        default_config_path = os.path.join(self.root_directory, "datasources", datasource_name, "config.yml")
-        if datasource_name in self._project_config["datasources"]:
-            base_datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
-            if "config_file" in base_datasource_config:
-                defined_config_path = os.path.join(self.root_directory, base_datasource_config.pop("config_file"))
-            datasource_config.update(base_datasource_config)
-        
-        try:
-            with open(default_config_path, "r") as config_file:
-                default_path_datasource_config = yaml.load(config_file) or {}
-            datasource_config.update(default_path_datasource_config)
-        except IOError as e:
-            if e.errno != errno.ENOENT:
-                raise
-            logger.debug("No config file found in default location for datasource %s" % datasource_name)
-        
-        if defined_config_path is not None:
-            try:
-                with open(defined_config_path, "r") as config_file:
-                    defined_path_datasource_config = yaml.load(config_file) or {}
-                datasource_config.update(defined_path_datasource_config)
-            except IOError as e:
-                if e.errno != errno.ENOENT:
-                    raise
-                logger.warning("No config file found in user-defined location for datasource %s" % datasource_name)
-        
-        return datasource_config
+        with open(config_variables_filepath, "w") as config_variables_file:
+            yaml.dump(config_variables, config_variables_file)
 
     def get_available_data_asset_names(self, datasource_names=None, generator_names=None):
         """Inspect datasource and generators to provide available data_asset objects.
@@ -565,7 +569,7 @@ class DataContext(object):
         if generator_names is not None:
             if isinstance(generator_names, string_types):
                 generator_names = [generator_names]
-            if len(generator_names) == len(datasource_names): # Iterate over both together
+            if len(generator_names) == len(datasource_names):  # Iterate over both together
                 for idx, datasource_name in enumerate(datasource_names):
                     datasource = self.get_datasource(datasource_name)
                     data_asset_names[datasource_name] = \
@@ -580,37 +584,101 @@ class DataContext(object):
                     "If providing generators, you must either specify one generator for each datasource or only "
                     "one datasource."
                 )
-        else: # generator_names is None
+        else:  # generator_names is None
             for datasource_name in datasource_names:
                 datasource = self.get_datasource(datasource_name)
                 data_asset_names[datasource_name] = datasource.get_available_data_asset_names(None)
 
         return data_asset_names
 
-    def get_batch(self, data_asset_name, expectation_suite_name="default", batch_kwargs=None, **kwargs):
+    def yield_batch_kwargs(self, data_asset_name, **kwargs):
+        """Yields a the next batch_kwargs for the provided data_asset_name, supplemented by any kwargs provided inline.
+
+        Args:
+            data_asset_name (str or NormalizedDataAssetName): the name from which to provide batch_kwargs
+            **kwargs: additional kwargs to supplement the returned batch_kwargs
+
+        Returns:
+            BatchKwargs
+
         """
-        Get a batch of data from the specified data_asset_name. Attaches the named expectation_suite, and uses the \
-        provided batch_kwargs.
+        if not isinstance(data_asset_name, NormalizedDataAssetName):
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
+
+        datasource = self.get_datasource(data_asset_name.datasource)
+        generator = datasource.get_generator(data_asset_name.generator)
+        batch_kwargs = generator.yield_batch_kwargs(data_asset_name.generator_asset)
+        batch_kwargs.update(**kwargs)
+
+        return batch_kwargs
+
+    def build_batch_kwargs(self, data_asset_name, partition_id=None, **kwargs):
+        """Builds batch kwargs for the provided data_asset_name, using an optional partition_id or building from
+        provided kwargs.
+
+        build_batch_kwargs relies on the generator's implementation
+
+        Args:
+            data_asset_name (str or NormalizedDataAssetName): the name from which to provide batch_kwargs
+            partition_id (str): partition_id to use when building batch_kwargs
+            **kwargs: additional kwargs to supplement the returned batch_kwargs
+
+        Returns:
+            BatchKwargs
+
+        """
+        if not isinstance(data_asset_name, (NormalizedDataAssetName, DataAssetIdentifier)):
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
+
+        datasource = self.get_datasource(data_asset_name.datasource)
+        if partition_id is not None:
+            kwargs.update({
+                "partition_id": partition_id
+            })
+        batch_kwargs = datasource.named_generator_build_batch_kwargs(
+            data_asset_name.generator,
+            data_asset_name.generator_asset,
+            **kwargs
+        )
+
+        return batch_kwargs
+
+    def get_batch(self, data_asset_name, expectation_suite_name, batch_kwargs=None, **kwargs):
+        """
+        Get a batch of data, using the namespace of the provided data_asset_name.
+
+        get_batch constructs its batch by first normalizing the data_asset_name (if not already normalized) and then:
+          (1) getting data using the provided batch_kwargs; and
+          (2) attaching the named expectation suite
+
+        A single partition_id may be used in place of batch_kwargs when using a data_asset_name whose generator
+        supports that partition type, and additional kwargs will be used to supplement the provided batch_kwargs.
 
         Args:
             data_asset_name: name of the data asset. The name will be normalized. \
-            (See :py:meth:`_normalize_data_asset_name` )
+                (See :py:meth:`normalize_data_asset_name` )
             expectation_suite_name: name of the expectation suite to attach to the data_asset returned
             batch_kwargs: key-value pairs describing the batch of data the datasource should fetch. \
-            (See :class:`BatchGenerator` ) If no batch_kwargs are specified, then the context will get the next
-            available batch_kwargs for the data_asset.
+                (See :class:`BatchGenerator` ) If no batch_kwargs are specified, then the context will get the next
+                available batch_kwargs for the data_asset.
             **kwargs: additional key-value pairs to pass to the datasource when fetching the batch.
 
         Returns:
             Great Expectations data_asset with attached expectation_suite and DataContext
         """
-        normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+        normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(normalized_data_asset_name.datasource)
         if not datasource:
-            raise DataContextError(
-                "Can't find datasource {0:s} in the config - please check your great_expectations.yml"
+            raise ge_exceptions.DataContextError(
+                "Can't find datasource {} in the config - please check your {}".format(
+                    normalized_data_asset_name,
+                    self.GE_YML
+                )
             )
+
+        if batch_kwargs is None:
+            batch_kwargs = self.build_batch_kwargs(data_asset_name, **kwargs)
 
         data_asset = datasource.get_batch(normalized_data_asset_name,
                                           expectation_suite_name,
@@ -618,33 +686,102 @@ class DataContext(object):
                                           **kwargs)
         return data_asset
 
-    def add_datasource(self, name, type_, **kwargs):
-        """Add a new datasource to the data context.
+    def run_validation_operator(
+            self,
+            validation_operator_name,
+            assets_to_validate,
+            run_id=None,
+    ):
+        """
+        Run a validation operator to validate data assets and to perform the business logic around
+        validation that the operator implements.
 
-        The type\_ parameter must match one of the recognized types for the DataContext
+        :param validation_operator_name: name of the operator, as appears in the context's config file
+        :param assets_to_validate: a list that specifies the data assets that the operator will validate.
+                                    The members of the list can be either batches (which means that have
+                                    data asset identifier, batch kwargs and expectation suite identifier)
+                                    or a triple that will allow the operator to fetch the batch:
+                                    (data asset identifier, batch kwargs, expectation suite identifier)
+        :param run_id: run id - this is set by the caller and should correspond to something
+                                meaningful to the user (e.g., pipeline run id or timestamp)
+        :return: A result object that is defined by the class of the operator that is invoked.
+        """
+        return self.validation_operators[validation_operator_name].run(
+            assets_to_validate=assets_to_validate,
+            run_id=run_id,
+        )
 
+    def add_datasource(self, name, **kwargs):
+        """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name (str): the name for the new datasource to add
-            type_ (str): the type of datasource to add
-
+            kwargs (keyword arguments): the configuration for the new datasource
+        Note:
+            the type_ parameter is still supported as a way to add a datasource, but support will
+            be removed in a future release. Please update to using class_name instead.
         Returns:
             datasource (Datasource)
         """
-        datasource_class = self._get_datasource_class(type_)
-        datasource = datasource_class(name=name, data_context=self, **kwargs)
+        logger.debug("Starting ConfigOnlyDataContext.add_datasource for %s" % name)
+        if "generators" not in kwargs:
+            logger.warning("Adding a datasource without configuring a generator will rely on default "
+                           "generator behavior. Consider adding a generator.")
+
+        if "type" in kwargs:
+            warnings.warn("Using type_ configuration to build datasource. Please update to using class_name.")
+            type_ = kwargs["type"]
+            datasource_class = self._get_datasource_class_from_type(type_)
+        else:
+            datasource_class = load_class(
+                kwargs.get("class_name"),
+                kwargs.get("module_name", "great_expectations.datasource")
+            )
+
+        # For any class that should be loaded, it may control its configuration construction
+        # by implementing a classmethod called build_configuration
+        if hasattr(datasource_class, "build_configuration"):
+            config = datasource_class.build_configuration(**kwargs)
+
+        # We perform variable substitution in the datasource's config here before using the config
+        # to instantiate the datasource object. Variable substitution is a service that the data
+        # context provides. Datasources should not see unsubstituted variables in their config.
+        self._project_config_with_varibles_substituted["datasources"][
+            name] = self.get_config_with_variables_substituted(config)
+
+        datasource = self._build_datasource_from_config(
+            **self._project_config_with_varibles_substituted["datasources"][name])
         self._datasources[name] = datasource
-        if not "datasources" in self._project_config:
-            self._project_config["datasources"] = {}
-        self._project_config["datasources"][name] = datasource.get_config()
-        self._save_project_config()
+        self._project_config["datasources"][name] = config
 
         return datasource
 
     def get_config(self):
-        self._save_project_config()
         return self._project_config
 
-    def _get_datasource_class(self, datasource_type):
+    def _build_datasource_from_config(self, **kwargs):
+        if "type" in kwargs:
+            warnings.warn("Using type configuration to build datasource. Please update to using class_name.")
+            type_ = kwargs.pop("type")
+            datasource_class = self._get_datasource_class_from_type(type_)
+            kwargs.update({
+                "class_name": datasource_class.__name__
+            })
+        datasource = instantiate_class_from_config(
+            config=kwargs,
+            runtime_config={
+                "data_context": self
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource"
+            }
+        )
+        return datasource
+
+    def _get_datasource_class_from_type(self, datasource_type):
+        """NOTE: THIS METHOD OF BUILDING DATASOURCES IS DEPRECATED.
+        Instead, please specify class_name
+        """
+        warnings.warn("Using the 'type' key to instantiate a datasource is deprecated. Please use class_name instead.")
         if datasource_type == "pandas":
             return PandasDatasource
         elif datasource_type == "dbt":
@@ -671,135 +808,20 @@ class DataContext(object):
         """
         if datasource_name in self._datasources:
             return self._datasources[datasource_name]
-        elif datasource_name in self._project_config["datasources"]:
-            datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
-        # elif len(self._project_config["datasources"]) == 1:
-        #     datasource_name = list(self._project_config["datasources"])[0]
-        #     datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
+        elif datasource_name in self._project_config_with_varibles_substituted["datasources"]:
+            datasource_config = copy.deepcopy(self._project_config_with_varibles_substituted["datasources"][datasource_name])
         else:
             raise ValueError(
                 "Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name
             )
-        type_ = datasource_config.pop("type")
-        datasource_class= self._get_datasource_class(type_)
-        datasource = datasource_class(name=datasource_name, data_context=self, **datasource_config)
+        datasource = self._build_datasource_from_config(**datasource_config)
         self._datasources[datasource_name] = datasource
         return datasource
             
-    def _load_evaluation_parameter_store(self):
-        """Load the evaluation parameter store to use for managing cross data-asset parameterized expectations.
-
-        By default, the Context uses an in-memory parameter store only suitable for evaluation on a single node.
-
-        Returns:
-            None
-        """
-        # This is a trivial class that implements in-memory key value store.
-        # We use it when user does not specify a custom class in the config file
-        class MemoryEvaluationParameterStore(object):
-            def __init__(self):
-                self.dict = {}
-
-            def get(self, run_id, name):
-                if run_id in self.dict:
-                    return self.dict[run_id][name] 
-                else:
-                    return {}
-
-            def set(self, run_id, name, value):
-                if run_id not in self.dict:
-                    self.dict[run_id] = {}
-                self.dict[run_id][name] = value
-
-            def get_run_parameters(self, run_id):
-                if run_id in self.dict:
-                    return self.dict[run_id]
-                else:
-                    return {}
-
-        #####
-        #
-        # If user wishes to provide their own implementation for this key value store (e.g.,
-        # Redis-based), they should specify the following in the project config file:
-        #
-        # evaluation_parameter_store:
-        #   type: demostore
-        #   config:  - this is optional - this is how we can pass kwargs to the object's c-tor
-        #     param1: boo
-        #     param2: bah
-        #
-        # Module called "demostore" must be found in great_expectations/plugins/store.
-        # Class "GreatExpectationsEvaluationParameterStore" must be defined in that module.
-        # The class must implement the following methods:
-        # 1. def __init__(self, **kwargs)
-        #
-        # 2. def get(self, name)
-        #
-        # 3. def set(self, name, value)
-        #
-        # We will load the module dynamically
-        #
-        #####
-        try:
-            config_block = self._project_config.get("evaluation_parameter_store")
-            if not config_block or not config_block.get("type"):
-                self._evaluation_parameter_store = MemoryEvaluationParameterStore()
-            else:
-                module_name = config_block.get("type")
-                class_name = "GreatExpectationsEvaluationParameterStore"
-
-                loaded_module = __import__(module_name, fromlist=[module_name])
-                loaded_class = getattr(loaded_module, class_name)
-                if config_block.get("config"):
-                    self._evaluation_parameter_store = loaded_class(**config_block.get("config"))
-                else:
-                    self._evaluation_parameter_store = loaded_class()
-        except Exception:
-            logger.exception("Failed to load evaluation_parameter_store class")
-            raise
-
-    def list_expectation_suites(self):
-        """Returns currently-defined expectation suites available in a nested dictionary structure
-        reflecting the namespace provided by this DataContext.
-
-        Returns:
-            Dictionary of currently-defined expectation suites::
-
-            {
-              datasource: {
-                generator: {
-                  generator_asset: [list_of_expectation_suites]
-                }
-              }
-              ...
-            }
-
-        """
-
-        expectation_suites_dict = {}
-
-        # First, we construct the *actual* defined expectation suites
-        for datasource in os.listdir(self.expectations_directory):
-            datasource_path = os.path.join(self.expectations_directory, datasource)
-            if not os.path.isdir(datasource_path):
-                continue
-            if datasource not in expectation_suites_dict:
-                expectation_suites_dict[datasource] = {}
-            for generator in os.listdir(datasource_path):
-                generator_path = os.path.join(datasource_path, generator)
-                if not os.path.isdir(generator_path):
-                    continue
-                if generator not in expectation_suites_dict[datasource]:
-                    expectation_suites_dict[datasource][generator] = {}
-                for generator_asset in os.listdir(generator_path):
-                    generator_asset_path = os.path.join(generator_path, generator_asset)
-                    if os.path.isdir(generator_asset_path):
-                        candidate_suites = os.listdir(generator_asset_path)
-                        expectation_suites_dict[datasource][generator][generator_asset] = [
-                            suite_name[:-5] for suite_name in candidate_suites if suite_name.endswith(".json")
-                        ]
-
-        return expectation_suites_dict
+    def list_expectation_suite_keys(self):
+        """Return a list of available expectation suite keys."""
+        keys = self.stores[self.expectations_store_name].list_keys()
+        return keys
 
     def list_datasources(self):
         """List currently-configured datasources on this context.
@@ -807,9 +829,24 @@ class DataContext(object):
         Returns:
             List(dict): each dictionary includes "name" and "type" keys
         """
-        return [{"name": key, "type": value["type"]} for key, value in self._project_config["datasources"].items()]
+        datasources = []
+        # NOTE: 20190916 - JPC - Upon deprecation of support for type: configuration, this can be simplified
+        for key, value in self._project_config_with_varibles_substituted["datasources"].items():
+            if "type" in value:
+                logger.warning("Datasource %s configured using type. Please use class_name instead." % key)
+                datasources.append({
+                    "name": key,
+                    "type": value["type"],
+                    "class_name": self._get_datasource_class_from_type(value["type"]).__name__
+                })
+            else:
+                datasources.append({
+                    "name": key,
+                    "class_name": value["class_name"]
+                })
+        return datasources
 
-    def _normalize_data_asset_name(self, data_asset_name):
+    def normalize_data_asset_name(self, data_asset_name):
         """Normalizes data_asset_names for a data context.
         
         A data_asset_name is defined per-project and consists of three components that together define a "namespace"
@@ -834,25 +871,31 @@ class DataContext(object):
         Returns:
             NormalizedDataAssetName
         """
+
         if isinstance(data_asset_name, NormalizedDataAssetName):
             return data_asset_name
+        elif isinstance(data_asset_name, DataAssetIdentifier):
+            return NormalizedDataAssetName(
+                datasource=data_asset_name.datasource,
+                generator=data_asset_name.generator,
+                generator_asset=data_asset_name.generator_asset
+            )
 
         split_name = data_asset_name.split(self.data_asset_name_delimiter)
-        existing_expectation_suites = self.list_expectation_suites()
+
+        existing_expectation_suite_keys = self.list_expectation_suite_keys()
         existing_namespaces = []
-        for datasource in existing_expectation_suites.keys():
-            for generator in existing_expectation_suites[datasource].keys():
-                for generator_asset in existing_expectation_suites[datasource][generator]:
-                    existing_namespaces.append(
-                        NormalizedDataAssetName(
-                            datasource,
-                            generator,
-                            generator_asset
-                        )
-                    )
+        for key in existing_expectation_suite_keys:
+            existing_namespaces.append(
+                NormalizedDataAssetName(
+                    key.data_asset_name.datasource,
+                    key.data_asset_name.generator,
+                    key.data_asset_name.generator_asset,
+                )
+            )
 
         if len(split_name) > 3:
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "Invalid data_asset_name '{data_asset_name}': found too many components using delimiter '{delimiter}'"
                 .format(
                         data_asset_name=data_asset_name,
@@ -883,7 +926,7 @@ class DataContext(object):
             #     return provider_names[0]
             #
             # elif len(provider_names) > 1:
-            #     raise DataContextError(
+            #     raise ge_exceptions.DataContextError(
             #         "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
             #         .format(data_asset_name=data_asset_name, provider_names=provider_names)
             #     )
@@ -901,7 +944,7 @@ class DataContext(object):
                 return provider_names.pop()
 
             elif len(provider_names) > 1:
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
                     .format(data_asset_name=data_asset_name, provider_names=provider_names)
                 )
@@ -911,7 +954,6 @@ class DataContext(object):
             # namespace.
             if (len(available_names.keys()) == 1 and  # in this case, we know that the datasource name is valid
                     len(available_names[datasource].keys()) == 1):
-                logger.info("Normalizing to a new generator name.")
                 return NormalizedDataAssetName(
                     datasource,
                     generator,
@@ -919,11 +961,11 @@ class DataContext(object):
                 )
 
             if len(available_names.keys()) == 0:
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "No datasource configured: a datasource is required to normalize an incomplete data_asset_name"
                 )
 
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "Ambiguous data_asset_name: no existing data_asset has the provided name, no generator provides it, "
                 " and there are multiple datasources and/or generators configured."
             )
@@ -951,7 +993,7 @@ class DataContext(object):
             #     return provider_names[0]
             #
             # elif len(provider_names) > 1:
-            #     raise DataContextError(
+            #     raise ge_exceptions.DataContextError(
             #         "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
             #         .format(data_asset_name=data_asset_name, provider_names=provider_names)
             #     )
@@ -967,7 +1009,7 @@ class DataContext(object):
                 return provider_names.pop()
             
             elif len(provider_names) > 1:
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
                     .format(data_asset_name=data_asset_name, provider_names=provider_names)
                 )
@@ -984,11 +1026,11 @@ class DataContext(object):
                 )
 
             if len(available_names.keys()) == 0:
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "No datasource configured: a datasource is required to normalize an incomplete data_asset_name"
                 )
 
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "No generator available to produce data_asset_name '{data_asset_name}' "
                 "with datasource '{datasource_name}'"
                 .format(data_asset_name=data_asset_name, datasource_name=datasource_name)
@@ -1000,18 +1042,60 @@ class DataContext(object):
             datasources = [datasource["name"] for datasource in self.list_datasources()]
             if split_name[0] in datasources:
                 datasource = self.get_datasource(split_name[0])
+
                 generators = [generator["name"] for generator in datasource.list_generators()]
                 if split_name[1] in generators:
                     return NormalizedDataAssetName(*split_name)
 
-            raise DataContextError(
+            raise ge_exceptions.DataContextError(
                 "Invalid data_asset_name: no configured datasource '{datasource_name}' "
                 "with generator '{generator_name}'"
                 .format(datasource_name=split_name[0], generator_name=split_name[1])
             )
 
+    def create_expectation_suite(self, data_asset_name, expectation_suite_name, overwrite_existing=False):
+        """Build a new expectation suite and save it into the data_context expectation store.
+
+        Args:
+            data_asset_name: The name of the data_asset for which this suite will be stored.
+                data_asset_name will be normalized if it is a string
+            expectation_suite_name: The name of the expectation_suite to create
+            overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
+                already exists
+
+        Returns:
+            A new (empty) expectation suite.
+        """
+        if not isinstance(data_asset_name, NormalizedDataAssetName):
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
+
+        expectation_suite = get_empty_expectation_suite(
+            # FIXME: For now, we just cast this to a string to be close to the old behavior
+            self.data_asset_name_delimiter.join(data_asset_name),
+            expectation_suite_name
+        )
+
+        key = ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier(*data_asset_name),
+            expectation_suite_name=expectation_suite_name,
+        )
+
+        if self._stores[self.expectations_store_name].has_key(key) and not overwrite_existing:
+            raise ge_exceptions.DataContextError(
+                "expectation_suite with name {} already exists for data_asset "\
+                "{}. If you would like to overwrite this expectation_suite, "\
+                "set overwrite_existing=True.".format(
+                    expectation_suite_name,
+                    data_asset_name
+                )
+            )
+        else:
+            self._stores[self.expectations_store_name].set(key, expectation_suite)
+
+        return expectation_suite
+
     def get_expectation_suite(self, data_asset_name, expectation_suite_name="default"):
-        """Get or create a named expectation suite for the provided data_asset_name.
+        """Get a named expectation suite for the provided data_asset_name.
 
         Args:
             data_asset_name (str or NormalizedDataAssetName): the data asset name to which the expectation suite belongs
@@ -1021,19 +1105,19 @@ class DataContext(object):
             expectation_suite
         """
         if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
-        config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name, expectation_suite_name)
-        if os.path.isfile(config_file_path):
-            with open(config_file_path, 'r') as json_file:
-                read_config = json.load(json_file)
-            # update the data_asset_name to correspond to the current name (in case the config has been moved/renamed)
-            read_config["data_asset_name"] = self.data_asset_name_delimiter.join(data_asset_name)
-            return read_config
+        key = ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier(*data_asset_name),
+            expectation_suite_name=expectation_suite_name,
+        )
+
+        if self.stores[self.expectations_store_name].has_key(key):
+            return self.stores[self.expectations_store_name].get(key)
         else:
-            return get_empty_expectation_suite(
-                self.data_asset_name_delimiter.join(data_asset_name),
-                expectation_suite_name
+            raise ge_exceptions.DataContextError(
+                "No expectation_suite found for data_asset_name %s and expectation_suite_name %s" %
+                (data_asset_name, expectation_suite_name)
             )
 
     def save_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
@@ -1053,181 +1137,34 @@ class DataContext(object):
             try:
                 data_asset_name = expectation_suite['data_asset_name']
             except KeyError:
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "data_asset_name must either be specified or present in the provided expectation suite")
+        else:
+            # Note: we ensure that the suite name is a string here, until we have typed ExpectationSuite
+            # objects that will know how to read the correct type back in
+            expectation_suite['data_asset_name'] = str(data_asset_name)
+            # expectation_suite['data_asset_name'] = data_asset_name
+
         if expectation_suite_name is None:
             try:
                 expectation_suite_name = expectation_suite['expectation_suite_name']
             except KeyError:
-                raise DataContextError(
+                raise ge_exceptions.DataContextError(
                     "expectation_suite_name must either be specified or present in the provided expectation suite")
+        else:
+            expectation_suite['expectation_suite_name'] = expectation_suite_name
+
         if not isinstance(data_asset_name, NormalizedDataAssetName):
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name, expectation_suite_name)
-        safe_mmkdir(os.path.dirname(config_file_path), exist_ok=True)
-        with open(config_file_path, 'w') as outfile:
-            json.dump(expectation_suite, outfile, indent=2)
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
+
+        self.stores[self.expectations_store_name].set(ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier(*data_asset_name),
+            expectation_suite_name=expectation_suite_name,
+        ), expectation_suite)
+
         self._compiled = False
 
-    def bind_evaluation_parameters(self, run_id):  # , expectations):
-        """Return current evaluation parameters stored for the provided run_id, ready to be bound to parameterized
-        expectation values.
-
-        Args:
-            run_id: the run_id for which to return evaluation parameters
-
-        Returns:
-            evaluation_parameters (dict)
-        """
-        # TOOO: only return parameters requested by the given expectations
-        return self._evaluation_parameter_store.get_run_parameters(run_id)
-
-    def register_validation_results(self, run_id, validation_results, data_asset=None):
-        """Process results of a validation run. This method is called by data_asset objects that are connected to
-         a DataContext during validation. It performs several actions:
-          - store the validation results to a validations_store, if one is configured
-          - store a snapshot of the data_asset, if so configured and a compatible data_asset is available
-          - perform a callback action using the validation results, if one is configured
-          - retrieve validation results referenced in other parameterized expectations and store them in the \
-            evaluation parameter store.
-
-        Args:
-            run_id: the run_id for which to register validation results
-            validation_results: the validation results object
-            data_asset: the data_asset to snapshot, if snapshot is configured
-
-        Returns:
-            validation_results: Validation results object, with updated meta information including references to \
-            stored data, if appropriate
-        """
-
-        try:
-            data_asset_name = validation_results["meta"]["data_asset_name"]
-        except KeyError:
-            logger.warning("No data_asset_name found in validation results; using '_untitled'")
-            data_asset_name = "_untitled"
-
-        try:
-            expectation_suite_name = validation_results["meta"]["expectation_suite_name"]
-        except KeyError:
-            logger.warning("No expectation_suite_name found in validation results; using '_untitled'")
-            expectation_suite_name = "_untitled"
-
-        try:
-            normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        except DataContextError:
-            logger.warning(
-                "Registering validation results for a data_asset_name that cannot be normalized in this context."
-            )
-
-        expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
-        if self.validations_store:
-            validations_store = self.validations_store
-            if isinstance(validations_store, dict) and validations_store["type"] == "filesystem":
-                validation_filepath = self._get_normalized_data_asset_name_filepath(
-                    normalized_data_asset_name,
-                    expectation_suite_name,
-                    base_path=os.path.join(
-                        self.root_directory,
-                        validations_store["base_directory"],
-                        run_id
-                    )
-                )
-                logger.debug("Storing validation result: %s" % validation_filepath)
-                safe_mmkdir(os.path.dirname(validation_filepath))
-                with open(validation_filepath, "w") as outfile:
-                    json.dump(validation_results, outfile, indent=2)
-            if isinstance(validations_store, dict) and validations_store["type"] == "s3":
-                bucket = validations_store["bucket"]
-                key_prefix = validations_store["key_prefix"]
-                key = os.path.join(
-                    key_prefix,
-                    "validations/{run_id}/{data_asset_name}".format(
-                        run_id=run_id,
-                        data_asset_name=self._get_normalized_data_asset_name_filepath(
-                            normalized_data_asset_name,
-                            expectation_suite_name,
-                            base_path=""
-                        )
-                    )
-                )
-                validation_results["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
-                try:
-                    import boto3
-                    s3 = boto3.resource('s3')
-                    result_s3 = s3.Object(bucket, key)
-                    result_s3.put(Body=json.dumps(validation_results).encode('utf-8'))
-                except ImportError:
-                    logger.error("Error importing boto3 for AWS support.")
-                except Exception:
-                    raise
-
-        profile = self._get_all_profile_credentials()
-        if "result_callback" in profile:
-            result_callback = profile["result_callback"]
-            try:
-                slack_webhook_url = result_callback["slack"]
-                # TODO move type checking to profile/environment loaders
-                assert isinstance(slack_webhook_url, str), TypeError
-                get_slack_callback(slack_webhook_url)(validation_results)
-            except (KeyError, TypeError):
-                logger.warning("Unrecognized result_slack callback configuration. Please verify this in your profiles.yml file: {}".format(PROFILE_PATH))
-
-        if "data_asset_snapshot_store" in self._project_config and validation_results["success"] is False:
-            data_asset_snapshot_store = self._project_config["data_asset_snapshot_store"]
-            if isinstance(data_asset, PandasDataset):
-                if isinstance(data_asset_snapshot_store, dict) and "filesystem" in data_asset_snapshot_store:
-                    logger.info("Storing dataset to file")
-                    safe_mmkdir(os.path.join(
-                        self.root_directory,
-                        data_asset_snapshot_store["filesystem"]["base_directory"],
-                        run_id)
-                    )
-                    data_asset.to_csv(
-                        self._get_normalized_data_asset_name_filepath(
-                            normalized_data_asset_name,
-                            expectation_suite_name,
-                            base_path=os.path.join(
-                                self.root_directory,
-                                data_asset_snapshot_store["filesystem"]["base_directory"],
-                                run_id
-                            ),
-                            file_extension=".csv.gz"
-                        ),
-                        compression="gzip"
-                    )
-
-                if isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
-                    bucket = data_asset_snapshot_store["s3"]["bucket"]
-                    key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
-                    key = os.path.join(
-                        key_prefix,
-                        "validations/{run_id}/{data_asset_name}.csv.gz".format(
-                            run_id=run_id,
-                            data_asset_name=self._get_normalized_data_asset_name_filepath(
-                                normalized_data_asset_name,
-                                expectation_suite_name,
-                                base_path="",
-                                file_extension=".csv.gz"
-                            )
-                        )
-                    )
-                    validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(
-                        bucket=bucket,
-                        key=key)
-
-                    try:
-                        import boto3
-                        s3 = boto3.resource('s3')
-                        result_s3 = s3.Object(bucket, key)
-                        result_s3.put(Body=data_asset.to_csv(compression="gzip").encode('utf-8'))
-                    except ImportError:
-                        logger.error("Error importing boto3 for AWS support. Unable to save to result store.")
-                    except Exception:
-                        raise
-            else:
-                logger.warning(
-                    "Unable to save data_asset of type: %s. Only PandasDataset is supported." % type(data_asset))
+    def _extract_and_store_parameters_from_validation_results(self, validation_results, data_asset_name, expectation_suite_name, run_id):
 
         if not self._compiled:
             self._compile()
@@ -1237,14 +1174,15 @@ class DataContext(object):
                 "expectation_suite_name" not in validation_results["meta"]
         ):
             logger.warning(
-                "Both data_asset_name ane expectation_suite_name must be in validation results to "
+                "Both data_asset_name and expectation_suite_name must be in validation results to "
                 "register evaluation parameters."
             )
-            return validation_results
+            return
+
         elif (data_asset_name not in self._compiled_parameters["data_assets"] or
               expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]):
             # This is fine; short-circuit since we do not need to register any results from this dataset.
-            return validation_results
+            return
         
         for result in validation_results['results']:
             # Unoptimized: loop over all results and check if each is needed
@@ -1254,7 +1192,7 @@ class DataContext(object):
                 if (("column" in result['expectation_config']['kwargs']) and 
                     ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]) and
                     (result['expectation_config']['kwargs']["column"] in
-                     self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
+                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
 
                     column = result['expectation_config']['kwargs']["column"]
                     # Now that we have a small search space, invert logic, and look for the parameters in our result
@@ -1263,9 +1201,9 @@ class DataContext(object):
                         for desired_param in desired_parameters:
                             desired_key = desired_param.split(":")[-1]
                             if type_key == "result" and desired_key in result['result']:
-                                self.store_validation_param(run_id, desired_param, result["result"][desired_key])
+                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"][desired_key])
                             elif type_key == "details" and desired_key in result["result"]["details"]:
-                                self.store_validation_param(run_id, desired_param, result["result"]["details"])
+                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"]["details"])
                             else:
                                 logger.warning("Unrecognized key for parameter %s" % desired_param)
                 
@@ -1276,15 +1214,29 @@ class DataContext(object):
                     for desired_param in desired_parameters:
                         desired_key = desired_param.split(":")[-1]
                         if type_key == "result" and desired_key in result['result']:
-                            self.store_validation_param(run_id, desired_param, result["result"][desired_key])
+                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"][desired_key])
                         elif type_key == "details" and desired_key in result["result"]["details"]:
-                            self.store_validation_param(run_id, desired_param, result["result"]["details"])
+                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"]["details"])
                         else:
                             logger.warning("Unrecognized key for parameter %s" % desired_param)
 
-        return validation_results
+    @property
+    def evaluation_parameter_store(self):
+        return self.stores[self.evaluation_parameter_store_name]
 
-    def store_validation_param(self, run_id, key, value):
+    @property
+    def evaluation_parameter_store_name(self):
+        return self._project_config_with_varibles_substituted["evaluation_parameter_store_name"]
+
+    @property
+    def validations_store_name(self):
+        return self._project_config_with_varibles_substituted["validations_store_name"]
+
+    @property
+    def validations_store(self):
+        return self.stores[self.validations_store_name]
+
+    def set_parameters_in_evaluation_parameter_store_by_run_id_and_key(self, run_id, key, value):
         """Store a new validation parameter.
 
         Args:
@@ -1295,20 +1247,28 @@ class DataContext(object):
         Returns:
             None
         """
-        self._evaluation_parameter_store.set(run_id, key, value)
+        run_params = self.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
+        run_params[key] = value
+        self.evaluation_parameter_store.set(run_id, run_params)
 
-    def get_validation_param(self, run_id, key):
-        """Get a new validation parameter.
+    def get_parameters_in_evaluation_parameter_store_by_run_id(self, run_id):
+        """Fetches all validation parameters for a given run_id.
 
         Args:
-            run_id: run_id for desired value
-            key: parameter key
+            run_id: current run_id
 
         Returns:
             value stored in evaluation_parameter_store for the provided run_id and key
         """
-        return self._evaluation_parameter_store.get(run_id, key)
+        if self.evaluation_parameter_store.has_key(run_id):
+            return copy.deepcopy(
+                self.evaluation_parameter_store.get(run_id)
+            )
+        else:
+            return {}
 
+    #NOTE: Abe 2019/08/22 : Can we rename this to _compile_all_evaluation_parameters_from_expectation_suites, or something similar?
+    # A more descriptive name would have helped me grok this faster when I first encountered it
     def _compile(self):
         """Compiles all current expectation configurations in this context to be ready for result registration.
         
@@ -1359,21 +1319,8 @@ class DataContext(object):
             "data_assets": {}
         }
 
-        known_asset_dict = self.list_expectation_suites()
-        # Convert known assets to the normalized name system
-        flat_assets_dict = {}
-        for datasource in known_asset_dict.keys():
-            for generator in known_asset_dict[datasource].keys():
-                for data_asset_name in known_asset_dict[datasource][generator].keys():
-                    flat_assets_dict[
-                        datasource + self._data_asset_name_delimiter +
-                        generator + self._data_asset_name_delimiter +
-                        data_asset_name
-                    ] = known_asset_dict[datasource][generator][data_asset_name]
-        config_paths = [y for x in os.walk(self.expectations_directory) for y in glob(os.path.join(x[0], '*.json'))]
-
-        for config_file in config_paths:
-            config = json.load(open(config_file, 'r'))
+        for key in self.stores[self.expectations_store_name].list_keys():
+            config = self.stores[self.expectations_store_name].get(key)
             for expectation in config["expectations"]:
                 for _, value in expectation["kwargs"].items():
                     if isinstance(value, dict) and '$PARAMETER' in value:
@@ -1398,10 +1345,11 @@ class DataContext(object):
                                 logger.warning("Invalid parameter urn (not enough parts): %s" % parameter)
                                 continue
 
-                            if (data_asset_name not in flat_assets_dict or
-                                    expectation_suite_name not in flat_assets_dict[data_asset_name]):
-                                logger.warning("Adding parameter %s for unknown data asset config" % parameter)
+                            normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
+                            data_asset_name = DataAssetIdentifier(normalized_data_asset_name.datasource,
+                                                                  normalized_data_asset_name.generator,
+                                                                  normalized_data_asset_name.generator_asset)
                             if data_asset_name not in self._compiled_parameters["data_assets"]:
                                 self._compiled_parameters["data_assets"][data_asset_name] = {}
 
@@ -1430,152 +1378,98 @@ class DataContext(object):
 
         self._compiled = True
 
-    def write_resource(
-            self,
-            resource,  # bytes
-            resource_name,  # name to be used inside namespace, e.g. "my_file.html"
-            resource_store,  # store to use to write the resource
-            resource_namespace=None,  # An arbitrary name added to the resource namespace
-            data_asset_name=None,  # A name that will be normalized by the data_context and used in the namespace
-            expectation_suite_name=None,  # A string that is part of the namespace
-            run_id=None
-    ):  # A string that is part of the namespace
-        """Writes the bytes in "resource" according to the resource_store's writing method, with a name constructed
-        as follows:
+    # # TDOD : Deprecate this method in favor of Stores.
+    # def write_resource(
+    #         self,
+    #         resource,  # bytes
+    #         resource_name,  # name to be used inside namespace, e.g. "my_file.html"
+    #         resource_store,  # store to use to write the resource
+    #         resource_namespace=None,  # An arbitrary name added to the resource namespace
+    #         data_asset_name=None,  # A name that will be normalized by the data_context and used in the namespace
+    #         expectation_suite_name=None,  # A string that is part of the namespace
+    #         run_id=None
+    # ):  # A string that is part of the namespace
+    #     """Writes the bytes in "resource" according to the resource_store's writing method, with a name constructed
+    #     as follows:
+    #
+    #     resource_namespace/run_id/data_asset_name/expectation_suite_name/resource_name
+    #
+    #     If any of those components is None, it is omitted from the namespace.
+    #
+    #     Args:
+    #         resource:
+    #         resource_name:
+    #         resource_store:
+    #         resource_namespace:
+    #         data_asset_name:
+    #         expectation_suite_name:
+    #         run_id:
+    #
+    #     Returns:
+    #         A dictionary describing how to locate the resource (specific to resource_store type)
+    #     """
+    #     logger.debug("Starting DatContext.write_resource")
+    #
+    #     if resource_store is None:
+    #         logger.error("No resource store specified")
+    #         return
+    #
+    #     resource_locator_info = {}
+    #
+    #     if resource_store['type'] == "s3":
+    #         raise NotImplementedError("s3 is not currently a supported resource_store type for writing")
+    #     elif resource_store['type'] == 'filesystem':
+    #         resource_store = self._normalize_store_path(resource_store)
+    #         path_components = [resource_store['base_directory']]
+    #         if resource_namespace is not None:
+    #             path_components.append(resource_namespace)
+    #         if run_id is not None:
+    #             path_components.append(run_id)
+    #         if data_asset_name is not None:
+    #             if not isinstance(data_asset_name, NormalizedDataAssetName):
+    #                 normalized_name = self.normalize_data_asset_name(data_asset_name)
+    #             else:
+    #                 normalized_name = data_asset_name
+    #             if expectation_suite_name is not None:
+    #                 path_components.append(self._get_normalized_data_asset_name_filepath(normalized_name, expectation_suite_name, base_path="", file_extension=""))
+    #             else:
+    #                 path_components.append(
+    #                     self._get_normalized_data_asset_name_filepath(normalized_name, "",
+    #                                                                   base_path="", file_extension=""))
+    #         else:
+    #             if expectation_suite_name is not None:
+    #                 path_components.append(expectation_suite_name)
+    #
+    #         path_components.append(resource_name)
+    #
+    #         path = os.path.join(
+    #             *path_components
+    #         )
+    #         safe_mmkdir(os.path.dirname(path))
+    #         with open(path, "w") as writer:
+    #             writer.write(resource)
+    #
+    #         resource_locator_info['path'] = path
+    #     else:
+    #         raise ge_exceptions.DataContextError("Unrecognized resource store type.")
+    #
+    #     return resource_locator_info
 
-        resource_namespace/run_id/data_asset_name/expectation_suite_name/resource_name
-
-        If any of those components is None, it is omitted from the namespace.
-
-        Args:
-            resource:
-            resource_name:
-            resource_store:
-            resource_namespace:
-            data_asset_name:
-            expectation_suite_name:
-            run_id:
-
-        Returns:
-            A dictionary describing how to locate the resource (specific to resource_store type)
-        """
-
-        if resource_store is None:
-            logger.error("No resource store specified")
-            return
-
-        resource_locator_info = {}
-
-        if resource_store['type'] == "s3":
-            raise NotImplementedError("s3 is not currently a supported resource_store type for writing")
-        elif resource_store['type'] == 'filesystem':
-            resource_store = self._normalize_store_path(resource_store)
-            path_components = [resource_store['base_directory']]
-            if resource_namespace is not None:
-                path_components.append(resource_namespace)
-            if run_id is not None:
-                path_components.append(run_id)
-            if data_asset_name is not None:
-                if not isinstance(data_asset_name, NormalizedDataAssetName):
-                    normalized_name = self._normalize_data_asset_name(data_asset_name)
-                else:
-                    normalized_name = data_asset_name
-                if expectation_suite_name is not None:
-                    path_components.append(self._get_normalized_data_asset_name_filepath(normalized_name, expectation_suite_name, base_path="", file_extension=""))
-                else:
-                    path_components.append(
-                        self._get_normalized_data_asset_name_filepath(normalized_name, "",
-                                                                      base_path="", file_extension=""))
-            else:
-                if expectation_suite_name is not None:
-                    path_components.append(expectation_suite_name)
-
-            path_components.append(resource_name)
-            path = os.path.join(
-                *path_components
-            )
-            safe_mmkdir(os.path.dirname(path))
-            with open(path, "w") as writer:
-                writer.write(resource)
-
-            resource_locator_info['path'] = path
-        else:
-            raise DataContextError("Unrecognized resource store type.")
-
-        return resource_locator_info
-
-    def list_validation_results(self, validations_store=None):
-        """
-        Returns:
-             A dictionary describing validation results in the following format::
-
-                {
-                  "run_id":
-                    "datasource": {
-                        "generator": {
-                            "generator_asset": [expectation_suite_1, expectation_suite_1, ...]
-                        }
-                    }
-                }
-
-        """
-        if validations_store is None:
-            validations_store = self.validations_store
-        else:
-            validations_store = self._normalize_store_path(validations_store)
-
-        validation_results = {}
-
-        if validations_store["type"] == "filesystem":
-            result_paths = [y for x in os.walk(validations_store["base_directory"]) for y in glob(os.path.join(x[0], '*.json'))]
-            base_length = len(validations_store["base_directory"])
-            rel_paths = [path[base_length:] for path in result_paths]
-
-            for result in rel_paths:
-                components = result.split("/")
-
-                if len(components) != 5:
-                    logger.error("Unrecognized validation result path: %s" % result)
-                    continue
-                run_id = components[0]
-
-                # run_id_filter attribute in the config of validation store allows to filter run ids
-                run_id_filter = validations_store.get("run_id_filter")
-                if run_id_filter:
-                    if run_id_filter.get("eq"):
-                        if run_id_filter.get("eq") != run_id:
-                            continue
-                    elif run_id_filter.get("ne"):
-                        if run_id_filter.get("ne") == run_id:
-                            continue
-
-                datasource_name = components[1]
-                generator_name = components[2]
-                generator_asset = components[3]
-                expectation_suite = components[4][:-5]
-                if run_id not in validation_results:
-                    validation_results[run_id] = {}
-                if datasource_name not in validation_results[run_id]:
-                    validation_results[run_id][datasource_name] = {}
-                if generator_name not in validation_results[run_id][datasource_name]:
-                    validation_results[run_id][datasource_name][generator_name] = {}
-                if generator_asset not in validation_results[run_id][datasource_name][generator_name]:
-                    validation_results[run_id][datasource_name][generator_name][generator_asset] = []
-                validation_results[run_id][datasource_name][generator_name][generator_asset].append(expectation_suite)
-            return validation_results
-        elif validations_store["type"] == "s3":
-            raise NotImplementedError("s3 validations_store is not yet supported for listing validation results")
-        else:
-            raise DataContextError("unrecognized validations_store type: %s" % validations_store["type"])
-
-    def get_validation_result(self, data_asset_name, expectation_suite_name="default", run_id=None, validations_store=None, failed_only=False):
+    def get_validation_result(
+        self,
+        data_asset_name,
+        expectation_suite_name="default",
+        run_id=None,
+        validations_store_name="validations_store",
+        failed_only=False,
+    ):
         """Get validation results from a configured store.
 
         Args:
             data_asset_name: name of data asset for which to get validation result
             expectation_suite_name: expectation_suite name for which to get validation result (default: "default")
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
-            validations_store: the store from which to get validation results
+            validations_store_name: the name of the store from which to get validation results
             failed_only: if True, filter the result to return only failed expectations
 
         Returns:
@@ -1583,72 +1477,47 @@ class DataContext(object):
 
         """
 
-        validation_location = self.get_validation_location(data_asset_name, expectation_suite_name, run_id, validations_store=validations_store)
+        selected_store = self.stores[validations_store_name]
+        if not isinstance(data_asset_name, NormalizedDataAssetName):
+            data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
-        if 'filepath' in validation_location:
-            validation_path = validation_location['filepath']
-            with open(validation_path, "r") as infile:
-                results_dict = json.load(infile)
+        if not isinstance(data_asset_name, DataAssetIdentifier):
+            data_asset_name = DataAssetIdentifier(
+                datasource=data_asset_name.datasource,
+                generator=data_asset_name.generator,
+                generator_asset=data_asset_name.generator_asset
+            )
 
-            if failed_only:
-                failed_results_list = [result for result in results_dict["results"] if not result["success"]]
-                results_dict["results"] = failed_results_list
-                return results_dict
-            else:
-                return results_dict
-    
-        elif 'bucket' in validation_location: # s3
 
-            try:
-                import boto3
-                s3 = boto3.client('s3')
-            except ImportError:
-                raise ImportError("boto3 is required for retrieving a dataset from s3")
-        
-            bucket = validation_location["bucket"]
-            key = validation_location["key"]
-            s3_response_object = s3.get_object(Bucket=bucket, Key=key)
-            object_content = s3_response_object['Body'].read()
-            
-            results_dict = json.loads(object_content)
+        if run_id == None:
+            #Get most recent run id
+            # NOTE : This method requires a (potentially very inefficient) list_keys call.
+            # It should probably move to live in an appropriate Store class,
+            # but when we do so, that Store will need to function as more than just a key-value Store.
+            key_list = selected_store.list_keys()
+            run_id_set = set([key.run_id for key in key_list])
+            if len(run_id_set) == 0:
+                logger.warning("No valid run_id values found.")
+                return {}
 
-            if failed_only:
-                failed_results_list = [result for result in results_dict["results"] if not result["success"]]
-                results_dict["results"] = failed_results_list
-                return results_dict
-            else:
-                return results_dict
+            run_id = max(run_id_set)
+
+        key = ValidationResultIdentifier(
+                expectation_suite_identifier=ExpectationSuiteIdentifier(
+                    data_asset_name=data_asset_name,
+                    expectation_suite_name=expectation_suite_name
+                ),
+                run_id=run_id
+            )
+        results_dict = selected_store.get(key)
+
+        #TODO: This should be a convenience method of ValidationResultSuite
+        if failed_only:
+            failed_results_list = [result for result in results_dict["results"] if not result["success"]]
+            results_dict["results"] = failed_results_list
+            return results_dict
         else:
-            raise DataContextError("Invalid validations_store configuration: only 'filesystem' and 's3' are supported.")
-
-    # TODO: refactor this into a snapshot getter based on project_config
-    # def get_failed_dataset(self, validation_result, **kwargs):
-    #     try:
-    #         reference_url = validation_result["meta"]["dataset_reference"]
-    #     except KeyError:
-    #         raise ValueError("Validation result must have a dataset_reference in the meta object to fetch")
-        
-    #     if reference_url.startswith("s3://"):
-    #         try:
-    #             import boto3
-    #             s3 = boto3.client('s3')
-    #         except ImportError:
-    #             raise ImportError("boto3 is required for retrieving a dataset from s3")
-        
-    #         parsed_url = urlparse(reference_url)
-    #         bucket = parsed_url.netloc
-    #         key = parsed_url.path[1:]
-            
-    #         s3_response_object = s3.get_object(Bucket=bucket, Key=key)
-    #         if key.endswith(".csv"):
-    #             # Materialize as dataset
-    #             # TODO: check the associated config for the correct data_asset_type to use
-    #             return read_csv(s3_response_object['Body'], **kwargs)
-    #         else:
-    #             return s3_response_object['Body']
-
-    #     else:
-    #         raise ValueError("Only s3 urls are supported.")
+            return results_dict
 
     def update_return_obj(self, data_asset, return_obj):
         """Helper called by data_asset.
@@ -1660,43 +1529,64 @@ class DataContext(object):
         Returns:
             return_obj: the return object, potentially changed into a widget by the configured expectation explorer
         """
-        if self._expectation_explorer:
-            return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
-        else:
-            return return_obj
+        return return_obj
 
-    def build_data_documentation(self, site_names=None, data_asset_name=None):
+    def build_data_docs(self, site_names=None, resource_identifiers=None):
         """
-        TODO!!!!
+        Build Data Docs for your project.
+
+        These make it simple to visualize data quality in your project. These
+        include Expectations, Validations & Profiles. The are built for all
+        Datasources from JSON artifacts in the local repo including validations
+        & profiles from the uncommitted directory.
+
+        :param site_names: if specified, build data docs only for these sites, otherwise,
+                            build all the sites specified in the context's config
+        :param resource_identifiers: a list of resource identifiers (ExpectationSuiteIdentifier,
+                            ValidationResultIdentifier). If specified, rebuild HTML
+                            (or other views the data docs sites are rendering) only for
+                            the resources in this list. This supports incremental build
+                            of data docs sites (e.g., when a new validation result is created)
+                            and avoids full rebuild.
 
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
             of their index.html files as values
         """
+        logger.debug("Starting DataContext.build_data_docs")
 
         index_page_locator_infos = {}
 
-        # construct the config (merge defaults with specifics)
+        sites = self._project_config_with_varibles_substituted.get('data_docs_sites', [])
+        if sites:
+            logger.debug("Found data_docs_sites. Building sites...")
 
-        data_docs_config = self._project_config.get('data_docs')
-        if data_docs_config:
-            sites = data_docs_config.get('sites', [])
             for site_name, site_config in sites.items():
-                if (site_names and site_name in site_names) or not site_names or len(site_names) == 0:
-                    #TODO: get the builder class
-                    #TODO: build the site config by using defaults if needed
+                logger.debug("Building Data Docs Site %s" % site_name,)
+
+                # NOTE: 20191007 - JPC: removed condition that zero-length site_names mean build all sites
+                if (site_names and site_name in site_names) or not site_names:
                     complete_site_config = site_config
-                    index_page_locator_info = SiteBuilder.build(self, complete_site_config, specified_data_asset_name=data_asset_name)
+                    site_builder = instantiate_class_from_config(
+                        config=complete_site_config,
+                        runtime_config={
+                            "data_context": self,
+                        },
+                        config_defaults={
+                            "module_name": "great_expectations.render.renderer.site_builder"
+                        }
+                    )
+                    index_page_locator_info = site_builder.build(resource_identifiers)[0]
+
                     if index_page_locator_info:
                         index_page_locator_infos[site_name] = index_page_locator_info
+        else:
+            logger.debug("No data_docs_config found. No site(s) built.")
 
         return index_page_locator_infos
 
-    def get_absolute_path(self, path):
-        #TODO: ideally, the data context object should resolve all paths before
-        # calling the site builder (or any other specific logic)
-        return os.path.join(self._context_root_directory, path)
-
+    # Proposed TODO : Abe 2019/09/21 : I think we want to convert this method into a configurable profiler class, so that
+    # it can be pluggable and configurable
     def profile_datasource(self,
                            datasource_name,
                            generator_name=None,
@@ -1728,16 +1618,19 @@ class DataContext(object):
 
             When success = False, the error details are under "error" key
         """
+
         if not dry_run:
             logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
 
         profiling_results = {}
+
+        # Get data_asset_name_list
         data_asset_names = self.get_available_data_asset_names(datasource_name)
         if generator_name is None:
             if len(data_asset_names[datasource_name].keys()) == 1:
                 generator_name = list(data_asset_names[datasource_name].keys())[0]
         if generator_name not in data_asset_names[datasource_name]:
-            raise ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
+            raise ge_exceptions.ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
 
         data_asset_name_list = list(data_asset_names[datasource_name][generator_name])
         total_data_assets = len(data_asset_name_list)
@@ -1798,22 +1691,47 @@ class DataContext(object):
                     # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
                     if additional_batch_kwargs is None:
                         additional_batch_kwargs = {}
-                        
-                    batch = self.get_batch(
-                        data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
-                        expectation_suite_name=profiler.__name__,
+
+                    normalized_data_asset_name = self.normalize_data_asset_name(name)
+                    expectation_suite_name = profiler.__name__
+                    self.create_expectation_suite(
+                        data_asset_name=normalized_data_asset_name,
+                        expectation_suite_name=expectation_suite_name,
+                        overwrite_existing=True
+                    )
+                    batch_kwargs = self.yield_batch_kwargs(
+                        data_asset_name=normalized_data_asset_name,
                         **additional_batch_kwargs
                     )
 
+                    batch = self.get_batch(
+                        data_asset_name=normalized_data_asset_name,
+                        expectation_suite_name=expectation_suite_name,
+                        batch_kwargs=batch_kwargs
+                    )
+
                     if not profiler.validate(batch):
-                        raise ProfilerError(
+                        raise ge_exceptions.ProfilerError(
                             "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
                         )
 
                     # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
                     # will have more to unpack.
-                    expectation_suite, validation_result = profiler.profile(batch, run_id=run_id)
-                    profiling_results['results'].append((expectation_suite, validation_result))
+                    expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
+                    profiling_results['results'].append((expectation_suite, validation_results))
+
+                    self.validations_store.set(
+                        key=ValidationResultIdentifier(
+                            expectation_suite_identifier=ExpectationSuiteIdentifier(
+                                data_asset_name=DataAssetIdentifier(
+                                    *normalized_data_asset_name
+                                ),
+                                expectation_suite_name=expectation_suite_name
+                            ),
+                            run_id=run_id
+                        ),
+                        value=validation_results
+                    )
 
                     if isinstance(batch, Dataset):
                         # For datasets, we can produce some more detailed statistics
@@ -1830,16 +1748,14 @@ class DataContext(object):
                     logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
                                 (new_column_count, row_count, name, duration))
 
-                except ProfilerError as err:
+                except ge_exceptions.ProfilerError as err:
                     logger.warning(err.message)
-                except IOError as exc:
-                    logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
-                    logger.debug(str(exc))
+                except IOError as err:
+                    logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % name)
+                    logger.debug(str(err))
                     skipped_data_assets += 1
-                # FIXME: this is a workaround for catching SQLAlchemny exceptions without taking SQLAlchemy dependency.
-                # Think how to avoid this.
-                except Exception as e:
-                    logger.warning("Exception while profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                except SQLAlchemyError as e:
+                    logger.warning("SqlAlchemyError while profiling %s. Skipping." % name)
                     logger.debug(str(e))
                     skipped_data_assets += 1
 
@@ -1862,168 +1778,192 @@ class DataContext(object):
         return profiling_results
 
 
-PROJECT_HELP_COMMENT = """# Welcome to great expectations. 
-# This project configuration file allows you to define datasources, 
-# generators, integrations, and other configuration artifacts that
-# make it easier to use Great Expectations.
+class DataContext(ConfigOnlyDataContext):
+    """A DataContext represents a Great Expectations project. It organizes storage and access for
+    expectation suites, datasources, notification settings, and data fixtures.
 
-# For more help configuring great expectations, 
-# see the documentation at: https://docs.greatexpectations.io/en/latest/core_concepts/data_context.html#configuration
+    The DataContext is configured via a yml file stored in a directory called great_expectations; the configuration file
+    as well as managed expectation suites should be stored in version control.
 
-# NOTE: GE uses the names of configured datasources and generators to manage
-# how expectations and other configuration artifacts are stored in the 
-# expectations/ and datasources/ folders. If you need to rename an existing
-# datasource or generator, be sure to also update the paths for related artifacts.
+    Use the `create` classmethod to create a new empty config, or instantiate the DataContext
+    by passing the path to an existing data context root directory.
 
-"""
+    DataContexts use data sources you're already familiar with. Generators help introspect data stores and data execution
+    frameworks (such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
+    enables fetching, validation, profiling, and documentation of  your data in a way that is meaningful within your
+    existing infrastructure and work environment.
 
-PROJECT_OPTIONAL_CONFIG_COMMENT = """
+    DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
+    normalized *data_asset_name*, consisting of *datasource/generator/generator_asset*.
 
-# The plugins_directory is where the data_context will look for custom_data_assets.py
-# and any configured evaluation parameter store
+    - The datasource actually connects to a source of materialized data and returns Great Expectations DataAssets \
+      connected to a compute environment and ready for validation.
 
-plugins_directory: plugins/
+    - The Generator knows how to introspect datasources and produce identifying "batch_kwargs" that define \
+      particular slices of data.
 
-# Configure additional data context options here.
+    - The generator_asset is a specific name -- often a table name or other name familiar to users -- that \
+      generators can slice into batches.
 
-# Uncomment the lines below to enable s3 as a result store. If a result store is enabled,
-# validation results will be saved in the store according to run id.
+    An expectation suite is a collection of expectations ready to be applied to a batch of data. Since
+    in many projects it is useful to have different expectations evaluate in different contexts--profiling
+    vs. testing; warning vs. error; high vs. low compute; ML model or dashboard--suites provide a namespace
+    option for selecting which expectations a DataContext returns.
 
-# For S3, ensure that appropriate credentials or assume_role permissions are set where
-# validation happens.
+    In many simple projects, the datasource or generator name may be omitted and the DataContext will infer
+    the correct name when there is no ambiguity.
 
+    Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
+    """
 
-validations_store:
-  local:
-    type: filesystem
-    base_directory: uncommitted/validations/
-#   remote:
-#     type: s3
-#     bucket: <your bucket>
-#     key_prefix: <your key prefix>
-#   
+    # def __init__(self, config, filepath, data_asset_name_delimiter='/'):
+    def __init__(self, context_root_dir=None, active_environment_name='default', data_asset_name_delimiter='/'):
 
-# Uncomment the lines below to save snapshots of data assets that fail validation.
+        # Determine the "context root directory" - this is the parent of "great_expectations" dir
+        if context_root_dir is None:
+            context_root_dir = self.find_context_root_dir()
+        context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
+        self._context_root_directory = context_root_directory
 
-# data_asset_snapshot_store:
-#   filesystem:
-#     base_directory: uncommitted/snapshots/
-#   s3:
-#     bucket:
-#     key_prefix:
+        self.active_environment_name = active_environment_name
 
-# Uncomment the lines below to enable a custom evaluation_parameter_store
-# evaluation_parameter_store:
-#   type: my_evaluation_parameter_store
-#   config:  # - this is optional - this is how we can pass kwargs to the object's constructor
-#     param1: boo
-#     param2: bah
+        project_config = self._load_project_config()
 
+        super(DataContext, self).__init__(
+            project_config,
+            context_root_directory,
+            data_asset_name_delimiter,
+        )
 
-data_docs:
-  sites:
-    local_site: # site name
-    # “local_site” renders documentation for all the datasources in the project from GE artifacts in the local repo. 
-    # The site includes expectation suites and profiling and validation results from uncommitted directory. 
-    # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
-      type: SiteBuilder
-      site_store: # where the HTML will be written to (filesystem/S3)
-        type: filesystem
-        base_directory: uncommitted/documentation/local_site
-      validations_store: # where to look for validation results (filesystem/S3)
-        type: filesystem
-        base_directory: uncommitted/validations/
-        run_id_filter:
-          ne: profiling
-      profiling_store: # where to look for profiling results (filesystem/S3)
-        type: filesystem
-        base_directory: uncommitted/validations/
-        run_id_filter:
-          eq: profiling
+    # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
+    def _load_project_config(self):
+        """
+        Reads the project configuration from the project configuration file.
+        The file may contain ${SOME_VARIABLE} variables - see self._project_config_with_varibles_substituted
+        for how these are substituted.
 
-      datasources: '*' # by default, all datasources
-      sections:
-        index:
-          renderer:
-            module: great_expectations.render.renderer
-            class: SiteIndexPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaIndexPageView
-        validations: # if not present, validation results are not rendered
-          renderer:
-            module: great_expectations.render.renderer
-            class: ValidationResultsPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
-        expectations: # if not present, expectation suites are not rendered
-          renderer:
-            module: great_expectations.render.renderer
-            class: ExpectationSuitePageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
-        profiling: # if not present, profiling results are not rendered
-          renderer:
-            module: great_expectations.render.renderer
-            class: ProfilingResultsPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
-            
-    team_site:
-      # "team_site" is meant to support the "shared source of truth for a team" use case. 
-      # By default only the expectations section is enabled.
-      #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3). 
-      # Reach out on Slack (https://greatexpectations.io/slack>) if you would like to discuss the best way to configure a team site.
-      type: SiteBuilder
-      site_store:
-        type: filesystem
-        base_directory: uncommitted/documentation/team_site
-#      validations_store:
-#        type: s3
-#        bucket: ???
-#        path: ???
-#      profiling_store:
-#        type: filesystem
-#        base_directory: fixtures/validations/
-#        run_id_filter:
-#          eq: profiling
+        :return: the configuration object read from the file
+        """
+        path_to_yml = os.path.join(self.root_directory, self.GE_YML)
+        try:
+            with open(path_to_yml, "r") as data:
+                config_dict = yaml.load(data)
 
-      datasources: '*'
-      sections:
-        index:
-          renderer:
-            module: great_expectations.render.renderer
-            class: SiteIndexPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaIndexPageView
-        expectations:
-          renderer:
-            module: great_expectations.render.renderer
-            class: ExpectationSuitePageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
+        except YAMLError as err:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(err)
+            )
+        except IOError:
+            raise ge_exceptions.ConfigNotFoundError()
 
-"""
+        version = config_dict.get("config_version", 0)
 
-PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + "datasources: {}\n" + PROJECT_OPTIONAL_CONFIG_COMMENT
+        # TODO clean this up once type-checking configs is more robust
+        if not isinstance(version, int):
+            raise ge_exceptions.InvalidConfigValueTypeError("The key `config_version` must be an integer. Please check your config file.")
+
+        # When migrating from 0.7.x to 0.8.0
+        if version == 0 and "validations_stores" in list(config_dict.keys()):
+            raise ge_exceptions.ZeroDotSevenConfigVersionError(
+                "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
+            )
+        elif version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+            raise ge_exceptions.UnsupportedConfigVersionError(
+                "You appear to have an invalid config version ({}).\n    The version number must be between {} and {}.".format(
+                    version,
+                    MINIMUM_SUPPORTED_CONFIG_VERSION,
+                    CURRENT_CONFIG_VERSION,
+                )
+            )
+        elif version > CURRENT_CONFIG_VERSION:
+            raise ge_exceptions.InvalidConfigVersionError(
+                "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
+                    version,
+                    CURRENT_CONFIG_VERSION
+                )
+            )
+
+        # return DataContextConfig(**config_dict)
+        return config_dict
 
 
-PROFILE_COMMENT = """This file stores profiles with database access credentials. 
-Do not commit this file to version control. 
+    # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
+    def _save_project_config(self):
+        """Save the current project to disk."""
+        logger.debug("Starting DataContext._save_project_config")
 
-A profile can optionally have a single parameter called 
-"url" which will be passed to sqlalchemy's create_engine.
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)
+        with open(config_filepath, "w") as data:
+            config = copy.deepcopy(
+                self._project_config
+            )
 
-Otherwise, all credential options specified here for a 
-given profile will be passed to sqlalchemy's create URL function.
+            yaml.dump(config, data)
 
-# Uncomment the lines below to enable a Slack webhook result callback.
-# result_callback:
-#   slack: https://slack.com/replace_with_your_webhook
+    def add_store(self, store_name, store_config):
+        logger.debug("Starting DataContext.add_store")
 
-"""
+        new_store = super(DataContext, self).add_store(store_name, store_config)
+        self._save_project_config()
+        return new_store
+
+    def add_datasource(self, name, **kwargs):
+        logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
+
+        new_datasource = super(DataContext, self).add_datasource(name, **kwargs)
+        self._save_project_config()
+
+        return new_datasource
+
+    @staticmethod
+    def find_context_root_dir():
+        ge_home_environment = os.getenv("GE_HOME", None)
+        if ge_home_environment:
+            ge_home_environment = os.path.expanduser(ge_home_environment)
+            if os.path.isdir(ge_home_environment) and os.path.isfile(
+                os.path.join(ge_home_environment, "great_expectations.yml")
+            ):
+                return ge_home_environment
+        elif os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
+            return "../"
+        elif os.path.isdir("./great_expectations") and \
+                os.path.isfile("./great_expectations/great_expectations.yml"):
+            return "./great_expectations"
+        elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
+            return "./"
+        else:
+            raise ge_exceptions.ConfigNotFoundError()
+
+
+class ExplorerDataContext(DataContext):
+
+    def __init__(self, context_root_dir=None, expectation_explorer=True, data_asset_name_delimiter='/'):
+        """
+            expectation_explorer: If True, load the expectation explorer manager, which will modify GE return objects \
+            to include ipython notebook widgets.
+        """
+
+        super(ExplorerDataContext, self).__init__(
+            context_root_dir,
+            data_asset_name_delimiter,
+        )
+
+        self._expectation_explorer = expectation_explorer
+        if expectation_explorer:
+            from great_expectations.jupyter_ux.expectation_explorer import ExpectationExplorer
+            self._expectation_explorer_manager = ExpectationExplorer()
+
+    def update_return_obj(self, data_asset, return_obj):
+        """Helper called by data_asset.
+
+        Args:
+            data_asset: The data_asset whose validation produced the current return object
+            return_obj: the return object to update
+
+        Returns:
+            return_obj: the return object, potentially changed into a widget by the configured expectation explorer
+        """
+        if self._expectation_explorer:
+            return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
+        else:
+            return return_obj

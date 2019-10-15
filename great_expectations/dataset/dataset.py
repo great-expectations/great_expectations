@@ -19,6 +19,7 @@ from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     build_continuous_partition_object,
+    build_categorical_partition_object,
     is_valid_partition_object,
     is_valid_categorical_partition_object
 )
@@ -49,7 +50,7 @@ class MetaDataset(DataAsset):
         Notes:
             column_map_expectation intercepts and takes action based on the following parameters:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
             column_map_expectation *excludes null values* from being passed to the function
@@ -125,7 +126,7 @@ class MetaDataset(DataAsset):
                 'observed_value': evaluation_result['result']['observed_value'],
                 "element_count": element_count,
                 "missing_count": null_count,
-                "missing_percent": null_count * 1.0 / element_count if element_count > 0 else None
+                "missing_percent": null_count * 100.0 / element_count if element_count > 0 else None
             }
 
             if result_format['result_format'] == 'BASIC':
@@ -164,6 +165,7 @@ class Dataset(MetaDataset):
         'get_column_unique_count',
         'get_column_value_counts',
         'get_row_count',
+        'get_column_count',
         'get_table_columns',
         'get_column_count_in_range',
     ]
@@ -190,6 +192,10 @@ class Dataset(MetaDataset):
         """Returns: int, table row count"""
         raise NotImplementedError
 
+    def get_column_count(self):
+        """Returns: int, table column count"""
+        raise NotImplementedError
+
     def get_table_columns(self):
         """Returns: List[str], list of column names"""
         raise NotImplementedError
@@ -202,8 +208,21 @@ class Dataset(MetaDataset):
         """Returns: float"""
         raise NotImplementedError
 
-    def get_column_value_counts(self, column):
-        """Returns: pd.Series of value counts for a column, sorted by value"""
+    def get_column_value_counts(self, column, sort="value", collate=None):
+        """Get a series containing the frequency counts of unique values from the named column.
+
+        Args:
+            column: the column for which to obtain value_counts
+            sort (string): must be one of "value", "count", or "none".
+                - if "value" then values in the resulting partition object will be sorted lexigraphically
+                - if "count" then values will be sorted according to descending count (frequency)
+                - if "none" then values will not be sorted
+            collate (string): the collate (sort) method to be used on supported backends (SqlAlchemy only)
+
+
+        Returns:
+            pd.Series of value counts for a column, sorted according to the value requested in sort
+        """
         raise NotImplementedError
 
     def get_column_sum(self, column):
@@ -318,7 +337,7 @@ class Dataset(MetaDataset):
             define custom classes, etc. To use developed expectations from the command-line tool, you'll still need to \
             define custom classes, etc.
 
-            Check out :ref:`custom_expectations` for more information.
+            Check out :ref:`custom_expectations_reference` for more information.
         """
 
         new_function = self.column_map_expectation(function)
@@ -340,7 +359,7 @@ class Dataset(MetaDataset):
             define custom classes, etc. To use developed expectations from the command-line tool, you'll still need to \
             define custom classes, etc.
 
-            Check out :ref:`custom_expectations` for more information.
+            Check out :ref:`custom_expectations_reference` for more information.
         """
 
         new_function = self.column_aggregate_expectation(function)
@@ -476,28 +495,23 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @DataAsset.expectation(['min_value', 'max_value'])
-    def expect_table_row_count_to_be_between(
+    def expect_table_column_count_to_be_between(
         self,
         min_value=None, max_value=None,
-        strict_min=False, strict_max=False,
         result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
-        """Expect the number of rows to be between two values.
+        """Expect the number of columns to be between two values.
 
-        expect_table_row_count_to_be_between is a :func:`expectation \
+        expect_table_column_count_to_be_between is a :func:`expectation \
         <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
         ``column_map_expectation`` or ``column_aggregate_expectation``.
 
         Keyword Args:
             min_value (int or None): \
-                The minimum number of rows, inclusive unless strict_min=True.
+                The minimum number of columns, inclusive.
             max_value (int or None): \
-                The maximum number of rows, inclusive unless strict_max=True.
-            strict_min (boolean):
-                If True, the table row count must be strictly larger than min_value.
-            strict_max (boolean):
-                If True, the table row count be strictly smaller than max_value.
+                The maximum number of columns, inclusive.
 
         Other Parameters:
             result_format (str or None): \
@@ -520,7 +534,150 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         Notes:
-            * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable columns \
+              has no minimum.
+            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable columns \
+              has no maximum.
+
+        See Also:
+            expect_table_column_count_to_equal
+        """
+        try:
+            if min_value is not None:
+                if not float(min_value).is_integer():
+                    raise ValueError("min_value must be integer")
+            if max_value is not None:
+                if not float(max_value).is_integer():
+                    raise ValueError("max_value must be integer")
+        except ValueError:
+            raise ValueError("min_value and max_value must be integers")
+
+        # check that min_value or max_value is set
+        # if min_value is None and max_value is None:
+        #     raise Exception('Must specify either or both of min_value and max_value')
+
+        column_count = self.get_column_count()
+
+        if min_value is not None:
+            above_min = column_count >= min_value
+        else:
+            above_min = True
+
+        if max_value is not None:
+            below_max = column_count <= max_value
+        else:
+            below_max = True
+
+        outcome = above_min and below_max
+
+        return {
+            'success': outcome,
+            'result': {
+                'observed_value': column_count
+            }
+        }
+
+    # noinspection PyUnusedLocal
+    @DocInherit
+    @DataAsset.expectation(['value'])
+    def expect_table_column_count_to_equal(
+            self,
+            value,
+            result_format=None, include_config=False, catch_exceptions=None,
+            meta=None
+    ):
+        """Expect the number of columns to equal a value.
+
+        expect_table_column_count_to_equal is a :func:`expectation \
+        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        ``column_map_expectation`` or ``column_aggregate_expectation``.
+
+        Args:
+            value (int): \
+                The expected number of columns.
+
+        Other Parameters:
+            result_format (string or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        See Also:
+            expect_table_column_count_to_be_between
+        """
+        try:
+            if not float(value).is_integer():
+                raise ValueError("value must be an integer")
+        except ValueError:
+            raise ValueError("value must be an integer")
+
+        column_count = self.get_column_count()
+
+        return {
+            'success': column_count == value,
+            'result': {
+                'observed_value': column_count
+            }
+        }
+
+    # noinspection PyUnusedLocal
+    @DocInherit
+    @DataAsset.expectation(['min_value', 'max_value'])
+    def expect_table_row_count_to_be_between(
+        self,
+        min_value=None, max_value=None,
+        result_format=None, include_config=False, catch_exceptions=None,
+        meta=None,
+    ):
+        """Expect the number of rows to be between two values.
+
+        expect_table_row_count_to_be_between is a :func:`expectation \
+        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        ``column_map_expectation`` or ``column_aggregate_expectation``.
+
+        Keyword Args:
+            min_value (int or None): \
+                The minimum number of rows, inclusive.
+            max_value (int or None): \
+                The maximum number of rows, inclusive.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            * min_value and max_value are both inclusive.
             * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has \
               no minimum.
             * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has \
@@ -546,18 +703,12 @@ class Dataset(MetaDataset):
         row_count = self.get_row_count()
 
         if min_value is not None:
-            if strict_min:
-                above_min = row_count > min_value
-            else:
-                above_min = row_count >= min_value
+            above_min = row_count >= min_value
         else:
             above_min = True
 
         if max_value is not None:
-            if strict_max:
-                below_max = row_count < max_value
-            else:
-                below_max = row_count <= max_value
+            below_max = row_count <= max_value
         else:
             below_max = True
 
@@ -643,7 +794,7 @@ class Dataset(MetaDataset):
         This expectation detects duplicates. All duplicated values are counted as exceptions.
 
         For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `result.exceptions_list`, with \
-        `unexpected_percent = 0.6`.
+        `unexpected_percent = 60.0`.
 
         expect_column_values_to_be_unique is a \
         :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
@@ -654,7 +805,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -698,7 +849,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -744,7 +895,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -806,7 +957,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -865,7 +1016,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -923,8 +1074,8 @@ class Dataset(MetaDataset):
               "success": false
               "result": {
                 "unexpected_count": 1
-                "unexpected_percent": 0.16666666666666666,
-                "unexpected_percent_nonmissing": 0.16666666666666666,
+                "unexpected_percent": 16.66666666666666666,
+                "unexpected_percent_nonmissing": 16.66666666666666666,
                 "partial_unexpected_list": [
                   1
                 ],
@@ -942,7 +1093,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
             parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
                 datetimes before making comparisons.
@@ -996,8 +1147,8 @@ class Dataset(MetaDataset):
               "success": false
               "result": {
                 "unexpected_count": 3
-                "unexpected_percent": 0.5,
-                "unexpected_percent_nonmissing": 0.5,
+                "unexpected_percent": 50.0,
+                "unexpected_percent_nonmissing": 50.0,
                 "partial_unexpected_list": [
                   1, 2, 2
                 ],
@@ -1015,7 +1166,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1082,7 +1233,7 @@ class Dataset(MetaDataset):
                 A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
 
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1145,7 +1296,7 @@ class Dataset(MetaDataset):
             parse_strings_as_datetimes (boolean or None) : \
                 If True, all non-null column values to datetimes before making comparisons
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1203,7 +1354,7 @@ class Dataset(MetaDataset):
             parse_strings_as_datetimes (boolean or None) : \
                 If True, all non-null column values to datetimes before making comparisons
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1244,8 +1395,6 @@ class Dataset(MetaDataset):
             column,
             min_value=None,
             max_value=None,
-            strict_min=False,
-            strict_max=False,
             mostly=None,
             result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
@@ -1266,12 +1415,8 @@ class Dataset(MetaDataset):
             max_value (int or None): \
                 The maximum value for a column entry length.
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
-            strict_min (boolean):
-                If True, value lengths must be strictly larger than min_value, default=False
-            strict_max (boolean):
-                If True, value lengths must be strictly smaller than max_value, default=False
 
         Other Parameters:
             result_format (str or None): \
@@ -1294,7 +1439,7 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         Notes:
-            * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+            * min_value and max_value are both inclusive.
             * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has \
               no minimum.
             * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has \
@@ -1328,7 +1473,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1379,7 +1524,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1434,7 +1579,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1491,7 +1636,7 @@ class Dataset(MetaDataset):
                 Use "any" if the value should match at least one regular expression in the list.
                 Use "all" if it should match each regular expression in the list.
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1544,7 +1689,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1600,7 +1745,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1643,7 +1788,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1686,7 +1831,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1734,7 +1879,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
+                Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -2604,7 +2749,6 @@ class Dataset(MetaDataset):
         self,
         column,
         min_value=None, max_value=None,
-        strict_min=False, strict_max=False,
         result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
@@ -2620,10 +2764,6 @@ class Dataset(MetaDataset):
                 The minimum number of unique values allowed.
             max_value (int or None): \
                 The maximum number of unique values allowed.
-            strict_min (boolean):
-                If True, the number of unique values must be strictly larger than min_value, default=False
-            strict_max (boolean):
-                If True, the number of unique values must be strictly smaller than max_value, default=False
 
         Other Parameters:
             result_format (str or None): \
@@ -2653,7 +2793,7 @@ class Dataset(MetaDataset):
                     "observed_value": (int) The number of unique values in the column
                 }
 
-            * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+            * min_value and max_value are both inclusive.
             * If min_value is None, then max_value is treated as an upper bound
             * If max_value is None, then min_value is treated as a lower bound
 
@@ -2673,18 +2813,12 @@ class Dataset(MetaDataset):
             }
 
         if min_value is not None:
-            if strict_min:
-                above_min = unique_value_count > min_value
-            else:
-                above_min = unique_value_count >= min_value
+            above_min = unique_value_count >= min_value
         else:
             above_min = True
 
         if max_value is not None:
-            if strict_max:
-                below_max = unique_value_count < max_value
-            else:
-                below_max = unique_value_count <= max_value
+            below_max = unique_value_count <= max_value
         else:
             below_max = True
 
@@ -3459,6 +3593,7 @@ class Dataset(MetaDataset):
         threshold=None,
         tail_weight_holdout=0,
         internal_weight_holdout=0,
+        bucketize_data=True,
         result_format=None, include_config=False, catch_exceptions=None,
         meta=None
     ):
@@ -3488,7 +3623,7 @@ class Dataset(MetaDataset):
         Keyword Args:
             internal_weight_holdout (float between 0 and 1 or None): \
                 The amount of weight to split uniformly among zero-weighted partition bins. internal_weight_holdout \
-                provides a mechanims to make the test less strict by assigning positive weights to values observed in \
+                provides a mechanisms to make the test less strict by assigning positive weights to values observed in \
                 the data for which the partition explicitly expected zero weight. With no internal_weight_holdout, \
                 any value observed in such a region will cause KL divergence to rise to +Infinity.\
                 Defaults to 0.
@@ -3499,6 +3634,10 @@ class Dataset(MetaDataset):
                 values observed in the data that are not present in the partition. With no tail_weight_holdout, \
                 any value observed outside the provided partition_object will cause KL divergence to rise to +Infinity.\
                 Defaults to 0.
+            bucketize_data (boolean): If True, then continuous data will be bucketized before evaluation. Setting
+                this parameter to false allows evaluation of KL divergence with a None partition object for profiling
+                against discrete data.
+
 
         Other Parameters:
             result_format (str or None): \
@@ -3567,7 +3706,10 @@ class Dataset(MetaDataset):
 
         """
         if partition_object is None:
-            partition_object = build_continuous_partition_object(dataset=self, column=column, bins='uniform')
+            if bucketize_data:
+                partition_object = build_continuous_partition_object(dataset=self, column=column, bins='auto')
+            else:
+                partition_object = build_categorical_partition_object(dataset=self, column=column)
 
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
@@ -3651,6 +3793,11 @@ class Dataset(MetaDataset):
 
         else:
             # Data are expected to be continuous; discretize first
+            if bucketize_data is False:
+                raise ValueError(
+                    "KL Divergence cannot be computed with a continuous partition object and the bucketize_data "
+                    "parameter set to false."
+                )
             # Build the histogram first using expected bins so that the largest bin is >=
             hist = np.array(self.get_column_hist(column, tuple(partition_object['bins'])))
             # np.histogram(column, partition_object['bins'], density=False)
