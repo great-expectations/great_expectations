@@ -659,7 +659,7 @@ class ConfigOnlyDataContext(object):
             BatchKwargs
 
         """
-        if not isinstance(data_asset_name, NormalizedDataAssetName, DataAssetIdentifier):
+        if not isinstance(data_asset_name, (NormalizedDataAssetName, DataAssetIdentifier)):
             data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(data_asset_name.datasource)
