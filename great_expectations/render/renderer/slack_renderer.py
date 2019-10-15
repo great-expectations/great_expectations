@@ -24,6 +24,7 @@ class SlackRenderer(Renderer):
 
         query = {
             "blocks": [title_block],
+            # this abbreviated root level "text" will show up in the notification and not the message
             "text": default_text
         }
 
@@ -61,6 +62,7 @@ class SlackRenderer(Renderer):
                 check_details_text
             )
             query["blocks"][0]["text"]["text"] = summary_text
+            # this abbreviated root level "text" will show up in the notification and not the message
             query["text"] = "{}: {}".format(data_asset_name, status)
 
             if "result_reference" in validation_json["meta"]:
