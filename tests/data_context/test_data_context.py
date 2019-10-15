@@ -656,32 +656,6 @@ data_docs/
     )
 
 
-def test_move_validation_to_fixtures(titanic_data_context):
-    profiling_results = titanic_data_context.profile_datasource("mydatasource")
-    all_validation_result = titanic_data_context.get_validation_result(
-        "mydatasource/mygenerator/Titanic",
-        "BasicDatasetProfiler",
-        "profiling"
-    )
-    # print(all_validation_result)
-    assert len(all_validation_result["results"]) == 51
-
-    assert titanic_data_context.stores["fixture_validation_results_store"].list_keys() == []
-
-    titanic_data_context.move_validation_to_fixtures(
-        "mydatasource/mygenerator/Titanic",
-        "BasicDatasetProfiler",
-        "profiling"
-    )
-
-    # titanic_data_context.stores["fixtures"].get(
-    #     "mydatasource/mygenerator/Titanic",
-    #     "BasicDatasetProfiler",
-    #     "profiling"
-    # )
-    assert len(titanic_data_context.stores["fixture_validation_results_store"].list_keys()) == 1
-
-
 def test_add_store(empty_data_context):
     assert "my_new_store" not in empty_data_context.stores.keys()
     assert "my_new_store" not in empty_data_context.get_config()["stores"]
