@@ -77,6 +77,7 @@ def test_list_expectation_suite_keys(data_context):
         )
     ]
 
+
 def test_get_existing_data_asset_config(data_context):
     data_asset_config = data_context.get_expectation_suite('mydatasource/mygenerator/my_dag_node', 'default')
     assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/my_dag_node'
@@ -655,32 +656,6 @@ data_docs/
     )
 
 
-def test_move_validation_to_fixtures(titanic_data_context):
-    profiling_results = titanic_data_context.profile_datasource("mydatasource")
-    all_validation_result = titanic_data_context.get_validation_result(
-        "mydatasource/mygenerator/Titanic",
-        "BasicDatasetProfiler",
-        "profiling"
-    )
-    # print(all_validation_result)
-    assert len(all_validation_result["results"]) == 51
-
-    assert titanic_data_context.stores["fixture_validation_results_store"].list_keys() == []
-
-    titanic_data_context.move_validation_to_fixtures(
-        "mydatasource/mygenerator/Titanic",
-        "BasicDatasetProfiler",
-        "profiling"
-    )
-
-    # titanic_data_context.stores["fixtures"].get(
-    #     "mydatasource/mygenerator/Titanic",
-    #     "BasicDatasetProfiler",
-    #     "profiling"
-    # )
-    assert len(titanic_data_context.stores["fixture_validation_results_store"].list_keys()) == 1
-
-
 def test_add_store(empty_data_context):
     assert "my_new_store" not in empty_data_context.stores.keys()
     assert "my_new_store" not in empty_data_context.get_config()["stores"]
@@ -1136,3 +1111,11 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
         "create_expectations.ipynb",
         "integrate_validation_into_pipeline.ipynb"
     }
+
+
+def test_build_batch_kwargs(titanic_multibatch_data_context):
+    data_asset_name = titanic_multibatch_data_context.normalize_data_asset_name("titanic")
+    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(data_asset_name, "Titanic_1911")
+    assert "./data/titanic/Titanic_1911.csv" in batch_kwargs["path"]
+    assert "partition_id" in batch_kwargs
+    assert batch_kwargs["partition_id"] == "Titanic_1911"
