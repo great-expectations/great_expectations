@@ -1,16 +1,16 @@
 from great_expectations.types import (
-    LooselyTypedDotDict,
+    AllowedKeysDotDict,
     ListOf,
 )
 
 # TODO: Rename to this:
-# class RenderedContent(LooselyTypedDotDict):
+# class RenderedContent(AllowedKeysDotDict):
     # class RenderedComponentContent(RenderedContent):
     # class RenderedSectionContent(RenderedContent):
     # class RenderedDocumentContentContent(RenderedContent):
     # class RenderedComponentContentWrapper(RenderedContent):
 
-class RenderedContent(LooselyTypedDotDict):
+class RenderedContent(AllowedKeysDotDict):
     pass
 
 class RenderedComponentContent(RenderedContent):
@@ -18,9 +18,7 @@ class RenderedComponentContent(RenderedContent):
     _allowed_keys = set([
         "content_block_type",
         "header",
-        #TODO: There can be only one!
         "subheader",
-        "sub_header",
         "styling",
 
         "string_template",

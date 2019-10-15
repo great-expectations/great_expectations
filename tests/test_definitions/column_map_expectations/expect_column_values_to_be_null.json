@@ -30,8 +30,6 @@
             "success": true,
             "result": {
               "element_count": 4,
-              "missing_count": 0,
-              "missing_percent": 0.0,
               "unexpected_count": 0,
               "unexpected_percent": 0.0,
               "partial_unexpected_list": []

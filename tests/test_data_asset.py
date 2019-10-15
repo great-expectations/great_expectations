@@ -429,7 +429,7 @@ class TestDataAsset(unittest.TestCase):
                 'result': {
                     'element_count': 20,
                     'missing_count': 5,
-                    'missing_percent': 0.25,
+                    'missing_percent': 25.0,
                     'partial_unexpected_list': [],
                     'unexpected_count': 0,
                     'unexpected_percent': 0.0,
@@ -452,7 +452,7 @@ class TestDataAsset(unittest.TestCase):
                 'result': {
                     'element_count': 20,
                     'missing_count': 5,
-                    'missing_percent': 0.25,
+                    'missing_percent': 25.0,
                     'partial_unexpected_list': [],
                     'unexpected_count': 0,
                     'unexpected_percent': 0.0,
@@ -478,7 +478,7 @@ class TestDataAsset(unittest.TestCase):
                     {
                         'element_count': 20,
                         'missing_count': 5,
-                        'missing_percent': 0.25,
+                        'missing_percent': 25.0,
                         'partial_unexpected_list': [],
                         'unexpected_count': 0,
                         'unexpected_percent': 0.0,
@@ -528,7 +528,7 @@ class TestDataAsset(unittest.TestCase):
                 'result': {
                     'element_count': 20,
                     'missing_count': 20,
-                    'missing_percent': 1,
+                    'missing_percent': 100,
                     'partial_unexpected_list': [],
                     'unexpected_count': 0,
                     'unexpected_percent': 0.0,
@@ -551,7 +551,7 @@ class TestDataAsset(unittest.TestCase):
                 'result': {
                     'element_count': 20,
                     'missing_count': 20,
-                    'missing_percent': 1,
+                    'missing_percent': 100,
                     'partial_unexpected_list': [],
                     'unexpected_count': 0,
                     'unexpected_percent': 0.0,
@@ -576,7 +576,7 @@ class TestDataAsset(unittest.TestCase):
                 'result': {
                     'element_count': 20,
                     'missing_count': 20,
-                    'missing_percent': 1,
+                    'missing_percent': 100,
                     'partial_unexpected_list': [],
                     'unexpected_count': 0,
                     'unexpected_percent': 0.0,

@@ -10,7 +10,7 @@ import datetime
 from six import PY3, string_types
 from collections import namedtuple, Hashable, Counter, defaultdict
 
-from great_expectations.version import __version__
+from great_expectations import __version__ as ge_version
 from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
     parse_result_format,
@@ -49,6 +49,8 @@ class DataAsset(object):
         expectation_suite_name = kwargs.pop("expectation_suite_name", None)
         data_context = kwargs.pop("data_context", None)
         batch_kwargs = kwargs.pop("batch_kwargs", None)
+        batch_id = kwargs.pop("batch_id", None)
+
         if "autoinspect_func" in kwargs:
             warnings.warn("Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).",
                           category=DeprecationWarning)
@@ -63,12 +65,15 @@ class DataAsset(object):
         )
         self._data_context = data_context
         self._batch_kwargs = batch_kwargs
+        self._batch_id = batch_id
 
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
         self._active_validation = False
         if profiler is not None:
             profiler.profile(self)
+        if data_context and hasattr(data_context, '_expectation_explorer_manager'):
+            self.set_default_expectation_argument("include_config", True)
 
     def autoinspect(self, profiler):
         """Deprecated: use profile instead.
@@ -98,6 +103,10 @@ class DataAsset(object):
         """
         expectation_suite, validation_results = profiler.profile(self)
         return expectation_suite, validation_results
+
+    #TODO: add warning if no expectation_explorer_manager and how to turn on
+    def edit_expectation_suite(self):
+        return self._data_context._expectation_explorer_manager.edit_expectation_suite(self)
 
     @classmethod
     def expectation(cls, method_arg_names):
@@ -612,8 +621,17 @@ class DataAsset(object):
     def get_config_value(self, key):
         return self._config[key]
 
-    def get_batch_kwargs(self):
+    @property
+    def batch_kwargs(self):
         return self._batch_kwargs
+
+    @property
+    def batch_id(self):
+        return self._batch_id
+
+    @property
+    def batch_fingerprint(self):
+        return self._batch_id.batch_fingerprint
 
     def discard_failing_expectations(self):
         res = self.validate(only_return_failures=True).get('results')
@@ -770,21 +788,6 @@ class DataAsset(object):
         logger.info(message + settings_message)
         return expectation_suite
 
-    def save_expectations_config(
-        self,
-        filepath=None,
-        discard_failed_expectations=True,
-        discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-        suppress_warnings=False
-    ):
-        warnings.warn("save_expectations_config is deprecated, and will be removed in a future release. " +
-                      "Please use save_expectation_suite instead.", DeprecationWarning)
-        self.save_expectation_suite(
-            filepath, discard_failed_expectations, discard_result_format_kwargs,
-            discard_include_config_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
-
     def save_expectation_suite(
         self,
         filepath=None,
@@ -836,7 +839,11 @@ class DataAsset(object):
         else:
             raise ValueError("Unable to save config: filepath or data_context must be available.")
 
-    def validate(self, 
+    #TODO: when validate is called and expectation editor is in data_context, need to bypass widget creation
+    # NOTE : Abe 2019/09/21 : This method contains a lot of logic that will need to be split between
+    # the DataContextAwareDataAsset and BasicDataAsset classes, when we created those typed classes.
+    # Some of the ContextAware logic may go to live in the DataContext itself.
+    def validate(self,
                  expectation_suite=None, 
                  run_id=None,
                  data_context=None,
@@ -939,7 +946,7 @@ class DataAsset(object):
             # So, we load them in reverse order
 
             if data_context is not None:
-                runtime_evaluation_parameters = data_context.bind_evaluation_parameters(run_id)  # , expectation_suite)
+                runtime_evaluation_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
             else:
                 runtime_evaluation_parameters = {}
 
@@ -954,11 +961,11 @@ class DataAsset(object):
 
             # Warn if our version is different from the version in the configuration
             try:
-                if expectation_suite['meta']['great_expectations.__version__'] != __version__:
+                if expectation_suite['meta']['great_expectations.__version__'] != ge_version:
                     warnings.warn(
                         "WARNING: This configuration object was built using version %s of great_expectations, but "
                         "is currently being valided by version %s."
-                        % (expectation_suite['meta']['great_expectations.__version__'], __version__))
+                        % (expectation_suite['meta']['great_expectations.__version__'], ge_version))
             except KeyError:
                 warnings.warn(
                     "WARNING: No great_expectations version found in configuration object.")
@@ -1003,6 +1010,7 @@ class DataAsset(object):
 
                     result = expectation_method(
                         catch_exceptions=catch_exceptions,
+                        include_config=True,
                         **evaluation_args
                     )
 
@@ -1058,7 +1066,7 @@ class DataAsset(object):
                     "success_percent": statistics.success_percent,
                 },
                 "meta": {
-                    "great_expectations.__version__": __version__,
+                    "great_expectations.__version__": ge_version,
                     "data_asset_name": data_asset_name,
                     "expectation_suite_name": expectation_suite_name
                 }
@@ -1075,9 +1083,6 @@ class DataAsset(object):
 
             if self._batch_kwargs is not None:
                 result["meta"].update({"batch_kwargs": self._batch_kwargs})
-
-            if data_context is not None:
-                result = data_context.register_validation_results(run_id, result, self)
 
             self._data_context = validate__data_context
         except Exception:
@@ -1126,7 +1131,7 @@ class DataAsset(object):
         """Gets the current name of this data_asset as stored in the expectations configuration."""
         return self._expectation_suite.get("data_asset_name", None)
 
-    def set_expectation_suite_name(self, expectation_suite_name):
+    def save_expectation_suite_name(self, expectation_suite_name):
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
         self._expectation_suite["expectation_suite_name"] = expectation_suite_name
     
@@ -1204,11 +1209,11 @@ class DataAsset(object):
         missing_count = element_count - nonnull_count
 
         if element_count > 0:
-            unexpected_percent = unexpected_count / element_count
-            missing_percent = missing_count / element_count
+            unexpected_percent = unexpected_count / element_count * 100
+            missing_percent = missing_count / element_count * 100
 
             if nonnull_count > 0:
-                unexpected_percent_nonmissing = unexpected_count / nonnull_count
+                unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
             else:
                 unexpected_percent_nonmissing = None
 
@@ -1277,7 +1282,7 @@ class DataAsset(object):
             nonnull_count (int): \
                 The number of nonnull values in the column
             mostly (float or None): \
-                A value between 0 and 1 (or None), indicating the percentage of successes required to pass the \
+                A value between 0 and 1 (or None), indicating the fraction of successes required to pass the \
                 expectation as a whole. If mostly=None, then all values must succeed in order for the expectation as \
                 a whole to succeed.
 
@@ -1323,7 +1328,7 @@ class DataAsset(object):
             define custom classes, etc. To use developed expectations from the command-line tool, you will still need \
             to define custom classes, etc.
 
-            Check out :ref:`custom_expectations` for more information.
+            Check out :ref:`custom_expectations_reference` for more information.
         """
 
         if PY3:

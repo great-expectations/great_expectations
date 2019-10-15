@@ -169,6 +169,8 @@ class MetaSqlAlchemyDataset(Dataset):
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 # These results are unnecessary for the above expectations
                 del return_obj['result']['unexpected_percent_nonmissing']
+                del return_obj['result']['missing_count']
+                del return_obj['result']['missing_percent']
                 try:
                     del return_obj['result']['partial_unexpected_counts']
                     del return_obj['result']['partial_unexpected_list']
@@ -248,13 +250,28 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def head(self, n=5):
         """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
-        return PandasDataset(
-            next(pd.read_sql_table(
+
+        try:
+            df = next(pd.read_sql_table(
                 table_name=self._table.name,
                 schema=self._table.schema,
                 con=self.engine,
                 chunksize=n
-            )),
+            ))
+        except ValueError:
+            # it looks like MetaData that is used by pd.read_sql_table
+            # cannot work on a temp table.
+            # If it fails, we are trying to get the data using read_sql
+            head_sql_str = "select * from "
+            if self._table.schema:
+                head_sql_str += self._table.schema + "."
+            head_sql_str += self._table.name
+            head_sql_str += " limit {0:d}".format(n)
+
+            df = pd.read_sql(head_sql_str, con=self.engine)
+
+        return PandasDataset(
+            df,
             expectation_suite=self.get_expectation_suite(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
@@ -267,6 +284,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         count_query = sa.select([sa.func.count()]).select_from(
             self._table)
         return self.engine.execute(count_query).scalar()
+
+    def get_column_count(self):
+        return len(self.columns)
 
     def get_table_columns(self):
         return [col['name'] for col in self.columns]
@@ -310,14 +330,29 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 self._table)
         ).scalar()
     
-    def get_column_value_counts(self, column):
-        results = self.engine.execute(
-            sa.select([
+    def get_column_value_counts(self, column, sort="value", collate=None):
+        if sort not in ["value", "count", "none"]:
+            raise ValueError(
+                "sort must be either 'value', 'count', or 'none'"
+            )
+
+        query = sa.select([
                 sa.column(column).label("value"),
                 sa.func.count(sa.column(column)).label("count"),
             ]).where(sa.column(column) != None) \
-              .group_by(sa.column(column)) \
-              .select_from(self._table)).fetchall()
+              .group_by(sa.column(column))
+        if sort == "value":
+            # NOTE: depending on the way the underlying database collates columns,
+            # ordering can vary. postgresql collate "C" matches default sort
+            # for python and most other systems, but is not universally supported,
+            # so we use the default sort for the system, unless specifically overridden
+            if collate is not None:
+                query = query.order_by(sa.column(column).collate(collate))
+            else:
+                query = query.order_by(sa.column(column))
+        elif sort == "count":
+            query = query.order_by(sa.column("count").desc())
+        results = self.engine.execute(query.select_from(self._table)).fetchall()
         series = pd.Series(
             [row[1] for row in results],
             index=pd.Index(
@@ -326,7 +361,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ),
             name="count"
         )
-        series.sort_index(inplace=True)
         return series
 
     def get_column_mean(self, column):

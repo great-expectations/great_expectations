@@ -20,7 +20,7 @@
             "observed_value": [1, 2],
             "element_count": 10,
             "missing_count": 5,
-            "missing_percent": 0.5
+            "missing_percent": 50.0
           }
         }
       },{

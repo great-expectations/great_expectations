@@ -1,0 +1,9 @@
+# This must have all the required keys one with an incorrect type
+config_version: "foo"
+plugins_directory: "foo"
+expectations_store_name: expectations_store
+evaluation_parameter_store_name: "foo"
+datasources: "foo"
+stores: "foo"
+validations_store_name: "foo"
+data_docs_sites: "foo"

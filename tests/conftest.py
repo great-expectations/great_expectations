@@ -7,6 +7,7 @@ import warnings
 
 import pandas as pd
 import numpy as np
+
 import sqlalchemy as sa
 
 import great_expectations as ge
@@ -262,23 +263,103 @@ def non_numeric_high_card_dataset(request):
             "pIX0vhOzql5c6Z6NpLbzc8MvYiONyT54", "nvyCo3MkIK4tS6rkuL4Yw1RgGKwhm4c2", "prQGAOvQbB8fQIrp8xaLXmGwcxDcCnqt",
             "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "mty9rQJBeTsBQ7ra8vWRbBaWulzhWRSG", "JL38Vw7yERPC4gBplBaixlbpDg8V7gC6",
             "MylTvGl5L1tzosEcgGCQPjIRN6bCUwtI", "hmr0LNyYObqe5sURs408IhRb50Lnek5K"
+        ],
+        # Built from highcardnonnum using the following:
+        # vals = pd.Series(data["highcardnonnum"])
+        # sample_vals = vals.sample(n=10, random_state=42)
+        # weights = np.random.RandomState(42).rand(10)
+        # weights = weights / np.sum(weights)
+        # new_vals = sample_vals.sample(n=200, weights=weights, replace=True, random_state=11)
+        "medcardnonnum": [
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'mS2AVcLFp6i36sX7yAUrdfM0g0RB2X4D', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'NfX4KfEompMbbKloFq8NQpdXtk5PjaPe',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'NfX4KfEompMbbKloFq8NQpdXtk5PjaPe', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'NfX4KfEompMbbKloFq8NQpdXtk5PjaPe', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'NfX4KfEompMbbKloFq8NQpdXtk5PjaPe', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ',
+            'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP',
+            'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'NhTsracusfp5V6zVeWqLZnychDl7jjO4', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk', 'T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP', 'NhTsracusfp5V6zVeWqLZnychDl7jjO4',
+            'k8B9KCXhaQb6Q82zFbAzOESAtDxK174J', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer', '2K8njWnvuq1u6tkzreNhxTEyO8PTeWer',
+            'ajcLVizD2vwZlmmGKyXYki03SWn7fnt3', 'oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ'
         ]
     }
     schemas = {
         "pandas": {
             "highcardnonnum": "str",
+            "medcardnonnum": "str",
         },
         "postgresql": {
             "highcardnonnum": "TEXT",
+            "medcardnonnum": "TEXT",
         },
         "sqlite": {
             "highcardnonnum": "VARCHAR",
+            "medcardnonnum": "VARCHAR",
         },
         "mysql": {
             "highcardnonnum": "TEXT",
+            "medcardnonnum": "TEXT",
         },
         "spark": {
             "highcardnonnum": "StringType",
+            "medcardnonnum": "StringType",
         }
     }
     return get_dataset(request.param, data, schemas=schemas)
@@ -332,6 +413,35 @@ def dataset(request):
 
 
 @pytest.fixture
+def sqlalchemy_dataset():
+    """Provide dataset fixtures that have special values and/or are otherwise useful outside
+    the standard json testing framework"""
+    if "postgresql" in CONTEXTS:
+        backend = "postgresql"
+    else:
+        backend = "sqlite"
+
+    data = {
+        "infinities": [-np.inf, -10, -np.pi, 0, np.pi, 10/2.2, np.inf],
+        "nulls": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
+        "naturals": [1, 2, 3, 4, 5, 6, 7]
+    }
+    schemas = {
+        "postgresql": {
+            "infinities": "DOUBLE_PRECISION",
+            "nulls": "DOUBLE_PRECISION",
+            "naturals": "DOUBLE_PRECISION"
+        },
+        "sqlite": {
+            "infinities": "FLOAT",
+            "nulls": "FLOAT",
+            "naturals": "FLOAT"
+        }
+    }
+    return get_dataset(backend, data, schemas=schemas, profiler=None)
+
+
+@pytest.fixture
 def sqlitedb_engine():
     return sa.create_engine('sqlite://')
 
@@ -359,6 +469,79 @@ def titanic_data_context(tmp_path_factory):
     shutil.copy("./tests/test_sets/Titanic.csv",
                 str(os.path.join(context_path, "../data/Titanic.csv")))
     return ge.data_context.DataContext(context_path)
+
+@pytest.fixture
+def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, filesystem_csv_3):
+    base_dir = str(tmp_path_factory.mktemp("project_dir"))
+    project_dir = os.path.join(base_dir, "project_path")
+    os.mkdir(project_dir)
+
+    os.makedirs(os.path.join(project_dir, "data"))
+    os.makedirs(os.path.join(project_dir, "data/titanic"))
+    curdir = os.path.abspath(os.getcwd())
+    shutil.copy(
+        "./tests/test_sets/Titanic.csv",
+        str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
+    )
+
+    os.makedirs(os.path.join(project_dir, "data/random"))
+    curdir = os.path.abspath(os.getcwd())
+    shutil.copy(
+        os.path.join(filesystem_csv_3, "f1.csv"),
+        str(os.path.join(project_dir, "data/random/f1.csv"))
+    )
+    shutil.copy(
+        os.path.join(filesystem_csv_3, "f2.csv"),
+        str(os.path.join(project_dir, "data/random/f2.csv"))
+    )
+
+    ge_directory = os.path.join(project_dir, "great_expectations")
+    shutil.copy("./tests/test_fixtures/great_expectations_site_builder.yml",
+                str(os.path.join(project_dir, "great_expectations.yml")))
+    context = ge.data_context.DataContext.create(project_dir)
+
+    context.add_datasource(
+        "titanic",
+        type="pandas",
+        base_directory=os.path.join(project_dir, "data/titanic/")
+    )
+    context.add_datasource(
+        "random",
+        type="pandas",
+        base_directory=os.path.join(project_dir, "data/random/")
+    )
+
+    context.profile_datasource("titanic")
+    # print(gen_directory_tree_str(project_dir))
+
+    context.profile_datasource("random")
+    # print(gen_directory_tree_str(project_dir))
+
+    context.profile_datasource(context.list_datasources()[0]["name"])
+
+    return context
+
+@pytest.fixture
+def titanic_multibatch_data_context(tmp_path_factory):
+    """
+    Based on titanic_data_context, but with 2 identical batches of
+    data asset "titanic"
+    :param tmp_path_factory:
+    :return:
+    """
+    project_path = str(tmp_path_factory.mktemp('titanic_data_context'))
+    context_path = os.path.join(project_path, "great_expectations")
+    safe_mmkdir(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path = os.path.join(context_path, "../data/titanic")
+    safe_mmkdir(os.path.join(data_path), exist_ok=True)
+    shutil.copy("./tests/test_fixtures/great_expectations_titanic.yml",
+                str(os.path.join(context_path, "great_expectations.yml")))
+    shutil.copy("./tests/test_sets/Titanic.csv",
+                str(os.path.join(context_path, "../data/titanic/Titanic_1911.csv")))
+    shutil.copy("./tests/test_sets/Titanic.csv",
+                str(os.path.join(context_path, "../data/titanic/Titanic_1912.csv")))
+    return ge.data_context.DataContext(context_path)
+
 
 
 @pytest.fixture
@@ -429,6 +612,20 @@ def filesystem_csv_3(tmp_path_factory):
 
     return base_dir
 
+@pytest.fixture()
+def filesystem_csv_4(tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp('test_files')
+    base_dir = str(base_dir)
+
+    # Put a file in the directory
+    toy_dataset = PandasDataset({
+        "x": [1, 2, 3],
+        "y": [1, 2, 3],
+    })
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+
+    return base_dir
+
 
 @pytest.fixture
 def titanic_profiled_evrs_1():
@@ -492,8 +689,8 @@ def evr_failed():
         "missing_count": 0,
         "missing_percent": 0.0,
         "unexpected_count": 3,
-        "unexpected_percent": 0.002284843869002285,
-        "unexpected_percent_nonmissing": 0.002284843869002285,
+        "unexpected_percent": 0.2284843869002285,
+        "unexpected_percent_nonmissing": 0.2284843869002285,
         "partial_unexpected_list": [
           "Daly, Mr Peter Denis ",
           "Barber, Ms ",

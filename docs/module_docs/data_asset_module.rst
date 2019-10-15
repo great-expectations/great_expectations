@@ -1,6 +1,6 @@
 .. _data_asset_module:
 
-Data Asset Module
+DataAsset Module
 ==================================
 
 .. automodule:: great_expectations.data_asset.data_asset
@@ -13,7 +13,7 @@ Data Asset Module
         :members:
         :undoc-members:
 
-great_expectations.data_asset.file_data_asset
+FileDataAsset
 ---------------------------------------------
 
 .. automodule:: great_expectations.data_asset.file_data_asset
@@ -32,7 +32,7 @@ great_expectations.data_asset.file_data_asset
         :undoc-members:
         :show-inheritance:
 
-great_expectations.data_asset.util
+util
 ----------------------------------
 
 .. automodule:: great_expectations.data_asset.util

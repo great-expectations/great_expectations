@@ -1,7 +1,5 @@
 import logging
-import warnings
 from .base import DatasetProfiler
-from great_expectations.dataset.dataset import Dataset
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +13,11 @@ class BasicDatasetProfiler(DatasetProfiler):
     Based on the column's type it provides a description of the column by computing a number of statistics,
     such as min, max, mean and median, for numeric columns, and distribution of values, when appropriate.
     """
-    INT_TYPE_NAMES = set(["INTEGER", "int", "INT", "TINYINT", "BYTEINT", "SMALLINT", "BIGINT", "IntegerType", "LongType", "DECIMAL"])
-    FLOAT_TYPE_NAMES = set(["FLOAT", "FLOAT4", "FLOAT8", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"])
-    STRING_TYPE_NAMES = set(["CHAR", "VARCHAR", "TEXT", "StringType", "string", "str"])
-    BOOLEAN_TYPE_NAMES = set(["BOOLEAN", "BOOL", "bool", "BooleanType"])
-    DATETIME_TYPE_NAMES = set(["DATETIME", "DATE", "TIMESTAMP", "DateType", "TimestampType", "datetime64", "Timestamp"])
+    INT_TYPE_NAMES = {"INTEGER", "int", "INT", "TINYINT", "BYTEINT", "SMALLINT", "BIGINT", "IntegerType", "LongType", "DECIMAL"}
+    FLOAT_TYPE_NAMES = {"FLOAT", "FLOAT4", "FLOAT8", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"}
+    STRING_TYPE_NAMES = {"CHAR", "VARCHAR", "TEXT", "StringType", "string", "str"}
+    BOOLEAN_TYPE_NAMES = {"BOOLEAN", "BOOL", "bool", "BooleanType"}
+    DATETIME_TYPE_NAMES = {"DATETIME", "DATE", "TIMESTAMP", "DateType", "TimestampType", "datetime64", "Timestamp"}
 
     @classmethod
     def _get_column_type(cls, df, column):
@@ -116,7 +114,7 @@ class BasicDatasetProfiler(DatasetProfiler):
 
         number_of_columns = len(columns)
         for i, column in enumerate(columns):
-            logger.info("            Preparing column {} of {}: {}".format(i, number_of_columns, column))
+            logger.info("            Preparing column {} of {}: {}".format(i+1, number_of_columns, column))
 
             # df.expect_column_to_exist(column)
 

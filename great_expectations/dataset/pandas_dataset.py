@@ -123,6 +123,8 @@ class MetaPandasDataset(Dataset):
             # FIXME Temp fix for result format
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 del return_obj['result']['unexpected_percent_nonmissing']
+                del return_obj['result']['missing_count']
+                del return_obj['result']['missing_percent']
                 try:
                     del return_obj['result']['partial_unexpected_counts']
                     del return_obj['result']['partial_unexpected_list']
@@ -306,11 +308,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     def __finalize__(self, other, method=None, **kwargs):
         if isinstance(other, PandasDataset):
-            self._initialize_expectations(other.get_expectation_suite(
-                discard_failed_expectations=False,
-                discard_result_format_kwargs=False,
-                discard_include_config_kwargs=False,
-                discard_catch_exceptions_kwargs=False))
+            self._initialize_expectations(other._expectation_suite)
             # If other was coerced to be a PandasDataset (e.g. via _constructor call during self.copy() operation)
             # then it may not have discard_subset_failing_expectations set. Default to self value
             self.discard_subset_failing_expectations = getattr(other, "discard_subset_failing_expectations",
@@ -327,6 +325,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     def get_row_count(self):
         return self.shape[0]
+
+    def get_column_count(self):
+        return self.shape[1]
 
     def get_table_columns(self):
         return list(self.columns)
@@ -355,12 +356,23 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         nonnull_values = series[null_indexes == False]
         return len(nonnull_values)
 
-    def get_column_value_counts(self, column):
-        cnts =  self[column].value_counts()
-        cnts.sort_index(inplace=True)
-        cnts.name = "count"
-        cnts.index.name = "value"
-        return cnts
+    def get_column_value_counts(self, column, sort="value", collate=None):
+        if sort not in ["value", "count", "none"]:
+            raise ValueError(
+                "sort must be either 'value', 'count', or 'none'"
+            )
+        if collate is not None:
+            raise ValueError(
+                "collate parameter is not supported in PandasDataset"
+            )
+        counts = self[column].value_counts()
+        if sort == "value":
+            counts.sort_index(inplace=True)
+        elif sort == "counts":
+            counts.sort_values(inplace=True)
+        counts.name = "count"
+        counts.index.name = "value"
+        return counts
 
     def get_column_unique_count(self, column):
         return self.get_column_value_counts(column).shape[0]
@@ -996,8 +1008,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_value_lengths_to_be_between(self, column,
                                                   min_value=None,
                                                   max_value=None,
-                                                  strict_min=False,
-                                                  strict_max=False,
                                                   mostly=None,
                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
 

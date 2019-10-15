@@ -1,7 +1,10 @@
 from .base import (
     ListOf,
+    DictOf,
     DotDict,
-    LooselyTypedDotDict,
+    RequiredKeysDotDict,
+    AllowedKeysDotDict,
+    OrderedKeysDotDict,
 )
 
 from .expectations import (
@@ -12,5 +15,6 @@ from .expectations import (
 )
 
 from .configurations import (
+    Config,
     ClassConfig
 )

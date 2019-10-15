@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 try:
     from pyspark.sql.functions import (
         udf, col, lit,
+        desc,
         stddev_samp,
         length as length_,
         when,
@@ -162,6 +163,8 @@ class MetaSparkDFDataset(Dataset):
             # FIXME Temp fix for result format
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 del return_obj['result']['unexpected_percent_nonmissing']
+                del return_obj['result']['missing_count']
+                del return_obj['result']['missing_percent']
                 try:
                     del return_obj['result']['partial_unexpected_counts']
                 except KeyError:
@@ -207,6 +210,9 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     def get_row_count(self):
         return self.spark_df.count()
+
+    def get_column_count(self):
+        return len(self.spark_df.columns)
 
     def get_table_columns(self):
         return self.spark_df.columns
@@ -257,13 +263,24 @@ class SparkDFDataset(MetaSparkDFDataset):
             return None
         return result[0][0]
 
-    def get_column_value_counts(self, column):
+    def get_column_value_counts(self, column, sort="value", collate=None):
+        if sort not in ["value", "count", "none"]:
+            raise ValueError(
+                "sort must be either 'value', 'count', or 'none'"
+            )
+        if collate is not None:
+            raise ValueError(
+                "collate parameter is not supported in SparkDFDataset"
+            )
         value_counts = self.spark_df.select(column)\
             .where(col(column).isNotNull())\
             .groupBy(column)\
-            .count()\
-            .orderBy(column)\
-            .collect()
+            .count()
+        if sort == "value":
+            value_counts = value_counts.orderBy(column)
+        elif sort == "count":
+            value_counts = value_counts.orderBy(desc("count"))
+        value_counts = value_counts.collect()
         series = pd.Series(
             [row['count'] for row in value_counts],
             index=pd.Index(
@@ -272,7 +289,6 @@ class SparkDFDataset(MetaSparkDFDataset):
             ),
             name="count"
         )
-        series.sort_index(inplace=True)
         return series
 
     def get_column_unique_count(self, column):
