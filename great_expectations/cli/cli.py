@@ -244,7 +244,7 @@ def _slack_setup(context):
         webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default="")
 
     while not _is_sane_slack_webhook(webhook_url):
-        click.prompt("That URL was not valid.")
+        cli_message("That URL was not valid.\n")
         if not click.confirm(SLACK_SETUP_PROMPT, default=True):
             cli_message(SLACK_LATER)
             return context
