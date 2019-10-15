@@ -61,7 +61,7 @@ def test_db_introspection(sqlalchemy_dataset):
         def __init__(self, engine):
             self.engine = engine
 
-    if not isinstance(sqlalchemy_dataset.engine.dialect, sa.dialects.postgresql.dialect):
+    if sqlalchemy_dataset is None or not isinstance(sqlalchemy_dataset.engine.dialect, sa.dialects.postgresql.dialect):
         pytest.skip("Skipping test that expects postgresql...")
 
     # Get the engine from the dataset
