@@ -62,13 +62,13 @@ SLACK_SETUP_PROMPT = "Would you like to set up Slack data quality notifications?
 SLACK_DOC_LINK = """http://docs.greatexpectations.io/en/latest/getting_started/cli_init.html#configuring-slack-notifications
 """
 
-SLACK_WEBHOOK_PROMPT = """Please add your Slack webhook below.
-  - Getting one is easy!
-""" + SLACK_DOC_LINK
+SLACK_WEBHOOK_PROMPT = """Please add your Slack webhook below. Getting one is easy!
+"""
 
-SLACK_LATER = "To setup Slack later please see this guide:" + SLACK_DOC_LINK
+SLACK_LATER = "\nTo setup Slack later please see the the slack section in the CLI init getting started guide."
 
-SLACK_SETUP_COMPLETE = "OK. <green>Slack is set up.</green> To modify this in the future please see:" + SLACK_DOC_LINK
+SLACK_SETUP_COMPLETE = """
+OK. <green>Slack is set up.</green> To modify this in the future please see the slack section in the CLI init getting started guide."""
 
 ONBOARDING_COMPLETE = """
 Done. You may see new files in `<yellow>great_expectations/uncommitted</yellow>`.
