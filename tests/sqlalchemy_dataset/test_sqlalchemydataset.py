@@ -3,15 +3,13 @@ try:
 except ImportError:
     import mock
 import pytest
-
-from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
-import sqlalchemy as sa
 import pandas as pd
 from ..test_utils import get_dataset
 
+from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
 
 @pytest.fixture
-def custom_dataset():
+def custom_dataset(sa):
     class CustomSqlAlchemyDataset(SqlAlchemyDataset):
 
         @MetaSqlAlchemyDataset.column_map_expectation
@@ -94,17 +92,17 @@ def test_broken_decorator_errors(custom_dataset):
             err)
 
 
-def test_missing_engine_error():
+def test_missing_engine_error(sa):
     with pytest.raises(ValueError) as err:
         SqlAlchemyDataset('test_engine', schema='example')
         assert "Engine or connection_string must be provided." in str(err)
 
 
-def test_only_connection_string():
+def test_only_connection_string(sa):
     SqlAlchemyDataset('test_engine', connection_string='sqlite://')
 
 
-def test_schema_custom_sql_error():
+def test_schema_custom_sql_error(sa):
     engine = sa.create_engine('sqlite://')
 
     with pytest.raises(ValueError) as err:
@@ -113,13 +111,13 @@ def test_schema_custom_sql_error():
         assert "Cannot specify both schema and custom_sql." in str(err)
 
 
-def test_sqlalchemydataset_raises_error_on_missing_table_name():
+def test_sqlalchemydataset_raises_error_on_missing_table_name(sa):
     with pytest.raises(ValueError) as ve:
         SqlAlchemyDataset(table_name=None, engine="foo", connection_string='bar')
     assert str(ve.value) == "No table_name provided."
 
 
-def test_sqlalchemydataset_builds_guid_for_table_name_on_custom_sql():
+def test_sqlalchemydataset_builds_guid_for_table_name_on_custom_sql(sa):
     engine = sa.create_engine('sqlite://')
     with mock.patch("uuid.uuid4") as mock_uuid:
         mock_uuid.return_value = "a-guid-with-dashes-that-will-break-sql"
@@ -128,7 +126,7 @@ def test_sqlalchemydataset_builds_guid_for_table_name_on_custom_sql():
         assert dataset._table.name =="a_guid_with_dashes_that_will_break_sql"
 
 
-def test_sqlalchemydataset_with_custom_sql():
+def test_sqlalchemydataset_with_custom_sql(sa):
     engine = sa.create_engine('sqlite://')
 
     data = pd.DataFrame({
@@ -154,7 +152,7 @@ def test_sqlalchemydataset_with_custom_sql():
     assert result['success'] == False
 
 
-def test_column_fallback():
+def test_column_fallback(sa):
     engine = sa.create_engine('sqlite://')
 
     data = pd.DataFrame({
@@ -182,7 +180,7 @@ def test_column_fallback():
 
 
 @pytest.fixture
-def unexpected_count_df():
+def unexpected_count_df(sa):
     return get_dataset("sqlite", {"a": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
 
 
@@ -198,7 +196,7 @@ def test_sqlalchemy_dataset_view(sqlite_view_engine):
     assert res["success"] is True
 
 
-def test_sqlalchemy_dataset_unexpected_count_calculations(unexpected_count_df):
+def test_sqlalchemy_dataset_unexpected_count_calculations(sa, unexpected_count_df):
     # The partial_unexpected_count should not affect overall success calculations, but should limit number of returned rows
     res1 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "BASIC", "partial_unexpected_count": 2})
     res2 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "BASIC", "partial_unexpected_count": 10})
@@ -218,6 +216,6 @@ def test_sqlalchemy_dataset_unexpected_count_calculations(unexpected_count_df):
     assert res2["result"]["unexpected_count"] == 5
 
 
-def test_result_format_warning(unexpected_count_df):
+def test_result_format_warning(sa, unexpected_count_df):
     with pytest.warns(UserWarning, match=r'Setting result format to COMPLETE for a SqlAlchemyDataset can be dangerous'):
         unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "COMPLETE", "partial_unexpected_count": 2})
