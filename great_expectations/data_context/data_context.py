@@ -430,38 +430,6 @@ class ConfigOnlyDataContext(object):
         else:
             self._data_asset_name_delimiter = new_delimiter
 
-    def move_validation_to_fixtures(self, data_asset_name, expectation_suite_name, run_id):
-        """
-        Move validation results from uncommitted to fixtures/validations to make available for the data doc renderer
-
-        Args:
-            data_asset_name: name of data asset for which to get documentation filepath
-            expectation_suite_name: name of expectation suite for which to get validation location
-            run_id: run_id of validation to get. If no run_id is specified, fetch the latest run_id according to \
-            alphanumeric sort (by default, the latest run_id if using ISO 8601 formatted timestamps for run_id
-
-        Returns:
-            None
-        """
-
-        # NOTE : Once we start consistently generating DataContextKeys at the source, all this packing/unpacking nonsense will vanish like a dream.
-        normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
-        validation_result_identifier = ValidationResultIdentifier(
-            coerce_types=True,
-            **{
-                "expectation_suite_identifier": {
-                    "data_asset_name": tuple(normalized_data_asset_name),
-                    "expectation_suite_name" : expectation_suite_name,
-                },
-                "run_id": run_id,
-            })
-        validation_result = self.stores.validations_store.get(validation_result_identifier)
-
-        self.stores.fixture_validation_results_store.set(
-            validation_result_identifier,
-            json.dumps(validation_result, indent=2)
-        )
-
     #####
     #
     # Internal helper methods
@@ -659,7 +627,7 @@ class ConfigOnlyDataContext(object):
             BatchKwargs
 
         """
-        if not isinstance(data_asset_name, NormalizedDataAssetName, DataAssetIdentifier):
+        if not isinstance(data_asset_name, (NormalizedDataAssetName, DataAssetIdentifier)):
             data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(data_asset_name.datasource)

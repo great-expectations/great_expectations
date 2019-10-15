@@ -12,7 +12,6 @@ from great_expectations.cli.init_messages import (
     BUILD_DOCS_PROMPT,
     COMPLETE_ONBOARDING_PROMPT,
     GREETING,
-    INVALID_SLACK_WEBHOOK_PROMPT,
     LETS_BEGIN_PROMPT,
     NEW_TEMPLATE_INSTALLED,
     NEW_TEMPLATE_PROMPT,
@@ -245,7 +244,11 @@ def _slack_setup(context):
         webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default="")
 
     while not _is_sane_slack_webhook(webhook_url):
-        webhook_url = click.prompt(INVALID_SLACK_WEBHOOK_PROMPT)
+        cli_message("That URL was not valid.\n")
+        if not click.confirm(SLACK_SETUP_PROMPT, default=True):
+            cli_message(SLACK_LATER)
+            return context
+        webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default="")
 
     context.save_config_variable("validation_notification_slack_webhook", webhook_url)
     cli_message(SLACK_SETUP_COMPLETE)
