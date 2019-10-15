@@ -3,12 +3,9 @@ import pytest
 import shutil
 import os
 import json
-import warnings
 
 import pandas as pd
 import numpy as np
-
-import sqlalchemy as sa
 
 import great_expectations as ge
 from great_expectations.dataset.pandas_dataset import PandasDataset
@@ -16,59 +13,89 @@ from great_expectations.data_context.util import safe_mmkdir
 
 from .test_utils import get_dataset
 
-CONTEXTS = ['PandasDataset', 'sqlite']
-
 
 def pytest_configure(config):
     config.addinivalue_line(
-        "markers", "smoketest: mark test as smoketest--it does not have useful assertions but may produce side effects that"
-                     "require manual inspection."
+        "markers", "smoketest: mark test as smoketest--it does not have useful assertions but may produce side effects "
+                   "that require manual inspection."
     )
 
-#####
-#
-# Spark Context
-#
-#####
-try:
-    from pyspark.sql import SparkSession
-    CONTEXTS += ['SparkDFDataset']
-except (ImportError):
-    warnings.warn("pyspark not installed and available for testing.")
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--no-spark", action='store_true', help="If set, suppress tests against the spark test suite"
+    )
+    parser.addoption(
+        "--no-sqlalchemy", action="store_true", help="If set, suppress tests using sqlalchemy; run sqlite tests"
+    )
+    parser.addoption(
+        "--no-postgresql", action="store_true", help="If set, suppress tests against postgresql"
+    )
 
 
-#####
-#
-# Postgresql Context
-#
-#####
-try:
-    ### NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
-    ### SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
-    ### round trip compared to NUMERIC, which stays as a python DECIMAL
+def build_test_backends_list(metafunc):
+    test_backends = ['PandasDataset']
+    no_spark = metafunc.config.getoption("--no-spark")
+    if not no_spark:
+        try:
+            from pyspark.sql import SparkSession
+        except ImportError:
+            raise ValueError("spark tests are requested, but pyspark is not installed")
+        test_backends += ['SparkDFDataset']
+    no_sqlalchemy = metafunc.config.getoption("--no-sqlalchemy")
+    if not no_sqlalchemy:
+        test_backends += ['sqlite']
+        import sqlalchemy as sa
+    no_postgresql = metafunc.config.getoption("--no-postgresql")
+    if not no_postgresql:
+        if no_sqlalchemy:
+            raise ValueError("sqlalchemy tests must be enabled to test with postgresql")
+        ###
+        # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
+        # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
+        # round trip compared to NUMERIC, which stays as a python DECIMAL
 
-    ### Be sure to ensure that tests (and users!) understand that subtelty,
-    ### which can be important for distributional expectations, for example.
-    engine = sa.create_engine('postgresql://postgres@localhost/test_ci')
-    conn = engine.connect()
-    CONTEXTS += ['postgresql']
-    conn.close()
-except (ImportError, sa.exc.SQLAlchemyError):
-    warnings.warn("No postgres context available for testing.")
+        # Be sure to ensure that tests (and users!) understand that subtlety,
+        # which can be important for distributional expectations, for example.
+        ###
+        try:
+            engine = sa.create_engine('postgresql://postgres@localhost/test_ci')
+            conn = engine.connect()
+            conn.close()
+        except (ImportError, sa.exc.SQLAlchemyError):
+            raise ImportError("postgresql tests are requested, but unable to connect to the postgresql database at "
+                              "'postgresql://postgres@localhost/test_ci'")
+        test_backends += ['postgresql']
+    # TODO: enable mysql or other backend tests to be optionally specified
+    # if mysql:
+    #     try:
+    #         engine = sa.create_engine('mysql://root@localhost/test_ci')
+    #         conn = engine.connect()
+    #         test_backends += ['mysql']
+    #         conn.close()
+    #     except (ImportError, sa.exc.SQLAlchemyError):
+    #         warnings.warn("No mysql context available for testing.")
+    return test_backends
 
-#####
-#
-# MySQL context -- TODO FIXME enable these tests
-#
-#####
 
-# try:
-#     engine = sa.create_engine('mysql://root@localhost/test_ci')
-#     conn = engine.connect()
-#     CONTEXTS += ['mysql']
-#     conn.close()
-# except (ImportError, sa.exc.SQLAlchemyError):
-#     warnings.warn("No mysql context available for testing.")
+def pytest_generate_tests(metafunc):
+    test_backends = build_test_backends_list(metafunc)
+    if "test_backend" in metafunc.fixturenames:
+        metafunc.parametrize("test_backend", test_backends)
+    if "test_backends" in metafunc.fixturenames:
+        metafunc.parametrize("test_backends", [test_backends])
+
+
+@pytest.fixture
+def sa(test_backends):
+    if (
+        "postgresql" not in test_backends and
+        "sqlite" not in test_backends
+    ):
+        pytest.skip("No recognized sqlalchemy backend selected.")
+    else:
+        import sqlalchemy as sa
+        return sa
 
 
 @pytest.fixture
@@ -138,8 +165,8 @@ def numeric_high_card_dict():
     return data
 
 
-@pytest.fixture(params=CONTEXTS)
-def numeric_high_card_dataset(request, numeric_high_card_dict):
+@pytest.fixture
+def numeric_high_card_dataset(test_backend, numeric_high_card_dict):
     schemas = {
         "pandas": {
             "norm_0_1": "float64",
@@ -158,11 +185,11 @@ def numeric_high_card_dataset(request, numeric_high_card_dict):
             "norm_0_1": "FloatType",
         }
     }
-    return get_dataset(request.param, numeric_high_card_dict, schemas=schemas)
+    return get_dataset(test_backend, numeric_high_card_dict, schemas=schemas)
 
 
-@pytest.fixture(params=CONTEXTS)
-def non_numeric_low_card_dataset(request):
+@pytest.fixture
+def non_numeric_low_card_dataset(test_backend):
     """Provide dataset fixtures that have special values and/or are otherwise useful outside
     the standard json testing framework"""
 
@@ -186,11 +213,11 @@ def non_numeric_low_card_dataset(request):
             "lowcardnonnum": "StringType",
         }
     }
-    return get_dataset(request.param, data, schemas=schemas)
+    return get_dataset(test_backend, data, schemas=schemas)
 
 
-@pytest.fixture(params=CONTEXTS)
-def non_numeric_high_card_dataset(request):
+@pytest.fixture
+def non_numeric_high_card_dataset(test_backend):
     """Provide dataset fixtures that have special values and/or are otherwise useful outside
     the standard json testing framework"""
 
@@ -362,15 +389,15 @@ def non_numeric_high_card_dataset(request):
             "medcardnonnum": "StringType",
         }
     }
-    return get_dataset(request.param, data, schemas=schemas)
+    return get_dataset(test_backend, data, schemas=schemas)
 
 
-@pytest.fixture(params=CONTEXTS)
-def dataset(request):
+@pytest.fixture
+def dataset(test_backend):
     """Provide dataset fixtures that have special values and/or are otherwise useful outside
     the standard json testing framework"""
     # No infinities for mysql
-    if request.param == "mysql":
+    if test_backend == "mysql":
         data = {
             # "infinities": [-np.inf, -10, -np.pi, 0, np.pi, 10/2.2, np.inf],
             "nulls": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
@@ -409,17 +436,19 @@ def dataset(request):
             "naturals": "FloatType"
         }
     }
-    return get_dataset(request.param, data, schemas=schemas)
+    return get_dataset(test_backend, data, schemas=schemas)
 
 
 @pytest.fixture
-def sqlalchemy_dataset():
+def sqlalchemy_dataset(test_backends):
     """Provide dataset fixtures that have special values and/or are otherwise useful outside
     the standard json testing framework"""
-    if "postgresql" in CONTEXTS:
+    if "postgresql" in test_backends:
         backend = "postgresql"
-    else:
+    elif "sqlite" in test_backends:
         backend = "sqlite"
+    else:
+        return
 
     data = {
         "infinities": [-np.inf, -10, -np.pi, 0, np.pi, 10/2.2, np.inf],
@@ -442,8 +471,12 @@ def sqlalchemy_dataset():
 
 
 @pytest.fixture
-def sqlitedb_engine():
-    return sa.create_engine('sqlite://')
+def sqlitedb_engine(test_backend):
+    if test_backend == 'sqlite':
+        import sqlalchemy as sa
+        return sa.create_engine('sqlite://')
+    else:
+        pytest.skip("Skipping sqlite tests.")
 
 
 @pytest.fixture
@@ -469,6 +502,7 @@ def titanic_data_context(tmp_path_factory):
     shutil.copy("./tests/test_sets/Titanic.csv",
                 str(os.path.join(context_path, "../data/Titanic.csv")))
     return ge.data_context.DataContext(context_path)
+
 
 @pytest.fixture
 def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, filesystem_csv_3):
@@ -521,6 +555,7 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
 
     return context
 
+
 @pytest.fixture
 def titanic_multibatch_data_context(tmp_path_factory):
     """
@@ -541,7 +576,6 @@ def titanic_multibatch_data_context(tmp_path_factory):
     shutil.copy("./tests/test_sets/Titanic.csv",
                 str(os.path.join(context_path, "../data/titanic/Titanic_1912.csv")))
     return ge.data_context.DataContext(context_path)
-
 
 
 @pytest.fixture
@@ -611,6 +645,7 @@ def filesystem_csv_3(tmp_path_factory):
     toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=None)
 
     return base_dir
+
 
 @pytest.fixture()
 def filesystem_csv_4(tmp_path_factory):
@@ -780,11 +815,15 @@ def evr_success():
 
 
 @pytest.fixture
-def sqlite_view_engine():
+def sqlite_view_engine(test_backends):
     # Create a small in-memory engine with two views, one of which is temporary
-    sqlite_engine = sa.create_engine("sqlite://")
-    df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
-    df.to_sql("test_table", con=sqlite_engine)
-    sqlite_engine.execute("CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;")
-    sqlite_engine.execute("CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;")
-    return sqlite_engine
+    if "sqlite" in test_backends:
+        import sqlalchemy as sa
+        sqlite_engine = sa.create_engine("sqlite://")
+        df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
+        df.to_sql("test_table", con=sqlite_engine)
+        sqlite_engine.execute("CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;")
+        sqlite_engine.execute("CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;")
+        return sqlite_engine
+    else:
+        pytest.skip("SqlAlchemy tests disabled; not testing views")
