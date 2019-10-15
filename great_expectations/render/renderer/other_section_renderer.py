@@ -68,7 +68,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         ])
 
         table_rows += [
-            ["Missing cells", cls._get_percentage_missing_cells_str(evrs), ], # "866 (8.1%)"
+            ["Missing cells", cls._get_percentage_missing_cells_str(evrs), ],
             # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this
         ]
 
@@ -246,7 +246,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             return "?"
 
         # assume 100.0 missing for columns where ["result"]["unexpected_percent"] is not available
-        return "{0:.2f}%".format(sum([evr["result"]["unexpected_percent"] if "unexpected_percent" in evr["result"] and evr["result"]["unexpected_percent"] is not None else 100.0 for evr in expect_column_values_to_not_be_null_evrs])/len(columns)*100)
+        return "{0:.2f}%".format(sum([evr["result"]["unexpected_percent"] if "unexpected_percent" in evr["result"] and evr["result"]["unexpected_percent"] is not None else 100.0 for evr in expect_column_values_to_not_be_null_evrs])/len(columns))
 
     @classmethod
     def _get_column_types(cls, evrs):
@@ -268,7 +268,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 else:
                     expected_types = set(evr["expectation_config"]["kwargs"]["type_list"])
             else:  # assuming expect_column_values_to_be_of_type
-                expected_types = set([evr["expectation_config"]["kwargs"]["type_"]])
+                expected_types = {[evr["expectation_config"]["kwargs"]["type_"]]}
 
             if expected_types.issubset(BasicDatasetProfiler.INT_TYPE_NAMES):
                 column_types[column] = "int"
