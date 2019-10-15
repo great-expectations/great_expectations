@@ -77,10 +77,10 @@ batches into named data assets. We can use the ``yield_batch_kwargs`` method on 
 .. code-block:: json
 
     {
-        'path': '/data/npidata/npidata_pfile_20190902-20190908.csv',
-        'partition_id': 'npidata_pfile_20190902-20190908',
-        'sep': None,
-        'engine': 'python'
+        "path": "/data/npidata/npidata_pfile_20190902-20190908.csv",
+        "partition_id": "npidata_pfile_20190902-20190908",
+        "sep": null,
+        "engine": "python"
     }
 
 In addition to batch_kwargs, we need to create an expectation suite. We recommend 'warning' or 'default' as the name
