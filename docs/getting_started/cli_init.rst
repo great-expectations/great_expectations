@@ -18,8 +18,7 @@ Great Expectations provides a default project framework that simplifies operatio
 fetching, profiling and validating batches of data; and compiling to human-readable documentation.
 
 This tutorial uses example data from the United States Centers for Medicare and Medicaid Services `National Provider
-Identifier Standard <https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/\
-NationalProvIdentStand/DataDissemination.html>`_
+Identifier Standard <https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/DataDissemination.html>`_
 (NPI). If you want to follow along with this exact example, start with:
 
 .. code-block:: bash
@@ -181,8 +180,8 @@ A Great Expectations Datasource is not the data itself, but part of a *pointer* 
 environment where Expectations can be evaluated: it brings the world of data and the world of expectations together.
 Fully describing the pointer requires a 3-ple:
 
-1. ``datasource_name`` (`my_postgresql_db`)
-2. ``generator_name`` (`queries`)
+1. ``datasource`` (`my_postgresql_db`)
+2. ``generator`` (`queries`)
 3. ``generator_asset`` (`user_events_table`)
 
 In addition, for some operations you will need to specify:

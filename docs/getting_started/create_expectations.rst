@@ -143,20 +143,20 @@ column.
 
 Here is how we can add an expectation that expresses that knowledge:
 
-.. image:: ../images/expect_column_values_to_be_unique_success.jpg
+.. image:: ../images/expect_column_values_to_be_unique_success.png
 
 Other expectations can be created by examining the data in the batch. For example, we want to protect our pipeline
 against improper values in the "Provider Other Organization Name Type Code" column. We don't know exactly what the
 "improper" values are, but we can try some values and check if the data in the batch meets this expectation:
 
-.. image:: ../images/expect_column_values_to_be_in_set_failure.jpg
+.. image:: ../images/expect_column_values_to_be_in_set_failure.png
 
 Validating the expectation against the batch resulted in failure - there are some values in the column that do not meet
 the expectation. The "partial_unexpected_list" key in the result dictionary contains examples of non-conforming values.
 Examining these examples shows that some titles are not in our expected set. We adjust the ``value_set`` and rerun
 the expectation method:
 
-.. image:: ../images/expect_column_values_to_be_in_set_success.jpg
+.. image:: ../images/expect_column_values_to_be_in_set_success.png
 
 This time validation was successful - all values in the column meet our expectation.
 
