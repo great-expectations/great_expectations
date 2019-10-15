@@ -77,6 +77,7 @@ def test_list_expectation_suite_keys(data_context):
         )
     ]
 
+
 def test_get_existing_data_asset_config(data_context):
     data_asset_config = data_context.get_expectation_suite('mydatasource/mygenerator/my_dag_node', 'default')
     assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/my_dag_node'
@@ -1136,3 +1137,11 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
         "create_expectations.ipynb",
         "integrate_validation_into_pipeline.ipynb"
     }
+
+
+def test_build_batch_kwargs(titanic_multibatch_data_context):
+    data_asset_name = titanic_multibatch_data_context.normalize_data_asset_name("titanic")
+    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(data_asset_name, "Titanic_1911")
+    assert "./data/titanic/Titanic_1911.csv" in batch_kwargs["path"]
+    assert "partition_id" in batch_kwargs
+    assert batch_kwargs["partition_id"] == "Titanic_1911"

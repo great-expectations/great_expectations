@@ -4,11 +4,11 @@ config_version: 1
 datasources:
   # For example, this one.
   mydatasource:
-    type: pandas
+    class_name: PandasDatasource
     generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
-        type: subdir_reader
+        class_name: SubdirReaderGenerator
         base_directory: ../data
 plugins_directory: plugins/
 
@@ -25,41 +25,12 @@ stores:
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: expectations/
+
   validations_store:
     class_name: ValidationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
-
-  # These next three blocks are never used in tests.
-
-  # local_profiling_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: uncommitted/profiling/
-  #     serialization_type: json
-  #     file_extension: .json
-
-  # local_workbench_site_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: uncommitted/data_docs/local_site
-  #     file_extension: .html
-
-  # shared_team_site_store:
-  #   module_name: great_expectations.data_context.store
-  #   class_name: FilesystemStore
-  #   store_config:
-  #     base_directory: uncommitted/data_docs/team_site
-  #     file_extension: .html
-
-  fixture_validation_results_store:
-    class_name: ValidationsStore
-    store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
-      base_directory: fixtures/validations
 
   evaluation_parameter_store:
       module_name: great_expectations.data_context.store
