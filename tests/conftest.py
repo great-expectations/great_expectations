@@ -46,35 +46,35 @@ def build_test_backends_list(metafunc):
     if not no_sqlalchemy:
         test_backends += ['sqlite']
         import sqlalchemy as sa
-    no_postgresql = metafunc.config.getoption("--no-postgresql")
-    if not no_postgresql:
-        if no_sqlalchemy:
-            raise ValueError("sqlalchemy tests must be enabled to test with postgresql")
-        ###
-        # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
-        # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
-        # round trip compared to NUMERIC, which stays as a python DECIMAL
+        no_postgresql = metafunc.config.getoption("--no-postgresql")
+        if not no_postgresql:
+            if no_sqlalchemy:
+                raise ValueError("sqlalchemy tests must be enabled to test with postgresql")
+            ###
+            # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
+            # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
+            # round trip compared to NUMERIC, which stays as a python DECIMAL
 
-        # Be sure to ensure that tests (and users!) understand that subtlety,
-        # which can be important for distributional expectations, for example.
-        ###
-        try:
-            engine = sa.create_engine('postgresql://postgres@localhost/test_ci')
-            conn = engine.connect()
-            conn.close()
-        except (ImportError, sa.exc.SQLAlchemyError):
-            raise ImportError("postgresql tests are requested, but unable to connect to the postgresql database at "
-                              "'postgresql://postgres@localhost/test_ci'")
-        test_backends += ['postgresql']
-    # TODO: enable mysql or other backend tests to be optionally specified
-    # if mysql:
-    #     try:
-    #         engine = sa.create_engine('mysql://root@localhost/test_ci')
-    #         conn = engine.connect()
-    #         test_backends += ['mysql']
-    #         conn.close()
-    #     except (ImportError, sa.exc.SQLAlchemyError):
-    #         warnings.warn("No mysql context available for testing.")
+            # Be sure to ensure that tests (and users!) understand that subtlety,
+            # which can be important for distributional expectations, for example.
+            ###
+            try:
+                engine = sa.create_engine('postgresql://postgres@localhost/test_ci')
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError("postgresql tests are requested, but unable to connect to the postgresql database at "
+                                  "'postgresql://postgres@localhost/test_ci'")
+            test_backends += ['postgresql']
+            # TODO: enable mysql or other backend tests to be optionally specified
+            # if mysql:
+            #     try:
+            #         engine = sa.create_engine('mysql://root@localhost/test_ci')
+            #         conn = engine.connect()
+            #         test_backends += ['mysql']
+            #         conn.close()
+            #     except (ImportError, sa.exc.SQLAlchemyError):
+            #         warnings.warn("No mysql context available for testing.")
     return test_backends
 
 
