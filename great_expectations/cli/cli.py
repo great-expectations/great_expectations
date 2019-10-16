@@ -268,7 +268,7 @@ def _open_data_docs_in_browser(ge_dir):
         "uncommitted/data_docs/local_site/index.html"
     )
     if os.path.isfile(data_docs_index):
-        cli_message("Opening Data Docs found here: {}".format(data_docs_index))
+        cli_message("Opening Data Docs found here: {}".format("file://" + data_docs_index))
         webbrowser.open("file://" + data_docs_index)
 
 
@@ -454,7 +454,7 @@ def _offer_to_install_new_template(err, ge_dir):
         shutil.move(ge_yml, archived_yml)
         DataContext.write_project_template_to_disk(ge_dir)
 
-        cli_message(NEW_TEMPLATE_INSTALLED.format(ge_yml, archived_yml))
+        cli_message(NEW_TEMPLATE_INSTALLED.format("file://" + ge_yml, "file://" + archived_yml))
     else:
         cli_message(
             """\nOK. To continue, you will need to upgrade your config file to the latest format.
