@@ -1,6 +1,11 @@
 .. _changelog:
 
-v0.8.0__develop
+0.8.1
+-----------------
+* Fix an issue where version was reported as '0+unknown'
+
+
+0.8.0
 -----------------
 
 Version 0.8.0 is a significant update to Great Expectations, with many improvements focused on configurability
