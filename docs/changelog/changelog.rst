@@ -1,6 +1,15 @@
 .. _changelog:
 
-v0.8.0__develop
+0.8.2__develop
+-----------------
+
+
+0.8.1
+-----------------
+* Fix an issue where version was reported as '0+unknown'
+
+
+0.8.0
 -----------------
 
 Version 0.8.0 is a significant update to Great Expectations, with many improvements focused on configurability
@@ -43,7 +52,7 @@ Highlights include:
    - The command build-documentation has been renamed build-docs and now by
      default opens the Data Docs in the users' browser.
 
-v0.7.11__develop
+v0.7.11
 -----------------
 * Fix an issue where head() lost the column name for SqlAlchemyDataset objects with a single column
 * Fix logic for the 'auto' bin selection of `build_continuous_partition_object`

@@ -12,7 +12,6 @@ from great_expectations.cli.init_messages import (
     BUILD_DOCS_PROMPT,
     COMPLETE_ONBOARDING_PROMPT,
     GREETING,
-    INVALID_SLACK_WEBHOOK_PROMPT,
     LETS_BEGIN_PROMPT,
     NEW_TEMPLATE_INSTALLED,
     NEW_TEMPLATE_PROMPT,
@@ -245,7 +244,11 @@ def _slack_setup(context):
         webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default="")
 
     while not _is_sane_slack_webhook(webhook_url):
-        webhook_url = click.prompt(INVALID_SLACK_WEBHOOK_PROMPT)
+        cli_message("That URL was not valid.\n")
+        if not click.confirm(SLACK_SETUP_PROMPT, default=True):
+            cli_message(SLACK_LATER)
+            return context
+        webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default="")
 
     context.save_config_variable("validation_notification_slack_webhook", webhook_url)
     cli_message(SLACK_SETUP_COMPLETE)
@@ -265,7 +268,7 @@ def _open_data_docs_in_browser(ge_dir):
         "uncommitted/data_docs/local_site/index.html"
     )
     if os.path.isfile(data_docs_index):
-        cli_message("Opening Data Docs found here: {}".format(data_docs_index))
+        cli_message("Opening Data Docs found here: {}".format("file://" + data_docs_index))
         webbrowser.open("file://" + data_docs_index)
 
 
@@ -451,7 +454,7 @@ def _offer_to_install_new_template(err, ge_dir):
         shutil.move(ge_yml, archived_yml)
         DataContext.write_project_template_to_disk(ge_dir)
 
-        cli_message(NEW_TEMPLATE_INSTALLED.format(ge_yml, archived_yml))
+        cli_message(NEW_TEMPLATE_INSTALLED.format("file://" + ge_yml, "file://" + archived_yml))
     else:
         cli_message(
             """\nOK. To continue, you will need to upgrade your config file to the latest format.

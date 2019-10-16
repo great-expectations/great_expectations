@@ -59,36 +59,34 @@ See <blue>https://docs.greatexpectations.io/en/latest/getting_started/cli_init.h
 
 SLACK_SETUP_PROMPT = "Would you like to set up Slack data quality notifications?"
 
-SLACK_DOC_LINK = """
-  - Getting one is easy!
-  - http://docs.greatexpectations.io/en/latest/getting_started/cli_init.html#configuring-slack-notifications"""
+SLACK_DOC_LINK = """http://docs.greatexpectations.io/en/latest/getting_started/cli_init.html#configuring-slack-notifications
+"""
 
-SLACK_WEBHOOK_PROMPT = "Please paste in your Slack webhook url." + SLACK_DOC_LINK
+SLACK_WEBHOOK_PROMPT = """Please add your Slack webhook below. Getting one is easy!
+"""
 
-INVALID_SLACK_WEBHOOK_PROMPT = "Please paste in a valid Slack webhook url here:" + SLACK_DOC_LINK
+SLACK_LATER = "\nTo setup Slack later please see the the slack section in the CLI init getting started guide."
 
-SLACK_LATER = "To setup Slack later please see this guide:" + SLACK_DOC_LINK
+SLACK_SETUP_COMPLETE = """
+OK. <green>Slack is set up.</green> To modify this in the future please see the slack section in the CLI init getting started guide."""
 
-SLACK_SETUP_COMPLETE = "OK. <green>Slack is set up.</green> To modify this in the future please see:" + SLACK_DOC_LINK
-
-ONBOARDING_COMPLETE = """\nDone. You may see new files in `<yellow>great_expectations/uncommitted</yellow>`.
+ONBOARDING_COMPLETE = """
+Done. You may see new files in `<yellow>great_expectations/uncommitted</yellow>`.
   - Now add secrets to <yellow>great_expectations/uncommitted/config_variables.yml</yellow> to finish onboarding.
 """
 
 BUILD_DOCS_PROMPT = "Would you like to build & view this project's Data Docs!?"
 
-NEW_TEMPLATE_PROMPT = """\nWould you like to install a new config file template?
+NEW_TEMPLATE_PROMPT = """
+Would you like to install a new config file template?
   - We will move your existing `{}` to `{}`"""
 
-NEW_TEMPLATE_INSTALLED = """\nOK. You now have a new config file: `{}`.
+NEW_TEMPLATE_INSTALLED = """
+OK. You now have a new config file: `{}`.
   - Please copy the relevant values from the archived file ({}) into this new template.
 """
 
 NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please add one by:
   - running `<green>great_expectations add-datasource</green>` or
-  - by editing the {} file""".format(DataContext.GE_YML)
-
-NO_DATASOURCES_FOUND = """You can add add one by:
-  - running `<green>great_expectations add-datasource</green>` or
-  - by editing the {} file""".format(DataContext.GE_YML)
-
+  - by editing the {} file
+""".format(DataContext.GE_YML)

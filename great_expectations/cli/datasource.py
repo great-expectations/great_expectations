@@ -150,7 +150,13 @@ def _add_sqlalchemy_datasource(context):
                                    class_name="SqlAlchemyDatasource",
                                    data_asset_type={
                                        "class_name": "SqlAlchemyDataset"},
-                                   credentials="${" + data_source_name + "}")
+                                   credentials="${" + data_source_name + "}",
+                                   generators={
+                                        "default": {
+                                            "class_name": "TableGenerator"
+                                        }
+                                    }
+                                   )
             break
         except ModuleNotFoundError as de:
             message = message + "\n  - Please `pip install psycopg2` and try again"

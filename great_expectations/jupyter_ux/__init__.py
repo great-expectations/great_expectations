@@ -132,7 +132,7 @@ def list_available_data_asset_names(context, data_source_name=None):
         for generator_info in generators:
             print('  generator: {0:s} ({1:s})'.format(generator_info['name'], generator_info['class_name']))
             generator = ds.get_generator(generator_info['name'])
-            data_asset_names = generator.get_available_data_asset_names()
+            data_asset_names = sorted(generator.get_available_data_asset_names())
             if len(data_asset_names) > 0:
                 for data_asset_name in data_asset_names:
                     print('    generator_asset: {0:s}'.format(data_asset_name))
