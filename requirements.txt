@@ -17,6 +17,3 @@ pypandoc>=1.4
 future>=0.16
 jinja2>=2.10
 marshmallow>=2.0,<3.0
-# TEMPORARY FOR BROKEN PROMPT-TOOLKIT BUILDS
-prompt-toolkit<2.0.10;python_version>="3"  # downstream dependency of ipykernel -> ipython -> prompt-toolkit
-prompt-toolkit<1.0.17;python_version<"3"  # downstream dependency of ipykernel -> ipython -> prompt-toolkit
