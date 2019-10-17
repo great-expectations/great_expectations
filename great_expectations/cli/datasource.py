@@ -15,11 +15,11 @@ def add_datasource(context):
         """
 ========== Datasources ==========
 
-See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue> for more information about datasources.
+See <blue>https://docs.greatexpectations.io/en/latest/features/datasource.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue> for more information about datasources.
 """.format(rtd_url_ge_version)
     )
     data_source_selection = click.prompt(
-        msg_prompt_choose_data_source,
+        msg_prompt_choose_datasource,
         type=click.Choice(["1", "2", "3", "4"]),
         show_choices=False
     )
@@ -150,7 +150,13 @@ def _add_sqlalchemy_datasource(context):
                                    class_name="SqlAlchemyDatasource",
                                    data_asset_type={
                                        "class_name": "SqlAlchemyDataset"},
-                                   credentials="${" + data_source_name + "}")
+                                   credentials="${" + data_source_name + "}",
+                                   generators={
+                                        "default": {
+                                            "class_name": "TableGenerator"
+                                        }
+                                    }
+                                   )
             break
         except ModuleNotFoundError as de:
             message = message + "\n  - Please `pip install psycopg2` and try again"
@@ -214,7 +220,7 @@ Please note: Profiling is still a beta feature in Great Expectations.  The curre
 data source (without sampling), which may be very time consuming. 
 As a rule of thumb, we recommend starting with data smaller than 100MB.
 
-To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/guides/profiling.html\
+To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/features/profiling.html\
 ?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
 """
 
@@ -245,7 +251,7 @@ Would you like to profile '{0:s}'?
 
 Great Expectations can create data documentation from the data you just profiled.
 
-To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_docs.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_docs.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
 """
 
     cli_message(msg_intro.format(data_source_name, rtd_url_ge_version))
@@ -354,7 +360,7 @@ The following data documentation HTML sites were generated:
     cli_message(msg)
 
 
-msg_prompt_choose_data_source = """
+msg_prompt_choose_datasource = """
 Configure a datasource:
     1. Pandas DataFrame
     2. Relational database (SQL)

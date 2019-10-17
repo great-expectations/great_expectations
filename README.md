@@ -79,6 +79,7 @@ Great Expectations also provides robust concepts of Batches and Runs. Although w
 
 As of v0.7.0, Great Expectations includes new classes and methods to `render` Expectations to clean, human-readable documentation. Since docs are compiled from tests and you are running tests against new data as it arrives, your documentation is guaranteed to never go stale.
 
+
 What does Great Expectations NOT do?
 -------------------------------------------------------------
 
@@ -110,7 +111,7 @@ For quick, hands-on introductions to Great Expectations' key features, check out
 Who maintains Great Expectations?
 -------------------------------------------------------------
 
-Great Expectations is under active development by James Campbell, Abe Gong, Eugene Mandel and Rob Lim, with help from many others.
+Great Expectations is under active development by James Campbell, Abe Gong, Eugene Mandel, Rob Lim, Taylor Miller, and help from many others.
 
 What's the best way to get in touch with the Great Expectations team?
 --------------------------------------------------------------------------------

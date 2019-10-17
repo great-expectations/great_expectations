@@ -47,6 +47,7 @@ from .types import (
 from .templates import (
     PROJECT_TEMPLATE,
     CONFIG_VARIABLES_INTRO,
+    CONFIG_VARIABLES_TEMPLATE,
 )
 from .util import (
     load_class,
@@ -168,7 +169,7 @@ class ConfigOnlyDataContext(object):
         safe_mmkdir(uncommitted_dir)
         config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
         with open(config_var_file, "w") as template:
-            template.write(CONFIG_VARIABLES_INTRO)
+            template.write(CONFIG_VARIABLES_TEMPLATE)
 
     @classmethod
     def write_project_template_to_disk(cls, ge_dir):
@@ -429,38 +430,6 @@ class ConfigOnlyDataContext(object):
         else:
             self._data_asset_name_delimiter = new_delimiter
 
-    def move_validation_to_fixtures(self, data_asset_name, expectation_suite_name, run_id):
-        """
-        Move validation results from uncommitted to fixtures/validations to make available for the data doc renderer
-
-        Args:
-            data_asset_name: name of data asset for which to get documentation filepath
-            expectation_suite_name: name of expectation suite for which to get validation location
-            run_id: run_id of validation to get. If no run_id is specified, fetch the latest run_id according to \
-            alphanumeric sort (by default, the latest run_id if using ISO 8601 formatted timestamps for run_id
-
-        Returns:
-            None
-        """
-
-        # NOTE : Once we start consistently generating DataContextKeys at the source, all this packing/unpacking nonsense will vanish like a dream.
-        normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
-        validation_result_identifier = ValidationResultIdentifier(
-            coerce_types=True,
-            **{
-                "expectation_suite_identifier": {
-                    "data_asset_name": tuple(normalized_data_asset_name),
-                    "expectation_suite_name" : expectation_suite_name,
-                },
-                "run_id": run_id,
-            })
-        validation_result = self.stores.validations_store.get(validation_result_identifier)
-
-        self.stores.fixture_validation_results_store.set(
-            validation_result_identifier,
-            json.dumps(validation_result, indent=2)
-        )
-
     #####
     #
     # Internal helper methods
@@ -602,7 +571,7 @@ class ConfigOnlyDataContext(object):
         if generator_names is not None:
             if isinstance(generator_names, string_types):
                 generator_names = [generator_names]
-            if len(generator_names) == len(datasource_names): # Iterate over both together
+            if len(generator_names) == len(datasource_names):  # Iterate over both together
                 for idx, datasource_name in enumerate(datasource_names):
                     datasource = self.get_datasource(datasource_name)
                     data_asset_names[datasource_name] = \
@@ -660,7 +629,7 @@ class ConfigOnlyDataContext(object):
             BatchKwargs
 
         """
-        if not isinstance(data_asset_name, NormalizedDataAssetName):
+        if not isinstance(data_asset_name, (NormalizedDataAssetName, DataAssetIdentifier)):
             data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(data_asset_name.datasource)
@@ -668,19 +637,19 @@ class ConfigOnlyDataContext(object):
             kwargs.update({
                 "partition_id": partition_id
             })
-        batch_kwargs = datasource.build_batch_kwargs(
-            data_asset_name,
+        batch_kwargs = datasource.named_generator_build_batch_kwargs(
+            data_asset_name.generator,
+            data_asset_name.generator_asset,
             **kwargs
         )
 
         return batch_kwargs
 
-    def get_batch(self, data_asset_name, expectation_suite_name, batch_kwargs, **kwargs):
+    def get_batch(self, data_asset_name, expectation_suite_name, batch_kwargs=None, **kwargs):
         """
         Get a batch of data, using the namespace of the provided data_asset_name.
 
-        get_batch constructs its batch by first normalizing the data_asset_name (if not already normalized into either
-        a DataAssetName) and then:
+        get_batch constructs its batch by first normalizing the data_asset_name (if not already normalized) and then:
           (1) getting data using the provided batch_kwargs; and
           (2) attaching the named expectation suite
 
@@ -709,6 +678,9 @@ class ConfigOnlyDataContext(object):
                     self.GE_YML
                 )
             )
+
+        if batch_kwargs is None:
+            batch_kwargs = self.build_batch_kwargs(data_asset_name, **kwargs)
 
         data_asset = datasource.get_batch(normalized_data_asset_name,
                                           expectation_suite_name,
@@ -984,7 +956,6 @@ class ConfigOnlyDataContext(object):
             # namespace.
             if (len(available_names.keys()) == 1 and  # in this case, we know that the datasource name is valid
                     len(available_names[datasource].keys()) == 1):
-                logger.info("Normalizing to a new generator name.")
                 return NormalizedDataAssetName(
                     datasource,
                     generator,
@@ -1854,7 +1825,7 @@ class DataContext(ConfigOnlyDataContext):
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
             context_root_dir = self.find_context_root_dir()
-        context_root_directory = os.path.abspath(context_root_dir)
+        context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
         self._context_root_directory = context_root_directory
 
         self.active_environment_name = active_environment_name
@@ -1951,6 +1922,7 @@ class DataContext(ConfigOnlyDataContext):
     def find_context_root_dir():
         ge_home_environment = os.getenv("GE_HOME", None)
         if ge_home_environment:
+            ge_home_environment = os.path.expanduser(ge_home_environment)
             if os.path.isdir(ge_home_environment) and os.path.isfile(
                 os.path.join(ge_home_environment, "great_expectations.yml")
             ):

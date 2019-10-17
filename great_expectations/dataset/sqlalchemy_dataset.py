@@ -250,13 +250,28 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def head(self, n=5):
         """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
-        return PandasDataset(
-            next(pd.read_sql_table(
+
+        try:
+            df = next(pd.read_sql_table(
                 table_name=self._table.name,
                 schema=self._table.schema,
                 con=self.engine,
                 chunksize=n
-            )),
+            ))
+        except ValueError:
+            # it looks like MetaData that is used by pd.read_sql_table
+            # cannot work on a temp table.
+            # If it fails, we are trying to get the data using read_sql
+            head_sql_str = "select * from "
+            if self._table.schema:
+                head_sql_str += self._table.schema + "."
+            head_sql_str += self._table.name
+            head_sql_str += " limit {0:d}".format(n)
+
+            df = pd.read_sql(head_sql_str, con=self.engine)
+
+        return PandasDataset(
+            df,
             expectation_suite=self.get_expectation_suite(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,

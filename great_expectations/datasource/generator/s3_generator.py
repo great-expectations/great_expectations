@@ -104,7 +104,7 @@ class S3Generator(BatchGenerator):
         return self._bucket
 
     def get_available_data_asset_names(self):
-        return set(self._assets.keys())
+        return self._assets.keys()
 
     def _get_iterator(self, generator_asset, **kwargs):
         logger.debug("Beginning S3Generator _get_iterator for generator_asset: %s" % generator_asset)
