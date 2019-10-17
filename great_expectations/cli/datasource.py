@@ -330,7 +330,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_d
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
 
-    if click.confirm("Build HTML documentation?", default=True):
+    if click.confirm("Build HTML Data Docs?", default=True):
         build_docs(context)
     else:
         cli_message("Okay, skipping HTML documentation for now.")
@@ -355,7 +355,7 @@ The following data documentation HTML sites were generated:
 """
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         msg += site_name + ":\n"
-        msg += "   <green>" + index_page_locator_info + "</green>\n\n"
+        msg += "   <green>file://" + index_page_locator_info + "</green>\n\n"
 
     cli_message(msg)
 
