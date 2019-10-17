@@ -171,7 +171,7 @@ class SiteIndexPageRenderer(Renderer):
                         "body": {
                             "styles": {
                                 "max-height": "15em",
-                                "overflow": "scroll"
+                                # "overflow": "scroll"
                             }
                         }
                     }
@@ -219,7 +219,7 @@ class SiteIndexPageRenderer(Renderer):
                     "body": {
                         "styles": {
                             "max-height": "15em",
-                            "overflow": "scroll"
+                            # "overflow": "scroll"
                         }
                     }
                 }
@@ -299,7 +299,7 @@ class SiteIndexPageRenderer(Renderer):
                             "body": {
                                 "styles": {
                                     "max-height": "15em",
-                                    "overflow": "scroll"
+                                    # "overflow": "scroll"
                                 }
                             }
                         }

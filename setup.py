@@ -17,6 +17,7 @@ config = {
     'url': 'https://github.com/great-expectations/great_expectations',
     'author_email': 'team@greatexpectations.io',
     'version': versioneer.get_version(),
+    'cmdclass': versioneer.get_cmdclass(),
     'install_requires': required,
     'extras_require': {
         'spark':  ['pyspark>=2.3.2'],

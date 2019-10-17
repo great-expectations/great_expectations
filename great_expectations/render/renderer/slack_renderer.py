@@ -11,23 +11,26 @@ class SlackRenderer(Renderer):
     def render(self, validation_json=None):
         # Defaults
         timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
+        default_text = "No validation occurred. Please ensure you passed a validation_json."
         status = "Failed :x:"
-        run_id = None
-    
+
         title_block = {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "No validation occurred. Please ensure you passed a validation_json.",
+                "text": default_text,
             },
         }
-    
-        divider_block = {
-            "type": "divider"
+
+        query = {
+            "blocks": [title_block],
+            # this abbreviated root level "text" will show up in the notification and not the message
+            "text": default_text
         }
-    
-        query = {"blocks": [divider_block, title_block]}
-    
+
+        # TODO improve this nested logic
+        expectation_suite_name = None
+        data_asset_name = None
         if validation_json:
             if "meta" in validation_json:
                 data_asset_name = validation_json["meta"].get(
@@ -39,15 +42,29 @@ class SlackRenderer(Renderer):
             n_checks_succeeded = validation_json["statistics"]["successful_expectations"]
             n_checks = validation_json["statistics"]["evaluated_expectations"]
             run_id = validation_json["meta"].get("run_id", None)
-            check_details_text = "{} of {} expectations were met\n\n".format(
+            check_details_text = "*{}* of *{}* expectations were met".format(
                 n_checks_succeeded, n_checks)
         
             if validation_json["success"]:
                 status = "Success :tada:"
-        
-            query["blocks"][1]["text"]["text"] = "*Validated batch from data asset:* `{}`\n*Status: {}*\n*Run ID:* {}\n*Timestamp:* {}\n*Summary:* {}".format(
-                data_asset_name, status, run_id, timestamp, check_details_text)
-        
+
+            summary_text = """*Batch Validation Status*: {}
+*Data Asset:* `{}`
+*Expectation suite name*: `{}`
+*Run ID*: `{}`
+*Timestamp*: `{}`
+*Summary*: {}""".format(
+                status,
+                data_asset_name,
+                expectation_suite_name,
+                run_id,
+                timestamp,
+                check_details_text
+            )
+            query["blocks"][0]["text"]["text"] = summary_text
+            # this abbreviated root level "text" will show up in the notification and not the message
+            query["text"] = "{}: {}".format(data_asset_name, status)
+
             if "result_reference" in validation_json["meta"]:
                 report_element = {
                     "type": "section",
@@ -71,16 +88,18 @@ class SlackRenderer(Renderer):
         if custom_blocks:
             query["blocks"].append(custom_blocks)
 
-        documentation_url = "https://docs.greatexpectations.io/en/latest/guides/reviewing_validation_results.html"
+        documentation_url = "https://docs.greatexpectations.io/en/latest/features/validation.html#reviewing-validation-results"
         footer_section = {
             "type": "context",
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": "Learn how to review validation results at {}".format(documentation_url),
+                    "text": "Learn how to review validation results: {}".format(documentation_url),
                 }
             ],
         }
+
+        divider_block = {"type": "divider"}
         query["blocks"].append(divider_block)
         query["blocks"].append(footer_section)
         return query

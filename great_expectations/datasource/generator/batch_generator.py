@@ -86,7 +86,7 @@ class BatchGenerator(object):
         """Return the list of asset names known by this generator.
 
         Returns:
-            available names (set)
+            A list of available names
         """
         raise NotImplementedError
 
@@ -99,7 +99,7 @@ class BatchGenerator(object):
             generator_asset: the generator asset whose partitions should be returned.
 
         Returns:
-            A set of partition_id strings
+            A list of partition_id strings
         """
         raise NotImplementedError
 

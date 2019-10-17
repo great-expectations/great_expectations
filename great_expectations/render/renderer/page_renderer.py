@@ -43,7 +43,7 @@ class ValidationResultsPageRenderer(Renderer):
             if "column" in evr["expectation_config"]["kwargs"]:
                 column = evr["expectation_config"]["kwargs"]["column"]
             else:
-                column = "Table-level Expectations"
+                column = "Table-Level Expectations"
         
             if column not in columns:
                 columns[column] = []
@@ -68,6 +68,13 @@ class ValidationResultsPageRenderer(Renderer):
                 "content_blocks": overview_content_blocks
             })
         ]
+
+        if "Table-Level Expectations" in columns:
+            sections += [
+                self._column_section_renderer.render(
+                    validation_results=columns["Table-Level Expectations"]
+                )
+            ]
 
         sections += [
             self._column_section_renderer.render(

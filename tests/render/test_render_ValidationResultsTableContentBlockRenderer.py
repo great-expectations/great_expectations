@@ -40,27 +40,12 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
             {
               "content_block_type": "string_template",
               "string_template": {
-                "template": "$column Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a provided threshold but no distribution was specified.",
+                "template": "$column Column can match any distribution.",
                 "params": {
                   "column": "live",
                   "partition_object": None,
                   "threshold": None,
                   "result_format": "SUMMARY"
-                },
-                "styling": {
-                  "default": {
-                    "classes": [
-                      "badge",
-                      "badge-secondary"
-                    ]
-                  },
-                  "params": {
-                    "sparklines_histogram": {
-                      "styles": {
-                        "font-family": "serif !important"
-                      }
-                    }
-                  }
                 }
               }
             },
@@ -251,7 +236,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     # test _get_observed_value when evr["result"]["observed_value"] exists
     output_1 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_success)
     print(output_1)
-    assert output_1 == 1313
+    assert output_1 == "1313"
     # test _get_observed_value when evr["result"] does not exist
     output_2 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_no_result_key)
     print(output_2)
@@ -259,11 +244,11 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     # test _get_observed_value for expect_column_values_to_not_be_null expectation type
     output_3 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_not_be_null)
     print(output_3)
-    assert(output_3) == "20.0305% not null"
+    assert output_3 == "20.03046458% not null"
     # test _get_observed_value for expect_column_values_to_be_null expectation type
     output_4 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_be_null)
     print(output_4)
-    assert output_4 == "100.0000% null"
+    assert output_4 == "100% null"
 
     
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr_success, evr_failed):

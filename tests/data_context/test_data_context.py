@@ -52,10 +52,11 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
 
 def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
     empty_data_context.add_datasource("my_datasource",
-                                    module_name="great_expectations.datasource",
-                                    class_name="PandasDatasource",
-                                    base_directory=str(filesystem_csv))
+                                      module_name="great_expectations.datasource",
+                                      class_name="PandasDatasource",
+                                      base_directory=str(filesystem_csv))
     available_asset_names = empty_data_context.get_available_data_asset_names()
+    available_asset_names["my_datasource"]["default"] = set(available_asset_names["my_datasource"]["default"])
 
     assert available_asset_names == {
         "my_datasource": {
@@ -75,6 +76,7 @@ def test_list_expectation_suite_keys(data_context):
             expectation_suite_name="default"
         )
     ]
+
 
 def test_get_existing_data_asset_config(data_context):
     data_asset_config = data_context.get_expectation_suite('mydatasource/mygenerator/my_dag_node', 'default')
@@ -325,11 +327,13 @@ def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_cs
 
     data_context.data_asset_name_delimiter = '.'
     assert data_context.normalize_data_asset_name("my_datasource.default.f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
+    assert data_context.normalize_data_asset_name("my_datasource.default.f1") == \
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     data_context.data_asset_name_delimiter = '/'
     assert data_context.normalize_data_asset_name("my_datasource/default/f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     with pytest.raises(DataContextError) as exc:
         data_context.data_asset_name_delimiter = "$"
@@ -367,25 +371,25 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     # a the data_asset_name; the datasource name and data_asset_name or all
     # three components of the normalized data asset name
     assert data_context.normalize_data_asset_name("f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     assert data_context.normalize_data_asset_name("my_datasource/f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     assert data_context.normalize_data_asset_name("my_datasource/default/f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     # With only one datasource and generator configured, we
     # can create new namespaces at the generator asset level easily:
     assert data_context.normalize_data_asset_name("f5") == \
-           NormalizedDataAssetName("my_datasource", "default", "f5")
+        NormalizedDataAssetName("my_datasource", "default", "f5")
 
     # We can also be more explicit in creating new namespaces at the generator asset level:
     assert data_context.normalize_data_asset_name("my_datasource/f6") == \
-           NormalizedDataAssetName("my_datasource", "default", "f6")
+        NormalizedDataAssetName("my_datasource", "default", "f6")
 
     assert data_context.normalize_data_asset_name("my_datasource/default/f7") == \
-           NormalizedDataAssetName("my_datasource", "default", "f7")
+        NormalizedDataAssetName("my_datasource", "default", "f7")
 
     # However, we cannot create against nonexisting datasources or generators:
     with pytest.raises(DataContextError) as exc:
@@ -412,10 +416,10 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
 
     # We can still reference *unambiguous* data_asset_names:
     assert data_context.normalize_data_asset_name("f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     assert data_context.normalize_data_asset_name("f4") == \
-           NormalizedDataAssetName("my_second_datasource", "default", "f4")
+        NormalizedDataAssetName("my_second_datasource", "default", "f4")
 
     # However, single-name resolution will fail with ambiguous entries
     with pytest.raises(DataContextError) as exc:
@@ -424,11 +428,11 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
 
     # Two-name resolution still works since generators are not ambiguous in that case
     assert data_context.normalize_data_asset_name("my_datasource/f3") == \
-           NormalizedDataAssetName("my_datasource", "default", "f3")
+        NormalizedDataAssetName("my_datasource", "default", "f3")
 
     # We can also create new namespaces using only two components since that is not ambiguous
     assert data_context.normalize_data_asset_name("my_datasource/f9") == \
-           NormalizedDataAssetName("my_datasource", "default", "f9")
+        NormalizedDataAssetName("my_datasource", "default", "f9")
 
     # However, we cannot create new names using only a single component
     with pytest.raises(DataContextError) as exc:
@@ -444,7 +448,7 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     # We've chosen an interesting case: in_memory_generator does not by default provide its own names
     # so we can still get some names if there is no ambiguity about the namespace
     assert data_context.normalize_data_asset_name("f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     # However, if we add a data_asset that would cause that name to be ambiguous, it will then fail:
     suite = data_context.create_expectation_suite("my_datasource/in_memory_generator/f1", "default")
@@ -461,10 +465,10 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
 
     # But we can get the asset using all three components
     assert data_context.normalize_data_asset_name("my_datasource/default/f1") == \
-           NormalizedDataAssetName("my_datasource", "default", "f1")
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     assert data_context.normalize_data_asset_name("my_datasource/in_memory_generator/f1") == \
-           NormalizedDataAssetName("my_datasource", "in_memory_generator", "f1")
+        NormalizedDataAssetName("my_datasource", "in_memory_generator", "f1")
 
 
 def test_list_datasources(data_context):
@@ -652,32 +656,6 @@ data_docs/
         ),
         "./tests/data_context/output/data_docs"
     )
-
-
-def test_move_validation_to_fixtures(titanic_data_context):
-    profiling_results = titanic_data_context.profile_datasource("mydatasource")
-    all_validation_result = titanic_data_context.get_validation_result(
-        "mydatasource/mygenerator/Titanic",
-        "BasicDatasetProfiler",
-        "profiling"
-    )
-    # print(all_validation_result)
-    assert len(all_validation_result["results"]) == 51
-
-    assert titanic_data_context.stores["fixture_validation_results_store"].list_keys() == []
-
-    titanic_data_context.move_validation_to_fixtures(
-        "mydatasource/mygenerator/Titanic",
-        "BasicDatasetProfiler",
-        "profiling"
-    )
-
-    # titanic_data_context.stores["fixtures"].get(
-    #     "mydatasource/mygenerator/Titanic",
-    #     "BasicDatasetProfiler",
-    #     "profiling"
-    # )
-    assert len(titanic_data_context.stores["fixture_validation_results_store"].list_keys()) == 1
 
 
 def test_add_store(empty_data_context):
@@ -1135,3 +1113,11 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
         "create_expectations.ipynb",
         "integrate_validation_into_pipeline.ipynb"
     }
+
+
+def test_build_batch_kwargs(titanic_multibatch_data_context):
+    data_asset_name = titanic_multibatch_data_context.normalize_data_asset_name("titanic")
+    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(data_asset_name, "Titanic_1911")
+    assert "./data/titanic/Titanic_1911.csv" in batch_kwargs["path"]
+    assert "partition_id" in batch_kwargs
+    assert batch_kwargs["partition_id"] == "Titanic_1911"
