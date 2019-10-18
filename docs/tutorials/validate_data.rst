@@ -1,6 +1,8 @@
-.. _tutorial_pipeline_integration:
+.. _tutorial_validate_data:
 
-Step 3: Pipeline integration
+
+
+Validate Data
 =================================
 
 This tutorial covers integrating Great Expectations (GE) into a data pipeline.

@@ -1,6 +1,6 @@
 .. _tutorial_create_expectations:
 
-Step 2: Create Expectations
+Create Expectations
 ==============================
 
 This tutorial covers creating expectations for a data asset in the Jupyter notebook
