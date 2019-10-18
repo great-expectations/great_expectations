@@ -36,6 +36,7 @@ option for selecting which expectations a DataContext returns.
 In many simple projects, the datasource or generator name may be omitted and the DataContext will infer
 the correct name when there is no ambiguity.
 
-Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
+The DataContext also provides other services, such as storing and substituting evaluation parameters during validation.
+See :ref:`data_context_evaluation_parameter_store` for more information.
 
 See the :ref:`data_context_reference` for more information.

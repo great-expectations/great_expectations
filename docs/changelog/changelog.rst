@@ -2,6 +2,9 @@
 
 0.8.2__develop
 -----------------
+* Use higher precision for rendering 'mostly' parameter in data-docs
+* Documentation fixes (thanks @DanielOliver!)
+* Minor CLI wording fixes
 
 
 0.8.1
