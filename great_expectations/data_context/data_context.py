@@ -1923,24 +1923,49 @@ class DataContext(ConfigOnlyDataContext):
 
         return new_datasource
 
-    @staticmethod
-    def find_context_root_dir():
+    @classmethod
+    def find_context_root_dir(cls):
+        result = None
         ge_home_environment = os.getenv("GE_HOME", None)
         if ge_home_environment:
             ge_home_environment = os.path.expanduser(ge_home_environment)
             if os.path.isdir(ge_home_environment) and os.path.isfile(
                 os.path.join(ge_home_environment, "great_expectations.yml")
             ):
-                return ge_home_environment
-        elif os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
-            return "../"
-        elif os.path.isdir("./great_expectations") and \
-                os.path.isfile("./great_expectations/great_expectations.yml"):
-            return "./great_expectations"
-        elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
-            return "./"
+                result = ge_home_environment
         else:
+            yml_path = cls.find_context_yml_file()
+            if yml_path:
+                result = os.path.dirname(yml_path)
+
+        if result is None:
             raise ge_exceptions.ConfigNotFoundError()
+
+        logger.info("Using project config: {}".format(yml_path))
+        return result
+
+    @classmethod
+    def find_context_yml_file(cls, search_start_dir=os.getcwd(), verbose=False):
+        """Search for the yml file starting here and moving upward."""
+        yml_path = None
+
+        for i in range(4):
+            if verbose:
+                print(i, f"    Searching {search_start_dir}")
+
+            potential_ge_dir = os.path.join(search_start_dir, cls.GE_DIR)
+
+            if os.path.isdir(potential_ge_dir):
+                potential_yml = os.path.join(potential_ge_dir, cls.GE_YML)
+                if os.path.isfile(potential_yml):
+                    yml_path = potential_yml
+                    if verbose:
+                        print("Found config file at " + str(yml_path))
+                    break
+            # move up one directory
+            search_start_dir = os.path.dirname(search_start_dir)
+
+        return yml_path
 
 
 class ExplorerDataContext(DataContext):
