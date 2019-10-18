@@ -190,7 +190,12 @@ for how to profile a single batch of data and build documentation from the valid
   context = ge.data_context.DataContext()
 
   # load a batch from the data asset
-  batch = context.get_batch('ratings')
+  data_asset_name = context.normalize_data_asset_name('ratings')
+  context.creat_expectation_suite(data_asset_name, 'default'),
+  batch = context.get_batch(
+    data_asset_name=data_asset_name,
+    expectation_suite_name='default',
+    context.yield_batch_kwargs(data_asset_name))
 
   # run the profiler on the batch - this returns an expectation suite and validation results for this suite
   expectation_suite, validation_result = BasicDatasetProfiler().profile(batch)
