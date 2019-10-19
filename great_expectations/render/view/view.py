@@ -50,9 +50,16 @@ class DefaultJinjaView(object):
     * Vega-Lite 3.2.1
     * Vega-Embed 4.0.0
     """
-
     _template = NoOpTemplate
 
+    def __init__(self, data_context):
+        self.data_context = data_context
+        plugins_directory = data_context.plugins_directory
+        if os.path.isdir(os.path.join(plugins_directory, "custom_data_docs", "styles")):
+            self.custom_styles_directory = os.path.join(plugins_directory, "custom_data_docs/styles")
+        else:
+            self.custom_styles_directory = None
+    
     def render(self, document, template=None, **kwargs):
         self._validate_document(document)
 
