@@ -1142,3 +1142,12 @@ def test_build_batch_kwargs(titanic_multibatch_data_context):
     assert "./data/titanic/Titanic_1911.csv" in batch_kwargs["path"]
     assert "partition_id" in batch_kwargs
     assert batch_kwargs["partition_id"] == "Titanic_1911"
+
+
+def test_existing_local_data_docs_urls_returns_nothing_on_empty_project(tmp_path_factory):
+    empty_directory = str(tmp_path_factory.mktemp("hey_there"))
+    DataContext.create(empty_directory)
+    context = DataContext(os.path.join(empty_directory, DataContext.GE_DIR))
+
+    obs = context.get_existing_local_data_docs_sites_urls()
+    assert obs == []

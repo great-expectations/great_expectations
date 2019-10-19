@@ -4,6 +4,7 @@ import os
 import json
 import logging
 import shutil
+import webbrowser
 
 from ruamel.yaml import YAML, YAMLError
 import sys
@@ -395,6 +396,32 @@ class ConfigOnlyDataContext(object):
             if not os.path.isabs(resource_store["base_directory"]):
                 resource_store["base_directory"] = os.path.join(self.root_directory, resource_store["base_directory"])
         return resource_store
+
+    def get_existing_local_data_docs_sites_urls(self):
+        """Get file urls for all built local data docs."""
+        ge_dir = os.path.abspath(self.root_directory)
+        sites = self.get_project_config().get("data_docs_sites")
+
+        existing_sites = []
+
+        for site_name, site in sites.items():
+            store_backend = site.get("store_backend")
+
+            # TODO this should probably use a store api and check for types rather than relying on strings in the config file
+            if store_backend and store_backend.get("class_name") == "FixedLengthTupleFilesystemStoreBackend":
+                base_dir = store_backend.get("base_directory")
+                data_docs_index = os.path.join(ge_dir, base_dir, "index.html")
+
+                if os.path.isfile(data_docs_index):
+                    existing_sites.append("file://" + data_docs_index)
+        return existing_sites
+
+    def open_data_docs(self):
+        """A stdlib cross-platform way to open a file in a browser."""
+        data_docs_urls = self.get_existing_local_data_docs_sites_urls()
+        for url in data_docs_urls:
+            logger.info("Opening Data Docs found here: {}".format(url))
+            webbrowser.open(url)
 
     @property
     def root_directory(self):
