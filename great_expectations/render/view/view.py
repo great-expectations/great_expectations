@@ -73,11 +73,25 @@ class DefaultJinjaView(object):
         if template is None:
             return NoOpTemplate
 
+        templates_loader = PackageLoader(
+            'great_expectations',
+            'render/view/templates'
+        )
+        styles_loader = PackageLoader(
+            'great_expectations',
+            'render/view/styles'
+        )
+
+        loaders = [
+            templates_loader,
+            styles_loader
+        ]
+        
+        if self.custom_styles_directory:
+            loaders.append(FileSystemLoader(self.custom_styles_directory))
+        
         env = Environment(
-            loader=PackageLoader(
-                'great_expectations',
-                'render/view/templates'
-            ),
+            loader=ChoiceLoader(loaders),
             autoescape=select_autoescape(['html', 'xml'])
         )
         env.filters['render_string_template'] = self.render_string_template
