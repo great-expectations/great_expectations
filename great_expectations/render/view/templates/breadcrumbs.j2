@@ -1,16 +1,16 @@
 {% if full_data_asset_identifier %}
 {% set identifier_list = full_data_asset_identifier.split("/") -%}
 <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
+    <ol class="ge-breadcrumbs breadcrumb">
         {% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
-          <li class="breadcrumb-item"><a href="../../../../../index.html">Home</a></li>
+          <li class="ge-breadcrumbs-item breadcrumb-item"><a href="../../../../../index.html">Home</a></li>
         {% else %}
-          <li class="breadcrumb-item"><a href="../../../../index.html">Home</a></li>
+          <li class="ge-breadcrumbs-item breadcrumb-item"><a href="../../../../index.html">Home</a></li>
         {% endif %}
         {% for el in identifier_list %}
-            <li class="breadcrumb-item">{{ el }}</li>
+            <li class="ge-breadcrumbs-item breadcrumb-item">{{ el }}</li>
         {% endfor %}
-        <li class="breadcrumb-item active" aria-current="page">{{page_title}}</li>
+        <li class="ge-breadcrumbs-item breadcrumb-item active" aria-current="page">{{page_title}}</li>
     </ol>
 </nav>
 {% endif %}
