@@ -573,6 +573,7 @@ project_path/
                             base_directory=os.path.join(project_dir, "data/random/"))
 
     context.profile_datasource("titanic")
+
     assert gen_directory_tree_str(project_dir) == """\
 project_path/
     data/
@@ -601,6 +602,11 @@ project_path/
                 create_expectations.ipynb
                 validation_playground.ipynb
         plugins/
+            custom_data_docs/
+                renderers/
+                styles/
+                    data_docs_custom_styles.css
+                views/
         uncommitted/
             config_variables.yml
             data_docs/
@@ -1017,6 +1023,11 @@ great_expectations/
             create_expectations.ipynb
             validation_playground.ipynb
     plugins/
+        custom_data_docs/
+            renderers/
+            styles/
+                data_docs_custom_styles.css
+            views/
     uncommitted/
         config_variables.yml
         data_docs/
@@ -1043,6 +1054,11 @@ great_expectations/
             create_expectations.ipynb
             validation_playground.ipynb
     plugins/
+        custom_data_docs/
+            renderers/
+            styles/
+                data_docs_custom_styles.css
+            views/
     uncommitted/
         config_variables.yml
         data_docs/
@@ -1054,6 +1070,7 @@ great_expectations/
 
     DataContext.create(project_path)
     fixture = gen_directory_tree_str(ge_dir)
+
     assert fixture == expected
 
     # re-run create to simulate onboarding

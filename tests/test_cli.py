@@ -640,7 +640,6 @@ def test_cli_init_on_existing_ge_yml_with_missing_uncommitted_dirs_and_missing_c
 
         # check dir structure
         dir_structure = gen_directory_tree_str(ge_dir)
-        print(dir_structure)
         assert dir_structure == """\
 great_expectations/
     .gitignore
