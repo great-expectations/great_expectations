@@ -1,6 +1,5 @@
 import pytest
 
-from .conftest import CONTEXTS
 from .test_utils import get_dataset
 from collections import OrderedDict
 
@@ -22,9 +21,8 @@ schemas = {
 }
 
 
-@pytest.mark.parametrize('context', CONTEXTS)
-def test_caching(context):
-    dataset = get_dataset(context, data, schemas=schemas.get(context), caching=True)
+def test_caching(test_backend):
+    dataset = get_dataset(test_backend, data, schemas=schemas.get(test_backend), caching=True)
     dataset.get_column_max('a')
     dataset.get_column_max('a')
     dataset.get_column_max('b')
@@ -32,14 +30,13 @@ def test_caching(context):
     assert dataset.get_column_max.cache_info().misses == 2
     assert dataset.get_column_max.cache_info().misses == 2
 
-    dataset = get_dataset(context, data, schemas=schemas.get(context), caching=False)
+    dataset = get_dataset(test_backend, data, schemas=schemas.get(test_backend), caching=False)
     with pytest.raises(AttributeError):
         dataset.get_column_max.cache_info()
 
 
-@pytest.mark.parametrize('context', CONTEXTS)
-def test_head(context):
-    dataset = get_dataset(context, data, schemas=schemas.get(context), caching=True)
+def test_head(test_backend):
+    dataset = get_dataset(test_backend, data, schemas=schemas.get(test_backend), caching=True)
     dataset.expect_column_mean_to_be_between("b", 5, 5)
     head = dataset.head(1)
     assert isinstance(head, PandasDataset)
@@ -52,7 +49,7 @@ def test_head(context):
     # Interestingly, the original implementation failed to work for a single
     # column (it would always name the column "*").
     # This should also work if we only get a single column
-    dataset = get_dataset(context, {"a": data["a"]}, schemas=schemas.get(context), caching=True)
+    dataset = get_dataset(test_backend, {"a": data["a"]}, schemas=schemas.get(test_backend), caching=True)
     head = dataset.head(1)
     assert isinstance(head, PandasDataset)
     assert len(head) == 1

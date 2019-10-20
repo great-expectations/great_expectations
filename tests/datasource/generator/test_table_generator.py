@@ -1,7 +1,5 @@
 import pytest
 
-import sqlalchemy as sa
-
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
@@ -57,11 +55,13 @@ def test_basic_operation():
 
 
 def test_db_introspection(sqlalchemy_dataset):
+    import sqlalchemy as sa
+
     class MockDatasource(object):
         def __init__(self, engine):
             self.engine = engine
 
-    if not isinstance(sqlalchemy_dataset.engine.dialect, sa.dialects.postgresql.dialect):
+    if sqlalchemy_dataset is None or not isinstance(sqlalchemy_dataset.engine.dialect, sa.dialects.postgresql.dialect):
         pytest.skip("Skipping test that expects postgresql...")
 
     # Get the engine from the dataset
