@@ -89,6 +89,14 @@ class ConfigOnlyDataContext(object):
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
     UNCOMMITTED_DIRECTORIES = ["data_docs", "samples", "validations"]
+    BASE_DIRECTORIES = [
+        "datasources",
+        "expectations",
+        "notebooks",
+        "plugins",
+        "uncommitted",
+    ]
+    NOTEBOOK_SUBDIRECTORIES = ["pandas", "spark", "sql"]
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
 
@@ -183,13 +191,7 @@ class ConfigOnlyDataContext(object):
         safe_mmkdir(base_dir, exist_ok=True)
         open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
 
-        for directory in [
-            "datasources",
-            "expectations",
-            "notebooks",
-            "plugins",
-            "uncommitted",
-        ]:
+        for directory in cls.BASE_DIRECTORIES:
             if directory == "plugins":
                 plugins_dir = os.path.join(base_dir, directory)
                 safe_mmkdir(plugins_dir, exist_ok=True)
@@ -200,13 +202,17 @@ class ConfigOnlyDataContext(object):
                 cls.scaffold_custom_data_docs(plugins_dir)
             else:
                 safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
+        
         uncommitted_dir = os.path.join(base_dir, "uncommitted")
-
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
             safe_mmkdir(
                 os.path.join(uncommitted_dir, new_directory),
                 exist_ok=True
             )
+
+        notebook_path = os.path.join(base_dir, "notebooks")
+        for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
+            safe_mmkdir(os.path.join(notebook_path, subdir), exist_ok=True)
     
     @classmethod
     def scaffold_custom_data_docs(cls, plugins_dir):
@@ -214,16 +220,18 @@ class ConfigOnlyDataContext(object):
         styles_template = file_relative_path(__file__, "../render/view/styles/data_docs_custom_styles_template.css")
         styles_destination_path = os.path.join(plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
         shutil.copyfile(styles_template, styles_destination_path)
-    
+
     @classmethod
     def scaffold_notebooks(cls, base_dir):
         """Copy template notebooks into the notebooks directory for a project."""
         template_dir = file_relative_path(__file__, "../init_notebooks/*.ipynb")
-        for notebook in glob.glob(template_dir):
-            notebook_name = os.path.basename(notebook)
-            destination_path = os.path.join(base_dir, "notebooks",
-                                            notebook_name)
-            shutil.copyfile(notebook, destination_path)
+        notebook_dir = os.path.join(base_dir, "notebooks")
+        for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
+            subdir_path = os.path.join(notebook_dir, subdir)
+            for notebook in glob.glob(template_dir):
+                notebook_name = os.path.basename(notebook)
+                destination_path = os.path.join(subdir_path, notebook_name)
+                shutil.copyfile(notebook, destination_path)
 
     @classmethod
     def validate_config(cls, project_config):

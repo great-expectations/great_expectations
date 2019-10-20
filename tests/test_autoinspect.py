@@ -4,7 +4,6 @@ Tests for autoinspection framework.
 
 import pytest
 from .test_utils import get_dataset
-from .conftest import CONTEXTS
 
 import great_expectations as ge
 
@@ -23,10 +22,9 @@ def test_default_no_autoinspection():
     assert len(suite["expectations"]) == 0
 
 
-@pytest.mark.parametrize("dataset_type", CONTEXTS)
-def test_autoinspect_existing_dataset(dataset_type):
+def test_autoinspect_existing_dataset(test_backend):
     # Get a basic dataset with no expectations
-    df = get_dataset(dataset_type, {"a": [1, 2, 3]}, profiler=None)
+    df = get_dataset(test_backend, {"a": [1, 2, 3]}, profiler=None)
     suite = df.get_expectation_suite()
     assert len(suite["expectations"]) == 0
 
@@ -39,10 +37,8 @@ def test_autoinspect_existing_dataset(dataset_type):
         [{'expectation_type': 'expect_column_to_exist', 'kwargs': {'column': 'a'}}]
 
 
-@pytest.mark.parametrize("dataset_type", CONTEXTS)
-def test_autoinspect_columns_exist(dataset_type):
-    df = get_dataset(
-        dataset_type, {"a": [1, 2, 3]}, profiler=ge.profile.ColumnsExistProfiler)
+def test_autoinspect_columns_exist(test_backend):
+    df = get_dataset(test_backend, {"a": [1, 2, 3]}, profiler=ge.profile.ColumnsExistProfiler)
     suite = df.get_expectation_suite()
 
     assert len(suite["expectations"]) == 1

@@ -401,7 +401,7 @@ Within the CLI, we compile to documentation as follows:
 
     To learn more: https://docs.greatexpectations.io/en/latest/features/data_docs.html
 
-    Build HTML documentation? [Y/n]:
+    Build HTML Data Docs? [Y/n]:
 
     Building Data Docs...
         ...

@@ -8,7 +8,6 @@ from collections import OrderedDict
 import numpy as np
 import pandas as pd
 
-from ..conftest import CONTEXTS
 from ..test_utils import get_dataset, candidate_getter_is_on_temporary_notimplemented_list
 
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
@@ -23,20 +22,19 @@ def generate_ids(test):
     return ':'.join([test['dataset'], test['func']])
 
 
-@pytest.mark.parametrize('context', CONTEXTS)
 @pytest.mark.parametrize('test', test_config['tests'], ids=[generate_ids(t) for t in test_config['tests']])
-def test_implementations(context, test):
+def test_implementations(test_backend, test):
     should_skip = (
-        candidate_getter_is_on_temporary_notimplemented_list(context, test['func'])
+        candidate_getter_is_on_temporary_notimplemented_list(test_backend, test['func'])
         or
-        context in test.get('suppress_test_for', [])
+        test_backend in test.get('suppress_test_for', [])
     )
     if should_skip:
         pytest.skip()
 
     data = test_datasets[test['dataset']]['data']
-    schema = test_datasets[test['dataset']]['schemas'].get(context)
-    dataset = get_dataset(context, data, schemas=schema)
+    schema = test_datasets[test['dataset']]['schemas'].get(test_backend)
+    dataset = get_dataset(test_backend, data, schemas=schema)
     func = getattr(dataset, test['func'])
     run_kwargs = copy.deepcopy(test.get('kwargs', {}))
     for arg in run_kwargs.keys():
@@ -65,8 +63,7 @@ def test_implementations(context, test):
         assert test['expected'] == result
 
 
-@pytest.mark.parametrize('context', CONTEXTS)
-def test_get_column_value_counts(context):
+def test_get_column_value_counts(test_backend):
     schemas = {
         "SparkDFDataset": {
             "x": "FloatType",
@@ -83,7 +80,7 @@ def test_get_column_value_counts(context):
                 "n": [0, None],
                 "b": [True, False]
             }
-    dataset = get_dataset(context, data, schemas=schemas)
+    dataset = get_dataset(test_backend, data, schemas=schemas)
 
     res = dataset.get_column_value_counts("x")
     expected = pd.Series(data["x"]).value_counts()
@@ -136,7 +133,7 @@ def test_get_column_value_counts(context):
             "d": "StringType"
         }
     }
-    dataset = get_dataset(context, data, schemas=schemas)
+    dataset = get_dataset(test_backend, data, schemas=schemas)
 
     res = dataset.get_column_value_counts("a")
     expected = pd.Series(data["a"]).value_counts()
