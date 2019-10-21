@@ -208,7 +208,7 @@ def init(target_directory):
             if context.list_expectation_suite_keys():
                 if click.confirm(BUILD_DOCS_PROMPT, default=True):
                     context.build_data_docs()
-                    _open_data_docs_in_browser(context.root_directory)
+                    context.open_data_docs()
         except ge_exceptions.DataContextError as e:
             cli_message("<red>{}</red>".format(e))
     else:
@@ -258,18 +258,6 @@ def _slack_setup(context):
 
 def _get_full_path_to_ge_dir(target_directory):
     return os.path.abspath(os.path.join(target_directory, DataContext.GE_DIR))
-
-
-def _open_data_docs_in_browser(ge_dir):
-    """A stdlib cross-platform way to open a file in a browser."""
-    ge_dir = os.path.abspath(ge_dir)
-    data_docs_index = os.path.join(
-        ge_dir,
-        "uncommitted/data_docs/local_site/index.html"
-    )
-    if os.path.isfile(data_docs_index):
-        cli_message("Opening Data Docs found here: {}".format("file://" + data_docs_index))
-        webbrowser.open("file://" + data_docs_index)
 
 
 def _create_new_project(target_directory):
@@ -402,7 +390,7 @@ def build_docs(directory, site_name, view=True):
             site_name=site_name
         )
         if view:
-            _open_data_docs_in_browser(context.root_directory)
+            context.open_data_docs()
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
