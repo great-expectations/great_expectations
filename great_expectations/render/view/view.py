@@ -6,6 +6,7 @@ import datetime
 from collections import OrderedDict
 import os
 
+
 from jinja2 import (
     ChoiceLoader,
     Environment,
@@ -49,6 +50,7 @@ class DefaultJinjaView(object):
     * Vega 5.3.5
     * Vega-Lite 3.2.1
     * Vega-Embed 4.0.0
+
     """
     _template = NoOpTemplate
 
@@ -59,7 +61,7 @@ class DefaultJinjaView(object):
             plugins_directory = data_context.plugins_directory
             if os.path.isdir(os.path.join(plugins_directory, "custom_data_docs", "styles")):
                 self.custom_styles_directory = os.path.join(plugins_directory, "custom_data_docs/styles")
-                
+
     def render(self, document, template=None, **kwargs):
         self._validate_document(document)
 
@@ -86,10 +88,10 @@ class DefaultJinjaView(object):
             templates_loader,
             styles_loader
         ]
-        
+
         if self.custom_styles_directory:
             loaders.append(FileSystemLoader(self.custom_styles_directory))
-        
+
         env = Environment(
             loader=ChoiceLoader(loaders),
             autoescape=select_autoescape(['html', 'xml'])
@@ -120,32 +122,30 @@ class DefaultJinjaView(object):
         return template.render(context, content_block=content_block, index=index)
 
     def render_styling(self, styling):
-        """Adds styling information suitable for an html tag
+        """Adds styling information suitable for an html tag.
 
-        styling = {
-            "classes": ["alert", "alert-warning"],
-            "attributes": {
-                "role": "alert",
-                "data-toggle": "popover",
-            },
-            "styles" : {
-                "padding" : "10px",
-                "border-radius" : "2px",
+        Example styling block::
+
+            styling = {
+                "classes": ["alert", "alert-warning"],
+                "attributes": {
+                    "role": "alert",
+                    "data-toggle": "popover",
+                },
+                "styles" : {
+                    "padding" : "10px",
+                    "border-radius" : "2px",
+                }
             }
-        }
 
-        returns a string similar to:
-        'class="alert alert-warning" role="alert" data-toggle="popover" style="padding: 10px; border-radius: 2px"'
+        The above block returns a string similar to::
 
-        (Note: `render_styling` makes no guarantees about)
+            'class="alert alert-warning" role="alert" data-toggle="popover" style="padding: 10px; border-radius: 2px"'
 
         "classes", "attributes" and "styles" are all optional parameters.
         If they aren't present, they simply won't be rendered.
 
         Other dictionary keys are also allowed and ignored.
-        This makes it possible for styling objects to be nested, so that different DOM elements
-
-        # NOTE: We should add some kind of type-checking to styling
         """
     
         class_list = styling.get("classes", None)
