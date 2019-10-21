@@ -6,7 +6,6 @@ import os
 import shutil
 import sys
 import warnings
-import webbrowser
 
 from great_expectations.cli.init_messages import (
     BUILD_DOCS_PROMPT,
@@ -31,7 +30,7 @@ from .datasource import (
     build_docs as build_documentation_impl,
     MSG_GO_TO_NOTEBOOK,
 )
-from great_expectations.cli.util import cli_message
+from great_expectations.cli.util import cli_message, is_sane_slack_webhook
 from great_expectations.data_context import DataContext
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
@@ -216,22 +215,15 @@ def init(target_directory):
             cli_message(RUN_INIT_AGAIN)
             exit(0)
 
-        context, data_source_name = _create_new_project(target_directory)
+        context, data_source_name, data_source_type = _create_new_project(target_directory)
         if not data_source_name:  # no datasource was created
             return
 
         context = _slack_setup(context)
 
         profile_datasource(context, data_source_name)
-        cli_message(MSG_GO_TO_NOTEBOOK)
-
-
-def _is_sane_slack_webhook(url):
-    """Really basic sanity checking."""
-    if url is None:
-        return False
-
-    return "https://hooks.slack.com/" in url.strip()
+        specific_dir = data_source_type.value.lower()
+        cli_message(MSG_GO_TO_NOTEBOOK.format(specific_dir, specific_dir))
 
 
 def _slack_setup(context):
@@ -243,7 +235,7 @@ def _slack_setup(context):
     else:
         webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default="")
 
-    while not _is_sane_slack_webhook(webhook_url):
+    while not is_sane_slack_webhook(webhook_url):
         cli_message("That URL was not valid.\n")
         if not click.confirm(SLACK_SETUP_PROMPT, default=True):
             cli_message(SLACK_LATER)
@@ -263,8 +255,8 @@ def _get_full_path_to_ge_dir(target_directory):
 def _create_new_project(target_directory):
     try:
         context = DataContext.create(target_directory)
-        data_source_name = add_datasource_impl(context)
-        return context, data_source_name
+        data_source_name, data_source_type = add_datasource_impl(context)
+        return context, data_source_name, data_source_type
     except ge_exceptions.DataContextError as err:
         logger.critical(err.message)
         sys.exit(-1)
@@ -296,7 +288,7 @@ def add_datasource(directory):
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         _offer_to_install_new_template(err, context.root_directory)
 
-    data_source_name = add_datasource_impl(context)
+    data_source_name, data_source_type = add_datasource_impl(context)
 
     if not data_source_name:  # no datasource was created
         return
