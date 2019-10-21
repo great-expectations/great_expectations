@@ -13,7 +13,9 @@ from great_expectations.render.types import (
     RenderedComponentContent,
     RenderedSectionContent,
     RenderedComponentContentWrapper,
+    RenderedDocumentContent
 )
+from ..test_utils import dict_to_ordered_dict
 
 @pytest.fixture()
 def validation_results():
@@ -49,7 +51,8 @@ def test_render_DefaultJinjaPageView_meta_info():
             }
         }
     }
-    document = ProfilingResultsPageRenderer().render(validation_results)
+
+    document = RenderedDocumentContent(dict_to_ordered_dict(ProfilingResultsPageRenderer().render(validation_results)))
     html = DefaultJinjaPageView().render(document)
     print(html)
 
@@ -293,28 +296,12 @@ def test_render_DefaultJinjaPageView_meta_info():
         <td id="section-1-content-block-3-cell-3-1" ><div class="table-cell-frame"><span>string</span></div></td><td id="section-1-content-block-3-cell-3-2" ><div class="table-cell-frame"><span>0</span></div></td></tr><tr>
         <td id="section-1-content-block-3-cell-4-1" ><div class="table-cell-frame"><span>unknown</span></div></td><td id="section-1-content-block-3-cell-4-2" ><div class="table-cell-frame"><span>0</span></div></td></tr></table>
 
+</div>"""
+
+    expected_html_2 = """
+</div>
 </div>
 
-
-<div id="section-1-content-block-4" class="col-12" style="margin-top:20px;" >
-
-    <div id="section-1-content-block-4-header" class="collapsed" data-toggle="collapse" href="#section-1-content-block-4-body" aria-expanded="true" aria-controls="collapseExample" style="cursor:pointer;" >
-        
-        <h4>
-            Expectation types <span class="mr-3 triangle"></span>
-        </h4>
-        </div>
-
-
-<ul id="section-1-content-block-4-body" class="list-group collapse" >
-
-</ul>
-
-</div>
-    
-    </div>
-</div>
-        
         </div>
         <div class="col-lg-2 col-md-2 col-xs-12 d-none d-md-block">
             <div>
@@ -376,7 +363,8 @@ def test_render_DefaultJinjaPageView_meta_info():
 </html>
 """
     
-    assert html.replace(" ", "").replace("\t", "").replace("\n", "") == expected_html.replace(" ", "").replace("\t", "").replace("\n", "")
+    assert expected_html.replace(" ", "").replace("\t", "").replace("\n", "") in html.replace(" ", "").replace("\t", "").replace("\n", "")
+    assert expected_html_2.replace(" ", "").replace("\t", "").replace("\n", "") in html.replace(" ", "").replace("\t", "").replace("\n", "")
 
 
 def test_render_section_page():
