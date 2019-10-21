@@ -209,11 +209,11 @@ class ConfigOnlyDataContext(object):
     @classmethod
     def scaffold_notebooks(cls, base_dir):
         """Copy template notebooks into the notebooks directory for a project."""
-        template_dir = file_relative_path(__file__, "../init_notebooks/*.ipynb")
-        notebook_dir = os.path.join(base_dir, "notebooks")
+        template_dir = file_relative_path(__file__, "../init_notebooks/")
+        notebook_dir = os.path.join(base_dir, "notebooks/")
         for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
             subdir_path = os.path.join(notebook_dir, subdir)
-            for notebook in glob.glob(template_dir):
+            for notebook in glob.glob(os.path.join(template_dir, subdir, "*.ipynb")):
                 notebook_name = os.path.basename(notebook)
                 destination_path = os.path.join(subdir_path, notebook_name)
                 shutil.copyfile(notebook, destination_path)
