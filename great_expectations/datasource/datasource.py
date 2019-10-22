@@ -7,7 +7,10 @@ import logging
 
 from ruamel.yaml import YAML
 
-from ..data_context.types import NormalizedDataAssetName, DataAssetIdentifier
+from great_expectations.data_context.types import (
+    DataAssetIdentifier,
+    NormalizedDataAssetName,
+)
 from great_expectations.data_context.util import (
     load_class,
     instantiate_class_from_config

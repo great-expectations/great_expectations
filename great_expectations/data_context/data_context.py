@@ -399,6 +399,7 @@ class ConfigOnlyDataContext(object):
 
     def get_existing_local_data_docs_sites_urls(self):
         """Get file urls for all built local data docs."""
+        from great_expectations.data_context.store import FixedLengthTupleFilesystemStoreBackend
         ge_dir = os.path.abspath(self.root_directory)
         sites = self.get_project_config().get("data_docs_sites")
 
@@ -406,9 +407,12 @@ class ConfigOnlyDataContext(object):
 
         for site_name, site in sites.items():
             store_backend = site.get("store_backend")
-
-            # TODO this should probably use a store api and check for types rather than relying on strings in the config file
-            if store_backend and store_backend.get("class_name") == "FixedLengthTupleFilesystemStoreBackend":
+            store_class = load_class(
+                store_backend.get("class_name"),
+                "great_expectations.data_context.store"
+            )
+            # Only do this for local files
+            if issubclass(store_class, FixedLengthTupleFilesystemStoreBackend):
                 base_dir = store_backend.get("base_directory")
                 data_docs_index = os.path.join(ge_dir, base_dir, "index.html")
 
