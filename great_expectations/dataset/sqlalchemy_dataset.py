@@ -199,7 +199,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if custom_sql and not table_name:
             # dashes are special characters in most databases so use underscores
-            table_name = str(uuid.uuid4()).replace("-", "_")
+            table_name = "ge_tmp_" + str(uuid.uuid4()).replace("-", "_")
 
         if table_name is None:
             raise ValueError("No table_name provided.")
