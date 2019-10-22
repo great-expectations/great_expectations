@@ -1972,13 +1972,12 @@ class DataContext(ConfigOnlyDataContext):
         return result
 
     @classmethod
-    def find_context_yml_file(cls, search_start_dir=os.getcwd(), verbose=False):
+    def find_context_yml_file(cls, search_start_dir=os.getcwd()):
         """Search for the yml file starting here and moving upward."""
         yml_path = None
 
         for i in range(4):
-            if verbose:
-                print(i, f"    Searching {search_start_dir}")
+            logger.debug("Searching for config file {} ({} layer deep)".format(search_start_dir, i))
 
             potential_ge_dir = os.path.join(search_start_dir, cls.GE_DIR)
 
@@ -1986,8 +1985,7 @@ class DataContext(ConfigOnlyDataContext):
                 potential_yml = os.path.join(potential_ge_dir, cls.GE_YML)
                 if os.path.isfile(potential_yml):
                     yml_path = potential_yml
-                    if verbose:
-                        print("Found config file at " + str(yml_path))
+                    logger.debug("Found config file at " + str(yml_path))
                     break
             # move up one directory
             search_start_dir = os.path.dirname(search_start_dir)
