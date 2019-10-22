@@ -3,12 +3,11 @@ logger = logging.getLogger(__name__)
 
 from six import string_types
 
-from .base_resource_identifiers import (
+from great_expectations.data_context.types.base_resource_identifiers import (
     DataContextKey,
     OrderedDataContextKey,
 )
 
-from great_expectations.datasource.types.batch_kwargs import BatchFingerprint
 
 
 # TODO: Rename to DataAssetKey, for consistency

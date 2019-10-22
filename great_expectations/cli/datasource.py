@@ -1,4 +1,5 @@
 import os
+import enum
 import click
 from .util import cli_message
 from great_expectations.exceptions import DatasourceInitializationError
@@ -8,6 +9,13 @@ from great_expectations import rtd_url_ge_version
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+class DataSourceTypes(enum.Enum):
+    PANDAS = "pandas"
+    SQL = "sql"
+    SPARK = "spark"
+    DBT = "dbt"
 
 
 def add_datasource(context):
@@ -26,28 +34,32 @@ See <blue>https://docs.greatexpectations.io/en/latest/features/datasource.html?u
 
     cli_message(data_source_selection)
     data_source_name = None
+    data_source_type = None
 
     if data_source_selection == "1":  # pandas
+        data_source_type = DataSourceTypes.PANDAS
         data_source_name = _add_pandas_datasource(context)
     elif data_source_selection == "2":  # sqlalchemy
+        data_source_type = DataSourceTypes.SQL
         data_source_name = _add_sqlalchemy_datasource(context)
     elif data_source_selection == "3":  # Spark
+        data_source_type = DataSourceTypes.SPARK
         data_source_name = _add_spark_datasource(context)
     # if data_source_selection == "5": # dbt
+    #     data_source_type = DataSourceTypes.DBT
     #     dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
     #     log_message(msg_dbt_go_to_notebook, color="blue")
     #     context.add_datasource("dbt", "dbt", profile=dbt_profile)
     if data_source_selection == "4":  # None of the above
         cli_message(msg_unknown_data_source)
-        cli_message(
-            """
+        cli_message("""
 Skipping datasource configuration.
     - Add one by running `<green>great_expectations add-datasource</green>` or
     - ... by editing the `{}` file
 """.format(DataContext.GE_YML)
         )
 
-    return data_source_name
+    return data_source_name, data_source_type
 
 
 def _add_pandas_datasource(context):
@@ -327,13 +339,9 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_d
             if profiling_results['success']: # data context is ready to profile
                 break
 
-
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
-
-    if click.confirm("Build HTML Data Docs?", default=True):
-        build_docs(context)
-    else:
-        cli_message("Okay, skipping HTML documentation for now.")
+    build_docs(context)
+    context.open_data_docs()
 
 
 def build_docs(context, site_name=None):
@@ -398,16 +406,14 @@ of this config file: great_expectations/uncommitted/credentials/profiles.yml:
 
 msg_unknown_data_source = """
 Do we not have the type of data source you want?
-    - Please create a GitHub issue here: <blue>https://github.com/great-expectations/great_expectations/issues/new</blue>
+    - Please create a GitHub issue here so we can discuss it!
+    - <blue>https://github.com/great-expectations/great_expectations/issues/new</blue>"""
 
-In the meantime, consider reviewing the following notebook for an example of 
-creating and saving an expectation suite for validation:
-    - `<green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>`
-"""
-
-MSG_GO_TO_NOTEBOOK = """    - To create expectations for your data, start Jupyter and open a tutorial notebook:
-        - To launch with jupyter notebooks:
-            <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
-        - To launch with jupyter lab:
-            <green>jupyter lab great_expectations/notebooks/create_expectations.ipynb</green>
+# TODO also maybe add validation playground notebook or wait for the full onboarding flow
+MSG_GO_TO_NOTEBOOK = """
+To create expectations for your data, start Jupyter and open a tutorial notebook:
+    - To launch with jupyter notebooks:
+        <green>jupyter notebook great_expectations/notebooks/{}/create_expectations.ipynb</green>
+    - To launch with jupyter lab:
+        <green>jupyter lab great_expectations/notebooks/{}/create_expectations.ipynb</green>
 """
