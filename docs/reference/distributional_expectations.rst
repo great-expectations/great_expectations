@@ -43,7 +43,7 @@ For continuous data:
 * However, following the behavior of numpy.histogram, a data element x is in the largest bin k if x == upper_bound_k.
 * A bin may include -Infinity and Infinity as endpoints, however, those endpoints are not supported by the Kolmogorov-Smirnov test.
 
-* Partition weights define the probability of the associated interval. Note that this effectively applies a "piecewise uniform" distribution to the data for the purpose of statistical tests.
+* Partition weights define the probability of the associated interval. Note that this effectively applies a "piecewise uniform" distribution to the data for the purpose of statistical tests. The weights must define a valid probability distribution, ie they must be non-negative numbers that sum to 1.
 
 Example continuous partition object:
 
@@ -97,7 +97,7 @@ For continuous data, the expect_column_bootstrapped_ks_test_p_value_to_be_greate
 
 * :func:`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than <great_expectations.dataset.dataset.Dataset.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than>`
 
-For categorical data, the expect_column_chisquare_test_p_value_to_be_greater_than expectation uses the Chi-Squared test. The provided weights are scaled to the size of the data in the tested column at the time of the test.
+For categorical data, the expect_column_chisquare_test_p_value_to_be_greater_than expectation uses the Chi-Squared test. The Chi-Squared test works with expected and observed counts, but that is handled internally in this function -- both the input and output to this function are valid partition objects (ie with weights that are probabilities and sum to 1).
 
 * :func:`expect_column_chisquare_test_p_value_to_be_greater_than <great_expectations.dataset.dataset.Dataset.expect_column_chisquare_test_p_value_to_be_greater_than>`
 

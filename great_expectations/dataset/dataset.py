@@ -3480,6 +3480,11 @@ class Dataset(MetaDataset):
         test_result = stats.chisquare(
             test_df["count"], test_df["expected"])[1]
 
+        # Normalize the ouputs so they can be used as partitions into other expectations
+        # GH653
+        expected_weights = (test_df["expected"] / test_df["expected"].sum()).tolist()
+        observed_weights = (test_df["count"] / test_df["count"].sum()).tolist()
+
         return {
             "success": test_result > p,
             "result": {
@@ -3487,11 +3492,11 @@ class Dataset(MetaDataset):
                 "details": {
                     "observed_partition": {
                         "values": test_df.index.tolist(),
-                        "weights": test_df["count"].tolist()
+                        "weights": observed_weights
                     },
                     "expected_partition": {
                         "values": test_df.index.tolist(),
-                        "weights": test_df["expected"].tolist()
+                        "weights": expected_weights
                     }
                 }
             }
