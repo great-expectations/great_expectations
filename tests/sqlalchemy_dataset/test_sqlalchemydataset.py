@@ -123,7 +123,7 @@ def test_sqlalchemydataset_builds_guid_for_table_name_on_custom_sql(sa):
         mock_uuid.return_value = "a-guid-with-dashes-that-will-break-sql"
 
         dataset = SqlAlchemyDataset(engine=engine, custom_sql="select 1")
-        assert dataset._table.name =="a_guid_with_dashes_that_will_break_sql"
+        assert dataset._table.name =="ge_tmp_a_guid_with_dashes_that_will_break_sql"
 
 
 def test_sqlalchemydataset_with_custom_sql(sa):
