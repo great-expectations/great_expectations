@@ -3,7 +3,7 @@ import copy
 import json
 
 from great_expectations.render.renderer.content_block.content_block import ContentBlockRenderer
-from great_expectations.render.util import ordinal
+from great_expectations.render.util import ordinal, float_to_str
 
 import pandas as pd
 import altair as alt
@@ -116,7 +116,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "may have any number of unique values."
         else:
             if params["mostly"] is not None:
-                params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if params["min_value"] is None:
                     template_str = "must have fewer than $max_value unique values, at least $mostly_pct % of the time."
                 elif params["max_value"] is None:
@@ -155,7 +156,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "may have any numerical value."
         else:
             if params["mostly"] is not None:
-                params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must be between $min_value and $max_value, at least $mostly_pct % of the time."
                 
@@ -203,7 +205,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             else:
                 template_str = "Values in $column_A must always be greater than or equal to those in $column_B."
         else:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must be greater than those in $column_B, at least $mostly_pct % of the time."
             else:
@@ -237,7 +240,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if params["mostly"] is None:
             template_str = "Values in $column_A and $column_B must always be equal."
         else:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
         
         return [{
@@ -428,7 +432,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         )
 
         if params["mostly"] is not None:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             if include_column_name:
                 template_str = "$column values must not be null, at least $mostly_pct % of the time."
             else:
@@ -456,7 +461,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         )
         
         if params["mostly"] is not None:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = "values must be null, at least $mostly_pct % of the time."
         else:
             template_str = "values must be null."
@@ -481,7 +487,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         )
         
         if params["mostly"] is not None:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = "values must be of type $type_, at least $mostly_pct % of the time."
         else:
             template_str = "values must be of type $type_."
@@ -513,7 +520,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             )
 
             if params["mostly"] is not None:
-                params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if include_column_name:
                     template_str = "$column value types must belong to this set: " + values_string + ", at least $mostly_pct % of the time."
                 else:
@@ -558,7 +566,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         template_str = "values must belong to this set: " + values_string
         
         if params["mostly"] is not None:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
@@ -598,7 +607,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         template_str = "values must not belong to this set: " + values_string
     
         if params["mostly"] is not None:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
@@ -662,7 +672,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "values must be greater than or equal to previous values"
             
         if params["mostly"] is not None:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
@@ -696,7 +707,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "values must be less than or equal to previous values"
     
         if params["mostly"] is not None:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
@@ -727,7 +739,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "values may have any length."
         else:
             if params["mostly"] is not None:
-                params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must be between $min_value and $max_value characters long, at least $mostly_pct % of the time."
                 
@@ -770,7 +783,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         else:
             template_str = "values must be $value characters long"
             if params["mostly"] is not None:
-                params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
@@ -799,7 +813,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         else:
             template_str = "values must match this regular expression: $regex"
             if params["mostly"] is not None:
-                params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
@@ -827,7 +842,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "values must not match a regular expression but none was specified."
         else:
             if params["mostly"] is not None:
-                params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if include_column_name:
                     template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
                 else:
@@ -869,7 +885,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "values must match any of the following regular expressions: " + values_string
             
         if params["mostly"] is not None:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
@@ -905,7 +922,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         template_str = "values must not match any of the following regular expressions: " + values_string
         
         if params["mostly"] is not None:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
@@ -934,7 +952,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         else:
             template_str = "values must match the following strftime format: $strftime_format"
             if params["mostly"] is not None:
-                params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
@@ -961,7 +980,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         template_str = "values must be parseable by dateutil"
         
         if params["mostly"] is not None:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
@@ -988,7 +1008,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         template_str = "values must be parseable as JSON"
     
         if params["mostly"] is not None:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
@@ -1017,7 +1038,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         else:
             params["formatted_json"] = "<pre>" + json.dumps(params.get("json_schema"), indent=4) + "</pre>"
             if params["mostly"] is not None:
-                params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
             else:
                 template_str = "values must match the following JSON Schema: $formatted_json"
@@ -1424,7 +1446,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "values must be unique"
 
         if params["mostly"] is not None:
-            params["mostly_pct"] = "{:.14}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            params["mostly_pct"] = float_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
