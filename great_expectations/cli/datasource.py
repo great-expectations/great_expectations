@@ -18,6 +18,16 @@ class DataSourceTypes(enum.Enum):
     DBT = "dbt"
 
 
+class SupportedDatabases(enum.Enum):
+    MYSQL = 'MySQL'
+    POSTGRES = 'Postgres'
+    REDSHIFT = 'Redshift'
+    SNOWFLAKE = 'Snowflake'
+    OTHER = 'other'
+    # TODO MSSQL
+    # TODO BigQuery
+
+
 def add_datasource(context):
     cli_message(
         """
@@ -105,42 +115,39 @@ def _add_sqlalchemy_datasource(context):
   - Please `pip install sqlalchemy` before trying again.""")
         return None
 
-    data_source_name = click.prompt(
-        msg_prompt_datasource_name, default="mydb", show_default=True)
+    db_choices = [str(x) for x in list(range(1, 1 + len(SupportedDatabases)))]
+    selected_database = int(
+        click.prompt(
+            msg_prompt_choose_database,
+            type=click.Choice(db_choices),
+            show_choices=False
+        )
+    ) - 1  # don't show user a zero index list :)
 
+    selected_database = list(SupportedDatabases)[selected_database]
+
+    data_source_name = click.prompt(
+        msg_prompt_datasource_name,
+        default="my_{}_db".format(selected_database.value.lower()),
+        show_default=True
+    )
+
+    credentials = {}
     while True:
         cli_message(msg_sqlalchemy_config_connection.format(data_source_name))
 
-        drivername = click.prompt("What is the driver for the sqlalchemy connection?", default="postgres",
-                                  show_default=True)
-        if drivername == "postgres":
-            host = click.prompt("What is the host for the sqlalchemy connection?", default="localhost",
-                                show_default=True)
-            port = click.prompt("What is the port for the sqlalchemy connection?", default="5432",
-                                show_default=True)
-            username = click.prompt("What is the username for the sqlalchemy connection?", default="postgres",
-                                show_default=True)
-            password = click.prompt("What is the password for the sqlalchemy connection?", default="",
-                                show_default=False, hide_input=True)
-            database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
-                                show_default=True)
-
-            # Since we don't want to save the database credentials in the config file that will be
-            # committed in the repo, we will use our Variable Substitution feature to store the credentials
-            # in the credentials file (that will not be committed, since it is in the uncommitted directory)
-            # with the datasource's name as the variable name.
-            # The value of the datasource's "credentials" key in the config file (great_expectations.yml) will
-            # be ${datasource name}.
-            # GE will replace the ${datasource name} with the value from the credentials file in runtime.
-            credentials = {
-                "drivername": drivername,
-                "host": host,
-                "port": port,
-                "username": username,
-                "password": password,
-                "database": database
-            }
-        else:
+        if selected_database == SupportedDatabases.MYSQL:
+            # TODO implement
+            pass
+        elif selected_database == SupportedDatabases.POSTGRES:
+            credentials = _collect_postgres_credentials(default_credentials=credentials)
+        elif selected_database == SupportedDatabases.REDSHIFT:
+            # TODO implement
+            pass
+        elif selected_database == SupportedDatabases.SNOWFLAKE:
+            # TODO implement
+            pass
+        elif selected_database == SupportedDatabases.OTHER:
             sqlalchemy_url = click.prompt(
 """What is the url/connection string for the sqlalchemy connection?
 (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
@@ -189,6 +196,42 @@ def _add_sqlalchemy_datasource(context):
                 return None
 
     return data_source_name
+
+
+def _collect_postgres_credentials(default_credentials={}):
+    host = click.prompt("What is the host for the sqlalchemy connection?",
+                        default=default_credentials.get("host", "localhost"),
+                        show_default=True)
+    port = click.prompt("What is the port for the sqlalchemy connection?",
+                        default=default_credentials.get("port", "5432"),
+                        show_default=True)
+    username = click.prompt("What is the username for the sqlalchemy connection?",
+                            default=default_credentials.get("username", "postgres"),
+                            show_default=True)
+    password = click.prompt("What is the password for the sqlalchemy connection?",
+                            default="",
+                            show_default=False, hide_input=True)
+    database = click.prompt("What is the database name for the sqlalchemy connection?",
+                            default=default_credentials.get("database", "postgres"),
+                            show_default=True)
+
+    # Since we don't want to save the database credentials in the config file that will be
+    # committed in the repo, we will use our Variable Substitution feature to store the credentials
+    # in the credentials file (that will not be committed, since it is in the uncommitted directory)
+    # with the datasource's name as the variable name.
+    # The value of the datasource's "credentials" key in the config file (great_expectations.yml) will
+    # be ${datasource name}.
+    # GE will replace the ${datasource name} with the value from the credentials file in runtime.
+    credentials = {
+        "drivername": "postgres",
+        "host": host,
+        "port": port,
+        "username": username,
+        "password": password,
+        "database": database
+    }
+
+    return credentials
 
 
 def _add_spark_datasource(context):
@@ -375,6 +418,12 @@ Configure a datasource:
     3. Spark DataFrame
     4. Skip datasource configuration
 """
+
+
+msg_prompt_choose_database = """
+Which database?
+{}
+""".format("\n".join(["    {}. {}".format(i, db.value) for i, db in enumerate(SupportedDatabases, 1)]))
 
 #     msg_prompt_dbt_choose_profile = """
 # Please specify the name of the dbt profile (from your ~/.dbt/profiles.yml file Great Expectations \
