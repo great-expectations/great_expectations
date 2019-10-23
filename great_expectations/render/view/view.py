@@ -129,6 +129,7 @@ class DefaultJinjaView(object):
         template = self._get_template(template="{content_block_type}.j2".format(content_block_type=content_block_type))
         return template.render(context, content_block=content_block, index=index)
 
+
     def render_styling(self, styling):
         """Adds styling information suitable for an html tag.
 

@@ -1,10 +1,16 @@
 .. _changelog:
 
+
 0.8.2__develop
 -----------------
-* Use higher precision for rendering 'mostly' parameter in data-docs
-* Documentation fixes (thanks @DanielOliver!)
+* Add easier support for customizing data-docs css
+* Use higher precision for rendering 'mostly' parameter in data-docs; add more consistent locale-based
+  formatting in data-docs
+* Fix an issue causing visual overlap of large numbers of validation results in build-docs index
+* Documentation fixes (thanks @DanielOliver!) and improvements
 * Minor CLI wording fixes
+* Improved handling of MySql temporary tables
+* Improved detection of older config versions
 
 
 0.8.1
