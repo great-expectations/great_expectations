@@ -32,15 +32,8 @@ that will look like this:
     ├── expectations
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── pandas
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   ├── spark
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   └── sql
-    │       ├── create_expectations.ipynb
-    │       └── validations_playground.ipynb
+    │   ├── create_expectations.ipynb
+    │   └── integrate_validation_into_pipeline.ipynb
     ├── plugins
     │   └── custom_data_docs
     │       ├── renderers
@@ -53,7 +46,8 @@ that will look like this:
         ├── samples
         └── validations
     
-OK to proceed?"""
+OK to proceed?
+"""
 
 PROJECT_IS_COMPLETE = "This looks like an existing project that <green>appears complete!</green> You are <green>ready to roll.</green>\n"
 
