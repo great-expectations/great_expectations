@@ -193,8 +193,18 @@ class ConfigOnlyDataContext(object):
         open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
 
         for directory in cls.BASE_DIRECTORIES:
-            safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
-            uncommitted_dir = os.path.join(base_dir, "uncommitted")
+            if directory == "plugins":
+                plugins_dir = os.path.join(base_dir, directory)
+                safe_mmkdir(plugins_dir, exist_ok=True)
+                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs"), exist_ok=True)
+                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "views"), exist_ok=True)
+                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "renderers"), exist_ok=True)
+                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "styles"), exist_ok=True)
+                cls.scaffold_custom_data_docs(plugins_dir)
+            else:
+                safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
+
+        uncommitted_dir = os.path.join(base_dir, "uncommitted")
 
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
             safe_mmkdir(
@@ -205,6 +215,13 @@ class ConfigOnlyDataContext(object):
         notebook_path = os.path.join(base_dir, "notebooks")
         for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
             safe_mmkdir(os.path.join(notebook_path, subdir), exist_ok=True)
+
+    @classmethod
+    def scaffold_custom_data_docs(cls, plugins_dir):
+        """Copy custom data docs templates"""
+        styles_template = file_relative_path(__file__, "../render/view/styles/data_docs_custom_styles_template.css")
+        styles_destination_path = os.path.join(plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
+        shutil.copyfile(styles_template, styles_destination_path)
 
     @classmethod
     def scaffold_notebooks(cls, base_dir):
@@ -1902,7 +1919,7 @@ class DataContext(ConfigOnlyDataContext):
             raise ge_exceptions.InvalidConfigValueTypeError("The key `config_version` must be an integer. Please check your config file.")
 
         # When migrating from 0.7.x to 0.8.0
-        if version == 0 and "validations_stores" in list(config_dict.keys()):
+        if version == 0 and ("validations_store" in list(config_dict.keys()) or "validations_stores" in list(config_dict.keys())):
             raise ge_exceptions.ZeroDotSevenConfigVersionError(
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
             )

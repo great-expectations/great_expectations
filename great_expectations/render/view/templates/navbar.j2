@@ -1,12 +1,12 @@
-<nav id="navigation" class="navbar navbar-light bg-light sticky d-none d-sm-block">
-    <nav class="nav nav-pills flex-column">
+<nav id="navigation" class="navbar navbar-light bg-light sticky d-none d-sm-block ge-navigation-sidebar-container">
+    <nav class="nav nav-pills flex-column ge-navigation-sidebar-content">
         {% if data_asset_name -%}
-            <a class="navbar-brand" href="#" style="white-space: normal; word-break: break-all;overflow-wrap: normal; font-size: 1rem; font-weight: 500;">{{data_asset_name}}</a>
+            <a class="navbar-brand ge-navigation-sidebar-title" href="#" style="white-space: normal; word-break: break-all;overflow-wrap: normal; font-size: 1rem; font-weight: 500;">{{data_asset_name}}</a>
         {% else -%}
-            <a class="navbar-brand" href="#" style="white-space: normal; word-break: break-all;overflow-wrap: normal; font-size: 1rem; font-weight: 500;"></a>
+            <a class="navbar-brand ge-navigation-sidebar-title" href="#" style="white-space: normal; word-break: break-all;overflow-wrap: normal; font-size: 1rem; font-weight: 500;"></a>
         {% endif -%}
         {% for section in sections %}
-            <a class="nav-link" href="#section-{{loop.index}}">{{section['section_name']}}</a>
+            <a class="nav-link ge-navigation-sidebar-link" href="#section-{{loop.index}}">{{section['section_name']}}</a>
         {% endfor %}
     </nav>
 </nav>

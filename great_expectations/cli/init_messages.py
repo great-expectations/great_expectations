@@ -42,6 +42,11 @@ that will look like this:
     │       ├── create_expectations.ipynb
     │       └── validations_playground.ipynb
     ├── plugins
+    │   └── custom_data_docs
+    │       ├── renderers
+    │       ├── styles
+    │       │   └── data_docs_custom_styles.css
+    │       └── views
     └── uncommitted
         ├── config_variables.yml
         ├── data_docs
