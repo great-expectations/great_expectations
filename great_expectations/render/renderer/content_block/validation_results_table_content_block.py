@@ -1,6 +1,8 @@
+from six import integer_types
+
 from great_expectations.render.renderer.content_block.expectation_string import ExpectationStringRenderer
 from great_expectations.render.types import RenderedComponentContent
-from great_expectations.render.util import float_to_str
+from great_expectations.render.util import num_to_str
 
 import pandas as pd
 import altair as alt
@@ -159,9 +161,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         if success or not result.get("unexpected_count"):
             return None
         else:
-            unexpected_count = float_to_str(result["unexpected_count"], use_locale=True)
-            unexpected_percent = float_to_str(result["unexpected_percent"], precision=4) + "%"
-            element_count = float_to_str(result["element_count"], use_locale=True)
+            unexpected_count = num_to_str(result["unexpected_count"], use_locale=True, precision=20)
+            unexpected_percent = num_to_str(result["unexpected_percent"], precision=4) + "%"
+            element_count = num_to_str(result["element_count"], use_locale=True, precision=20)
             
             template_str = "\n\n$unexpected_count unexpected values found. " \
                            "$unexpected_percent of $element_count total rows."
@@ -250,21 +252,24 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             }
 
         if result.get("observed_value"):
-            return str(result.get("observed_value"))
+            observed_value = result.get("observed_value")
+            if isinstance(observed_value, (integer_types, float)) and not isinstance(observed_value, bool):
+                return num_to_str(observed_value, precision=10, use_locale=True)
+            return str(observed_value)
         elif expectation_type == "expect_column_values_to_be_null":
             try:
                 notnull_percent = result["unexpected_percent"]
-                return float_to_str(100-notnull_percent, precision=5) + "% null"
+                return num_to_str(100 - notnull_percent, precision=5, use_locale=True) + "% null"
             except KeyError:
                 return "unknown % null"
         elif expectation_type == "expect_column_values_to_not_be_null":
             try:
                 null_percent = result["unexpected_percent"]
-                return float_to_str(100-null_percent, precision=5) + "% not null"
+                return num_to_str(100 - null_percent, precision=5, use_locale=True) + "% not null"
             except KeyError:
                 return "unknown % not null"
         elif result.get("unexpected_percent") is not None:
-            return float_to_str(result.get("unexpected_percent"), precision=5) + "% unexpected"
+            return num_to_str(result.get("unexpected_percent"), precision=5) + "% unexpected"
         else:
             return "--"
 
