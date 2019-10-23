@@ -25,6 +25,7 @@ from great_expectations.render.types import (
     RenderedComponentContent
 )
 
+
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs():
     with open('./tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'r') as infile:
@@ -66,6 +67,7 @@ def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
         json.dump(rendered, outfile, indent=2)
 
     assert len(rendered["sections"]) > 5
+
 
 @pytest.mark.smoketest
 def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_1):
@@ -186,8 +188,8 @@ def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expe
     rendered_json = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations)
     rendered_page = DefaultJinjaPageView().render(rendered_json)
 
-    with open('./tests/render/output/test_render_profiled_fixture_expectation_suite.html', 'w') as f:
-        f.write(rendered_page)
+    with open('./tests/render/output/test_render_profiled_fixture_expectation_suite.html', 'wb') as f:
+        f.write(rendered_page.encode("utf-8"))
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
     assert rendered_page[-7:] == "</html>"
@@ -211,8 +213,8 @@ def test_render_profiling_results(titanic_profiled_evrs_1):
     rendered_json = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     rendered_page = DefaultJinjaPageView().render(rendered_json)
 
-    with open('./tests/render/output/test_render_profiling_results.html', 'w') as f:
-        f.write(rendered_page)
+    with open('./tests/render/output/test_render_profiling_results.html', 'wb') as f:
+        f.write(rendered_page.encode("utf-8"))
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
     assert rendered_page[-7:] == "</html>"
@@ -223,8 +225,8 @@ def test_render_validation_results(titanic_profiled_evrs_1):
     rendered_json = ValidationResultsPageRenderer().render(titanic_profiled_evrs_1)
     rendered_page = DefaultJinjaPageView().render(rendered_json)
 
-    with open('./tests/render/output/test_render_validation_results.html', 'w') as f:
-        f.write(rendered_page)
+    with open('./tests/render/output/test_render_validation_results.html', 'wb') as f:
+        f.write(rendered_page.encode("utf-8"))
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
     assert rendered_page[-7:] == "</html>"
@@ -239,8 +241,8 @@ def test_smoke_render_profiling_results_page_renderer_with_exception(
     rendered_json = ProfilingResultsPageRenderer().render(titanic_profiler_evrs_with_exception)
     rendered_page = DefaultJinjaPageView().render(rendered_json)
 
-    with open('./tests/render/output/test_render_profiling_results_column_section_renderer_with_exception.html', 'w') as f:
-        f.write(rendered_page)
+    with open('./tests/render/output/test_render_profiling_results_column_section_renderer_with_exception.html', 'wb') as f:
+        f.write(rendered_page.encode("utf-8"))
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
     assert rendered_page[-7:] == "</html>"
@@ -256,8 +258,8 @@ def test_full_oobe_flow():
     rendered_json = ProfilingResultsPageRenderer().render(evrs)
     rendered_page = DefaultJinjaPageView().render(rendered_json)
 
-    with open('./tests/render/output/test_full_oobe_flow.html', 'w') as f:
-        f.write(rendered_page)
+    with open('./tests/render/output/test_full_oobe_flow.html', 'wb') as f:
+        f.write(rendered_page.encode("utf-8"))
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
     assert rendered_page[-7:] == "</html>"

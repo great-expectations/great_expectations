@@ -1,3 +1,5 @@
+.. cssclass:: widetable
+
 .. _generator_module:
 
 

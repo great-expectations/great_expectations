@@ -182,7 +182,7 @@ def _add_sqlalchemy_datasource(context):
 def _add_spark_datasource(context):
     path = click.prompt(
         msg_prompt_filesys_enter_base_path,
-        default='/data/',
+        # default='/data/',
         type=click.Path(
             exists=True,
             file_okay=False,
@@ -196,15 +196,14 @@ def _add_spark_datasource(context):
 
     if path.endswith("/"):
         path = path[:-1]
-    default_data_source_name = os.path.basename(path)
+    default_data_source_name = os.path.basename(path) + "__dir"
     data_source_name = click.prompt(
         msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
     context.add_datasource(data_source_name,
                            module_name="great_expectations.datasource",
                            class_name="SparkDFDatasource",
-                           base_directory=path)  # NOTE: Eugene: 2019-09-17: review the path and make sure that the logic works both for abs and rel.
-    # base_directory=os.path.join("..", path))
+                           base_directory=os.path.join("..", path))
     return data_source_name
 
 
