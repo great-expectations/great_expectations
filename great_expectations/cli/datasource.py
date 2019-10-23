@@ -108,38 +108,14 @@ def _add_sqlalchemy_datasource(context):
     data_source_name = click.prompt(
         msg_prompt_datasource_name, default="mydb", show_default=True)
 
+    credentials = {}
     while True:
         cli_message(msg_sqlalchemy_config_connection.format(data_source_name))
 
         drivername = click.prompt("What is the driver for the sqlalchemy connection?", default="postgres",
                                   show_default=True)
         if drivername == "postgres":
-            host = click.prompt("What is the host for the sqlalchemy connection?", default="localhost",
-                                show_default=True)
-            port = click.prompt("What is the port for the sqlalchemy connection?", default="5432",
-                                show_default=True)
-            username = click.prompt("What is the username for the sqlalchemy connection?", default="postgres",
-                                show_default=True)
-            password = click.prompt("What is the password for the sqlalchemy connection?", default="",
-                                show_default=False, hide_input=True)
-            database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
-                                show_default=True)
-
-            # Since we don't want to save the database credentials in the config file that will be
-            # committed in the repo, we will use our Variable Substitution feature to store the credentials
-            # in the credentials file (that will not be committed, since it is in the uncommitted directory)
-            # with the datasource's name as the variable name.
-            # The value of the datasource's "credentials" key in the config file (great_expectations.yml) will
-            # be ${datasource name}.
-            # GE will replace the ${datasource name} with the value from the credentials file in runtime.
-            credentials = {
-                "drivername": drivername,
-                "host": host,
-                "port": port,
-                "username": username,
-                "password": password,
-                "database": database
-            }
+            credentials = _collect_postgres_credentials(default_credentials=credentials)
         else:
             sqlalchemy_url = click.prompt(
 """What is the url/connection string for the sqlalchemy connection?
@@ -189,6 +165,42 @@ def _add_sqlalchemy_datasource(context):
                 return None
 
     return data_source_name
+
+
+def _collect_postgres_credentials(default_credentials={}):
+    host = click.prompt("What is the host for the sqlalchemy connection?",
+                        default=default_credentials.get("host", "localhost"),
+                        show_default=True)
+    port = click.prompt("What is the port for the sqlalchemy connection?",
+                        default=default_credentials.get("port", "5432"),
+                        show_default=True)
+    username = click.prompt("What is the username for the sqlalchemy connection?",
+                            default=default_credentials.get("username", "postgres"),
+                            show_default=True)
+    password = click.prompt("What is the password for the sqlalchemy connection?",
+                            default="",
+                            show_default=False, hide_input=True)
+    database = click.prompt("What is the database name for the sqlalchemy connection?",
+                            default=default_credentials.get("database", "postgres"),
+                            show_default=True)
+
+    # Since we don't want to save the database credentials in the config file that will be
+    # committed in the repo, we will use our Variable Substitution feature to store the credentials
+    # in the credentials file (that will not be committed, since it is in the uncommitted directory)
+    # with the datasource's name as the variable name.
+    # The value of the datasource's "credentials" key in the config file (great_expectations.yml) will
+    # be ${datasource name}.
+    # GE will replace the ${datasource name} with the value from the credentials file in runtime.
+    credentials = {
+        "drivername": "postgres",
+        "host": host,
+        "port": port,
+        "username": username,
+        "password": password,
+        "database": database
+    }
+
+    return credentials
 
 
 def _add_spark_datasource(context):
