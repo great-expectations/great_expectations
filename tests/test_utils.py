@@ -5,6 +5,10 @@ import pytest
 import random
 import string
 import copy
+from collections import (
+    OrderedDict,
+    Mapping
+)
 
 from dateutil.parser import parse
 
@@ -542,3 +546,14 @@ def evaluate_json_test(data_asset, expectation_type, test):
             else:
                 raise ValueError(
                     "Invalid test specification: unknown key " + key + " in 'out'")
+
+
+def dict_to_ordered_dict(plain_dict):
+    ordered_dict = OrderedDict()
+    for key, val in plain_dict.items():
+        if isinstance(val, Mapping):
+            ordered_dict[key] = dict_to_ordered_dict(val)
+        else:
+            ordered_dict[key] = val
+    return ordered_dict
+
