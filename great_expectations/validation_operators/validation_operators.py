@@ -44,29 +44,28 @@ class ActionListValidationOperator(ValidationOperator):
     Each action in the list must be an instance of NamespacedValidationAction
     class (or its descendants).
 
-    Below is an example of this operator's configuration:
+    Below is an example of this operator's configuration::
 
-
-    action_list_operator:
-        class_name: ActionListValidationOperator
-        action_list:
-          - name: store_validation_result
-            action:
-              class_name: StoreAction
-              target_store_name: validations_store
-          - name: store_evaluation_params
-            action:
-              class_name: ExtractAndStoreEvaluationParamsAction
-              target_store_name: evaluation_parameter_store
-          - name: send_slack_notification_on_validation_result
-            action:
-              class_name: SlackNotificationAction
-              # put the actual webhook URL in the uncommitted/config_variables.yml file
-              slack_webhook: ${validation_notification_slack_webhook}
-             notify_on: all # possible values: "all", "failure", "success"
-              renderer:
-                module_name: great_expectations.render.renderer.slack_renderer
-                class_name: SlackRenderer
+        action_list_operator:
+            class_name: ActionListValidationOperator
+            action_list:
+              - name: store_validation_result
+                action:
+                  class_name: StoreAction
+                  target_store_name: validations_store
+              - name: store_evaluation_params
+                action:
+                  class_name: ExtractAndStoreEvaluationParamsAction
+                  target_store_name: evaluation_parameter_store
+              - name: send_slack_notification_on_validation_result
+                action:
+                  class_name: SlackNotificationAction
+                  # put the actual webhook URL in the uncommitted/config_variables.yml file
+                  slack_webhook: ${validation_notification_slack_webhook}
+                 notify_on: all # possible values: "all", "failure", "success"
+                  renderer:
+                    module_name: great_expectations.render.renderer.slack_renderer
+                    class_name: SlackRenderer
     """
 
     def __init__(self, data_context, action_list):
@@ -204,8 +203,7 @@ class ActionListValidationOperator(ValidationOperator):
 
 
 class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationOperator):
-    """
-    WarningAndFailureExpectationSuitesValidationOperator is a validation operator
+    """WarningAndFailureExpectationSuitesValidationOperator is a validation operator
     that accepts a list batches of data assets (or the information necessary to fetch these batches).
     The operator retrieves 2 expectation suites for each data asset/batch - one containing
     the critical expectations ("failure") and the other containing non-critical expectations
@@ -227,44 +225,51 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
     should be sent only in the case of failure ("failure"), only in the case
     of success ("success"), or always ("all").
 
-    Below is an example of this operator's configuration:
-    run_warning_and_failure_expectation_suites:
-        class_name: WarningAndFailureExpectationSuitesValidationOperator
-        # put the actual webhook URL in the uncommitted/config_variables.yml file
-        slack_webhook: ${validation_notification_slack_webhook}
-        action_list:
-          - name: store_validation_result
-            action:
-              class_name: StoreAction
-              target_store_name: validations_store
-          - name: store_evaluation_params
-            action:
-              class_name: ExtractAndStoreEvaluationParamsAction
-              target_store_name: evaluation_parameter_store
+    Below is an example of this operator's configuration::
+
+
+        run_warning_and_failure_expectation_suites:
+            class_name: WarningAndFailureExpectationSuitesValidationOperator
+            # put the actual webhook URL in the uncommitted/config_variables.yml file
+            slack_webhook: ${validation_notification_slack_webhook}
+            action_list:
+              - name: store_validation_result
+                action:
+                  class_name: StoreAction
+                  target_store_name: validations_store
+              - name: store_evaluation_params
+                action:
+                  class_name: ExtractAndStoreEvaluationParamsAction
+                  target_store_name: evaluation_parameter_store
 
 
     The operator returns an object that looks like the example below.
 
     The value of "success" is True if no critical expectation suites ("failure")
     failed to validate (non-critial ("warning") expectation suites
-    are allowed to fail without affecting the success status of the run.
+    are allowed to fail without affecting the success status of the run::
 
-    {
-        "data_asset_identifiers": list of data asset identifiers
-        "success": True/False,
-        "failure": {
-            expectation suite identifier: {
-                "validation_result": validation result,
-                "action_results": {action name: action result object}
+
+        {
+            "data_asset_identifiers": [list, of, data, asset, identifiers],
+            "success": True/False,
+            "failure": {
+                "expectation_suite_identifier": {
+                    "validation_result": validation_result,
+                    "action_results": {
+                        "action name": "action result object"
+                    }
+                }
+            },
+            "warning": {
+                "expectation_suite_identifier": {
+                    "validation_result": validation_result,
+                    "action_results": {
+                        "action name": "action result object"
+                    }
+                }
             }
         }
-        "warning": {
-            expectation suite identifier: {
-                "validation_result": validation result,
-                "action_results": {action name: action result object}
-            }
-        }
-    }
 
     """
 

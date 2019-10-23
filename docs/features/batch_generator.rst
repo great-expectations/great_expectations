@@ -27,4 +27,4 @@ assembled by the generator, While not every datasource will enable re-fetching a
 specific batch of data, GE can store snapshots of batches or store metadata from an
 external data version control system.
 
-See :py:mod:`great_expectations.datasource.batch_generator.BatchGenerator`
+See more detailed documentation on the :ref:`generator_module`.

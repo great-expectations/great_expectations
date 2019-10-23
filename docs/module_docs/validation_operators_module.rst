@@ -1,3 +1,5 @@
+.. cssclass:: widetable
+
 .. _validation_operators_module:
 
 
