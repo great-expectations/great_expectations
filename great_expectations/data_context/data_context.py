@@ -183,7 +183,13 @@ class ConfigOnlyDataContext(object):
         safe_mmkdir(base_dir, exist_ok=True)
         open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
 
-        for directory in cls.BASE_DIRECTORIES:
+        for directory in [
+            "datasources",
+            "expectations",
+            "notebooks",
+            "plugins",
+            "uncommitted",
+        ]:
             if directory == "plugins":
                 plugins_dir = os.path.join(base_dir, directory)
                 safe_mmkdir(plugins_dir, exist_ok=True)
@@ -203,9 +209,6 @@ class ConfigOnlyDataContext(object):
                 exist_ok=True
             )
 
-        notebook_path = os.path.join(base_dir, "notebooks")
-        for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
-            safe_mmkdir(os.path.join(notebook_path, subdir), exist_ok=True)
     
     @classmethod
     def scaffold_custom_data_docs(cls, plugins_dir):
