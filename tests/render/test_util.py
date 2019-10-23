@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from great_expectations.render.util import num_to_str
 
 # Set the locale so locale-specific tests will work
