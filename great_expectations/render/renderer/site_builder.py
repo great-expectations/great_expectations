@@ -127,7 +127,8 @@ class SiteBuilder(object):
             },
             config_defaults={
                 "name": "site_index_builder",
-                "module_name": "great_expectations.render.renderer.site_builder"
+                "module_name": "great_expectations.render.renderer.site_builder",
+                "class_name": "DefaultSiteIndexBuilder"
             }
         )
 
@@ -316,13 +317,15 @@ class DefaultSiteIndexBuilder(object):
             name,
             data_context,
             target_store,
+            show_cta_footer=None,
             renderer=None,
-            view=None
+            view=None,
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
         self.name = name
         self.data_context = data_context
         self.target_store = target_store
+        self.show_cta_footer = show_cta_footer
 
         if renderer is None:
             renderer = {
@@ -402,6 +405,17 @@ class DefaultSiteIndexBuilder(object):
     
         return index_links_dict
 
+    #TODO: Fill out this method to make cta footer dynamic
+    def get_cta_object(self):
+        return {
+            "cta_header": "Blah blah blah!",
+            "cta_buttons": [
+                ("Create Expectations", "https://docs.greatexpectations.io/en/latest/getting_started/create_expectations.html"),
+                ("Integrate into Pipeline", "https://docs.greatexpectations.io/en/latest/getting_started/pipeline_integration.html"),
+                ("Customize Data Docs", "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs")
+            ]
+        }
+
     def build(self):
         # Loop over sections in the HtmlStore
         logger.debug("DefaultSiteIndexBuilder.build")
@@ -409,6 +423,9 @@ class DefaultSiteIndexBuilder(object):
         target_store = self.target_store
         resource_keys = target_store.list_keys()
         index_links_dict = OrderedDict()
+
+        if self.show_cta_footer:
+            index_links_dict["cta_object"] = self.get_cta_object()
 
         for key in resource_keys:
             key_resource_identifier = key.resource_identifier
