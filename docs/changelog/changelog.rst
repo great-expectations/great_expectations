@@ -1,6 +1,10 @@
 .. _changelog:
 
 
+0.8.3__develop
+-----------------
+
+
 0.8.2
 -----------------
 * Add easier support for customizing data-docs css
