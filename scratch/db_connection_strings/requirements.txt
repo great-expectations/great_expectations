@@ -1,0 +1,6 @@
+sqlalchemy
+jupyterlab
+PyMySQL
+psycopg2
+pyodbc
+
