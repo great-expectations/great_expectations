@@ -114,8 +114,16 @@ class DefaultJinjaView(object):
         elif content_block is None:
             return ""
         elif type(content_block) is list:
-            return "".join([self.render_content_block(context, content_block_el, idx) for idx, content_block_el in enumerate(content_block)])
-        elif not isinstance(content_block, (dict, OrderedDict)):
+            # If the content_block item here is actually a list of content blocks then we want to recursively render
+            rendered_block = ""
+            for idx, content_block_el in enumerate(content_block):
+                if (isinstance(content_block_el, RenderedComponentContent) or
+                        isinstance(content_block_el, dict) and "content_block_type" in content_block_el):
+                    rendered_block += self.render_content_block(context, content_block_el, idx)
+                else:
+                    rendered_block += "<span>" + str(content_block_el) + "</span>"
+            return rendered_block
+        elif not isinstance(content_block, dict):
             return content_block
         content_block_type = content_block.get("content_block_type")
         template = self._get_template(template="{content_block_type}.j2".format(content_block_type=content_block_type))
