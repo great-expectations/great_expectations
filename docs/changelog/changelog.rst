@@ -1,7 +1,7 @@
 .. _changelog:
 
 
-0.8.2__develop
+0.8.2
 -----------------
 * Add easier support for customizing data-docs css
 * Use higher precision for rendering 'mostly' parameter in data-docs; add more consistent locale-based
