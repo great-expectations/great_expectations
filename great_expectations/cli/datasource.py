@@ -1,3 +1,4 @@
+import importlib
 import os
 import enum
 import click
@@ -106,13 +107,25 @@ def _add_pandas_datasource(context):
     return data_source_name
 
 
-def _add_sqlalchemy_datasource(context):
+def load_library(library_name):
+    """Dynamically load a module from strings or raise a helpful error."""
+    # TODO remove this nasty python 2 hack
     try:
-        import sqlalchemy
-        from sqlalchemy import create_engine, MetaData
-    except ImportError:
-        cli_message("""<red>ERROR: Unable find `sqlalchemy`</red>.
-  - Please `pip install sqlalchemy` before trying again.""")
+        ModuleNotFoundError
+    except NameError:
+        ModuleNotFoundError = ImportError
+
+    try:
+        loaded_module = importlib.import_module(library_name)
+        return True
+    except ModuleNotFoundError as e:
+        cli_message("""<red>ERROR: Great Expectations relies on the library `{}` to connect to your database.</red>
+  - Please `pip install {}` before trying again.""".format(library_name, library_name))
+        return False
+
+
+def _add_sqlalchemy_datasource(context):
+    if not load_library("sqlalchemy"):
         return None
 
     db_choices = [str(x) for x in list(range(1, 1 + len(SupportedDatabases)))]
@@ -142,15 +155,24 @@ def _add_sqlalchemy_datasource(context):
     # GE will replace the ${datasource name} with the value from the credentials file in runtime.
 
     while True:
-        cli_message(msg_sqlalchemy_config_connection.format(data_source_name))
+        cli_message(msg_db_config.format(data_source_name))
 
         if selected_database == SupportedDatabases.MYSQL:
+            if not load_library("pymysql"):
+                return None
+            # TODO implement
             credentials = _collect_mysql_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.POSTGRES:
             credentials = _collect_postgres_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.REDSHIFT:
+            if not load_library("psycopg2"):
+                return None
+            # TODO implement
             credentials = _collect_redshift_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.SNOWFLAKE:
+            if not load_library("snowflake"):
+                return None
+            # TODO implement
             credentials = _collect_snowflake_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.OTHER:
             sqlalchemy_url = click.prompt(
@@ -423,7 +445,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_d
         else:
             cli_message(msg_skipping)
             return
-    else: # we need to get arguments from user interactively
+    else:  # we need to get arguments from user interactively
         do_exit = False
         while not do_exit:
             if profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND:
@@ -531,10 +553,7 @@ msg_prompt_datasource_name = """
 Give your new data source a short name.
 """
 
-msg_sqlalchemy_config_connection = """
-Great Expectations relies on sqlalchemy to connect to relational databases.
-Please make sure that you have it installed.
-
+msg_db_config = """
 Next, we will configure database credentials and store them in the "{0:s}" section
 of this config file: great_expectations/uncommitted/credentials/profiles.yml:
 """
