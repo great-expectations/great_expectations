@@ -89,14 +89,6 @@ class ConfigOnlyDataContext(object):
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
     UNCOMMITTED_DIRECTORIES = ["data_docs", "samples", "validations"]
-    BASE_DIRECTORIES = [
-        "datasources",
-        "expectations",
-        "notebooks",
-        "plugins",
-        "uncommitted",
-    ]
-    NOTEBOOK_SUBDIRECTORIES = ["pandas", "spark", "sql"]
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
 
@@ -204,6 +196,7 @@ class ConfigOnlyDataContext(object):
                 safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
         
         uncommitted_dir = os.path.join(base_dir, "uncommitted")
+
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
             safe_mmkdir(
                 os.path.join(uncommitted_dir, new_directory),
@@ -225,13 +218,11 @@ class ConfigOnlyDataContext(object):
     def scaffold_notebooks(cls, base_dir):
         """Copy template notebooks into the notebooks directory for a project."""
         template_dir = file_relative_path(__file__, "../init_notebooks/*.ipynb")
-        notebook_dir = os.path.join(base_dir, "notebooks")
-        for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
-            subdir_path = os.path.join(notebook_dir, subdir)
-            for notebook in glob.glob(template_dir):
-                notebook_name = os.path.basename(notebook)
-                destination_path = os.path.join(subdir_path, notebook_name)
-                shutil.copyfile(notebook, destination_path)
+        for notebook in glob.glob(template_dir):
+            notebook_name = os.path.basename(notebook)
+            destination_path = os.path.join(base_dir, "notebooks",
+                                            notebook_name)
+            shutil.copyfile(notebook, destination_path)
 
     @classmethod
     def validate_config(cls, project_config):
@@ -1887,7 +1878,7 @@ class DataContext(ConfigOnlyDataContext):
             raise ge_exceptions.InvalidConfigValueTypeError("The key `config_version` must be an integer. Please check your config file.")
 
         # When migrating from 0.7.x to 0.8.0
-        if version == 0 and "validations_stores" in list(config_dict.keys()):
+        if version == 0 and ("validations_store" in list(config_dict.keys()) or "validations_stores" in list(config_dict.keys())):
             raise ge_exceptions.ZeroDotSevenConfigVersionError(
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
             )

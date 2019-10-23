@@ -199,7 +199,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if custom_sql and not table_name:
             # dashes are special characters in most databases so use underscores
-            table_name = str(uuid.uuid4()).replace("-", "_")
+            table_name = "ge_tmp_" + str(uuid.uuid4()).replace("-", "_")
 
         if table_name is None:
             raise ValueError("No table_name provided.")
@@ -532,8 +532,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         It hasn't been tested in all SQL dialects, and may change based on community feedback.
         :param custom_sql:
         """
-        stmt = "CREATE TEMPORARY TABLE \"{table_name}\" AS {custom_sql}".format(
-            table_name=table_name, custom_sql=custom_sql)
+        if self.engine.dialect.name == "mysql":
+            stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql)
+        else:
+            stmt = "CREATE TEMPORARY TABLE \"{table_name}\" AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql)
+
         self.engine.execute(stmt)
 
     def column_reflection_fallback(self):

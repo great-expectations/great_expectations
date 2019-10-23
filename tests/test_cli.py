@@ -236,15 +236,8 @@ great_expectations/
                 Titanic/
                     BasicDatasetProfiler.json
     notebooks/
-        pandas/
-            create_expectations.ipynb
-            validation_playground.ipynb
-        spark/
-            create_expectations.ipynb
-            validation_playground.ipynb
-        sql/
-            create_expectations.ipynb
-            validation_playground.ipynb
+        create_expectations.ipynb
+        integrate_validation_into_pipeline.ipynb
     plugins/
         custom_data_docs/
             renderers/
@@ -647,15 +640,8 @@ great_expectations/
     datasources/
     expectations/
     notebooks/
-        pandas/
-            create_expectations.ipynb
-            validation_playground.ipynb
-        spark/
-            create_expectations.ipynb
-            validation_playground.ipynb
-        sql/
-            create_expectations.ipynb
-            validation_playground.ipynb
+        create_expectations.ipynb
+        integrate_validation_into_pipeline.ipynb
     plugins/
         custom_data_docs/
             renderers/
