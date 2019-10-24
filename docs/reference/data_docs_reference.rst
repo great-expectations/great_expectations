@@ -79,6 +79,24 @@ be specified for ``filesystem`` stores. The optional ``run_id_filter`` attribute
 allows to include (``eq`` for exact match) or exclude (``ne``) validation
 results with a particular run id.
 
+.. _customizing_data_docs_store_backend:
+
+Automatically Publishing Data Docs
+=====================================
+
+It is possible to directly publish (continuously updating!) data docs sites to a shared location such as a static
+site hosted in S3 by simply updating the store_backend configuration in the site configuration. If we modify the
+configuration in the example above to adjust the store backend to an S3 bucket of our choosing, our `SiteBuilder`
+will automatically save the resulting site to that bucket.
+
+.. code-block:: yaml
+
+  store_backend:
+    class_name: FixedLengthTupleS3StoreBackend
+    bucket: data-docs.my_org.org
+    prefix:
+
+See the tutorial on :ref:`publishing data docs to S3 <publishing_data_docs_to_s3>` for more information.
 
 More advanced configuration
 ============================
