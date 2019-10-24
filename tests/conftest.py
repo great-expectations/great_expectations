@@ -1,4 +1,5 @@
 import pytest
+import locale
 
 import shutil
 import os
@@ -12,6 +13,13 @@ from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.data_context.util import safe_mmkdir
 
 from .test_utils import get_dataset
+
+###
+#
+# NOTE: THESE TESTS ARE WRITTEN WITH THE en_US.UTF-8 LOCALE AS DEFAULT FOR STRING FORMATTING
+#
+###
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 
 def pytest_configure(config):
@@ -96,6 +104,14 @@ def sa(test_backends):
     else:
         import sqlalchemy as sa
         return sa
+
+
+@pytest.fixture
+def spark_session(test_backends):
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+    from pyspark.sql import SparkSession
+    return SparkSession.builder.getOrCreate()
 
 
 @pytest.fixture
