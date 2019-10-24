@@ -53,6 +53,7 @@ class RenderedDocumentContent(RenderedContent):
         "page_title",
         "utm_medium",
         "sections",
+        "cta_footer"
     ])
     _required_keys = set({
         "sections"

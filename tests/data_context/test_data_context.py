@@ -574,7 +574,9 @@ project_path/
 
     context.profile_datasource("titanic")
 
-    assert gen_directory_tree_str(project_dir) == """\
+    tree_str = gen_directory_tree_str(project_dir)
+    print(tree_str)
+    assert tree_str == """\
 project_path/
     data/
         random/
@@ -593,11 +595,7 @@ project_path/
                         BasicDatasetProfiler.json
         notebooks/
             pandas/
-                create_expectations.ipynb
-                validation_playground.ipynb
             spark/
-                create_expectations.ipynb
-                validation_playground.ipynb
             sql/
                 create_expectations.ipynb
                 validation_playground.ipynb
@@ -1004,6 +1002,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(tmp_pat
     # re-run create to simulate onboarding
     DataContext.create(project_path)
     obs = gen_directory_tree_str(ge_dir)
+    print(obs)
 
     assert os.path.isdir(uncommitted_dir), "No uncommitted directory created"
     assert obs == """\
@@ -1014,11 +1013,7 @@ great_expectations/
     expectations/
     notebooks/
         pandas/
-            create_expectations.ipynb
-            validation_playground.ipynb
         spark/
-            create_expectations.ipynb
-            validation_playground.ipynb
         sql/
             create_expectations.ipynb
             validation_playground.ipynb
@@ -1045,11 +1040,7 @@ great_expectations/
     expectations/
     notebooks/
         pandas/
-            create_expectations.ipynb
-            validation_playground.ipynb
         spark/
-            create_expectations.ipynb
-            validation_playground.ipynb
         sql/
             create_expectations.ipynb
             validation_playground.ipynb
@@ -1070,6 +1061,7 @@ great_expectations/
 
     DataContext.create(project_path)
     fixture = gen_directory_tree_str(ge_dir)
+    print(fixture)
 
     assert fixture == expected
 
