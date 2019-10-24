@@ -215,7 +215,7 @@ class ConfigOnlyDataContext(object):
         notebook_path = os.path.join(base_dir, "notebooks")
         for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
             safe_mmkdir(os.path.join(notebook_path, subdir), exist_ok=True)
-
+            
     @classmethod
     def scaffold_custom_data_docs(cls, plugins_dir):
         """Copy custom data docs templates"""

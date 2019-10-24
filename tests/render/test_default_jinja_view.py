@@ -68,27 +68,30 @@ def test_render_DefaultJinjaPageView_meta_info():
     
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
 
-    <style>  body {
+    <style>body {
     position: relative;
-  }
-  .container {
+    padding-bottom: 100px;
+}
+
+.container {
     padding-top: 50px;
-  }
-  .sticky {
+}
+
+.sticky {
     position: -webkit-sticky;
     position: sticky;
     max-height: 90vh;
     overflow-y: auto;
     top: 15px;
-  }
+}
 
-  .ge-section {
-    clear:both;
+.ge-section {
+    clear: both;
     margin-bottom: 30px;
     padding-bottom: 20px;
-  }
+}
 
-  .triangle {
+.triangle {
     border: solid #222;
     border-width: 0 1px 1px 0;
     display: inline;
@@ -101,105 +104,124 @@ def test_render_DefaultJinjaPageView_meta_info():
     transform: rotate(40deg);
     -webkit-transform: rotate(40deg);
     transition: .3s transform ease-in-out;
-  }
+}
 
-  .collapsed .triangle{
+.collapsed .triangle {
     transform: rotate(-140deg);
     -webkit-transform: rotate(-140deg);
     transition: .3s transform ease-in-out;
-  }
+}
 
-  .popover {
+.popover {
     max-width: 100%;
-  }
+}
 
-  .cooltip {
-    display:inline-block;
-    position:relative;
-    text-align:left;
-    cursor:pointer;
-  }
+.cooltip {
+    display: inline-block;
+    position: relative;
+    text-align: left;
+    cursor: pointer;
+}
 
-  .cooltip .top {
-    min-width:200px;
-    top:-6px;
-    left:50%;
-    transform:translate(-50%, -100%);
-    padding:10px 20px;
-    color:#FFFFFF;
-    background-color:#222222;
-    font-weight:normal;
-    font-size:13px;
-    border-radius:8px;
-    position:absolute;
-    z-index:99999999 !important;
-    box-sizing:border-box;
-    box-shadow:0 1px 8px rgba(0,0,0,0.5);
-    display:none;
-    }
+.cooltip .top {
+    min-width: 200px;
+    top: -6px;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    padding: 10px 20px;
+    color: #FFFFFF;
+    background-color: #222222;
+    font-weight: normal;
+    font-size: 13px;
+    border-radius: 8px;
+    position: absolute;
+    z-index: 99999999 !important;
+    box-sizing: border-box;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+    display: none;
+}
 
-  .cooltip:hover .top {
-      display:block;
-      z-index:99999999 !important;
-  }
+.cooltip:hover .top {
+    display: block;
+    z-index: 99999999 !important;
+}
 
-  .cooltip .top i {
-      position:absolute;
-      top:100%;
-      left:50%;
-      margin-left:-12px;
-      width:24px;
-      height:12px;
-      overflow:hidden;
-  }
+.cooltip .top i {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -12px;
+    width: 24px;
+    height: 12px;
+    overflow: hidden;
+}
 
-  .cooltip .top i::after {
-      content:'';
-      position:absolute;
-      width:12px;
-      height:12px;
-      left:50%;
-      transform:translate(-50%,-50%) rotate(45deg);
-      background-color:#222222;
-      box-shadow:0 1px 8px rgba(0,0,0,0.5);
-  }
+.cooltip .top i::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    background-color: #222222;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
 
-  ul {
+ul {
     padding-inline-start: 20px;
-  }
+}
 
-  .table-cell-frame {
-      overflow-y: auto;
-      max-height: 200px;
-  }
+.table-cell-frame {
+    overflow-y: auto;
+    max-height: 200px;
+}
 
-  .table-cell-frame ul {
+.table-cell-frame ul {
     padding-bottom: 20px
-  }
+}
 
-  .table-cell-frame::-webkit-scrollbar {
-      -webkit-appearance: none;
-  }
+.table-cell-frame::-webkit-scrollbar {
+    -webkit-appearance: none;
+}
 
-  .table-cell-frame::-webkit-scrollbar:vertical {
-      width: 11px;
-  }
+.table-cell-frame::-webkit-scrollbar:vertical {
+    width: 11px;
+}
 
-  .table-cell-frame::-webkit-scrollbar:horizontal {
-      height: 11px;
-  }
+.table-cell-frame::-webkit-scrollbar:horizontal {
+    height: 11px;
+}
 
-  .table-cell-frame::-webkit-scrollbar-thumb {
-      border-radius: 8px;
-      border: 2px solid white; /* should match background, can't be transparent */
-      background-color: rgba(0, 0, 0, .5);
-  }</style>
+.table-cell-frame::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    border: 2px solid white; /* should match background, can't be transparent */
+    background-color: rgba(0, 0, 0, .5);
+}
+
+.ge-navigation-sidebar-container {
+    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+    z-index: 1; /* Stay on top */
+    width: 15%;
+}
+
+#ge-cta-footer {
+    opacity: 0.9;
+    border-left-width: 4px
+}</style>
     <style></style>
 
     <script src="https://cdn.jsdelivr.net/npm/vega@5.3.5/build/vega.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@3.2.1/build/vega-lite.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-embed@4.0.0/build/vega-embed.js"></script>
     <script src="https://kit.fontawesome.com/8217dffd95.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(window).on('activate.bs.scrollspy', function () {
+          document.querySelector(".nav-link.active").scrollIntoViewIfNeeded();
+        });
+    </script>
   </head>
 
   <body
@@ -208,7 +230,7 @@ def test_render_DefaultJinjaPageView_meta_info():
         data-offset="50"
     >
     
-<nav aria-label="breadcrumb">
+<nav aria-label="breadcrumb" class="sticky-top">
     <ol class="ge-breadcrumbs breadcrumb">
         
           <li class="ge-breadcrumbs-item breadcrumb-item"><a href="../../../../../index.html">Home</a></li>
@@ -224,7 +246,7 @@ def test_render_DefaultJinjaPageView_meta_info():
     <div class="container-fluid px-3">
       <div class="row">
         <div class="col-2 navbar-collapse">
-          <nav id="navigation" class="navbar navbar-light bg-light sticky d-none d-sm-block ge-navigation-sidebar-container">
+          <nav id="navigation" class="navbar navbar-light bg-light d-none d-sm-block ge-navigation-sidebar-container pt-4">
     <nav class="nav nav-pills flex-column ge-navigation-sidebar-content">
         <a class="navbar-brand ge-navigation-sidebar-title" href="#" style="white-space: normal; word-break: break-all;overflow-wrap: normal; font-size: 1rem; font-weight: 500;">tetanusvaricella</a>
         
@@ -241,10 +263,10 @@ def test_render_DefaultJinjaPageView_meta_info():
 
 <div id="section-1-content-block-1" class="col-12" >
 
-    <div id="section-1-content-block-1-header" class="alert alert-secondary" >
-    <h3>
-        Overview
-    </h3></div>
+    <div id="section-1-content-block-1-header" class="alert alert-secondary" ><h3>
+          Overview
+      </h3>
+    </div>
 
 </div>
 
@@ -296,12 +318,28 @@ def test_render_DefaultJinjaPageView_meta_info():
         <td id="section-1-content-block-3-cell-3-1" ><div class="table-cell-frame"><span>string</span></div></td><td id="section-1-content-block-3-cell-3-2" ><div class="table-cell-frame"><span>0</span></div></td></tr><tr>
         <td id="section-1-content-block-3-cell-4-1" ><div class="table-cell-frame"><span>unknown</span></div></td><td id="section-1-content-block-3-cell-4-2" ><div class="table-cell-frame"><span>0</span></div></td></tr></table>
 
-</div>"""
-
-    expected_html_2 = """
-</div>
 </div>
 
+
+<div id="section-1-content-block-4" class="col-12" style="margin-top:20px;" >
+
+    <div id="section-1-content-block-4-header" class="collapsed" data-toggle="collapse" href="#section-1-content-block-4-body" aria-expanded="true" aria-controls="collapseExample" style="cursor:pointer;" >
+        
+        <h4>
+            Expectation types <span class="mr-3 triangle"></span>
+        </h4>
+        </div>
+
+
+<ul id="section-1-content-block-4-body" class="list-group collapse" >
+
+</ul>
+
+</div>
+    
+    </div>
+</div>
+        
         </div>
         <div class="col-lg-2 col-md-2 col-xs-12 d-none d-md-block">
             <div>
@@ -352,19 +390,12 @@ def test_render_DefaultJinjaPageView_meta_info():
 
       </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script>
-        $(window).on('activate.bs.scrollspy', function () {
-          document.querySelector(".nav-link.active").scrollIntoViewIfNeeded();
-        });
-    </script>
   </body>
 </html>
 """
     
-    assert expected_html.replace(" ", "").replace("\t", "").replace("\n", "") in html.replace(" ", "").replace("\t", "").replace("\n", "")
-    assert expected_html_2.replace(" ", "").replace("\t", "").replace("\n", "") in html.replace(" ", "").replace("\t", "").replace("\n", "")
+    assert expected_html.replace(" ", "").replace("\t", "").replace("\n", "") == html.replace(" ", "").replace("\t", "").replace("\n", "")
+
 
 
 def test_render_section_page():
