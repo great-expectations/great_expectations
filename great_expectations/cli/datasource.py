@@ -107,8 +107,15 @@ def _add_pandas_datasource(context):
     return data_source_name
 
 
-def load_library(library_name):
-    """Dynamically load a module from strings or raise a helpful error."""
+def load_library(library_name, install_instructions_string=None):
+    """
+    Dynamically load a module from strings or raise a helpful error.
+
+    :param library_name: name of the library to load
+    :param install_instructions_string: optional - used when the install instructions
+            are different from 'pip install library_name'
+    :return: True if the library was loaded successfully, False otherwise
+    """
     # TODO remove this nasty python 2 hack
     try:
         ModuleNotFoundError
@@ -119,8 +126,13 @@ def load_library(library_name):
         loaded_module = importlib.import_module(library_name)
         return True
     except ModuleNotFoundError as e:
-        cli_message("""<red>ERROR: Great Expectations relies on the library `{}` to connect to your database.</red>
-  - Please `pip install {}` before trying again.""".format(library_name, library_name))
+        if install_instructions_string:
+            cli_message("""<red>ERROR: Great Expectations relies on the library `{}` to connect to your database.</red>
+            - Please `{}` before trying again.""".format(library_name, install_instructions_string))
+        else:
+            cli_message("""<red>ERROR: Great Expectations relies on the library `{}` to connect to your database.</red>
+      - Please `pip install {}` before trying again.""".format(library_name, library_name))
+
         return False
 
 
@@ -146,26 +158,31 @@ def _add_sqlalchemy_datasource(context):
     )
 
     credentials = {}
+    # Since we don't want to save the database credentials in the config file that will be
+    # committed in the repo, we will use our Variable Substitution feature to store the credentials
+    # in the credentials file (that will not be committed, since it is in the uncommitted directory)
+    # with the datasource's name as the variable name.
+    # The value of the datasource's "credentials" key in the config file (great_expectations.yml) will
+    # be ${datasource name}.
+    # GE will replace the ${datasource name} with the value from the credentials file in runtime.
+
     while True:
         cli_message(msg_db_config.format(data_source_name))
 
         if selected_database == SupportedDatabases.MYSQL:
             if not load_library("pymysql"):
                 return None
-            # TODO implement
-            pass
+            credentials = _collect_mysql_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.POSTGRES:
             credentials = _collect_postgres_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.REDSHIFT:
             if not load_library("psycopg2"):
                 return None
-            # TODO implement
-            pass
+            credentials = _collect_redshift_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.SNOWFLAKE:
-            if not load_library("snowflake"):
+            if not load_library("snowflake", install_instructions_string="pip install snowflake-sqlalchemy"):
                 return None
-            # TODO implement
-            pass
+            credentials = _collect_snowflake_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.OTHER:
             sqlalchemy_url = click.prompt(
 """What is the url/connection string for the sqlalchemy connection?
@@ -197,7 +214,7 @@ def _add_sqlalchemy_datasource(context):
                                    )
             break
         except ModuleNotFoundError as de:
-            message = message + "\n  - Please `pip install psycopg2` and try again"
+            message = message + "\n  - Please `pip install psycopg2` and try again" #TODO: Taylor, this looks wrong (?)
             cli_message(message.format(str(de)))
             return None
 
@@ -218,40 +235,132 @@ def _add_sqlalchemy_datasource(context):
 
 
 def _collect_postgres_credentials(default_credentials={}):
-    host = click.prompt("What is the host for the sqlalchemy connection?",
+    credentials = {
+        "drivername": "postgres"
+    }
+
+    credentials["host"] = click.prompt("What is the host for the sqlalchemy connection?",
                         default=default_credentials.get("host", "localhost"),
                         show_default=True)
-    port = click.prompt("What is the port for the sqlalchemy connection?",
+    credentials["port"] = click.prompt("What is the port for the sqlalchemy connection?",
                         default=default_credentials.get("port", "5432"),
                         show_default=True)
-    username = click.prompt("What is the username for the sqlalchemy connection?",
+    credentials["username"] = click.prompt("What is the username for the sqlalchemy connection?",
                             default=default_credentials.get("username", "postgres"),
                             show_default=True)
-    password = click.prompt("What is the password for the sqlalchemy connection?",
+    credentials["password"] = click.prompt("What is the password for the sqlalchemy connection?",
                             default="",
                             show_default=False, hide_input=True)
-    database = click.prompt("What is the database name for the sqlalchemy connection?",
+    credentials["database"] = click.prompt("What is the database name for the sqlalchemy connection?",
                             default=default_credentials.get("database", "postgres"),
                             show_default=True)
 
-    # Since we don't want to save the database credentials in the config file that will be
-    # committed in the repo, we will use our Variable Substitution feature to store the credentials
-    # in the credentials file (that will not be committed, since it is in the uncommitted directory)
-    # with the datasource's name as the variable name.
-    # The value of the datasource's "credentials" key in the config file (great_expectations.yml) will
-    # be ${datasource name}.
-    # GE will replace the ${datasource name} with the value from the credentials file in runtime.
+    return credentials
+
+def _collect_snowflake_credentials(default_credentials={}):
     credentials = {
-        "drivername": "postgres",
-        "host": host,
-        "port": port,
-        "username": username,
-        "password": password,
-        "database": database
+        "drivername": "snowflake"
     }
+
+    # required
+
+    credentials["username"] = click.prompt("What is the user login name for the snowflake connection?",
+                        default=default_credentials.get("username", ""),
+                        show_default=True)
+    credentials["password"] = click.prompt("What is the password for the snowflake connection?",
+                            default="",
+                            show_default=False, hide_input=True)
+    credentials["host"] = click.prompt("What is the account name for the snowflake connection?",
+                        default=default_credentials.get("host", ""),
+                        show_default=True)
+
+
+    # optional
+
+    #TODO: database is optional, but it is not a part of query
+    credentials["database"] = click.prompt("What is database name for the snowflake connection?",
+                        default=default_credentials.get("database", ""),
+                        show_default=True)
+
+    # # TODO: schema_name is optional, but it is not a part of query and there is no obvious way to pass it
+    # credentials["schema_name"] = click.prompt("What is schema name for the snowflake connection?",
+    #                     default=default_credentials.get("schema_name", ""),
+    #                     show_default=True)
+
+    credentials["query"] = {}
+    credentials["query"]["warehouse_name"] = click.prompt("What is warehouse name for the snowflake connection?",
+                        default=default_credentials.get("warehouse_name", ""),
+                        show_default=True)
+    credentials["query"]["role_name"] = click.prompt("What is role name for the snowflake connection?",
+                        default=default_credentials.get("role_name", ""),
+                        show_default=True)
 
     return credentials
 
+def _collect_mysql_credentials(default_credentials={}):
+
+    # We are insisting on pymysql driver when adding a MySQL datasource through the CLI
+    # to avoid overcomplication of this flow.
+    # If user wants to use another driver, they must create the sqlalchemy connection
+    # URL by themselves in config_variables.yml
+    credentials = {
+        "drivername": "mysql+pymysql"
+    }
+
+    credentials["host"] = click.prompt("What is the host for the MySQL connection?",
+                        default=default_credentials.get("host", "localhost"),
+                        show_default=True)
+    credentials["port"] = click.prompt("What is the port for the MySQL connection?",
+                        default=default_credentials.get("port", "3306"),
+                        show_default=True)
+    credentials["username"] = click.prompt("What is the username for the MySQL connection?",
+                            default=default_credentials.get("username", ""),
+                            show_default=True)
+    credentials["password"] = click.prompt("What is the password for the MySQL connection?",
+                            default="",
+                            show_default=False, hide_input=True)
+    credentials["database"] = click.prompt("What is the database name for the MySQL connection?",
+                            default=default_credentials.get("database", ""),
+                            show_default=True)
+
+    return credentials
+
+def _collect_redshift_credentials(default_credentials={}):
+
+    # We are insisting on psycopg2 driver when adding a Redshift datasource through the CLI
+    # to avoid overcomplication of this flow.
+    # If user wants to use another driver, they must create the sqlalchemy connection
+    # URL by themselves in config_variables.yml
+    credentials = {
+        "drivername": "postgresql+psycopg2"
+    }
+
+    # required
+
+    credentials["host"] = click.prompt("What is the host for the Redshift connection?",
+                        default=default_credentials.get("host", ""),
+                        show_default=True)
+    credentials["port"] = click.prompt("What is the port for the Redshift connection?",
+                        default=default_credentials.get("port", "5439"),
+                        show_default=True)
+    credentials["username"] = click.prompt("What is the username for the Redshift connection?",
+                            default=default_credentials.get("username", "postgres"),
+                            show_default=True)
+    credentials["password"] = click.prompt("What is the password for the Redshift connection?",
+                            default="",
+                            show_default=False, hide_input=True)
+    credentials["database"] = click.prompt("What is the database name for the Redshift connection?",
+                            default=default_credentials.get("database", "postgres"),
+                            show_default=True)
+
+    # optional
+
+    credentials["query"] = {}
+    credentials["query"]["sslmode"] = click.prompt("What is sslmode name for the Redshift connection?",
+                        default=default_credentials.get("sslmode", "prefer"),
+                        show_default=True)
+
+    return credentials
 
 def _add_spark_datasource(context):
     path = click.prompt(
