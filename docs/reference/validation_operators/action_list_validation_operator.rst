@@ -22,29 +22,29 @@ An instance of ActionListValidationOperator is included in the default configura
 
 .. code-block:: yaml
 
-    perform_action_list_operator: # this is the name you will use when you invoke the operator
-        class_name: ActionListValidationOperator
+  perform_action_list_operator:  # this is the name you will use when you invoke the operator
+    class_name: ActionListValidationOperator
 
-        # the operator will call the following actions on each validation result
-        # you can remove or add actions to this list. See the details in the actions
-        # reference
-        action_list:
-          - name: store_validation_result
-            action:
-              class_name: StoreAction
-              target_store_name: validations_store
-          - name: send_slack_notification_on_validation_result
-            action:
-              class_name: SlackNotificationAction
-              # put the actual webhook URL in the uncommitted/config_variables.yml file
-              slack_webhook: ${validation_notification_slack_webhook}
-             notify_on: all # possible values: "all", "failure", "success"
-              renderer:
-                module_name: great_expectations.render.renderer.slack_renderer
-                class_name: SlackRenderer
-          - name: update_data_docs
-            action:
-              class_name: UpdateDataDocsAction
+    # the operator will call the following actions on each validation result
+    # you can remove or add actions to this list. See the details in the actions
+    # reference
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreAction
+          target_store_name: validations_store
+      - name: send_slack_notification_on_validation_result
+        action:
+          class_name: SlackNotificationAction
+          # put the actual webhook URL in the uncommitted/config_variables.yml file
+          slack_webhook: ${validation_notification_slack_webhook}
+          notify_on: all # possible values: "all", "failure", "success"
+          renderer:
+            module_name: great_expectations.render.renderer.slack_renderer
+            class_name: SlackRenderer
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
 
 
 Invocation

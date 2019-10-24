@@ -1,3 +1,5 @@
+.. cssclass:: widetable
+
 .. _data_asset_module:
 
 DataAsset Module

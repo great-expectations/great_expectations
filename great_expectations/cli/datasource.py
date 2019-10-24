@@ -182,7 +182,7 @@ def _add_sqlalchemy_datasource(context):
 def _add_spark_datasource(context):
     path = click.prompt(
         msg_prompt_filesys_enter_base_path,
-        default='/data/',
+        # default='/data/',
         type=click.Path(
             exists=True,
             file_okay=False,
@@ -196,15 +196,14 @@ def _add_spark_datasource(context):
 
     if path.endswith("/"):
         path = path[:-1]
-    default_data_source_name = os.path.basename(path)
+    default_data_source_name = os.path.basename(path) + "__dir"
     data_source_name = click.prompt(
         msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
     context.add_datasource(data_source_name,
                            module_name="great_expectations.datasource",
                            class_name="SparkDFDatasource",
-                           base_directory=path)  # NOTE: Eugene: 2019-09-17: review the path and make sure that the logic works both for abs and rel.
-    # base_directory=os.path.join("..", path))
+                           base_directory=os.path.join("..", path))
     return data_source_name
 
 
@@ -330,7 +329,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_d
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
 
-    if click.confirm("Build HTML documentation?", default=True):
+    if click.confirm("Build HTML Data Docs?", default=True):
         build_docs(context)
     else:
         cli_message("Okay, skipping HTML documentation for now.")
@@ -355,7 +354,7 @@ The following data documentation HTML sites were generated:
 """
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         msg += site_name + ":\n"
-        msg += "   <green>" + index_page_locator_info + "</green>\n\n"
+        msg += "   <green>file://" + index_page_locator_info + "</green>\n\n"
 
     cli_message(msg)
 

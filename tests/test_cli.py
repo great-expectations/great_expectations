@@ -239,6 +239,11 @@ great_expectations/
         create_expectations.ipynb
         integrate_validation_into_pipeline.ipynb
     plugins/
+        custom_data_docs/
+            renderers/
+            styles/
+                data_docs_custom_styles.css
+            views/
     uncommitted/
         config_variables.yml
         data_docs/
@@ -627,7 +632,8 @@ def test_cli_init_on_existing_ge_yml_with_missing_uncommitted_dirs_and_missing_c
         result = runner.invoke(cli, ["init"], input="Y\n")
 
         # check dir structure
-        assert gen_directory_tree_str(ge_dir) == """\
+        dir_structure = gen_directory_tree_str(ge_dir)
+        assert dir_structure == """\
 great_expectations/
     .gitignore
     great_expectations.yml
@@ -637,6 +643,11 @@ great_expectations/
         create_expectations.ipynb
         integrate_validation_into_pipeline.ipynb
     plugins/
+        custom_data_docs/
+            renderers/
+            styles/
+                data_docs_custom_styles.css
+            views/
     uncommitted/
         config_variables.yml
         data_docs/

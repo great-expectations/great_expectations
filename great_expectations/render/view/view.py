@@ -4,9 +4,16 @@ import json
 from string import Template as pTemplate
 import datetime
 from collections import OrderedDict
+import os
+
 
 from jinja2 import (
-    Template, Environment, BaseLoader, PackageLoader, select_autoescape, contextfilter
+    ChoiceLoader,
+    Environment,
+    PackageLoader,
+    FileSystemLoader,
+    select_autoescape,
+    contextfilter
 )
 
 from great_expectations import __version__ as ge_version
@@ -17,15 +24,14 @@ from great_expectations.render.types import (
     RenderedComponentContentWrapper,
 )
 
+
 class NoOpTemplate(object):
-    @classmethod
-    def render(cls, document):
+    def render(self, document):
         return document
 
 
 class PrettyPrintTemplate(object):
-    @classmethod
-    def render(cls, document, indent=2):
+    def render(self, document, indent=2):
         print(json.dumps(document, indent=indent))
 
 
@@ -44,36 +50,56 @@ class DefaultJinjaView(object):
     * Vega 5.3.5
     * Vega-Lite 3.2.1
     * Vega-Embed 4.0.0
-    """
 
+    """
     _template = NoOpTemplate
 
-    @classmethod
-    def render(cls, document, template=None, **kwargs):
-        cls._validate_document(document)
+    def __init__(self, data_context=None):
+        self.data_context = data_context
+        self.custom_styles_directory = None
+        if data_context:
+            plugins_directory = data_context.plugins_directory
+            if os.path.isdir(os.path.join(plugins_directory, "custom_data_docs", "styles")):
+                self.custom_styles_directory = os.path.join(plugins_directory, "custom_data_docs/styles")
+
+    def render(self, document, template=None, **kwargs):
+        self._validate_document(document)
 
         if template is None:
-            template = cls._template
+            template = type(self)._template
 
-        t = cls._get_template(template)
+        t = self._get_template(template)
         return t.render(document, **kwargs)
 
-    @classmethod
-    def _get_template(cls, template):
+    def _get_template(self, template):
         if template is None:
             return NoOpTemplate
 
+        templates_loader = PackageLoader(
+            'great_expectations',
+            'render/view/templates'
+        )
+        styles_loader = PackageLoader(
+            'great_expectations',
+            'render/view/styles'
+        )
+
+        loaders = [
+            templates_loader,
+            styles_loader
+        ]
+
+        if self.custom_styles_directory:
+            loaders.append(FileSystemLoader(self.custom_styles_directory))
+
         env = Environment(
-            loader=PackageLoader(
-                'great_expectations',
-                'render/view/templates'
-            ),
+            loader=ChoiceLoader(loaders),
             autoescape=select_autoescape(['html', 'xml'])
         )
-        env.filters['render_string_template'] = cls.render_string_template
-        env.filters['render_styling_from_string_template'] = cls.render_styling_from_string_template
-        env.filters['render_styling'] = cls.render_styling
-        env.filters['render_content_block'] = cls.render_content_block
+        env.filters['render_string_template'] = self.render_string_template
+        env.filters['render_styling_from_string_template'] = self.render_styling_from_string_template
+        env.filters['render_styling'] = self.render_styling
+        env.filters['render_content_block'] = self.render_content_block
         env.globals['ge_version'] = ge_version
 
         template = env.get_template(template)
@@ -81,49 +107,54 @@ class DefaultJinjaView(object):
 
         return template
 
-    @classmethod
     @contextfilter
-    def render_content_block(cls, context, content_block, index=None):
+    def render_content_block(self, context, content_block, index=None):
         if type(content_block) is str:
             return "<span>{content_block}</span>".format(content_block=content_block)
         elif content_block is None:
             return ""
         elif type(content_block) is list:
-            return "".join([cls.render_content_block(context, content_block_el, idx) for idx, content_block_el in enumerate(content_block)])
-        elif not isinstance(content_block, (dict, OrderedDict)):
+            # If the content_block item here is actually a list of content blocks then we want to recursively render
+            rendered_block = ""
+            for idx, content_block_el in enumerate(content_block):
+                if (isinstance(content_block_el, RenderedComponentContent) or
+                        isinstance(content_block_el, dict) and "content_block_type" in content_block_el):
+                    rendered_block += self.render_content_block(context, content_block_el, idx)
+                else:
+                    rendered_block += "<span>" + str(content_block_el) + "</span>"
+            return rendered_block
+        elif not isinstance(content_block, dict):
             return content_block
         content_block_type = content_block.get("content_block_type")
-        template = cls._get_template(template="{content_block_type}.j2".format(content_block_type=content_block_type))
+        template = self._get_template(template="{content_block_type}.j2".format(content_block_type=content_block_type))
         return template.render(context, content_block=content_block, index=index)
 
-    @classmethod
-    def render_styling(cls, styling):
-        """Adds styling information suitable for an html tag
 
-        styling = {
-            "classes": ["alert", "alert-warning"],
-            "attributes": {
-                "role": "alert",
-                "data-toggle": "popover",
-            },
-            "styles" : {
-                "padding" : "10px",
-                "border-radius" : "2px",
+    def render_styling(self, styling):
+        """Adds styling information suitable for an html tag.
+
+        Example styling block::
+
+            styling = {
+                "classes": ["alert", "alert-warning"],
+                "attributes": {
+                    "role": "alert",
+                    "data-toggle": "popover",
+                },
+                "styles" : {
+                    "padding" : "10px",
+                    "border-radius" : "2px",
+                }
             }
-        }
 
-        returns a string similar to:
-        'class="alert alert-warning" role="alert" data-toggle="popover" style="padding: 10px; border-radius: 2px"'
+        The above block returns a string similar to::
 
-        (Note: `render_styling` makes no guarantees about)
+            'class="alert alert-warning" role="alert" data-toggle="popover" style="padding: 10px; border-radius: 2px"'
 
         "classes", "attributes" and "styles" are all optional parameters.
         If they aren't present, they simply won't be rendered.
 
         Other dictionary keys are also allowed and ignored.
-        This makes it possible for styling objects to be nested, so that different DOM elements
-
-        # NOTE: We should add some kind of type-checking to styling
         """
     
         class_list = styling.get("classes", None)
@@ -158,8 +189,7 @@ class DefaultJinjaView(object):
     
         return styling_string
 
-    @classmethod
-    def render_styling_from_string_template(cls, template):
+    def render_styling_from_string_template(self, template):
         # NOTE: We should add some kind of type-checking to template
         """This method is a thin wrapper use to call `render_styling` from within jinja templates.
         """
@@ -167,13 +197,12 @@ class DefaultJinjaView(object):
             return template
     
         if "styling" in template:
-            return cls.render_styling(template["styling"])
+            return self.render_styling(template["styling"])
     
         else:
             return ""
 
-    @classmethod
-    def render_string_template(cls, template):
+    def render_string_template(self, template):
         #NOTE: Using this line for debugging. This should probably be logged...? 
         # print(template)
 
@@ -221,7 +250,7 @@ class DefaultJinjaView(object):
                             continue
                 
                     params[parameter] = pTemplate(base_param_template_string).substitute({
-                        "styling": cls.render_styling(default_parameter_styling),
+                        "styling": self.render_styling(default_parameter_styling),
                         "content": params[parameter],
                     })
         
@@ -234,27 +263,26 @@ class DefaultJinjaView(object):
                     param_tag = parameter_styling.get("tag", "span")
                     param_template_string = "<{param_tag} $styling>$content</{param_tag}>".format(param_tag=param_tag)
                     params[parameter] = pTemplate(param_template_string).substitute({
-                        "styling": cls.render_styling(parameter_styling),
+                        "styling": self.render_styling(parameter_styling),
                         "content": params[parameter],
                     })
         
             string = pTemplate(
                 pTemplate(base_template_string).substitute(
-                    {"template": template["template"], "styling": cls.render_styling(template.get("styling", {}))})
+                    {"template": template["template"], "styling": self.render_styling(template.get("styling", {}))})
             ).substitute(params)
             return string
 
         return pTemplate(
             pTemplate(base_template_string).substitute(
-                {"template": template.get("template", ""), "styling": cls.render_styling(template.get("styling", {}))})
+                {"template": template.get("template", ""), "styling": self.render_styling(template.get("styling", {}))})
         ).substitute(template.get("params", {}))
     
     
 class DefaultJinjaPageView(DefaultJinjaView):
     _template = "page.j2"
 
-    @classmethod
-    def _validate_document(cls, document):
+    def _validate_document(self, document):
         assert isinstance(document, RenderedDocumentContent)
 
 class DefaultJinjaIndexPageView(DefaultJinjaPageView):
@@ -264,15 +292,13 @@ class DefaultJinjaIndexPageView(DefaultJinjaPageView):
 class DefaultJinjaSectionView(DefaultJinjaView):
     _template = "section.j2"
 
-    @classmethod
-    def _validate_document(cls, document):
+    def _validate_document(self, document):
         assert isinstance(document, RenderedComponentContentWrapper)
         assert isinstance(document.section, RenderedSectionContent)
 
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"
 
-    @classmethod
-    def _validate_document(cls, document):
+    def _validate_document(self, document):
         assert isinstance(document, RenderedComponentContentWrapper)
         assert isinstance(document.content_block, RenderedComponentContent)
