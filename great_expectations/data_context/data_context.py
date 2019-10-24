@@ -767,10 +767,12 @@ class ConfigOnlyDataContext(object):
             run_id=run_id,
         )
 
-    def add_datasource(self, name, **kwargs):
+    def add_datasource(self, name, do_not_initialize=False, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name (str): the name for the new datasource to add
+            do_not_initialize - if True, add the datasource to the config, but do not
+                                initialize it. Example: user needs to debug database connectivity.
             kwargs (keyword arguments): the configuration for the new datasource
         Note:
             the type_ parameter is still supported as a way to add a datasource, but support will
@@ -804,9 +806,13 @@ class ConfigOnlyDataContext(object):
         self._project_config_with_varibles_substituted["datasources"][
             name] = self.get_config_with_variables_substituted(config)
 
-        datasource = self._build_datasource_from_config(
-            **self._project_config_with_varibles_substituted["datasources"][name])
-        self._datasources[name] = datasource
+        if not do_not_initialize:
+            datasource = self._build_datasource_from_config(
+                **self._project_config_with_varibles_substituted["datasources"][name])
+            self._datasources[name] = datasource
+        else:
+            datasource = None
+
         self._project_config["datasources"][name] = config
 
         return datasource
