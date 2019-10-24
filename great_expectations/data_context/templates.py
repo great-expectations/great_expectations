@@ -55,7 +55,7 @@ plugins_directory: plugins/
 validation_operators:
   action_list_operator:
     # To learn how to configure sending Slack notifications during evaluation
-    # (and other customizations), read: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/reference/validation_operators/perform_action_list_validation_operator.html
+    # (and other customizations), read: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/reference/validation_operators/action_list_validation_operator.html
     class_name: ActionListValidationOperator
     action_list:
       - name: store_validation_result

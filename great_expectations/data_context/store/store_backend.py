@@ -289,8 +289,8 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
         path, filename = os.path.split(filepath)
 
         safe_mmkdir(str(path))
-        with open(filepath, "w") as outfile:
-            outfile.write(value)
+        with open(filepath, "wb") as outfile:
+            outfile.write(value.encode("utf-8"))
         return filepath
 
     def list_keys(self):

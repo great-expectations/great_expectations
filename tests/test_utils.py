@@ -1,56 +1,89 @@
 from __future__ import division
 
+import pytest
+import locale
+from functools import wraps
 import random
 import string
 import copy
+from collections import (
+    OrderedDict,
+    Mapping
+)
 
 from dateutil.parser import parse
+
 import pandas as pd
 import numpy as np
-import pytest
-from sqlalchemy import create_engine
-import sqlalchemy.dialects.sqlite as sqlitetypes
-import sqlalchemy.dialects.postgresql as postgresqltypes
-import sqlalchemy.dialects.mysql as mysqltypes
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 from great_expectations.profile import ColumnsExistProfiler
 
-SQLITE_TYPES = {
-    "VARCHAR": sqlitetypes.VARCHAR,
-    "CHAR": sqlitetypes.CHAR,
-    "INTEGER": sqlitetypes.INTEGER,
-    "SMALLINT": sqlitetypes.SMALLINT,
-    "DATETIME": sqlitetypes.DATETIME(truncate_microseconds=True),
-    "DATE": sqlitetypes.DATE,
-    "FLOAT": sqlitetypes.FLOAT,
-    "BOOLEAN": sqlitetypes.BOOLEAN
-}
+try:
+    import sqlalchemy.dialects.sqlite as sqlitetypes
+    SQLITE_TYPES = {
+        "VARCHAR": sqlitetypes.VARCHAR,
+        "CHAR": sqlitetypes.CHAR,
+        "INTEGER": sqlitetypes.INTEGER,
+        "SMALLINT": sqlitetypes.SMALLINT,
+        "DATETIME": sqlitetypes.DATETIME(truncate_microseconds=True),
+        "DATE": sqlitetypes.DATE,
+        "FLOAT": sqlitetypes.FLOAT,
+        "BOOLEAN": sqlitetypes.BOOLEAN
+    }
+except ImportError:
+    SQLITE_TYPES = {}
 
-POSTGRESQL_TYPES = {
-    "TEXT": postgresqltypes.TEXT,
-    "CHAR": postgresqltypes.CHAR,
-    "INTEGER": postgresqltypes.INTEGER,
-    "SMALLINT": postgresqltypes.SMALLINT,
-    "BIGINT": postgresqltypes.BIGINT,
-    "TIMESTAMP": postgresqltypes.TIMESTAMP,
-    "DATE": postgresqltypes.DATE,
-    "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
-    "BOOLEAN": postgresqltypes.BOOLEAN,
-    "NUMERIC": postgresqltypes.NUMERIC
-}
+try:
+    import sqlalchemy.dialects.postgresql as postgresqltypes
+    POSTGRESQL_TYPES = {
+        "TEXT": postgresqltypes.TEXT,
+        "CHAR": postgresqltypes.CHAR,
+        "INTEGER": postgresqltypes.INTEGER,
+        "SMALLINT": postgresqltypes.SMALLINT,
+        "BIGINT": postgresqltypes.BIGINT,
+        "TIMESTAMP": postgresqltypes.TIMESTAMP,
+        "DATE": postgresqltypes.DATE,
+        "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
+        "BOOLEAN": postgresqltypes.BOOLEAN,
+        "NUMERIC": postgresqltypes.NUMERIC
+    }
+except ImportError:
+    POSTGRESQL_TYPES = {}
 
-MYSQL_TYPES = {
-    "TEXT": mysqltypes.TEXT,
-    "CHAR": mysqltypes.CHAR,
-    "INTEGER": mysqltypes.INTEGER,
-    "SMALLINT": mysqltypes.SMALLINT,
-    "BIGINT": mysqltypes.BIGINT,
-    "TIMESTAMP": mysqltypes.TIMESTAMP,
-    "DATE": mysqltypes.DATE,
-    "FLOAT": mysqltypes.FLOAT,
-    "BOOLEAN": mysqltypes.BOOLEAN
-}
+try:
+    import sqlalchemy.dialects.mysql as mysqltypes
+    MYSQL_TYPES = {
+        "TEXT": mysqltypes.TEXT,
+        "CHAR": mysqltypes.CHAR,
+        "INTEGER": mysqltypes.INTEGER,
+        "SMALLINT": mysqltypes.SMALLINT,
+        "BIGINT": mysqltypes.BIGINT,
+        "TIMESTAMP": mysqltypes.TIMESTAMP,
+        "DATE": mysqltypes.DATE,
+        "FLOAT": mysqltypes.FLOAT,
+        "BOOLEAN": mysqltypes.BOOLEAN
+    }
+except ImportError:
+    MYSQL_TYPES = {}
+
+
+def modify_locale(func):
+    @wraps(func)
+    def locale_wrapper(*args, **kwargs):
+        old_locale = locale.setlocale(locale.LC_TIME, None)
+        print(old_locale)
+        # old_locale = locale.getlocale(locale.LC_TIME) Why not getlocale? not sure
+        try:
+            new_locale = locale.setlocale(locale.LC_TIME, 'en_US.UTF-8')
+            assert new_locale == 'en_US.UTF-8'
+            func(*args, **kwargs)
+        except Exception:
+            raise
+        finally:
+            locale.setlocale(locale.LC_TIME, old_locale)
+
+    return locale_wrapper
 
 
 # Taken from the following stackoverflow:
@@ -124,6 +157,7 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         return PandasDataset(df, profiler=profiler, caching=caching)
 
     elif dataset_type == "sqlite":
+        from sqlalchemy import create_engine
         engine = create_engine('sqlite://')
         conn = engine.connect()
         # Add the data to the database as a new table
@@ -148,6 +182,7 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         return SqlAlchemyDataset(tablename, engine=conn, profiler=profiler, caching=caching)
 
     elif dataset_type == 'postgresql':
+        from sqlalchemy import create_engine
         # Create a new database
         engine = create_engine('postgresql://postgres@localhost/test_ci')
         conn = engine.connect()
@@ -299,6 +334,7 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
         ]
     if context == 'SparkDFDataset':
         return getter in []
+
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
     if context in ["sqlite", "postgresql", "mysql"]:
@@ -529,3 +565,13 @@ def evaluate_json_test(data_asset, expectation_type, test):
             else:
                 raise ValueError(
                     "Invalid test specification: unknown key " + key + " in 'out'")
+
+
+def dict_to_ordered_dict(plain_dict):
+    ordered_dict = OrderedDict()
+    for key, val in plain_dict.items():
+        if isinstance(val, Mapping):
+            ordered_dict[key] = dict_to_ordered_dict(val)
+        else:
+            ordered_dict[key] = val
+    return ordered_dict

@@ -8,52 +8,9 @@
     {# {# Remove this when not debugging: #}
     {# <meta http-equiv="refresh" content="1"/> #}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
-    <style>
-      body {
-        position: relative;
-      }
-      .container {
-        padding-top: 50px;
-      }
-      .sticky {
-        position: -webkit-sticky;
-        position: sticky;
-        max-height: 90vh;
-        overflow-y: auto;
-        top: 15px;
-      }
 
-      .ge-section {
-        clear:both;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-      }
-
-      .triangle {
-        border: solid #222;
-        border-width: 0 1px 1px 0;
-        display: inline;
-        cursor: pointer;
-        padding: 3px;
-        position: absolute;
-        right: 0;
-        margin-top: 10px;
-
-        transform: rotate(40deg);
-        -webkit-transform: rotate(40deg);
-        transition: .3s transform ease-in-out;
-      }
-
-      .collapsed .triangle{
-        transform: rotate(-140deg);
-        -webkit-transform: rotate(-140deg);
-        transition: .3s transform ease-in-out;
-      }
-
-      .popover {
-        max-width: 100%;
-      }
-    </style>
+    <style>{% include 'data_docs_default_styles.css' %}</style>
+    <style>{% include 'data_docs_custom_styles.css' ignore missing %}</style>
 
     <script src="https://cdn.jsdelivr.net/npm/vega@5.3.5/build/vega.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@3.2.1/build/vega-lite.js"></script>
@@ -68,13 +25,13 @@
     >
     <div class="container-fluid p-4">
       <div class="row">
-        <div class="col-md-8 col-lg-9 col-xs-12">
+        <div class="col-md-10 col-lg-10 col-xs-12">
         {% for section in sections %}
           {% set section_loop = loop -%}
           {% include 'section.j2' %}
         {% endfor %}
         </div>
-        <div class="col-lg-3 col-md-4 col-xs-12">
+        <div class="col-lg-2 col-md-2 col-xs-12">
             {% include 'ge_info.j2' %}
         </div>
       </div>

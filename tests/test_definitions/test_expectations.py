@@ -13,8 +13,8 @@ from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
 from sqlalchemy.dialects.mysql import dialect as mysqlDialect
 
 from great_expectations.dataset import SqlAlchemyDataset, PandasDataset, SparkDFDataset
-from ..conftest import CONTEXTS
 from ..test_utils import get_dataset, candidate_test_is_on_temporary_notimplemented_list, evaluate_json_test
+from ..conftest import build_test_backends_list
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ def pytest_generate_tests(metafunc):
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(dir_path+'/' + expectation_category + '/*.json')
-        for c in CONTEXTS:
+        for c in build_test_backends_list(metafunc):
             for filename in test_configuration_files:
                 file = open(filename)
                 # Use OrderedDict so that python2 will use the correct order of columns in all cases
@@ -126,7 +126,6 @@ def pytest_generate_tests(metafunc):
     )
 
 
-@pytest.mark.filterwarnings("ignore:Setting result format to COMPLETE")
 def test_case_runner(test_case):
     if test_case['skip']:
         pytest.skip()
