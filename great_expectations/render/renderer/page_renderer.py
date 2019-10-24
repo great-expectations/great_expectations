@@ -3,6 +3,7 @@ import logging
 import pypandoc
 
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.render.util import num_to_str
 
 from .renderer import Renderer
 from ..types import (
@@ -146,7 +147,8 @@ class ValidationResultsPageRenderer(Renderer):
         for key, value in statistics_dict.items():
             if statistics.get(key) is not None:
                 if key == "success_percent":
-                    table_rows.append([value, "{0:.2f}%".format(statistics[key])])
+                    # table_rows.append([value, "{0:.2f}%".format(statistics[key])])
+                    table_rows.append([value, num_to_str(statistics[key], precision=4) + "%"])
                 else:
                     table_rows.append([value, statistics[key]])
         
