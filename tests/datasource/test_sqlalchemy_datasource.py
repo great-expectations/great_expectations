@@ -2,24 +2,25 @@ import pytest
 
 import os
 
-import sqlalchemy as sa
 from ruamel.yaml import YAML
 import pandas as pd
 
 from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.datasource import SqlAlchemyDatasource
-from great_expectations.datasource.generator import QueryGenerator
 
 yaml = YAML(typ='safe')
 
 
-@pytest.fixture(scope="module")
-def test_db_connection_string(tmp_path_factory):
+@pytest.fixture
+def test_db_connection_string(tmp_path_factory, test_backends):
+    if "sqlite" not in test_backends:
+        pytest.skip("skipping fixture because sqlite not selected")
     df1 = pd.DataFrame(
         {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
     df2 = pd.DataFrame(
         {'col_1': [0, 1, 2, 3, 4], 'col_2': ['b', 'c', 'd', 'e', 'f']})
 
+    import sqlalchemy as sa
     basepath = str(tmp_path_factory.mktemp("db_context"))
     path = os.path.join(basepath, "test.db")
     engine = sa.create_engine('sqlite:///' + str(path))

@@ -202,14 +202,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def __init__(self, table_name=None, engine=None, connection_string=None,
                  custom_sql=None, schema=None, *args, **kwargs):
 
-        
+
         if custom_sql and not table_name:
             batch_kwargs = kwargs.pop("batch_kwargs", None)
             if batch_kwargs is not None:
                 table_name = batch_kwargs.pop("bigquery_temp_table", None)
             if table_name is None:
                 # dashes are special characters in most databases so use underscores
-                table_name = str(uuid.uuid4()).replace("-", "_")
+                table_name = "ge_tmp_" + str(uuid.uuid4()).replace("-", "_")
 
         if table_name is None:
             raise ValueError("No table_name provided.")
@@ -237,7 +237,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif self.engine.dialect.name.lower() == "redshift":
             self.dialect = import_module("sqlalchemy_redshift.dialect")
         elif self.engine.dialect.name.lower() == "bigquery":
-            self.dialect = import_module("pybigquery.sqlalchemy_bigquery")        
+            self.dialect = import_module("pybigquery.sqlalchemy_bigquery")
         else:
             self.dialect = None
 
@@ -344,7 +344,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             sa.select([sa.func.min(sa.column(column))]).select_from(
                 self._table)
         ).scalar()
-    
+
     def get_column_value_counts(self, column, sort="value", collate=None):
         if sort not in ["value", "count", "none"]:
             raise ValueError(
@@ -476,7 +476,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     )
                 ).label("bin_" + str(len(bins)-1))
             )
-        else:    
+        else:
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
@@ -519,7 +519,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 max_condition = sa.column(column) < max_val
             else:
                 max_condition = sa.column(column) <= max_val
-        
+
         if min_condition is not None and max_condition is not None:
             condition = sa.and_(min_condition, max_condition)
         elif min_condition is not None:
@@ -537,7 +537,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     )
                 ) \
                 .select_from(self._table)
-        
+
         return self.engine.execute(query).scalar()
 
     def create_temporary_table(self, table_name, custom_sql):
@@ -550,6 +550,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if self.engine.dialect.name.lower() == "bigquery":
             stmt = "CREATE OR REPLACE TABLE `{table_name}` AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql)
+
+        elif self.engine.dialect.name == "mysql":
+            stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql)
         else:
             stmt = "CREATE TEMPORARY TABLE \"{table_name}\" AS {custom_sql}".format(
@@ -632,7 +636,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     success = issubclass(col_type, getattr(sa, type_))
                 else:
                     success = issubclass(col_type, getattr(self.dialect, type_))
-                
+
             return {
                     "success": success,
                     "result": {
