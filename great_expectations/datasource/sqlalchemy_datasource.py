@@ -114,7 +114,7 @@ class SqlAlchemyDatasource(Datasource):
                 self.engine = create_engine(self._get_sqlalchemy_connection_options(**kwargs))
                 self.engine.connect()
 
-        except sqlalchemy.exc.OperationalError as sqlalchemy_error:
+        except (sqlalchemy.exc.OperationalError, sqlalchemy.exc.DatabaseError) as sqlalchemy_error:
             raise DatasourceInitializationError(self._name, str(sqlalchemy_error))
 
         self._build_generators()
