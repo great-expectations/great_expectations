@@ -128,7 +128,12 @@ class TableGenerator(BatchGenerator):
             else:
                 raise ValueError("Table name must be of shape '[SCHEMA.]TABLE'. Passed: " + split_generator_asset)
             tables = self.inspector.get_table_names(schema=schema_name)
-            tables.extend(self.inspector.get_view_names(schema=schema_name))
+            try:
+                tables.extend(self.inspector.get_view_names(schema=schema_name))
+            except NotImplementedError:
+                # Not implemented by bigquery dialect
+                pass
+
             if table_name in tables:
                 return iter([
                     SqlAlchemyDatasourceTableBatchKwargs(
@@ -162,13 +167,17 @@ class TableGenerator(BatchGenerator):
                      if table_name not in known_system_tables
                      ]
                 )
-                tables.extend(
-                    [table_name if self.inspector.default_schema_name == schema_name else
-                     schema_name + "." + table_name
-                     for table_name in self.inspector.get_view_names(schema=schema_name)
-                     if table_name not in known_system_tables
-                     ]
-                )
+                try:
+                    tables.extend(
+                        [table_name if self.inspector.default_schema_name == schema_name else
+                        schema_name + "." + table_name
+                        for table_name in self.inspector.get_view_names(schema=schema_name)
+                        if table_name not in known_system_tables
+                        ]
+                    )
+                except NotImplementedError:
+                    # Not implemented by bigquery dialect
+                    pass
 
         return defined_assets + tables
 
