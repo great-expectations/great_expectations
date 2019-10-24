@@ -160,19 +160,16 @@ def _add_sqlalchemy_datasource(context):
         if selected_database == SupportedDatabases.MYSQL:
             if not load_library("pymysql"):
                 return None
-            # TODO implement
             credentials = _collect_mysql_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.POSTGRES:
             credentials = _collect_postgres_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.REDSHIFT:
             if not load_library("psycopg2"):
                 return None
-            # TODO implement
             credentials = _collect_redshift_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.SNOWFLAKE:
             if not load_library("snowflake"):
                 return None
-            # TODO implement
             credentials = _collect_snowflake_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.OTHER:
             sqlalchemy_url = click.prompt(
@@ -205,7 +202,7 @@ def _add_sqlalchemy_datasource(context):
                                    )
             break
         except ModuleNotFoundError as de:
-            message = message + "\n  - Please `pip install psycopg2` and try again"
+            message = message + "\n  - Please `pip install psycopg2` and try again" #TODO: !!!
             cli_message(message.format(str(de)))
             return None
 
@@ -226,7 +223,9 @@ def _add_sqlalchemy_datasource(context):
 
 
 def _collect_postgres_credentials(default_credentials={}):
-    credentials = {}
+    credentials = {
+        "drivername": "postgres"
+    }
 
     credentials["host"] = click.prompt("What is the host for the sqlalchemy connection?",
                         default=default_credentials.get("host", "localhost"),
@@ -247,97 +246,106 @@ def _collect_postgres_credentials(default_credentials={}):
     return credentials
 
 def _collect_snowflake_credentials(default_credentials={}):
-    credentials = {}
+    credentials = {
+        "drivername": "snowflake"
+    }
 
     # required
 
-    credentials["user_login_name"] = click.prompt("What is the user login name for the snowflake connection?",
-                        default=default_credentials.get("user_login_name", ""),
+    credentials["username"] = click.prompt("What is the user login name for the snowflake connection?",
+                        default=default_credentials.get("username", ""),
                         show_default=True)
     credentials["password"] = click.prompt("What is the password for the snowflake connection?",
                             default="",
                             show_default=False, hide_input=True)
-    credentials["account_name"] = click.prompt("What is the account name for the snowflake connection?",
-                        default=default_credentials.get("account_name", ""),
+    credentials["host"] = click.prompt("What is the account name for the snowflake connection?",
+                        default=default_credentials.get("host", ""),
                         show_default=True)
+
 
     # optional
 
-    credentials["database_name"] = click.prompt("What is database name for the snowflake connection?",
-                        default=default_credentials.get("database_name", ""),
+    #TODO: database is optional, but it is not a part of query
+    credentials["database"] = click.prompt("What is database name for the snowflake connection?",
+                        default=default_credentials.get("database", ""),
                         show_default=True)
-    credentials["schema_name"] = click.prompt("What is schema name for the snowflake connection?",
-                        default=default_credentials.get("schema_name", ""),
-                        show_default=True)
-    credentials["warehouse_name"] = click.prompt("What is warehouse name for the snowflake connection?",
+
+    # # TODO: schema_name is optional, but it is not a part of query and there is no obvious way to pass it
+    # credentials["schema_name"] = click.prompt("What is schema name for the snowflake connection?",
+    #                     default=default_credentials.get("schema_name", ""),
+    #                     show_default=True)
+
+    credentials["query"] = {}
+    credentials["query"]["warehouse_name"] = click.prompt("What is warehouse name for the snowflake connection?",
                         default=default_credentials.get("warehouse_name", ""),
                         show_default=True)
-    credentials["role_name"] = click.prompt("What is role name for the snowflake connection?",
+    credentials["query"]["role_name"] = click.prompt("What is role name for the snowflake connection?",
                         default=default_credentials.get("role_name", ""),
                         show_default=True)
 
     return credentials
 
 def _collect_mysql_credentials(default_credentials={}):
-    credentials = {}
 
-    # required
+    # We are insisting on pymysql driver when adding a MySQL datasource through the CLI
+    # to avoid overcomplication of this flow.
+    # If user wants to use another driver, they must create the sqlalchemy connection
+    # URL by themselves in config_variables.yml
+    credentials = {
+        "drivername": "mysql+pymysql"
+    }
 
-    credentials["user_login_name"] = click.prompt("What is the user login name for the snowflake connection?",
-                        default=default_credentials.get("user_login_name", ""),
+    credentials["host"] = click.prompt("What is the host for the MySQL connection?",
+                        default=default_credentials.get("host", "localhost"),
                         show_default=True)
-    credentials["password"] = click.prompt("What is the password for the snowflake connection?",
+    credentials["port"] = click.prompt("What is the port for the MySQL connection?",
+                        default=default_credentials.get("port", "3306"),
+                        show_default=True)
+    credentials["username"] = click.prompt("What is the username for the MySQL connection?",
+                            default=default_credentials.get("username", ""),
+                            show_default=True)
+    credentials["password"] = click.prompt("What is the password for the MySQL connection?",
                             default="",
                             show_default=False, hide_input=True)
-    credentials["account_name"] = click.prompt("What is the account name for the snowflake connection?",
-                        default=default_credentials.get("account_name", ""),
-                        show_default=True)
-
-    # optional
-
-    credentials["database_name"] = click.prompt("What is database name for the snowflake connection?",
-                        default=default_credentials.get("database_name", ""),
-                        show_default=True)
-    credentials["schema_name"] = click.prompt("What is schema name for the snowflake connection?",
-                        default=default_credentials.get("schema_name", ""),
-                        show_default=True)
-    credentials["warehouse_name"] = click.prompt("What is warehouse name for the snowflake connection?",
-                        default=default_credentials.get("warehouse_name", ""),
-                        show_default=True)
-    credentials["role_name"] = click.prompt("What is role name for the snowflake connection?",
-                        default=default_credentials.get("role_name", ""),
-                        show_default=True)
+    credentials["database"] = click.prompt("What is the database name for the MySQL connection?",
+                            default=default_credentials.get("database", ""),
+                            show_default=True)
 
     return credentials
 
 def _collect_redshift_credentials(default_credentials={}):
-    credentials = {}
+
+    # We are insisting on psycopg2 driver when adding a Redshift datasource through the CLI
+    # to avoid overcomplication of this flow.
+    # If user wants to use another driver, they must create the sqlalchemy connection
+    # URL by themselves in config_variables.yml
+    credentials = {
+        "drivername": "postgresql+psycopg2"
+    }
 
     # required
 
-    credentials["user_login_name"] = click.prompt("What is the user login name for the snowflake connection?",
-                        default=default_credentials.get("user_login_name", ""),
+    credentials["host"] = click.prompt("What is the host for the Redshift connection?",
+                        default=default_credentials.get("host", ""),
                         show_default=True)
-    credentials["password"] = click.prompt("What is the password for the snowflake connection?",
+    credentials["port"] = click.prompt("What is the port for the Redshift connection?",
+                        default=default_credentials.get("port", "5439"),
+                        show_default=True)
+    credentials["username"] = click.prompt("What is the username for the Redshift connection?",
+                            default=default_credentials.get("username", "postgres"),
+                            show_default=True)
+    credentials["password"] = click.prompt("What is the password for the Redshift connection?",
                             default="",
                             show_default=False, hide_input=True)
-    credentials["account_name"] = click.prompt("What is the account name for the snowflake connection?",
-                        default=default_credentials.get("account_name", ""),
-                        show_default=True)
+    credentials["database"] = click.prompt("What is the database name for the Redshift connection?",
+                            default=default_credentials.get("database", "postgres"),
+                            show_default=True)
 
     # optional
 
-    credentials["database_name"] = click.prompt("What is database name for the snowflake connection?",
-                        default=default_credentials.get("database_name", ""),
-                        show_default=True)
-    credentials["schema_name"] = click.prompt("What is schema name for the snowflake connection?",
-                        default=default_credentials.get("schema_name", ""),
-                        show_default=True)
-    credentials["warehouse_name"] = click.prompt("What is warehouse name for the snowflake connection?",
-                        default=default_credentials.get("warehouse_name", ""),
-                        show_default=True)
-    credentials["role_name"] = click.prompt("What is role name for the snowflake connection?",
-                        default=default_credentials.get("role_name", ""),
+    credentials["query"] = {}
+    credentials["query"]["sslmode"] = click.prompt("What is sslmode name for the Redshift connection?",
+                        default=default_credentials.get("sslmode", "prefer"),
                         show_default=True)
 
     return credentials
