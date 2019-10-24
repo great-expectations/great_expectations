@@ -39,6 +39,11 @@ try:
 except ImportError:
     snowflake = None
 
+try:
+    import pybigquery.sqlalchemy_bigquery
+except ImportError:
+    pybigquery = None
+
 
 class MetaSqlAlchemyDataset(Dataset):
 
@@ -197,9 +202,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def __init__(self, table_name=None, engine=None, connection_string=None,
                  custom_sql=None, schema=None, *args, **kwargs):
 
+        
         if custom_sql and not table_name:
-            # dashes are special characters in most databases so use underscores
-            table_name = str(uuid.uuid4()).replace("-", "_")
+            batch_kwargs = kwargs.pop("batch_kwargs", None)
+            if batch_kwargs is not None:
+                table_name = batch_kwargs.pop("bigquery_temp_table", None)
+            if table_name is None:
+                # dashes are special characters in most databases so use underscores
+                table_name = str(uuid.uuid4()).replace("-", "_")
 
         if table_name is None:
             raise ValueError("No table_name provided.")
@@ -226,6 +236,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_module("snowflake.sqlalchemy.snowdialect")
         elif self.engine.dialect.name.lower() == "redshift":
             self.dialect = import_module("sqlalchemy_redshift.dialect")
+        elif self.engine.dialect.name.lower() == "bigquery":
+            self.dialect = import_module("pybigquery.sqlalchemy_bigquery")        
         else:
             self.dialect = None
 
@@ -258,14 +270,17 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 con=self.engine,
                 chunksize=n
             ))
-        except ValueError:
+        except (ValueError, NotImplementedError):
             # it looks like MetaData that is used by pd.read_sql_table
             # cannot work on a temp table.
             # If it fails, we are trying to get the data using read_sql
             head_sql_str = "select * from "
             if self._table.schema:
                 head_sql_str += self._table.schema + "."
-            head_sql_str += self._table.name
+            if self.engine.dialect.name.lower() == "bigquery":
+                head_sql_str += "`" + self._table.name + "`"
+            else:
+               head_sql_str += self._table.name
             head_sql_str += " limit {0:d}".format(n)
 
             df = pd.read_sql(head_sql_str, con=self.engine)
@@ -532,8 +547,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         It hasn't been tested in all SQL dialects, and may change based on community feedback.
         :param custom_sql:
         """
-        stmt = "CREATE TEMPORARY TABLE \"{table_name}\" AS {custom_sql}".format(
-            table_name=table_name, custom_sql=custom_sql)
+
+        if self.engine.dialect.name.lower() == "bigquery":
+            stmt = "CREATE OR REPLACE TABLE `{table_name}` AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql)
+        else:
+            stmt = "CREATE TEMPORARY TABLE \"{table_name}\" AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql)
         self.engine.execute(stmt)
 
     def column_reflection_fallback(self):
@@ -863,6 +883,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # Snowflake
             if isinstance(self.engine.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect):
                 return "RLIKE" if positive else "NOT RLIKE"
+        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+            pass
+
+        try:
+            # Bigquery
+            if isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+                return "REGEXP_CONTAINS" if positive else "NOT REGEXP_CONTAINS"
         except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
             pass
 
