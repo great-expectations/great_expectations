@@ -1,3 +1,5 @@
+.. cssclass:: widetable
+
 .. _dataset_module:
 
 Dataset Module

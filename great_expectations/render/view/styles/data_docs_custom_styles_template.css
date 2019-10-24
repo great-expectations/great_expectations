@@ -1,0 +1,25 @@
+/*index page*/
+.ge-index-page-datasource-title {}
+.ge-index-page-generator-title {}
+.ge-index-page-generator-table-container {}
+.ge-index-page-generator-table {}
+.ge-index-page-generator-table-data-asset-header {}
+.ge-index-page-generator-table-profiling-links-header {}
+.ge-index-page-generator-table-expectations-links-header {}
+.ge-index-page-generator-table-validations-links-header {}
+.ge-index-page-generator-table-data-asset-name {}
+.ge-index-page-generator-table-profiling-links-list {}
+.ge-index-page-generator-table-profiling-links-item {}
+.ge-index-page-generator-table-expectation-suite-link {}
+.ge-index-page-generator-table-validation-links-list {}
+.ge-index-page-generator-table-validation-links-item {}
+
+/*breadcrumbs*/
+.ge-breadcrumbs {}
+.ge-breadcrumbs-item {}
+
+/*navigation sidebar*/
+.ge-navigation-sidebar-container {}
+.ge-navigation-sidebar-content {}
+.ge-navigation-sidebar-title {}
+.ge-navigation-sidebar-link {}
