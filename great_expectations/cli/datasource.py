@@ -107,8 +107,15 @@ def _add_pandas_datasource(context):
     return data_source_name
 
 
-def load_library(library_name):
-    """Dynamically load a module from strings or raise a helpful error."""
+def load_library(library_name, install_instructions_string=None):
+    """
+    Dynamically load a module from strings or raise a helpful error.
+
+    :param library_name: name of the library to load
+    :param install_instructions_string: optional - used when the install instructions
+            are different from 'pip install library_name'
+    :return: True if the library was loaded successfully, False otherwise
+    """
     # TODO remove this nasty python 2 hack
     try:
         ModuleNotFoundError
@@ -119,8 +126,13 @@ def load_library(library_name):
         loaded_module = importlib.import_module(library_name)
         return True
     except ModuleNotFoundError as e:
-        cli_message("""<red>ERROR: Great Expectations relies on the library `{}` to connect to your database.</red>
-  - Please `pip install {}` before trying again.""".format(library_name, library_name))
+        if install_instructions_string:
+            cli_message("""<red>ERROR: Great Expectations relies on the library `{}` to connect to your database.</red>
+            - Please `{}` before trying again.""".format(library_name, install_instructions_string))
+        else:
+            cli_message("""<red>ERROR: Great Expectations relies on the library `{}` to connect to your database.</red>
+      - Please `pip install {}` before trying again.""".format(library_name, library_name))
+
         return False
 
 
@@ -168,7 +180,7 @@ def _add_sqlalchemy_datasource(context):
                 return None
             credentials = _collect_redshift_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.SNOWFLAKE:
-            if not load_library("snowflake"):
+            if not load_library("snowflake", install_instructions_string="pip install snowflake-sqlalchemy"):
                 return None
             credentials = _collect_snowflake_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.OTHER:
@@ -202,7 +214,7 @@ def _add_sqlalchemy_datasource(context):
                                    )
             break
         except ModuleNotFoundError as de:
-            message = message + "\n  - Please `pip install psycopg2` and try again" #TODO: !!!
+            message = message + "\n  - Please `pip install psycopg2` and try again" #TODO: Taylor, this looks wrong (?)
             cli_message(message.format(str(de)))
             return None
 
