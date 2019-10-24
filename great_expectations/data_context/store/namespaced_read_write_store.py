@@ -310,7 +310,6 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         return [self._convert_tuple_to_resource_identifier(("expectations", key)) for key in self.store_backends[ExpectationSuiteIdentifier].list_keys()] + \
                [self._convert_tuple_to_resource_identifier(("validations", key)) for key in self.store_backends[ValidationResultIdentifier].list_keys()]
 
-
     def write_index_page(self, page):
         """This third store has a special method, which uses a zero-length tuple as a key."""
         return self.store_backends["index_page"].set((), page, content_encoding='utf-8', content_type='text/html')

@@ -215,7 +215,7 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_prof
         ],
         [
           "Success Percent",
-          "84.31%"
+          "≈84.31%"
         ]
       ],
       "styling": {
