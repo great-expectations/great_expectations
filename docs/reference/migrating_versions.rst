@@ -49,7 +49,7 @@ Some specific changes:
   - `validations_store_name`
 
 - Deprecation of the `type` key for configuring objects (replaced by
-`class_name` (and `module_name` as well when ambiguous).
+  `class_name` (and `module_name` as well when ambiguous).
 - Completely new `SiteBuilder` configuration. See :ref:`data_docs_reference`.
 
 BREAKING:
@@ -62,6 +62,11 @@ BREAKING:
    - ActionListValidationOperator
  - Several modules are now refactored into different names including all datasources
  - InMemoryBatchKwargs use the key dataset instead of df to be more explicit
+
+
+Pre-0.8.x configuration files ``great_expectations.yml`` are not compatible with 0.8.x. Run ``great_expectations check-config`` - it will offer to create a new config file. The new config file will not have any customizations you made, so you will have to copy these from the old file.
+
+If you run into any issues, please ask for help on `Slack <https://greatexpectations.io/slack>`__.
 
 *************************
 Upgrading to 0.7.x

@@ -1,3 +1,5 @@
+.. cssclass:: widetable
+
 .. _great_expectations_module:
 
 Great Expectations Module

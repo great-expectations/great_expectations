@@ -231,7 +231,9 @@ class DefaultSiteSectionBuilder(object):
 
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_config={},
+            runtime_config={
+                "data_context": data_context
+            },
             config_defaults={
                 "module_name": "great_expectations.render.view"
             }
@@ -342,7 +344,9 @@ class DefaultSiteIndexBuilder(object):
             }
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_config={},
+            runtime_config={
+                "data_context": data_context
+            },
             config_defaults={
                 "module_name": "great_expectations.render.view"
             }
