@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 """Rendering utility"""
 import decimal
 import locale
@@ -38,8 +37,12 @@ def num_to_str(f, precision=DEFAULT_PRECISION, use_locale=False, no_scientific=F
         local_context.prec = precision
     else:
         local_context = ctx
-
-    d = local_context.create_decimal(repr(f))
+    # We cast to string; we want to avoid precision issues, but format everything as though it were a float.
+    # So, if it's not already a float, we will append a decimal point to the string representation
+    s = repr(f)
+    if not isinstance(f, float):
+        s += locale.localeconv().get('decimal_point') + "0"
+    d = local_context.create_decimal(s)
     if no_scientific:
         result = format(d, 'f')
     elif use_locale:
@@ -47,9 +50,9 @@ def num_to_str(f, precision=DEFAULT_PRECISION, use_locale=False, no_scientific=F
     else:
         result = format(d, 'g')
     if f != locale.atof(result):
-        # result = '~' + result
+        # result = '≈' + result
         #  ≈  # \u2248
-        result = '≈' + result
+        result = '~' + result
     if 'e' not in result and 'E' not in result:
         result = result.rstrip('0').rstrip(locale.localeconv().get('decimal_point'))
     return result

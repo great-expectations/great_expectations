@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 import json
 
 from great_expectations.render.renderer.content_block import (
@@ -246,7 +245,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     # test _get_observed_value for expect_column_values_to_not_be_null expectation type
     output_3 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_not_be_null)
     print(output_3)
-    assert output_3 == "≈20.03% not null"
+    assert output_3 == "~20.03% not null"
     # test _get_observed_value for expect_column_values_to_be_null expectation type
     output_4 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_be_null)
     print(output_4)
@@ -330,7 +329,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
         "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",
         "params": {
           "unexpected_count": '3',
-          "unexpected_percent": "≈0.2285%",
+          "unexpected_percent": "~0.2285%",
           "element_count": '1,313'
         },
         "tag": "strong",
