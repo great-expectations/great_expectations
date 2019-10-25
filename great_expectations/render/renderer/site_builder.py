@@ -408,7 +408,7 @@ class DefaultSiteIndexBuilder(object):
 
     def get_calls_to_action(self):
         telemetry = None
-        drivername = None
+        db_driver = None
         datasource_classes_by_name = self.data_context.list_datasources()
 
         if datasource_classes_by_name:
@@ -418,16 +418,13 @@ class DefaultSiteIndexBuilder(object):
             last_datasource = self.data_context.datasources[last_datasource_name]
 
             if last_datasource_class_name == "SqlAlchemyDatasource":
-                drivername = last_datasource.drivername
+                db_driver = last_datasource.drivername
 
-            # TODO we need to confer w/ Kyle to see which elements should go in
-            #  which field. We want at least DataSourceTypes, and if SQL,
-            #  SupportedDatabases. These are both enums.
-            enum_value = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
+            datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
             telemetry = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
-                "datadocs",
-                enum_value,
-                drivername,
+                "ge-init-datadocs",
+                datasource_type,
+                db_driver,
             )
 
         return {
@@ -443,18 +440,19 @@ class DefaultSiteIndexBuilder(object):
         calls to action.
         """
         create_expectations = CallToActionButton(
-                "Create Expectations",
-                "https://docs.greatexpectations.io/en/latest/getting_started/create_expectations.html"
-            )
+            "Create Expectations",
+            # TODO update this link to a proper tutorial
+            "https://docs.greatexpectations.io/en/latest/getting_started/create_expectations.html"
+        )
         validation_playground = CallToActionButton(
             "Play with Validations",
+            # TODO update this link to a proper tutorial
             "https://docs.greatexpectations.io/en/latest/getting_started/pipeline_integration.html"
         )
         customize_data_docs = CallToActionButton(
             "Customize Data Docs",
             "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs"
         )
-        # TODO update S3 url
         s3_team_site = CallToActionButton(
             "Set up a team site on AWS S3",
             "https://docs.greatexpectations.io/en/latest/tutorials/publishing_data_docs_to_s3.html"
@@ -468,7 +466,10 @@ class DefaultSiteIndexBuilder(object):
         results = []
 
         expectations_store = self.data_context.stores["expectations_store"]
-        if not expectations_store.list_keys():
+        suites = expectations_store.list_keys()
+        # Ingore BasicDatasetProfiler. We want to know about user created suties
+        suites = [s for s in suites if s["expectation_suite_name"] != "BasicDatasetProfiler"]
+        if not suites:
             # TODO this needs testing as complexity increases probably using mocked DataContext
             logger.info('No expectations found')
             results.append(create_expectations)
