@@ -106,12 +106,17 @@ class SqlAlchemyDatasource(Datasource):
                 self.engine.connect()
             elif "url" in credentials:
                 url = credentials.pop("url")
+                # TODO perhaps we could carefully regex out the driver from the
+                #  url. It would need to be cautious to avoid leaking secrets.
+                self.drivername = "url"
                 self.engine = create_engine(url, **kwargs)
                 self.engine.connect()
 
             # Otherwise, connect using remaining kwargs
             else:
-                self.engine = create_engine(self._get_sqlalchemy_connection_options(**kwargs))
+                options, drivername = self._get_sqlalchemy_connection_options(**kwargs)
+                self.drivername = drivername
+                self.engine = create_engine(options)
                 self.engine.connect()
 
         except (sqlalchemy.exc.OperationalError, sqlalchemy.exc.DatabaseError) as sqlalchemy_error:
@@ -120,6 +125,7 @@ class SqlAlchemyDatasource(Datasource):
         self._build_generators()
 
     def _get_sqlalchemy_connection_options(self, **kwargs):
+        drivername = None
         if "credentials" in self._datasource_config:
             credentials = self._datasource_config["credentials"]
         else:
@@ -136,7 +142,7 @@ class SqlAlchemyDatasource(Datasource):
             drivername = credentials.pop("drivername")
             options = sqlalchemy.engine.url.URL(drivername, **credentials)
 
-        return options
+        return options, drivername
 
     def _get_generator_class_from_type(self, type_):
         if type_ == "queries":
