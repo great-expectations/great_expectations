@@ -24,16 +24,16 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
     assert result["content"] == ["*hi*"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : ["*alpha*", "_bravo_", "charlie"]
+        "meta": {
+            "notes": ["*alpha*", "_bravo_", "charlie"]
         }
     })
     print(result)
     assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : {
+        "meta": {
+            "notes": {
                 "format": "string",
                 "content": ["*alpha*", "_bravo_", "charlie"]
             }
@@ -43,8 +43,8 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
     assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : {
+        "meta": {
+            "notes": {
                 "format": "markdown",
                 "content": "*alpha*"
             }
@@ -59,8 +59,8 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
         assert result["content"] == ["*alpha*"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : {
+        "meta": {
+            "notes": {
                 "format": "markdown",
                 "content": ["*alpha*", "_bravo_", "charlie"]
             }

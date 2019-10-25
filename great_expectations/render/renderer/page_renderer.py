@@ -1,4 +1,5 @@
 import logging
+from six import string_types
 
 import pypandoc
 
@@ -301,18 +302,18 @@ class ExpectationSuitePageRenderer(Renderer):
             notes = expectations["meta"]["notes"]
             note_content = None
             
-            if type(notes) == str:
+            if isinstance(notes, string_types):
                 note_content = [notes]
             
-            elif type(notes) == list:
+            elif isinstance(notes, list):
                 note_content = notes
             
-            elif type(notes) == dict:
+            elif isinstance(notes, dict):
                 if "format" in notes:
                     if notes["format"] == "string":
-                        if type(notes["content"]) == str:
+                        if isinstance(notes["content"], string_types):
                             note_content = [notes["content"]]
-                        elif type(notes["content"]) == list:
+                        elif isinstance(notes["content"], list):
                             note_content = notes["content"]
                         else:
                             logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
@@ -320,13 +321,13 @@ class ExpectationSuitePageRenderer(Renderer):
                     elif notes["format"] == "markdown":
                         # ???: Should converting to markdown be the renderer's job, or the view's job?
                         # Renderer is easier, but will end up mixing HTML strings with content_block info.
-                        if type(notes["content"]) == str:
+                        if isinstance(notes["content"], string_types):
                             try:
                                 note_content = [pypandoc.convert_text(notes["content"], format='md', to="html")]
                             except OSError:
                                 note_content = [notes["content"]]
                         
-                        elif type(notes["content"]) == list:
+                        elif isinstance(notes["content"], list):
                             try:
                                 note_content = [pypandoc.convert_text(note, format='md', to="html") for note in
                                             notes["content"]]
