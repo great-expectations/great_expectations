@@ -13,6 +13,7 @@ from great_expectations.render.renderer.content_block.expectation_string import 
 
 from six import PY2
 
+
 def test_substitute_none_for_missing():
     assert substitute_none_for_missing(
         kwargs={"a": 1, "b": 2},
@@ -26,6 +27,7 @@ def test_substitute_none_for_missing():
     ) == {"a": 1, "b": 2, "c": None, "d": None}
     assert my_kwargs == {"a": 1, "b": 2}, \
         "substitute_none_for_missing should not change input kwargs in place."
+
 
 @pytest.mark.smoketest
 def test_all_expectations_using_test_definitions():
@@ -71,7 +73,7 @@ def test_all_expectations_using_test_definitions():
                 # rendered_template = pTemplate(el["template"]).substitute(el["params"])
 
                 test_results[test_definitions["expectation_type"]].append({
-                    test["title"]:render_result, 
+                    test["title"]: render_result,
                     # "rendered_template":rendered_template
                     })
              
