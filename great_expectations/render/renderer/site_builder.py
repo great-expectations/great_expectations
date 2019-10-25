@@ -454,6 +454,11 @@ class DefaultSiteIndexBuilder(object):
             "Customize Data Docs",
             "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs"
         )
+        # TODO update S3 url
+        s3_team_site = CallToActionButton(
+            "Set up a team site on AWS S3",
+            "https://docs.greatexpectations.io/en/latest/tutorials/publishing_data_docs_to_s3.html"
+        )
         # TODO gallery does not yet exist
         # gallery = CallToActionButton(
         #     "Great Expectations Gallery",
@@ -468,10 +473,10 @@ class DefaultSiteIndexBuilder(object):
             logger.info('No expectations found')
             results.append(create_expectations)
 
-        # Show validations no matter what
+        # Show these no matter what
         results.append(validation_playground)
-        # Show customizations no matter what
         results.append(customize_data_docs)
+        results.append(s3_team_site)
 
         if telemetry:
             for button in results:
