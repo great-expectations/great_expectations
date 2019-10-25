@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
 import json
 import pypandoc
 
@@ -13,24 +16,24 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
     # print(pypandoc.convert_text("*hi*", to='html', format="md"))
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : "*hi*"
+        "meta": {
+            "notes": "*hi*"
         }
     })
     print(result)
     assert result["content"] == ["*hi*"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : ["*alpha*", "_bravo_", "charlie"]
+        "meta": {
+            "notes": ["*alpha*", "_bravo_", "charlie"]
         }
     })
     print(result)
     assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : {
+        "meta": {
+            "notes": {
                 "format": "string",
                 "content": ["*alpha*", "_bravo_", "charlie"]
             }
@@ -40,8 +43,8 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
     assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : {
+        "meta": {
+            "notes": {
                 "format": "markdown",
                 "content": "*alpha*"
             }
@@ -56,8 +59,8 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
         assert result["content"] == ["*alpha*"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : {
+        "meta": {
+            "notes": {
                 "format": "markdown",
                 "content": ["*alpha*", "_bravo_", "charlie"]
             }
@@ -215,7 +218,7 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_prof
         ],
         [
           "Success Percent",
-          "84.31%"
+          "≈84.31%"
         ]
       ],
       "styling": {
