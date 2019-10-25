@@ -171,7 +171,7 @@ def test_render_DefaultJinjaPageView_meta_info():
 
   .table-cell-frame {
       overflow-y: auto;
-      max-height: 200px;
+      max-height: 335px;
   }
 
   .table-cell-frame ul {
