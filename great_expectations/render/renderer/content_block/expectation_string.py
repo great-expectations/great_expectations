@@ -1377,14 +1377,13 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 df = pd.DataFrame({
                     "bin_min": bins_x1,
                     "bin_max": bins_x2,
-                    "weights": weights,
+                    "fraction": weights,
                 })
-                df.weights *= 100
-    
+
                 bars = alt.Chart(df).mark_bar().encode(
                     x='bin_min:O',
                     x2='bin_max:O',
-                    y="weights:Q"
+                    y="fraction:Q"
                 ).properties(width=width, height=height, autosize="fit")
     
                 chart = bars.to_json()
@@ -1393,13 +1392,12 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 
                 df = pd.DataFrame({
                     "values": values,
-                    "weights": weights
+                    "fraction": weights
                 })
-                df.weights *= 100
 
                 bars = alt.Chart(df).mark_bar().encode(
                     x='values:N',
-                    y="weights:Q"
+                    y="fraction:Q"
                 ).properties(width=width, height=height, autosize="fit")
                 chart = bars.to_json()
 
