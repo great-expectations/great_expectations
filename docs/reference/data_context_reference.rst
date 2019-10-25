@@ -190,8 +190,6 @@ Validation Operators
 
 See the :ref:`validation_operators_reference` for more information regarding configuring and using validation operators.
 
-
-
 .. _environment_and_secrets:
 
 *****************************************
