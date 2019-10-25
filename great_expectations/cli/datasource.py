@@ -231,11 +231,28 @@ def _add_sqlalchemy_datasource(context):
                     "Enter the credentials again?".format(str(de)),
                     default=True
             ):
+                context.add_datasource(data_source_name,
+                                       do_not_initialize=True,
+                                       module_name="great_expectations.datasource",
+                                       class_name="SqlAlchemyDatasource",
+                                       data_asset_type={
+                                           "class_name": "SqlAlchemyDataset"},
+                                       credentials="${" + data_source_name + "}",
+                                       generators={
+                                           "default": {
+                                               "class_name": "TableGenerator"
+                                           }
+                                       }
+                                       )
                 cli_message(
-                    """You can add a datasource later by:
-  - Running <green>great_expectations add-datasource</green>
-  - Editing the {} file.
-""".format(DataContext.GE_YML))
+                    """
+We saved datasource {0:s} in {1:s} and the credentials you entered in {2:s}.
+Since we could not connect to the database, you can complete troubleshooting in the configuration files. Read here:
+<blue>https://docs.greatexpectations.io/en/latest/tutorials/add-sqlalchemy-datasource.html?utm_source=cli&utm_medium=init&utm_campaign={3:s}#{4:s}</blue> .
+
+After you connect to the datasource, run great_expectations profile to continue.
+
+""".format(data_source_name, DataContext.GE_YML, context.get_project_config().get("config_variables_file_path"), rtd_url_ge_version, selected_database.value.lower()))
                 return None
 
     return data_source_name

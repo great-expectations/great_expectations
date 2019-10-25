@@ -1239,10 +1239,10 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
         assert os.path.isfile(expected_path)
 
     obs = context.get_existing_local_data_docs_sites_urls()
-    assert obs == [
+    assert set(obs) == set([
         "file://{}".format(path_1),
         "file://{}".format(path_2),
-    ]
+    ])
 
 
 def test_existing_local_data_docs_urls_returns_only_existing_urls_from_customized_local_site(tmp_path_factory):
