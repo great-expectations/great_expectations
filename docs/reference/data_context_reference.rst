@@ -11,16 +11,15 @@ Configuration
 *************************
 
 
-The DataContext configuration file (``great_expectations.yml``) provides fine-grained control over several core features available to the
-DataContext to assist in managing resources used by Great Expectations. Key configuration areas include specifying
-datasources, Data Docs, and Stores used to manage access to resources such as expectation suites,
-validation results, profiling results, evaluation parameters and plugins.
+The DataContext configuration file (``great_expectations.yml``) provides fine-grained control over several core
+features available to the DataContext to assist in managing resources used by Great Expectations. Key
+configuration areas include specifying Datasources, Data Docs, Validation Operators, and Stores used to manage access
+to resources such as expectation suites, validation results, profiling results, evaluation parameters and plugins.
 
 This file is intended to be committed to your repo.
 
 Datasources
 =============
-
 
 Datasources tell Great Expectations where your data lives and how to get it.
 
@@ -35,10 +34,10 @@ configuration information. For example, the following simple configuration suppo
 
   datasources:
     pipeline:
-      type: pandas
+      class_name: PandasDatasource
       generators:
         default:
-          type: memory
+          class_name: InMemoryGenerator
 
 The following configuration demonstrates a more complicated configuration for reading assets from s3 into pandas. It
 will access the amazon public NYC taxi data and provides access to two assets: 'taxi-green' and 'taxi-fhv' which
@@ -48,10 +47,10 @@ represent two public datasets available from the resource.
 
   datasources:
     nyc_taxi:
-      type: pandas
+      class_name: PandasDatasource
       generators:
         s3:
-          type: s3
+          class_name: S3Generator
           bucket: nyc-tlc
           delimiter: '/'
           reader_options:
@@ -73,7 +72,6 @@ Here is an example for a SQL based pipeline:
 
     datasources:
       edw:
-        module_name: great_expectations.datasource
         class_name: SqlAlchemyDatasource
         credentials: ${data_warehouse}
         data_asset_type:
@@ -101,7 +99,7 @@ Note that the datasources section *includes* all defined generators as well as s
 
 
 Data Asset Names
-===================
+------------------
 
 Data asset names consist of three parts, a datasource, generator, and generator asset. DataContext functions will
 attempt to "normalize" a data_asset_name if they are provided with only a string, by splitting on the delimiter
@@ -117,7 +115,7 @@ For example:
     context.normalize_data_asset_name("my_asset")
 
 
-Data Documentation
+Data Docs
 =====================
 
 The :ref:`data_docs` section defines how individual sites should be built and deployed. See the detailed
@@ -127,10 +125,70 @@ documentation for more information.
 Stores
 =============
 
-Stores provide a valuable abstraction for making access to critical resources such as expectation suites, validation
-results, profiling data, data documentation, and evaluation parameters both easy to configure and to extend and
-customize. See the :ref:`stores_reference` for more information.
+A DataContext requires three :ref:`stores <stores_reference>` to function properly: an `expectations_store`,
+`validations_store`, and `evaluation_parameter_store`. Consequently a minimal store configuration for a DataContext
+would include the following:
 
+.. code-block:: yaml
+
+    expectations_store_name: expectations_store
+    validations_store_name: validations_store
+    evaluation_parameter_store_name: evaluation_parameter_store
+
+    stores:
+      expectations_store:
+        class_name: ExpectationsStore
+        store_backend:
+          class_name: FixedLengthTupleFilesystemStoreBackend
+          base_directory: expectations/
+      validations_store:
+        class_name: ValidationsStore
+        store_backend:
+          class_name: FixedLengthTupleFilesystemStoreBackend
+          base_directory: uncommitted/validations/
+      evaluation_parameter_store:
+        class_name: InMemoryEvaluationParameterStore
+
+The `expectations_store` provides access to expectations_suite objects, using the DataContext's namespace; the
+`validations_store` does the same for validations. See :ref:`evaluation_parameters` for more information on the
+evaluation parameters store.
+
+Stores can be referenced in other objects in the DataContext. They provide a common API for accessing data
+independently of the backend where it is stored. For example, on a team that uses S3 to store expectation suites and
+validation results, updating the configuration to use cloud storage requires only changing the store class_name and
+providing the bucket/prefix combination:
+
+.. code-block:: yaml
+
+    expectations_store_name: expectations_store
+    validations_store_name: validations_store
+    evaluation_parameter_store_name: evaluation_parameter_store
+
+    stores:
+      expectations_store:
+        class_name: ExpectationsStore
+        store_backend:
+          class_name: FixedLengthTupleS3StoreBackend
+          base_directory: expectations/
+          bucket: ge.my_org.com
+          prefix:
+      validations_store:
+        class_name: ValidationsStore
+        store_backend:
+          class_name: FixedLengthTupleS3StoreBackend
+          bucket: ge.my_org.com
+          prefix: common_validations
+      evaluation_parameter_store:
+        class_name: InMemoryEvaluationParameterStore
+
+GE uses `boto3 <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_ to access AWS, so credentials
+simply need to be available in any standard place searched by that library.
+
+
+Validation Operators
+=====================
+
+See the :ref:`validation_operators_reference` for more information regarding configuring and using validation operators.
 
 .. _environment_and_secrets:
 
@@ -218,7 +276,6 @@ new directory or use this template:
     # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/features/datasource.html
     datasources: {}
       edw:
-        module_name: great_expectations.datasource
         class_name: SqlAlchemyDatasource
         credentials: ${edw}
         data_asset_type:
