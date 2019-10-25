@@ -11,8 +11,9 @@ currently configured for data assets under test.
 
 Configuring data docs requires three simple steps:
 
-1. Create a bucket to host the site. Modify the bucket name and region for your situation. You may also wish
-to apply organization specific access control policies; see below for additional resources regarding access controls.
+1. Configure an S3 bucket.
+
+**Modify the bucket name and region for your situation.**
 
 .. code-block:: bash
 
@@ -21,10 +22,11 @@ to apply organization specific access control policies; see below for additional
         "Location": "/data-docs.my_org"
     }
 
-2. Configure your bucket policy to enable appropriate access. **IMPORTANT**: your policy should provide access only
+Configure your bucket policy to enable appropriate access. **IMPORTANT**: your policy should provide access only
 to appropriate users; data-docs can include critical information about raw data and should generally **not** be
-publicly accessible. The example policy below **enforces IP-based access** access.  For example, the following could
-be used to whitelist a specific IP address.
+publicly accessible. The example policy below **enforces IP-based access** access.
+
+**Modify the bucket name and IP addresses below for your situation.**
 
 .. code-block:: json
 
@@ -51,29 +53,34 @@ be used to whitelist a specific IP address.
       ]
     }
 
-Copy the policy above into a file called `ip-policy.json` in your local directory, then run:
+Modify the policy above and save it to a file called `ip-policy.json` in your local directory. Then, run:
 
 .. code-block:: bash
 
     > aws s3api put-bucket-policy --bucket data-docs.ge.test --policy file://ip-policy.json
 
 
-3. Edit your `great_expectations.yml` file to change the `data_docs_sites` configuration for the site you will publish.
-You will need to modify three lines, annotated below by "# Changed from".
+2. Edit your `great_expectations.yml` file to change the `data_docs_sites` configuration for the site you will publish.
+**Add the `s3_site`** section below existing site configuration.
 
 .. code-block:: yaml
 
     # ... additional configuration above
     data_docs_sites:
-      s3_site:  # Changed from: 'local_site'
+      local_site:
         class_name: SiteBuilder
         store_backend:
-          class_name: FixedLengthTupleS3StoreBackend  # Changed from: FixedLengthTupleFilesystemStoreBackend
-          bucket: data-docs.my_org  # Changed from: base_directory: uncommitted/data_docs/local_site/
+          class_name: FixedLengthTupleFilesystemStoreBackend
+          base_directory: uncommitted/data_docs/local_site/
+      s3_site:
+        class_name: SiteBuilder
+        store_backend:
+          class_name: FixedLengthTupleS3StoreBackend
+          bucket: data-docs.my_org  # UPDATE the bucket name here to match the bucket you configured above.
     # ... additional configuration below
 
 
-4. Build your documentation:
+3. Build your documentation:
 
 .. code-block:: bash
 

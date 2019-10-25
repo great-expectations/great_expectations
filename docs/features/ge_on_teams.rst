@@ -44,12 +44,11 @@ Similar to Validations, Data Docs are by default stored in your
 include examples of data (which could be sensitive or regulated) these
 **should not** be committed to a source control system.
 
-You can configure a Store to write these to a cloud provider blob storage such
-as Amazon S3 or some other securely mounted file system. This will depend on
-your team's deployment patterns.
+You can configure a store to write these to a cloud provider blob storage such
+as Amazon S3 or some other securely mounted file system.
 
 See the :ref:`data docs reference <data_docs_reference>` for more information on configuring data docs to use cloud
-storage.
+storage, or follow the :ref:`tutorial <publishing_data_docs_to_s3>`_ to configure a site now.
 
 Where Should Notifications Go?
 ----------------------------------
