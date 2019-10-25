@@ -4,10 +4,10 @@
 Batch Generators
 ##################
 
-Batch generators produce identifying information, called "batch_kwargs" that datasources
-can use to get individual batches of data. They add flexibility in how to obtain data
-such as with time-based partitioning, downsampling, or other techniques appropriate
-for the datasource.
+A generator builds instructions for GE datasources by inspecting data and helping to identify useful elements such as
+batches. Batch generators produce identifying information, called "batch_kwargs" that datasources can use to get
+individual batches of data. They add flexibility in how to obtain data such as with time-based partitioning,
+downsampling, or other techniques appropriate for the datasource.
 
 For example, a generator could produce a SQL query that logically represents "rows in
 the Events table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource
