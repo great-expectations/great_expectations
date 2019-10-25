@@ -71,13 +71,9 @@ Here is an example of a site configuration from great_expectations.yml with defa
             module_name: great_expectations.render.renderer
             class_name: ProfilingResultsPageRenderer
 
-``validations_store`` in the example above specifies the location of validation
-and profiling results that the site will include in the documentation. The
-store's ``type`` can be ``filesystem`` or ``s3`` (S3 store is not currently
-implemented, but will be supported in the near future). ``base_directory`` must
-be specified for ``filesystem`` stores. The optional ``run_id_filter`` attribute
-allows to include (``eq`` for exact match) or exclude (``ne``) validation
-results with a particular run id.
+``validations_store`` in the example above specifies the name of a store configured in the `stores` section.
+Validation and profiling results from that store will be included in the documentation. The optional ``run_id_filter``
+attribute allows to include (``eq`` for exact match) or exclude (``ne``) validation results with a particular run id.
 
 .. _customizing_data_docs_store_backend:
 
