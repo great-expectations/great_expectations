@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """Rendering utility"""
+from __future__ import unicode_literals
 import decimal
 import locale
-# locale.setlocale(locale.LC_ALL, '')
 
 DEFAULT_PRECISION = 4
 # create a new context for this task
@@ -52,7 +52,7 @@ def num_to_str(f, precision=DEFAULT_PRECISION, use_locale=False, no_scientific=F
     if f != locale.atof(result):
         # result = '≈' + result
         #  ≈  # \u2248
-        result = '~' + result
+        result = '≈' + result
     if 'e' not in result and 'E' not in result:
         result = result.rstrip('0').rstrip(locale.localeconv().get('decimal_point'))
     return result
