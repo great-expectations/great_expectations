@@ -16,7 +16,14 @@ class DataSourceTypes(enum.Enum):
     PANDAS = "pandas"
     SQL = "sql"
     SPARK = "spark"
-    DBT = "dbt"
+    # TODO DBT = "dbt"
+
+
+DATASOURCE_TYPE_BY_DATASOURCE_CLASS = {
+    "PandasDatasource": DataSourceTypes.PANDAS,
+    "SparkDFDatasource": DataSourceTypes.SPARK,
+    "SqlAlchemyDatasource": DataSourceTypes.SQL,
+}
 
 
 class SupportedDatabases(enum.Enum):
@@ -382,7 +389,7 @@ def _collect_redshift_credentials(default_credentials={}):
 def _add_spark_datasource(context):
     path = click.prompt(
         msg_prompt_filesys_enter_base_path,
-        default='/data/',
+        # default='/data/',
         type=click.Path(
             exists=True,
             file_okay=False,
@@ -396,19 +403,26 @@ def _add_spark_datasource(context):
 
     if path.endswith("/"):
         path = path[:-1]
-    default_data_source_name = os.path.basename(path)
+    default_data_source_name = os.path.basename(path) + "__dir"
     data_source_name = click.prompt(
         msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
     context.add_datasource(data_source_name,
                            module_name="great_expectations.datasource",
                            class_name="SparkDFDatasource",
-                           base_directory=path)  # NOTE: Eugene: 2019-09-17: review the path and make sure that the logic works both for abs and rel.
-    # base_directory=os.path.join("..", path))
+                           base_directory=os.path.join("..", path))
     return data_source_name
 
 
-def profile_datasource(context, data_source_name, data_assets=None, profile_all_data_assets=False, max_data_assets=20,additional_batch_kwargs=None):
+def profile_datasource(
+    context,
+    data_source_name,
+    data_assets=None,
+    profile_all_data_assets=False,
+    max_data_assets=20,
+    additional_batch_kwargs=None,
+    open_docs=False,
+):
     """"Profile a named datasource using the specified context"""
     # TODO candidates language is a little obscure
     msg_intro = """
@@ -529,7 +543,8 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_d
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
     build_docs(context)
-    context.open_data_docs()
+    if open_docs:  # This is mostly to keep tests from spawning windows
+        context.open_data_docs()
 
 
 def build_docs(context, site_name=None):

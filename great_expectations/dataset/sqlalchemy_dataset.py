@@ -617,7 +617,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     success = issubclass(col_type, getattr(sa, type_))
                 else:
                     success = issubclass(col_type, getattr(self.dialect, type_))
-                
+
             return {
                     "success": success,
                     "result": {

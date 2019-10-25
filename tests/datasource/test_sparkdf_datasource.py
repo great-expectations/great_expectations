@@ -35,8 +35,8 @@ def test_parquet_folder_connection_path(tmp_path_factory):
     return basepath
 
 
-def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connection_path):
-    pyspark_skip = pytest.importorskip("pyspark")
+def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connection_path, spark_session):
+    assert spark_session  # Ensure a spark session exists
     name = "test_sparkdf_datasource"
     # type_ = "spark"
     class_name = "SparkDFDatasource"
@@ -125,8 +125,8 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory):
         assert "          header: false\n" in lines
 
 
-def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path):
-    pyspark_skip = pytest.importorskip("pyspark")
+def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path, spark_session):
+    assert spark_session  # Ensure a sparksession exists
     datasource = SparkDFDatasource('SparkParquet', base_directory=test_parquet_folder_connection_path)
 
     assert datasource.get_available_data_asset_names() == {

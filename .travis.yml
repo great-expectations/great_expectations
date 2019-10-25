@@ -1,8 +1,8 @@
-branches:
-  only:
-  - master
-  - develop
-  - /v\d.*/
+#branches:
+#  only:
+#  - master
+#  - develop
+#  - /v\d.*/
 # dist: xenial
 language: python
 os:

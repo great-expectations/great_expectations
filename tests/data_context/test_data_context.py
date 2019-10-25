@@ -595,7 +595,11 @@ project_path/
                         BasicDatasetProfiler.json
         notebooks/
             pandas/
+                create_expectations.ipynb
+                validation_playground.ipynb
             spark/
+                create_expectations.ipynb
+                validation_playground.ipynb
             sql/
                 create_expectations.ipynb
                 validation_playground.ipynb
@@ -1013,7 +1017,11 @@ great_expectations/
     expectations/
     notebooks/
         pandas/
+            create_expectations.ipynb
+            validation_playground.ipynb
         spark/
+            create_expectations.ipynb
+            validation_playground.ipynb
         sql/
             create_expectations.ipynb
             validation_playground.ipynb
@@ -1040,7 +1048,11 @@ great_expectations/
     expectations/
     notebooks/
         pandas/
+            create_expectations.ipynb
+            validation_playground.ipynb
         spark/
+            create_expectations.ipynb
+            validation_playground.ipynb
         sql/
             create_expectations.ipynb
             validation_playground.ipynb

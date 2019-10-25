@@ -2,6 +2,7 @@ import logging
 
 from collections import OrderedDict
 
+from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLASS
 from great_expectations.data_context.types import (
     ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
@@ -317,7 +318,7 @@ class DefaultSiteIndexBuilder(object):
             name,
             data_context,
             target_store,
-            show_cta_footer=None,
+            show_cta_footer=True,
             renderer=None,
             view=None,
     ):
@@ -405,15 +406,56 @@ class DefaultSiteIndexBuilder(object):
     
         return index_links_dict
 
-    #TODO: Fill out this method to make cta footer dynamic
-    def get_cta_object(self):
+    def get_calls_to_action(self):
+        telemetry = None
+        drivername = None
+        datasource_classes_by_name = self.data_context.list_datasources()
+
+        if datasource_classes_by_name:
+            last_datasource_class_by_name = datasource_classes_by_name[-1]
+            last_datasource_class_name = last_datasource_class_by_name["class_name"]
+            last_datasource_name = last_datasource_class_by_name["name"]
+            last_datasource = self.data_context.datasources[last_datasource_name]
+
+            if last_datasource_class_name == "SqlAlchemyDatasource":
+                drivername = last_datasource.drivername
+
+            # TODO we need to confer w/ Kyle to see which elements should go in
+            #  which field. We want at least DataSourceTypes, and if SQL,
+            #  SupportedDatabases. These are both enums.
+            enum_value = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
+            telemetry = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
+                "datadocs",
+                enum_value,
+                drivername,
+            )
+
+        buttons = [
+            (
+                "Create Expectations",
+                "https://docs.greatexpectations.io/en/latest/getting_started/create_expectations.html"
+            ),
+            (
+                "Play with Validations",
+                "https://docs.greatexpectations.io/en/latest/getting_started/pipeline_integration.html"
+            ),
+            (
+                "Customize Data Docs",
+                "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs"
+            ),
+            # TODO gallery does not yet exist
+            # (
+            #     "Great Expectations Gallery",
+            #     "https://greatexpectations.io/gallery"
+            # )
+        ]
+        if telemetry:
+            # Squirrely url query params appender
+            buttons = [(x[0], x[1] + telemetry) for x in buttons]
+
         return {
-            "cta_header": "Blah blah blah!",
-            "cta_buttons": [
-                ("Create Expectations", "https://docs.greatexpectations.io/en/latest/getting_started/create_expectations.html"),
-                ("Integrate into Pipeline", "https://docs.greatexpectations.io/en/latest/getting_started/pipeline_integration.html"),
-                ("Customize Data Docs", "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs")
-            ]
+            "cta_header": "To continue exploring Great Expectations...",
+            "cta_buttons": buttons
         }
 
     def build(self):
@@ -425,7 +467,7 @@ class DefaultSiteIndexBuilder(object):
         index_links_dict = OrderedDict()
 
         if self.show_cta_footer:
-            index_links_dict["cta_object"] = self.get_cta_object()
+            index_links_dict["cta_object"] = self.get_calls_to_action()
 
         for key in resource_keys:
             key_resource_identifier = key.resource_identifier
