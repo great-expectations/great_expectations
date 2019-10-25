@@ -177,7 +177,13 @@ validate the data.
     default="./",
     help='The root of the project directory where you want to initialize Great Expectations.'
 )
-def init(target_directory):
+@click.option(
+    # Note this --no-view option is mostly here for tests
+    "--view/--no-view",
+    help="By default open in browser unless you specify the --no-view flag",
+    default=True
+)
+def init(target_directory, view):
     """
     Create a new project and help with onboarding.
 
@@ -221,7 +227,7 @@ def init(target_directory):
 
         context = _slack_setup(context)
 
-        profile_datasource(context, data_source_name)
+        profile_datasource(context, data_source_name, open_docs=view)
         specific_dir = data_source_type.value.lower()
         cli_message(MSG_GO_TO_NOTEBOOK.format(specific_dir, specific_dir))
 
@@ -278,7 +284,12 @@ def _complete_onboarding(target_dir):
     default=None,
     help="The project's great_expectations directory."
 )
-def add_datasource(directory):
+@click.option(
+    "--view/--no-view",
+    help="By default open in browser unless you specify the --no-view flag",
+    default=True
+)
+def add_datasource(directory, view):
     """Add a new datasource to the data context."""
     try:
         context = DataContext(directory)
@@ -293,7 +304,7 @@ def add_datasource(directory):
     if not data_source_name:  # no datasource was created
         return
 
-    profile_datasource(context, data_source_name)
+    profile_datasource(context, data_source_name, open_docs=view)
 
 
 @cli.command()
@@ -311,7 +322,12 @@ def add_datasource(directory):
 )
 @click.option('--batch_kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset.')
-def profile(datasource_name, data_assets, profile_all_data_assets, directory, batch_kwargs):
+@click.option(
+    "--view/--no-view",
+    help="By default open in browser unless you specify the --no-view flag",
+    default=True
+)
+def profile(datasource_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
     """
     Profile datasources from the specified context.
 
@@ -324,6 +340,7 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
     :param data_assets: if this comma-separated list of data asset names is provided, only the specified data assets will be profiled
     :param profile_all_data_assets: if provided, all data assets will be profiled
     :param directory:
+    :param view: Open the docs in a browser
     :param batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
     :return:
     """
@@ -352,9 +369,23 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
             )
             sys.exit(-1)
         else:
-            profile_datasource(context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets, additional_batch_kwargs=batch_kwargs)
+            profile_datasource(
+                context,
+                datasources[0],
+                data_assets=data_assets,
+                profile_all_data_assets=profile_all_data_assets,
+                open_docs=view,
+                additional_batch_kwargs=batch_kwargs
+            )
     else:
-        profile_datasource(context, datasource_name, data_assets=data_assets, profile_all_data_assets=profile_all_data_assets, additional_batch_kwargs=batch_kwargs)
+        profile_datasource(
+            context,
+            datasource_name,
+            data_assets=data_assets,
+            profile_all_data_assets=profile_all_data_assets,
+            open_docs=view,
+            additional_batch_kwargs=batch_kwargs
+        )
 
 
 @cli.command()

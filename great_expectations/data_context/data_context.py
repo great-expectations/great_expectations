@@ -1974,6 +1974,7 @@ class DataContext(ConfigOnlyDataContext):
     @classmethod
     def find_context_root_dir(cls):
         result = None
+        yml_path = None
         ge_home_environment = os.getenv("GE_HOME", None)
         if ge_home_environment:
             ge_home_environment = os.path.expanduser(ge_home_environment)
