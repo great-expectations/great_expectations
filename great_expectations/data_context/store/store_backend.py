@@ -352,7 +352,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         filepath_template,
         key_length,
         bucket,
-        prefix,
+        prefix="",
         forbidden_substrings=["/", "\\"],
     ):
         super(FixedLengthTupleS3StoreBackend, self).__init__(
