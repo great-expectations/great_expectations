@@ -422,7 +422,7 @@ class DefaultSiteIndexBuilder(object):
 
             datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
             telemetry = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
-                "ge-init-datadocs",
+                "ge-init-datadocs-v2",
                 datasource_type,
                 db_driver,
             )
