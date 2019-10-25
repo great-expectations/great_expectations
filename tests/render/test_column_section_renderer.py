@@ -307,7 +307,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profil
     assert len(content_block["bullet_list"]) == 4
     assert "value types must belong to this set" in json.dumps(content_block)
     assert "may have any number of unique values" in json.dumps(content_block)
-    assert "may have any percentage of unique values" in json.dumps(content_block)
+    assert "may have any fraction of unique values" in json.dumps(content_block)
     assert "values must not be null, at least $mostly_pct % of the time." in json.dumps(content_block)
     
     
@@ -385,7 +385,7 @@ def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_na
     assert content_block_stringified.count("$icon") == 6
     assert "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5." in content_block_stringified
     assert "may have any number of unique values." in content_block_stringified
-    assert "may have any percentage of unique values." in content_block_stringified
+    assert "may have any fraction of unique values." in content_block_stringified
     assert "values must not be null, at least $mostly_pct % of the time." in content_block_stringified
     assert "values must belong to this set: [ ]." in content_block_stringified
     assert "\\n\\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows." in content_block_stringified
