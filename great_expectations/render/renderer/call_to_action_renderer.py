@@ -1,6 +1,6 @@
 class CallToActionRenderer(object):
     _document_defaults = {
-        "cta_header": "What would you like to do next?",
+        "header": "What would you like to do next?",
         "styling": {
             "classes": [
                 "border",
@@ -27,18 +27,18 @@ class CallToActionRenderer(object):
         """
         :param cta_object: dict
             {
-                "cta_header": # optional, can be a string or string template
-                "cta_buttons": # list of tuples of form (cta-button text, cta-button url)
+                "header": # optional, can be a string or string template
+                "buttons": # list of CallToActionButtons
             }
         :return: dict
             {
-                "cta_header": # optional, can be a string or string template
-                "cta_buttons": # list of tuples of form (cta-button text, cta-button url)
+                "header": # optional, can be a string or string template
+                "buttons": # list of CallToActionButtons
             }
         """
         
-        if not cta_object.get("cta_header"):
-            cta_object["cta_header"] = cls._document_defaults.get("cta_header")
+        if not cta_object.get("header"):
+            cta_object["header"] = cls._document_defaults.get("header")
         
         cta_object["styling"] = cls._document_defaults.get("styling")
         cta_object["tooltip_icon"] = {

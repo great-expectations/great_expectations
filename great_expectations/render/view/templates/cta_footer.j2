@@ -7,11 +7,11 @@
 <footer {{ cta_footer_styling }}>
   <h5 class="alert-heading text-center">
     {{ cta_footer["tooltip_icon"] | render_string_template }}
-    {{ cta_footer["cta_header"] | render_string_template }}
+    {{ cta_footer["header"] | render_string_template }}
   </h5>
   <div class="d-flex justify-content-center">
-    {% for cta_button in cta_footer["cta_buttons"] %}
-      <a href="{{ cta_button[1] }}" class="btn btn-primary m-2" rel="noopener noreferrer" target="_blank">{{ cta_button[0] }}</a>
+    {% for cta_button in cta_footer["buttons"] %}
+      <a href="{{ cta_button.link }}" class="btn btn-primary m-2" rel="noopener noreferrer" target="_blank">{{ cta_button.title }}</a>
     {% endfor %}
   </div>
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">

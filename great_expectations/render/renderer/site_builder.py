@@ -430,33 +430,54 @@ class DefaultSiteIndexBuilder(object):
                 drivername,
             )
 
-        buttons = [
-            (
+        return {
+            "header": "To continue exploring Great Expectations...",
+            "buttons": self._get_call_to_action_buttons(telemetry)
+        }
+
+    def _get_call_to_action_buttons(self, telemetry):
+        """
+        Build project and user specific calls to action buttons.
+
+        This can become progressively smarter about project and user specific
+        calls to action.
+        """
+        create_expectations = CallToActionButton(
                 "Create Expectations",
                 "https://docs.greatexpectations.io/en/latest/getting_started/create_expectations.html"
-            ),
-            (
-                "Play with Validations",
-                "https://docs.greatexpectations.io/en/latest/getting_started/pipeline_integration.html"
-            ),
-            (
-                "Customize Data Docs",
-                "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs"
-            ),
-            # TODO gallery does not yet exist
-            # (
-            #     "Great Expectations Gallery",
-            #     "https://greatexpectations.io/gallery"
-            # )
-        ]
-        if telemetry:
-            # Squirrely url query params appender
-            buttons = [(x[0], x[1] + telemetry) for x in buttons]
+            )
+        validation_playground = CallToActionButton(
+            "Play with Validations",
+            "https://docs.greatexpectations.io/en/latest/getting_started/pipeline_integration.html"
+        )
+        customize_data_docs = CallToActionButton(
+            "Customize Data Docs",
+            "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs"
+        )
+        # TODO gallery does not yet exist
+        # gallery = CallToActionButton(
+        #     "Great Expectations Gallery",
+        #     "https://greatexpectations.io/gallery"
+        # )
 
-        return {
-            "cta_header": "To continue exploring Great Expectations...",
-            "cta_buttons": buttons
-        }
+        results = []
+
+        expectations_store = self.data_context.stores["expectations_store"]
+        if not expectations_store.list_keys():
+            # TODO this needs testing as complexity increases probably using mocked DataContext
+            logger.info('No expectations found')
+            results.append(create_expectations)
+
+        # Show validations no matter what
+        results.append(validation_playground)
+        # Show customizations no matter what
+        results.append(customize_data_docs)
+
+        if telemetry:
+            for button in results:
+                button.link = button.link + telemetry
+
+        return results
 
     def build(self):
         # Loop over sections in the HtmlStore
@@ -529,3 +550,9 @@ class DefaultSiteIndexBuilder(object):
             self.target_store.write_index_page(viewable_content),
             index_links_dict
         )
+
+
+class CallToActionButton(object):
+    def __init__(self, title, link):
+        self.title = title
+        self.link = link
