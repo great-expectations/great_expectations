@@ -3,7 +3,6 @@ from __future__ import division
 import copy
 import inspect
 import logging
-import re
 from datetime import datetime
 from functools import wraps
 

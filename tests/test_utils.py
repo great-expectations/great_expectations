@@ -1,7 +1,8 @@
 from __future__ import division
 
 import pytest
-
+import locale
+from functools import wraps
 import random
 import string
 import copy
@@ -65,6 +66,24 @@ try:
     }
 except ImportError:
     MYSQL_TYPES = {}
+
+
+def modify_locale(func):
+    @wraps(func)
+    def locale_wrapper(*args, **kwargs):
+        old_locale = locale.setlocale(locale.LC_TIME, None)
+        print(old_locale)
+        # old_locale = locale.getlocale(locale.LC_TIME) Why not getlocale? not sure
+        try:
+            new_locale = locale.setlocale(locale.LC_TIME, 'en_US.UTF-8')
+            assert new_locale == 'en_US.UTF-8'
+            func(*args, **kwargs)
+        except Exception:
+            raise
+        finally:
+            locale.setlocale(locale.LC_TIME, old_locale)
+
+    return locale_wrapper
 
 
 # Taken from the following stackoverflow:
@@ -556,4 +575,3 @@ def dict_to_ordered_dict(plain_dict):
         else:
             ordered_dict[key] = val
     return ordered_dict
-
