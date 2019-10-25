@@ -16,7 +16,14 @@ class DataSourceTypes(enum.Enum):
     PANDAS = "pandas"
     SQL = "sql"
     SPARK = "spark"
-    DBT = "dbt"
+    # TODO DBT = "dbt"
+
+
+DATASOURCE_TYPE_BY_DATASOURCE_CLASS = {
+    "PandasDatasource": DataSourceTypes.PANDAS,
+    "SparkDFDatasource": DataSourceTypes.SPARK,
+    "SqlAlchemyDatasource": DataSourceTypes.SQL,
+}
 
 
 class SupportedDatabases(enum.Enum):

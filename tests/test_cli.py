@@ -47,12 +47,13 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  add-datasource  Add a new datasource to the data context.
-  build-docs      Build Data Docs for a project.
-  check-config    Check a config for validity and help with migrations.
-  init            Create a new project and help with onboarding.
-  profile         Profile datasources from the specified context.
-  validate        Validate a CSV file against an expectation suite.
+  add-datasource    Add a new datasource to the data context.
+  build-docs        Build Data Docs for a project.
+  check-config      Check a config for validity and help with migrations.
+  init              Create a new project and help with onboarding.
+  list-datasources  List known datasources.
+  profile           Profile datasources from the specified context.
+  validate          Validate a CSV file against an expectation suite.
 """
 
 

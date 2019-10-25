@@ -308,6 +308,27 @@ def add_datasource(directory, view):
 
 
 @cli.command()
+@click.option(
+    '--directory',
+    '-d',
+    default=None,
+    help="The project's great_expectations directory."
+)
+def list_datasources(directory):
+    """List known datasources."""
+    try:
+        context = DataContext(directory)
+        datasources = context.list_datasources()
+        # TODO Pretty up this console output
+        cli_message(str([d for d in datasources]))
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, context.root_directory)
+
+
+@cli.command()
 @click.argument('datasource_name', default=None, required=False)
 @click.option('--data_assets', '-l', default=None,
               help='Comma-separated list of the names of data assets that should be profiled. Requires datasource_name specified.')
