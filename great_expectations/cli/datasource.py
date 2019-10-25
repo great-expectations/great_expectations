@@ -390,7 +390,15 @@ def _add_spark_datasource(context):
     return data_source_name
 
 
-def profile_datasource(context, data_source_name, data_assets=None, profile_all_data_assets=False, max_data_assets=20,additional_batch_kwargs=None):
+def profile_datasource(
+    context,
+    data_source_name,
+    data_assets=None,
+    profile_all_data_assets=False,
+    max_data_assets=20,
+    additional_batch_kwargs=None,
+    open_docs=False,
+):
     """"Profile a named datasource using the specified context"""
     # TODO candidates language is a little obscure
     msg_intro = """
@@ -511,7 +519,8 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_d
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
     build_docs(context)
-    context.open_data_docs()
+    if open_docs:  # This is mostly to keep tests from spawning windows
+        context.open_data_docs()
 
 
 def build_docs(context, site_name=None):

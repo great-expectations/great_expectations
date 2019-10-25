@@ -202,7 +202,7 @@ def test_cli_init_on_new_project(tmp_path_factory, filesystem_csv_2):
         os.chdir(basedir)
 
         runner = CliRunner()
-        result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\nn\n\n" % str(
+        result = runner.invoke(cli, ["init", "--no-view"], input="Y\n1\n%s\n\nn\n\n" % str(
             os.path.join(basedir, "data")))
 
         print(result.output)
@@ -214,7 +214,6 @@ def test_cli_init_on_new_project(tmp_path_factory, filesystem_csv_2):
 
         assert """Always know what to expect from your data""" in result.output
         assert """Let's add Great Expectations to your project""" in result.output
-        assert """open a tutorial notebook""" in result.output
 
         assert os.path.isdir(os.path.join(basedir, "great_expectations"))
         assert os.path.isfile(os.path.join(
@@ -237,7 +236,11 @@ great_expectations/
                     BasicDatasetProfiler.json
     notebooks/
         pandas/
+            create_expectations.ipynb
+            validation_playground.ipynb
         spark/
+            create_expectations.ipynb
+            validation_playground.ipynb
         sql/
             create_expectations.ipynb
             validation_playground.ipynb
@@ -316,7 +319,7 @@ def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_ym
         basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
         os.chdir(basedir)
         runner = CliRunner()
-        result = runner.invoke(cli, ["init"], input="Y\n4\n")
+        result = runner.invoke(cli, ["init", "--no-view"], input="Y\n4\n")
 
         assert "Skipping datasource configuration." in result.output
         print(result.output)
@@ -359,7 +362,11 @@ def test_cli_add_datasource(empty_data_context, filesystem_csv_2, capsys):
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
     runner = CliRunner()
-    result = runner.invoke(cli, ["add-datasource", "-d", project_root_dir], input="1\n%s\nmynewsource\nn\n" % str(filesystem_csv_2))
+    result = runner.invoke(
+        cli,
+        ["add-datasource", "-d", project_root_dir, "--no-view"],
+        input="1\n%s\nmynewsource\nn\n" % str(filesystem_csv_2)
+    )
 
     captured = capsys.readouterr()
 
@@ -367,14 +374,6 @@ def test_cli_add_datasource(empty_data_context, filesystem_csv_2, capsys):
 
     assert "Would you like to profile 'mynewsource'?" in result.stdout
     logger.removeHandler(handler)
-
-# def test_cli_render(tmp_path_factory):
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["render"])
-
-#     print(result)
-#     print(result.output)
-#     assert False
 
 
 def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, capsys):
@@ -400,7 +399,7 @@ def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, c
     logger.setLevel(logging.INFO)
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["profile", "my_datasource", "-d", project_root_dir])
+        cli, ["profile", "my_datasource", "-d", project_root_dir, "--no-view"])
 
     captured = capsys.readouterr()
 
@@ -429,7 +428,7 @@ def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
     logger.setLevel(logging.INFO)
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["profile", "-d", project_root_dir])
+        cli, ["profile", "-d", project_root_dir, "--no-view"])
 
     captured = capsys.readouterr()
 
@@ -448,7 +447,7 @@ def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem
 
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["profile", "-d", project_root_dir, "--batch_kwargs", '{"sep": ",", "parse_dates": [0]}'])
+        cli, ["profile", "-d", project_root_dir, "--batch_kwargs", '{"sep": ",", "parse_dates": [0]}', "--no-view"])
     evr = not_so_empty_data_context.get_validation_result("f1", expectation_suite_name="BasicDatasetProfiler")
 
     assert evr["meta"]["batch_kwargs"]["parse_dates"] == [0]
@@ -475,7 +474,7 @@ def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_cs
     logger.setLevel(logging.INFO)
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["profile", "my_datasource", "--data_assets", "f1", "-d", project_root_dir])
+        cli, ["profile", "my_datasource", "--data_assets", "f1", "-d", project_root_dir, "--no-view"])
 
     captured = capsys.readouterr()
 
@@ -504,7 +503,7 @@ def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_
     logger.setLevel(logging.INFO)
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["profile", "my_datasource", "--data_assets", "bad-bad-asset", "-d", project_root_dir],
+        cli, ["profile", "my_datasource", "--data_assets", "bad-bad-asset", "-d", project_root_dir, "--no-view"],
     input="2\n")
 
     assert "Some of the data assets you specified were not found: bad-bad-asset" in result.output
@@ -533,7 +532,7 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     logger.setLevel(logging.DEBUG)
 
     runner = CliRunner()
-    _ = runner.invoke(cli, ["profile", "my_datasource", "-d", project_root_dir])
+    _ = runner.invoke(cli, ["profile", "my_datasource", "-d", project_root_dir, "--no-view"])
 
     captured = capsys.readouterr()
 
@@ -559,9 +558,9 @@ def test_cli_config_not_found(tmp_path_factory):
         runner = CliRunner()
 
         # profile
-        result = runner.invoke(cli, ["profile", "-d", "./"])
+        result = runner.invoke(cli, ["profile", "-d", "./", "--no-view"])
         assert ConfigNotFoundError().message in result.output
-        result = runner.invoke(cli, ["profile"])
+        result = runner.invoke(cli, ["profile", "--no-view"])
         assert ConfigNotFoundError().message in result.output
 
         # build-docs
@@ -592,11 +591,11 @@ def test_cli_init_on_existing_ge_yml_with_some_missing_uncommitted_dirs(tmp_path
     curdir = os.path.abspath(os.getcwd())
     os.chdir(tmp_dir)
     runner = CliRunner()
-    runner.invoke(cli, ["init"], input="Y\n4\n")
+    runner.invoke(cli, ["init", "--no-view"], input="Y\n4\n")
     shutil.rmtree(os.path.join(tmp_dir, "great_expectations/uncommitted"))
 
     try:
-        result = runner.invoke(cli, ["init"], input="Y\n4\n")
+        result = runner.invoke(cli, ["init", "--no-view"], input="Y\n4\n")
         obs = result.output
         # Users should see
         assert "To run locally, we need some files that are not in source control." in obs
@@ -622,7 +621,7 @@ def test_cli_init_on_existing_ge_yml_with_missing_uncommitted_dirs_and_missing_c
     curdir = os.path.abspath(os.getcwd())
     os.chdir(tmp_dir)
     runner = CliRunner()
-    runner.invoke(cli, ["init"], input="Y\n4\n")
+    runner.invoke(cli, ["init", "--no-view"], input="Y\n4\n")
     # mangle setup
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
     shutil.rmtree(os.path.join(uncommitted_dir, "data_docs"))
@@ -632,7 +631,7 @@ def test_cli_init_on_existing_ge_yml_with_missing_uncommitted_dirs_and_missing_c
     assert not os.path.isfile(config_var_path)
 
     try:
-        result = runner.invoke(cli, ["init"], input="Y\n")
+        result = runner.invoke(cli, ["init", "--no-view"], input="Y\n")
 
         # check dir structure
         dir_structure = gen_directory_tree_str(ge_dir)
@@ -689,10 +688,10 @@ def test_cli_init_does_not_prompt_to_fix_if_all_uncommitted_dirs_exist(tmp_path_
     curdir = os.path.abspath(os.getcwd())
     os.chdir(tmp_dir)
     runner = CliRunner()
-    runner.invoke(cli, ["init"], input="Y\n4\n")
+    runner.invoke(cli, ["init", "--no-view"], input="Y\n4\n")
 
     try:
-        result = runner.invoke(cli, ["init"])
+        result = runner.invoke(cli, ["init", "--no-view"])
         assert result.exit_code == 0
         obs = result.output
 
