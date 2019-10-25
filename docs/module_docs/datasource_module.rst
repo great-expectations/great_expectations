@@ -1,3 +1,5 @@
+.. cssclass:: widetable
+
 .. _datasource_module:
 
 Datasource Module
@@ -17,7 +19,7 @@ Datasource Module
 PandasDatasource
 ---------------------------------------------
 
-.. autoclass:: great_expectations.datasource.pandas_source.PandasDatasource
+.. autoclass:: great_expectations.datasource.pandas_datasource.PandasDatasource
     :members:
     :undoc-members:
     :show-inheritance:
@@ -26,7 +28,7 @@ PandasDatasource
 SqlAlchemyDatasource
 ------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.sqlalchemy_source.SqlAlchemyDatasource
+.. autoclass:: great_expectations.datasource.sqlalchemy_datasource.SqlAlchemyDatasource
     :members:
     :undoc-members:
     :show-inheritance:
@@ -35,7 +37,7 @@ SqlAlchemyDatasource
 SparkDFDatasource
 ---------------------------------------------
 
-.. autoclass:: great_expectations.datasource.spark_source.SparkDFDatasource
+.. autoclass:: great_expectations.datasource.sparkdf_datasource.SparkDFDatasource
     :members:
     :undoc-members:
     :show-inheritance:

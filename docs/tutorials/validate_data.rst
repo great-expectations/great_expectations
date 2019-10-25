@@ -123,7 +123,7 @@ Finally, we can explicitly build batch kwargs, which can be particularly useful 
   my_explicit_batch_kwargs = {
     "query": "select id, date, procedure_code from normalized_codes where date < '2019-07-01'"
   }
-  batch = context.get_batch("my_source/my_generator/my_asset","my_expectations", my_explicit_batch_kwargs)
+  batch = context.get_batch("my_source/my_generator/my_asset", "my_expectations", my_explicit_batch_kwargs)
 
 
 Validate
