@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
 import json
 import pypandoc
 
@@ -13,8 +16,8 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
     # print(pypandoc.convert_text("*hi*", to='html', format="md"))
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : "*hi*"
+        "meta": {
+            "notes": "*hi*"
         }
     })
     print(result)
