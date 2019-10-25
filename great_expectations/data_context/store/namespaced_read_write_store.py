@@ -285,7 +285,7 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         key_tuple = self._convert_resource_identifier_to_tuple(key.resource_identifier)
         return self.store_backends[
             type(key.resource_identifier)
-        ].set(key_tuple, serialized_value, content_encoding='utf-8', content_type='text/html')
+        ].set(key_tuple, serialized_value, content_encoding='utf-8', content_type='text/html; charset=utf-8')
 
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
@@ -313,7 +313,7 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         return [self._convert_tuple_to_resource_identifier(("expectations", key)) for key in self.store_backends[ExpectationSuiteIdentifier].list_keys()] + \
                [self._convert_tuple_to_resource_identifier(("validations", key)) for key in self.store_backends[ValidationResultIdentifier].list_keys()]
 
-
     def write_index_page(self, page):
         """This third store has a special method, which uses a zero-length tuple as a key."""
-        return self.store_backends["index_page"].set((), page, content_encoding='utf-8', content_type='text/html')
+        return self.store_backends["index_page"].set((), page, content_encoding='utf-8', content_type='text/html; '
+                                                                                                      'charset=utf-8')

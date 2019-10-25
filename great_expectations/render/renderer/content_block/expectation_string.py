@@ -637,14 +637,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         )
         
         if params["min_value"] is None and params["max_value"] is None:
-            template_str = "may have any percentage of unique values."
+            template_str = "may have any fraction of unique values."
         else:
             if params["min_value"] is None:
-                template_str = "must have no more than $max_value% unique values."
+                template_str = "fraction of unique values must be less than $max_value."
             elif params["max_value"] is None:
-                template_str = "must have at least $min_value% unique values."
+                template_str = "fraction of unique values must be at least $min_value."
             else:
-                template_str = "must have between $min_value and $max_value% unique values."
+                template_str = "fraction of unique values must be between $min_value and $max_value."
         
         if include_column_name:
             template_str = "$column " + template_str
@@ -1377,14 +1377,13 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 df = pd.DataFrame({
                     "bin_min": bins_x1,
                     "bin_max": bins_x2,
-                    "weights": weights,
+                    "fraction": weights,
                 })
-                df.weights *= 100
-    
+
                 bars = alt.Chart(df).mark_bar().encode(
                     x='bin_min:O',
                     x2='bin_max:O',
-                    y="weights:Q"
+                    y="fraction:Q"
                 ).properties(width=width, height=height, autosize="fit")
     
                 chart = bars.to_json()
@@ -1393,13 +1392,12 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 
                 df = pd.DataFrame({
                     "values": values,
-                    "weights": weights
+                    "fraction": weights
                 })
-                df.weights *= 100
 
                 bars = alt.Chart(df).mark_bar().encode(
                     x='values:N',
-                    y="weights:Q"
+                    y="fraction:Q"
                 ).properties(width=width, height=height, autosize="fit")
                 chart = bars.to_json()
 

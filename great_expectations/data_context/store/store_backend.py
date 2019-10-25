@@ -278,7 +278,7 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
             self.full_base_directory,
             self._convert_key_to_filepath(key)
         )
-        with open(filepath) as infile:
+        with open(filepath, 'r') as infile:
             return infile.read()
 
     def _set(self, key, value, **kwargs):
@@ -338,7 +338,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         filepath_template,
         key_length,
         bucket,
-        prefix,
+        prefix="",
         forbidden_substrings=["/", "\\"],
     ):
         super(FixedLengthTupleS3StoreBackend, self).__init__(
@@ -360,7 +360,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         import boto3
         s3 = boto3.client('s3')
         s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
-        return s3_response_object['Body'].read()
+        return s3_response_object['Body'].read().decode(s3_response_object.get("ContentEncoding", 'utf-8'))
 
     def _set(self, key, value, content_encoding='utf-8', content_type='application/json'):
         s3_object_key = os.path.join(
