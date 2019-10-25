@@ -637,7 +637,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         )
         
         if params["min_value"] is None and params["max_value"] is None:
-            template_str = "may have any percentage of unique values."
+            template_str = "may have any fraction of unique values."
         else:
             if params["min_value"] is None:
                 template_str = "fraction of unique values must be less than $max_value."
