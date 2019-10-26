@@ -158,7 +158,7 @@ def test_FixedLengthTupleFilesystemStoreBackend(tmp_path_factory):
     # assert my_store.get("subdir/my_file_CCC") == "ccc"
 
     print(my_store.list_keys())
-    assert set(my_store.list_keys()) == set([("AAA",), ("BBB",)])
+    assert set(my_store.list_keys()) == {("AAA",), ("BBB",)}
 
     print(gen_directory_tree_str(project_path))
     assert gen_directory_tree_str(project_path) == """\
@@ -166,6 +166,7 @@ test_FixedLengthTupleFilesystemStoreBackend__dir0/
     my_file_AAA
     my_file_BBB
 """
+
 
 @mock_s3
 def test_FixedLengthTupleS3StoreBackend():
@@ -187,26 +188,29 @@ def test_FixedLengthTupleS3StoreBackend():
     conn.create_bucket(Bucket=bucket)
 
     my_store = FixedLengthTupleS3StoreBackend(
-        root_directory=os.path.abspath(path), # NOTE: Eugene: 2019-09-06: root_directory should be removed from the base class
+        # NOTE: Eugene: 2019-09-06: root_directory should be removed from the base class
+        root_directory=os.path.abspath(path),
         key_length=1,
         filepath_template="my_file_{0}",
         bucket=bucket,
         prefix=prefix,
     )
 
-    my_store.set(("AAA",), "aaa", content_type='text/html')
-    assert my_store.get(("AAA",)) == b'aaa'
+    my_store.set(("AAA",), "aaa", content_type='text/html; charset=utf-8')
+    assert my_store.get(("AAA",)) == 'aaa'
+
 
     # We should have set the raw data content type since we encode as utf-8
     object = boto3.client('s3').get_object(Bucket=bucket, Key=prefix + "/my_file_AAA")
-    assert object["ContentType"] == 'text/html'
+    assert object["ContentType"] == 'text/html; charset=utf-8'
     assert object["ContentEncoding"] == 'utf-8'
 
     my_store.set(("BBB",), "bbb")
-    assert my_store.get(("BBB",)) == b'bbb'
+    assert my_store.get(("BBB",)) == 'bbb'
 
     print(my_store.list_keys())
-    assert set(my_store.list_keys()) == set([("AAA",), ("BBB",)])
+    assert set(my_store.list_keys()) == {("AAA",), ("BBB",)}
 
-    assert set([s3_object_info['Key'] for s3_object_info in boto3.client('s3').list_objects(Bucket=bucket, Prefix=prefix)['Contents']])\
-           == set(['this_is_a_test_prefix/my_file_AAA', 'this_is_a_test_prefix/my_file_BBB'])
+    assert set([s3_object_info['Key'] for s3_object_info in boto3.client('s3').list_objects(
+        Bucket=bucket, Prefix=prefix)['Contents']]) == {'this_is_a_test_prefix/my_file_AAA',
+                                                        'this_is_a_test_prefix/my_file_BBB'}

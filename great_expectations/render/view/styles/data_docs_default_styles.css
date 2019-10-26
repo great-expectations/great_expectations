@@ -101,10 +101,10 @@ ul {
     padding-inline-start: 20px;
 }
 
-.table-cell-frame {
-    overflow-y: auto;
-    max-height: 200px;
-}
+  .table-cell-frame {
+      overflow-y: auto;
+      max-height: 335px;
+  }
 
 .table-cell-frame ul {
     padding-bottom: 20px
