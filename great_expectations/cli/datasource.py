@@ -562,11 +562,14 @@ def build_docs(context, site_name=None):
 
     msg = """
 The following data documentation HTML sites were generated:
-    
+
 """
     for site_name, index_page_locator_info in index_page_locator_infos.items():
-        msg += site_name + ":\n"
-        msg += "   <green>file://" + index_page_locator_info + "</green>\n\n"
+        if os.path.isfile(index_page_locator_info):
+            msg += site_name + ":\n"
+            msg += "   <green>file://" + index_page_locator_info + "</green>\n\n"
+        else:
+            msg += site_name + "\n"
 
     cli_message(msg)
 
