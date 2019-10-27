@@ -155,7 +155,7 @@ Validation Operators
 --------------------
 
 Validation Operators and Actions make it possible to define collections of tasks together that should be done after a
-validation. For example, we might store results (either on a local filesystem or to S3), send a slack notification,
+validation. For example, we might store results (either on a local filesystem, to S3 or GCS), send a slack notification,
 and update data documentation. The default configuration performs each of those actions. See the
 :ref:`validation_operators_and_actions` for more information.
 

@@ -3,7 +3,7 @@
 
 0.8.3__develop
 -----------------
-
+* Add support for GCS store
 
 0.8.2
 -----------------
@@ -215,7 +215,7 @@ v.0.7.0
 Version 0.7 of Great Expectations is HUGE. It introduces several major new features
 and a large number of improvements, including breaking API changes.
 
-The core vocabulary of expectations remains consistent. Upgrading to 
+The core vocabulary of expectations remains consistent. Upgrading to
 the new version of GE will primarily require changes to code that
 uses data contexts; existing expectation suites will require only changes
 to top-level names.
@@ -294,7 +294,7 @@ v.0.6.0
 ------------
 * Add support for SparkDFDataset and caching (HUGE work from @cselig)
 * Migrate distributional expectations to new testing framework
-* Add support for two new expectations: expect_column_distinct_values_to_contain_set 
+* Add support for two new expectations: expect_column_distinct_values_to_contain_set
   and expect_column_distinct_values_to_equal_set (thanks @RoyalTS)
 * FUTURE BREAKING CHANGE: The new cache mechanism for Datasets, \
   when enabled, causes GE to assume that dataset does not change between evaluation of individual expectations. \
