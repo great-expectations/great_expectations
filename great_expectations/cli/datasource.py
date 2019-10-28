@@ -197,11 +197,10 @@ def _add_spark_datasource(context):
 
 def profile_datasource(context, data_source_name, data_assets=None, profile_all_data_assets=False, max_data_assets=20,additional_batch_kwargs=None):
     """"Profile a named datasource using the specified context"""
-    # TODO candidates language is a little obscure
     msg_intro = """
 ========== Profiling ==========
 
-Profiling '{0:s}' will create candidate expectations and documentation.
+Profiling '{0:s}' will create expectations and documentation.
 
 Please note: Profiling is still a beta feature in Great Expectations.  The current profiler will evaluate the entire 
 data source (without sampling), which may be very time consuming. 
@@ -398,6 +397,4 @@ creating and saving an expectation suite for validation:
 MSG_GO_TO_NOTEBOOK = """    - To create expectations for your data, start Jupyter and open a tutorial notebook:
         - To launch with jupyter notebooks:
             <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
-        - To launch with jupyter lab:
-            <green>jupyter lab great_expectations/notebooks/create_expectations.ipynb</green>
 """
