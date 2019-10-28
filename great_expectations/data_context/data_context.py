@@ -306,7 +306,8 @@ class ConfigOnlyDataContext(object):
         # However, for now, I'm adding this check, to avoid having to migrate all the test fixtures
         # while still experimenting with the workings of validation operators and actions.
         if "validation_operators" in self._project_config:
-            for validation_operator_name, validation_operator_config in self._project_config_with_variables_substituted["validation_operators"].items():
+            for validation_operator_name, validation_operator_config in \
+                    self._project_config_with_variables_substituted["validation_operators"].items():
                 self.add_validation_operator(
                     validation_operator_name,
                     validation_operator_config,
@@ -355,7 +356,8 @@ class ConfigOnlyDataContext(object):
         """
 
         self._project_config["stores"][store_name] = store_config
-        self._project_config_with_variables_substituted["stores"][store_name] = self.get_config_with_variables_substituted(config=store_config)
+        self._project_config_with_variables_substituted["stores"][store_name] = \
+            self.get_config_with_variables_substituted(config=store_config)
         new_store = instantiate_class_from_config(
             config=self._project_config_with_variables_substituted["stores"][store_name],
             runtime_config={
@@ -380,7 +382,8 @@ class ConfigOnlyDataContext(object):
         """
 
         self._project_config["validation_operators"][validation_operator_name] = validation_operator_config
-        self._project_config_with_variables_substituted["validation_operators"][validation_operator_name] = self.get_config_with_variables_substituted(config=validation_operator_config)
+        self._project_config_with_variables_substituted["validation_operators"][validation_operator_name] = \
+            self.get_config_with_variables_substituted(config=validation_operator_config)
         new_validation_operator = instantiate_class_from_config(
             config=self._project_config_with_variables_substituted["validation_operators"][validation_operator_name],
             runtime_config={
@@ -829,7 +832,8 @@ class ConfigOnlyDataContext(object):
         if datasource_name in self._datasources:
             return self._datasources[datasource_name]
         elif datasource_name in self._project_config_with_variables_substituted["datasources"]:
-            datasource_config = copy.deepcopy(self._project_config_with_variables_substituted["datasources"][datasource_name])
+            datasource_config = copy.deepcopy(
+                self._project_config_with_variables_substituted["datasources"][datasource_name])
         else:
             raise ValueError(
                 "Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name
