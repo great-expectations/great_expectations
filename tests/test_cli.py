@@ -404,7 +404,7 @@ def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, c
     captured = capsys.readouterr()
 
     assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
-    assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
+    assert "Please review results using data-docs." in captured.out
     logger.removeHandler(handler)
 
 def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
@@ -433,7 +433,7 @@ def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
     captured = capsys.readouterr()
 
     assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
-    assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
+    assert "Please review results using data-docs." in captured.out
     logger.removeHandler(handler)
 
 def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem_csv_2, capsys):
@@ -479,7 +479,7 @@ def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_cs
     captured = capsys.readouterr()
 
     assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
-    assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
+    assert "Please review results using data-docs." in captured.out
     logger.removeHandler(handler)
 
 def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
@@ -537,7 +537,7 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     captured = capsys.readouterr()
 
     assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
-    assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
+    assert "Please review results using data-docs." in captured.out
 
     _ = runner.invoke(cli, ["build-docs", "-d", project_root_dir, "--no-view"])
 
