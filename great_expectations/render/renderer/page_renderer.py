@@ -1,8 +1,10 @@
 import logging
+from six import string_types
 
 import pypandoc
 
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.render.util import num_to_str
 
 from .renderer import Renderer
 from ..types import (
@@ -146,7 +148,8 @@ class ValidationResultsPageRenderer(Renderer):
         for key, value in statistics_dict.items():
             if statistics.get(key) is not None:
                 if key == "success_percent":
-                    table_rows.append([value, "{0:.2f}%".format(statistics[key])])
+                    # table_rows.append([value, "{0:.2f}%".format(statistics[key])])
+                    table_rows.append([value, num_to_str(statistics[key], precision=4) + "%"])
                 else:
                     table_rows.append([value, statistics[key]])
         
@@ -299,18 +302,18 @@ class ExpectationSuitePageRenderer(Renderer):
             notes = expectations["meta"]["notes"]
             note_content = None
             
-            if type(notes) == str:
+            if isinstance(notes, string_types):
                 note_content = [notes]
             
-            elif type(notes) == list:
+            elif isinstance(notes, list):
                 note_content = notes
             
-            elif type(notes) == dict:
+            elif isinstance(notes, dict):
                 if "format" in notes:
                     if notes["format"] == "string":
-                        if type(notes["content"]) == str:
+                        if isinstance(notes["content"], string_types):
                             note_content = [notes["content"]]
-                        elif type(notes["content"]) == list:
+                        elif isinstance(notes["content"], list):
                             note_content = notes["content"]
                         else:
                             logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
@@ -318,13 +321,13 @@ class ExpectationSuitePageRenderer(Renderer):
                     elif notes["format"] == "markdown":
                         # ???: Should converting to markdown be the renderer's job, or the view's job?
                         # Renderer is easier, but will end up mixing HTML strings with content_block info.
-                        if type(notes["content"]) == str:
+                        if isinstance(notes["content"], string_types):
                             try:
                                 note_content = [pypandoc.convert_text(notes["content"], format='md', to="html")]
                             except OSError:
                                 note_content = [notes["content"]]
                         
-                        elif type(notes["content"]) == list:
+                        elif isinstance(notes["content"], list):
                             try:
                                 note_content = [pypandoc.convert_text(note, format='md', to="html") for note in
                                             notes["content"]]

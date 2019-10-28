@@ -4,6 +4,10 @@
 0.8.3__develop
 -----------------
 * Add support for GCS store
+* Fix a bug in data-docs' rendering of mostly parameter
+* Correct wording for expect_column_proportion_of_unique_values_to_be_between
+* Avoid use of unicode character in data-docs to skirt encoding issues
+
 
 0.8.2
 -----------------
