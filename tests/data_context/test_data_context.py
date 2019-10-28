@@ -1144,7 +1144,7 @@ def test_build_batch_kwargs(titanic_multibatch_data_context):
 
 def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
     # Setup:
-    base_path = tmp_path_factory.mktemp('test_load_config_variables_file')
+    base_path = str(tmp_path_factory.mktemp('test_load_config_variables_file'))
     safe_mmkdir(os.path.join(base_path, "uncommitted"))
     with open(os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w") as outfile:
         yaml.dump({'env': 'dev'}, outfile)
