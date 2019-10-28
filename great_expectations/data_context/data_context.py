@@ -14,7 +14,7 @@ import datetime
 import warnings
 
 from great_expectations.util import file_relative_path
-from .util import safe_mmkdir, substitute_all_config_variables
+from .util import safe_mmkdir, substitute_all_config_variables, substitute_config_variable
 from ..types.base import DotDict
 
 import great_expectations.exceptions as ge_exceptions
@@ -282,8 +282,8 @@ class ConfigOnlyDataContext(object):
 
         self._project_config = project_config
         # FIXME: This should just be a property
-        self._project_config_with_varibles_substituted = dict(**self.get_config_with_variables_substituted())
         self._context_root_directory = os.path.abspath(context_root_dir)
+        self._project_config_with_variables_substituted = dict(**self.get_config_with_variables_substituted())
 
 
         # Init plugins
@@ -292,12 +292,12 @@ class ConfigOnlyDataContext(object):
 
         # Init data sources
         self._datasources = {}
-        for datasource in self._project_config_with_varibles_substituted["datasources"].keys():
+        for datasource in self._project_config_with_variables_substituted["datasources"].keys():
             self.get_datasource(datasource)
 
         # Init stores
         self._stores = DotDict()
-        self._init_stores(self._project_config_with_varibles_substituted["stores"])
+        self._init_stores(self._project_config_with_variables_substituted["stores"])
 
         # Init validation operators
         self.validation_operators = {}
@@ -306,7 +306,8 @@ class ConfigOnlyDataContext(object):
         # However, for now, I'm adding this check, to avoid having to migrate all the test fixtures
         # while still experimenting with the workings of validation operators and actions.
         if "validation_operators" in self._project_config:
-            for validation_operator_name, validation_operator_config in self._project_config_with_varibles_substituted["validation_operators"].items():
+            for validation_operator_name, validation_operator_config in \
+                    self._project_config_with_variables_substituted["validation_operators"].items():
                 self.add_validation_operator(
                     validation_operator_name,
                     validation_operator_config,
@@ -355,9 +356,10 @@ class ConfigOnlyDataContext(object):
         """
 
         self._project_config["stores"][store_name] = store_config
-        self._project_config_with_varibles_substituted["stores"][store_name] = self.get_config_with_variables_substituted(config=store_config)
+        self._project_config_with_variables_substituted["stores"][store_name] = \
+            self.get_config_with_variables_substituted(config=store_config)
         new_store = instantiate_class_from_config(
-            config=self._project_config_with_varibles_substituted["stores"][store_name],
+            config=self._project_config_with_variables_substituted["stores"][store_name],
             runtime_config={
                 "root_directory" : self.root_directory,
             },
@@ -380,9 +382,10 @@ class ConfigOnlyDataContext(object):
         """
 
         self._project_config["validation_operators"][validation_operator_name] = validation_operator_config
-        self._project_config_with_varibles_substituted["validation_operators"][validation_operator_name] = self.get_config_with_variables_substituted(config=validation_operator_config)
+        self._project_config_with_variables_substituted["validation_operators"][validation_operator_name] = \
+            self.get_config_with_variables_substituted(config=validation_operator_config)
         new_validation_operator = instantiate_class_from_config(
-            config=self._project_config_with_varibles_substituted["validation_operators"][validation_operator_name],
+            config=self._project_config_with_variables_substituted["validation_operators"][validation_operator_name],
             runtime_config={
                 "data_context" : self,
             },
@@ -416,7 +419,7 @@ class ConfigOnlyDataContext(object):
     def plugins_directory(self):
         """The directory in which custom plugin modules should be placed."""
         return self._normalize_absolute_or_relative_path(
-            self._project_config_with_varibles_substituted["plugins_directory"]
+            self._project_config_with_variables_substituted["plugins_directory"]
         )
 
     @property
@@ -431,7 +434,7 @@ class ConfigOnlyDataContext(object):
 
     @property
     def expectations_store_name(self):
-        return self._project_config_with_varibles_substituted["expectations_store_name"]
+        return self._project_config_with_variables_substituted["expectations_store_name"]
 
     # TODO: Decide whether this stays here or moves into NamespacedStore
     @property
@@ -503,7 +506,9 @@ class ConfigOnlyDataContext(object):
         config_variables_file_path = self.get_project_config().get("config_variables_file_path")
         if config_variables_file_path:
             try:
-                with open(os.path.join(self.root_directory, config_variables_file_path), "r") as config_variables_file:
+                with open(os.path.join(self.root_directory,
+                                       substitute_config_variable(config_variables_file_path, {})),
+                          "r") as config_variables_file:
                     return yaml.load(config_variables_file) or {}
             except IOError as e:
                 if e.errno != errno.ENOENT:
@@ -763,11 +768,11 @@ class ConfigOnlyDataContext(object):
         # We perform variable substitution in the datasource's config here before using the config
         # to instantiate the datasource object. Variable substitution is a service that the data
         # context provides. Datasources should not see unsubstituted variables in their config.
-        self._project_config_with_varibles_substituted["datasources"][
+        self._project_config_with_variables_substituted["datasources"][
             name] = self.get_config_with_variables_substituted(config)
 
         datasource = self._build_datasource_from_config(
-            **self._project_config_with_varibles_substituted["datasources"][name])
+            **self._project_config_with_variables_substituted["datasources"][name])
         self._datasources[name] = datasource
         self._project_config["datasources"][name] = config
 
@@ -826,8 +831,9 @@ class ConfigOnlyDataContext(object):
         """
         if datasource_name in self._datasources:
             return self._datasources[datasource_name]
-        elif datasource_name in self._project_config_with_varibles_substituted["datasources"]:
-            datasource_config = copy.deepcopy(self._project_config_with_varibles_substituted["datasources"][datasource_name])
+        elif datasource_name in self._project_config_with_variables_substituted["datasources"]:
+            datasource_config = copy.deepcopy(
+                self._project_config_with_variables_substituted["datasources"][datasource_name])
         else:
             raise ValueError(
                 "Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name
@@ -849,7 +855,7 @@ class ConfigOnlyDataContext(object):
         """
         datasources = []
         # NOTE: 20190916 - JPC - Upon deprecation of support for type: configuration, this can be simplified
-        for key, value in self._project_config_with_varibles_substituted["datasources"].items():
+        for key, value in self._project_config_with_variables_substituted["datasources"].items():
             if "type" in value:
                 logger.warning("Datasource %s configured using type. Please use class_name instead." % key)
                 datasources.append({
@@ -1244,11 +1250,11 @@ class ConfigOnlyDataContext(object):
 
     @property
     def evaluation_parameter_store_name(self):
-        return self._project_config_with_varibles_substituted["evaluation_parameter_store_name"]
+        return self._project_config_with_variables_substituted["evaluation_parameter_store_name"]
 
     @property
     def validations_store_name(self):
-        return self._project_config_with_varibles_substituted["validations_store_name"]
+        return self._project_config_with_variables_substituted["validations_store_name"]
 
     @property
     def validations_store(self):
@@ -1575,7 +1581,7 @@ class ConfigOnlyDataContext(object):
 
         index_page_locator_infos = {}
 
-        sites = self._project_config_with_varibles_substituted.get('data_docs_sites', [])
+        sites = self._project_config_with_variables_substituted.get('data_docs_sites', [])
         if sites:
             logger.debug("Found data_docs_sites. Building sites...")
 
@@ -1857,7 +1863,7 @@ class DataContext(ConfigOnlyDataContext):
     def _load_project_config(self):
         """
         Reads the project configuration from the project configuration file.
-        The file may contain ${SOME_VARIABLE} variables - see self._project_config_with_varibles_substituted
+        The file may contain ${SOME_VARIABLE} variables - see self._project_config_with_variables_substituted
         for how these are substituted.
 
         :return: the configuration object read from the file
