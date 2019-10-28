@@ -454,7 +454,7 @@ class FixedLengthTupleGCSStoreBackend(FixedLengthTupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         gcs_response_object = bucket.get_blob(gcs_object_key)
-        return gcs_response_object.download_as_string()
+        return gcs_response_object.download_as_string().decode("utf-8")
 
     def _set(self, key, value, content_encoding='utf-8', content_type='application/json'):
         gcs_object_key = os.path.join(
@@ -466,7 +466,7 @@ class FixedLengthTupleGCSStoreBackend(FixedLengthTupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
-        blob.upload_from_string(value.encode(content_encoding))
+        blob.upload_from_string(value.encode(content_encoding), content_type=content_type)
         return gcs_object_key
 
     def list_keys(self):
