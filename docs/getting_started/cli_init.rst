@@ -263,8 +263,7 @@ Be cautious when executing against shared databases.
         Profiled 329 columns using 18877 rows from npidata (17.647 sec)
 
     Profiled 1 of 1 named data assets, with 18877 total rows and 329 columns in 17.65 seconds.
-    Generated, evaluated, and stored 2039 candidate Expectations.
-    Note: You will need to review and revise Expectations before using them in production.
+    Generated, evaluated, and stored 2039 candidate Expectations. Please review results using data-docs.
 
 The default profiler (``BasicDatasetProfiler``) will add two JSON files in your ``great_expectations/`` directory.
 They will be placed in subdirectories that following our namespacing conventions. Great Expectations' DataContexts can

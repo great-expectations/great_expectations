@@ -1786,8 +1786,7 @@ class ConfigOnlyDataContext(object):
             total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
             logger.info("""
     Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
-    Generated, evaluated, and stored %d candidate Expectations.
-    Note: You will need to review and revise Expectations before using them in production.""" % (
+    Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs.""" % (
                 len(data_asset_name_list),
                 total_data_assets,
                 total_rows,
