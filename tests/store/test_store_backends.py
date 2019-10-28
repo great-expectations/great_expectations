@@ -251,13 +251,14 @@ def test_FixedLengthTupleGCSStoreBackend():
         mock_gcs_client.assert_called_once_with('dummy-project')
         mock_client.get_bucket.assert_called_once_with("leakybucket")
         mock_bucket.blob.assert_called_once_with("this_is_a_test_prefix/my_file_AAA")
-        mock_blob.upload_from_string.assert_called_once_with(b"aaa")
+        mock_blob.upload_from_string.assert_called_once_with(b"aaa", content_type="text/html")
 
     with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
 
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.get_bucket.return_value
         mock_blob = mock_bucket.get_blob.return_value
+        mock_str = mock_blob.download_as_string.return_value
 
         my_store.get(("BBB",))
 
@@ -265,6 +266,7 @@ def test_FixedLengthTupleGCSStoreBackend():
         mock_client.get_bucket.assert_called_once_with("leakybucket")
         mock_bucket.get_blob.assert_called_once_with("this_is_a_test_prefix/my_file_BBB")
         mock_blob.download_as_string.assert_called_once()
+        mock_str.decode.assert_called_once_with("utf-8")
 
     with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
 
