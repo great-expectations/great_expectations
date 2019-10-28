@@ -3,15 +3,10 @@ import logging
 from string import Template
 
 from great_expectations.datasource import Datasource
-from great_expectations.datasource.types import (
-    SqlAlchemyDatasourceQueryBatchKwargs,
-    SqlAlchemyDatasourceTableBatchKwargs,
-    BatchId
-)
-from great_expectations.data_context.types import NormalizedDataAssetName, DataAssetIdentifier
+from great_expectations.datasource.types import BatchId
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
 from .generator.query_generator import QueryGenerator
-from great_expectations.exceptions import DatasourceInitializationError, BatchKwargsError
+from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.types import ClassConfig
 
 logger = logging.getLogger(__name__)
@@ -108,7 +103,7 @@ class SqlAlchemyDatasource(Datasource):
                 url = credentials.pop("url")
                 # TODO perhaps we could carefully regex out the driver from the
                 #  url. It would need to be cautious to avoid leaking secrets.
-                self.drivername = "url"
+                self.drivername = "other"
                 self.engine = create_engine(url, **kwargs)
                 self.engine.connect()
 
