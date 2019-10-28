@@ -42,9 +42,9 @@ def test_setting_config_variables_is_visible_immediately(data_context_with_varia
     # verify that the value of the config variable is immediately updated.
     # verify that the config variable will be substituted with the value from the file if the
     # env variable is not set (for both ${} and $ syntax variations)
-    context._project_config_with_varibles_substituted["datasources"]["mydatasource"]["generators"]["mygenerator"][
+    context._project_config_with_variables_substituted["datasources"]["mydatasource"]["generators"]["mygenerator"][
                "reader_options"]["test_variable_sub1"] == {"n1": "v1"}
-    context._project_config_with_varibles_substituted["datasources"]["mydatasource"]["generators"]["mygenerator"][
+    context._project_config_with_variables_substituted["datasources"]["mydatasource"]["generators"]["mygenerator"][
                "reader_options"]["test_variable_sub2"] == {"n1": "v1"}
 
     # verify that the value of the env var takes precedence over the one from the config variables file
