@@ -25,14 +25,11 @@ from great_expectations.datasource.types import (
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.types import ClassConfig
 from great_expectations.exceptions import BatchKwargsError
+from .util import S3Url
 
 logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
-
-from .util import S3Url
-
-logger = logging.getLogger(__name__)
 
 
 class PandasDatasource(Datasource):
@@ -58,7 +55,7 @@ class PandasDatasource(Datasource):
         if generators is None:
             # Provide a gentle way to build a datasource with a sane default,
             # including ability to specify the base_directory and reader_options
-            base_directory = kwargs.pop("base_directory", "/data")
+            base_directory = kwargs.pop("base_directory", "data")
             # By default, use CSV sniffer to infer separator, which requires the python engine
             reader_options = kwargs.pop("reader_options", {
                 "sep": None,
