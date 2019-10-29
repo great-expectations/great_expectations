@@ -1,7 +1,7 @@
 .. _changelog:
 
 
-0.8.3__develop
+0.8.3
 -----------------
 * Fix a bug in data-docs' rendering of mostly parameter
 * Correct wording for expect_column_proportion_of_unique_values_to_be_between
@@ -9,6 +9,11 @@
 * Improve formatting of empirical histograms in validation result data docs
 * Add support for using environment variables in `config_variables_file_path`
 * Documentation improvements and corrections
+
+
+0.8.2.post0
+------------
+* Correct a packaging issue resulting in missing css files in tarball release
 
 
 0.8.2
