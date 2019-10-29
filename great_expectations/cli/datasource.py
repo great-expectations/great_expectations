@@ -412,11 +412,10 @@ def profile_datasource(
     open_docs=False,
 ):
     """"Profile a named datasource using the specified context"""
-    # TODO candidates language is a little obscure
     msg_intro = """
 ========== Profiling ==========
 
-Profiling '{0:s}' will create candidate expectations and documentation.
+Profiling '{0:s}' will create expectations and documentation.
 
 Please note: Profiling is still a beta feature in Great Expectations.  The current profiler will evaluate the entire 
 data source (without sampling), which may be very time consuming. 
@@ -611,6 +610,4 @@ MSG_GO_TO_NOTEBOOK = """
 To create expectations for your data, start Jupyter and open a tutorial notebook:
     - To launch with jupyter notebooks:
         <green>jupyter notebook great_expectations/notebooks/{}/create_expectations.ipynb</green>
-    - To launch with jupyter lab:
-        <green>jupyter lab great_expectations/notebooks/{}/create_expectations.ipynb</green>
 """
