@@ -11,6 +11,7 @@ import os
 import shutil
 import json
 from collections import OrderedDict
+from ruamel.yaml import YAML
 
 from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import (
@@ -31,6 +32,8 @@ from great_expectations.data_context.store import (
 from great_expectations.util import (
     gen_directory_tree_str,
 )
+
+yaml = YAML()
 
 
 @pytest.fixture()
@@ -696,6 +699,7 @@ def basic_data_context_config():
         "evaluation_parameter_store_name": "evaluation_parameter_store",
         "validations_store_name": "does_not_have_to_be_real",
         "expectations_store_name": "expectations_store",
+        "config_variables_file_path": "uncommitted/config_variables.yml",
         "datasources": {},
         "stores": {
             "expectations_store": {
@@ -1290,3 +1294,28 @@ def test_existing_local_data_docs_urls_returns_only_existing_urls_from_customize
     assert obs == [
         "file://{}".format(path_2),
     ]
+
+def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
+    # Setup:
+    base_path = str(tmp_path_factory.mktemp('test_load_config_variables_file'))
+    safe_mmkdir(os.path.join(base_path, "uncommitted"))
+    with open(os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w") as outfile:
+        yaml.dump({'env': 'dev'}, outfile)
+    with open(os.path.join(base_path, "uncommitted", "prod_variables.yml"), "w") as outfile:
+        yaml.dump({'env': 'prod'}, outfile)
+    basic_data_context_config["config_variables_file_path"] = "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
+    context = ConfigOnlyDataContext(basic_data_context_config, context_root_dir=base_path)
+
+    try:
+        # We should be able to load different files based on an environment variable
+        os.environ["TEST_CONFIG_FILE_ENV"] = "dev"
+        vars = context._load_config_variables_file()
+        assert vars['env'] == 'dev'
+        os.environ["TEST_CONFIG_FILE_ENV"] = "prod"
+        vars = context._load_config_variables_file()
+        assert vars['env'] == 'prod'
+    except Exception:
+        raise
+    finally:
+        # Make sure we unset the environment variable we're using
+        del os.environ["TEST_CONFIG_FILE_ENV"]
