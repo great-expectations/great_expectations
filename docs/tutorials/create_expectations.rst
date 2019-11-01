@@ -3,26 +3,26 @@
 Create Expectations
 ==============================
 
-This tutorial covers creating expectations for a data asset in the Jupyter notebook
-``great_expectations/notebooks/create_expectations.ipynb`` that ``great_expectations init`` created in your project.
-
-We will continue the example we used in the previous section - CSV files containing National Provider Identifier (NPI)
-data.
-
 Creating expectations is an opportunity to blend contextual knowledge from subject-matter experts and insights from
-profiling and performing exploratory analysis on your dataset.
+profiling and performing exploratory analysis on your dataset. This tutorial covers creating expectations for a data asset in the Jupyter notebook.
 
 Video
 ------
 
-Watch `the video on YouTube <https://greatexpectations.io/videos/getting_started/create_expectations>`_.
+If you prefer videos to written tutorials, `James <https://github.com/jcampbell>`_ (one of the original core contributors) walks you through this turorial in a `video on YouTube <https://greatexpectations.io/videos/getting_started/create_expectations>`_.
 
 
-Get DataContext Object
------------------------
+This tutorial assumes that you ran ``great_expectations init`` and went through the steps covered in the previous tutorial: :ref:`tutorial_init`.
 
-A DataContext represents a Great Expectations project. It organizes storage and access for
-expectation suites, datasources, notification settings, and data fixtures.
+Jupyter notebooks is the interface for creating expectations.
+
+The ``great_expectations init`` command created ``great_expectations/notebooks/`` folder in your project. The folder contains example notebooks for pandas, Spark and SQL datasources. Choose the notebook directory that corresponds to your datasource. We will continue with the example we used in the previous section: CSV files containing National Provider Identifier (NPI) data that are processed with pandas. Since the datasource is pandas, we are going into this notebook: ``great_expectations/notebooks/pandas/create_expectations.ipynb``.
+
+
+1. Get DataContext Object
+-------------------------
+
+A DataContext represents a Great Expectations project. It organizes datasources, notification settings, data documentation sites, and storage and access for expectation suites and validation results.
 The DataContext is configured via a yml file stored in a directory called great_expectations;
 the configuration file as well as managed expectation suites should be stored in version control.
 
@@ -37,99 +37,182 @@ To read more about DataContext, see: :ref:`data_context`
 
 
 
-Data Assets
--------------
+2. List Data Assets
+-------------------
 
-A Great Expectations DataContext describes data assets using a three-part namespace consisting of
-**datasource_name**, **generator_name**, and **generator_asset**.
+A Data Asset is data you describe with expectations.
 
-To run validation for a data_asset, we need two additional elements:
 
-* a **batch** to validate; in our case it is a file loaded into a Pandas DataFrame
-* an **expectation_suite** to validate against
+It is useful to explain what can be a data asset in each type of datasource that Great Expectations supports:
 
-.. image:: ../images/data_asset_namespace.png
 
-Here are the data assets that DataContext is aware of in our example project:
+.. content-tabs::
+
+    .. tab-container:: tab0
+        :title: pandas
+
+        Pandas DataFrames are data assets in a Pandas datasource. In this example the pipeline processes NPI data that it reads from CSV files in ``npidata`` directory into Pandas DataFrames. This is the data we want to describe and specify with expectations. We think of this data asset as "data from the npidata directory that we read into Pandas DataFrames" and give it a name "NPI data".
+
+    .. tab-container:: tab1
+        :title: pyspark
+
+        Spark DataFrames are data assets in a Spark datasource. In this example the pipeline processes NPI data that it reads from CSV files in ``npidata`` directory into Pandas DataFrames. This is the data we want to describe and specify with expectations. If the example read the data into Spark DataFrames, we would think of this data asset as "data from the npidata directory that we read into Spark DataFrames" and give it a name "NPI data".
+
+    .. tab-container:: tab2
+        :title: SQLAlchemy
+
+        Tables, views and query results can be data assets in a SQLAlchemy datasource.
+
+        * If the pipeline in this example used SQL to process NPI data that resided in ``npidata`` table (or view) in a database (as opposed to using Pandas to process NPI data that resides in CSV files in ``npidata`` folder), that table would be a data asset named ``npidata``.
+        * If the NPI data did not reside in one table ``npidata`` and, instead, the example pipeline ran an SQL query that fetched the data (probably from multiple tables), we would consider the result set of that query to be the data asset. The name of this data asset would be up to us (e.g., "npidata" or "npidata_query").
+
+
+Great Expectations' ``jupyter_ux`` module has a convenience method that lists all data assets and expectation suites in a Data Context:
+
+.. code-block:: python
+
+    great_expectations.jupyter_ux.list_available_data_asset_names(context)
+
+Here is the output of this method when executed in our example project:
 
 .. image:: ../images/list_data_assets.png
+    :width: 600px
+
+``npidata`` is the short name of the data asset. Full names of data assets in a DataContext consist of three parts that look like that: ``data__dir/default/npidata``. You don't need to know (yet) how the namespace is managed and the exact meaning of each part. The :ref:`data_context` article describes this in detail.
 
 
-Get Batch
-----------
+3. Pick a data asset and set the expectation suite name
+-------------------------------------------------------
 
-Datasources and generators work together closely with your pipeline infrastructure to provide Great Expectations
-batches of data to validate. The generator can help identifying the ``batch_kwargs`` that a datasource will
-use to load a batch of data. For example the :class:`~great_expectations.datasource.generator.\
-subdir_reader_generator.SubdirReaderGenerator`
-generator will create batches of data based on individual files and group those batches into a single data_asset based
-on the subdirectory in which they are located. By contrast, the :class:`~great_expectations.datasource.generator.\
-glob_reader_generator.GlobReaderGenerator`
-will also create batches of data based on individual files, but uses defined glob-style match patterns to group those
-batches into named data assets. We can use the ``yield_batch_kwargs`` method on the data context to get a bach of data.
+.. code-block:: python
+
+    data_asset_name = "npidata"
+    normalized_data_asset_name = context.normalize_data_asset_name(data_asset_name)
+    normalized_data_asset_name
+
+
+.. code-block:: python
+
+    expectation_suite_name = "warning"
+
+4. Create a new empty expectation suite
+---------------------------------------
+
+Expectations for a data asset are organized into expectation suites. Usually, we validate data against expectation suites, not single expectations. We recommend 'warning' or 'default' as the name
+for a first expectation suite associated with a data asset.
+
+.. code-block:: python
+
+    context.create_expectation_suite(data_asset_name=data_asset_name,
+                                     expectation_suite_name=expectation_suite_name)
+
+
+If an expectation suite with this name already exists for this data_asset, you will get an error. If you would like to overwrite this expectation suite, set ``overwrite_existing=True``.
+
+
+5. Load a batch of data you want to use to create Expectations
+--------------------------------------------------------------
+
+Expectations describe and specify data assets. What is validated at validation time are batches of data. A batch is a sample from a data asset, sliced according to a particular rule. If a database table is a data asset, then the data in that table snapshotted at a particular time is a batch.
+
+To create expectations about a data asset you will load a sample batch of data from that data asset into a Great Expectations object of class :class:`Dataset <great_expectations.dataset.dataset.Dataset>` and then use the expectation methods (one method per expectation type) this class provides to add expectations, while immediately checking if the sample batch conforms to these expectations (this will become clear in the next section of this tutorial).
+
+DataContext's ``get_batch`` method is used to load a batch of a data asset:
+
+.. code-block:: python
+
+    batch = context.get_batch(normalized_data_asset_name,
+                              expectation_suite_name,
+                              batch_kwargs)
+
+
+Calling this method asks the Context to get a batch of data from the data asset ``normalized_data_asset_name`` and attach the expectation suite ``expectation_suite_name`` to it. ``batch_kwargs`` argument specifies which batch of the data asset should be loaded.
+
+If you have no preference as to which batch should be sampled from the data asset, use the ``yield_batch_kwargs`` method on the data context to get a batch:
 
 .. code-block:: python
 
     batch_kwargs = context.yield_batch_kwargs(data_asset_name)
 
-``batch_kwargs`` from one of those filesystem reader generators might look like the following:
+This is most likely sufficient for the purpose of this tutorial.
 
-.. code-block:: json
+.. toggle-header::
+    :header: However, if you want to use a specific batch, **click here to learn how to specify the right batch_kwargs**
 
-    {
-        "path": "/data/npidata/npidata_pfile_20190902-20190908.csv",
-        "partition_id": "npidata_pfile_20190902-20190908",
-        "sep": null,
-        "engine": "python"
-    }
+        .. content-tabs::
 
-In addition to batch_kwargs, we need to create an expectation suite. We recommend 'warning' or 'default' as the name
-for a first expectation suite associated with a data asset.
+            .. tab-container:: tab0
+                :title: pandas
 
-.. code-block:: python
+                If the data asset is a collection of CSV files in a folder that are processed with Pandas, then a batch is one of these files. Here is how to construct batch_kwargs that specify a particular file to load:
 
-    expectation_suite_name = 'warning'
-    context.create_expectation_suite(data_asset_name=data_asset_name, expectation_suite_name=expectation_suite_name)
+                .. code-block:: python
 
-With that preparation, the following call loads one of the batches of the ``data__dir/default/npidata`` data
-asset (one of the files).
+                    batch_kwargs = {'path': "PATH OF THE FILE YOU WANT TO LOAD"}
 
-The argument ``expectation_suite_name`` specifies the name of the expectation suite you want to create. At first this
-suite contains no expectations. We will add expectations to it in the next steps.
+                To instruct ``get_batch`` to read CSV files with specific options (e.g., not to interpret the first line as the
+                header or to use a specific separator), add them to the the ``batch_kwargs``.
 
-.. code-block:: python
+                See the complete list of options for `Pandas read_csv <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html>`__.
 
-    batch = context.get_batch(
-        data_asset_name=data_asset_name,
-        expectation_suite_name=expectation_suite_name,
-        batch_kwargs=batch_kwargs)
+                ``batch_kwargs`` might look like the following:
+
+                .. code-block:: json
+
+                    {
+                        "path": "/data/npidata/npidata_pfile_20190902-20190908.csv",
+                        "partition_id": "npidata_pfile_20190902-20190908",
+                        "sep": null,
+                        "engine": "python"
+                    }
+
+            .. tab-container:: tab1
+                :title: pyspark
+
+                If the data asset is a collection of CSV files in a folder that are processed with pyspark, then a batch is one of these files. Here is how to construct batch_kwargs that specify a particular file to load:
+
+                .. code-block:: python
+
+                    batch_kwargs = {'path': "PATH OF THE FILE YOU WANT TO LOAD"}
+
+                To instruct ``get_batch`` to read CSV files with specific options (e.g., not to interpret the first line as the
+                header or to use a specific separator), add them to the the ``batch_kwargs``.
+
+                See the complete list of options for `Spark DataFrameReader <https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader>`__
+
+            .. tab-container:: tab2
+                :title: SQLAlchemy
+
+                Here are three examples of constructing ``batch_kwargs`` that specify which batch of data should be loaded from a data asset:
+
+                If you would like to validate an entire table (or a view) in your database's default schema:
+
+                .. code-block:: python
+
+                    batch_kwargs = {'table': "YOUR TABLE NAME"}
+
+                If you would like to validate an entire table or view from a non-default schema in your database:
+
+                .. code-block:: python
+
+                    batch_kwargs = {'table': "YOUR TABLE NAME", "schema": "YOUR SCHEMA"}
+
+                If you would like to validate using a query to construct a temporary table:
+
+                .. code-block:: python
+
+                    batch_kwargs = {'query': 'SELECT YOUR_ROWS FROM YOUR_TABLE'}
 
 
-If you want to validate data in Pandas Dataframes or in Spark Dataframes:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-``yield_batch_kwargs`` will build a batch definition from any type of asset, using the logic of the configured
-generator. You can also build kwargs explicitly, following examples in the notebook.
-
-Reader Options
----------------
-
-To instruct ``get_batch`` to read CSV files with specific options (e.g., not to interpret the first line as the
-header or to use a specific separator), either specify these options in the generator configuration, add them
-when building the batch_kwargs, or pass them as additional kwargs to the ``get_batch`` method. Those reader options
-will become components in the ``batch_kwargs``.
+        A batch is a sample from a data asset, sliced according to a particular rule. Generators are classes that implement these rules in Great Expectations. The examples of ``batch_kwargs`` above are the inputs of the default Generators that come with Great Expectations. You can read about the default Generators' behavior and how to implement additional generators in this article: :ref:`batch_generator`.
 
 
-If the datasource is of type ``pandas``, see the complete list of options for
-`Pandas read_csv <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html>`__.
+|
+The previous call loaded one of the batches of the ``data__dir/default/npidata`` data asset (one of the files).
 
 
-If the datasource is of type ``spark``, see the complete list of options for
-`Spark DataFrameReader <https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader>`__.
-
-
-Create Expectations
---------------------------------
+6. Author Expectations
+-----------------------
 
 Now that we have one of the data batches loaded, we can call ``expect`` methods on the data asset in order to check
 whether this expectation is true for this batch of data.
@@ -173,9 +256,12 @@ How do I know which types of expectations I can add?
 * Visit the `glossary of expectations <https://docs.greatexpectations.io/en/latest/glossary.html>`__ for a complete
   list of expectations that are currently part of the great expectations vocabulary.
 
+.. image:: ../images/glossary_of_expectations_preview.png
+    :width: 400px
 
-Review and Save Expectation Suite
----------------------------------
+
+7. Review and save your Expectations
+------------------------------------
 
 .. image:: ../images/get_expectation_suite_output.png
 
@@ -199,3 +285,12 @@ an additional argument to ``save_expectation_suite`` method:
 
     df.save_expectation_suite(discard_failed_expectations=False)
 
+
+8. View the Expectations in Data Docs
+-------------------------------------
+
+.. code-block:: python
+
+
+    context.build_data_docs()
+    context.open_data_docs()
