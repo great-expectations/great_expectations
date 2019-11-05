@@ -190,18 +190,22 @@ class FixedLengthTupleStoreBackend(StoreBackend):
         # NOTE : These methods support fixed-length keys, but not variable.
         self._validate_key(key)
         converted_string = self.filepath_template.format(*list(key))
-        path = os.path.join(converted_string.split('/'))
+        path = os.path.join(*converted_string.split('/'))
         return path
 
     def _convert_filepath_to_key(self, filepath):
+        # filepath_template (for now) is always specified with forward slashes, but it is then
+        # used to (1) dynamically construct and evaluate a regex, and (2) split the provided (observed) filepath
+        filepath_template = os.path.join(*self.filepath_template.split('/'))
+        filepath_template = filepath_template.replace('\\', '\\\\')
 
         # Convert the template to a regex
-        indexed_string_substitutions = re.findall("\{\d+\}", self.filepath_template)
+        indexed_string_substitutions = re.findall("\{\d+\}", filepath_template)
         tuple_index_list = ["(?P<tuple_index_{0}>.*)".format(i, ) for i in range(len(indexed_string_substitutions))]
         intermediate_filepath_regex = re.sub(
             "\{\d+\}",
             lambda m, r=iter(tuple_index_list): next(r),
-            self.filepath_template
+            filepath_template
         )
         filepath_regex = intermediate_filepath_regex.format(*tuple_index_list)
 
@@ -210,8 +214,7 @@ class FixedLengthTupleStoreBackend(StoreBackend):
         if matches is None:
             return None
 
-        #Map key elements into the appropriate parts of the tuple
-        # TODO: A common configuration error is for the key length to not match the number of elements in the filepath_template. We should trap this error and add a more informative message.
+        # Map key elements into the appropriate parts of the tuple
         new_key = list([None for element in range(self.key_length)])
         for i in range(len(tuple_index_list)):
             tuple_index = int(re.search('\d+', indexed_string_substitutions[i]).group(0))
@@ -222,12 +225,6 @@ class FixedLengthTupleStoreBackend(StoreBackend):
         return new_key
 
     def verify_that_key_to_filepath_operation_is_reversible(self):
-        # NOTE: There's actually a fairly complicated problem here, similar to magic autocomplete for dataAssetNames.
-        # "Under what conditions does an incomplete key tuple fully specify an object within the GE namespace?"
-        # This doesn't just depend on the structure of keys.
-        # It also depends on uniqueness of combinations of named elements within the namespace tree.
-        # For now, I do the blunt thing and force filepaths to fully specify keys.
-
         def get_random_hex(len=4):
             return "".join([random.choice(list("ABCDEF0123456789")) for i in range(len)])
 
@@ -241,10 +238,6 @@ class FixedLengthTupleStoreBackend(StoreBackend):
                     self.__class__.__name__,
                     self.key_length,
                 ))
-            # raise AssertionError("Cannot reverse key conversion in {}\nThis is most likely a problem with your filepath_template:\n\t{}".format(
-            #     self.__class__.__name__,
-            #     self.filepath_template
-            # ))
 
 
 class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
