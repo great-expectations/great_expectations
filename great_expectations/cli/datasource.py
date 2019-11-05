@@ -1,5 +1,7 @@
 import os
 import click
+
+from great_expectations.datasource import PandasDatasource, SparkDFDatasource, SqlAlchemyDatasource
 from .util import cli_message
 from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.data_context import DataContext
@@ -77,10 +79,8 @@ def _add_pandas_datasource(context):
         show_default=True
     )
 
-    context.add_datasource(data_source_name,
-                           module_name="great_expectations.datasource",
-                           class_name="PandasDatasource",
-                           base_directory=os.path.join("..", path))
+    configuration = PandasDatasource.build_configuration(base_directory=os.path.join("..", path))
+    context.add_datasource(name=data_source_name, class_name='PandasDatasource', **configuration)
     return data_source_name
 
 
@@ -145,18 +145,8 @@ def _add_sqlalchemy_datasource(context):
   - Please check your environment and the configuration you provided.
   - Database Error: {0:s}"""
         try:
-            context.add_datasource(data_source_name,
-                                   module_name="great_expectations.datasource",
-                                   class_name="SqlAlchemyDatasource",
-                                   data_asset_type={
-                                       "class_name": "SqlAlchemyDataset"},
-                                   credentials="${" + data_source_name + "}",
-                                   generators={
-                                        "default": {
-                                            "class_name": "TableGenerator"
-                                        }
-                                    }
-                                   )
+            configuration = SqlAlchemyDatasource.build_configuration(credentials="${" + data_source_name + "}")
+            context.add_datasource(name=data_source_name, class_name='SqlAlchemyDatasource', **configuration)
             break
         except ModuleNotFoundError as de:
             message = message + "\n  - Please `pip install psycopg2` and try again"
@@ -200,20 +190,17 @@ def _add_spark_datasource(context):
     data_source_name = click.prompt(
         msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
-    context.add_datasource(data_source_name,
-                           module_name="great_expectations.datasource",
-                           class_name="SparkDFDatasource",
-                           base_directory=os.path.join("..", path))
+    configuration = SparkDFDatasource.build_configuration(base_directory=os.path.join("..", path))
+    context.add_datasource(name=data_source_name, class_name='SparkDFDatasource', **configuration)
     return data_source_name
 
 
 def profile_datasource(context, data_source_name, data_assets=None, profile_all_data_assets=False, max_data_assets=20,additional_batch_kwargs=None):
     """"Profile a named datasource using the specified context"""
-    # TODO candidates language is a little obscure
     msg_intro = """
 ========== Profiling ==========
 
-Profiling '{0:s}' will create candidate expectations and documentation.
+Profiling '{0:s}' will create expectations and documentation.
 
 Please note: Profiling is still a beta feature in Great Expectations.  The current profiler will evaluate the entire 
 data source (without sampling), which may be very time consuming. 
@@ -410,6 +397,4 @@ creating and saving an expectation suite for validation:
 MSG_GO_TO_NOTEBOOK = """    - To create expectations for your data, start Jupyter and open a tutorial notebook:
         - To launch with jupyter notebooks:
             <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
-        - To launch with jupyter lab:
-            <green>jupyter lab great_expectations/notebooks/create_expectations.ipynb</green>
 """
