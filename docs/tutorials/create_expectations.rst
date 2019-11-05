@@ -299,7 +299,7 @@ How do I know which types of expectations I can add?
 * *Tab-complete* the partially typed ``expect_`` method name to see available expectations.
 * In Jupyter, we can also use *shift-tab* to see the docstring for each expectation, including the parameters it
   takes and to get more information about the expectation.
-* Visit the `glossary of expectations <https://docs.greatexpectations.io/en/latest/glossary.html>`__ for a complete
+* Visit the :ref:`expectation_glossary` for a complete
   list of expectations that are currently part of the great expectations vocabulary. Here is a short preview of the glossary:
 
 .. image:: ../images/glossary_of_expectations_preview.png
