@@ -56,7 +56,8 @@ class ValidationResultsPageRenderer(Renderer):
         overview_content_blocks = [
             self._render_validation_header(),
             self._render_validation_info(validation_results=validation_results),
-            self._render_validation_statistics(validation_results=validation_results)
+            self._render_batch_kwargs(validation_results=validation_results),
+            self._render_validation_statistics(validation_results=validation_results),
         ]
     
         if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
@@ -134,6 +135,53 @@ class ValidationResultsPageRenderer(Renderer):
                 }
             },
         })
+    
+    @classmethod
+    def _render_batch_kwargs(cls, validation_results):
+        batch_kwargs = validation_results["meta"]["batch_kwargs"]
+        table_rows = [
+            [
+                kwarg,
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$value",
+                        "params": {
+                            "value": str(value)
+                        },
+                        "styling": {
+                            "default": {
+                                "styles": {
+                                    "word-break": "break-all"
+                                }
+                            },
+                        }
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": ["pl-3"],
+                        }
+                    }
+                }
+            ] for kwarg, value in batch_kwargs.items()
+        ]
+        table_rows.sort(key=lambda row: row[0])
+        
+        return RenderedComponentContent(**{
+            "content_block_type": "table",
+            "header": "Batch Kwargs",
+            "table": table_rows,
+            "styling": {
+                "classes": ["col-12", "table-responsive"],
+                "styles": {
+                    "margin-top": "20px"
+                },
+                "body": {
+                    "classes": ["table", "table-sm"]
+                }
+            },
+        })
+        
     
     @classmethod
     def _render_validation_statistics(cls, validation_results):
