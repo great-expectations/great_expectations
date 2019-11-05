@@ -56,9 +56,14 @@ class ValidationResultsPageRenderer(Renderer):
         overview_content_blocks = [
             self._render_validation_header(),
             self._render_validation_info(validation_results=validation_results),
-            self._render_batch_kwargs(validation_results=validation_results),
             self._render_validation_statistics(validation_results=validation_results),
         ]
+        
+        if validation_results["meta"].get("batch_kwargs"):
+            overview_content_blocks.insert(
+                2,
+                self._render_batch_kwargs(validation_results=validation_results)
+            )
     
         if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
             data_asset_name = short_data_asset_name
@@ -138,7 +143,7 @@ class ValidationResultsPageRenderer(Renderer):
     
     @classmethod
     def _render_batch_kwargs(cls, validation_results):
-        batch_kwargs = validation_results["meta"]["batch_kwargs"]
+        batch_kwargs = validation_results["meta"].get("batch_kwargs")
         table_rows = [
             [
                 kwarg,
