@@ -35,4 +35,3 @@ google-cloud-storage>=1.20.0
 pybigquery>=0.4.11
 # TEMPORARY FOR BROKEN PROMPT-TOOLKIT BUILDS
 prompt-toolkit<2.0.10;python_version>="3"  # downstream dependency of ipykernel -> ipython -> prompt-toolkit
-prompt-toolkit<1.0.17;python_version<"3"  # downstream dependency of ipykernel -> ipython -> prompt-toolkit
