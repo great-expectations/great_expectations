@@ -58,7 +58,7 @@ class ValidationResultsPageRenderer(Renderer):
             self._render_validation_info(validation_results=validation_results),
             self._render_validation_statistics(validation_results=validation_results),
         ]
-        
+
         if validation_results["meta"].get("batch_kwargs"):
             overview_content_blocks.insert(
                 2,
@@ -171,7 +171,7 @@ class ValidationResultsPageRenderer(Renderer):
             ] for kwarg, value in batch_kwargs.items()
         ]
         table_rows.sort(key=lambda row: row[0])
-        
+
         return RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Batch Kwargs",
@@ -186,8 +186,7 @@ class ValidationResultsPageRenderer(Renderer):
                 }
             },
         })
-        
-    
+
     @classmethod
     def _render_validation_statistics(cls, validation_results):
         statistics = validation_results["statistics"]

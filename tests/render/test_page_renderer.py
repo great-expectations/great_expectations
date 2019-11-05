@@ -370,5 +370,5 @@ def test_ValidationResultsPageRenderer_render_batch_kwargs(titanic_profiled_evrs
             }
         }
     }
-    
+
     assert batch_kwargs_table == expected_batch_kwarg_table
