@@ -182,7 +182,6 @@ class FixedLengthTupleStoreBackend(StoreBackend):
                 type(value),
             ))
 
-
     def _convert_key_to_filepath(self, key):
         # NOTE: At some point in the future, it might be better to replace this logic with os.path.join.
         # That seems more correct, but the configs will be a lot less intuitive.
@@ -190,10 +189,9 @@ class FixedLengthTupleStoreBackend(StoreBackend):
 
         # NOTE : These methods support fixed-length keys, but not variable.
         self._validate_key(key)
-
         converted_string = self.filepath_template.format(*list(key))
-
-        return converted_string
+        path = os.path.join(converted_string.split('/'))
+        return path
 
     def _convert_filepath_to_key(self, filepath):
 
