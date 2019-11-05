@@ -14,7 +14,16 @@ If you prefer videos to written tutorials, `James <https://github.com/jcampbell>
 0. Open Jupyter Notebook
 ------------------------
 
-This tutorial assumes that you ran ``great_expectations init`` and went through the steps covered in the previous tutorial: :ref:`tutorial_init`. The dataset is a folder with CSV files containing National Provider Identifier (NPI) data that are processed with pandas.
+This tutorial assumes that:
+
+* you ran ``great_expectations init`` and went through the steps covered in the previous tutorial: :ref:`tutorial_init`.
+* your current directory is the root of the project where you ran ``great_expectations init``
+
+You can either follow the tutorial with the dataset that it uses or you can execute the same steps on your project with your own data.
+
+If you get stuck, find a bug or want to ask a question, go to `our Slack <https://greatexpectations.io/slack>`_ - this is the best way to get help from the contributors and other users.
+
+The dataset is a folder with CSV files containing National Provider Identifier (NPI) data that are processed with pandas.
 
 Jupyter notebooks is the interface for creating expectations.
 
@@ -326,9 +335,21 @@ an additional argument to ``save_expectation_suite`` method:
 8. View the Expectations in Data Docs
 -------------------------------------
 
+Data Docs compiles raw Great Expectations objects including Expectations and Validations into structured documents such as HTML documentation. By default the HTML website is hosted on your local filesystem. When you are working in a team, the website can be hosted in the cloud (e.g., on S3) and serve as the shared source of truth for the team working on the data pipeline.
+
 To view the expectation suite you just created as HTML, rebuild the data docs and open the webstite in the browser:
 
 .. code-block:: python
 
     context.build_data_docs()
     context.open_data_docs()
+
+Read more about the capabilities and configuration of Data Docs here: :ref:`data_docs`.
+
+
+Congratulations!
+----------------
+
+Now you you know the basics of creating expectations.
+
+What is next? This is a collection of tutorials that walk you through a variety of useful Great Expectations workflows: :ref:`tutorials`.
