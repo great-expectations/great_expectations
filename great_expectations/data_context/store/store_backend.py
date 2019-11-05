@@ -151,11 +151,15 @@ class FixedLengthTupleStoreBackend(StoreBackend):
         filepath_template,
         key_length,
         root_directory,
-        forbidden_substrings=["/", "\\"],
+        forbidden_substrings=None,
+        platform_specific_separator=True
     ):
         assert isinstance(key_length, int)
         self.key_length = key_length
+        if forbidden_substrings is None:
+            forbidden_substrings = ["/", "\\"]
         self.forbidden_substrings = forbidden_substrings
+        self.platform_specific_separator = platform_specific_separator
 
         self.filepath_template = filepath_template
         self.verify_that_key_to_filepath_operation_is_reversible()
@@ -190,20 +194,24 @@ class FixedLengthTupleStoreBackend(StoreBackend):
         # NOTE : These methods support fixed-length keys, but not variable.
         self._validate_key(key)
         converted_string = self.filepath_template.format(*list(key))
-        path = os.path.join(*converted_string.split('/'))
-        return path
+        if self.platform_specific_separator:
+            converted_string = os.path.join(*converted_string.split('/'))
+        return converted_string
 
     def _convert_filepath_to_key(self, filepath):
         # filepath_template (for now) is always specified with forward slashes, but it is then
         # used to (1) dynamically construct and evaluate a regex, and (2) split the provided (observed) filepath
-        filepath_template = os.path.join(*self.filepath_template.split('/'))
-        filepath_template = filepath_template.replace('\\', '\\\\')
+        if self.platform_specific_separator:
+            filepath_template = os.path.join(*self.filepath_template.split('/'))
+            filepath_template = filepath_template.replace('\\', '\\\\')
+        else:
+            filepath_template = self.filepath_template
 
         # Convert the template to a regex
-        indexed_string_substitutions = re.findall("\{\d+\}", filepath_template)
+        indexed_string_substitutions = re.findall(r"{\d+}", filepath_template)
         tuple_index_list = ["(?P<tuple_index_{0}>.*)".format(i, ) for i in range(len(indexed_string_substitutions))]
         intermediate_filepath_regex = re.sub(
-            "\{\d+\}",
+            r"{\d+}",
             lambda m, r=iter(tuple_index_list): next(r),
             filepath_template
         )
@@ -255,13 +263,15 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
         filepath_template,
         key_length,
         root_directory,
-        forbidden_substrings=["/", "\\"],
+        forbidden_substrings=None,
+        platform_specific_separator=True
     ):
         super(FixedLengthTupleFilesystemStoreBackend, self).__init__(
             root_directory=root_directory,
             filepath_template=filepath_template,
             key_length=key_length,
             forbidden_substrings=forbidden_substrings,
+            platform_specific_separator=platform_specific_separator
         )
 
         self.base_directory = base_directory
@@ -344,17 +354,18 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         key_length,
         bucket,
         prefix="",
-        forbidden_substrings=["/", "\\"],
+        forbidden_substrings=None,
+        platform_specific_separator=False
     ):
         super(FixedLengthTupleS3StoreBackend, self).__init__(
             root_directory=root_directory,
             filepath_template=filepath_template,
             key_length=key_length,
             forbidden_substrings=forbidden_substrings,
+            platform_specific_separator=platform_specific_separator
         )
         self.bucket = bucket
         self.prefix = prefix
-
 
     def _get(self, key):
         s3_object_key = os.path.join(
@@ -403,4 +414,3 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
 
         all_keys = self.list_keys()
         return key in all_keys
-
