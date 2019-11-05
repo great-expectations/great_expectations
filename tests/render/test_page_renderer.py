@@ -240,3 +240,135 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_prof
 
     assert validation_statistics == expected_validation_statistics
 
+
+def test_ValidationResultsPageRenderer_render_batch_kwargs(titanic_profiled_evrs_1):
+    batch_kwargs_table = ValidationResultsPageRenderer._render_batch_kwargs(titanic_profiled_evrs_1)
+    print(json.dumps(batch_kwargs_table, indent=2))
+
+    expected_batch_kwarg_table = {
+        "content_block_type": "table",
+        "header": "Batch Kwargs",
+        "table": [
+            [
+                "engine",
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$value",
+                        "params": {
+                            "value": "python"
+                        },
+                        "styling": {
+                            "default": {
+                                "styles": {
+                                    "word-break": "break-all"
+                                }
+                            }
+                        }
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": [
+                                "pl-3"
+                            ]
+                        }
+                    }
+                }
+            ],
+            [
+                "partition_id",
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$value",
+                        "params": {
+                            "value": "Titanic"
+                        },
+                        "styling": {
+                            "default": {
+                                "styles": {
+                                    "word-break": "break-all"
+                                }
+                            }
+                        }
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": [
+                                "pl-3"
+                            ]
+                        }
+                    }
+                }
+            ],
+            [
+                "path",
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$value",
+                        "params": {
+                            "value": "project_dir/project_path/data/titanic/Titanic.csv"
+                        },
+                        "styling": {
+                            "default": {
+                                "styles": {
+                                    "word-break": "break-all"
+                                }
+                            }
+                        }
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": [
+                                "pl-3"
+                            ]
+                        }
+                    }
+                }
+            ],
+            [
+                "sep",
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$value",
+                        "params": {
+                            "value": "None"
+                        },
+                        "styling": {
+                            "default": {
+                                "styles": {
+                                    "word-break": "break-all"
+                                }
+                            }
+                        }
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": [
+                                "pl-3"
+                            ]
+                        }
+                    }
+                }
+            ]
+        ],
+        "styling": {
+            "classes": [
+                "col-12",
+                "table-responsive"
+            ],
+            "styles": {
+                "margin-top": "20px"
+            },
+            "body": {
+                "classes": [
+                    "table",
+                    "table-sm"
+                ]
+            }
+        }
+    }
+    
+    assert batch_kwargs_table == expected_batch_kwarg_table
