@@ -251,7 +251,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql)
 
-            if generated_table_name is not None:
+            if generated_table_name is not None and self.engine.dialect.name.lower() == "bigquery":
                 logger.warning("Created permanent table {table_name}".format(
                     table_name=table_name))
 

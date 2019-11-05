@@ -44,8 +44,7 @@ Otherwise, default behavior depends on how the pybigquery engine is configured:
 If a default BigQuery dataset is defined in the connection string
 (for example, ``bigquery://project-name/dataset-name``), and no ``bigquery_temp_table``
 Batch Kwarg is supplied, then GE will create a permanent table with a random
-UUID that location
-(e.g. ``project-name.dataset-name.ge_tmp_1a1b6511_03e6_4e18_a1b2_d85f9e9045c3``).
+UUID in that location (e.g. ``project-name.dataset-name.ge_tmp_1a1b6511_03e6_4e18_a1b2_d85f9e9045c3``).
 
 If a default BigQuery dataset is not defined in the connection string
 (for example, ``bigquery://project-name``) and no ``bigquery_temp_table`` Batch Kwawrg
