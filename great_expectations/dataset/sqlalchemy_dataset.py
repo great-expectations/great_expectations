@@ -252,7 +252,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.create_temporary_table(table_name, custom_sql)
 
             if generated_table_name is not None:
-                logger.warn("Created permanent table {table_name}".format(
+                logger.warning("Created permanent table {table_name}".format(
                     table_name=table_name))
 
         try:
