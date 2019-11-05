@@ -202,14 +202,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def __init__(self, table_name=None, engine=None, connection_string=None,
                  custom_sql=None, schema=None, *args, **kwargs):
 
-
         if custom_sql and not table_name:
-            batch_kwargs = kwargs.pop("batch_kwargs", None)
-            if batch_kwargs is not None:
-                table_name = batch_kwargs.pop("bigquery_temp_table", None)
-            if table_name is None:
-                # dashes are special characters in most databases so use underscores
-                table_name = "ge_tmp_" + str(uuid.uuid4()).replace("-", "_")
+            # dashes are special characters in most databases so use underscores
+            table_name = "ge_tmp_" + str(uuid.uuid4()).replace("-", "_")
+            generated_table_name = table_name
+        else:
+            generated_table_name = None
 
         if table_name is None:
             raise ValueError("No table_name provided.")
@@ -246,8 +244,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # a user-defined schema
             raise ValueError("Cannot specify both schema and custom_sql.")
 
+        if custom_sql is not None and self.engine.dialect.name.lower() == "bigquery":
+            if generated_table_name is not None and self.engine.dialect.dataset_id is None:
+                raise ValueError("No BigQuery dataset specified. Use biquery_temp_table batch_kwarg or a specify a default dataset in engine url")
+
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql)
+
+            if generated_table_name is not None:
+                logger.warn("Created permanent table {table_name}".format(
+                    table_name=table_name))
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
@@ -275,12 +281,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # cannot work on a temp table.
             # If it fails, we are trying to get the data using read_sql
             head_sql_str = "select * from "
-            if self._table.schema:
+            if self._table.schema and self.engine.dialect.name.lower() != "bigquery":
                 head_sql_str += self._table.schema + "."
-            if self.engine.dialect.name.lower() == "bigquery":
+            elif self.engine.dialect.name.lower() == "bigquery":
                 head_sql_str += "`" + self._table.name + "`"
             else:
-               head_sql_str += self._table.name
+                head_sql_str += self._table.name
             head_sql_str += " limit {0:d}".format(n)
 
             df = pd.read_sql(head_sql_str, con=self.engine)
