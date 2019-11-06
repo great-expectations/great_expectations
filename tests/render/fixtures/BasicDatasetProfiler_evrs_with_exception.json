@@ -2026,6 +2026,12 @@
     "great_expectations.__version__": "__fixture__",
     "data_asset_name": null,
     "expectation_suite_name": "default",
-    "run_id": "__run_id_fixture__"
+    "run_id": "__run_id_fixture__",
+    "batch_kwargs": {
+      "path": "project_dir/project_path/data/titanic/Titanic.csv",
+      "partition_id": "Titanic",
+      "sep": null,
+      "engine": "python"
+    }
   }
 }
