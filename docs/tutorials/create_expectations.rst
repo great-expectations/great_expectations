@@ -335,7 +335,7 @@ an additional argument to ``save_expectation_suite`` method:
 8. View the Expectations in Data Docs
 -------------------------------------
 
-Data Docs compiles raw Great Expectations objects including Expectations and Validations into structured documents such as HTML documentation. By default the HTML website is hosted on your local filesystem. When you are working in a team, the website can be hosted in the cloud (e.g., on S3) and serve as the shared source of truth for the team working on the data pipeline.
+Data Docs compiles Expectations and Validations into HTML documentation. By default the HTML website is hosted on your local filesystem. When you are working in a team, the website can be hosted in the cloud (e.g., on S3) and serve as the shared source of truth for the team working on the data pipeline.
 
 To view the expectation suite you just created as HTML, rebuild the data docs and open the webstite in the browser:
 
