@@ -9,27 +9,24 @@ profiling and performing exploratory analysis on your dataset. This tutorial cov
 Video
 ------
 
-If you prefer videos to written tutorials, `James <https://github.com/jcampbell>`_ (one of the original core contributors) walks you through this turorial in a `video on YouTube <https://greatexpectations.io/videos/getting_started/create_expectations>`_.
+Want to watch a video walkthrough of this tutorial? `James <https://github.com/jcampbell>`_ (one of the original core contributors to Great Expectations) walks you through this tutorial in a `video on YouTube <https://greatexpectations.io/videos/getting_started/create_expectations>`_.
 
 0. Open Jupyter Notebook
 ------------------------
 
 This tutorial assumes that:
 
-* you ran ``great_expectations init`` and went through the steps covered in the previous tutorial: :ref:`tutorial_init`.
+* you ran ``great_expectations init`` and completed the steps covered in the previous tutorial: :ref:`tutorial_init`.
 * your current directory is the root of the project where you ran ``great_expectations init``
 
 You can either follow the tutorial with the dataset that it uses or you can execute the same steps on your project with your own data.
 
 If you get stuck, find a bug or want to ask a question, go to `our Slack <https://greatexpectations.io/slack>`_ - this is the best way to get help from the contributors and other users.
 
-The dataset is a folder with CSV files containing National Provider Identifier (NPI) data that are processed with pandas.
 
-Jupyter notebooks is the interface for creating expectations.
+The ``great_expectations init`` command created a ``great_expectations/notebooks/`` folder in your project. The folder contains example notebooks for pandas, Spark and SQL datasources.
 
-The ``great_expectations init`` command created ``great_expectations/notebooks/`` folder in your project. The folder contains example notebooks for pandas, Spark and SQL datasources.
-
-If you are following this tutorial using the NPI dataset, open the pandas notebook. If you are working with your dataset, see the instructions for your datasource:
+If you are following this tutorial using the NPI dataset, open the pandas notebook. If you are working with a different dataset, follow along in the notebook with instructions tailored to your datasource:
 
 .. content-tabs::
 
@@ -60,9 +57,9 @@ If you are following this tutorial using the NPI dataset, open the pandas notebo
 
 A DataContext represents a Great Expectations project. It organizes datasources, notification settings, data documentation sites, and storage and access for expectation suites and validation results.
 The DataContext is configured via a yml file stored in a directory called ``great_expectations``.
-This entire directory which includes configuration files as well as expectation suites should be stored in version control.
+This entire directory, which includes configuration files as well as expectation suites, should be stored in version control.
 
-Instantiating a DataContext loads our project configuration and all its resources.
+Instantiating a DataContext loads your project configuration and all its resources.
 
 
 
@@ -85,12 +82,12 @@ A Data Asset is data you can describe with expectations.
     .. tab-container:: tab0
         :title: pandas
 
-        A Pandas datasource generates data assets from Pandas DataFrames or CSV files. In this example the pipeline processes NPI data that it reads from CSV files in ``npidata`` directory into Pandas DataFrames. This is the data you want to describe and specify with expectations. That directory and its files are a data asset, named "NPI data" (based on the directory name).
+        A Pandas datasource generates data assets from Pandas DataFrames or CSV files. In this example the pipeline processes NPI data that it reads from CSV files in the ``npidata`` directory into Pandas DataFrames. This is the data you want to describe with expectations. That directory and its files form a data asset, named "npidata" (based on the directory name).
 
     .. tab-container:: tab1
         :title: pyspark
 
-        A Spark datasource generates data assets from Spark DataFrames or CSV files. In this example the pipeline processes NPI data that it reads from CSV files in ``npidata`` directory into Pandas DataFrames. This is the data you want to describe and specify with expectations. If the example read the data into Spark DataFrames, we would think of this data asset as "data from the npidata directory that we read into Spark DataFrames" and give it a name "NPI data".
+        A Spark datasource generates data assets from Spark DataFrames or CSV files. The data loaded into a data asset is the data you want to describe and specify with expectations. If this example read CSV files in a directory called ``npidata`` into a Spark DataFrame, the resulting data asset would be called "npidata" based on the directory name.
 
     .. tab-container:: tab2
         :title: SQLAlchemy
@@ -228,7 +225,10 @@ This is most likely sufficient for the purpose of this tutorial.
                 header or to use a specific separator), add them to the the ``batch_kwargs``.
 
                 See the complete list of options for `Spark DataFrameReader <https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader>`__
+ If you already loaded the data into a Spark DataFrame, here is how you construct ``batch_kwargs`` that instruct the datasource to use your dataframe as a batch:
 
+                .. code-block:: python
+                    batch_kwargs = {'df': "YOUR_SPARK_DF"}
             .. tab-container:: tab2
                 :title: SQLAlchemy
 
@@ -263,10 +263,10 @@ Now you have the contents of one of the files loaded as batch of the data asset 
 6. Author Expectations
 -----------------------
 
-Now that we have a batch of data, we can call ``expect`` methods on the data asset in order to check
+Now that you have a batch of data, you can call ``expect`` methods on the data asset in order to check
 whether this expectation is true for this batch of data.
 
-For example, to check if we can expect values in column "NPI" to never be empty, call:
+For example, to check whether it is reasonable to expect values in the column "NPI" to never be empty, call:
 ``batch.expect_column_values_to_not_be_null('NPI')``
 
 Some expectations can be created from your domain expertise; for example we might expect that most entries in the NPI
@@ -277,22 +277,22 @@ Here is how we can add an expectation that expresses that knowledge:
 
 .. image:: ../images/expect_column_values_to_be_unique_success.png
 
-Other expectations can be created by examining the data in the batch. For example, we want to protect our pipeline
-against improper values in the "Provider Other Organization Name Type Code" column. We don't know exactly what the
-"improper" values are, but we can try some values and check if the data in the batch meets this expectation:
+Other expectations can be created by examining the data in the batch. For example, suppose you want to protect a pipeline
+against improper values in the "Provider Other Organization Name Type Code" column. Even if you don't know exactly what the
+"improper" values are, you can explore the data by trying some values to check if the data in the batch meets your expectation:
 
 .. image:: ../images/expect_column_values_to_be_in_set_failure.png
 
 Validating the expectation against the batch resulted in failure - there are some values in the column that do not meet
 the expectation. The "partial_unexpected_list" key in the result dictionary contains examples of non-conforming values.
-Examining these examples shows that some titles are not in our expected set. We adjust the ``value_set`` and rerun
+Examining these examples shows that some titles are not in the expected set. Adjust the ``value_set`` and rerun
 the expectation method:
 
 .. image:: ../images/expect_column_values_to_be_in_set_success.png
 
-This time validation was successful - all values in the column meet our expectation.
+This time validation was successful - all values in the column meet the expectation.
 
-Although we called ``expect_column_values_to_be_in_set`` twice (with different argument values), only one
+Although you called ``expect_column_values_to_be_in_set`` twice (with different argument values), only one
 expectation of type ``expect_column_values_to_be_in_set`` will be created for the column - the latest call
 overrides all the earlier ones. By default, only expectations that were true on their last run are saved.
 
@@ -300,7 +300,7 @@ How do I know which types of expectations I can add?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * *Tab-complete* the partially typed ``expect_`` method name to see available expectations.
-* In Jupyter, we can also use *shift-tab* to see the docstring for each expectation, including the parameters it
+* In Jupyter, you can also use *shift-tab* to see the docstring for each expectation, including the parameters it
   takes and to get more information about the expectation.
 * Visit the :ref:`expectation_glossary` for a complete
   list of expectations that are currently part of the great expectations vocabulary. Here is a short preview of the glossary:
@@ -318,17 +318,17 @@ How do I know which types of expectations I can add?
 
     df.save_expectation_suite()
 
-The ``expectations_store`` attribute in ``great_expectations.yml`` configuration file controls the location where the DataContext saves the expectation suite.
+The ``expectations_store`` attribute in the ``great_expectations.yml`` configuration file controls the location where the DataContext saves the expectation suite.
 
-When we call ``get_expectation_suite``, we might see this warning in the output:
+When you call ``get_expectation_suite``, you might see this warning in the output:
 
 .. image:: ../images/failing_expectations_warning.png
 
-When we save an expectation suite, by default, GE will drop any expectation that was not successful on its last run.
+That is produced since, by default, GE will drop any expectation that was not successful on its last run.
 
-Sometimes we want to save an expectation even though it did not validate successfully on the current batch (e.g., we
-have a reason to believe that our expectation is correct and the current batch has bad entries). In this case we pass
-an additional argument to ``save_expectation_suite`` method:
+Sometimes, you may want to save an expectation even though it did not validate successfully on the current batch (e.g., you
+have a reason to believe that the expectation is correct and the current batch has bad entries). In this case, pass
+an additional argument to the ``save_expectation_suite`` method:
 
 .. code-block:: python
 
