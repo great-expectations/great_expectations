@@ -60,7 +60,7 @@ If you are following this tutorial using the NPI dataset, open the pandas notebo
 
 A DataContext represents a Great Expectations project. It organizes datasources, notification settings, data documentation sites, and storage and access for expectation suites and validation results.
 The DataContext is configured via a yml file stored in a directory called ``great_expectations``.
-the configuration file as well as managed expectation suites should be stored in version control.
+This entire directory which includes configuration files as well as expectation suites should be stored in version control.
 
 Instantiating a DataContext loads our project configuration and all its resources.
 
