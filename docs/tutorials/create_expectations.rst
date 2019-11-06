@@ -150,7 +150,7 @@ If an expectation suite with this name already exists for this data_asset, you w
 
 Expectations describe data assets. Data assets are composed of batches. Validation checks expectations against a batch of data.
 
- For example, a batch could be the most recent day of log data. For a database table, a batch could be the data in that table at a particular time.
+For example, a batch could be the most recent day of log data. For a database table, a batch could be the data in that table at a particular time.
 
 To create expectations about a data asset you will load a batch of data as a Great Expectations :class:`Dataset <great_expectations.dataset.dataset.Dataset>` and then call expectation methods.
 
