@@ -106,7 +106,7 @@ Use this convenience method to list all data assets and expectation suites in yo
 
     great_expectations.jupyter_ux.list_available_data_asset_names(context)
 
-Here is the output of this method when executed in our example project:
+The output looks like this:
 
 .. image:: ../images/list_data_assets.png
     :width: 600px
