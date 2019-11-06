@@ -330,7 +330,7 @@ Here is what a part of this object looks like:
 .. image:: ../images/validation_playground_result_json.png
     :width: 500px
 
-Don't worry - this blob of JSON is meant for machines. :ref:`data_docs` provide an HTML view of both expectation suites and validation results that is more suitable for humans. You will see how to get to them in the next sections.
+Don't panic! This blob of JSON is meant for machines. :ref:`data_docs` are an compiled HTML view of both expectation suites and validation results that is far more suitable for humans. You will see how easy it is to build them in the next sections.
 
 
 7. Validation Operators
