@@ -100,7 +100,7 @@ A Data Asset is data you can describe with expectations.
         * If the data did not reside in one table ``npidata`` and, instead, the example pipeline ran an SQL query that fetched the data (probably from multiple tables), the result set of that query would be accessible as a data asset. The name of this data asset would be up to us (e.g., "npidata" or "npidata_query").
 
 
-Great Expectations' ``jupyter_ux`` module has a convenience method that lists all data assets and expectation suites known to a Data Context:
+Use this convenience method to list all data assets and expectation suites in your project (using the `DataContext`).
 
 .. code-block:: python
 
