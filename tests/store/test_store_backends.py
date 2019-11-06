@@ -71,7 +71,7 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
         root_directory=os.path.abspath(path),
         base_directory=project_path,
         key_length=3,
-        filepath_template= "{0}/{1}/{2}/foo-{2}-expectations.txt",
+        filepath_template="{0}/{1}/{2}/foo-{2}-expectations.txt",
     )
 
     tuple_ = ("A__a", "B-b", "C")
