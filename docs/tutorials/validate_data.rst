@@ -349,7 +349,7 @@ Validation Operators provide a convenient abstraction for both bundling the vali
 
 An instance of ``action_list_operator`` operator is configured in the default ``great_expectations.yml`` configuration file. ActionListValidationOperator validates each batch in the list that is passed as `assets_to_validate` argument to its `run` method against the expectation suite included within that batch and then invokes a list of configured actions on every validation result.
 
-Below is the operator's configuration:
+Below is the operator's configuration snippet in the ``great_expectations.yml`` file:
 
 .. code-block:: bash
 
