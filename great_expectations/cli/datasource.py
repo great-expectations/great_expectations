@@ -211,7 +211,6 @@ def _add_sqlalchemy_datasource(context):
             context.add_datasource(name=data_source_name, class_name='SqlAlchemyDatasource', **configuration)
             break
         except ModuleNotFoundError as de:
-            message = message + "\n  - Please `pip install psycopg2` and try again" #TODO: Taylor, this looks wrong (?)
             cli_message(message.format(str(de)))
             return None
 
