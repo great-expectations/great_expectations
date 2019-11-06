@@ -339,7 +339,7 @@ When deploying Great Expectations in a real data pipeline, you will typically di
 Validation Operators provide a convenient abstraction for both bundling the validation of multiple expectation suites and the actions that should be taken after the validation. See the
 :ref:`validation_operators_and_actions` for more information.
 
-An instance of ``action_list_operator`` operator is configured in the default ``great_expectations.yml`` configuration file. ActionListValidationOperator validates each batch in the list that is passed as `assets_to_validate` argument to its `run` method against the expectation suite included within that batch and then invokes a list of configured actions on every validation result.
+An instance of ``action_list_operator`` operator is configured in the default ``great_expectations.yml`` configuration file. ``ActionListValidationOperator`` validates each batch in the list that is passed as ``assets_to_validate`` argument to its ``run`` method against the expectation suite included within that batch and then invokes a list of configured actions on every validation result.
 
 Below is the operator's configuration snippet in the ``great_expectations.yml`` file:
 
