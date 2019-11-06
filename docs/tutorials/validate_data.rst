@@ -337,7 +337,8 @@ Don't panic! This blob of JSON is meant for machines. :ref:`data_docs` are an co
 -----------------------
 
 The ``validate()`` method evaluates one batch of data against one expectation suite and returns a dictionary of validation results. This is sufficient when you explore your data and get to know Great Expectations.
-When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
+
+When deploying Great Expectations in a real data pipeline, you will typically discover these additional needs:
 
 * validating a group of batches that are logically related
 * validating a batch against several expectation suites
