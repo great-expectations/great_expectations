@@ -330,9 +330,9 @@ Don't panic! This blob of JSON is meant for machines. :ref:`data_docs` are an co
 The `validate` method evaluates one batch of data against one expectation suite and returns a dictionary of validation results. This is sufficient when you explore your data and get to know Great Expectations.
 When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
 
-* validating a group of batches that are logically related
-* validating a batch against several expectation suites
-* doing something with the validation results (e.g., saving them for a later review, sending notifications in case of failures, etc.).
+* Validating a group of batches that are logically related (eg Did all my salesforce integrations work last night?).
+* Validating a batch against several expectation suites (eg Does my nightly clickstream event job have any **critical** failures I need to deal with asap or **warnings** I should investigate later?).
+* Doing something with the validation results (e.g., saving them for a later review, sending notifications in case of failures, etc.).
 
 Validation Operators provide a convenient abstraction for both bundling the validation of multiple expectation suites and the actions that should be taken after the validation. See the
 :ref:`validation_operators_and_actions` for more information.
