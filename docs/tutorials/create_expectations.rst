@@ -137,6 +137,8 @@ The ``normalize_data_asset_name`` method converts the short name of a data asset
 Individual Expectations are organized into expectation suites. We recommend 'warning' or 'default' as the name
 for a first expectation suite associated with a data asset.
 
+Let's create a new empty suite in our project so we can start writing Expectations!
+
 .. code-block:: python
 
     context.create_expectation_suite(data_asset_name=data_asset_name,
