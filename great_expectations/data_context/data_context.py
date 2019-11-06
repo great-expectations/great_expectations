@@ -811,7 +811,7 @@ class ConfigOnlyDataContext(object):
         self._project_config_with_variables_substituted["datasources"][
             name] = self.get_config_with_variables_substituted(config)
 
-        if not do_not_initialize:
+        if initialize:
             datasource = self._build_datasource_from_config(
                 **self._project_config_with_variables_substituted["datasources"][name])
             self._datasources[name] = datasource
