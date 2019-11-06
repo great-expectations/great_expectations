@@ -6,6 +6,7 @@ from great_expectations.render.types import (
     RenderedSectionContent,
     RenderedDocumentContent
 )
+from .call_to_action_renderer import CallToActionRenderer
 
 # FIXME : This class needs to be rebuilt to accept SiteSectionIdentifiers as input.
 # FIXME : This class needs tests.
@@ -175,7 +176,7 @@ class SiteIndexPageRenderer(Renderer):
                             }
                         },
                         "body": {
-                            "classes": ["pl-1", "ge-index-page-generator-table-validation-links-list"]
+                            "classes": ["ge-index-page-generator-table-validation-links-list"]
                         }
                     }
                 })
@@ -314,6 +315,7 @@ class SiteIndexPageRenderer(Renderer):
     def render(cls, index_links_dict):
 
         sections = []
+        cta_object = index_links_dict.pop("cta_object", None)
 
         for source, generators in index_links_dict.items():
             content_blocks = []
@@ -321,7 +323,20 @@ class SiteIndexPageRenderer(Renderer):
             # datasource header
             source_header_block = RenderedComponentContent(**{
                 "content_block_type": "header",
-                "header": source,
+                "header": {
+                    "template": "$title_prefix | $source",
+                    "params": {
+                        "source": source,
+                        "title_prefix": "Datasource"
+                    },
+                    "styling": {
+                        "params": {
+                            "title_prefix": {
+                                "tag": "strong"
+                            }
+                        }
+                    },
+                },
                 "styling": {
                     "classes": ["col-12", "ge-index-page-datasource-title"],
                     "header": {
@@ -335,25 +350,25 @@ class SiteIndexPageRenderer(Renderer):
             for generator, data_assets in generators.items():
                 generator_header_block = RenderedComponentContent(**{
                     "content_block_type": "header",
-                    "header": generator,
+                    "subheader": {
+                        "template": "$title_prefix | $generator",
+                        "params": {
+                            "generator": generator,
+                            "title_prefix": "Data Asset Generator"
+                        },
+                        "styling": {
+                            "params": {
+                                "title_prefix": {
+                                    "tag": "strong"
+                                }
+                            }
+                        },
+                    },
                     "styling": {
                         "classes": ["col-12", "ml-4", "ge-index-page-generator-title"],
                     }
                 })
                 content_blocks.append(generator_header_block)
-
-                horizontal_rule = RenderedComponentContent(**{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "",
-                        "params": {},
-                        "tag": "hr"
-                    },
-                    "styling": {
-                        "classes": ["col-12"],
-                    }
-                })
-                content_blocks.append(horizontal_rule)
 
                 generator_table_rows = []
                 generator_table_header_row = [RenderedComponentContent(**{
@@ -399,7 +414,7 @@ class SiteIndexPageRenderer(Renderer):
                     "header_row": generator_table_header_row,
                     "table": generator_table_rows,
                     "styling": {
-                        "classes": ["col-12", "ge-index-page-generator-table-container"],
+                        "classes": ["col-12", "ge-index-page-generator-table-container", "pl-5", "pr-4"],
                         "styles": {
                             "margin-top": "10px"
                         },
@@ -420,7 +435,12 @@ class SiteIndexPageRenderer(Renderer):
             })
             sections.append(section)
 
-        return RenderedDocumentContent(**{
+        index_page_document = RenderedDocumentContent(**{
                 "utm_medium": "index-page",
                 "sections": sections
             })
+        
+        if cta_object:
+            index_page_document["cta_footer"] = CallToActionRenderer.render(cta_object)
+            
+        return index_page_document

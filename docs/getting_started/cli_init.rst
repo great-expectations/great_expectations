@@ -1,6 +1,6 @@
 .. _tutorial_init:
 
-Step 1: Run ``great_expectations init``
+Run ``great_expectations init``
 ===============================================
 
 Video

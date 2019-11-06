@@ -4,6 +4,7 @@ import os
 import json
 import logging
 import shutil
+import webbrowser
 
 from ruamel.yaml import YAML, YAMLError
 import sys
@@ -89,6 +90,14 @@ class ConfigOnlyDataContext(object):
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
     UNCOMMITTED_DIRECTORIES = ["data_docs", "samples", "validations"]
+    BASE_DIRECTORIES = [
+        "datasources",
+        "expectations",
+        "notebooks",
+        "plugins",
+        "uncommitted",
+    ]
+    NOTEBOOK_SUBDIRECTORIES = ["pandas", "spark", "sql"]
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
 
@@ -183,13 +192,7 @@ class ConfigOnlyDataContext(object):
         safe_mmkdir(base_dir, exist_ok=True)
         open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
 
-        for directory in [
-            "datasources",
-            "expectations",
-            "notebooks",
-            "plugins",
-            "uncommitted",
-        ]:
+        for directory in cls.BASE_DIRECTORIES:
             if directory == "plugins":
                 plugins_dir = os.path.join(base_dir, directory)
                 safe_mmkdir(plugins_dir, exist_ok=True)
@@ -200,7 +203,7 @@ class ConfigOnlyDataContext(object):
                 cls.scaffold_custom_data_docs(plugins_dir)
             else:
                 safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
-        
+
         uncommitted_dir = os.path.join(base_dir, "uncommitted")
 
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
@@ -209,7 +212,10 @@ class ConfigOnlyDataContext(object):
                 exist_ok=True
             )
 
-    
+        notebook_path = os.path.join(base_dir, "notebooks")
+        for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
+            safe_mmkdir(os.path.join(notebook_path, subdir), exist_ok=True)
+
     @classmethod
     def scaffold_custom_data_docs(cls, plugins_dir):
         """Copy custom data docs templates"""
@@ -220,12 +226,14 @@ class ConfigOnlyDataContext(object):
     @classmethod
     def scaffold_notebooks(cls, base_dir):
         """Copy template notebooks into the notebooks directory for a project."""
-        template_dir = file_relative_path(__file__, "../init_notebooks/*.ipynb")
-        for notebook in glob.glob(template_dir):
-            notebook_name = os.path.basename(notebook)
-            destination_path = os.path.join(base_dir, "notebooks",
-                                            notebook_name)
-            shutil.copyfile(notebook, destination_path)
+        template_dir = file_relative_path(__file__, "../init_notebooks/")
+        notebook_dir = os.path.join(base_dir, "notebooks/")
+        for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
+            subdir_path = os.path.join(notebook_dir, subdir)
+            for notebook in glob.glob(os.path.join(template_dir, subdir, "*.ipynb")):
+                notebook_name = os.path.basename(notebook)
+                destination_path = os.path.join(subdir_path, notebook_name)
+                shutil.copyfile(notebook, destination_path)
 
     @classmethod
     def validate_config(cls, project_config):
@@ -408,6 +416,36 @@ class ConfigOnlyDataContext(object):
             if not os.path.isabs(resource_store["base_directory"]):
                 resource_store["base_directory"] = os.path.join(self.root_directory, resource_store["base_directory"])
         return resource_store
+
+    def get_existing_local_data_docs_sites_urls(self):
+        """Get file urls for all built local data docs."""
+        from great_expectations.data_context.store import FixedLengthTupleFilesystemStoreBackend
+        ge_dir = os.path.abspath(self.root_directory)
+        sites = self.get_project_config().get("data_docs_sites")
+
+        existing_sites = []
+
+        for site_name, site in sites.items():
+            store_backend = site.get("store_backend")
+            store_class = load_class(
+                store_backend.get("class_name"),
+                "great_expectations.data_context.store"
+            )
+            # Only do this for local files
+            if issubclass(store_class, FixedLengthTupleFilesystemStoreBackend):
+                base_dir = store_backend.get("base_directory")
+                data_docs_index = os.path.join(ge_dir, base_dir, "index.html")
+
+                if os.path.isfile(data_docs_index):
+                    existing_sites.append("file://" + data_docs_index)
+        return existing_sites
+
+    def open_data_docs(self):
+        """A stdlib cross-platform way to open a file in a browser."""
+        data_docs_urls = self.get_existing_local_data_docs_sites_urls()
+        for url in data_docs_urls:
+            logger.info("Opening Data Docs found here: {}".format(url))
+            webbrowser.open(url)
 
     @property
     def root_directory(self):
@@ -734,10 +772,12 @@ class ConfigOnlyDataContext(object):
             run_id=run_id,
         )
 
-    def add_datasource(self, name, **kwargs):
+    def add_datasource(self, name, initialize=True, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name (str): the name for the new datasource to add
+            initialize - if False, add the datasource to the config, but do not
+                                initialize it. Example: user needs to debug database connectivity.
             kwargs (keyword arguments): the configuration for the new datasource
         Note:
             the type_ parameter is still supported as a way to add a datasource, but support will
@@ -771,9 +811,13 @@ class ConfigOnlyDataContext(object):
         self._project_config_with_variables_substituted["datasources"][
             name] = self.get_config_with_variables_substituted(config)
 
-        datasource = self._build_datasource_from_config(
-            **self._project_config_with_variables_substituted["datasources"][name])
-        self._datasources[name] = datasource
+        if initialize:
+            datasource = self._build_datasource_from_config(
+                **self._project_config_with_variables_substituted["datasources"][name])
+            self._datasources[name] = datasource
+        else:
+            datasource = None
+
         self._project_config["datasources"][name] = config
 
         return datasource
@@ -1938,24 +1982,48 @@ class DataContext(ConfigOnlyDataContext):
 
         return new_datasource
 
-    @staticmethod
-    def find_context_root_dir():
+    @classmethod
+    def find_context_root_dir(cls):
+        result = None
+        yml_path = None
         ge_home_environment = os.getenv("GE_HOME", None)
         if ge_home_environment:
             ge_home_environment = os.path.expanduser(ge_home_environment)
             if os.path.isdir(ge_home_environment) and os.path.isfile(
                 os.path.join(ge_home_environment, "great_expectations.yml")
             ):
-                return ge_home_environment
-        elif os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
-            return "../"
-        elif os.path.isdir("./great_expectations") and \
-                os.path.isfile("./great_expectations/great_expectations.yml"):
-            return "./great_expectations"
-        elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
-            return "./"
+                result = ge_home_environment
         else:
+            yml_path = cls.find_context_yml_file()
+            if yml_path:
+                result = os.path.dirname(yml_path)
+
+        if result is None:
             raise ge_exceptions.ConfigNotFoundError()
+
+        logger.info("Using project config: {}".format(yml_path))
+        return result
+
+    @classmethod
+    def find_context_yml_file(cls, search_start_dir=os.getcwd()):
+        """Search for the yml file starting here and moving upward."""
+        yml_path = None
+
+        for i in range(4):
+            logger.debug("Searching for config file {} ({} layer deep)".format(search_start_dir, i))
+
+            potential_ge_dir = os.path.join(search_start_dir, cls.GE_DIR)
+
+            if os.path.isdir(potential_ge_dir):
+                potential_yml = os.path.join(potential_ge_dir, cls.GE_YML)
+                if os.path.isfile(potential_yml):
+                    yml_path = potential_yml
+                    logger.debug("Found config file at " + str(yml_path))
+                    break
+            # move up one directory
+            search_start_dir = os.path.dirname(search_start_dir)
+
+        return yml_path
 
 
 class ExplorerDataContext(DataContext):
