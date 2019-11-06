@@ -263,7 +263,7 @@ Now you have the contents of one of the files loaded as batch of the data asset 
 6. Author Expectations
 -----------------------
 
-Now that we have one of the data batches loaded, we can call ``expect`` methods on the data asset in order to check
+Now that we have a batch of data, we can call ``expect`` methods on the data asset in order to check
 whether this expectation is true for this batch of data.
 
 For example, to check if we can expect values in column "NPI" to never be empty, call:
