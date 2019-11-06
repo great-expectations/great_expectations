@@ -125,8 +125,8 @@ Here is the output of this method when executed in our example project:
 ``npidata`` is the short name of the data asset. Full names of data assets in a DataContext consist of three parts, for example: ``data__dir/default/npidata``. You don't need to know (yet) how the namespace is managed and the exact meaning of each part. The :ref:`data_context` article describes this in detail.
 
 
-3. Pick a data asset and and expectation suite
-----------------------------------------------
+3. Pick a data asset and expectation suite
+-------------------------------------------
 
 The previous section showed how to list all data assets and expectation suites in a project.
 
