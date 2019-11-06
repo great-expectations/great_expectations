@@ -159,7 +159,7 @@ If you created an expectation suite for this data asset, you can skip executing 
 
 Expectations describe data assets. Data assets are composed of batches. Validation checks expectations against a batch of data.
 
- For example, a batch could be the most recent day of log data. For a database table, a batch could be the data in that table at a particular time.
+For example, a batch could be the most recent day of log data. For a database table, a batch could be the data in that table at a particular time.
 
 In order to validate a batch of data you will load it as a Great Expectations :class:`Dataset <great_expectations.dataset.dataset.Dataset>`.
 
@@ -321,7 +321,7 @@ Here is what a part of this object looks like:
 .. image:: ../images/validation_playground_result_json.png
     :width: 500px
 
-Don't worry - this blob of JSON is meant for machines. :ref:`data_docs` provide an HTML view of both expectation suites and validation results that is more suitable for humans. You will see how to get to them in the next sections.
+Don't panic! This blob of JSON is meant for machines. :ref:`data_docs` are an compiled HTML view of both expectation suites and validation results that is far more suitable for humans. You will see how easy it is to build them in the next sections.
 
 
 7. Validation Operators
