@@ -267,7 +267,7 @@ Now that we have a batch of data, we can call ``expect`` methods on the data ass
 whether this expectation is true for this batch of data.
 
 For example, to check if we can expect values in column "NPI" to never be empty, call:
-``df.expect_column_values_to_not_be_null('NPI')``
+``batch.expect_column_values_to_not_be_null('NPI')``
 
 Some expectations can be created from your domain expertise; for example we might expect that most entries in the NPI
 database use the title "Dr." instead of "Ms.", or we might expect that every row should use a unique value in the 'NPI'
