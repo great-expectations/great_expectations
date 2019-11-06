@@ -3,15 +3,10 @@ import logging
 from string import Template
 
 from great_expectations.datasource import Datasource
-from great_expectations.datasource.types import (
-    SqlAlchemyDatasourceQueryBatchKwargs,
-    SqlAlchemyDatasourceTableBatchKwargs,
-    BatchId
-)
-from great_expectations.data_context.types import NormalizedDataAssetName, DataAssetIdentifier
+from great_expectations.datasource.types import BatchId
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
 from .generator.query_generator import QueryGenerator
-from great_expectations.exceptions import DatasourceInitializationError, BatchKwargsError
+from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.types import ClassConfig
 
 logger = logging.getLogger(__name__)
@@ -106,20 +101,26 @@ class SqlAlchemyDatasource(Datasource):
                 self.engine.connect()
             elif "url" in credentials:
                 url = credentials.pop("url")
+                # TODO perhaps we could carefully regex out the driver from the
+                #  url. It would need to be cautious to avoid leaking secrets.
+                self.drivername = "other"
                 self.engine = create_engine(url, **kwargs)
                 self.engine.connect()
 
             # Otherwise, connect using remaining kwargs
             else:
-                self.engine = create_engine(self._get_sqlalchemy_connection_options(**kwargs))
+                options, drivername = self._get_sqlalchemy_connection_options(**kwargs)
+                self.drivername = drivername
+                self.engine = create_engine(options)
                 self.engine.connect()
 
-        except sqlalchemy.exc.OperationalError as sqlalchemy_error:
+        except (sqlalchemy.exc.OperationalError, sqlalchemy.exc.DatabaseError) as sqlalchemy_error:
             raise DatasourceInitializationError(self._name, str(sqlalchemy_error))
 
         self._build_generators()
 
     def _get_sqlalchemy_connection_options(self, **kwargs):
+        drivername = None
         if "credentials" in self._datasource_config:
             credentials = self._datasource_config["credentials"]
         else:
@@ -136,7 +137,7 @@ class SqlAlchemyDatasource(Datasource):
             drivername = credentials.pop("drivername")
             options = sqlalchemy.engine.url.URL(drivername, **credentials)
 
-        return options
+        return options, drivername
 
     def _get_generator_class_from_type(self, type_):
         if type_ == "queries":

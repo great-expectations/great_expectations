@@ -33,6 +33,18 @@ in many projects it is useful to have different expectations evaluate in differe
 vs. testing; warning vs. error; high vs. low compute; ML model or dashboard--suites provide a namespace
 option for selecting which expectations a DataContext returns.
 
+
+A Great Expectations DataContext describes data assets using a three-part namespace consisting of
+**datasource_name**, **generator_name**, and **generator_asset**.
+
+To run validation for a data_asset, we need two additional elements:
+
+* a **batch** to validate; in our case it is a file loaded into a Pandas DataFrame
+* an **expectation_suite** to validate against
+
+.. image:: ../images/data_asset_namespace.png
+
+
 In many simple projects, the datasource or generator name may be omitted and the DataContext will infer
 the correct name when there is no ambiguity.
 

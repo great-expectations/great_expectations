@@ -116,6 +116,8 @@ data_docs_sites:
     store_backend:
         class_name: FixedLengthTupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
+    site_index_builder:
+        show_cta_footer: True
 """
 
 PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT

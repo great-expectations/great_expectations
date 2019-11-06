@@ -17,28 +17,34 @@
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@3.2.1/build/vega-lite.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-embed@4.0.0/build/vega-embed.js"></script>
     <script src="https://kit.fontawesome.com/8217dffd95.js"></script>
-  </head>
-
-  <body
-        data-spy="scroll"
-        data-target="#navigation"
-        data-offset="50"
-    >
-    <div class="container-fluid p-4">
-      <div class="row">
-        <div class="col-md-10 col-lg-10 col-xs-12">
-        {% for section in sections %}
-          {% set section_loop = loop -%}
-          {% include 'section.j2' %}
-        {% endfor %}
-        </div>
-        <div class="col-lg-2 col-md-2 col-xs-12">
-            {% include 'ge_info.j2' %}
-        </div>
-      </div>
-    </div>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  </head>
+
+  <body
+          data-spy="scroll"
+          data-target="#navigation"
+          data-offset="50"
+  >
+    <div class="container-fluid p-4">
+      <div class="row">
+        <div class="col-md-10 col-lg-10 col-xs-12">
+          {% for section in sections %}
+            {% set section_loop = loop -%}
+            {% include 'section.j2' %}
+          {% endfor %}
+        </div>
+        <div class="col-lg-2 col-md-2 col-xs-12">
+          {% include 'ge_info.j2' %}
+        </div>
+      </div>
+    </div>
+
+    {% if cta_footer %}
+      {% include 'cta_footer.j2' %}
+    {% endif %}
+
   </body>
 </html>
