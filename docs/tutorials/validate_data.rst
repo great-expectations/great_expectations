@@ -327,8 +327,9 @@ Don't panic! This blob of JSON is meant for machines. :ref:`data_docs` are an co
 7. Validation Operators
 -----------------------
 
-The `validate` method evaluates one batch of data against one expectation suite and returns a dictionary of validation results. This is sufficient when you explore your data and get to know Great Expectations.
-When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
+The ``validate()`` method evaluates one batch of data against one expectation suite and returns a dictionary of validation results. This is sufficient when you explore your data and get to know Great Expectations.
+
+When deploying Great Expectations in a real data pipeline, you will typically discover these additional needs:
 
 * Validating a group of batches that are logically related (eg Did all my salesforce integrations work last night?).
 * Validating a batch against several expectation suites (eg Does my nightly clickstream event job have any **critical** failures I need to deal with asap or **warnings** I should investigate later?).
@@ -339,7 +340,7 @@ Validation Operators provide a convenient abstraction for both bundling the vali
 
 An instance of ``action_list_operator`` operator is configured in the default ``great_expectations.yml`` configuration file. ActionListValidationOperator validates each batch in the list that is passed as `assets_to_validate` argument to its `run` method against the expectation suite included within that batch and then invokes a list of configured actions on every validation result.
 
-Below is the operator's configuration:
+Below is the operator's configuration snippet in the ``great_expectations.yml`` file:
 
 .. code-block:: bash
 
