@@ -10,6 +10,7 @@ Expectations describe data assets. Data assets are composed of batches. Validati
 Validation = checking if a batch of data from a data asset X conforms to all expectations in expectation suite Y. Expectation suite Y is a collection of expectations that you created that specify what a valid batch of data asset X should look like.
 
 To run validation you need a **batch** of data. To get a **batch** of data you need:
+
 * to specify which **data asset** the batch is from
 * to specify an **expectation suite** to validate against
 
