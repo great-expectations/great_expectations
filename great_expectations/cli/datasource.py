@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class DataSourceTypes(enum.Enum):
+class DatasourceTypes(enum.Enum):
     PANDAS = "pandas"
     SQL = "sql"
     SPARK = "spark"
@@ -22,9 +22,9 @@ class DataSourceTypes(enum.Enum):
 
 
 DATASOURCE_TYPE_BY_DATASOURCE_CLASS = {
-    "PandasDatasource": DataSourceTypes.PANDAS,
-    "SparkDFDatasource": DataSourceTypes.SPARK,
-    "SqlAlchemyDatasource": DataSourceTypes.SQL,
+    "PandasDatasource": DatasourceTypes.PANDAS,
+    "SparkDFDatasource": DatasourceTypes.SPARK,
+    "SqlAlchemyDatasource": DatasourceTypes.SQL,
 }
 
 
@@ -57,16 +57,16 @@ See <blue>https://docs.greatexpectations.io/en/latest/features/datasource.html?u
     data_source_type = None
 
     if data_source_selection == "1":  # pandas
-        data_source_type = DataSourceTypes.PANDAS
+        data_source_type = DatasourceTypes.PANDAS
         data_source_name = _add_pandas_datasource(context)
     elif data_source_selection == "2":  # sqlalchemy
-        data_source_type = DataSourceTypes.SQL
+        data_source_type = DatasourceTypes.SQL
         data_source_name = _add_sqlalchemy_datasource(context)
     elif data_source_selection == "3":  # Spark
-        data_source_type = DataSourceTypes.SPARK
+        data_source_type = DatasourceTypes.SPARK
         data_source_name = _add_spark_datasource(context)
     # if data_source_selection == "5": # dbt
-    #     data_source_type = DataSourceTypes.DBT
+    #     data_source_type = DatasourceTypes.DBT
     #     dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
     #     log_message(msg_dbt_go_to_notebook, color="blue")
     #     context.add_datasource("dbt", "dbt", profile=dbt_profile)
