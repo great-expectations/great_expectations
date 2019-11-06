@@ -4,7 +4,7 @@ Create Expectations
 ==============================
 
 Creating expectations is an opportunity to blend contextual knowledge from subject-matter experts and insights from
-profiling and performing exploratory analysis on your dataset. This tutorial covers creating expectations for a data asset in the Jupyter notebook.
+profiling and performing exploratory analysis on your dataset. This tutorial covers creating expectations for a data asset using a Jupyter notebook.
 
 Video
 ------
