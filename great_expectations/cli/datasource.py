@@ -222,7 +222,7 @@ def _add_sqlalchemy_datasource(context):
                     default=True
             ):
                 context.add_datasource(data_source_name,
-                                       do_not_initialize=True,
+                                       initialize=False,
                                        module_name="great_expectations.datasource",
                                        class_name="SqlAlchemyDatasource",
                                        data_asset_type={

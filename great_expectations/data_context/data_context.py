@@ -772,11 +772,11 @@ class ConfigOnlyDataContext(object):
             run_id=run_id,
         )
 
-    def add_datasource(self, name, do_not_initialize=False, **kwargs):
+    def add_datasource(self, name, initialize=True, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name (str): the name for the new datasource to add
-            do_not_initialize - if True, add the datasource to the config, but do not
+            initialize - if False, add the datasource to the config, but do not
                                 initialize it. Example: user needs to debug database connectivity.
             kwargs (keyword arguments): the configuration for the new datasource
         Note:
