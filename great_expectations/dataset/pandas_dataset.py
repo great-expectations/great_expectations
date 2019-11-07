@@ -13,6 +13,7 @@ from dateutil.parser import parse
 from scipy import stats
 from six import PY2, PY3, integer_types, string_types
 
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from .dataset import Dataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -499,9 +500,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "_expect_column_values_to_be_of_type__aggregate", column
             )
             assert len(new_expectations) == 1
-            expectation_index = new_expectations[0]
-            self._expectation_suite["expectations"][expectation_index]["expectation_type"] = \
-                "expect_column_values_to_be_of_type"
+            old_config = self._expectation_suite["expectations"][new_expectations[0]]
+            new_config = ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_of_type",
+                kwargs=old_config.kwargs,
+                meta=old_config.meta,
+                success_on_last_run=old_config.success_on_last_run
+            )
+            self._expectation_suite["expectations"][new_expectations[0]] = new_config
         else:
             res = self._expect_column_values_to_be_of_type__map(
                 column, type_, **kwargs
@@ -526,9 +532,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "_expect_column_values_to_be_of_type__map", column
             )
             assert len(new_expectations) == 1
-            expectation_index = new_expectations[0]
-            self._expectation_suite["expectations"][expectation_index]["expectation_type"] = \
-                "expect_column_values_to_be_of_type"
+            old_config = self._expectation_suite["expectations"][new_expectations[0]]
+            new_config = ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_of_type",
+                kwargs=old_config.kwargs,
+                meta=old_config.meta,
+                success_on_last_run=old_config.success_on_last_run
+            )
+            self._expectation_suite["expectations"][new_expectations[0]] = new_config
 
         return res
 
@@ -689,9 +700,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "_expect_column_values_to_be_in_type_list__aggregate", column
             )
             assert len(new_expectations) == 1
-            expectation_index = new_expectations[0]
-            self._expectation_suite["expectations"][expectation_index]["expectation_type"] = \
-                "expect_column_values_to_be_in_type_list"
+            old_config = self._expectation_suite["expectations"][new_expectations[0]]
+            new_config = ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_in_type_list",
+                kwargs=old_config.kwargs,
+                meta=old_config.meta,
+                success_on_last_run=old_config.success_on_last_run
+            )
+            self._expectation_suite["expectations"][new_expectations[0]] = new_config
         else:
             res = self._expect_column_values_to_be_in_type_list__map(
                 column, type_list, **kwargs
@@ -716,9 +732,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "_expect_column_values_to_be_in_type_list__map", column
             )
             assert len(new_expectations) == 1
-            expectation_index = new_expectations[0]
-            self._expectation_suite["expectations"][expectation_index]["expectation_type"] = \
-                "expect_column_values_to_be_in_type_list"
+            old_config = self._expectation_suite["expectations"][new_expectations[0]]
+            new_config = ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_in_type_list",
+                kwargs=old_config.kwargs,
+                meta=old_config.meta,
+                success_on_last_run=old_config.success_on_last_run
+            )
+            self._expectation_suite["expectations"][new_expectations[0]] = new_config
 
         return res
 

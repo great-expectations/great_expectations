@@ -21,7 +21,7 @@ from great_expectations.render.types import (
     RenderedDocumentContent,
     RenderedSectionContent,
     RenderedComponentContent,
-    RenderedComponentContentWrapper,
+    # RenderedComponentContentWrapper,
 )
 
 
@@ -285,6 +285,7 @@ class DefaultJinjaPageView(DefaultJinjaView):
     def _validate_document(self, document):
         assert isinstance(document, RenderedDocumentContent)
 
+
 class DefaultJinjaIndexPageView(DefaultJinjaPageView):
     _template = "index_page.j2"
 
@@ -293,12 +294,11 @@ class DefaultJinjaSectionView(DefaultJinjaView):
     _template = "section.j2"
 
     def _validate_document(self, document):
-        assert isinstance(document, RenderedComponentContentWrapper)
         assert isinstance(document.section, RenderedSectionContent)
+
 
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"
 
     def _validate_document(self, document):
-        assert isinstance(document, RenderedComponentContentWrapper)
         assert isinstance(document.content_block, RenderedComponentContent)

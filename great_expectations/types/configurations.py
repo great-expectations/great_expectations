@@ -9,6 +9,7 @@
 #
 # class Config(AllowedKeysDotDict):
 #     pass
+from marshmallow import Schema, fields
 
 
 class ClassConfig(object):
@@ -24,6 +25,12 @@ class ClassConfig(object):
     @property
     def module_name(self):
         return self._module_name
+
+
+class ClassConfigSchema(Schema):
+    class_name = fields.Str()
+    module_name = fields.Str(allow_none=True)
+
 #
 #     #
 #     # _allowed_keys = {

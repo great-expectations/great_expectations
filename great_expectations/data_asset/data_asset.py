@@ -7,6 +7,8 @@ import traceback
 import warnings
 import logging
 import datetime
+
+from marshmallow import ValidationError
 from six import PY3, string_types
 from collections import namedtuple, Hashable, Counter, defaultdict
 
@@ -15,7 +17,9 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
     parse_result_format,
 )
-from great_expectations.expectation_suite import ExpectationSuite, ExpectationConfiguration, get_empty_expectation_suite
+from great_expectations.core import ExpectationSuite, ExpectationConfiguration, ExpectationValidationResult, \
+    ExpectationSuiteValidationResult, ExpectationSuiteSchema, expectationSuiteSchema
+from great_expectations.exceptions import GreatExpectationsError
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -193,10 +197,10 @@ class DataAsset(object):
                 # This will become the stored config
                 expectation_args = copy.deepcopy(all_args)
 
-                if "evaluation_parameters" in self._expectation_suite:
+                if self._expectation_suite.evaluation_parameters:
                     evaluation_args = self._build_evaluation_parameters(
                         expectation_args,
-                        self._expectation_suite["evaluation_parameters"]
+                        self._expectation_suite.evaluation_parameters
                     )
                 else:
                     evaluation_args = self._build_evaluation_parameters(
@@ -204,7 +208,7 @@ class DataAsset(object):
 
                 # Construct the expectation_config object
                 expectation_config = ExpectationConfiguration(
-                    expectation_type="method_name",
+                    expectation_type=method_name,
                     kwargs=expectation_args,
                     meta=meta
                 )
@@ -217,22 +221,23 @@ class DataAsset(object):
                 if self._config.get("interactive_evaluation", True) or self._active_validation:
                     try:
                         return_obj = func(self, **evaluation_args)
-                
+                        if isinstance(return_obj, dict):
+                            return_obj = ExpectationValidationResult(**return_obj)
+
                     except Exception as err:
                         if catch_exceptions:
                             raised_exception = True
                             exception_traceback = traceback.format_exc()
                             exception_message = str(err)
 
-                            return_obj = {
-                                "success": False
-                            }
+                            return_obj = ExpectationValidationResult(success=False)
 
                         else:
                             raise err
 
                 else:
-                    return_obj = {"stored_configuration": expectation_config}
+                    return_obj = ExpectationValidationResult(expectation_config=copy.deepcopy(
+                        expectation_config))
 
                 # If validate has set active_validation to true, then we do not save the config to avoid
                 # saving updating expectation configs to the same suite during validation runs
@@ -243,16 +248,15 @@ class DataAsset(object):
                     self._append_expectation(expectation_config)
 
                 if include_config:
-                    return_obj["expectation_config"] = copy.deepcopy(
-                        expectation_config)
+                    return_obj.expectation_config = copy.deepcopy(expectation_config)
 
                 # If there was no interactive evaluation, success will not have been computed.
-                if "success" in return_obj:
+                if return_obj.success is not None:
                     # Add a "success" object to the config
-                    expectation_config["success_on_last_run"] = return_obj["success"]                        
+                    expectation_config.success_on_last_run = return_obj.success
 
                 if catch_exceptions:
-                    return_obj["exception_info"] = {
+                    return_obj.exception_info = {
                         "raised_exception": raised_exception,
                         "exception_message": exception_message,
                         "exception_traceback": exception_traceback
@@ -260,7 +264,7 @@ class DataAsset(object):
 
                 # Add meta to return object
                 if meta is not None:
-                    return_obj['meta'] = meta
+                    return_obj.meta = meta
 
                 return_obj = recursively_convert_to_json_serializable(
                     return_obj)
@@ -301,31 +305,37 @@ class DataAsset(object):
             None
         """
         if expectation_suite is not None:
-            # TODO: validate the incoming expectation_suite with jsonschema here
-            self._expectation_suite = copy.deepcopy(expectation_suite)
+            if isinstance(expectation_suite, dict):
+                expectation_suite = expectationSuiteSchema.load(expectation_suite).data
+            else:
+                expectation_suite = copy.deepcopy(expectation_suite)
+            self._expectation_suite = expectation_suite
 
             if data_asset_name is not None:
-                if self._expectation_suite["data_asset_name"] != data_asset_name:
+                if self._expectation_suite.data_asset_name != data_asset_name:
                     logger.warning(
                         "Overriding existing data_asset_name {n1} with new name {n2}"
-                        .format(n1=self._expectation_suite["data_asset_name"], n2=data_asset_name)
+                        .format(n1=self._expectation_suite.data_asset_name, n2=data_asset_name)
                     )
-                self._expectation_suite["data_asset_name"] = data_asset_name
+                self._expectation_suite.data_asset_name = data_asset_name
 
             if expectation_suite_name is not None:
-                if self._expectation_suite["expectation_suite_name"] != expectation_suite_name:
+                if self._expectation_suite.expectation_suite_name != expectation_suite_name:
                     logger.warning(
                         "Overriding existing expectation_suite_name {n1} with new name {n2}"
-                        .format(n1=self._expectation_suite["expectation_suite_name"], n2=expectation_suite_name)
+                        .format(n1=self._expectation_suite.expectation_suite_name, n2=expectation_suite_name)
                     )
-                self._expectation_suite["expectation_suite_name"] = expectation_suite_name
+                self._expectation_suite.expectation_suite_name = expectation_suite_name
 
         else:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
-            self._expectation_suite = get_empty_expectation_suite(data_asset_name, expectation_suite_name)
+            if data_asset_name is None:
+                data_asset_name = "default"
+            self._expectation_suite = ExpectationSuite(data_asset_name=data_asset_name,
+                                                       expectation_suite_name=expectation_suite_name)
 
-        self._expectation_suite["data_asset_type"] = self._data_asset_type
+        self._expectation_suite.data_asset_type = self._data_asset_type
         self.default_expectation_args = {
             "include_config": False,
             "catch_exceptions": False,
@@ -349,13 +359,13 @@ class DataAsset(object):
                May raise future errors once json-serializable tests are implemented to check for correct arg formatting
 
         """
-        expectation_type = expectation_config['expectation_type']
+        expectation_type = expectation_config.expectation_type
 
         # Test to ensure the new expectation is serializable.
         # FIXME: If it's not, are we sure we want to raise an error?
         # FIXME: Should we allow users to override the error?
         # FIXME: Should we try to convert the object using something like recursively_convert_to_json_serializable?
-        json.dumps(expectation_config)
+        # json.dumps(expectation_config)
 
         # Drop existing expectations with the same expectation_type.
         # For column_expectations, _append_expectation should only replace expectations
@@ -364,17 +374,17 @@ class DataAsset(object):
         # !!!    it needs to be documented, and
         # !!!    we need to provide syntax to override it.
 
-        if 'column' in expectation_config['kwargs']:
-            column = expectation_config['kwargs']['column']
+        if 'column' in expectation_config.kwargs:
+            column = expectation_config.kwargs['column']
 
             self._expectation_suite.expectations = [f for f in filter(
-                lambda exp: (exp['expectation_type'] != expectation_type) or (
-                    'column' in exp['kwargs'] and exp['kwargs']['column'] != column),
+                lambda exp: (exp.expectation_type != expectation_type) or (
+                    'column' in exp.kwargs and exp.kwargs['column'] != column),
                 self._expectation_suite.expectations
             )]
         else:
             self._expectation_suite.expectations = [f for f in filter(
-                lambda exp: exp['expectation_type'] != expectation_type,
+                lambda exp: exp.expectation_type != expectation_type,
                 self._expectation_suite.expectations
             )]
 
@@ -630,7 +640,7 @@ class DataAsset(object):
         return self._batch_id.batch_fingerprint
 
     def discard_failing_expectations(self):
-        res = self.validate(only_return_failures=True).get('results')
+        res = self.validate(only_return_failures=True).results
         if any(res):
             for item in res:
                 self.remove_expectation(expectation_type=item['expectation_config']['expectation_type'],
@@ -718,8 +728,8 @@ class DataAsset(object):
              copy of _expectation_suite, not the original object.
         """
 
-        expectation_suite = copy.deepcopy(dict(self._expectation_suite))
-        expectations = expectation_suite["expectations"]
+        expectation_suite = copy.deepcopy(self._expectation_suite)
+        expectations = expectation_suite.expectations
 
         discards = defaultdict(int)
 
@@ -731,7 +741,7 @@ class DataAsset(object):
                 # Instead of retaining expectations IFF success==True, it discard expectations IFF success==False.
                 # In cases where expectation["success"] is missing or None, expectations are *retained*.
                 # Such a case could occur if expectations were loaded from a config file and never run.
-                if "success_on_last_run" in expectation and expectation["success_on_last_run"] is False:
+                if expectation.success_on_last_run is False:
                     discards["failed_expectations"] += 1
                 else:
                     new_expectations.append(expectation)
@@ -748,22 +758,21 @@ class DataAsset(object):
         for expectation in expectations:
             # FIXME: Factor this out into a new function. The logic is duplicated in remove_expectation,
             #  which calls _copy_and_clean_up_expectation
-            if "success_on_last_run" in expectation:
-                del expectation["success_on_last_run"]
+            expectation.success_on_last_run = None
 
             if discard_result_format_kwargs:
-                if "result_format" in expectation["kwargs"]:
-                    del expectation["kwargs"]["result_format"]
+                if "result_format" in expectation.kwargs:
+                    del expectation.kwargs["result_format"]
                     discards["result_format"] += 1
 
             if discard_include_config_kwargs:
-                if "include_config" in expectation["kwargs"]:
-                    del expectation["kwargs"]["include_config"]
+                if "include_config" in expectation.kwargs:
+                    del expectation.kwargs["include_config"]
                     discards["include_config"] += 1
 
             if discard_catch_exceptions_kwargs:
-                if "catch_exceptions" in expectation["kwargs"]:
-                    del expectation["kwargs"]["catch_exceptions"]
+                if "catch_exceptions" in expectation.kwargs:
+                    del expectation.kwargs["catch_exceptions"]
                     discards["catch_exceptions"] += 1
 
         settings_message = ""
@@ -780,7 +789,7 @@ class DataAsset(object):
         if len(settings_message) > 1:  # Only add this if we added one of the settings above.
             settings_message += " settings filtered."
 
-        expectation_suite["expectations"] = expectations
+        expectation_suite.expectations = expectations
         logger.info(message + settings_message)
         return expectation_suite
 
@@ -830,15 +839,11 @@ class DataAsset(object):
         if filepath is None and self._data_context is not None:
             self._data_context.save_expectation_suite(expectation_suite)
         elif filepath is not None:
-            expectation_config_str = json.dumps(expectation_suite, indent=2)
-            open(filepath, 'w').write(expectation_config_str)
+            with open(filepath, 'w') as outfile:
+                json.dump(expectationSuiteSchema.dump(expectation_suite).data, outfile, indent=2)
         else:
             raise ValueError("Unable to save config: filepath or data_context must be available.")
 
-    #TODO: when validate is called and expectation editor is in data_context, need to bypass widget creation
-    # NOTE : Abe 2019/09/21 : This method contains a lot of logic that will need to be split between
-    # the DataContextAwareDataAsset and BasicDataAsset classes, when we created those typed classes.
-    # Some of the ContextAware logic may go to live in the DataContext itself.
     def validate(self,
                  expectation_suite=None, 
                  run_id=None,
@@ -933,8 +938,18 @@ class DataAsset(object):
                     discard_catch_exceptions_kwargs=False,
                 )
             elif isinstance(expectation_suite, string_types):
-                expectation_suite = json.load(open(expectation_suite, 'r'))
-
+                try:
+                    with open(expectation_suite, 'r') as infile:
+                        expectation_suite = expectationSuiteSchema.loads(infile.read()).data
+                except ValidationError:
+                    raise
+                except IOError:
+                    raise GreatExpectationsError(
+                        "Unable to load expectation suite: IO error while reading %s" % expectation_suite)
+            elif not isinstance(expectation_suite, ExpectationSuite):
+                logger.error("Unable to validate using the provided value for expectation suite; does it need to be "
+                             "loaded from a dictionary?")
+                return ExpectationValidationResult(success=False)
             # Evaluation parameter priority is
             # 1. from provided parameters
             # 2. from expectation configuration
@@ -942,12 +957,13 @@ class DataAsset(object):
             # So, we load them in reverse order
 
             if data_context is not None:
-                runtime_evaluation_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
+                runtime_evaluation_parameters = \
+                    data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
             else:
                 runtime_evaluation_parameters = {}
 
-            if "evaluation_parameters" in expectation_suite:
-                runtime_evaluation_parameters.update(expectation_suite["evaluation_parameters"])
+            if expectation_suite.evaluation_parameters:
+                runtime_evaluation_parameters.update(expectation_suite.evaluation_parameters)
 
             if evaluation_parameters is not None:
                 runtime_evaluation_parameters.update(evaluation_parameters)
@@ -957,10 +973,10 @@ class DataAsset(object):
 
             # Warn if our version is different from the version in the configuration
             try:
-                if expectation_suite['meta']['great_expectations.__version__'] != ge_version:
+                if expectation_suite.meta['great_expectations.__version__'] != ge_version:
                     warnings.warn(
                         "WARNING: This configuration object was built using version %s of great_expectations, but "
-                        "is currently being valided by version %s."
+                        "is currently being validated by version %s."
                         % (expectation_suite['meta']['great_expectations.__version__'], ge_version))
             except KeyError:
                 warnings.warn(
@@ -975,9 +991,9 @@ class DataAsset(object):
             # Group expectations by column
             columns = {}
 
-            for expectation in expectation_suite["expectations"]:
-                if "column" in expectation["kwargs"] and isinstance(expectation["kwargs"]["column"], Hashable):
-                    column = expectation["kwargs"]["column"]
+            for expectation in expectation_suite.expectations:
+                if "column" in expectation.kwargs and isinstance(expectation.kwargs["column"], Hashable):
+                    column = expectation.kwargs["column"]
                 else:
                     column = "_nocolumn"
                 if column not in columns:
@@ -994,15 +1010,14 @@ class DataAsset(object):
                     # copy the config so we can modify it below if needed
                     expectation = copy.deepcopy(expectation)
 
-                    expectation_method = getattr(
-                        self, expectation['expectation_type'])
+                    expectation_method = getattr(self, expectation.expectation_type)
 
                     if result_format is not None:
-                        expectation['kwargs'].update({'result_format': result_format})
+                        expectation.kwargs.update({'result_format': result_format})
 
                     # A missing parameter should raise a KeyError
                     evaluation_args = self._build_evaluation_parameters(
-                        expectation['kwargs'], runtime_evaluation_parameters)
+                        expectation.kwargs, runtime_evaluation_parameters)
 
                     result = expectation_method(
                         catch_exceptions=catch_exceptions,
@@ -1015,24 +1030,24 @@ class DataAsset(object):
                         raised_exception = True
                         exception_traceback = traceback.format_exc()
 
-                        result = {
-                            "success": False,
-                            "exception_info": {
+                        result = ExpectationValidationResult(
+                            success=False,
+                            exception_info={
                                 "raised_exception": raised_exception,
                                 "exception_traceback": exception_traceback,
                                 "exception_message": str(err)
                             }
-                        }
+                        )
 
                     else:
                         raise err
 
                 # if include_config:
-                result["expectation_config"] = expectation
+                result.expectation_config = expectation
 
                 # Add an empty exception_info object if no exception was caught
-                if catch_exceptions and ('exception_info' not in result):
-                    result["exception_info"] = {
+                if catch_exceptions and result.exception_info is None:
+                    result.exception_info = {
                         "raised_exception": False,
                         "exception_traceback": None,
                         "exception_message": None
@@ -1045,40 +1060,36 @@ class DataAsset(object):
             if only_return_failures:
                 abbrev_results = []
                 for exp in results:
-                    if not exp["success"]:
+                    if not exp.success:
                         abbrev_results.append(exp)
                 results = abbrev_results
 
-            data_asset_name = expectation_suite.get("data_asset_name", None)
-            expectation_suite_name = expectation_suite.get("expectation_suite_name", "default")
+            data_asset_name = expectation_suite.data_asset_name
+            expectation_suite_name = expectation_suite.expectation_suite_name
 
-            result = {
-                "results": results,
-                "success": statistics.success,
-                "statistics": {
+            if run_id is None:
+                run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+
+            result = ExpectationSuiteValidationResult(
+                results=results,
+                success=statistics.success,
+                statistics={
                     "evaluated_expectations": statistics.evaluated_expectations,
                     "successful_expectations": statistics.successful_expectations,
                     "unsuccessful_expectations": statistics.unsuccessful_expectations,
                     "success_percent": statistics.success_percent,
                 },
-                "meta": {
+                evaluation_parameters=runtime_evaluation_parameters,
+                meta={
                     "great_expectations.__version__": ge_version,
                     "data_asset_name": data_asset_name,
-                    "expectation_suite_name": expectation_suite_name
+                    "expectation_suite_name": expectation_suite_name,
+                    "run_id": run_id
                 }
-            }
-
-            if evaluation_parameters is not None:
-                result.update({"evaluation_parameters": runtime_evaluation_parameters})
-
-            if run_id is not None:
-                result["meta"].update({"run_id": run_id})
-            else:
-                run_id = datetime.datetime.utcnow().isoformat().replace(":", "") + "Z"
-                result["meta"].update({"run_id": run_id})
+            )
 
             if self._batch_kwargs is not None:
-                result["meta"].update({"batch_kwargs": self._batch_kwargs})
+                result.meta["batch_kwargs"] = self._batch_kwargs
 
             self._data_context = validate__data_context
         except Exception:
@@ -1352,7 +1363,7 @@ def _calc_validation_statistics(validation_results):
     return ``ExpectationStatistics``.
     """
     # calc stats
-    successful_expectations = sum(exp["success"] for exp in validation_results)
+    successful_expectations = sum(exp.success for exp in validation_results)
     evaluated_expectations = len(validation_results)
     unsuccessful_expectations = evaluated_expectations - successful_expectations
     success = successful_expectations == evaluated_expectations

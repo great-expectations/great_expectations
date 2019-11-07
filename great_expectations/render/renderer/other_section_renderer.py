@@ -5,8 +5,8 @@ from .renderer import Renderer
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.types import (
     RenderedComponentContent,
-    RenderedSectionContent
-)
+    RenderedSectionContent,
+    RenderedHeaderContent)
 
 
 class ProfilingResultsOverviewSectionRenderer(Renderer):
@@ -32,7 +32,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
     @classmethod
     def _render_header(cls, evrs, content_blocks):
-        content_blocks.append(RenderedComponentContent(**{
+        content_blocks.append(RenderedHeaderContent(**{
             "content_block_type": "header",
             "header": "Overview",
             "styling": {

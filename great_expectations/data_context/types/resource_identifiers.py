@@ -1,87 +1,15 @@
 import logging
 
-from six import PY3
+from six import PY3, string_types
 
-from marshmallow import Schema, fields, ValidationError, pre_load, post_load
+from marshmallow import Schema, fields, ValidationError, pre_load, post_load, pre_dump, post_dump
 
-from .base_resource_identifiers import DataContextKey
+from great_expectations.core import DataContextKey, DataAssetIdentifier, DataAssetIdentifierSchema
 from great_expectations.exceptions import InvalidDataContextKeyError
 
 logger = logging.getLogger(__name__)
 
 
-class DataAssetIdentifier(DataContextKey):
-
-    prioritized_valid_delimiter_list = ["/", "."]
-
-    def __init__(self, datasource, generator, generator_asset, delimiter='/'):
-        self._datasource = datasource
-        self._generator = generator
-        self._generator_asset = generator_asset
-        if delimiter not in self.prioritized_valid_delimiter_list:
-            raise InvalidDataContextKeyError("'%s' is not a valid delimiter for DataAssetIdentifier; valid delimiters"
-                                             "are %s" % (delimiter, str(self.prioritized_valid_delimiter_list)))
-        self._delimiter = delimiter
-
-    @property
-    def datasource(self):
-        return self._datasource
-
-    @property
-    def generator(self):
-        return self._generator
-
-    @property
-    def generator_asset(self):
-        return self._generator_asset
-
-    def to_tuple(self):
-        return self.datasource, self.generator, self.generator_asset
-
-    #####
-    # DataAssetIdentifier is treated specially to make it very string friendly.
-    # Use DataAssetIdentifierSchema to load from a string
-    #####
-
-    def to_path(self):
-        return "/".join((
-            self.datasource.replace("/", "__"),
-            self.generator.replace("/", "__"),
-            self.generator_asset.replace("/", "__")
-        ))
-
-    def __str__(self):
-        return self._delimiter.join((self.datasource, self.generator, self.generator_asset))
-
-    def __repr__(self):
-        return self._delimiter.join((self.datasource, self.generator, self.generator_asset))
-
-
-class DataAssetIdentifierSchema(Schema):
-    datasource = fields.Str(required=True)
-    generator = fields.Str(required=True)
-    generator_asset = fields.Str(required=True)
-
-    # noinspection PyUnusedLocal
-    @pre_load(pass_many=False)
-    def parse_from_string(self, data, **kwargs):
-        for delimiter in DataAssetIdentifier.prioritized_valid_delimiter_list:
-            if data.count(delimiter) == 2:
-                data_split = data.split(delimiter)
-                return {
-                    "datasource": data_split[0],
-                    "generator": data_split[1],
-                    "generator_asset": data_split[2]
-                }
-        raise ValidationError("No valid delimiter found to parse DataAssetIdentifier: tried %s"
-                              % str(self.prioritized_delimiter_list))
-
-    # noinspection PyUnusedLocal
-    @post_load(pass_many=False)
-    def make_data_asset_identifier(self, data, **kwargs):
-        return DataAssetIdentifier(**data)
-
-#
 #
 # # TODO: Rename to DataAssetKey, for consistency
 # class DataAssetIdentifier(OrderedDataContextKey):
@@ -166,6 +94,16 @@ class ExpectationSuiteIdentifier(DataContextKey):
         )
 
 
+class ExpectationSuiteIdentifierSchema(Schema):
+    data_asset_name = fields.Nested(DataAssetIdentifierSchema)
+    expectation_suite_name = fields.Str()
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_expectation_suite_identifier(self, data, **kwargs):
+        return ExpectationSuiteIdentifier(**data)
+
+
 class ValidationResultIdentifier(DataContextKey):
     """A ValidationResultIdentifier identifies a validation result by the fully qualified expectation_suite_identifer
     and run_id.
@@ -210,6 +148,17 @@ class ValidationResultIdentifier(DataContextKey):
             run_id=tuple_[-1]
         )
 
+
+class ValidationResultIdentifierSchema(Schema):
+    expectation_suite_identifier = fields.Nested(ExpectationSuiteIdentifierSchema, required=True, error_messages={
+        'required': 'expectation_suite_identifier is required for a ValidationResultIdentifier'})
+    run_id = fields.Str(required=True, error_messages={'required': "run_id is required for a "
+                                                                   "ValidationResultIdentifier"})
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_validation_result_identifier(self, data, **kwargs):
+        return ValidationResultIdentifier(**data)
 
 # # TODO: Rename to ValidatioResultKey, for consistency
 # class ValidationResultIdentifier(OrderedDataContextKey):
@@ -302,3 +251,8 @@ class SiteSectionIdentifier(DataContextKey):
 #         print(self)
 #         print(other)
 #         return self.__hash__() == other.__hash__()
+
+
+dataAssetIdentifierSchema = DataAssetIdentifierSchema(strict=True)
+expectationSuiteIdentifierSchema = ExpectationSuiteIdentifierSchema(strict=True)
+validationResultIdentifierSchema = ValidationResultIdentifierSchema(strict=True)

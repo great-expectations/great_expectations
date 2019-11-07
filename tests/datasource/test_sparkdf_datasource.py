@@ -12,7 +12,7 @@ from great_expectations.datasource import SparkDFDatasource
 from great_expectations.dataset import SparkDFDataset
 from great_expectations.datasource.types import InMemoryBatchKwargs
 
-yaml = YAML(typ='safe')
+yaml = YAML()
 
 
 @pytest.fixture(scope="module")
@@ -163,11 +163,10 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path):
 
 def test_standalone_spark_passthrough_generator_datasource(data_context, dataset):
     pyspark_skip = pytest.importorskip("pyspark")
-    # noinspection PyUnusedLocal
     datasource = data_context.add_datasource("spark_source",
-                                            module_name="great_expectations.datasource",
-                                            class_name="SparkDFDatasource",
-                                            generators={"passthrough": {"type": "memory"}})
+                                             module_name="great_expectations.datasource",
+                                             class_name="SparkDFDatasource",
+                                             generators={"passthrough": {"class_name": "InMemoryGenerator"}})
 
     # We want to ensure that an externally-created spark DataFrame can be successfully instantiated using the
     # datasource built in a data context

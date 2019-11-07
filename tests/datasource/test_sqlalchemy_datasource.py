@@ -8,7 +8,7 @@ import pandas as pd
 from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 
-yaml = YAML(typ='safe')
+yaml = YAML()
 
 
 @pytest.fixture

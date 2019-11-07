@@ -1,8 +1,10 @@
 import pytest
+from marshmallow import ValidationError
 
 from moto import mock_s3
 import boto3
 
+from great_expectations.data_context.types.resource_identifiers import validationResultIdentifierSchema
 from great_expectations.exceptions import MissingTopLevelConfigKeyError
 from great_expectations.util import (
     gen_directory_tree_str,
@@ -33,23 +35,19 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
 
-    with pytest.raises(MissingTopLevelConfigKeyError):
-        my_store.get(ValidationResultIdentifier(**{}))
+    with pytest.raises(ValidationError):
+        my_store.get(validationResultIdentifierSchema.load({}).data)
     
     ns_1 = SiteSectionIdentifier(
         site_section_name="validations",
-        resource_identifier=ValidationResultIdentifier(
-            from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100"
-        )
+        resource_identifier=ValidationResultIdentifier.from_tuple(('a', 'b', 'c', 'quarantine', 'prod-100'))
     )
     my_store.set(ns_1, "aaa")
     # assert my_store.get(ns_1) == "aaa"
 
     ns_2 = SiteSectionIdentifier(
         site_section_name="validations",
-        resource_identifier=ValidationResultIdentifier(
-            from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-20"
-        )
+        resource_identifier=ValidationResultIdentifier.from_tuple(('a', 'b', 'c', 'quarantine', 'prod-20'))
     )
     my_store.set(ns_2, "bbb")
     # assert my_store.get(ns_2) == {"B": "bbb"}

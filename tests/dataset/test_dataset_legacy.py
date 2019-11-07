@@ -1,6 +1,6 @@
 import pytest
 
-from .test_utils import get_dataset
+from tests.test_utils import get_dataset
 from collections import OrderedDict
 
 from great_expectations.dataset import PandasDataset

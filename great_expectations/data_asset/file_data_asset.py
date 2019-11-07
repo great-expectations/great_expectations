@@ -460,8 +460,8 @@ class FileDataAsset(MetaFileDataAsset):
 
         return {
             "success": success,
-            "details": {
-                "filesize": size
+            "result": {
+                "observed_value": size
             }
         }
     
@@ -556,7 +556,7 @@ class FileDataAsset(MetaFileDataAsset):
 
         try:
             comp_regex = re.compile(regex)
-        except:
+        except re.error:
             raise ValueError("Must enter valid regular expression for regex")
 
         success = False

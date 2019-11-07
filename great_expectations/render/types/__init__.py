@@ -1,7 +1,10 @@
-from great_expectations.types import (
-    AllowedKeysDotDict,
-    ListOf,
-)
+from great_expectations.types import DictDot
+from great_expectations.render.exceptions import InvalidRenderedContentError
+
+# from great_expectations.types import (
+#     AllowedKeysDotDict,
+#     ListOf,
+# )
 
 # TODO: Rename to this:
 # class RenderedContent(AllowedKeysDotDict):
@@ -10,69 +13,231 @@ from great_expectations.types import (
     # class RenderedDocumentContentContent(RenderedContent):
     # class RenderedComponentContentWrapper(RenderedContent):
 
-class RenderedContent(AllowedKeysDotDict):
+
+class RenderedContent(dict):
+    # TODO: complete refactor of rendered types to avoid dictionary base
     pass
 
-class RenderedComponentContent(RenderedContent):
-    #TODO: It's weird that 'text'-type blocks are called "content" when all of the other types are named after their types
-    _allowed_keys = set([
-        "content_block_type",
-        "header",
-        "subheader",
-        "styling",
 
-        "string_template",
-        "content",
-        "graph",
-        "value_list",
-        "header_row",
-        "table",
-        "bullet_list",
-    ])
-    _required_keys = set({
-        "content_block_type"
-    })
+class RenderedComponentContent(RenderedContent):
+    def __init__(self, content_block_type, styling=None, **kwargs):
+        self._content_block_type = content_block_type
+        self._styling = styling
+        self.update(kwargs)
+
+    @property
+    def content_block_type(self):
+        return self._content_block_type
+
+    @property
+    def styling(self):
+        return self._styling
+
+
+class RenderedHeaderContent(RenderedComponentContent):
+    def __init__(self, header, subheader=None, header_row=None, styling=None):
+        super(RenderedHeaderContent, self).__init__(content_block_type="header", styling=styling)
+        self._header = header
+        self._header_row = header_row
+        self._subheader = subheader
+
+    @property
+    def header(self):
+        return self._header
+
+    @property
+    def subheader(self):
+        return self._subheader
+
+    @property
+    def header_row(self):
+        return self._header_row
+
+
+class RenderedGraphContent(RenderedComponentContent):
+    def __init__(self, graph, styling=None):
+        super(RenderedGraphContent, self).__init__(content_block_type="graph", styling=styling)
+        self._graph = graph
+
+    @property
+    def graph(self):
+        return self._graph
+
+
+class RenderedTableContent(RenderedComponentContent):
+    def __init__(self, table, header_row=None, styling=None):
+        super(RenderedTableContent, self).__init__(content_block_type="table", styling=styling)
+        self._table = table
+        self._header_row = header_row
+
+    @property
+    def table(self):
+        return self._table
+
+    @property
+    def header_row(self):
+        return self._header_row
+
+
+class RenderedStringTemplateContent(RenderedComponentContent):
+    def __init__(self, string_template, styling=None):
+        super(RenderedStringTemplateContent, self).__init__(content_block_type="string_template", styling=styling)
+        self._string_template = string_template
+
+    @property
+    def string_template(self):
+        return self._string_template
+
+
+class RenderedBulletListContent(RenderedComponentContent):
+    def __init__(self, bullet_list, styling=None):
+        super(RenderedBulletListContent, self).__init__(content_block_type="bullet_list", styling=styling)
+        self._bullet_list = bullet_list
+
+    @property
+    def bullet_list(self):
+        return self._bullet_list
+
+
+class ValueListContent(RenderedComponentContent):
+    def __init__(self, value_list, header=None, styling=None):
+        super(ValueListContent, self).__init__(content_block_type="value_list", styling=styling)
+        self._value_list = value_list
+        self._header = header
+
+    @property
+    def value_list(self):
+        return self._value_list
+
+    @property
+    def header(self):
+        return self._header
+
+#
+# class RenderedComponentContent(RenderedContent):
+#     #TODO: It's weird that 'text'-type blocks are called "content" when all of the other types are named after their types
+#     _allowed_keys = set([
+#         "content_block_type",
+#         "header",
+#         "subheader",
+#         "styling",
+#
+#         "string_template",
+#         "content",
+#         "graph",
+#         "value_list",
+#         "header_row",
+#         "table",
+#         "bullet_list",
+#     ])
+#     _required_keys = set({
+#         "content_block_type"
+#     })
+
+# TODO: REMOVE
+#### REMOVE ME########
+class RenderedComponentContentWrapper(dict):
+    pass
+
 
 class RenderedSectionContent(RenderedContent):
-    _allowed_keys = set([
-        "section_name",
-        "content_blocks",
-    ])
-    _required_keys = set({
-        "content_blocks",
-    })
-    _key_types = {
-        "content_blocks" : ListOf(RenderedComponentContent),
-    }
+    def __init__(self, content_blocks, section_name=None):
+        if not isinstance(content_blocks, list) and all([isinstance(content_block, RenderedComponentContent) for
+                                                         content_block in content_blocks]):
+            raise InvalidRenderedContentError("Rendered section content requires a list of RenderedComponentContent "
+                                              "for content blocks.")
+        self._content_blocks = content_blocks
+        self._section_name = section_name
+
+    @property
+    def content_blocks(self):
+        return self._content_blocks
+
+    @property
+    def section_name(self):
+        return self._section_name
+
+
+    # _allowed_keys = set([
+    #     "section_name",
+    #     "content_blocks",
+    # ])
+    # _required_keys = set({
+    #     "content_blocks",
+    # })
+    # _key_types = {
+    #     "content_blocks" : ListOf(RenderedComponentContent),
+    # }
+
 
 class RenderedDocumentContent(RenderedContent):
-    _allowed_keys = set([
-        "renderer_type",
-        "data_asset_name",
-        "full_data_asset_identifier",
-        "page_title",
-        "utm_medium",
-        "sections",
-    ])
-    _required_keys = set({
-        "sections"
-    })
-    _key_types = {
-        "sections" : ListOf(RenderedSectionContent),
-    }
+    # NOTE: JPC 20191028 - review these keys to consolidate and group
+    def __init__(self, sections, data_asset_name=None, full_data_asset_identifier=None, renderer_type=None,
+                 page_title=None, utm_medium=None):
+        if not isinstance(sections, list) and all([isinstance(section, RenderedSectionContent) for section in
+                                                   sections]):
+            raise InvalidRenderedContentError("RenderedDocumentContent requires a list of RenderedSectionContent for "
+                                              "sections.")
+        self._sections = sections
+        self._data_asset_name = data_asset_name
+        self._full_data_asset_identifier = full_data_asset_identifier
+        self._renderer_type = renderer_type
+        self._page_title = page_title
+        self._utm_medium = utm_medium
 
-class RenderedComponentContentWrapper(RenderedContent):
-    _allowed_keys = set([
-        "section",
-        "content_block",
-        "section_loop",
-        "content_block_loop",
-    ])
-    _required_keys = set([])
-    _key_types = {
-        "content_block": RenderedComponentContent,
-        "section": RenderedSectionContent,
-    }
+    @property
+    def sections(self):
+        return self._sections
+
+    @property
+    def data_asset_name(self):
+        return self._data_asset_name
+
+    @property
+    def full_data_asset_identifier(self):
+        return self._full_data_asset_identifier
+
+    @property
+    def renderer_type(self):
+        return self._renderer_type
+
+    @property
+    def page_title(self):
+        return self._page_title
+
+    @property
+    def utm_medium(self):
+        return self._utm_medium
+
+
+# class RenderedDocumentContent(RenderedContent):
+#     _allowed_keys = set([
+#         "renderer_type",
+#         "data_asset_name",
+#         "full_data_asset_identifier",
+#         "page_title",
+#         "utm_medium",
+#         "sections",
+#     ])
+#     _required_keys = set({
+#         "sections"
+#     })
+#     _key_types = {
+#         "sections" : ListOf(RenderedSectionContent),
+#     }
+
+# class RenderedComponentContentWrapper(RenderedContent):
+#     _allowed_keys = set([
+#         "section",
+#         "content_block",
+#         "section_loop",
+#         "content_block_loop",
+#     ])
+#     _required_keys = set([])
+#     _key_types = {
+#         "content_block": RenderedComponentContent,
+#         "section": RenderedSectionContent,
+#     }
 
 # NOTE: The types below are rendering-related classes that we will probably want to implement eventually.
 

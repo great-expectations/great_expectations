@@ -1,7 +1,6 @@
+import pytest
+
 import decimal
-import json
-import tempfile
-import shutil
 import warnings
 
 import pandas as pd
@@ -11,382 +10,211 @@ import great_expectations as ge
 import unittest
 from six import PY2
 
-
-def test_interactive_evaluation(dataset):
-    # We should be able to enable and disable interactive evaluation
-
-    # Default is on
-    assert dataset.get_config_value("interactive_evaluation") is True
-    res = dataset.expect_column_values_to_be_between("naturals", 1, 10, include_config=True)
-    assert res["success"] is True
-
-    # Disable
-    dataset.set_config_value("interactive_evaluation", False)
-    disable_res = dataset.expect_column_values_to_be_between("naturals", 1, 10)  # No need to explicitly include_config
-    assert "success" not in disable_res
-
-    assert res["expectation_config"] == disable_res["stored_configuration"]
+from great_expectations.core import ExpectationConfiguration, expectationConfigurationSchema, ExpectationSuite, \
+    expectationSuiteSchema
+from great_expectations.exceptions import InvalidExpectationConfigurationError
+from tests.test_utils import convert_test_obj_to_json_dict
 
 
-def test_data_asset_name_inheritance(dataset):
-    # A data_asset should have a generic type
-    data_asset = ge.data_asset.DataAsset()
-    assert data_asset.get_expectation_suite()["data_asset_type"] == "DataAsset"
+def test_get_and_save_expectation_suite(tmp_path_factory):
+    directory_name = str(tmp_path_factory.mktemp("test_get_and_save_expectation_config"))
+    df = ge.dataset.PandasDataset({
+        'x': [1, 2, 4],
+        'y': [1, 2, 5],
+        'z': ['hello', 'jello', 'mello'],
+    })
 
-    # A FileDataAsset should pick up its type
-    data_asset = ge.data_asset.FileDataAsset()
-    assert data_asset.get_expectation_suite()["data_asset_type"] == "FileDataAsset"
+    df.expect_column_values_to_be_in_set('x', [1, 2, 4])
+    df.expect_column_values_to_be_in_set(
+        'y', [1, 2, 4], catch_exceptions=True, include_config=True)
+    df.expect_column_values_to_match_regex('z', 'ello')
 
-    # So should a Dataset
-    data_asset = ge.dataset.Dataset()
-    assert data_asset.get_expectation_suite()["data_asset_type"] == "Dataset"
+    ### First test set ###
 
-    # Backends should *not* change the implementation
-    assert dataset.get_expectation_suite()["data_asset_type"] == "Dataset"
+    output_config = ExpectationSuite(
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_in_set",
+                kwargs={
+                    "column": "x",
+                    "value_set": [
+                        1,
+                        2,
+                        4
+                    ]
+                }
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_match_regex",
+                kwargs={
+                    "column": "z",
+                    "regex": "ello"
+                }
+            )
+        ],
+        data_asset_name="default",
+        expectation_suite_name="default",
+        data_asset_type="Dataset",
+        meta={
+            "great_expectations.__version__": ge.__version__
+        }
+    )
 
-    # But custom classes should choose to
-    class MyCustomDataset(ge.dataset.Dataset):
-        _data_asset_type = "MyCustomDataset"
+    assert output_config == df.get_expectation_suite()
 
-    data_asset = MyCustomDataset()
-    assert data_asset.get_expectation_suite()["data_asset_type"] == "MyCustomDataset"
+    df.save_expectation_suite(directory_name + '/temp1.json')
+    with open(directory_name + '/temp1.json') as infile:
+        loaded_config = expectationSuiteSchema.loads(infile.read()).data
+    assert output_config == loaded_config
 
+    ### Second test set ###
+
+    output_config = ExpectationSuite(
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_in_set",
+                kwargs={
+                    "column": "x",
+                    "value_set": [
+                        1,
+                        2,
+                        4
+                    ]
+                }
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_in_set",
+                kwargs={
+                    "column": "y",
+                    "value_set": [
+                        1,
+                        2,
+                        4
+                    ]
+                }
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_match_regex",
+                kwargs={
+                    "column": "z",
+                    "regex": "ello"
+                }
+            )
+        ],
+        data_asset_name="default",
+        expectation_suite_name="default",
+        data_asset_type="Dataset",
+        meta={
+            "great_expectations.__version__": ge.__version__
+        }
+    )
+
+    assert output_config == df.get_expectation_suite(discard_failed_expectations=False)
+    df.save_expectation_suite(
+        directory_name + '/temp2.json',
+        discard_failed_expectations=False
+    )
+    with open(directory_name + '/temp2.json') as infile:
+        loaded_suite = expectationSuiteSchema.loads(infile.read()).data
+    assert output_config == loaded_suite
+
+    ### Third test set ###
+
+    output_config = ExpectationSuite(
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_in_set",
+                kwargs={
+                    "column": "x",
+                    "value_set": [
+                        1,
+                        2,
+                        4
+                    ],
+                    "result_format": "BASIC"
+                }
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_match_regex",
+                kwargs={
+                    "column": "z",
+                    "regex": "ello",
+                    "result_format": "BASIC"
+                }
+            )
+        ],
+        data_asset_name="default",
+        expectation_suite_name="default",
+        data_asset_type="Dataset",
+        meta={
+            "great_expectations.__version__": ge.__version__
+        }
+    )
+    assert output_config == df.get_expectation_suite(
+        discard_result_format_kwargs=False,
+        discard_include_config_kwargs=False,
+        discard_catch_exceptions_kwargs=False)
+
+    df.save_expectation_suite(
+        directory_name + '/temp3.json',
+        discard_result_format_kwargs=False,
+        discard_include_config_kwargs=False,
+        discard_catch_exceptions_kwargs=False,
+    )
+    with open(directory_name + '/temp3.json') as infile:
+        loaded_suite = expectationSuiteSchema.loads(infile.read()).data
+    assert output_config == loaded_suite
+
+
+def test_expectation_meta():
+    df = ge.dataset.PandasDataset({
+        'x': [1, 2, 4],
+        'y': [1, 2, 5],
+        'z': ['hello', 'jello', 'mello'],
+    })
+    result = df.expect_column_median_to_be_between(
+        'x', 2, 2, meta={"notes": "This expectation is for lolz."})
+    k = 0
+    assert True is result['success']
+    suite = df.get_expectation_suite()
+    for expectation_config in suite.expectations:
+        if expectation_config['expectation_type'] == 'expect_column_median_to_be_between':
+            k += 1
+            assert {"notes": "This expectation is for lolz."} == expectation_config.meta
+    assert 1 == k
+
+    # This should raise an error because meta isn't serializable.
+    with pytest.raises(InvalidExpectationConfigurationError) as exc:
+        df.expect_column_values_to_be_increasing(
+            "x", meta={"unserializable_array": np.array(range(10))})
+        assert "is not json serializable." in exc.value.message
+
+
+ def test_set_default_expectation_argument():
+    df = ge.dataset.PandasDataset({
+        'x': [1, 2, 4],
+        'y': [1, 2, 5],
+        'z': ['hello', 'jello', 'mello'],
+    })
+
+    assert {"include_config": False,
+            "catch_exceptions": False,
+            "result_format": 'BASIC'} == df.get_default_expectation_arguments()
+
+    df.set_default_expectation_argument("result_format", "SUMMARY")
+
+    assert {
+            "include_config": False,
+            "catch_exceptions": False,
+            "result_format": 'SUMMARY',
+        } == df.get_default_expectation_arguments()
 
 class TestDataAsset(unittest.TestCase):
     """
     Recognized weakness: these tests are overly dependent on the Pandas implementation of dataset.
     """
 
-    def test_data_asset(self):
 
-        D = ge.dataset.PandasDataset({
-            'x': [1, 2, 4],
-            'y': [1, 2, 5],
-            'z': ['hello', 'jello', 'mello'],
-        })
-
-        # print D._expectation_suite.keys()
-        # print json.dumps(D._expectation_suite, indent=2)
-
-        self.assertEqual(
-            D._expectation_suite,
-            {
-                "data_asset_name": None,
-                "expectation_suite_name": "default",
-                "data_asset_type": "Dataset",
-                "meta": {
-                    "great_expectations.__version__": ge.__version__
-                },
-                "expectations": []
-            }
-        )
-
-        self.maxDiff = None
-        self.assertEqual(
-            D.get_expectation_suite(),
-            {
-                "data_asset_name": None,
-                "expectation_suite_name": "default",
-                "data_asset_type": "Dataset",
-                "meta": {
-                    "great_expectations.__version__": ge.__version__
-                },
-                "expectations": []
-            }
-        )
-
-    def test_expectation_meta(self):
-        df = ge.dataset.PandasDataset({
-            'x': [1, 2, 4],
-            'y': [1, 2, 5],
-            'z': ['hello', 'jello', 'mello'],
-        })
-
-        result = df.expect_column_median_to_be_between(
-            'x', 2, 2, meta={"notes": "This expectation is for lolz."})
-        k = 0
-        self.assertEqual(result['success'], True)
-        config = df.get_expectation_suite()
-        for expectation_config in config['expectations']:
-            if expectation_config['expectation_type'] == 'expect_column_median_to_be_between':
-                k += 1
-                self.assertEqual(
-                    expectation_config['meta'],
-                    {"notes": "This expectation is for lolz."}
-                )
-
-        self.assertEqual(k, 1)
-
-        # This should raise an error because meta isn't serializable.
-        with self.assertRaises(Exception) as context:
-            df.expect_column_values_to_be_increasing(
-                "x", meta={"unserializable_array": np.array(range(10))})
-
-    # TODO: !!! Add tests for expectation and column_expectation
-    # TODO: !!! Add tests for save_expectation
-
-    def test_set_default_expectation_argument(self):
-        df = ge.dataset.PandasDataset({
-            'x': [1, 2, 4],
-            'y': [1, 2, 5],
-            'z': ['hello', 'jello', 'mello'],
-        })
-
-        self.assertEqual(
-            df.get_default_expectation_arguments(),
-            {
-                "include_config": False,
-                "catch_exceptions": False,
-                "result_format": 'BASIC',
-            }
-        )
-
-        df.set_default_expectation_argument("result_format", "SUMMARY")
-
-        self.assertEqual(
-            df.get_default_expectation_arguments(),
-            {
-                "include_config": False,
-                "catch_exceptions": False,
-                "result_format": 'SUMMARY',
-            }
-        )
-
-    def test_get_and_save_expectation_config(self):
-        directory_name = tempfile.mkdtemp()
-
-        df = ge.dataset.PandasDataset({
-            'x': [1, 2, 4],
-            'y': [1, 2, 5],
-            'z': ['hello', 'jello', 'mello'],
-        })
-        df.expect_column_values_to_be_in_set('x', [1, 2, 4])
-        df.expect_column_values_to_be_in_set(
-            'y', [1, 2, 4], catch_exceptions=True, include_config=True)
-        df.expect_column_values_to_match_regex('z', 'ello')
-
-        ### First test set ###
-
-        output_config = {
-            "expectations": [
-                # No longer expect autoinspection 20180920
-                # {
-                #   "expectation_type": "expect_column_to_exist",
-                #   "kwargs": {
-                #     "column": "x"
-                #   }
-                # },
-                # {
-                #   "expectation_type": "expect_column_to_exist",
-                #   "kwargs": {
-                #     "column": "y"
-                #   }
-                # },
-                # {
-                #   "expectation_type": "expect_column_to_exist",
-                #   "kwargs": {
-                #     "column": "z"
-                #   }
-                # },
-                {
-                    "expectation_type": "expect_column_values_to_be_in_set",
-                    "kwargs": {
-                        "column": "x",
-                        "value_set": [
-                            1,
-                            2,
-                            4
-                        ]
-                    }
-                },
-                {
-                    "expectation_type": "expect_column_values_to_match_regex",
-                    "kwargs": {
-                        "column": "z",
-                        "regex": "ello"
-                    }
-                }
-            ],
-            "data_asset_name": None,
-            "expectation_suite_name": "default",
-            "data_asset_type": "Dataset",
-            "meta": {
-                "great_expectations.__version__": ge.__version__
-            }
-        }
-
-        self.assertEqual(
-            df.get_expectation_suite(),
-            output_config,
-        )
-
-        df.save_expectation_suite(directory_name + '/temp1.json')
-        temp_file = open(directory_name+'/temp1.json')
-        self.assertEqual(
-            json.load(temp_file),
-            output_config,
-        )
-        temp_file.close()
-
-        ### Second test set ###
-
-        output_config = {
-            "expectations": [
-                # No longer expect autoinspection 20180920
-                # {
-                #   "expectation_type": "expect_column_to_exist",
-                #   "kwargs": {
-                #     "column": "x"
-                #   }
-                # },
-                # {
-                #   "expectation_type": "expect_column_to_exist",
-                #   "kwargs": {
-                #     "column": "y"
-                #   }
-                # },
-                # {
-                #   "expectation_type": "expect_column_to_exist",
-                #   "kwargs": {
-                #     "column": "z"
-                #   }
-                # },
-                {
-                    "expectation_type": "expect_column_values_to_be_in_set",
-                    "kwargs": {
-                        "column": "x",
-                        "value_set": [
-                            1,
-                            2,
-                            4
-                        ]
-                    }
-                },
-                {
-                    "expectation_type": "expect_column_values_to_be_in_set",
-                    "kwargs": {
-                        "column": "y",
-                        "value_set": [
-                            1,
-                            2,
-                            4
-                        ]
-                    }
-                },
-                {
-                    "expectation_type": "expect_column_values_to_match_regex",
-                    "kwargs": {
-                        "column": "z",
-                        "regex": "ello"
-                    }
-                }
-            ],
-            "data_asset_name": None,
-            "expectation_suite_name": "default",
-            "data_asset_type": "Dataset",
-            "meta": {
-                "great_expectations.__version__": ge.__version__
-            }
-        }
-
-        self.assertEqual(
-            df.get_expectation_suite(
-                discard_failed_expectations=False
-            ),
-            output_config
-        )
-
-        df.save_expectation_suite(
-            directory_name+'/temp2.json',
-            discard_failed_expectations=False
-        )
-        temp_file = open(directory_name+'/temp2.json')
-        self.assertEqual(
-            json.load(temp_file),
-            output_config,
-        )
-        temp_file.close()
-
-        ### Third test set ###
-
-        output_config = {
-            "expectations": [
-                # No longer expect autoinspection 20180920
-                # {
-                #   "expectation_type": "expect_column_to_exist",
-                #   "kwargs": {
-                #     "column": "x",
-                #     "result_format": "BASIC"
-                #   }
-                # },
-                # {
-                #   "expectation_type": "expect_column_to_exist",
-                #   "kwargs": {
-                #     "column": "y",
-                #     "result_format": "BASIC"
-                #   }
-                # },
-                # {
-                #   "expectation_type": "expect_column_to_exist",
-                #   "kwargs": {
-                #     "column": "z",
-                #     "result_format": "BASIC"
-                #   }
-                # },
-                {
-                    "expectation_type": "expect_column_values_to_be_in_set",
-                    "kwargs": {
-                        "column": "x",
-                        "value_set": [
-                            1,
-                            2,
-                            4
-                        ],
-                        "result_format": "BASIC"
-                    }
-                },
-                {
-                    "expectation_type": "expect_column_values_to_match_regex",
-                    "kwargs": {
-                        "column": "z",
-                        "regex": "ello",
-                        "result_format": "BASIC"
-                    }
-                }
-            ],
-            "data_asset_name": None,
-            "data_asset_type": "Dataset",
-            "expectation_suite_name": "default",
-            "meta": {
-                "great_expectations.__version__": ge.__version__
-            }
-        }
-
-        self.assertEqual(
-            df.get_expectation_suite(
-                discard_result_format_kwargs=False,
-                discard_include_config_kwargs=False,
-                discard_catch_exceptions_kwargs=False,
-            ),
-            output_config,
-            msg="Second Test Set"
-        )
-
-        df.save_expectation_suite(
-            directory_name+'/temp3.json',
-            discard_result_format_kwargs=False,
-            discard_include_config_kwargs=False,
-            discard_catch_exceptions_kwargs=False,
-        )
-        temp_file = open(directory_name+'/temp3.json')
-        self.assertEqual(
-            json.load(temp_file),
-            output_config,
-        )
-        temp_file.close()
-
-        # Clean up the output directory
-        shutil.rmtree(directory_name)
 
     def test_format_map_output(self):
         df = ge.dataset.PandasDataset({
@@ -798,41 +626,45 @@ class TestDataAsset(unittest.TestCase):
         self.assertEqual(
             my_df.find_expectations(
                 "expect_column_to_exist", "x", expectation_kwargs={}),
-            [{
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
+            [ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={
                     "column": "x"
                 }
-            }]
+            )]
         )
 
         self.assertEqual(
             my_df.find_expectations(
                 "expect_column_to_exist", expectation_kwargs={"column": "y"}),
-            [{
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
+            [ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={
                     "column": "y"
                 }
-            }]
+            )]
         )
 
-        exp1 = [{
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
+        exp1 = [
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={
                     "column": "x"
                 }
-            }, {
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={
                     "column": "y"
                 }
-            }, {
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
-                    "column": "z"
-                }
-            }]
+            ),
+            ExpectationConfiguration(
+                    expectation_type="expect_column_to_exist",
+                    kwargs={
+                        "column": "z"
+                    }
+                )
+        ]
 
         if PY2:
             self.assertEqual(sorted(my_df.find_expectations("expect_column_to_exist")), sorted(exp1))
@@ -848,23 +680,24 @@ class TestDataAsset(unittest.TestCase):
         # print 'Conflicting column names in remove_expectation' in context.exception
         # self.assertTrue('Conflicting column names in remove_expectation:' in context.exception)
 
-        exp1 = [{
+        #TODO: convert these objects
+        exp1 = [expectationConfigurationSchema.load({
                 "expectation_type": "expect_column_to_exist",
                 "kwargs": {
                     "column": "x"
                 }
-            }, {
+            }).data, expectationConfigurationSchema.load({
                 "expectation_type": "expect_column_values_to_be_of_type",
                 "kwargs": {
                     "column": "x",
                     "type_": "int"
                 }
-            }, {
+            }).data, expectationConfigurationSchema.load({
                 "expectation_type": "expect_column_values_to_be_increasing",
                 "kwargs": {
                     "column": "x"
                 }
-            }]
+            }).data]
 
         if PY2:
             self.assertEqual(sorted(my_df.find_expectations(column="x")), sorted(exp1))
@@ -893,7 +726,7 @@ class TestDataAsset(unittest.TestCase):
 
         self.assertEqual(
             my_df.remove_expectation(
-                "expect_column_to_exist", "x", expectation_kwargs={}, dry_run=True),
+                "expect_column_to_exist", "x", expectation_kwargs={}, dry_run=True).to_json_dict(),
             {
                 "expectation_type": "expect_column_to_exist",
                 "kwargs": {
@@ -904,7 +737,7 @@ class TestDataAsset(unittest.TestCase):
 
         self.assertEqual(
             my_df.remove_expectation("expect_column_to_exist", expectation_kwargs={
-                                     "column": "y"}, dry_run=True),
+                                     "column": "y"}, dry_run=True).to_json_dict(),
             {
                 "expectation_type": "expect_column_to_exist",
                 "kwargs": {
@@ -914,8 +747,8 @@ class TestDataAsset(unittest.TestCase):
         )
 
         self.assertEqual(
-            my_df.remove_expectation("expect_column_to_exist", expectation_kwargs={
-                                     "column": "y"}, remove_multiple_matches=True, dry_run=True),
+            convert_test_obj_to_json_dict(my_df.remove_expectation("expect_column_to_exist", expectation_kwargs={
+                                     "column": "y"}, remove_multiple_matches=True, dry_run=True)),
             [{
                 "expectation_type": "expect_column_to_exist",
                 "kwargs": {
@@ -949,18 +782,21 @@ class TestDataAsset(unittest.TestCase):
 
         if PY2:
             self.assertEqual(
-                sorted(my_df.remove_expectation("expect_column_to_exist", remove_multiple_matches=True, dry_run=True)),
+                sorted(convert_test_obj_to_json_dict(my_df.remove_expectation("expect_column_to_exist",
+                                                                 remove_multiple_matches=True,
+                                                  dry_run=True))),
                 sorted(exp1)
             )
         else:
             self.assertEqual(
-                my_df.remove_expectation("expect_column_to_exist", remove_multiple_matches=True, dry_run=True),
+                convert_test_obj_to_json_dict(my_df.remove_expectation("expect_column_to_exist",
+                                                               remove_multiple_matches=True, dry_run=True)),
                 exp1
             )
 
         with self.assertRaises(Exception) as context:
             my_df.remove_expectation("expect_column_to_exist", "x", {
-                                     "column": "y"}, dry_run=True)
+                                     "column": "y"}, dry_run=True).to_json_dict()
 
         # FIXME: I don't understand why this test fails.
         # print context.exception
@@ -987,12 +823,13 @@ class TestDataAsset(unittest.TestCase):
 
         if PY2:
             self.assertEqual(
-                sorted(my_df.remove_expectation(column="x", remove_multiple_matches=True, dry_run=True)),
+                sorted(convert_test_obj_to_json_dict(my_df.remove_expectation(column="x", remove_multiple_matches=True,
+                                                                dry_run=True))),
                 sorted(exp1)
             )
         else:
             self.assertEqual(
-                my_df.remove_expectation(column="x", remove_multiple_matches=True, dry_run=True),
+                convert_test_obj_to_json_dict(my_df.remove_expectation(column="x", remove_multiple_matches=True, dry_run=True)),
                 exp1
             )
 
@@ -1026,7 +863,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
         self.assertEqual(
-            my_df.get_expectation_suite(discard_failed_expectations=False),
+            convert_test_obj_to_json_dict(my_df.get_expectation_suite(discard_failed_expectations=False)),
             {
                 'expectations': [
                     {
@@ -1085,30 +922,30 @@ class TestDataAsset(unittest.TestCase):
         sub1.discard_failing_expectations()
         # PY2 sorting is allowed and order not guaranteed
         if PY2:
-            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+            self.assertEqual(sorted(convert_test_obj_to_json_dict(sub1.find_expectations())), sorted(exp1))
         else:
-            self.assertEqual(sub1.find_expectations(), exp1)
+            self.assertEqual(convert_test_obj_to_json_dict(sub1.find_expectations()), exp1)
 
         sub1 = df[1:2]
         sub1.discard_failing_expectations()
         if PY2:
-            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+            self.assertEqual(sorted(convert_test_obj_to_json_dict(sub1.find_expectations())), sorted(exp1))
         else:
-            self.assertEqual(sub1.find_expectations(), exp1)
+            self.assertEqual(convert_test_obj_to_json_dict(sub1.find_expectations()), exp1)
 
         sub1 = df[:-1]
         sub1.discard_failing_expectations()
         if PY2:
-            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+            self.assertEqual(sorted(convert_test_obj_to_json_dict(sub1.find_expectations())), sorted(exp1))
         else:
-            self.assertEqual(sub1.find_expectations(), exp1)
+            self.assertEqual(convert_test_obj_to_json_dict(sub1.find_expectations()), exp1)
 
         sub1 = df[-1:]
         sub1.discard_failing_expectations()
         if PY2:
-            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+            self.assertEqual(sorted(convert_test_obj_to_json_dict(sub1.find_expectations())), sorted(exp1))
         else:
-            self.assertEqual(sub1.find_expectations(), exp1)
+            self.assertEqual(convert_test_obj_to_json_dict(sub1.find_expectations()), exp1)
 
         sub1 = df[['A', 'D']]
         exp1 = [
@@ -1123,9 +960,9 @@ class TestDataAsset(unittest.TestCase):
         ]
         sub1.discard_failing_expectations()
         if PY2:
-            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+            self.assertEqual(sorted(convert_test_obj_to_json_dict(sub1.find_expectations())), sorted(exp1))
         else:
-            self.assertEqual(sub1.find_expectations(), exp1)
+            self.assertEqual(convert_test_obj_to_json_dict(sub1.find_expectations()), exp1)
 
         sub1 = df[['A']]
         exp1 = [
@@ -1136,9 +973,9 @@ class TestDataAsset(unittest.TestCase):
         ]
         sub1.discard_failing_expectations()
         if PY2:
-            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+            self.assertEqual(sorted(convert_test_obj_to_json_dict(sub1.find_expectations())), sorted(exp1))
         else:
-            self.assertEqual(sub1.find_expectations(), exp1)
+            self.assertEqual(convert_test_obj_to_json_dict(sub1.find_expectations()), exp1)
 
         sub1 = df.iloc[:3, 1:4]
         exp1 = [
@@ -1157,9 +994,9 @@ class TestDataAsset(unittest.TestCase):
         ]
         sub1.discard_failing_expectations()
         if PY2:
-            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+            self.assertEqual(sorted(convert_test_obj_to_json_dict(sub1.find_expectations())), sorted(exp1))
         else:
-            self.assertEqual(sub1.find_expectations(), exp1)
+            self.assertEqual(convert_test_obj_to_json_dict(sub1.find_expectations()), exp1)
 
         sub1 = df.loc[0:, 'A':'B']
         exp1 = [
@@ -1174,9 +1011,9 @@ class TestDataAsset(unittest.TestCase):
         ]
         sub1.discard_failing_expectations()
         if PY2:
-            self.assertEqual(sorted(sub1.find_expectations()), sorted(exp1))
+            self.assertEqual(sorted(convert_test_obj_to_json_dict(sub1.find_expectations())), sorted(exp1))
         else:
-            self.assertEqual(sub1.find_expectations(), exp1)
+            self.assertEqual(convert_test_obj_to_json_dict(sub1.find_expectations()), exp1)
 
     def test_test_expectation_function(self):
         D = ge.dataset.PandasDataset({
@@ -1194,11 +1031,11 @@ class TestDataAsset(unittest.TestCase):
             }
 
         self.assertEqual(
-            D.test_expectation_function(expect_dataframe_to_contain_7),
+            convert_test_obj_to_json_dict(D.test_expectation_function(expect_dataframe_to_contain_7)),
             {'success': True}
         )
         self.assertEqual(
-            D2.test_expectation_function(expect_dataframe_to_contain_7),
+            convert_test_obj_to_json_dict(D2.test_expectation_function(expect_dataframe_to_contain_7)),
             {'success': False}
         )
 
@@ -1213,13 +1050,13 @@ class TestDataAsset(unittest.TestCase):
             return column % 2 == 1
 
         self.assertEqual(
-            D.test_column_map_expectation_function(is_odd, column='x'),
+            convert_test_obj_to_json_dict(D.test_column_map_expectation_function(is_odd, column='x')),
             {'result': {'element_count': 5, 'missing_count': 0, 'missing_percent': 0, 'unexpected_percent': 0.0,
                         'partial_unexpected_list': [], 'unexpected_percent_nonmissing': 0.0, 'unexpected_count': 0}, 'success': True}
         )
         self.assertEqual(
-            D.test_column_map_expectation_function(
-                is_odd, 'x', result_format="BOOLEAN_ONLY"),
+            convert_test_obj_to_json_dict(D.test_column_map_expectation_function(
+                is_odd, 'x', result_format="BOOLEAN_ONLY")),
             {'success': True}
         )
         self.assertEqual(
@@ -1248,25 +1085,25 @@ class TestDataAsset(unittest.TestCase):
             }
 
         self.assertEqual(
-            D.test_column_aggregate_expectation_function(
-                expect_second_value_to_be, 'x', 2),
+            convert_test_obj_to_json_dict(D.test_column_aggregate_expectation_function(
+                expect_second_value_to_be, 'x', 2)),
             {'result': {'observed_value': 3.0, 'element_count': 5,
                         'missing_count': 0, 'missing_percent': 0.0}, 'success': False}
         )
         self.assertEqual(
-            D.test_column_aggregate_expectation_function(
-                expect_second_value_to_be, column='x', value=3),
+            convert_test_obj_to_json_dict(D.test_column_aggregate_expectation_function(
+                expect_second_value_to_be, column='x', value=3)),
             {'result': {'observed_value': 3.0, 'element_count': 5,
                         'missing_count': 0, 'missing_percent': 0.0}, 'success': True}
         )
         self.assertEqual(
-            D.test_column_aggregate_expectation_function(
-                expect_second_value_to_be, 'y', value=3, result_format="BOOLEAN_ONLY"),
+            convert_test_obj_to_json_dict(D.test_column_aggregate_expectation_function(
+                expect_second_value_to_be, 'y', value=3, result_format="BOOLEAN_ONLY")),
             {'success': False}
         )
         self.assertEqual(
-            D.test_column_aggregate_expectation_function(
-                expect_second_value_to_be, 'y', 2, result_format="BOOLEAN_ONLY"),
+            convert_test_obj_to_json_dict(D.test_column_aggregate_expectation_function(
+                expect_second_value_to_be, 'y', 2, result_format="BOOLEAN_ONLY")),
             {'success': True}
         )
 
@@ -1285,29 +1122,6 @@ class TestDataAsset(unittest.TestCase):
                              "meta": {"great_expectations.__version__": "0.0.0"}, "expectations": []})
             self.assertEqual(str(w[0].message),
                              "WARNING: This configuration object was built using version 0.0.0 of great_expectations, but is currently being valided by version %s." % ge.__version__)
-
-    def test_catch_exceptions_with_bad_expectation_type(self):
-        my_df = ge.dataset.PandasDataset({"x": range(10)})
-        my_df._append_expectation({'expectation_type': 'foobar', 'kwargs': {}})
-        result = my_df.validate(catch_exceptions=True)
-
-        # Find the foobar result
-        for idx, val_result in enumerate(result["results"]):
-            if val_result["expectation_config"]["expectation_type"] == "foobar":
-                break
-
-        self.assertEqual(result["results"][idx]["success"], False)
-        self.assertEqual(
-            result["results"][idx]["expectation_config"]["expectation_type"], "foobar")
-        self.assertEqual(result["results"][idx]
-                         ["expectation_config"]["kwargs"], {})
-        self.assertEqual(result["results"][idx]
-                         ["exception_info"]["raised_exception"], True)
-        assert "AttributeError: \'PandasDataset\' object has no attribute \'foobar\'" in result[
-            "results"][idx]["exception_info"]["exception_traceback"]
-
-        with self.assertRaises(AttributeError) as context:
-            result = my_df.validate(catch_exceptions=False)
 
 
 if __name__ == "__main__":

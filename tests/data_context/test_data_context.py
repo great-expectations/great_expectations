@@ -2,6 +2,10 @@ import pytest
 
 import sys
 from freezegun import freeze_time
+
+from great_expectations.core import ExpectationConfiguration
+from great_expectations.data_context.types.base import DataContextConfig
+
 try:
     from unittest import mock
 except ImportError:
@@ -20,7 +24,6 @@ from great_expectations.data_context import (
 )
 from great_expectations.data_context.util import safe_mmkdir
 from great_expectations.data_context.types import (
-    NormalizedDataAssetName,
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
 )
@@ -78,34 +81,32 @@ def test_list_expectation_suite_keys(data_context):
     ]
 
 
-def test_get_existing_data_asset_config(data_context):
-    data_asset_config = data_context.get_expectation_suite('mydatasource/mygenerator/my_dag_node', 'default')
-    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/my_dag_node'
-    assert data_asset_config['expectation_suite_name'] == 'default'
-    assert len(data_asset_config['expectations']) == 2
+def test_get_existing_expectation_suite(data_context):
+    expectation_suite = data_context.get_expectation_suite('mydatasource/mygenerator/my_dag_node', 'default')
+    assert expectation_suite.data_asset_name == DataAssetIdentifier.from_tuple(('mydatasource', 'mygenerator',
+                                                                               'my_dag_node'))
+    assert expectation_suite.expectation_suite_name == 'default'
+    assert len(expectation_suite.expectations) == 2
 
 
-def test_get_new_data_asset_config(data_context):
-    data_asset_config = data_context.create_expectation_suite('this_data_asset_config_does_not_exist', 'default')
-    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist'
-    assert data_asset_config['expectation_suite_name'] == 'default'
-    assert len(data_asset_config['expectations']) == 0
+def test_get_new_expectation_suite(data_context):
+    expectation_suite = data_context.create_expectation_suite('this_data_asset_does_not_exist', 'default')
+    assert expectation_suite.data_asset_name == DataAssetIdentifier.from_tuple(
+        ('mydatasource', 'mygenerator', 'this_data_asset_does_not_exist'))
+    assert expectation_suite.expectation_suite_name == 'default'
+    assert len(expectation_suite.expectations) == 0
 
 
-def test_save_data_asset_config(data_context):
-    data_asset_config = data_context.create_expectation_suite('this_data_asset_config_does_not_exist', 'default')
-    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist'
-    assert data_asset_config["expectation_suite_name"] == "default"
-    assert len(data_asset_config['expectations']) == 0
-    data_asset_config['expectations'].append({
-            "expectation_type": "expect_table_row_count_to_equal",
-            "kwargs": {
-                "value": 10
-            }
-        })
-    data_context.save_expectation_suite(data_asset_config)
-    data_asset_config_saved = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
-    assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
+def test_save_expectation_suite(data_context):
+    expectation_suite = data_context.create_expectation_suite('this_data_asset_config_does_not_exist', 'default')
+    expectation_suite.expectations.append(ExpectationConfiguration(
+        expectation_type="expect_table_row_count_to_equal",
+        kwargs={
+            "value": 10
+        }))
+    data_context.save_expectation_suite(expectation_suite)
+    expectation_suite_saved = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
+    assert expectation_suite.expectations == expectation_suite_saved.expectations
 
 
 def test_evaluation_parameter_store_methods(data_context):
@@ -327,13 +328,13 @@ def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_cs
 
     data_context.data_asset_name_delimiter = '.'
     assert data_context.normalize_data_asset_name("my_datasource.default.f1") == \
-        NormalizedDataAssetName("my_datasource", "default", "f1")
+        DataAssetIdentifier("my_datasource", "default", "f1")
     assert data_context.normalize_data_asset_name("my_datasource.default.f1") == \
-        NormalizedDataAssetName("my_datasource", "default", "f1")
+        DataAssetIdentifier("my_datasource", "default", "f1")
 
     data_context.data_asset_name_delimiter = '/'
     assert data_context.normalize_data_asset_name("my_datasource/default/f1") == \
-        NormalizedDataAssetName("my_datasource", "default", "f1")
+        DataAssetIdentifier("my_datasource", "default", "f1")
 
     with pytest.raises(DataContextError) as exc:
         data_context.data_asset_name_delimiter = "$"
@@ -371,25 +372,25 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     # a the data_asset_name; the datasource name and data_asset_name or all
     # three components of the normalized data asset name
     assert data_context.normalize_data_asset_name("f1") == \
-        NormalizedDataAssetName("my_datasource", "default", "f1")
+        DataAssetIdentifier("my_datasource", "default", "f1")
 
     assert data_context.normalize_data_asset_name("my_datasource/f1") == \
-        NormalizedDataAssetName("my_datasource", "default", "f1")
+        DataAssetIdentifier("my_datasource", "default", "f1")
 
     assert data_context.normalize_data_asset_name("my_datasource/default/f1") == \
-        NormalizedDataAssetName("my_datasource", "default", "f1")
+        DataAssetIdentifier("my_datasource", "default", "f1")
 
     # With only one datasource and generator configured, we
     # can create new namespaces at the generator asset level easily:
     assert data_context.normalize_data_asset_name("f5") == \
-        NormalizedDataAssetName("my_datasource", "default", "f5")
+        DataAssetIdentifier("my_datasource", "default", "f5")
 
     # We can also be more explicit in creating new namespaces at the generator asset level:
     assert data_context.normalize_data_asset_name("my_datasource/f6") == \
-        NormalizedDataAssetName("my_datasource", "default", "f6")
+        DataAssetIdentifier("my_datasource", "default", "f6")
 
     assert data_context.normalize_data_asset_name("my_datasource/default/f7") == \
-        NormalizedDataAssetName("my_datasource", "default", "f7")
+        DataAssetIdentifier("my_datasource", "default", "f7")
 
     # However, we cannot create against nonexisting datasources or generators:
     with pytest.raises(DataContextError) as exc:
@@ -416,10 +417,10 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
 
     # We can still reference *unambiguous* data_asset_names:
     assert data_context.normalize_data_asset_name("f1") == \
-        NormalizedDataAssetName("my_datasource", "default", "f1")
+        DataAssetIdentifier("my_datasource", "default", "f1")
 
     assert data_context.normalize_data_asset_name("f4") == \
-        NormalizedDataAssetName("my_second_datasource", "default", "f4")
+        DataAssetIdentifier("my_second_datasource", "default", "f4")
 
     # However, single-name resolution will fail with ambiguous entries
     with pytest.raises(DataContextError) as exc:
@@ -428,11 +429,11 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
 
     # Two-name resolution still works since generators are not ambiguous in that case
     assert data_context.normalize_data_asset_name("my_datasource/f3") == \
-        NormalizedDataAssetName("my_datasource", "default", "f3")
+        DataAssetIdentifier("my_datasource", "default", "f3")
 
     # We can also create new namespaces using only two components since that is not ambiguous
     assert data_context.normalize_data_asset_name("my_datasource/f9") == \
-        NormalizedDataAssetName("my_datasource", "default", "f9")
+        DataAssetIdentifier("my_datasource", "default", "f9")
 
     # However, we cannot create new names using only a single component
     with pytest.raises(DataContextError) as exc:
@@ -448,7 +449,7 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     # We've chosen an interesting case: in_memory_generator does not by default provide its own names
     # so we can still get some names if there is no ambiguity about the namespace
     assert data_context.normalize_data_asset_name("f1") == \
-        NormalizedDataAssetName("my_datasource", "default", "f1")
+        DataAssetIdentifier("my_datasource", "default", "f1")
 
     # However, if we add a data_asset that would cause that name to be ambiguous, it will then fail:
     suite = data_context.create_expectation_suite("my_datasource/in_memory_generator/f1", "default")
@@ -465,10 +466,10 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
 
     # But we can get the asset using all three components
     assert data_context.normalize_data_asset_name("my_datasource/default/f1") == \
-        NormalizedDataAssetName("my_datasource", "default", "f1")
+        DataAssetIdentifier("my_datasource", "default", "f1")
 
     assert data_context.normalize_data_asset_name("my_datasource/in_memory_generator/f1") == \
-        NormalizedDataAssetName("my_datasource", "in_memory_generator", "f1")
+        DataAssetIdentifier("my_datasource", "in_memory_generator", "f1")
 
 
 def test_list_datasources(data_context):
@@ -508,9 +509,9 @@ def test_data_context_result_store(titanic_data_context):
     profiling_results = titanic_data_context.profile_datasource("mydatasource")
 
     for profiling_result in profiling_results['results']:
-        data_asset_name = profiling_result[1]['meta']['data_asset_name']
+        data_asset_name = profiling_result[0]['data_asset_name']
         validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
-        assert data_asset_name in validation_result["meta"]["data_asset_name"]
+        assert repr(data_asset_name) in validation_result["meta"]["data_asset_name"]
 
     all_validation_result = titanic_data_context.get_validation_result(
         "mydatasource/mygenerator/Titanic",
@@ -682,10 +683,11 @@ def test_add_store(empty_data_context):
 
 @pytest.fixture
 def basic_data_context_config():
-    # return DataContextConfig(**{
-    return {
+    return DataContextConfig(**{
+        "commented_map": {},
         "config_version": 1,
         "plugins_directory": "plugins/",
+        "config_variables_file_path": None,
         "evaluation_parameter_store_name": "evaluation_parameter_store",
         "validations_store_name": "does_not_have_to_be_real",
         "expectations_store_name": "expectations_store",
@@ -710,7 +712,7 @@ def basic_data_context_config():
                 "action_list": []
             }
         }
-    }
+    })
 
 
 def test_ExplorerDataContext(titanic_data_context):
@@ -788,19 +790,6 @@ def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_conte
     context._normalize_absolute_or_relative_path("/yikes")
     assert "test__normalize_absolute_or_relative_path__dir" not in context._normalize_absolute_or_relative_path("/yikes")
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
-
-
-def test__get_normalized_data_asset_name_filepath(basic_data_context_config):
-    context = ConfigOnlyDataContext(
-        project_config=basic_data_context_config,
-        context_root_dir="testing/",
-    )
-    assert context._get_normalized_data_asset_name_filepath(
-        NormalizedDataAssetName("my_db", "default", "my_table"),
-        "default",
-        "my/base/path",
-        ".json"
-    ) == "my/base/path/my_db/default/my_table/default.json"
 
 
 def test_load_data_context_from_environment_variables(tmp_path_factory):
@@ -935,7 +924,6 @@ def test_data_context_updates_expectation_suite_names(data_context):
             )
         )
         assert loaded_suite['expectation_suite_name'] == 'a_new_new_suite_name'
-
 
     #   3. Using the new name but having the context draw that from the suite
     expectation_suite['data_asset_name'] = str(DataAssetIdentifier(

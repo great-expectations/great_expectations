@@ -9,7 +9,8 @@ from .renderer import Renderer
 from great_expectations.util import load_class
 from .content_block import ExceptionListContentBlockRenderer
 
-from ..types import RenderedSectionContent
+from ..types import RenderedSectionContent, RenderedHeaderContent, RenderedGraphContent, RenderedBulletListContent, \
+    RenderedTableContent, ValueListContent
 
 from ..types import (
     RenderedComponentContent,
@@ -98,7 +99,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         except KeyError:
             column_name = "Table-level expectations"
 
-        return RenderedComponentContent(**{
+        return RenderedHeaderContent(**{
             "content_block_type": "header",
             "header": {
                     "template": convert_to_string_and_escape(column_name),
@@ -155,7 +156,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             }
         } for evr in evrs]
 
-        content_blocks.append(RenderedComponentContent(**{
+        content_blocks.append(RenderedBulletListContent(**{
             "content_block_type": "bullet_list",
             "header": 'Expectation types <span class="mr-3 triangle"></span>',
             "bullet_list": bullet_list,
@@ -253,7 +254,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 quantile_ranges[idx],
             ])
 
-        return RenderedComponentContent(**{
+        return RenderedHeaderContent(**{
             "content_block_type": "table",
             "header": "Quantiles",
             "table": table_rows,
@@ -337,7 +338,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             ])
 
         if len(table_rows) > 0:
-            return RenderedComponentContent(**{
+            return RenderedTableContent(**{
                 "content_block_type": "table",
                 "header": "Statistics",
                 "table": table_rows,
@@ -382,7 +383,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         else:
             content_block_type = "value_list"
 
-        new_block = RenderedComponentContent(**{
+        new_block = ValueListContent(**{
             "content_block_type": content_block_type,
             "header":
                 {
@@ -461,7 +462,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         chart = bars.to_json()
 
-        return RenderedComponentContent(**{
+        return RenderedGraphContent(**{
             "content_block_type": "graph",
             "header":
                 {
@@ -516,7 +517,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         chart = bars.to_json()
 
-        new_block = RenderedComponentContent(**{
+        new_block = RenderedGraphContent(**{
             "content_block_type": "graph",
             "header":
                 {
@@ -593,7 +594,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         if not column:
             column = "Table-Level Expectations"
         
-        new_block = RenderedComponentContent(**{
+        new_block = RenderedHeaderContent(**{
             "content_block_type": "header",
             "header": convert_to_string_and_escape(column),
             "styling": {
@@ -644,8 +645,7 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
     def _render_header(cls, expectations):
         column = cls._get_column_name(expectations)
 
-        new_block = RenderedComponentContent(**{
-            "content_block_type": "header",
+        new_block = RenderedHeaderContent(**{
             "header": convert_to_string_and_escape(column),
             "styling": {
                 "classes": ["col-12"],
@@ -679,7 +679,7 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
 
         # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))
-        return RenderedSectionContent(**{
-            "section_name": column,
-            "content_blocks": populated_content_blocks
-        })
+        return RenderedSectionContent(
+            section_name=column,
+            content_blocks=populated_content_blocks
+        )

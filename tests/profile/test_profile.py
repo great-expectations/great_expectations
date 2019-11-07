@@ -100,7 +100,6 @@ def test_BasicDatasetProfiler_null_column():
     assert len([result for result in evr_config['results'] if
      result['expectation_config']['kwargs'].get('column') == 'y' and result['success']]) == 4
 
-
     assert len([result for result in evr_config['results'] if
                 result['expectation_config']['kwargs'].get('column') == 'y' and result['success']]) < \
            len([result for result in evr_config['results'] if
