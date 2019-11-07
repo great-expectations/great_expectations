@@ -1,10 +1,15 @@
 .. _changelog:
 
 
-0.8.5.post0
-----------------
+0.8.5__develop
+-----------------
+
+
+0.8.4.post0
+-----------------
 * Correct a packaging issue resulting in missing notebooks in tarball release; update docs to reflect new notebook
 locations.
+
 
 0.8.4
 -----------------
