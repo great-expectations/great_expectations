@@ -1,9 +1,4 @@
-from six import string_types
-
-from great_expectations.data_context.types import NormalizedDataAssetName
-from great_expectations.datasource.types import BatchFingerprint
-# from great_expectations.types import AllowedKeysDotDict
-from great_expectations.data_context.types.base_resource_identifiers import DataContextKey
+from great_expectations.core import DataContextKey
 from great_expectations.profile.metrics_utils import make_dictionary_key
 
 try:
@@ -43,6 +38,7 @@ class Metric(object):
 #         "metric_value"
 #     }
 
+
 class MetricIdentifier(DataContextKey):
     # def __init__(self, data_asset_name, batch_kwargs, batch_id, metric_name, metric_kwargs, metric_value):
     def __init__(self, data_asset_name, batch_fingerprint, metric_name, metric_kwargs, metric_value):
@@ -73,14 +69,13 @@ class MetricIdentifier(DataContextKey):
                 make_dictionary_key(self.metric_kwargs))
 
 
-class ExpectationDefinedValidationMetric(DataContextKey):
-    def __init__(self, data_asset_name, batch_fingerprint, expectation_type, result_key, metric_kwargs, metric_value):
+class ExpectationDefinedMetricIdentifier(DataContextKey):
+    def __init__(self, data_asset_name, batch_fingerprint, expectation_type, result_key, metric_kwargs):
         self._data_asset_name = data_asset_name
         self._batch_fingerprint = batch_fingerprint
         self._expectation_type = expectation_type,
         self._result_key = result_key
         self._metric_kwargs = metric_kwargs
-        self._metric_value = metric_value
 
     @property
     def data_asset_name(self):
@@ -102,14 +97,24 @@ class ExpectationDefinedValidationMetric(DataContextKey):
     def metric_kwargs(self):
         return self._metric_kwargs
 
+    def to_tuple(self):
+        return (self.data_asset_name, self.batch_fingerprint, self.expectation_type, self.result_key,
+                make_dictionary_key(self.metric_kwargs))
+
+
+class ExpectationDefinedValidationMetric(object):
+    def __init__(self, metric_identifier, metric_value):
+        # TODO: validate and raise error
+        self._metric_identifier = metric_identifier
+        self._metric_value = metric_value
+
+    @property
+    def metric_identifier(self):
+        return self._metric_identifier
+
     @property
     def metric_value(self):
         return self._metric_value
-
-    def to_tuple(self):
-        return (self.data_asset_name, self.batch_fingerprint, self.expectation_type, self.result_key,
-                make_dictionary_key(self.metric_kwargs), self.metric_value)
-
 
 #
 #

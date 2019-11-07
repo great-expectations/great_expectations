@@ -5,9 +5,10 @@ import json
 import datetime
 import pandas as pd
 import great_expectations as ge
+from great_expectations.core import ExpectationSuiteSchema
 from great_expectations.profile import ColumnsExistProfiler
 
-from .test_utils import assertDeepAlmostEqual
+from tests.test_utils import assertDeepAlmostEqual, expectationValidationResultSchema, convert_test_obj_to_json_dict
 from six import PY2
 
 
@@ -109,7 +110,7 @@ def test_expectation_decorator_summary_mode():
     # print '&'*80
     # print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY"), indent=2)
 
-    exp_output = {
+    exp_output = expectationValidationResultSchema.load({
         "success": False,
         "result": {
             "element_count": 10,
@@ -127,11 +128,11 @@ def test_expectation_decorator_summary_mode():
             "partial_unexpected_list": [6.0, 7.0, 7.0],
             "partial_unexpected_index_list": [5, 6, 7],
         }
-    }
+    })
     assert df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY")\
         == exp_output
 
-    exp_output = {
+    exp_output = expectationValidationResultSchema.load({
         'success': True,
         'result': {
             'observed_value': 4.375,
@@ -139,66 +140,10 @@ def test_expectation_decorator_summary_mode():
             'missing_count': 2,
             'missing_percent': 20.0
         },
-    }
+    })
 
     assert df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY")\
         == exp_output
-
-
-def test_positional_arguments():
-
-    df = ge.dataset.PandasDataset({
-        'x': [1, 3, 5, 7, 9],
-        'y': [2, 4, 6, 8, 10],
-        'z': [None, 'a', 'b', 'c', 'abc']
-    })
-    df.set_default_expectation_argument('result_format', 'COMPLETE')
-
-    exp_output = {'success': True, 'result': {'observed_value': 5, 'element_count': 5,
-                                              'missing_count': 0,
-                                              'missing_percent': 0.0}}
-
-    assert df.expect_column_mean_to_be_between('x', 4, 6) == exp_output
-
-    out = df.expect_column_values_to_be_between('y', 1, 6)
-    t = {'out': {'success': False, 'unexpected_list': [
-        8, 10], 'unexpected_index_list': [3, 4]}}
-    if 'out' in t:
-        assert t['out']['success'] == out['success']
-        if 'unexpected_index_list' in t['out']:
-            assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
-        if 'unexpected_list' in t['out']:
-            assert t['out']['unexpected_list'] == out['result']['unexpected_list']
-
-    out = df.expect_column_values_to_be_between('y', 1, 6, mostly=.5)
-    t = {'out': {'success': True, 'unexpected_list': [
-        8, 10], 'unexpected_index_list': [3, 4]}}
-    if 'out' in t:
-        assert t['out']['success'] == out['success']
-        if 'unexpected_index_list' in t['out']:
-            assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
-        if 'unexpected_list' in t['out']:
-            assert t['out']['unexpected_list'] == out['result']['unexpected_list']
-
-    out = df.expect_column_values_to_be_in_set('z', ['a', 'b', 'c'])
-    t = {'out': {'success': False, 'unexpected_list': [
-        'abc'], 'unexpected_index_list': [4]}}
-    if 'out' in t:
-        assert t['out']['success'] == out['success']
-        if 'unexpected_index_list' in t['out']:
-            assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
-        if 'unexpected_list' in t['out']:
-            assert t['out']['unexpected_list'] == out['result']['unexpected_list']
-
-    out = df.expect_column_values_to_be_in_set('z', ['a', 'b', 'c'], mostly=.5)
-    t = {'out': {'success': True, 'unexpected_list': [
-        'abc'], 'unexpected_index_list': [4]}}
-    if 'out' in t:
-        assert t['out']['success'] == out['success']
-        if 'unexpected_index_list' in t['out']:
-            assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
-        if 'unexpected_list' in t['out']:
-            assert t['out']['unexpected_list'] == out['result']['unexpected_list']
 
 
 def test_result_format_argument_in_decorators():
@@ -210,7 +155,6 @@ def test_result_format_argument_in_decorators():
     df.set_default_expectation_argument('result_format', 'COMPLETE')
 
     # Test explicit Nones in result_format
-
     exp_output = {'success': True, 'result': {'observed_value': 5, 'element_count': 5,
                                               'missing_count': 0,
                                               'missing_percent': 0.0
@@ -218,7 +162,7 @@ def test_result_format_argument_in_decorators():
     assert df.expect_column_mean_to_be_between('x', 4, 6, result_format=None)\
         == exp_output
 
-    exp_output = {'result': {'element_count': 5,
+    exp_output = expectationValidationResultSchema.load({'result': {'element_count': 5,
                              'missing_count': 0,
                              'missing_percent': 0.0,
                              'partial_unexpected_counts': [{'count': 1, 'value': 8},
@@ -230,7 +174,7 @@ def test_result_format_argument_in_decorators():
                              'unexpected_list': [8, 10],
                              'unexpected_percent': 40.0,
                              'unexpected_percent_nonmissing': 40.0},
-                  'success': False}
+                  'success': False})
 
     assert df.expect_column_values_to_be_between('y', 1, 6, result_format=None)\
         == exp_output
@@ -407,9 +351,9 @@ def test_ge_pandas_sampling():
     samp1 = df.sample(n=2)
     assert isinstance(samp1, ge.dataset.PandasDataset)
     if PY2:
-        assert sorted(samp1.find_expectations()) == sorted(exp1)
+        assert convert_test_obj_to_json_dict(sorted(samp1.find_expectations())) == sorted(exp1)
     else:
-        assert samp1.find_expectations() == exp1
+        assert convert_test_obj_to_json_dict(samp1.find_expectations()) == exp1
 
     samp1 = df.sample(frac=0.25, replace=True)
     assert isinstance(samp1, ge.dataset.PandasDataset)
@@ -420,7 +364,7 @@ def test_ge_pandas_sampling():
     # in the sample.
     df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'x'])
     samp1 = df.sample(n=2)
-    exp1 = [
+    exp1 = ExpectationSuiteSchema(expectations=[
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'A'}},
         {'expectation_type': 'expect_column_to_exist',
@@ -437,11 +381,11 @@ def test_ge_pandas_sampling():
          'kwargs': {'column': 'C', 'value_set': ['a', 'b', 'c', 'd']}},
         {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'x']}}
-    ]
+    ])
     if PY2:
-        assert sorted(samp1.find_expectations()) == sorted(exp1)
+        assert convert_test_obj_to_json_dict(sorted(samp1.find_expectations())) == sorted(exp1)
     else:
-        assert samp1.find_expectations() == exp1
+        assert convert_test_obj_to_json_dict(samp1.find_expectations()) == exp1
 
 
 def test_ge_pandas_subsetting():
@@ -536,17 +480,17 @@ def test_ge_pandas_automatic_failure_removal():
     ]
     samp1 = df.sample(n=2)
     if PY2:
-        assert sorted(samp1.find_expectations()) == sorted(exp1)
+        assert convert_test_obj_to_json_dict(sorted(samp1.find_expectations())) == sorted(exp1)
     else:
-        assert samp1.find_expectations() == exp1
+        assert convert_test_obj_to_json_dict(samp1.find_expectations()) == exp1
 
     # Now check subsetting to verify that failing expectations are NOT
     # automatically dropped when subsetting.
     sub1 = df[['A', 'D']]
     if PY2:
-        assert sorted(samp1.find_expectations()) == sorted(exp1)
+        assert convert_test_obj_to_json_dict(sorted(samp1.find_expectations())) == sorted(exp1)
     else:
-        assert samp1.find_expectations() == exp1
+        assert convert_test_obj_to_json_dict(samp1.find_expectations()) == exp1
 
     # Set property/attribute so that failing expectations are
     # automatically removed when sampling or subsetting.
@@ -575,9 +519,9 @@ def test_ge_pandas_automatic_failure_removal():
 
     samp2 = df.sample(n=2)
     if PY2:
-        assert sorted(samp2.find_expectations()) == sorted(exp_samp)
+        assert convert_test_obj_to_json_dict(sorted(samp2.find_expectations())) == sorted(exp_samp)
     else:
-        assert samp2.find_expectations() == exp_samp
+        assert convert_test_obj_to_json_dict(samp2.find_expectations()) == exp_samp
 
     # Now check subsetting. In additional to the failure on column "C",
     # the expectations on column "B" now fail since column "B" doesn't
@@ -594,9 +538,9 @@ def test_ge_pandas_automatic_failure_removal():
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
     ]
     if PY2:
-        assert sorted(samp2.find_expectations()) == sorted(exp_samp)
+        assert convert_test_obj_to_json_dict(sorted(samp2.find_expectations())) == sorted(exp_samp)
     else:
-        assert samp2.find_expectations() == exp_samp
+        assert convert_test_obj_to_json_dict(samp2.find_expectations()) == exp_samp
 
 
 def test_subclass_pandas_subset_retains_subclass():

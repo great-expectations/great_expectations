@@ -53,8 +53,8 @@ def test_validate_using_data_context(dataset, data_context):
     assert data_context._compiled is False
 
     # And, we should have validated the right number of expectations from the context-provided config
-    assert res["success"] is False
-    assert res["statistics"]["evaluated_expectations"] == 2
+    assert res.success is False
+    assert res.statistics["evaluated_expectations"] == 2
 
 
 def test_validate_using_data_context_path(dataset, data_context):

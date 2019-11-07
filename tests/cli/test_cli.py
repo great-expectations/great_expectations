@@ -29,7 +29,7 @@ from six import PY2
 from great_expectations.cli import cli
 from great_expectations.util import gen_directory_tree_str
 from great_expectations import __version__ as ge_version
-from .test_utils import assertDeepAlmostEqual
+from tests.test_utils import assertDeepAlmostEqual
 yaml = YAML()
 yaml.default_flow_style = False
 

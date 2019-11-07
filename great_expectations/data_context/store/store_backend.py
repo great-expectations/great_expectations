@@ -43,20 +43,23 @@ class StoreBackend(object):
         return self._has_key(key)
 
     def _validate_key(self, key):
-        if not isinstance(key, (tuple, (DataContextKey))):
+        if isinstance(key, DataContextKey):
+            pass
+        elif isinstance(key, tuple):
+            for key_element in key:
+                if not isinstance(key_element, string_types):
+                    raise TypeError(
+                        "Elements within tuples passed as keys to {0} must be instances of {1}, not {2}".format(
+                            self.__class__.__name__,
+                            string_types,
+                            type(key_element),
+                        ))
+        else:
             raise TypeError("Keys in {0} must be instances of {1}, not {2}".format(
                 self.__class__.__name__,
                 tuple,
                 type(key),
             ))
-        
-        # for key_element in key:
-        #     if not isinstance(key_element, string_types):
-        #         raise TypeError("Elements within tuples passed as keys to {0} must be instances of {1}, not {2}".format(
-        #             self.__class__.__name__,
-        #             string_types,
-        #             type(key_element),
-        #         ))
 
     def _validate_value(self, value):
         pass
@@ -167,7 +170,6 @@ class FixedLengthTupleStoreBackend(StoreBackend):
                 string_types,
                 type(value),
             ))
-
 
     def _convert_key_to_filepath(self, key):
         # NOTE: At some point in the future, it might be better to replace this logic with os.path.join.

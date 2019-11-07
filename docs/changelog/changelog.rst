@@ -5,7 +5,8 @@
 -----------------
 * Fix a bug in data-docs' rendering of mostly parameter
 * Correct wording for expect_column_proportion_of_unique_values_to_be_between
-* Avoid use of unicode character in data-docs to skirt encoding issues
+* Set unicode charset and meta tag in data-docs to ensure correct rendering of unicode
+
 
 0.8.2
 -----------------

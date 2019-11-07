@@ -9,6 +9,7 @@ import json
 import numpy as np
 
 from great_expectations.data_asset import DataAsset
+from tests.test_utils import expectationSuiteValidationResultSchema
 
 
 @pytest.fixture
@@ -124,7 +125,7 @@ def test_validation_substitution_with_json_coercion(single_expectation_custom_da
     # Verify that the entire result object including evaluation_parameters is serializable
     assert validation_result["evaluation_parameters"]["upstream_dag_key"] == ["upstream_dag_value"]
     try:
-        json.dumps(validation_result)
+        json.dumps(expectationSuiteValidationResultSchema.dumps(validation_result))
     except TypeError as err:
         pytest.fail("Error converting validation_result to json. Got TypeError: %s" + str(err))
 

@@ -12,7 +12,6 @@ from great_expectations.render.view import DefaultJinjaPageView
 from great_expectations.render.types import (
     RenderedComponentContent,
     RenderedSectionContent,
-    RenderedComponentContentWrapper,
     RenderedDocumentContent
 )
 from ..test_utils import dict_to_ordered_dict

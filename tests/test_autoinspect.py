@@ -6,7 +6,7 @@ import pytest
 from .test_utils import get_dataset
 
 import great_expectations as ge
-
+from great_expectations.core import ExpectationConfiguration
 
 def test_no_autoinspection():
     df = ge.dataset.PandasDataset({"a": [1, 2, 3]}, profiler=None)
@@ -33,8 +33,9 @@ def test_autoinspect_existing_dataset(test_backend):
     suite = df.get_expectation_suite()
 
     # Ensure that autoinspect worked
+    assert len(suite["expectations"]) == 1
     assert suite["expectations"] == \
-        [{'expectation_type': 'expect_column_to_exist', 'kwargs': {'column': 'a'}}]
+        [ge.core.ExpectationConfiguration(expectation_type='expect_column_to_exist', kwargs={'column': 'a'})]
 
 
 def test_autoinspect_columns_exist(test_backend):
@@ -43,7 +44,7 @@ def test_autoinspect_columns_exist(test_backend):
 
     assert len(suite["expectations"]) == 1
     assert suite["expectations"] == \
-        [{'expectation_type': 'expect_column_to_exist', 'kwargs': {'column': 'a'}}]
+        [ExpectationConfiguration(expectation_type='expect_column_to_exist', kwargs={'column': 'a'})]
 
 
 def test_autoinspect_warning():

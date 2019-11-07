@@ -72,6 +72,6 @@
       }
     }
   ],
-  "data_asset_name": null,
+  "data_asset_name": "titanic",
   "expectation_suite_name": "default"
 }

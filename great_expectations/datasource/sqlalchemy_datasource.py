@@ -8,7 +8,6 @@ from great_expectations.datasource.types import (
     SqlAlchemyDatasourceTableBatchKwargs,
     BatchId
 )
-from great_expectations.data_context.types import NormalizedDataAssetName, DataAssetIdentifier
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
 from .generator.query_generator import QueryGenerator
 from great_expectations.exceptions import DatasourceInitializationError, BatchKwargsError

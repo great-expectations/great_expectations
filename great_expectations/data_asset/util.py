@@ -13,6 +13,9 @@ import numpy as np
 
 from functools import wraps
 
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite, ExpectationValidationResult, \
+    ExpectationKwargs, ExpectationSuiteValidationResult
+
 
 def parse_result_format(result_format):
     """This is a simple helper utility that can be used to parse a string result_format into the dict format used
@@ -99,6 +102,12 @@ def recursively_convert_to_json_serializable(test_obj):
         test_obj may also be converted in place.
 
     """
+    # If it's one of our types, we pass
+    if isinstance(test_obj, (ExpectationConfiguration, ExpectationSuite, ExpectationValidationResult,
+                             ExpectationSuiteValidationResult)):
+        return test_obj
+
+
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
     # print(type(test_obj), test_obj)
     # Note: Not 100% sure I've resolved this correctly...

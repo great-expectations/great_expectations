@@ -67,15 +67,6 @@ class TestUtilMethods(unittest.TestCase):
         with open('./tests/test_sets/test_partitions.json', 'r') as file:
             self.test_partitions = json.loads(file.read())
 
-    def test_DotDict(self):
-        D = ge.types.DotDict({
-            'x': [1, 2, 4],
-            'y': [1, 2, 5],
-            'z': ['hello', 'jello', 'mello'],
-        })
-        self.assertEqual(D.x[0], D.y[0])
-        self.assertNotEqual(D.x[0], D.z[0])
-
     def test_continuous_partition_data_error(self):
         with self.assertRaises(ValueError):
             test_partition = ge.dataset.util.continuous_partition_data(

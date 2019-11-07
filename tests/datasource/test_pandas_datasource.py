@@ -19,7 +19,7 @@ from great_expectations.datasource.types.batch_kwargs import (
 )
 from great_expectations.dataset import PandasDataset
 
-yaml = YAML(typ='safe')
+yaml = YAML()
 
 
 @pytest.fixture(scope="module")

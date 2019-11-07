@@ -9,14 +9,6 @@ class Renderer(object):
         return ge_object
 
     @classmethod
-    def _id_from_configuration(cls, expectation_type, expectation_kwargs, data_asset_name=None):
-        urn_hash = hashlib.md5()
-        urn_hash.update(expectation_type.encode('utf-8'))
-        urn_hash.update(json.dumps(expectation_kwargs).encode('utf-8'))
-        urn_hash.update(json.dumps(data_asset_name).encode('utf-8')) # Dump first even though this is a string in case it is null;
-        return base64.b64encode(urn_hash.digest()).decode('utf-8')
-
-    @classmethod
     def _get_expectation_type(cls, ge_object):
         if "expectation_type" in ge_object:
             # This is an expectation

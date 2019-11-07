@@ -69,6 +69,7 @@ def basic_data_context_config_for_validation_operator():
     }
     # })
 
+
 def test_ActionListValidationOperator(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
     project_path = str(tmp_path_factory.mktemp('great_expectations'))
 
@@ -95,10 +96,6 @@ def test_ActionListValidationOperator(basic_data_context_config_for_validation_o
     data_context.save_expectation_suite(warning_expectations, data_asset_name="my_datasource/default/f1",
                                         expectation_suite_name="warning")
 
-    print("W"*80)
-    print(json.dumps(warning_expectations, indent=2))
-    print(json.dumps(failure_expectations, indent=2))
-
     validator_batch_kwargs = data_context.yield_batch_kwargs("my_datasource/default/f1")
     batch = data_context.get_batch("my_datasource/default/f1",
                                    expectation_suite_name="failure",
@@ -122,7 +119,6 @@ def test_ActionListValidationOperator(basic_data_context_config_for_validation_o
     assert len(operator_result['details'].keys()) == 2
 
     first_validation_result = data_context.stores["validation_result_store"].get(validation_result_store_keys[0])
-    print(json.dumps(first_validation_result, indent=2))
     assert data_context.stores["validation_result_store"].get(validation_result_store_keys[0])["success"] is True
 
 

@@ -4,7 +4,7 @@ from abc import ABC
 from hashlib import md5
 import datetime
 
-from great_expectations.data_context.types.base_resource_identifiers import DataContextKey
+from great_expectations.core import DataContextKey
 from great_expectations.exceptions import InvalidBatchKwargsError, InvalidBatchIdError
 
 logger = logging.getLogger(__name__)
