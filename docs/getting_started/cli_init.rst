@@ -50,8 +50,15 @@ If you inspect the ``great_expectations/`` directory after the init command has 
     ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── create_expectations.ipynb
-    │   └── integrate_validation_into_pipeline.ipynb
+    │   ├── pandas
+    │   │   ├── create_expectations.ipynb
+    │   │   └── validations_playground.ipynb
+    │   ├── spark
+    │   │   ├── create_expectations.ipynb
+    │   │   └── validations_playground.ipynb
+    │   └── sql
+    │       ├── create_expectations.ipynb
+    │       └── validations_playground.ipynb
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -283,8 +290,15 @@ Still, it's useful to see how they're stored, to get a sense for how namespaces 
     ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── create_expectations.ipynb
-    │   └── integrate_validation_into_pipeline.ipynb
+    │   ├── pandas
+    │   │   ├── create_expectations.ipynb
+    │   │   └── validations_playground.ipynb
+    │   ├── spark
+    │   │   ├── create_expectations.ipynb
+    │   │   └── validations_playground.ipynb
+    │   └── sql
+    │       ├── create_expectations.ipynb
+    │       └── validations_playground.ipynb
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -443,8 +457,15 @@ After the init command completes, you should see the following directory structu
     ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── create_expectations.ipynb
-    │   └── integrate_validation_into_pipeline.ipynb
+    │   ├── pandas
+    │   │   ├── create_expectations.ipynb
+    │   │   └── validations_playground.ipynb
+    │   ├── spark
+    │   │   ├── create_expectations.ipynb
+    │   │   └── validations_playground.ipynb
+    │   └── sql
+    │       ├── create_expectations.ipynb
+    │       └── validations_playground.ipynb
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -473,12 +494,5 @@ After the init command completes, you should see the following directory structu
 Next Steps
 -----------
 
-Before exiting, the init command points you to the notebooks that you can use to create expectations:
-
-::
-
-    To create expectations for your data, start Jupyter and open a tutorial notebook:
-
-    To launch with jupyter notebook:
-        jupyter notebook great_expectations/notebooks/create_expectations.ipynb
-
+Once you have opened datadocs, a prompt will suggest possible next steps, such as to :ref:`tutorial_create_expectations` or
+:ref:`tutorial_validate_data`.
