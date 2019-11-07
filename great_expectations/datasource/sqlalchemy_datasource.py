@@ -68,6 +68,14 @@ class SqlAlchemyDatasource(Datasource):
         })
         return configuration
 
+    @classmethod
+    def get_sampling_generator_configuration(cls):
+        return {
+            "sampling_generator": {
+                "class_name": "TableSamplingGenerator"
+            }
+        }
+
     def __init__(self, name="default", data_context=None, data_asset_type=None, credentials=None, generators=None, **kwargs):
         if not sqlalchemy:
             raise DatasourceInitializationError(name, "ModuleNotFoundError: No module named 'sqlalchemy'")
