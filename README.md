@@ -18,6 +18,8 @@ For full documentation, visit [Great Expectations on readthedocs.io](http://grea
 
 [Down with Pipeline Debt!](https://medium.com/@expectgreatdata/down-with-pipeline-debt-introducing-great-expectations-862ddc46782a) explains the core philosophy behind Great Expectations. Please give it a read, and clap, follow, and share while you're at it.
 
+We are looking for user testers to help make this project better! **In return for your time we’d love to help you get up and running!**
+Feel free to schedule here:  https://calendly.com/great-expectations-1/great-expectations-integration-one-on-one
 
 What is great_expectations?
 --------------------------------------------------------------------------------
