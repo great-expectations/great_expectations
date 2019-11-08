@@ -2,15 +2,23 @@
 
 
 0.8.5__develop
-----------------
+-----------------
+
+
+0.8.4.post0
+-----------------
+* Correct a packaging issue resulting in missing notebooks in tarball release; update docs to reflect new notebook
+locations.
 
 
 0.8.4
 -----------------
 * Improved the tutorials that walk new users through the process of creating expectations and validating data
-* Changed the flow of the init command - now it creates the scaffolding of the project and adds a datasource. After that users can choose their path.
+* Changed the flow of the init command - now it creates the scaffolding of the project and adds a datasource. After
+that users can choose their path.
 * Added a component with links to useful tutorials to the index page of the Data Docs website
-* Improved the UX of adding a SQL datasource in the CLI - now the CLI asks for specific credentials for Postgres, MySQL, Redshift and Snowflake, allows continuing debugging in the config file and has better error messages
+* Improved the UX of adding a SQL datasource in the CLI - now the CLI asks for specific credentials for Postgres,
+MySQL, Redshift and Snowflake, allows continuing debugging in the config file and has better error messages
 * Added batch_kwargs infomration to DataDocs validation results
 * Fix an issue affecting file stores on Windows
 
