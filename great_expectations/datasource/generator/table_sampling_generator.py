@@ -25,7 +25,6 @@ class AssetConfigurationSchema(Schema):
     schema = fields.Str(allow_none=True)
     count = fields.Integer(allow_none=True)
     limit = fields.Integer(allow_none=True, validate=lambda x: x > 0)
-    frac = fields.Float(allow_none=True, validate=lambda x: 0 <= x <= 1)
 
     @post_load(pass_many=False)
     def make_asset_configuration(self, data):
@@ -33,12 +32,11 @@ class AssetConfigurationSchema(Schema):
 
 
 class AssetConfiguration(object):
-    def __init__(self, table, schema=None, count=None, limit=None, frac=None):
+    def __init__(self, table, schema=None, count=None, limit=None):
         self.__table = table
         self.__schema = schema
         self.count = count  # count is intended to be mutable
-        self.limit = limit
-        self.__frac = frac
+        self.limit = limit  # limit is intended to be mutable
 
     @property
     def table(self):
@@ -48,33 +46,25 @@ class AssetConfiguration(object):
     def schema(self):
         return self.__schema
 
-    @property
-    def frac(self):
-        return self.__frac
+
+assetConfigurationSchema = AssetConfigurationSchema(strict=True, exclude=['count'])
 
 
-assetConfigurationSchema = AssetConfigurationSchema(strict=True)
-
-
-class TableSamplingGenerator(BatchGenerator):
+class SamplingTableGenerator(BatchGenerator):
     """Produce query-based batch_kwargs based from tables, with sampling parameters applied
     """
 
-    def __init__(self, name="default", datasource=None, limit=None, frac=None, assets=None):
-        super(TableSamplingGenerator, self).__init__(name=name, datasource=datasource)
-        self._limit = limit
-        self._frac = frac
-
+    def __init__(self, name="default", datasource=None, limit=None, assets=None):
+        super(SamplingTableGenerator, self).__init__(name=name, datasource=datasource)
         if not assets:
             assets = {}
-
         try:
             self._assets = {
                 asset_name: assetConfigurationSchema.load(asset_config).data for
                 (asset_name, asset_config) in assets.items()
             }
         except ValidationError as err:
-            raise GreatExpectationsError("Unable to load asset configuration in TableSamplingGenerator '%s': "
+            raise GreatExpectationsError("Unable to load asset configuration in TableGenerator '%s': "
                                          "validation error: %s." % (name, str(err)))
 
         if datasource is not None:
@@ -85,6 +75,7 @@ class TableSamplingGenerator(BatchGenerator):
             except sqlalchemy.exc.OperationalError:
                 logger.warning("Unable to create inspector from engine in generator '%s'" % name)
                 self.inspector = None
+        self._limit = limit
 
     def _get_asset_config(self, generator_asset, limit=None):
 
@@ -109,7 +100,6 @@ class TableSamplingGenerator(BatchGenerator):
                     table=table_name,
                     schema=schema_name,
                     limit=self._limit,
-                    frac=self._frac
                 )
         if asset_config is None:
             raise BatchKwargsError("Unable to generate an asset config for %s" % generator_asset)
@@ -197,7 +187,7 @@ class TableSamplingGenerator(BatchGenerator):
 
     def get_available_partition_ids(self, generator_asset):
         if not self.engine:
-            raise BatchKwargsError("TableSamplingGenerator cannot identify partition ids without an engine.")
+            raise BatchKwargsError("SamplingTableGenerator cannot identify partition ids without an engine.")
         asset_config = self._get_asset_config(generator_asset)
         if not asset_config.count:
             count_query = sqlalchemy.select([sqlalchemy.func.count()]).select_from(

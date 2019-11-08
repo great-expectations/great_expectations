@@ -11,9 +11,9 @@ KNOWN_EXTENSIONS = ['.csv', '.tsv', '.parquet', '.xls', '.xlsx', '.json', '.csv.
 
 
 class SubdirReaderGenerator(BatchGenerator):
-    """The SubdirReaderGenerator inspects a filesytem and produces batch_kwargs with a path and timestamp.
+    """The SubdirReaderGenerator inspects a filesytem and produces path-based batch_kwargs.
 
-    SubdirReaderGenerator recognizes generator_asset using two criteria:
+    SubdirReaderGenerator recognizes generator_assets using two criteria:
       - for files directly in 'base_directory' with recognized extensions (.csv, .tsv, .parquet, .xls, .xlsx, .json),
         it uses the name of the file without the extension
       - for other files or directories in 'base_directory', is uses the file or directory name
@@ -24,13 +24,15 @@ class SubdirReaderGenerator(BatchGenerator):
     by this generator.
     """
 
+    _default_reader_options = {}
+
     def __init__(self, name="default",
                  datasource=None,
                  base_directory="/data",
                  reader_options=None):
         super(SubdirReaderGenerator, self).__init__(name, datasource=datasource)
         if reader_options is None:
-            reader_options = {}
+            reader_options = self._default_reader_options
 
         self._reader_options = reader_options
         self._base_directory = base_directory
@@ -168,3 +170,15 @@ class SubdirReaderGenerator(BatchGenerator):
 
     def _partitioner(self, path):
         return os.path.basename(path).rpartition(".")[0]
+
+
+class SamplingSubdirReaderGenerator(SubdirReaderGenerator):
+    pass
+
+
+class PandasSamplingSubdirReaderGenerator(SamplingSubdirReaderGenerator):
+    _default_reader_options = {"nrows": 10000}
+
+
+class SparkDFSamplingSubdirReaderGenerator(SamplingSubdirReaderGenerator):
+    _default_reader_options = {"limit": 10000}

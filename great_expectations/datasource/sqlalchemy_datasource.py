@@ -72,7 +72,7 @@ class SqlAlchemyDatasource(Datasource):
     def get_sampling_generator_configuration(cls):
         return {
             "sampling_generator": {
-                "class_name": "TableSamplingGenerator"
+                "class_name": "SamplingTableGenerator"
             }
         }
 
