@@ -38,7 +38,7 @@ class AssetConfiguration(object):
         self.__table = table
         self.__schema = schema
         self.count = count  # count is intended to be mutable
-        self.__limit = limit
+        self.limit = limit
         self.__frac = frac
 
     @property
@@ -48,10 +48,6 @@ class AssetConfiguration(object):
     @property
     def schema(self):
         return self.__schema
-
-    @property
-    def limit(self):
-        return self.__limit
 
     @property
     def frac(self):
@@ -69,6 +65,10 @@ class TableSamplingGenerator(BatchGenerator):
         super(TableSamplingGenerator, self).__init__(name=name, datasource=datasource)
         self._limit = limit
         self._frac = frac
+
+        if not assets:
+            assets = {}
+
         try:
             self._assets = {
                 asset_name: assetConfigurationSchema.load(asset_config).data for
@@ -87,7 +87,8 @@ class TableSamplingGenerator(BatchGenerator):
                 logger.warning("Unable to create inspector from engine in generator '%s'" % name)
                 self.inspector = None
 
-    def _get_asset_config(self, generator_asset):
+    def _get_asset_config(self, generator_asset, limit=None):
+
         asset_config = self._assets.get(generator_asset)
         if asset_config is None and (self.engine and self.inspector):
             split_generator_asset = generator_asset.split(".")
@@ -116,18 +117,19 @@ class TableSamplingGenerator(BatchGenerator):
 
         return asset_config
 
-    def _get_iterator(self, generator_asset, partition_id=0, **kwargs):
+    def _get_iterator(self, generator_asset, partition_id=0, limit=None, **kwargs):
         asset_config = self._get_asset_config(generator_asset)
+        if limit:
+            asset_config.limit = limit
         raw_query = sqlalchemy.select([sqlalchemy.text("*")])\
-            .select_from(sqlalchemy.table(asset_config.table, schema=asset_config.schema))\
-            .where(sqlalchemy.func.random() <= asset_config.frac)\
+            .select_from(sqlalchemy.schema.Table(asset_config.table, sqlalchemy.MetaData(), schema=asset_config.schema))\
             .offset(partition_id)\
             .limit(asset_config.limit)
 
         if self.engine:
             return iter([
                 SqlAlchemyDatasourceQueryBatchKwargs(
-                    query=raw_query.compile(self.engine),
+                    query=str(raw_query.compile(self.engine, compile_kwargs={"literal_binds": True})),
                 )
                 ])
         else:
