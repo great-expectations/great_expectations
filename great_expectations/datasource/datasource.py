@@ -136,7 +136,6 @@ class Datasource(object):
         for generator in self._datasource_config["generators"].keys():
             self.get_generator(generator)
 
-
     def get_config(self):
         """
         Get the current configuration.
@@ -146,7 +145,8 @@ class Datasource(object):
         """
         return self._datasource_config
 
-    def _build_generator_from_config(self, **kwargs):
+    def build_generator(self, **kwargs):
+        """Build a generator using the provided configuration and return the newly-built generator."""
         if "type" in kwargs:
             warnings.warn("Using type to configure generators is now deprecated. Please use module_name and class_name"
                           "instead.")
@@ -184,7 +184,7 @@ class Datasource(object):
                 "type": generator_config
             }
         generator_config.update(kwargs)
-        generator = self._build_generator_from_config(**generator_config)
+        generator = self.build_generator(**generator_config)
         self._datasource_config["generators"][name] = generator_config
 
         return generator
@@ -206,7 +206,7 @@ class Datasource(object):
             raise ValueError(
                 "Unable to load generator %s -- no configuration found or invalid configuration." % generator_name
             )
-        generator = self._build_generator_from_config(**generator_config)
+        generator = self.build_generator(**generator_config)
         self._generators[generator_name] = generator
         return generator
 
