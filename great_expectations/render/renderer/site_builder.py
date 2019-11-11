@@ -263,7 +263,7 @@ class DefaultSiteSectionBuilder(object):
             if type(resource_key) is ExpectationSuiteIdentifier:
                 expectation_suite_name = resource_key.expectation_suite_name
                 data_asset_name = resource_key.data_asset_name.generator_asset
-                logger.info(
+                logger.debug(
                     "        Rendering expectation suite {} for data asset {}".format(
                         expectation_suite_name,
                         data_asset_name
@@ -273,10 +273,10 @@ class DefaultSiteSectionBuilder(object):
                 run_id = resource_key.run_id
                 expectation_suite_name = resource_key.expectation_suite_identifier.expectation_suite_name
                 if run_id == "profiling":
-                    logger.info("        Rendering profiling for data asset {}".format(data_asset_name))
+                    logger.debug("        Rendering profiling for data asset {}".format(data_asset_name))
                 else:
                     
-                    logger.info("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id,
+                    logger.debug("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id,
                                                                                                               expectation_suite_name,
                                                                                                               data_asset_name))
 
@@ -471,7 +471,7 @@ class DefaultSiteIndexBuilder(object):
         suites = [s for s in suites if s["expectation_suite_name"] != "BasicDatasetProfiler"]
         if not suites:
             # TODO this needs testing as complexity increases probably using mocked DataContext
-            logger.info('No expectations found')
+            logger.debug('No expectations found')
             results.append(create_expectations)
 
         # Show these no matter what

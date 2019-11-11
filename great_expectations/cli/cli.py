@@ -228,9 +228,7 @@ def init(target_directory, view):
         context = _slack_setup(context)
 
         profile_datasource(context, data_source_name, open_docs=view)
-        specific_dir = data_source_type.value.lower()
-        cli_message(MSG_GO_TO_NOTEBOOK.format(specific_dir, specific_dir))
-
+        cli_message("""\n<cyan>Great Expectations is now set up in your project!</cyan>""")
 
 def _slack_setup(context):
     webhook_url = None

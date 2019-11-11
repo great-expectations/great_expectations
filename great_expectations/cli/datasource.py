@@ -41,9 +41,7 @@ class SupportedDatabases(enum.Enum):
 def add_datasource(context):
     cli_message(
         """
-========== Datasources ==========
-
-See <blue>https://docs.greatexpectations.io/en/latest/features/datasource.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue> for more information about datasources.
+<cyan>========== Datasources ===========</cyan>
 """.format(rtd_url_ge_version)
     )
     data_source_selection = click.prompt(
@@ -412,21 +410,12 @@ def profile_datasource(
 ):
     """"Profile a named datasource using the specified context"""
     msg_intro = """
-========== Profiling ==========
+<cyan>========== Profiling ==========</cyan>
 
 Profiling '{0:s}' will create expectations and documentation.
-
-Please note: Profiling is still a beta feature in Great Expectations.  The current profiler will evaluate the entire 
-data source (without sampling), which may be very time consuming. 
-As a rule of thumb, we recommend starting with data smaller than 100MB.
-
-To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/features/profiling.html\
-?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
 """
 
-    msg_confirm_ok_to_proceed = """
-Would you like to profile '{0:s}'?
-"""
+    msg_confirm_ok_to_proceed = """Would you like to profile '{0:s}'?"""
 
     msg_skipping = "Skipping profiling for now. You can always do this later " \
                    "by running `<green>great_expectations profile</green>`."
@@ -447,12 +436,9 @@ Would you like to profile '{0:s}'?
 """
 
     msg_data_doc_intro = """
-========== Data Docs ==========
+<cyan>========== Data Docs ==========</cyan>
 
-Great Expectations can create data documentation from the data you just profiled.
-
-To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_docs.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
-"""
+Great Expectations is building Data Docs from the data you just profiled!"""
 
     cli_message(msg_intro.format(data_source_name, rtd_url_ge_version))
 
@@ -546,22 +532,18 @@ def build_docs(context, site_name=None):
 
     index_page_locator_infos = context.build_data_docs(site_names=site_names)
 
-    msg = """
-The following data documentation HTML sites were generated:
-
-"""
+    msg = "The following Data Docs sites were generated:\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         if os.path.isfile(index_page_locator_info):
-            msg += site_name + ":\n"
-            msg += "   <green>file://" + index_page_locator_info + "</green>\n\n"
+            msg += "- " + site_name + ":\n"
+            msg += "   <green>file://" + index_page_locator_info + "</green>\n"
         else:
             msg += site_name + "\n"
 
     cli_message(msg)
 
 
-msg_prompt_choose_datasource = """
-Configure a datasource:
+msg_prompt_choose_datasource = """Configure a datasource:
     1. Pandas DataFrame
     2. Relational database (SQL)
     3. Spark DataFrame

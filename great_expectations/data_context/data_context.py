@@ -444,7 +444,7 @@ class ConfigOnlyDataContext(object):
         """A stdlib cross-platform way to open a file in a browser."""
         data_docs_urls = self.get_existing_local_data_docs_sites_urls()
         for url in data_docs_urls:
-            logger.info("Opening Data Docs found here: {}".format(url))
+            logger.debug("Opening Data Docs found here: {}".format(url))
             webbrowser.open(url)
 
     @property
@@ -1740,7 +1740,7 @@ class ConfigOnlyDataContext(object):
         if not dry_run:
             logger.info("Profiling all %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
         else:
-            logger.info("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
+            logger.debug("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
 
         profiling_results['success'] = True
 
