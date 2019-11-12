@@ -2164,7 +2164,7 @@
   },
   "meta": {
     "great_expectations.__version__": "__fixture__",
-    "data_asset_name": null,
+    "data_asset_name": "my_datasource/my_generator/titanic_data",
     "expectation_suite_name": "default",
     "run_id": "__run_id_fixture__",
     "batch_kwargs": {
