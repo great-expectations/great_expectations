@@ -442,12 +442,12 @@ class DefaultSiteIndexBuilder(object):
         create_expectations = CallToActionButton(
             "Create Expectations",
             # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/getting_started/create_expectations.html"
+            "https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html"
         )
         validation_playground = CallToActionButton(
             "Play with Validations",
             # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/getting_started/pipeline_integration.html"
+            "https://docs.greatexpectations.io/en/latest/tutorials/pipeline_integration.html"
         )
         customize_data_docs = CallToActionButton(
             "Customize Data Docs",
