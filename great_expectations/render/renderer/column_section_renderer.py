@@ -444,16 +444,9 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         })
         df.weight *= 100
 
-        if len(weights) <= 10:
-            height = 200
-            width = 200
-            col_width = 4
+        if len(weights) > 60:
+            return None
         else:
-            height = 300
-            width = 300
-            col_width = 6
-
-        bars = alt.Chart(df).mark_bar().encode(
 
         mark_bar_args = {}
         if len(weights) == 1:
@@ -507,14 +500,9 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "count": counts,
         })
 
-        if len(values) <= 10:
-            height = 200
-            width = 200
-            col_width = 4
+        if len(values) > 60:
+            return None
         else:
-            height = 300
-            width = 300
-            col_width = 6
         mark_bar_args = {}
         if len(values) == 1:
             mark_bar_args["size"] = 20
