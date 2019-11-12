@@ -454,6 +454,12 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             col_width = 6
 
         bars = alt.Chart(df).mark_bar().encode(
+
+        mark_bar_args = {}
+        if len(weights) == 1:
+            mark_bar_args["size"] = 20
+
+        bars = alt.Chart(df).mark_bar(**mark_bar_args).encode(
             x='bin_min:O',
             x2='bin_max:O',
         ).properties(width=width, height=height, autosize="fit")
@@ -508,8 +514,11 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             height = 300
             width = 300
             col_width = 6
+        mark_bar_args = {}
+        if len(values) == 1:
+            mark_bar_args["size"] = 20
 
-        bars = alt.Chart(df).mark_bar(size=20).encode(
+        bars = alt.Chart(df).mark_bar(**mark_bar_args).encode(
             y='count:Q',
             x="value:O"
         ).properties(height=height, width=width, autosize="fit")
