@@ -462,8 +462,9 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         bars = alt.Chart(df).mark_bar(**mark_bar_args).encode(
             x='bin_min:O',
             x2='bin_max:O',
-        ).properties(width=width, height=height, autosize="fit")
             y="weight:Q",
+            tooltip=["bin_min", "bin_max", "weight"]
+        ).properties(width=chart_pixel_width, height=400, autosize="fit")
 
         chart = bars.to_json()
 
@@ -520,8 +521,9 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         bars = alt.Chart(df).mark_bar(**mark_bar_args).encode(
             y='count:Q',
-            x="value:O"
-        ).properties(height=height, width=width, autosize="fit")
+            x="value:O",
+            tooltip=["value", "count"]
+        ).properties(height=400, width=chart_pixel_width, autosize="fit")
 
         chart = bars.to_json()
 
