@@ -36,16 +36,14 @@
 
     <div class="container-fluid px-3">
       <div class="row">
-        <div class="col-2 navbar-collapse">
-          {% block navbar %}{% include 'navbar.j2' %}{% endblock %}
-        </div>
-        <div class="col-md-8 col-lg-8 col-xs-12">
+        {% block navbar %}{% include 'navbar.j2' %}{% endblock %}
+        <div class="col-md-9 col-lg-8 col-xs-12">
         {% for section in sections %}
           {% set section_loop = loop -%}
           {% include 'section.j2' %}
         {% endfor %}
         </div>
-        <div class="col-lg-2 col-md-2 col-xs-12 d-none d-md-block">
+        <div class="d-none d-lg-block col-lg-2">
             {% include 'ge_info.j2' %}
         </div>
         <div class="d-block d-sm-none col-12">

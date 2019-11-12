@@ -1408,6 +1408,11 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     "classes": ["col-" + str(col_width)],
                     "styles": {
                         "margin-top": "20px",
+                    },
+                    "parent": {
+                        "styles": {
+                            "list-style-type": "none"
+                        }
                     }
                 }
             }
