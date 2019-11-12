@@ -188,7 +188,7 @@ simply need to be available in any standard place searched by that library.
 Validation Operators
 =====================
 
-See the :ref:`validation_operators_reference` for more information regarding configuring and using validation operators.
+See the :ref:`validation_operators` for more information regarding configuring and using validation operators.
 
 .. _environment_and_secrets:
 
