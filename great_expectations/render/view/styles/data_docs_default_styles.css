@@ -8,11 +8,11 @@ body {
 }
 
 .sticky {
-    position: -webkit-sticky;
-    position: sticky;
-    max-height: 90vh;
-    overflow-y: auto;
-    top: 15px;
+  position: -webkit-sticky;
+  position: sticky;
+  max-height: 90vh;
+  overflow-y: auto;
+  top: 60px;
 }
 
 .ge-section {
@@ -128,10 +128,6 @@ ul {
     background-color: rgba(0, 0, 0, .5);
 }
 
-.ge-navigation-sidebar-container {
-    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
-    z-index: 1; /* Stay on top */
-    width: 15%;
 }
 
 #ge-cta-footer {

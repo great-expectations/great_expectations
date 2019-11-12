@@ -1,4 +1,4 @@
-<nav id="navigation" class="navbar navbar-light bg-light d-none d-sm-block ge-navigation-sidebar-container pt-4">
+<nav id="navigation" class="rounded navbar navbar-light bg-light d-none d-sm-block ge-navigation-sidebar-container pt-4 sticky">
     <nav class="nav nav-pills flex-column ge-navigation-sidebar-content">
         {% if data_asset_name -%}
             <a class="navbar-brand ge-navigation-sidebar-title" href="#" style="white-space: normal; word-break: break-all;overflow-wrap: normal; font-size: 1rem; font-weight: 500;">{{data_asset_name}}</a>
@@ -6,7 +6,7 @@
             <a class="navbar-brand ge-navigation-sidebar-title" href="#" style="white-space: normal; word-break: break-all;overflow-wrap: normal; font-size: 1rem; font-weight: 500;"></a>
         {% endif -%}
         {% for section in sections %}
-            <a class="nav-link ge-navigation-sidebar-link" href="#section-{{loop.index}}">{{section['section_name']}}</a>
+            <a class="nav-link ge-navigation-sidebar-link" href="#section-{{loop.index}}" style="white-space: normal; word-break: break-all;overflow-wrap: normal;">{{section['section_name']}}</a>
         {% endfor %}
     </nav>
 </nav>
