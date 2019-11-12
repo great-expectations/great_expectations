@@ -108,10 +108,10 @@ def test_render_section_page():
 
 <div id="content-block-1" >
 
-    <div id="content-block-1-header" >
-    <h3>
-        Overview
-    </h3></div>
+    <div id="content-block-1-header" ><h3>
+          Overview
+      </h3>
+    </div>
 
 </div>
 
@@ -130,8 +130,8 @@ def test_render_section_page():
     
 
     <tr>
-        <td id="content-block-2-cell-1-1" ><div class="table-cell-frame"><span>Number of variables</span></div></td><td id="content-block-2-cell-1-2" ><div class="table-cell-frame"><span>12</span></div></td></tr><tr>
-        <td id="content-block-2-cell-2-1" ><div class="table-cell-frame"><span>Number of observations</span></div></td><td id="content-block-2-cell-2-2" ><div class="table-cell-frame"><span>891</span></div></td></tr></table>
+        <td id="content-block-2-cell-1-1" ><div class="show-scrollbars"><span>Number of variables</span></div></td><td id="content-block-2-cell-1-2" ><div class="show-scrollbars"><span>12</span></div></td></tr><tr>
+        <td id="content-block-2-cell-2-1" ><div class="show-scrollbars"><span>Number of observations</span></div></td><td id="content-block-2-cell-2-2" ><div class="show-scrollbars"><span>891</span></div></td></tr></table>
 
 </div>
         
@@ -302,8 +302,8 @@ def test_rendering_components_with_styling():
     
 
     <tr>
-        <td id="section-1-content-block-2-cell-1-1" ><div class="table-cell-frame"><span>Mean</span></div></td><td id="section-1-content-block-2-cell-1-2" ><div class="table-cell-frame"><span>446</span></div></td></tr><tr>
-        <td id="section-1-content-block-2-cell-2-1" ><div class="table-cell-frame"><span>Minimum</span></div></td><td id="section-1-content-block-2-cell-2-2" ><div class="table-cell-frame"><span>1</span></div></td></tr></table>
+        <td id="section-1-content-block-2-cell-1-1" ><div class="show-scrollbars"><span>Mean</span></div></td><td id="section-1-content-block-2-cell-1-2" ><div class="show-scrollbars"><span>446</span></div></td></tr><tr>
+        <td id="section-1-content-block-2-cell-2-1" ><div class="show-scrollbars"><span>Minimum</span></div></td><td id="section-1-content-block-2-cell-2-2" ><div class="show-scrollbars"><span>1</span></div></td></tr></table>
 
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
@@ -376,8 +376,8 @@ def test_render_table_component():
     
 
     <tr>
-        <td id="section-1-content-block-2-cell-1-1" ><div class="table-cell-frame"><span>Mean</span></div></td><td id="section-1-content-block-2-cell-1-2" ><div class="table-cell-frame"><span>446</span></div></td></tr><tr>
-        <td id="section-1-content-block-2-cell-2-1" ><div class="table-cell-frame"><span>Minimum</span></div></td><td id="section-1-content-block-2-cell-2-2" ><div class="table-cell-frame"><span>1</span></div></td></tr></table>
+        <td id="section-1-content-block-2-cell-1-1" ><div class="show-scrollbars"><span>Mean</span></div></td><td id="section-1-content-block-2-cell-1-2" ><div class="show-scrollbars"><span>446</span></div></td></tr><tr>
+        <td id="section-1-content-block-2-cell-2-1" ><div class="show-scrollbars"><span>Minimum</span></div></td><td id="section-1-content-block-2-cell-2-2" ><div class="show-scrollbars"><span>1</span></div></td></tr></table>
 
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
@@ -469,7 +469,9 @@ def test_render_graph():
             Histogram
         </h4>
         </div>
-<div id="section-1-content-block-2-graph" ></div>
+<div class="show-scrollbars">
+  <div id="section-1-content-block-2-graph" ></div>
+</div>
 <script>
     // Assign the specification to a local variable vlSpec.
     vlSpec = {"$schema": "https://vega.github.io/schema/vega-lite/v2.6.0.json", "autosize": "fit", "config": {"view": {"height": 300, "width": 400}}, "data": {"name": "data-a681d02fb484e64eadd9721b37015d5b"}, "datasets": {"data-a681d02fb484e64eadd9721b37015d5b": [{"bins": 3.7, "weights": 5.555555555555555}, {"bins": 10.8, "weights": 3.439153439153439}, {"bins": 17.9, "weights": 17.857142857142858}, {"bins": 25.0, "weights": 24.206349206349206}, {"bins": 32.0, "weights": 16.137566137566136}, {"bins": 39.1, "weights": 12.3015873015873}, {"bins": 46.2, "weights": 9.788359788359788}, {"bins": 53.3, "weights": 5.423280423280423}, {"bins": 60.4, "weights": 3.439153439153439}, {"bins": 67.5, "weights": 1.8518518518518516}]}, "encoding": {"x": {"field": "bins", "type": "ordinal"}, "y": {"field": "weights", "type": "quantitative"}}, "height": 200, "mark": "bar", "width": 200};
@@ -479,7 +481,8 @@ def test_render_graph():
     }).then(result=>console.log(result)).catch(console.warn);
 </script>
 
-</div>""".replace(" ", "").replace("\t", "").replace("\n", "")
+</div>
+""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
 def test_render_text():
