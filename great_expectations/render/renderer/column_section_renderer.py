@@ -453,6 +453,10 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             chart_container_col_width = round((len(weights) / 60.0) * 12)
             if chart_container_col_width < 4:
                 chart_container_col_width = 4
+            elif chart_container_col_width > 8:
+                chart_container_col_width = 12
+            elif chart_container_col_width > 4:
+                chart_container_col_width = 8
 
         mark_bar_args = {}
         if len(weights) == 1:
@@ -515,6 +519,10 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             chart_container_col_width = round((len(values) / 60.0) * 12)
             if chart_container_col_width < 4:
                 chart_container_col_width = 4
+            elif chart_container_col_width > 8:
+                chart_container_col_width = 12
+            elif chart_container_col_width > 4:
+                chart_container_col_width = 8
 
         mark_bar_args = {}
         if len(values) == 1:
