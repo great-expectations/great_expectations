@@ -440,9 +440,9 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         df = pd.DataFrame({
             "bin_min": bins_x1,
             "bin_max": bins_x2,
-            "weights": weights,
+            "weight": weights,
         })
-        df.weights *= 100
+        df.weight *= 100
 
         if len(weights) <= 10:
             height = 200
@@ -456,8 +456,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         bars = alt.Chart(df).mark_bar().encode(
             x='bin_min:O',
             x2='bin_max:O',
-            y="weights:Q"
         ).properties(width=width, height=height, autosize="fit")
+            y="weight:Q",
 
         chart = bars.to_json()
 
