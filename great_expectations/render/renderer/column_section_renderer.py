@@ -448,8 +448,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             return None
         else:
             chart_pixel_width = (len(weights) / 60.0) * 1000
-            if chart_pixel_width < 250:
-                chart_pixel_width = 250
+            if chart_pixel_width < 200:
+                chart_pixel_width = 200
             chart_container_col_width = round((len(weights) / 60.0) * 12)
             if chart_container_col_width < 4:
                 chart_container_col_width = 4
@@ -514,8 +514,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             return None
         else:
             chart_pixel_width = (len(values) / 60.0) * 1000
-            if chart_pixel_width < 250:
-                chart_pixel_width = 250
+            if chart_pixel_width < 200:
+                chart_pixel_width = 200
             chart_container_col_width = round((len(values) / 60.0) * 12)
             if chart_container_col_width < 4:
                 chart_container_col_width = 4
