@@ -472,7 +472,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 },
             "graph": chart,
             "styling": {
-                "classes": ["col-" + str(col_width)],
+                "classes": ["col-" + str(chart_container_col_width), "show-scrollbars"],
                 "styles": {
                     "margin-top": "20px",
                 }
@@ -527,7 +527,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 },
             "graph": chart,
             "styling": {
-                "classes": ["col-" + str(col_width)],
+                "classes": ["col-" + str(chart_container_col_width), "show-scrollbars"],
                 "styles": {
                     "margin-top": "20px",
                 }
