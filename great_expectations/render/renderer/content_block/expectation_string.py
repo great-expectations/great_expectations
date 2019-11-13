@@ -31,26 +31,6 @@ def substitute_none_for_missing(kwargs, kwarg_list):
 
 
 class ExpectationStringRenderer(ContentBlockRenderer):
-    # Unicode: 9601, 9602, 9603, 9604, 9605, 9606, 9607, 9608
-    bar = u'▁▂▃▄▅▆▇█'
-    barcount = len(bar)
-
-    @classmethod
-    def sparkline(cls, weights):
-        """Builds a unicode-text based sparkline for the provided histogram.
-
-        Code from https://rosettacode.org/wiki/Sparkline_in_unicode#Python
-        """
-        mn, mx = min(weights), max(weights)
-        extent = mx - mn
-        
-        if extent == 0:
-            extent = 1
-
-        sparkline = u''.join(cls.bar[min([cls.barcount - 1,
-                                         int((n - mn) / extent * cls.barcount)])]
-                            for n in weights)
-        return sparkline, mn, mx
 
     @classmethod
     def _missing_content_block_fn(cls, expectation, styling=None, include_column_name=True):
@@ -269,8 +249,9 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str += "$column_list_" + str(idx) + ", "
                 params["column_list_" + str(idx)] = params["column_list"][idx]
             
-            template_str += "$column_list_" + str(idx + 1)
-            params["column_list_" + str(idx + 1)] = params["column_list"][idx + 1]
+            last_idx = len(params["column_list"]) - 1
+            template_str += "$column_list_" + str(last_idx)
+            params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
         
         return [{
             "content_block_type": "string_template",
@@ -293,8 +274,9 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str += "$column_list_" + str(idx) + ", "
             params["column_list_" + str(idx)] = params["column_list"][idx]
         
-        template_str += "$column_list_" + str(idx + 1)
-        params["column_list_" + str(idx + 1)] = params["column_list"][idx + 1]
+        last_idx = len(params["column_list"]) - 1
+        template_str += "$column_list_" + str(last_idx)
+        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
         
         return [{
             "content_block_type": "string_template",
