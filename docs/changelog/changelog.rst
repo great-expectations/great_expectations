@@ -15,9 +15,16 @@
   `context.yield_batch_kwargs(data_asset_name, query_params={'schema': 'foo'})`.
 * Add support for limit parameter to batch_kwargs for all datasources: Pandas, SqlAlchemy, and SparkDF; add support
   to generators to support building batch_kwargs with limits specified.
+* Include raw_query and query_params in query_generator batch_kwargs
+* Rename generator keyword arguments from data_asset_name to generator_asset to avoid ambiguity with normalized names
+* Consistently migrate timestamp from batch_kwargs to batch_id
+* Include batch_id in validation results
+* Fix issue where batch_id was not included in some generated datasets
 * Fix rendering issue with expect_table_columns_to_match_ordered_list expectation
 * Add support for GCP, including BigQuery and GCS
 * Add support to S3 generator for retrieving directories by specifying the `directory_assets` configuration
+* Fix warning regarding implicit class_name during init flow
+* Expose build_generator API publicly on datasources
 
 0.8.4.post0
 -----------------

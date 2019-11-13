@@ -189,20 +189,8 @@ class TableGenerator(BatchGenerator):
 
     def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, limit=None, offset=None,
                                              query_params=None):
-        # batch_kwargs = batch_kwargs.copy()
-        #
-        # if limit is None:
-        #     # may still be None if the caller did not pass limit in either batch_kwargs *or* explicitly
-        #     limit = batch_kwargs.pop("limit", limit)
-        #
-        # if offset is None:
-        #     # may still be None if the caller did not pass offset in either batch_kwargs *or* explicitly
-        #     offset = batch_kwargs.pop("offset", offset)
-
         if query_params is None:
             query_params = {}
-        # kwargs_query_params = batch_kwargs.pop("query_params", query_params)
-        # query_params.update(kwargs_query_params)
 
         return next(self._get_iterator(generator_asset, query_params=query_params, limit=limit,
                                        offset=offset, partition_id=partition_id))
