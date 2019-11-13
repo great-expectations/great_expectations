@@ -249,8 +249,9 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str += "$column_list_" + str(idx) + ", "
                 params["column_list_" + str(idx)] = params["column_list"][idx]
             
-            template_str += "$column_list_" + str(idx + 1)
-            params["column_list_" + str(idx + 1)] = params["column_list"][idx + 1]
+            last_idx = len(params["column_list"]) - 1
+            template_str += "$column_list_" + str(last_idx)
+            params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
         
         return [{
             "content_block_type": "string_template",
@@ -273,8 +274,9 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str += "$column_list_" + str(idx) + ", "
             params["column_list_" + str(idx)] = params["column_list"][idx]
         
-        template_str += "$column_list_" + str(idx + 1)
-        params["column_list_" + str(idx + 1)] = params["column_list"][idx + 1]
+        last_idx = len(params["column_list"]) - 1
+        template_str += "$column_list_" + str(last_idx)
+        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
         
         return [{
             "content_block_type": "string_template",
