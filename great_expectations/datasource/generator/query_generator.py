@@ -87,13 +87,13 @@ class QueryGenerator(BatchGenerator):
                 query=substituted_query
             )])
 
-    def add_query(self, data_asset_name, query):
+    def add_query(self, generator_asset, query):
         if self._queries_path:
-            with open(os.path.join(self._queries_path, data_asset_name + ".sql"), "w") as queryfile:
+            with open(os.path.join(self._queries_path, generator_asset + ".sql"), "w") as queryfile:
                 queryfile.write(query)
         else:
             logger.info("Adding query to temporary storage only.")
-            self._queries[data_asset_name] = query
+            self._queries[generator_asset] = query
 
     def get_available_data_asset_names(self):
         if self._queries_path:

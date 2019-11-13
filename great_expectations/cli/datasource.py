@@ -542,7 +542,7 @@ def build_docs(context, site_name=None):
     if site_name is not None:
         site_names = [site_name]
     else:
-        site_names=None
+        site_names = None
 
     index_page_locator_infos = context.build_data_docs(site_names=site_names)
 

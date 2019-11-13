@@ -390,27 +390,18 @@ class Datasource(object):
             **kwargs
         )
 
-    def named_generator_build_batch_kwargs(self, generator_name, generator_asset, *args, **kwargs):
+    def named_generator_build_batch_kwargs(self, generator_name, generator_asset, partition_id=None, **kwargs):
         """Use the named generator to build batch_kwargs"""
         generator = self.get_generator(generator_name=generator_name)
-        if len(args) == 1:  # We interpret a single argument as a partition_id
+        if partition_id:
             batch_kwargs = generator.build_batch_kwargs_from_partition_id(
                 generator_asset=generator_asset,
-                partition_id=args[0],
-                batch_kwargs=kwargs
-            )
-        elif len(args) > 0:
-            raise BatchKwargsError("Multiple positional arguments were provided to build_batch_kwargs, but only"
-                                   "one is supported. Please provide named arguments to build_batch_kwargs.")
-        elif "partition_id" in kwargs:
-            batch_kwargs = generator.build_batch_kwargs_from_partition_id(
-                generator_asset=generator_asset,
-                partition_id=kwargs["partition_id"],
-                batch_kwargs=kwargs
+                partition_id=partition_id,
+                **kwargs
             )
         else:
             if len(kwargs) > 0:
-                batch_kwargs = generator.yield_batch_kwargs(generator_asset, kwargs)
+                batch_kwargs = generator.yield_batch_kwargs(generator_asset, **kwargs)
             else:
                 raise BatchKwargsError(
                     "Unable to build batch_kwargs: no partition_id or base kwargs found to pass to generator.",

@@ -1,5 +1,6 @@
 import time
 import logging
+from copy import deepcopy
 from string import Template
 
 from great_expectations.datasource import Datasource
@@ -67,14 +68,6 @@ class SqlAlchemyDatasource(Datasource):
             "generators": generators,
         })
         return configuration
-
-    @classmethod
-    def get_sampling_generator_configuration(cls):
-        return {
-            "sampling_generator": {
-                "class_name": "SamplingTableGenerator"
-            }
-        }
 
     def __init__(self, name="default", data_context=None, data_asset_type=None, credentials=None, generators=None, **kwargs):
         if not sqlalchemy:
@@ -185,26 +178,51 @@ class SqlAlchemyDatasource(Datasource):
             schema = None
 
         if "table" in batch_kwargs:
+            limit = batch_kwargs.get('limit')
+            offset = batch_kwargs.get('offset')
+            if limit is not None or offset is not None:
+                logger.info("Generating query from table batch_kwargs based on limit and offset")
+                raw_query = sqlalchemy.select([sqlalchemy.text("*")])\
+                    .select_from(sqlalchemy.schema.Table(batch_kwargs['table'], sqlalchemy.MetaData(), schema=schema))\
+                    .offset(offset)\
+                    .limit(limit)
+                query = str(raw_query.compile(self.engine, compile_kwargs={"literal_binds": True}))
+                return data_asset_type(
+                    custom_sql=query,
+                    engine=self.engine,
+                    data_context=self._data_context,
+                    expectation_suite=expectation_suite,
+                    batch_kwargs=batch_kwargs,
+                    batch_id=batch_id
+                )
+
+            else:
+                return data_asset_type(
+                    table_name=batch_kwargs["table"],
+                    engine=self.engine,
+                    schema=schema,
+                    data_context=self._data_context,
+                    expectation_suite=expectation_suite,
+                    batch_kwargs=batch_kwargs,
+                    batch_id=batch_id
+                )
+
+        elif "query" in batch_kwargs:
+            if "bigquery_temp_table" in batch_kwargs:
+                table_name = batch_kwargs.get("bigquery_temp_table")
+            else:
+                table_name = None
+            
+            query = Template(batch_kwargs["query"]).safe_substitute(**kwargs)
             return data_asset_type(
-                table_name=batch_kwargs["table"],
+                custom_sql=query,
                 engine=self.engine,
-                schema=schema,
+                table_name=table_name,
                 data_context=self._data_context,
                 expectation_suite=expectation_suite,
                 batch_kwargs=batch_kwargs,
                 batch_id=batch_id
             )
 
-        elif "query" in batch_kwargs:
-            query = Template(batch_kwargs["query"]).safe_substitute(**kwargs)
-            return data_asset_type(
-                custom_sql=query,
-                engine=self.engine,
-                data_context=self._data_context,
-                expectation_suite=expectation_suite,
-                batch_kwargs=batch_kwargs,
-                batch_id=batch_id
-            )
-    
         else:
             raise ValueError("Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified")

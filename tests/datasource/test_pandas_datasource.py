@@ -164,12 +164,18 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
         batch = data_context.get_batch("mysource/unicode",
                                        "default",
                                        batch_kwargs=data_context.yield_batch_kwargs("mysource/unicode"),
-                                       encoding='blarg')
+                                       reader_options={'encoding': 'blarg'})
+
+    with pytest.raises(LookupError, match="unknown encoding: blarg"):
+        batch = data_context.get_batch("mysource/unicode",
+                                       "default",
+                                       batch_kwargs=data_context.yield_batch_kwargs(
+                                           "mysource/unicode", reader_options={'encoding': 'blarg'}))
 
     batch = data_context.get_batch("mysource2/unicode",
                                    "default",
-                                   batch_kwargs=data_context.yield_batch_kwargs("mysource2/unicode"),
-                                   encoding='utf-8'
+                                   batch_kwargs=data_context.yield_batch_kwargs("mysource2/unicode", reader_options={
+                                       'encoding': 'utf-8'})
                                    )
     assert "😁" in list(batch["Μ"])
 
