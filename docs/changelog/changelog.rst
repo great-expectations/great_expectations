@@ -3,7 +3,7 @@
 
 0.8.5__develop
 -----------------
-
+* Fix rendering issue with expect_table_columns_to_match_ordered_list expectation
 
 0.8.4.post0
 -----------------
