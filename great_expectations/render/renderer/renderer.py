@@ -84,15 +84,21 @@ class Renderer(object):
         evrs_ = evrs["results"] if "results" in evrs else evrs
 
         expect_table_columns_to_match_ordered_list_evr = cls._find_evr_by_type(evrs_, "expect_table_columns_to_match_ordered_list")
+        # Group EVRs by column
+        sorted_columns = sorted(list(set([evr["expectation_config"]["kwargs"]["column"] for evr in evrs_ if
+                         "column" in evr["expectation_config"]["kwargs"]])))
+
         if expect_table_columns_to_match_ordered_list_evr:
             ordered_columns = expect_table_columns_to_match_ordered_list_evr["result"]["observed_value"]
         else:
-            # Group EVRs by column
-            columns = list(set([evr["expectation_config"]["kwargs"]["column"] for evr in evrs_ if "column" in evr["expectation_config"]["kwargs"]]))
+            ordered_columns = []
 
-            ordered_columns = sorted(columns)
-
-        return ordered_columns
+        # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column
+        # names from entire evr
+        if set(sorted_columns) == set(ordered_columns):
+            return ordered_columns
+        else:
+            return sorted_columns
 
     #TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
@@ -115,7 +121,7 @@ class Renderer(object):
     def _group_and_order_expectations_by_column(cls, expectations):
         # Group expectations by column
         columns = {}
-        ordered_columns = None
+        ordered_columns = []
 
         for expectation in expectations["expectations"]:
             if "column" in expectation["kwargs"]:
@@ -132,11 +138,15 @@ class Renderer(object):
                 if exp_column_list and len(exp_column_list) > 0:
                     ordered_columns = exp_column_list
 
-        # if no order of columns is expected, sort alphabetically
-        if not ordered_columns:
-            ordered_columns = sorted(list(columns.keys()))
-        
-        return columns, ordered_columns
+        # Group EVRs by column
+        sorted_columns = sorted(list(columns.keys()))
+
+        # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column
+        # names from entire evr, else use alphabetic sort
+        if set(sorted_columns) == set(ordered_columns):
+            return columns, ordered_columns
+        else:
+            return columns, sorted_columns
 
     #TODO: When we implement an ExpectationSuite class, this method will move there.
     @classmethod

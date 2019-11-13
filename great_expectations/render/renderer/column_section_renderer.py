@@ -440,24 +440,34 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         df = pd.DataFrame({
             "bin_min": bins_x1,
             "bin_max": bins_x2,
-            "weights": weights,
+            "weight": weights,
         })
-        df.weights *= 100
+        df.weight *= 100
 
-        if len(weights) <= 10:
-            height = 200
-            width = 200
-            col_width = 4
+        if len(weights) > 60:
+            return None
         else:
-            height = 300
-            width = 300
-            col_width = 6
+            chart_pixel_width = (len(weights) / 60.0) * 1000
+            if chart_pixel_width < 200:
+                chart_pixel_width = 200
+            chart_container_col_width = round((len(weights) / 60.0) * 12)
+            if chart_container_col_width < 4:
+                chart_container_col_width = 4
+            elif chart_container_col_width > 8:
+                chart_container_col_width = 12
+            elif chart_container_col_width > 4:
+                chart_container_col_width = 8
 
-        bars = alt.Chart(df).mark_bar().encode(
+        mark_bar_args = {}
+        if len(weights) == 1:
+            mark_bar_args["size"] = 20
+
+        bars = alt.Chart(df).mark_bar(**mark_bar_args).encode(
             x='bin_min:O',
             x2='bin_max:O',
-            y="weights:Q"
-        ).properties(width=width, height=height, autosize="fit")
+            y="weight:Q",
+            tooltip=["bin_min", "bin_max", "weight"]
+        ).properties(width=chart_pixel_width, height=400, autosize="fit")
 
         chart = bars.to_json()
 
@@ -472,7 +482,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 },
             "graph": chart,
             "styling": {
-                "classes": ["col-" + str(col_width)],
+                "classes": ["col-" + str(chart_container_col_width)],
                 "styles": {
                     "margin-top": "20px",
                 }
@@ -500,19 +510,29 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "count": counts,
         })
 
-        if len(values) <= 10:
-            height = 200
-            width = 200
-            col_width = 4
+        if len(values) > 60:
+            return None
         else:
-            height = 300
-            width = 300
-            col_width = 6
+            chart_pixel_width = (len(values) / 60.0) * 1000
+            if chart_pixel_width < 200:
+                chart_pixel_width = 200
+            chart_container_col_width = round((len(values) / 60.0) * 12)
+            if chart_container_col_width < 4:
+                chart_container_col_width = 4
+            elif chart_container_col_width > 8:
+                chart_container_col_width = 12
+            elif chart_container_col_width > 4:
+                chart_container_col_width = 8
 
-        bars = alt.Chart(df).mark_bar(size=20).encode(
+        mark_bar_args = {}
+        if len(values) == 1:
+            mark_bar_args["size"] = 20
+
+        bars = alt.Chart(df).mark_bar(**mark_bar_args).encode(
             y='count:Q',
-            x="value:O"
-        ).properties(height=height, width=width, autosize="fit")
+            x="value:O",
+            tooltip=["value", "count"]
+        ).properties(height=400, width=chart_pixel_width, autosize="fit")
 
         chart = bars.to_json()
 
@@ -527,7 +547,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 },
             "graph": chart,
             "styling": {
-                "classes": ["col-" + str(col_width)],
+                "classes": ["col-" + str(chart_container_col_width)],
                 "styles": {
                     "margin-top": "20px",
                 }

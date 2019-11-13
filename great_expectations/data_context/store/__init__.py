@@ -4,6 +4,7 @@ from .store_backend import (
     # FilesystemStoreBackend,
     FixedLengthTupleFilesystemStoreBackend,
     FixedLengthTupleS3StoreBackend,
+    FixedLengthTupleGCSStoreBackend
 )
 
 from .store import (
