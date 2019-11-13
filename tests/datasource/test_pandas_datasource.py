@@ -169,7 +169,8 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
     with pytest.raises(LookupError, match="unknown encoding: blarg"):
         batch = data_context.get_batch("mysource/unicode",
                                        "default",
-                                       batch_kwargs=data_context.yield_batch_kwargs("mysource/unicode", reader_options={'encoding': 'blarg'}))
+                                       batch_kwargs=data_context.yield_batch_kwargs(
+                                           "mysource/unicode", reader_options={'encoding': 'blarg'}))
 
     batch = data_context.get_batch("mysource2/unicode",
                                    "default",

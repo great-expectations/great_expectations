@@ -213,11 +213,13 @@ class S3Generator(BatchGenerator):
                     "incomplete batch_kwargs object returned with this error.",
                     {
                         "asset_configuration": asset_config,
-                        "common_prefixes": asset_options["CommonPrefixes"] if "CommonPrefixes" in asset_options else None
+                        "common_prefixes": asset_options["CommonPrefixes"]
+                        if "CommonPrefixes" in asset_options else None
                     }
                 )
             keys = [item["Key"] for item in asset_options["Contents"] if item["Size"] > 0]
-            keys = [key for key in filter(lambda x: re.match(asset_config.get("regex_filter", ".*"), x) is not None, keys)]
+            keys = [key for key in
+                    filter(lambda x: re.match(asset_config.get("regex_filter", ".*"), x) is not None, keys)]
             for key in keys:
                 yield key
 

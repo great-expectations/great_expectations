@@ -186,7 +186,6 @@ class GlobReaderGenerator(BatchGenerator):
             # Then update with any locally-specified reader options
             batch_kwargs['reader_options'].update(reader_options)
 
-
         if limit is not None:
             batch_kwargs['limit'] = limit
 
