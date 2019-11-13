@@ -1,7 +1,7 @@
 import logging
 import time
-from six import string_types
 
+from great_expectations.datasource.types import BatchId
 from ..exceptions import BatchKwargsError
 
 from .datasource import Datasource, ReaderMethods
@@ -72,14 +72,6 @@ class SparkDFDatasource(Datasource):
         })
         return configuration
 
-    @classmethod
-    def get_sampling_generator_configuration(cls):
-        return {
-            "sampling_generator": {
-                "class_name": "SparkDFSamplingSubdirReaderGenerator"
-            }
-        }
-
     def __init__(self, name="default", data_context=None, data_asset_type=None, generators=None, **kwargs):
         configuration_with_defaults = SparkDFDatasource.build_configuration(data_asset_type, generators, **kwargs)
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
@@ -118,9 +110,14 @@ class SparkDFDatasource(Datasource):
             return None
 
         batch_kwargs.update(kwargs)
-        reader_options = batch_kwargs.copy()
+        reader_options = batch_kwargs.get("reader_options", {})
 
-        if "data_asset_type" in reader_options:
+        # We need to build a batch_id to be used in the dataframe
+        batch_id = BatchId({
+            "timestamp": time.time()
+        })
+
+        if "data_asset_type" in batch_kwargs:
             data_asset_type_config = reader_options.pop("data_asset_type")  # Get and remove the config
             try:
                 data_asset_type_config = ClassConfig(**data_asset_type_config)
@@ -131,17 +128,18 @@ class SparkDFDatasource(Datasource):
             data_asset_type_config = self._data_asset_type
 
         data_asset_type = self._get_data_asset_class(data_asset_type_config)
+
         if not issubclass(data_asset_type, SparkDFDataset):
             raise ValueError("SparkDFDatasource cannot instantiate batch with data_asset_type: '%s'. It "
                              "must be a subclass of SparkDFDataset." % data_asset_type.__name__)
 
+        if "limit" in batch_kwargs:
+            reader_options['limit'] = batch_kwargs['limit']
+
         if "path" in batch_kwargs or "s3" in batch_kwargs:
-            if "path" in batch_kwargs:
-                path = reader_options.pop("path")  # We remove this so it is not used as a reader option
-            else:
-                path = reader_options.pop("s3")
-            reader_options.pop("timestamp", "")  # ditto timestamp (but missing ok)
-            reader_method = reader_options.pop("reader_method", None)
+            path = reader_options.get("path")
+            path = reader_options.pop("s3", path)
+            reader_method = batch_kwargs.get("reader_method")
             if reader_method is None:
                 reader_method = self._guess_reader_method_from_path(path)
                 if reader_method is None:
@@ -170,11 +168,15 @@ class SparkDFDatasource(Datasource):
             df = self.spark.sql(batch_kwargs["query"])
 
         elif "dataset" in batch_kwargs and isinstance(batch_kwargs["dataset"], (DataFrame, SparkDFDataset)):
-            df = batch_kwargs.pop("dataset")  # We don't want to store the actual DataFrame in kwargs
+            df = batch_kwargs.get("dataset")
+            # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs
+            batch_kwargs = {k: batch_kwargs[k] for k in batch_kwargs if k != 'dataset'}
             if isinstance(df, SparkDFDataset):
                 # Grab just the spark_df reference, since we want to override everything else
                 df = df.spark_df
+            # Record this in the kwargs *and* the id
             batch_kwargs["SparkDFRef"] = True
+            batch_id["SparkDFRef"] = True
 
         else:
             raise BatchKwargsError("Unrecognized batch_kwargs for spark_source", batch_kwargs)
@@ -183,4 +185,5 @@ class SparkDFDatasource(Datasource):
                                expectation_suite=expectation_suite,
                                data_context=self._data_context,
                                batch_kwargs=batch_kwargs,
-                               caching=caching)
+                               caching=caching,
+                               batch_id=batch_id)

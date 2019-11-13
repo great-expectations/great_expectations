@@ -83,7 +83,7 @@ class ReadWriteStore(WriteOnlyStore):
     def get(self, key, serialization_type=None):
         self._validate_key(key)
 
-        value=self._get(key)
+        value = self._get(key)
 
         if serialization_type:
             deserialization_method = self._get_deserialization_method(

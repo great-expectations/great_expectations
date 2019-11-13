@@ -117,6 +117,7 @@ data_docs_sites:
         class_name: FixedLengthTupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
+        class_name: DefaultSiteIndexBuilder
         show_cta_footer: True
 """
 

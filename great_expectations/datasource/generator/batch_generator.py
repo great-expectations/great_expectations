@@ -106,12 +106,6 @@ class BatchGenerator(object):
     def get_config(self):
         return self._generator_config
 
-    def _save_config(self):
-        if self._datasource is not None:
-            self._datasource.save_config()
-        else:
-            logger.warning("Unable to save generator config without a datasource attached.")
-     
     def reset_iterator(self, data_asset_name, **kwargs):
         self._data_asset_iterators[data_asset_name] = self._get_iterator(data_asset_name, **kwargs)
 
@@ -149,7 +143,7 @@ class BatchGenerator(object):
                 return next(data_asset_iterator)
             except StopIteration:
                 # This is a degenerate case in which no kwargs are actually being generated
-                logger.warning("No batch_kwargs found data_asset_name %s" % data_asset_name)
+                logger.warning("No batch_kwargs found for data_asset_name %s" % data_asset_name)
                 return {}
         except TypeError:
             # If we don't actually have an iterator we can generate, even after resetting, just return empty
