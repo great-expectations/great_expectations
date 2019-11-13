@@ -375,7 +375,7 @@ Save Validation Results
 The DataContext object provides a configurable ``validations_store`` where GE can store validation_result objects for
 subsequent evaluation and review. By default, the DataContext stores results in the
 ``great_expectations/uncommitted/validations`` directory. To specify a different directory or use a remote store such
-as ``s3``, edit stores section of the DataContext configuration object:
+as ``s3`` or ``gcs``, edit stores section of the DataContext configuration object:
 
 .. code-block:: bash
 
