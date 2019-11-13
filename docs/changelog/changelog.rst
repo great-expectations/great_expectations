@@ -16,6 +16,8 @@
 * Add support for limit parameter to batch_kwargs for all datasources: Pandas, SqlAlchemy, and SparkDF; add support
   to generators to support building batch_kwargs with limits specified.
 * Add support for GCS store
+* Add support to S3 generator for retrieving directories by specifying the `directory_assets` configuration
+
 
 0.8.4.post0
 -----------------
