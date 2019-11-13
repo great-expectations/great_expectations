@@ -106,11 +106,19 @@ class PandasDatasource(Datasource):
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
     def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
-        batch_kwargs.update(kwargs)
+        for k, v in kwargs.items():
+            if isinstance(v, dict):
+                if k in batch_kwargs and isinstance(batch_kwargs[k], dict):
+                    batch_kwargs[k].update(v)
+                else:
+                    batch_kwargs[k] = v
+            else:
+                batch_kwargs[k] = v
         # pandas cannot take unicode as a delimiter, which can happen in py2. Handle this case explicitly.
         # We handle it here so that the updated value will be in the batch_kwargs for transparency to the user.
-        if PY2 and "sep" in batch_kwargs and batch_kwargs["sep"] is not None:
-            batch_kwargs["sep"] = str(batch_kwargs["sep"])
+        if PY2 and "reader_options" in batch_kwargs and "sep" in batch_kwargs['reader_options'] and \
+                batch_kwargs['reader_options']['sep'] is not None:
+            batch_kwargs['reader_options']['sep'] = str(batch_kwargs['reader_options']['sep'])
         # We will use and manipulate reader_options along the way
         reader_options = batch_kwargs.get("reader_options", {})
 
@@ -153,7 +161,7 @@ class PandasDatasource(Datasource):
                 s3 = boto3.client("s3")
             except ImportError:
                 raise BatchKwargsError("Unable to load boto3 client to read s3 asset.", batch_kwargs)
-            raw_url = batch_kwargs.get("s3")  # We need to remove from the reader
+            raw_url = batch_kwargs["s3"]
             reader_method = batch_kwargs.get("reader_method")
             url = S3Url(raw_url)
             logger.debug("Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key))

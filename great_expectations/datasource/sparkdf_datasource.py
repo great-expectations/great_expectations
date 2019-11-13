@@ -109,7 +109,15 @@ class SparkDFDatasource(Datasource):
             logger.error("No spark session available")
             return None
 
-        batch_kwargs.update(kwargs)
+        for k, v in kwargs.items():
+            if isinstance(v, dict):
+                if k in batch_kwargs and isinstance(batch_kwargs[k], dict):
+                    batch_kwargs[k].update(v)
+                else:
+                    batch_kwargs[k] = v
+            else:
+                batch_kwargs[k] = v
+
         reader_options = batch_kwargs.get("reader_options", {})
 
         # We need to build a batch_id to be used in the dataframe
@@ -137,8 +145,9 @@ class SparkDFDatasource(Datasource):
             reader_options['limit'] = batch_kwargs['limit']
 
         if "path" in batch_kwargs or "s3" in batch_kwargs:
-            path = reader_options.get("path")
-            path = reader_options.pop("s3", path)
+            # If both are present, let s3 override
+            path = batch_kwargs.get("path")
+            path = batch_kwargs.get("s3", path)
             reader_method = batch_kwargs.get("reader_method")
             if reader_method is None:
                 reader_method = self._guess_reader_method_from_path(path)

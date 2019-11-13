@@ -107,14 +107,14 @@ class BatchGenerator(object):
         return self._generator_config
 
     def reset_iterator(self, data_asset_name, **kwargs):
-        self._data_asset_iterators[data_asset_name] = self._get_iterator(data_asset_name, **kwargs)
+        self._data_asset_iterators[data_asset_name] = self._get_iterator(data_asset_name, **kwargs), kwargs
 
     def get_iterator(self, data_asset_name, **kwargs):
         if data_asset_name in self._data_asset_iterators:
-            return self._data_asset_iterators[data_asset_name]
+            return self._data_asset_iterators[data_asset_name][0]
         else:
             self.reset_iterator(data_asset_name, **kwargs)
-            return self._data_asset_iterators[data_asset_name]
+            return self._data_asset_iterators[data_asset_name][0]
 
     def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
         """
@@ -133,12 +133,19 @@ class BatchGenerator(object):
     def yield_batch_kwargs(self, data_asset_name, **kwargs):
         if data_asset_name not in self._data_asset_iterators:
             self.reset_iterator(data_asset_name, **kwargs)
-        data_asset_iterator = self._data_asset_iterators[data_asset_name]
+        data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
+        if passed_kwargs != kwargs:
+            logger.warning("Asked to yield batch_kwargs using different supplemental kwargs. Please reset iterator to "
+                           "use different supplemental kwargs.")
         try:
             return next(data_asset_iterator)
         except StopIteration:
             self.reset_iterator(data_asset_name, **kwargs)
-            data_asset_iterator = self._data_asset_iterators[data_asset_name]
+            data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
+            if passed_kwargs != kwargs:
+                logger.warning(
+                    "Asked to yield batch_kwargs using different supplemental kwargs. Please reset iterator to "
+                    "use different supplemental kwargs.")
             try:
                 return next(data_asset_iterator)
             except StopIteration:

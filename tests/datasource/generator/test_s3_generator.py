@@ -84,7 +84,7 @@ def test_s3_generator_basic_operation(s3_generator):
     # Under the hood, we use the S3 ContinuationToken options to lazily fetch data
     batch_kwargs = [kwargs for kwargs in s3_generator.get_iterator("data")]
     assert len(batch_kwargs) == 2
-    assert batch_kwargs[0]["sep"] == ","
+    assert batch_kwargs[0]["reader_options"]["sep"] == ","
     assert batch_kwargs[0]["s3"] in ["s3a://test_bucket/data/for/you.csv", "s3a://test_bucket/data/for/me.csv"]
 
     # When a prefix and delimiter do not yield objects, there are no objects returned; raise an error

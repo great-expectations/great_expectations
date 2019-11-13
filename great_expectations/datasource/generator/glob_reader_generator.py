@@ -174,20 +174,21 @@ class GlobReaderGenerator(BatchGenerator):
             if partition_id != computed_partition_id:
                 logger.warning("Provided partition_id does not match computed partition_id; consider explicitly "
                                "defining the asset or updating your partitioner.")
-            batch_kwargs.update({"partition_id": partition_id})
+            batch_kwargs["partition_id"] = partition_id
         elif partition_id:
-            batch_kwargs.update({"partition_id": partition_id})
+            batch_kwargs["partition_id"] = partition_id
         elif computed_partition_id:
-            batch_kwargs.update({"partition_id": computed_partition_id})
+            batch_kwargs["partition_id"] = computed_partition_id
 
-        batch_kwargs.update(self.reader_options)
-        if reader_options is None:
-            reader_options = {}
-        # Then update with any locally-specified reader options
-        batch_kwargs.update({'reader_options': reader_options})
+        # Apply globally-configured reader options first
+        batch_kwargs['reader_options'] = self.reader_options
+        if reader_options:
+            # Then update with any locally-specified reader options
+            batch_kwargs['reader_options'].update(reader_options)
+
 
         if limit is not None:
-            batch_kwargs.update({'limit': limit})
+            batch_kwargs['limit'] = limit
 
         return batch_kwargs
 

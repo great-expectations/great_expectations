@@ -3,7 +3,18 @@
 
 0.8.5__develop
 -----------------
-
+* BREAKING CHANGE: move all reader options from the top-level batch_kwargs object to a sub-dictionary called
+  "reader_options" for SparkDFDatasource and PandasDatasource. This means it is no longer possible to specify
+  supplemental reader-specific options at the top-level of `get_batch`,  `yield_batch_kwargs` or `build_batch_kwargs`
+  calls, and instead, you must explicitly specify that they are reader_options, e.g. by a call such as:
+  `context.yield_batch_kwargs(data_asset_name, reader_options={'encoding': 'utf-8'})`.
+* BREAKING CHANGE: move all query_params from the top-level batch_kwargs object to a sub-dictionary called
+  "query_params" for SqlAlchemyDatasource. This means it is no longer possible to specify supplemental query_params at
+  the top-level of `get_batch`,  `yield_batch_kwargs` or `build_batch_kwargs`
+  calls, and instead, you must explicitly specify that they are query_params, e.g. by a call such as:
+  `context.yield_batch_kwargs(data_asset_name, query_params={'schema': 'foo'})`.
+* Add support for limit parameter to batch_kwargs for all datasources: Pandas, SqlAlchemy, and SparkDF; add support
+  to generators to support building batch_kwargs with limits specified.
 
 0.8.4.post0
 -----------------
@@ -15,10 +26,10 @@ locations.
 -----------------
 * Improved the tutorials that walk new users through the process of creating expectations and validating data
 * Changed the flow of the init command - now it creates the scaffolding of the project and adds a datasource. After
-that users can choose their path.
+  that users can choose their path.
 * Added a component with links to useful tutorials to the index page of the Data Docs website
 * Improved the UX of adding a SQL datasource in the CLI - now the CLI asks for specific credentials for Postgres,
-MySQL, Redshift and Snowflake, allows continuing debugging in the config file and has better error messages
+  MySQL, Redshift and Snowflake, allows continuing debugging in the config file and has better error messages
 * Added batch_kwargs infomration to DataDocs validation results
 * Fix an issue affecting file stores on Windows
 
