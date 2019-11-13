@@ -13,7 +13,7 @@ class InMemoryGenerator(BatchGenerator):
     def __init__(self, name="default", datasource=None):
         super(InMemoryGenerator, self).__init__(name, datasource=datasource)
 
-    def _get_iterator(self, data_asset_name, **kwargs):
+    def _get_iterator(self, generator_asset, **kwargs):
         return iter([])
 
     def get_available_data_asset_names(self):
