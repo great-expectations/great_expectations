@@ -7,7 +7,7 @@ Datasources
 Datasources are responsible for connecting data and compute infrastructure. Each Datasource provides
 Great Expectations DataAssets (or batches in a DataContext) connected to a specific compute environment, such as a
 SQL database, a Spark cluster, or a local in-memory Pandas DataFrame. Datasources know how to access data from
-relevant sources such as an existing object from a DAG runner, a SQL database, S3 bucket, or local filesystem.
+relevant sources such as an existing object from a DAG runner, a SQL database, an S3 bucket, GCS, or a local filesystem.
 
 To bridge the gap between those worlds, Datasources interact closely with *generators* which
 are aware of a source of data and can produce produce identifying information, called

@@ -25,7 +25,7 @@
             {% else -%}
                 {% set cell_styling = "" -%}
             {% endif -%}
-            <td id="{{content_block_id}}" {{ cell_styling }}><div class="table-cell-frame">{{ cell | render_content_block }}</div></td>
+            <td id="{{content_block_id}}" {{ cell_styling }}><div class="show-scrollbars">{{ cell | render_content_block }}</div></td>
         {%- endfor -%}
         </tr>
     {%- endfor -%}

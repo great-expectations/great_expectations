@@ -78,7 +78,7 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
     dataset2 = datasource.get_data_asset("main.table_2", "default")
     assert isinstance(dataset1, SqlAlchemyDataset)
     assert isinstance(dataset2, SqlAlchemyDataset)
-
+    assert len(dataset1.head(10)) == 5
 
 def test_create_sqlalchemy_datasource(data_context):
     name = "test_sqlalchemy_datasource"
@@ -145,7 +145,24 @@ def test_sqlalchemy_source_templating(sqlitedb_engine):
     generator.add_query("test", "select 'cat' as ${col_name};")
     df = datasource.get_batch("test",
                               "my_suite",
-                              generator.yield_batch_kwargs("test", col_name="animal_name")
+                              generator.yield_batch_kwargs("test", query_params={'col_name': "animal_name"})
                               )
     res = df.expect_column_to_exist("animal_name")
     assert res["success"] is True
+    res = df.expect_column_values_to_be_in_set('animal_name', ['cat'])
+    assert res["success"] is True
+
+
+def test_sqlalchemy_source_limit(sqlitedb_engine):
+    df1 = pd.DataFrame(
+        {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
+    df2 = pd.DataFrame(
+        {'col_1': [0, 1, 2, 3, 4], 'col_2': ['b', 'c', 'd', 'e', 'f']})
+    df1.to_sql('table_1', con=sqlitedb_engine, index=True)
+    df2.to_sql('table_2', con=sqlitedb_engine, index=True, schema='main')
+    datasource = SqlAlchemyDatasource('SqlAlchemy', engine=sqlitedb_engine)
+    limited_dataset = datasource.get_data_asset("table_1", "default", limit=1, offset=2)
+    assert isinstance(limited_dataset, SqlAlchemyDataset)
+    assert limited_dataset._table.name.startswith("ge_tmp_")  # we have generated a temporary table
+    assert len(limited_dataset.head(10)) == 1  # and it is only one row long
+    assert limited_dataset.head(10)['col_1'][0] == 3  # offset should have been applied

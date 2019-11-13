@@ -50,8 +50,8 @@ Users can specify
 
 * which datasources to document (by default, all)
 * whether to include expectations, validations and profiling results sections
-* where the expectations and validations should be read from (filesystem or S3)
-* where the HTML files should be written (filesystem or S3)
+* where the expectations and validations should be read from (filesystem, S3, or GCS)
+* where the HTML files should be written (filesystem, S3, or GCS)
 * which renderer and view class should be used to render each section
 
 ********************************
