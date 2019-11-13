@@ -51,10 +51,10 @@ def test_basic_operation():
     # fail with an informative message
     with pytest.raises(BatchKwargsError) as exc:
         table_generator.yield_batch_kwargs("my_asset")
-        assert "missing template key" in exc.message
+        assert "missing template key" in exc.value.message
 
 
-def test_db_introspection(sqlalchemy_dataset):
+def test_db_introspection(sqlalchemy_dataset, caplog):
     import sqlalchemy as sa
 
     class MockDatasource(object):
@@ -84,6 +84,16 @@ def test_db_introspection(sqlalchemy_dataset):
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
     assert batch_kwargs.table == table_name
     assert batch_kwargs.schema == "public"
+
+    # We should be able to pass a limit; but calling yield again with different kwargs should yield a warning
+    caplog.clear()
+    batch_kwargs = table_generator.yield_batch_kwargs("public." + table_name, limit=10)
+    assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
+    assert batch_kwargs.table == table_name
+    assert batch_kwargs.schema == "public"
+    assert batch_kwargs.limit == 10
+    assert ["Asked to yield batch_kwargs using different supplemental kwargs. Please reset iterator to "
+            "use different supplemental kwargs."] == [rec.message for rec in caplog.records]
 
 
 def test_query_generator_view(sqlite_view_engine):

@@ -141,9 +141,6 @@ class SparkDFDatasource(Datasource):
             raise ValueError("SparkDFDatasource cannot instantiate batch with data_asset_type: '%s'. It "
                              "must be a subclass of SparkDFDataset." % data_asset_type.__name__)
 
-        if "limit" in batch_kwargs:
-            reader_options['limit'] = batch_kwargs['limit']
-
         if "path" in batch_kwargs or "s3" in batch_kwargs:
             # If both are present, let s3 override
             path = batch_kwargs.get("path")
@@ -172,7 +169,7 @@ class SparkDFDatasource(Datasource):
                 df = reader.format("delta").load(path)
             else:
                 raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
-            
+
         elif "query" in batch_kwargs:
             df = self.spark.sql(batch_kwargs["query"])
 
@@ -189,6 +186,9 @@ class SparkDFDatasource(Datasource):
 
         else:
             raise BatchKwargsError("Unrecognized batch_kwargs for spark_source", batch_kwargs)
+
+        if "limit" in batch_kwargs:
+            df = df.limit(batch_kwargs['limit'])
 
         return data_asset_type(df,
                                expectation_suite=expectation_suite,

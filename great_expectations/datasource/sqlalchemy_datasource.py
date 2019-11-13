@@ -1,6 +1,5 @@
 import time
 import logging
-from copy import deepcopy
 from string import Template
 
 from great_expectations.datasource import Datasource
@@ -147,7 +146,14 @@ class SqlAlchemyDatasource(Datasource):
             raise ValueError("Unrecognized DataAssetGenerator type %s" % type_)
 
     def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
-        batch_kwargs.update(kwargs)
+        for k, v in kwargs.items():
+            if isinstance(v, dict):
+                if k in batch_kwargs and isinstance(batch_kwargs[k], dict):
+                    batch_kwargs[k].update(v)
+                else:
+                    batch_kwargs[k] = v
+            else:
+                batch_kwargs[k] = v
 
         if "data_asset_type" in batch_kwargs:
             # Sqlalchemy does not use reader_options or need to remove batch_kwargs since it does not pass
@@ -208,6 +214,9 @@ class SqlAlchemyDatasource(Datasource):
                 )
 
         elif "query" in batch_kwargs:
+            if "limit" in batch_kwargs or "offset" in batch_kwargs:
+                logger.warning("Limit and offset parameters are ignored when using query-based batch_kwargs; consider "
+                               "adding limit and offset directly to the generated query.")
             if "bigquery_temp_table" in batch_kwargs:
                 table_name = batch_kwargs.get("bigquery_temp_table")
             else:

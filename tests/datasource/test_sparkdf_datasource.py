@@ -143,6 +143,20 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
     assert isinstance(dataset, SparkDFDataset)
     # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
     assert dataset.spark_df.head()['col_1'] == 1
+    assert dataset.spark_df.count() == 5
+
+    # Limit should also work
+    dataset = datasource.get_batch('test',
+                                   expectation_suite_name="default",
+                                   batch_kwargs={
+                                       "path": os.path.join(test_parquet_folder_connection_path,
+                                                            'test.parquet'),
+                                       "limit": 2
+                                   })
+    assert isinstance(dataset, SparkDFDataset)
+    # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
+    assert dataset.spark_df.head()['col_1'] == 1
+    assert dataset.spark_df.count() == 2
 
 
 def test_standalone_spark_csv_datasource(test_folder_connection_path):

@@ -102,3 +102,9 @@ def test_subdir_reader_file_partitioning(tmp_path_factory):
 
     kwargs = subdir_reader_generator.build_batch_kwargs_from_partition_id("20190101__asset_1", "20190101__asset_1")
     assert kwargs["path"] == os.path.join(base_directory, "20190101__asset_1.csv")
+
+    # We should also be able to pass a limit
+    kwargs = subdir_reader_generator.build_batch_kwargs_from_partition_id("20190101__asset_1", "20190101__asset_1",
+                                                                          limit=10)
+    assert kwargs["path"] == os.path.join(base_directory, "20190101__asset_1.csv")
+    assert kwargs["limit"] == 10

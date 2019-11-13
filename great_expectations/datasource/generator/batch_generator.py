@@ -111,7 +111,12 @@ class BatchGenerator(object):
 
     def get_iterator(self, generator_asset, **kwargs):
         if generator_asset in self._data_asset_iterators:
-            return self._data_asset_iterators[generator_asset][0]
+            data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
+            if passed_kwargs != kwargs:
+                logger.warning(
+                    "Asked to yield batch_kwargs using different supplemental kwargs. Please reset iterator to "
+                    "use different supplemental kwargs.")
+            return data_asset_iterator
         else:
             self.reset_iterator(generator_asset, **kwargs)
             return self._data_asset_iterators[generator_asset][0]

@@ -53,6 +53,10 @@ def s3_generator(mock_s3_bucket):
                                     "delimiter": "",
                                     "regex_filter": r"data/for/.*\.csv"
                                 },
+                                "data_dirs": {
+                                    "prefix": "data/",
+                                    "directory_assets": True
+                                },
                                 "other": {
                                     "prefix": "other/",
                                     "regex_filter": r".*/you\.csv",
@@ -112,3 +116,16 @@ def test_s3_generator_incremental_fetch(s3_generator, caplog):
     batch_kwargs = [kwargs for kwargs in s3_generator.get_iterator("other_empty_delimiter")]
     assert len(caplog.records) == 4
     assert len(batch_kwargs) == 3
+
+
+def test_s3_generator_get_directories(s3_generator):
+    # Verify that an asset configured to return directories can do so
+    batch_kwargs_list = [kwargs for kwargs in s3_generator.get_iterator("data_dirs")]
+    assert 3 == len(batch_kwargs_list)
+    paths = set([batch_kwargs["s3"] for batch_kwargs in batch_kwargs_list])
+    assert {"s3a://test_bucket/data/for/", "s3a://test_bucket/data/to/", "s3a://test_bucket/data/is/"} == paths
+
+
+def test_s3_generator_limit(s3_generator):
+    batch_kwargs_list = [kwargs for kwargs in s3_generator.get_iterator("data", limit=10)]
+    assert all(["limit" in batch_kwargs for batch_kwargs in batch_kwargs_list])

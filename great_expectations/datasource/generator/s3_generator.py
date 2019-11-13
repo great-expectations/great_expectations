@@ -186,7 +186,7 @@ class S3Generator(BatchGenerator):
             "Prefix": asset_config.get("prefix", None),
             "MaxKeys": asset_config.get("max_keys", self._max_keys)
         }
-        dictionary_assets = asset_config.get("dictionary_assets", False)
+        directory_assets = asset_config.get("directory_assets", False)
 
         if "continuation_token" in iterator_dict:
             query_options.update({
@@ -195,7 +195,7 @@ class S3Generator(BatchGenerator):
 
         logger.debug("Fetching objects from S3 with query options: %s" % str(query_options))
         asset_options = self._s3.list_objects_v2(**query_options)
-        if dictionary_assets:
+        if directory_assets:
             if "CommonPrefixes" not in asset_options:
                 raise BatchKwargsError(
                     "Unable to build batch_kwargs. The asset may not be configured correctly. If dictionary assets "
@@ -205,6 +205,7 @@ class S3Generator(BatchGenerator):
                         "contents": asset_options["Contents"] if "Contents" in asset_options else None
                     }
                 )
+            keys = [item["Prefix"] for item in asset_options["CommonPrefixes"]]
         else:
             if "Contents" not in asset_options:
                 raise BatchKwargsError(
@@ -218,19 +219,20 @@ class S3Generator(BatchGenerator):
                     }
                 )
             keys = [item["Key"] for item in asset_options["Contents"] if item["Size"] > 0]
-            keys = [key for key in
-                    filter(lambda x: re.match(asset_config.get("regex_filter", ".*"), x) is not None, keys)]
-            for key in keys:
-                yield key
 
-            if asset_options["IsTruncated"]:
-                iterator_dict["continuation_token"] = asset_options["NextContinuationToken"]
-                # Recursively fetch more
-                for key in self._get_asset_options(asset_config, iterator_dict):
-                    yield key
-            elif "continuation_token" in iterator_dict:
-                # Make sure we clear the token once we've gotten fully through
-                del iterator_dict["continuation_token"]
+        keys = [key for key in
+                filter(lambda x: re.match(asset_config.get("regex_filter", ".*"), x) is not None, keys)]
+        for key in keys:
+            yield key
+
+        if asset_options["IsTruncated"]:
+            iterator_dict["continuation_token"] = asset_options["NextContinuationToken"]
+            # Recursively fetch more
+            for key in self._get_asset_options(asset_config, iterator_dict):
+                yield key
+        elif "continuation_token" in iterator_dict:
+            # Make sure we clear the token once we've gotten fully through
+            del iterator_dict["continuation_token"]
 
     def _build_asset_iterator(self, asset_config, iterator_dict, reader_options=None, limit=None):
         for key in self._get_asset_options(asset_config, iterator_dict):
