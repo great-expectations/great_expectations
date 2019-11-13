@@ -3,12 +3,15 @@
 Run ``great_expectations init``
 ===============================================
 
+This tutorial covers ``great_expectations init`` - the first command you run in the terminal to add Great Expectations to your project.
+
 Video
 ------
 
 ..
 
-Watch `the video on YouTube <https://greatexpectations.io/videos/getting_started/cli_init>`_.
+Want to watch a video walkthrough of this tutorial? `James <https://github.com/jcampbell>`_ (one of the original core contributors to Great Expectations) walks you through this tutorial in a `video on YouTube <https://greatexpectations.io/videos/getting_started/cli_init>`_.
+
 
 
 Default Project Structure
@@ -183,21 +186,7 @@ Note: the SQL credentials you entered are stored in the ``uncommitted/config_var
 Note that this file goes in the ``uncommitted/`` directory, which should *NOT* be committed to source control.
 The ${my_db} variable is substituted with the credentials at runtime.
 
-A Great Expectations Datasource brings the worlds of data and expectations together. Datasources produce
-Great Expectations DataAssets, which support the core GE api, including validation.
-Fully describing a DataAsset's "name" requires three parts:
-
-1. ``datasource`` (`my_postgresql_db`)
-2. ``generator`` (`queries`)
-3. ``generator_asset`` (`user_events_table`)
-
-In addition, to work with a specific batch of data and validate it against a particular set of expectations, you will
-need to specify:
-
-* ``batch_kwargs`` (`SELECT * FROM user_events_table WHERE created_at>2018-01-01`), and/or
-* ``expectation_suite_name`` (`BasicDatasetProfiler`).
-
-Together, these five elements completely allow you to reference all of the main entities within the DataContext.
+A Great Expectations Datasource brings the worlds of data and expectations together.
 
 You can get started in Great Expectations without learning all the details of the DataContext. To start, you'll mainly
 use elements 1 and 3: ``datasource``s, (with names such as  `my_postgresql_db`) and ``generator_asset``s, which may
