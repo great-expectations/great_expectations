@@ -188,10 +188,16 @@ class SqlAlchemyDatasource(Datasource):
             )
 
         elif "query" in batch_kwargs:
+            if "bigquery_temp_table" in batch_kwargs:
+                table_name = batch_kwargs.get("bigquery_temp_table")
+            else:
+                table_name = None
+            
             query = Template(batch_kwargs["query"]).safe_substitute(**kwargs)
             return data_asset_type(
                 custom_sql=query,
                 engine=self.engine,
+                table_name=table_name,
                 data_context=self._data_context,
                 expectation_suite=expectation_suite,
                 batch_kwargs=batch_kwargs,
