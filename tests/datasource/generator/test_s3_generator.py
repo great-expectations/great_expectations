@@ -81,7 +81,7 @@ def s3_generator(mock_s3_bucket):
 def test_s3_generator_basic_operation(s3_generator):
     # S3 Generator sees *only* configured assets
     assets = s3_generator.get_available_data_asset_names()
-    assert set(assets) == {"data", "other", "other_empty_delimiter"}
+    assert set(assets) == {"data", "data_dirs", "other", "other_empty_delimiter"}
 
     # We should observe that glob, prefix, delimiter all work together
     # They can be defined in the generator or overridden by a particular asset
@@ -95,7 +95,7 @@ def test_s3_generator_basic_operation(s3_generator):
     with pytest.raises(BatchKwargsError) as err:
         batch_kwargs = [kwargs for kwargs in s3_generator.get_iterator("other")]
         # The error should show the common prefixes
-        assert "CommonPrefixes" in err.batch_kwargs
+        assert "CommonPrefixes" in err.value.batch_kwargs
 
 
 def test_s3_generator_incremental_fetch(s3_generator, caplog):

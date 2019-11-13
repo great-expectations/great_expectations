@@ -140,8 +140,10 @@ class BatchGenerator(object):
             self.reset_iterator(generator_asset, **kwargs)
         data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
         if passed_kwargs != kwargs:
-            logger.warning("Asked to yield batch_kwargs using different supplemental kwargs. Please reset iterator to "
-                           "use different supplemental kwargs.")
+            logger.warning("Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "
+                           "use new supplemental kwargs.")
+            self.reset_iterator(generator_asset, **kwargs)
+            data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
         try:
             return next(data_asset_iterator)
         except StopIteration:
@@ -149,8 +151,10 @@ class BatchGenerator(object):
             data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
             if passed_kwargs != kwargs:
                 logger.warning(
-                    "Asked to yield batch_kwargs using different supplemental kwargs. Please reset iterator to "
+                    "Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "
                     "use different supplemental kwargs.")
+                self.reset_iterator(generator_asset, **kwargs)
+                data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
             try:
                 return next(data_asset_iterator)
             except StopIteration:
