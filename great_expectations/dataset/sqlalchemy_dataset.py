@@ -568,7 +568,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
-        sql = sa.select([sa.text("*")]).select_from(self._table)
+        sql = sa.select([sa.text("*")]).select_from(self._table).limit(1)
         col_names = self.engine.execute(sql).keys()
         col_dict = [{'name': col_name} for col_name in col_names]
         return col_dict

@@ -23,13 +23,13 @@ def test_basic_operation():
         }
     )
 
-    batch_kwargs = table_generator.yield_batch_kwargs("my_asset", schema="foo")
+    batch_kwargs = table_generator.yield_batch_kwargs("my_asset", query_params={"schema": "foo"})
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
     assert batch_kwargs.schema == "foo"
     assert batch_kwargs.table == "my_table"
 
     # Note that schema is ignored in this case -- it's not part of the defined asset
-    batch_kwargs = table_generator.yield_batch_kwargs("my_no_schema_asset", schema="foo")
+    batch_kwargs = table_generator.yield_batch_kwargs("my_no_schema_asset", query_params={"schema": "foo"})
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
     assert batch_kwargs.schema is None
     assert batch_kwargs.table == "important_data"
@@ -42,7 +42,7 @@ def test_basic_operation():
 
     # Note that in this case, we have a confusingly named asset, since it "could" be a schema + table name
     # Since it's not available to be found via introspection, however, and it *is* a valid name, this works fine
-    batch_kwargs = table_generator.yield_batch_kwargs("dangerous.named_asset", schema="bar")
+    batch_kwargs = table_generator.yield_batch_kwargs("dangerous.named_asset", query_params={"schema": "bar"})
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
     assert batch_kwargs.schema == "bar"
     assert batch_kwargs.table == "named_asset"
@@ -51,10 +51,10 @@ def test_basic_operation():
     # fail with an informative message
     with pytest.raises(BatchKwargsError) as exc:
         table_generator.yield_batch_kwargs("my_asset")
-        assert "missing template key" in exc.message
+        assert "missing template key" in exc.value.message
 
 
-def test_db_introspection(sqlalchemy_dataset):
+def test_db_introspection(sqlalchemy_dataset, caplog):
     import sqlalchemy as sa
 
     class MockDatasource(object):
@@ -84,6 +84,16 @@ def test_db_introspection(sqlalchemy_dataset):
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
     assert batch_kwargs.table == table_name
     assert batch_kwargs.schema == "public"
+
+    # We should be able to pass a limit; but calling yield again with different kwargs should yield a warning
+    caplog.clear()
+    batch_kwargs = table_generator.yield_batch_kwargs("public." + table_name, limit=10)
+    assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
+    assert batch_kwargs.table == table_name
+    assert batch_kwargs.schema == "public"
+    assert batch_kwargs.limit == 10
+    assert ["Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "
+            "use new supplemental kwargs."] == [rec.message for rec in caplog.records]
 
 
 def test_query_generator_view(sqlite_view_engine):

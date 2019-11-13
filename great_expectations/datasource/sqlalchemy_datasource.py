@@ -146,7 +146,14 @@ class SqlAlchemyDatasource(Datasource):
             raise ValueError("Unrecognized DataAssetGenerator type %s" % type_)
 
     def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
-        batch_kwargs.update(kwargs)
+        for k, v in kwargs.items():
+            if isinstance(v, dict):
+                if k in batch_kwargs and isinstance(batch_kwargs[k], dict):
+                    batch_kwargs[k].update(v)
+                else:
+                    batch_kwargs[k] = v
+            else:
+                batch_kwargs[k] = v
 
         if "data_asset_type" in batch_kwargs:
             # Sqlalchemy does not use reader_options or need to remove batch_kwargs since it does not pass
@@ -177,17 +184,39 @@ class SqlAlchemyDatasource(Datasource):
             schema = None
 
         if "table" in batch_kwargs:
-            return data_asset_type(
-                table_name=batch_kwargs["table"],
-                engine=self.engine,
-                schema=schema,
-                data_context=self._data_context,
-                expectation_suite=expectation_suite,
-                batch_kwargs=batch_kwargs,
-                batch_id=batch_id
-            )
+            limit = batch_kwargs.get('limit')
+            offset = batch_kwargs.get('offset')
+            if limit is not None or offset is not None:
+                logger.info("Generating query from table batch_kwargs based on limit and offset")
+                raw_query = sqlalchemy.select([sqlalchemy.text("*")])\
+                    .select_from(sqlalchemy.schema.Table(batch_kwargs['table'], sqlalchemy.MetaData(), schema=schema))\
+                    .offset(offset)\
+                    .limit(limit)
+                query = str(raw_query.compile(self.engine, compile_kwargs={"literal_binds": True}))
+                return data_asset_type(
+                    custom_sql=query,
+                    engine=self.engine,
+                    data_context=self._data_context,
+                    expectation_suite=expectation_suite,
+                    batch_kwargs=batch_kwargs,
+                    batch_id=batch_id
+                )
+
+            else:
+                return data_asset_type(
+                    table_name=batch_kwargs["table"],
+                    engine=self.engine,
+                    schema=schema,
+                    data_context=self._data_context,
+                    expectation_suite=expectation_suite,
+                    batch_kwargs=batch_kwargs,
+                    batch_id=batch_id
+                )
 
         elif "query" in batch_kwargs:
+            if "limit" in batch_kwargs or "offset" in batch_kwargs:
+                logger.warning("Limit and offset parameters are ignored when using query-based batch_kwargs; consider "
+                               "adding limit and offset directly to the generated query.")
             if "bigquery_temp_table" in batch_kwargs:
                 table_name = batch_kwargs.get("bigquery_temp_table")
             else:
@@ -203,6 +232,6 @@ class SqlAlchemyDatasource(Datasource):
                 batch_kwargs=batch_kwargs,
                 batch_id=batch_id
             )
-    
+
         else:
             raise ValueError("Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified")

@@ -34,15 +34,14 @@ class DatabricksTableGenerator(BatchGenerator):
         tables = self.spark.sql('show tables in {}'.format(self.database))
         return [row.tableName for row in tables.collect()]
 
-    def _get_iterator(self, data_asset_name, **kwargs):
-        query = 'select * from {}.{}'.format(self.database, data_asset_name)
+    def _get_iterator(self, generator_asset, **kwargs):
+        query = 'select * from {}.{}'.format(self.database, generator_asset)
         if kwargs.get('partition'):
             if not kwargs.get('date_field'):
                 raise Exception('Must specify date_field when using partition.')
             query += ' where {} = "{}"'.format(kwargs.get('date_field'), kwargs.get('partition'))
         return iter([
             {
-                "query": query,
-                "timestamp": time.time()
+                "query": query
             }
         ])
