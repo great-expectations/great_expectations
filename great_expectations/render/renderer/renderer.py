@@ -86,8 +86,8 @@ class Renderer(object):
         expect_table_columns_to_match_ordered_list_evr = cls._find_evr_by_type(evrs_, "expect_table_columns_to_match_ordered_list")
         # Group EVRs by column
         sorted_columns = sorted(list(set([evr["expectation_config"]["kwargs"]["column"] for evr in evrs_ if
-                            "column" in evr["expectation_config"]["kwargs"]])))
-    
+                         "column" in evr["expectation_config"]["kwargs"]])))
+
         if expect_table_columns_to_match_ordered_list_evr:
             ordered_columns = expect_table_columns_to_match_ordered_list_evr["result"]["observed_value"]
         else:
