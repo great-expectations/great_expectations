@@ -85,6 +85,14 @@ class PandasDatasource(Datasource):
         })
         return configuration
 
+    @classmethod
+    def get_sampling_generator_configuration(cls):
+        return {
+            "sampling_generator": {
+                "class_name": "PandasSamplingSubdirReaderGenerator"
+            }
+        }
+
     def __init__(self, name="pandas", data_context=None, data_asset_type=None, generators=None, **kwargs):
         configuration_with_defaults = PandasDatasource.build_configuration(data_asset_type, generators, **kwargs)
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
