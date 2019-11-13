@@ -173,8 +173,9 @@ If you have no preference as to which batch of the data asset should be loaded, 
 
 This is most likely sufficient for the purpose of this tutorial.
 
+
 .. toggle-header::
-    :header: However, if you want to use a specific batch, **click here to learn how to specify the right batch_kwargs**
+    :header: **Click here to learn how to specify batch_kwargs for fetching a particular batch**
 
         ``batch_kwargs`` provide detailed instructions for the datasource how to construct a batch. Each datasource accepts different types of ``batch_kwargs``:
 
@@ -225,10 +226,7 @@ This is most likely sufficient for the purpose of this tutorial.
                 header or to use a specific separator), add them to the the ``batch_kwargs``.
 
                 See the complete list of options for `Spark DataFrameReader <https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader>`__
- If you already loaded the data into a Spark DataFrame, here is how you construct ``batch_kwargs`` that instruct the datasource to use your dataframe as a batch:
 
-                .. code-block:: python
-                    batch_kwargs = {'df': "YOUR_SPARK_DF"}
             .. tab-container:: tab2
                 :title: SQLAlchemy
 
@@ -258,7 +256,6 @@ This is most likely sufficient for the purpose of this tutorial.
 
 |
 Now you have the contents of one of the files loaded as batch of the data asset ``data__dir/default/npidata``.
-
 
 6. Author Expectations
 -----------------------
