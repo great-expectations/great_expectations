@@ -54,7 +54,6 @@ def test_glob_reader_path_partitioning(mocked_glob_kwargs):
     assert len(kwargs) == 5
     assert kwargs[0]["path"] == "20190101__my_data.csv"
     assert kwargs[0]["partition_id"] == "20190101"
-    assert "timestamp" in kwargs[0]
     assert len(kwargs[0].keys()) == 3
 
 
@@ -130,11 +129,10 @@ def test_glob_reader_generator_partitioning():
         batch_kwargs = glob_generator.build_batch_kwargs_from_partition_id("asset1", "20190101")
         assert isinstance(batch_kwargs, PathBatchKwargs)
         assert batch_kwargs["path"] == "/data/project/asset1/20190101__my_data.csv"
-        assert "timestamp" in batch_kwargs
         assert batch_kwargs["partition_id"] == "20190101"
-        assert batch_kwargs["sep"] == "|"
-        assert batch_kwargs["quoting"] == 3
-        assert len(batch_kwargs) == 5
+        assert batch_kwargs["reader_options"]["sep"] == "|"
+        assert batch_kwargs["reader_options"]["quoting"] == 3
+        assert len(batch_kwargs) == 3
 
     with mock.patch("glob.glob") as mock_glob, mock.patch("os.path.isdir") as is_dir:
         mock_glob_match = [
@@ -163,22 +161,31 @@ def test_glob_reader_generator_partitioning():
         assert isinstance(batch_kwargs, PathBatchKwargs)
         assert batch_kwargs["path"] == "/data/project/no_partition_asset1/this_is_a_batch_of_data.csv"
         assert batch_kwargs["partition_id"] == "no_partition_asset1/this_is_a_batch_of_data.csv"
-        assert "timestamp" in batch_kwargs
-        assert batch_kwargs["sep"] == "|"
-        assert batch_kwargs["quoting"] == 3
-        assert len(batch_kwargs) == 5
+        assert batch_kwargs["reader_options"]["sep"] == "|"
+        assert batch_kwargs["reader_options"]["quoting"] == 3
+        assert len(batch_kwargs) == 3
 
         # When partition isn't really well defined, though, the preferred way is to use yield_batch_kwargs
         batch_kwargs = glob_generator.yield_batch_kwargs("no_partition_asset1")
         assert isinstance(batch_kwargs, PathBatchKwargs)
         assert batch_kwargs["path"] in mock_glob_match
-        assert "timestamp" in batch_kwargs
 
         # We do define a partition_id in this case, using the default fallback logic of relative path
         assert batch_kwargs["partition_id"] == "no_partition_asset1/this_is_a_batch_of_data.csv"
-        assert batch_kwargs["sep"] == "|"
-        assert batch_kwargs["quoting"] == 3
-        assert len(batch_kwargs) == 5
+        assert batch_kwargs["reader_options"]["sep"] == "|"
+        assert batch_kwargs["reader_options"]["quoting"] == 3
+        assert len(batch_kwargs) == 3
+
+        # We should be able to pass limit as well
+        batch_kwargs = glob_generator.yield_batch_kwargs("no_partition_asset1", limit=10)
+        assert isinstance(batch_kwargs, PathBatchKwargs)
+        assert batch_kwargs["path"] in mock_glob_match
+
+        assert batch_kwargs["partition_id"] == "no_partition_asset1/this_is_a_batch_of_data.csv"
+        assert batch_kwargs["reader_options"]["sep"] == "|"
+        assert batch_kwargs["reader_options"]["quoting"] == 3
+        assert batch_kwargs["limit"] == 10
+        assert len(batch_kwargs) == 4
 
 
 def test_glob_reader_generator_customize_partitioning():

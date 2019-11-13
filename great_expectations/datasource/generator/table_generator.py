@@ -1,4 +1,3 @@
-import os
 import logging
 from string import Template
 
@@ -93,15 +92,18 @@ class TableGenerator(BatchGenerator):
                 logger.warning("Unable to create inspector from engine in generator '%s'" % name)
                 self.inspector = None
 
-    def _get_iterator(self, generator_asset, **kwargs):
+    def _get_iterator(self, generator_asset, query_params=None, limit=None, offset=None, partition_id=None):
+        batch_kwargs = None
         # First, we check if we have a configured asset
         if generator_asset in self._assets:
             asset_config = self._assets[generator_asset]
             try:
-                table_name = Template(asset_config.table).substitute(kwargs)
+                if query_params is None:
+                    query_params = {}
+                table_name = Template(asset_config.table).substitute(query_params)
                 schema_name = None
                 if asset_config.schema is not None:
-                    schema_name = Template(asset_config.schema).substitute(kwargs)
+                    schema_name = Template(asset_config.schema).substitute(query_params)
             except KeyError:
                 raise BatchKwargsError("Unable to generate batch kwargs for asset '" + generator_asset + "': "
                                        "missing template key",
@@ -109,12 +111,7 @@ class TableGenerator(BatchGenerator):
                                         "table_template": asset_config.table,
                                         "schema_template": asset_config.schema}
                                        )
-            return iter([
-                SqlAlchemyDatasourceTableBatchKwargs(
-                    table=table_name,
-                    schema=schema_name
-                )
-            ])
+            batch_kwargs = SqlAlchemyDatasourceTableBatchKwargs(table=table_name, schema=schema_name)
 
         # If this is not a manually configured asset, we fall back to inspection of the database
         elif self.engine is not None and self.inspector is not None:
@@ -135,12 +132,21 @@ class TableGenerator(BatchGenerator):
                 pass
 
             if table_name in tables:
-                return iter([
-                    SqlAlchemyDatasourceTableBatchKwargs(
-                        table=table_name,
-                        schema=schema_name,
-                    )
-                ])
+                batch_kwargs = SqlAlchemyDatasourceTableBatchKwargs(table=table_name, schema=schema_name)
+
+        if batch_kwargs is not None:
+            if partition_id is not None:
+                logger.warning("table_generator cannot identify partitions; provided partition id will be recorded "
+                               "only")
+                batch_kwargs['partition_id'] = partition_id
+            if limit is not None:
+                batch_kwargs['limit'] = limit
+            if offset is not None:
+                batch_kwargs['offset'] = offset
+            return iter([batch_kwargs])
+
+        # Otherwise, we return None
+        return
 
     def get_available_data_asset_names(self):
         defined_assets = list(self._assets.keys())
@@ -181,10 +187,13 @@ class TableGenerator(BatchGenerator):
 
         return defined_assets + tables
 
-    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
-        all_the_kwargs = batch_kwargs.copy()
-        all_the_kwargs.update(kwargs)
-        return next(self._get_iterator(generator_asset, partition_id=partition_id, **all_the_kwargs))
+    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, limit=None, offset=None,
+                                             query_params=None):
+        if query_params is None:
+            query_params = {}
+
+        return next(self._get_iterator(generator_asset, query_params=query_params, limit=limit,
+                                       offset=offset, partition_id=partition_id))
 
     def get_available_partition_ids(self, generator_asset):
         raise BatchKwargsError("TableGenerator cannot identify partitions, however any existing table may"
