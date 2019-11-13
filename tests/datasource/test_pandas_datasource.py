@@ -47,12 +47,18 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
     # Include some extra kwargs...
     # Note that we are using get_data_asset NOT get_batch here, since we are standalone (no batch concept)
     dataset = datasource.get_data_asset("test",
-                                        generator_name="default", batch_kwargs=auto_batch_kwargs,
-                                        sep=",", header=0, index_col=0)
+                                        generator_name="default",
+                                        batch_kwargs=auto_batch_kwargs,
+                                        reader_options={
+                                            'sep': ",",
+                                            'header': 0,
+                                            'index_col': 0
+                                        })
     assert isinstance(dataset, PandasDataset)
     assert (dataset["col_1"] == [1, 2, 3, 4, 5]).all()
+    assert len(dataset) == 5
 
-    ## A datasource should always return an object with a typed batch_id
+    # A datasource should always return an object with a typed batch_id
     assert isinstance(dataset.batch_kwargs, PathBatchKwargs)
     assert isinstance(dataset.batch_id, BatchId)
     assert isinstance(dataset.batch_fingerprint, BatchFingerprint)
@@ -117,7 +123,7 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
     assert res["success"] is True
 
 
-def test_pandas_source_readcsv(data_context, tmp_path_factory):
+def test_pandas_source_read_csv(data_context, tmp_path_factory):
     if not PY3:
         # We don't specifically test py2 unicode reading since this test is about our handling of kwargs *to* read_csv
         pytest.skip()
@@ -164,12 +170,18 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
         batch = data_context.get_batch("mysource/unicode",
                                        "default",
                                        batch_kwargs=data_context.yield_batch_kwargs("mysource/unicode"),
-                                       encoding='blarg')
+                                       reader_options={'encoding': 'blarg'})
+
+    with pytest.raises(LookupError, match="unknown encoding: blarg"):
+        batch = data_context.get_batch("mysource/unicode",
+                                       "default",
+                                       batch_kwargs=data_context.yield_batch_kwargs(
+                                           "mysource/unicode", reader_options={'encoding': 'blarg'}))
 
     batch = data_context.get_batch("mysource2/unicode",
                                    "default",
-                                   batch_kwargs=data_context.yield_batch_kwargs("mysource2/unicode"),
-                                   encoding='utf-8'
+                                   batch_kwargs=data_context.yield_batch_kwargs("mysource2/unicode", reader_options={
+                                       'encoding': 'utf-8'})
                                    )
     assert "😁" in list(batch["Μ"])
 
@@ -185,15 +197,38 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
         datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         })
-        assert "Unable to determine reader for path" in exc.message
+        assert "Unable to determine reader for path" in exc.value.message
 
     with pytest.raises(BatchKwargsError) as exc:
         datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         }, reader_method="blarg")
-        assert "Unknown reader method: blarg" in exc.message
+        assert "Unknown reader method: blarg" in exc.value.message
 
     dataset = datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         }, reader_method="csv", header=0)
     assert dataset["a"][0] == 1
+
+
+def test_read_limit(test_folder_connection_path):
+    datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
+    dataset = datasource.get_data_asset("test",
+                                        generator_name="default",
+                                        batch_kwargs=PathBatchKwargs({
+                                            "path": os.path.join(str(test_folder_connection_path), "test.csv"),
+                                            "limit": 1
+                                        }),
+                                        reader_options={
+                                            'sep': ",",
+                                            'header': 0,
+                                            'index_col': 0
+                                        })
+    assert isinstance(dataset, PandasDataset)
+    assert (dataset["col_1"] == [1]).all()
+    assert len(dataset) == 1
+
+    # A datasource should always return an object with a typed batch_id
+    assert isinstance(dataset.batch_kwargs, PathBatchKwargs)
+    assert isinstance(dataset.batch_id, BatchId)
+    assert isinstance(dataset.batch_fingerprint, BatchFingerprint)

@@ -492,7 +492,7 @@ def sqlitedb_engine(test_backend):
         import sqlalchemy as sa
         return sa.create_engine('sqlite://')
     else:
-        pytest.skip("Skipping sqlite tests.")
+        pytest.skip("Skipping test designed for sqlite on non-sqlite backend.")
 
 
 @pytest.fixture
