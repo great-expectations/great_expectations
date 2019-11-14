@@ -521,7 +521,8 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_d
                 data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 max_data_assets=max_data_assets,
-                dry_run=False
+                dry_run=False,
+                additional_batch_kwargs=additional_batch_kwargs
             )
 
             if profiling_results['success']: # data context is ready to profile

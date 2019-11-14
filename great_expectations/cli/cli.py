@@ -227,7 +227,12 @@ def init(target_directory, view):
 
         context = _slack_setup(context)
 
-        profile_datasource(context, data_source_name, open_docs=view)
+        profile_datasource(context, data_source_name,
+                           open_docs=view,
+                           # do profiling on the first 1000 records of each table/file
+                           # in order to complete the step fast
+                           additional_batch_kwargs={"limit": 1000}
+        )
         specific_dir = data_source_type.value.lower()
         cli_message(MSG_GO_TO_NOTEBOOK.format(specific_dir, specific_dir))
 
@@ -362,7 +367,7 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, vi
     :param profile_all_data_assets: if provided, all data assets will be profiled
     :param directory:
     :param view: Open the docs in a browser
-    :param batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
+    :param batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset - must be valid JSON
     :return:
     """
 
