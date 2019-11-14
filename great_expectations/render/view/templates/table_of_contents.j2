@@ -1,4 +1,11 @@
 <div class="card bg-light" style="max-height: 90%">
+<script>
+  $(window).on('activate.bs.scrollspy', function () {
+    document.querySelector(".nav-link.active").scrollIntoViewIfNeeded();
+  });
+</script>
+
+<div class="card bg-light" style="max-height: 90vh">
   <div class="card-header p-2">
     <strong>Table of Contents</strong>
   </div>
