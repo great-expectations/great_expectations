@@ -172,8 +172,8 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
                 "__run_id_fixture__"
             ],
             [
-                "Validation Succeeded",
-                False
+                "Validation Status",
+                "<i class=\"fas fa-times text-danger\" aria-hidden=\"true\"></i> Failed"
             ]
         ],
         "styling": {

@@ -1084,6 +1084,9 @@ class DataAsset(object):
             if self._batch_kwargs is not None:
                 result["meta"].update({"batch_kwargs": self._batch_kwargs})
 
+            if self._batch_id is not None:
+                result["meta"].update({"batch_id": self._batch_id})
+
             self._data_context = validate__data_context
         except Exception:
             raise

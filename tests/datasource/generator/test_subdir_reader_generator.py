@@ -55,7 +55,7 @@ def test_subdir_reader_path_partitioning(tmp_path_factory):
         "20190102__asset_1",
         "20190103__asset_1"
     }
-    assert len(asset_1_kwargs[0].keys()) == 2
+    assert len(asset_1_kwargs[0].keys()) == 3
 
     assert len(asset_2_kwargs) == 2
     paths = [kwargs["path"] for kwargs in asset_2_kwargs]
@@ -68,7 +68,7 @@ def test_subdir_reader_path_partitioning(tmp_path_factory):
         "20190101__asset_2",
         "20190102__asset_2"
     }
-    assert len(asset_2_kwargs[0].keys()) == 2
+    assert len(asset_2_kwargs[0].keys()) == 3
 
 
 def test_subdir_reader_file_partitioning(tmp_path_factory):
@@ -102,3 +102,9 @@ def test_subdir_reader_file_partitioning(tmp_path_factory):
 
     kwargs = subdir_reader_generator.build_batch_kwargs_from_partition_id("20190101__asset_1", "20190101__asset_1")
     assert kwargs["path"] == os.path.join(base_directory, "20190101__asset_1.csv")
+
+    # We should also be able to pass a limit
+    kwargs = subdir_reader_generator.build_batch_kwargs_from_partition_id("20190101__asset_1", "20190101__asset_1",
+                                                                          limit=10)
+    assert kwargs["path"] == os.path.join(base_directory, "20190101__asset_1.csv")
+    assert kwargs["limit"] == 10

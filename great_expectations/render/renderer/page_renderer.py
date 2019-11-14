@@ -119,7 +119,11 @@ class ValidationResultsPageRenderer(Renderer):
         expectation_suite_name = validation_results['meta']['expectation_suite_name']
         ge_version = validation_results["meta"]["great_expectations.__version__"]
         success = validation_results["success"]
-        
+        if success:
+            success = '<i class="fas fa-check-circle text-success" aria-hidden="true"></i> Succeeded'
+        else:
+            success = '<i class="fas fa-times text-danger" aria-hidden="true"></i> Failed'
+
         return RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Info",
@@ -128,7 +132,7 @@ class ValidationResultsPageRenderer(Renderer):
                 ["Expectation Suite Name", expectation_suite_name],
                 ["Great Expectations Version", ge_version],
                 ["Run ID", run_id],
-                ["Validation Succeeded", success]
+                ["Validation Status", success]
             ],
             "styling": {
                 "classes": ["col-12", "table-responsive"],

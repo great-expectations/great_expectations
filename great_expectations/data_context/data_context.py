@@ -444,7 +444,7 @@ class ConfigOnlyDataContext(object):
         """A stdlib cross-platform way to open a file in a browser."""
         data_docs_urls = self.get_existing_local_data_docs_sites_urls()
         for url in data_docs_urls:
-            logger.info("Opening Data Docs found here: {}".format(url))
+            logger.debug("Opening Data Docs found here: {}".format(url))
             webbrowser.open(url)
 
     @property
@@ -668,8 +668,7 @@ class ConfigOnlyDataContext(object):
 
         datasource = self.get_datasource(data_asset_name.datasource)
         generator = datasource.get_generator(data_asset_name.generator)
-        batch_kwargs = generator.yield_batch_kwargs(data_asset_name.generator_asset)
-        batch_kwargs.update(**kwargs)
+        batch_kwargs = generator.yield_batch_kwargs(data_asset_name.generator_asset, **kwargs)
 
         return batch_kwargs
 
@@ -692,13 +691,10 @@ class ConfigOnlyDataContext(object):
             data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(data_asset_name.datasource)
-        if partition_id is not None:
-            kwargs.update({
-                "partition_id": partition_id
-            })
         batch_kwargs = datasource.named_generator_build_batch_kwargs(
-            data_asset_name.generator,
-            data_asset_name.generator_asset,
+            generator_name=data_asset_name.generator,
+            generator_asset=data_asset_name.generator_asset,
+            partition_id=partition_id,
             **kwargs
         )
 
@@ -1740,7 +1736,7 @@ class ConfigOnlyDataContext(object):
         if not dry_run:
             logger.info("Profiling all %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
         else:
-            logger.info("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
+            logger.debug("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
 
         profiling_results['success'] = True
 
