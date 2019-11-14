@@ -9,7 +9,6 @@ body {
 .sticky {
   position: -webkit-sticky;
   position: sticky;
-  max-height: 90vh;
   top: 80px;
   z-index: 1;
 }
