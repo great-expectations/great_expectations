@@ -21,16 +21,17 @@
           data-target="#navigation"
           data-offset="50"
   >
-    <div class="container-fluid p-4">
     {% include 'top_navbar.j2' %}
+    <div class="container-fluid pt-4 pb-4 pl-5 pr-5">
       <div class="row">
-        <div class="col-md-10 col-lg-10 col-xs-12">
+        {% include 'sidebar.j2' %}
+        <div class="col-md-10 col-lg-10 col-xs-12 pl-4 pr-3">
           {% for section in sections %}
             {% set section_loop = loop -%}
             {% include 'section.j2' %}
           {% endfor %}
         </div>
-        <div class="col-lg-2 col-md-2 col-xs-12">
+        <div class="d-block d-sm-none col-12">
           {% include 'ge_info.j2' %}
         </div>
       </div>
