@@ -91,7 +91,7 @@ class ValidationResultsPageRenderer(Renderer):
         ]
     
         return RenderedDocumentContent(**{
-            "renderer_type": "ValidationResultsColumnSectionRenderer",
+            "renderer_type": "ValidationResultsPageRenderer",
             "data_asset_name": data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": run_id + "-" + expectation_suite_name + "-ValidationResults",
