@@ -1,6 +1,5 @@
 body {
   position: relative;
-  padding-bottom: 100px;
 }
 
 .container {
@@ -109,9 +108,9 @@ td .show-scrollbars {
   max-height: 335px;
 }
 
-.show-scrollbars ul {
-  padding-bottom: 20px
-}
+/*.show-scrollbars ul {*/
+/*  padding-bottom: 20px*/
+/*}*/
 
 .show-scrollbars::-webkit-scrollbar {
   -webkit-appearance: none;
