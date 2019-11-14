@@ -12,11 +12,11 @@ class Renderer(object):
     def _get_expectation_type(cls, ge_object):
         if "expectation_type" in ge_object:
             # This is an expectation
-            return ge_object["expectation_type"]
+            return ge_object.expectation_type
 
         elif "expectation_config" in ge_object:
             # This is a validation
-            return ge_object["expectation_config"]["expectation_type"]
+            return ge_object.expectation_config.expectation_type
 
     @classmethod
     def _find_ge_object_type(cls, ge_object):
@@ -46,7 +46,7 @@ class Renderer(object):
     @classmethod
     def _find_evr_by_type(cls, evrs, type_):
         for evr in evrs:
-            if evr["expectation_config"]["expectation_type"] == type_:
+            if evr.expectation_config.expectation_type == type_:
                 return evr
 
     #TODO: When we implement a ValidationResultSuite class, this method will move there.
@@ -54,8 +54,8 @@ class Renderer(object):
     def _find_all_evrs_by_type(cls, evrs, type_, column_=None):
         ret = []
         for evr in evrs:
-            if evr["expectation_config"]["expectation_type"] == type_\
-                    and (not column_ or column_ == evr["expectation_config"]["kwargs"].get("column")):
+            if evr.expectation_config.expectation_type == type_\
+                    and (not column_ or column_ == evr.expectation_config.kwargs.get("column")):
                 ret.append(evr)
 
         return ret
@@ -73,14 +73,14 @@ class Renderer(object):
         :param evrs:
         :return: list of columns with best effort sorting
         """
-        evrs_ = evrs["results"] if "results" in evrs else evrs
+        evrs_ = evrs if isinstance(evrs, list) else evrs.results
 
         expect_table_columns_to_match_ordered_list_evr = cls._find_evr_by_type(evrs_, "expect_table_columns_to_match_ordered_list")
         if expect_table_columns_to_match_ordered_list_evr:
             ordered_columns = expect_table_columns_to_match_ordered_list_evr["result"]["observed_value"]
         else:
             # Group EVRs by column
-            columns = list(set([evr["expectation_config"]["kwargs"]["column"] for evr in evrs_ if "column" in evr["expectation_config"]["kwargs"]]))
+            columns = list(set([evr.expectation_config.kwargs["column"] for evr in evrs_ if "column" in evr.expectation_config.kwargs]))
 
             ordered_columns = sorted(columns)
 
@@ -90,9 +90,9 @@ class Renderer(object):
     @classmethod
     def _group_evrs_by_column(cls, validation_results):
         columns = {}
-        for evr in validation_results["results"]:
-            if "column" in evr["expectation_config"]["kwargs"]:
-                column = evr["expectation_config"]["kwargs"]["column"]
+        for evr in validation_results.results:
+            if "column" in evr.expectation_config.kwargs:
+                column = evr.expectation_config.kwargs["column"]
             else:
                 column = "Table-level Expectations"
 
@@ -109,9 +109,9 @@ class Renderer(object):
         columns = {}
         ordered_columns = None
 
-        for expectation in expectations["expectations"]:
-            if "column" in expectation["kwargs"]:
-                column = expectation["kwargs"]["column"]
+        for expectation in expectations.expectations:
+            if "column" in expectation.kwargs:
+                column = expectation.kwargs["column"]
             else:
                 column = "_nocolumn"
             if column not in columns:
@@ -119,8 +119,8 @@ class Renderer(object):
             columns[column].append(expectation)
 
             # if possible, get the order of columns from expect_table_columns_to_match_ordered_list
-            if expectation["expectation_type"] == "expect_table_columns_to_match_ordered_list":
-                exp_column_list = expectation["kwargs"]["column_list"]
+            if expectation.expectation_type == "expect_table_columns_to_match_ordered_list":
+                exp_column_list = expectation.kwargs["column_list"]
                 if exp_column_list and len(exp_column_list) > 0:
                     ordered_columns = exp_column_list
 

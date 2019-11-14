@@ -43,9 +43,9 @@ def test_all_expectations_using_test_definitions():
     test_results = {}
     for filename in test_files:
         test_definitions = json.load(open(filename))
-        types.append(test_definitions["expectation_type"])
+        types.append(test_definitions.expectation_type)
 
-        test_results[test_definitions["expectation_type"]] = []
+        test_results[test_definitions.expectation_type] = []
 
         for dataset in test_definitions["datasets"]:
 
@@ -53,7 +53,7 @@ def test_all_expectations_using_test_definitions():
                 # Construct an expectation from the test.
                 if type(test["in"]) == dict:
                     fake_expectation = {
-                        "expectation_type": test_definitions["expectation_type"],
+                        "expectation_type": test_definitions.expectation_type,
                         "kwargs": test["in"],
                     }
                 else:
@@ -72,7 +72,7 @@ def test_all_expectations_using_test_definitions():
                 # TODO: Assert that the template is renderable, with all the right arguments, etc.
                 # rendered_template = pTemplate(el["template"]).substitute(el["params"])
 
-                test_results[test_definitions["expectation_type"]].append({
+                test_results[test_definitions.expectation_type].append({
                     test["title"]: render_result,
                     # "rendered_template":rendered_template
                     })

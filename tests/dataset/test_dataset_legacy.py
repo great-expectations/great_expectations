@@ -44,7 +44,7 @@ def test_head(test_backend):
     assert list(head.columns) == ["a", "b", "c", "d"]
     assert head["a"][0] == 2.0
     suite = head.get_expectation_suite()
-    assert len(suite["expectations"]) == 5
+    assert len(suite.expectations) == 5
 
     # Interestingly, the original implementation failed to work for a single
     # column (it would always name the column "*").

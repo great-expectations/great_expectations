@@ -122,9 +122,7 @@ class ActionListValidationOperator(ValidationOperator):
         for item in assets_to_validate:
             batch = self._build_batch_from_item(item)
             expectation_suite_identifier = ExpectationSuiteIdentifier(
-                data_asset_name=DataAssetIdentifier(
-                    *self.data_context.normalize_data_asset_name(batch._expectation_suite["data_asset_name"])
-                ),
+                data_asset_name=self.data_context.normalize_data_asset_name(batch._expectation_suite.data_asset_name),
                 expectation_suite_name=batch._expectation_suite.expectation_suite_name
             )
             validation_result_id = ValidationResultIdentifier(
@@ -137,7 +135,7 @@ class ActionListValidationOperator(ValidationOperator):
             batch_actions_results = self._run_actions(batch, expectation_suite_identifier, batch._expectation_suite, batch_validation_result, run_id)
             result_object["details"][expectation_suite_identifier]["actions_results"] = batch_actions_results
 
-        result_object["success"] = all([val["validation_result"]["success"] for val in result_object["details"].values()])
+        result_object["success"] = all([val["validation_result"].success for val in result_object["details"].values()])
 
         return result_object
 
@@ -310,7 +308,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         if run_return_obj.get("failure"):
             failed_data_assets = [
                 validation_result_identifier.expectation_suite_identifier.data_asset_name for validation_result_identifier, value in run_return_obj.get("failure").items() \
-                if not value["validation_result"]["success"]
+                if not value["validation_result"].success
             ]
     
         title_block = {
@@ -405,12 +403,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         for item in assets_to_validate:
             batch = self._build_batch_from_item(item)
 
-            # TODO : We should be using typed batch
-            data_asset_identifier = DataAssetIdentifier(
-                *self.data_context.normalize_data_asset_name(
-                    batch._expectation_suite["data_asset_name"]
-                )
-            )
+            data_asset_identifier = batch.data_asset_name
             run_id = run_id
 
             assert not data_asset_identifier is None
@@ -459,7 +452,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                 )
                 return_obj["failure"][failure_validation_result_id]["actions_results"] = failure_actions_results
 
-                if not failure_validation_result["success"] and self.stop_on_first_error:
+                if not failure_validation_result.success and self.stop_on_first_error:
                     break
 
 
@@ -494,13 +487,13 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                 )
                 return_obj["warning"][warning_validation_result_id]["actions_results"] = warning_actions_results
 
-        return_obj["success"] = all([val["validation_result"]["success"] for val in return_obj["failure"].values()])
+        return_obj["success"] = all([val["validation_result"].success for val in return_obj["failure"].values()])
 
         # NOTE: Eugene: 2019-09-24: Update the data doc sites?
         if self.slack_webhook:
             if self.notify_on == "all" or \
-                    self.notify_on == "success" and return_obj["success"] or \
-                    self.notify_on == "failure" and not return_obj["success"]:
+                    self.notify_on == "success" and return_obj.success or \
+                    self.notify_on == "failure" and not return_obj.success:
                 slack_query = self._build_slack_query(run_return_obj=return_obj)
                 send_slack_notification(query=slack_query, slack_webhook=self.slack_webhook)
 

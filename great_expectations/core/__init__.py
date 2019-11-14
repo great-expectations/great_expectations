@@ -307,8 +307,7 @@ class ExpectationConfiguration(DictDot):
         self._kwargs = ExpectationKwargs(kwargs)
         if meta is None:
             meta = {}
-        assert_json_serializable(meta, "meta")
-        self.meta = meta
+        self.meta = convert_to_json_serializable(meta)  # We require meta information to be serializable.
         self.success_on_last_run = success_on_last_run
 
     @property
@@ -410,8 +409,7 @@ class ExpectationSuite(object):
         self.data_asset_type = data_asset_type
         if meta is None:
             meta = {"great_expectations.__version__": ge_version}
-        assert_json_serializable(meta, "meta")
-        self.meta = meta
+        self.meta = convert_to_json_serializable(meta)  # We require meta information to be serializable.
 
     def isEquivalentTo(self, other):
         """
@@ -561,6 +559,15 @@ class ExpectationSuiteSchema(Schema):
 class NamespaceAwareExpectationSuiteSchema(ExpectationSuiteSchema):
     data_asset_name = fields.Nested(DataAssetIdentifierSchema)
 
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        data = self.clean_empty(deepcopy(data))
+        # if isinstance(data.data_asset_name, DataAssetIdentifier):
+        #     logger.warning("Dumping a NamespaceAwareExpectationSuite using ExpectationSuiteSchema. Consider using "
+        #                    "NamespaceAwareExpectationSuiteSchema instead.")
+        #     data.data_asset_name = DataAssetIdentifier.to_path(data.data_asset_name)
+        return data
+
     @post_load
     def make_expectation_suite(self, data, **kwargs):
         return NamespaceAwareExpectationSuite(**data)
@@ -575,8 +582,7 @@ class ExpectationValidationResult(DictDot):
         self.result = result
         if meta is None:
             meta = {}
-        assert_json_serializable(meta, "meta")
-        self.meta = meta
+        self.meta = convert_to_json_serializable(meta)  # We require meta information to be serializable.
         self.exception_info = exception_info
 
     def __eq__(self, other):
@@ -653,8 +659,7 @@ class ExpectationSuiteValidationResult(DictDot):
         self.statistics = statistics
         if meta is None:
             meta = {}
-        assert_json_serializable(meta, "meta")
-        self.meta = meta
+        self.meta = convert_to_json_serializable(meta)  # We require meta information to be serializable.
 
     def __eq__(self, other):
         """ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."""

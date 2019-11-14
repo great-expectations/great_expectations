@@ -115,8 +115,8 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         type_counts = defaultdict(int)
 
-        for evr in evrs["results"]:
-            type_counts[evr["expectation_config"]["expectation_type"]] += 1
+        for evr in evrs.results:
+            type_counts[evr.expectation_config.expectation_type] += 1
 
         # table_rows = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
         bullet_list = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
@@ -239,7 +239,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             warnings.warn("Cannot get % of missing cells - column list is empty")
             return "?"
 
-        expect_column_values_to_not_be_null_evrs = cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_not_be_null")
+        expect_column_values_to_not_be_null_evrs = cls._find_all_evrs_by_type(evrs.results, "expect_column_values_to_not_be_null")
 
         if len(columns) > len(expect_column_values_to_not_be_null_evrs):
             warnings.warn("Cannot get % of missing cells - not all columns have expect_column_values_to_not_be_null expectations")
@@ -252,23 +252,23 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
     def _get_column_types(cls, evrs):
         columns = cls._get_column_list_from_evrs(evrs)
 
-        type_evrs = cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_be_in_type_list") +\
-            cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_be_of_type")
+        type_evrs = cls._find_all_evrs_by_type(evrs.results, "expect_column_values_to_be_in_type_list") +\
+            cls._find_all_evrs_by_type(evrs.results, "expect_column_values_to_be_of_type")
 
         column_types = {}
         for column in columns:
             column_types[column] = "unknown"
 
         for evr in type_evrs:
-            column = evr["expectation_config"]["kwargs"]["column"]
-            if evr["expectation_config"]["expectation_type"] == "expect_column_values_to_be_in_type_list":
-                if evr["expectation_config"]["kwargs"]["type_list"] is None:
+            column = evr.expectation_config.kwargs["column"]
+            if evr.expectation_config.expectation_type == "expect_column_values_to_be_in_type_list":
+                if evr.expectation_config.kwargs["type_list"] is None:
                     column_types[column] = "unknown"
                     continue
                 else:
-                    expected_types = set(evr["expectation_config"]["kwargs"]["type_list"])
+                    expected_types = set(evr.expectation_config.kwargs["type_list"])
             else:  # assuming expect_column_values_to_be_of_type
-                expected_types = {[evr["expectation_config"]["kwargs"]["type_"]]}
+                expected_types = {[evr.expectation_config.kwargs["type_"]]}
 
             if expected_types.issubset(BasicDatasetProfiler.INT_TYPE_NAMES):
                 column_types[column] = "int"

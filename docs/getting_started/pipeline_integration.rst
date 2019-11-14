@@ -145,7 +145,7 @@ to stop or issue a warning in the code:
 
 .. code-block:: python
 
-  if validation_result["success"]:
+  if validation_result.success:
     logger.info("This file meets all expectations from a valid batch of {0:s}".format(str(data_asset_name)))
   else:
     logger.warning("This file is not a valid batch of {0:s}".format(str(data_asset_name)))

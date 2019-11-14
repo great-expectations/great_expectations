@@ -72,7 +72,7 @@ def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connecti
         "quantiles": [0., 1.],
         "value_ranges": [[1, 1], [5, 5]]
     })
-    assert res["success"] is True
+    assert res.success is True
 
 
 def test_create_sparkdf_datasource(data_context, tmp_path_factory):
@@ -178,9 +178,9 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
         # We should be smart enough to figure out this is a batch:
         batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", batch_kwargs)
         res = batch.expect_column_to_exist("infinities")
-        assert res["success"] is True
+        assert res.success is True
         res = batch.expect_column_to_exist("not_a_column")
-        assert res["success"] is False
+        assert res.success is False
         batch.save_expectation_suite()
         assert os.path.isfile(os.path.join(
             data_context.root_directory,

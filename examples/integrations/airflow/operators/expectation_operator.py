@@ -169,7 +169,7 @@ class ExpectationOperator(BaseOperator):
             self._store_results(results)
 
         for result in results['results']:
-            if result['success'] is False:
+            if result.success is False:
                 if self.fail_on_error is True:
                     raise AirflowException("Validation failed for dataset {name}".format(name=self.dataset_name))
 

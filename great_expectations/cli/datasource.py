@@ -268,7 +268,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_d
         additional_batch_kwargs=additional_batch_kwargs
     )
 
-    if profiling_results['success']: # data context is ready to profile - run profiling
+    if profiling_results.success:  # data context is ready to profile - run profiling
         if data_assets or profile_all_data_assets or click.confirm(msg_confirm_ok_to_proceed.format(data_source_name), default=True):
             profiling_results = context.profile_datasource(
             data_source_name,
@@ -323,7 +323,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_d
                 dry_run=False
             )
 
-            if profiling_results['success']: # data context is ready to profile
+            if profiling_results.success:  # data context is ready to profile
                 break
 
 

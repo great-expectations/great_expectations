@@ -61,7 +61,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                 template_str = "$column: " + template_str
 
             try:
-                column = evr["expectation_config"]["kwargs"]["column"]
+                column = evr.expectation_config.kwargs["column"]
             except KeyError:
                 column = None
             return [RenderedComponentContent(**{
@@ -70,7 +70,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                     "template": template_str,
                     "params": {
                         "column": column,
-                        "expectation_type": evr["expectation_config"]["expectation_type"],
+                        "expectation_type": evr.expectation_config.expectation_type,
                         "exception_message": evr["exception_info"]["exception_message"]
                     },
                     "styling": styling,

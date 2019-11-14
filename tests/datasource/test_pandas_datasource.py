@@ -114,7 +114,7 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
     )
     assert type(batch).__name__ == "CustomPandasDataset"
     res = batch.expect_column_values_to_have_odd_lengths("col_2")
-    assert res["success"] is True
+    assert res.success is True
 
 
 def test_pandas_source_readcsv(data_context, tmp_path_factory):

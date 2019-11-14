@@ -420,18 +420,18 @@ class DataAsset(object):
             del new_expectation["success_on_last_run"]
 
         if discard_result_format_kwargs:
-            if "result_format" in new_expectation["kwargs"]:
-                del new_expectation["kwargs"]["result_format"]
+            if "result_format" in new_expectation.kwargs:
+                del new_expectation.kwargs["result_format"]
                 # discards["result_format"] += 1
 
         if discard_include_config_kwargs:
-            if "include_config" in new_expectation["kwargs"]:
-                del new_expectation["kwargs"]["include_config"]
+            if "include_config" in new_expectation.kwargs:
+                del new_expectation.kwargs["include_config"]
                 # discards["include_config"] += 1
 
         if discard_catch_exceptions_kwargs:
-            if "catch_exceptions" in new_expectation["kwargs"]:
-                del new_expectation["kwargs"]["catch_exceptions"]
+            if "catch_exceptions" in new_expectation.kwargs:
+                del new_expectation.kwargs["catch_exceptions"]
                 # discards["catch_exceptions"] += 1
 
         return new_expectation
@@ -505,7 +505,7 @@ class DataAsset(object):
 
         match_indexes = []
         for i, exp in enumerate(self._expectation_suite.expectations):
-            if expectation_type is None or (expectation_type == exp['expectation_type']):
+            if expectation_type is None or (expectation_type == exp.expectation_type):
                 # if column == None or ('column' not in exp['kwargs']) or
                 # (exp['kwargs']['column'] == column) or (exp['kwargs']['column']==:
                 match = True
@@ -643,8 +643,8 @@ class DataAsset(object):
         res = self.validate(only_return_failures=True).results
         if any(res):
             for item in res:
-                self.remove_expectation(expectation_type=item['expectation_config']['expectation_type'],
-                                        expectation_kwargs=item['expectation_config']['kwargs'])
+                self.remove_expectation(expectation_type=item.expectation_config.expectation_type,
+                                        expectation_kwargs=item.expectation_config['kwargs'])
             warnings.warn(
                 "Removed %s expectations that were 'False'" % len(res))
 
@@ -739,7 +739,7 @@ class DataAsset(object):
             for expectation in expectations:
                 # Note: This is conservative logic.
                 # Instead of retaining expectations IFF success==True, it discard expectations IFF success==False.
-                # In cases where expectation["success"] is missing or None, expectations are *retained*.
+                # In cases where expectation.success is missing or None, expectations are *retained*.
                 # Such a case could occur if expectations were loaded from a config file and never run.
                 if expectation.success_on_last_run is False:
                     discards["failed_expectations"] += 1
@@ -977,7 +977,7 @@ class DataAsset(object):
                     warnings.warn(
                         "WARNING: This configuration object was built using version %s of great_expectations, but "
                         "is currently being validated by version %s."
-                        % (expectation_suite['meta']['great_expectations.__version__'], ge_version))
+                        % (expectation_suite.meta['great_expectations.__version__'], ge_version))
             except KeyError:
                 warnings.warn(
                     "WARNING: No great_expectations version found in configuration object.")
@@ -1125,26 +1125,30 @@ class DataAsset(object):
         """
 
         if 'evaluation_parameters' not in self._expectation_suite:
-            self._expectation_suite['evaluation_parameters'] = {}
+            self._expectation_suite.evaluation_parameters = {}
 
-        self._expectation_suite['evaluation_parameters'].update(
+        self._expectation_suite.evaluation_parameters.update(
             {parameter_name: parameter_value})
 
-    def set_data_asset_name(self, data_asset_name):
-        """Sets the name of this data_asset as stored in the expectations configuration."""
-        self._expectation_suite['data_asset_name'] = data_asset_name
-
-    def get_data_asset_name(self):
+    @property
+    def data_asset_name(self):
         """Gets the current name of this data_asset as stored in the expectations configuration."""
-        return self._expectation_suite.get("data_asset_name", None)
+        return self._expectation_suite.data_asset_name
 
-    def save_expectation_suite_name(self, expectation_suite_name):
-        """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
-        self._expectation_suite["expectation_suite_name"] = expectation_suite_name
-    
-    def get_expectation_suite_name(self):
+    @data_asset_name.setter
+    def data_asset_name(self, data_asset_name):
+        """Sets the name of this data_asset as stored in the expectations configuration."""
+        self._expectation_suite.data_asset_name = data_asset_name
+
+    @property
+    def expectation_suite_name(self):
         """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
-        return self._expectation_suite.get("expectation_suite_name", None)
+        return self._expectation_suite.expectation_suite_name
+
+    @expectation_suite_name.setter
+    def expectation_suite_name(self, expectation_suite_name):
+        """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
+        self._expectation_suite.expectation_suite_name = expectation_suite_name
 
     def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
         """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,

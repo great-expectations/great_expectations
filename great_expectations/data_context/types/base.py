@@ -4,6 +4,7 @@ import logging
 
 from marshmallow import Schema, fields, ValidationError, pre_dump, post_load
 from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.types import DictDot
@@ -21,7 +22,6 @@ class DataContextConfig(DictDot):
 
     def __init__(
             self,
-            commented_map,
             config_version,
             datasources,
             expectations_store_name,
@@ -31,8 +31,11 @@ class DataContextConfig(DictDot):
             validation_operators,
             stores,
             data_docs_sites,
-            config_variables_file_path=None
+            config_variables_file_path=None,
+            commented_map=None
     ):
+        if commented_map is None:
+            commented_map = CommentedMap()
         self._commented_map = commented_map
         self._config_version = config_version
         if not isinstance(config_version, (int, float)):

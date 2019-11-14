@@ -60,6 +60,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExpectationSuiteIdentifier(DataContextKey):
+
     def __init__(self, data_asset_name, expectation_suite_name):
         super(ExpectationSuiteIdentifier, self).__init__()
         if isinstance(data_asset_name, DataAssetIdentifier):

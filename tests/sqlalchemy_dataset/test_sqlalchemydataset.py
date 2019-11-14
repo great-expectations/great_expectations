@@ -68,11 +68,11 @@ def test_custom_sqlalchemydataset(custom_dataset):
         "result_format", {"result_format": "COMPLETE"})
 
     result = custom_dataset.expect_column_values_to_equal_2('c1')
-    assert result['success'] == False
+    assert result.success is False
     assert result['result']['unexpected_list'] == [0]
 
     result = custom_dataset.expect_column_mode_to_equal_0('c2')
-    assert result['success'] == False
+    assert result.success is False
     assert result['result']['observed_value'] == 4
 
 
@@ -146,10 +146,10 @@ def test_sqlalchemydataset_with_custom_sql(sa):
 
     result = custom_sql_dataset.expect_column_values_to_be_in_set(
         "pet", ["fish", "cat", "python"])
-    assert result['success'] == True
+    assert result.success is True
 
     result = custom_sql_dataset.expect_column_to_exist("age")
-    assert result['success'] == False
+    assert result.success is False
 
 
 def test_column_fallback(sa):
@@ -188,12 +188,12 @@ def test_sqlalchemy_dataset_view(sqlite_view_engine):
     # This test demonstrates that a view can be used as a SqlAlchemyDataset table for purposes of validation
     dataset = SqlAlchemyDataset("test_view", engine=sqlite_view_engine)
     res = dataset.expect_table_row_count_to_equal(1)
-    assert res["success"] is True
+    assert res.success is True
 
     # A temp view can also be used, though generators will not see it
     dataset = SqlAlchemyDataset("test_temp_view", engine=sqlite_view_engine)
     res = dataset.expect_table_row_count_to_equal(3)
-    assert res["success"] is True
+    assert res.success is True
 
 
 def test_sqlalchemy_dataset_unexpected_count_calculations(sa, unexpected_count_df):
