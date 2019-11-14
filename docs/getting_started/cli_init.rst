@@ -228,8 +228,7 @@ please see :ref:`profiling`.
 
 Within the CLI, it's easy to profile our data.
 
-Warning: For large data sets, the current default profiler may run slowly and impose significant I/O and compute load.
-Be cautious when executing against shared databases.
+Note: To avoid significant I/O and compute load, the current default profiler will profile based on the first 1000 records of each table or file.
 
 .. code-block:: bash
 
@@ -237,9 +236,7 @@ Be cautious when executing against shared databases.
 
     Profiling 'data__dir' will create expectations and documentation.
 
-    Please note: Profiling is still a beta feature in Great Expectations.  The current profiler will evaluate the entire 
-    data source (without sampling), which may be very time consuming. 
-    As a rule of thumb, we recommend starting with data smaller than 100MB.
+    Please note: Profiling is still a beta feature in Great Expectations.  
 
     To learn more about profiling, visit https://docs.greatexpectations.io/en/latest/reference/profiling.html
 
