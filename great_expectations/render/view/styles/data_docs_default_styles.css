@@ -10,8 +10,8 @@ body {
   position: -webkit-sticky;
   position: sticky;
   max-height: 90vh;
-  overflow-y: auto;
-  top: 60px;
+  top: 80px;
+  z-index: 1;
 }
 
 .ge-section {
