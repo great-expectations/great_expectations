@@ -37,7 +37,7 @@ class SiteIndexPageRenderer(Renderer):
                 "styling": {
                     "params": {
                         "data_asset": {
-                            "classes": ["blockquote", "ge-index-page-generator-table-data-asset-name"],
+                            "classes": ["h6", "ge-index-page-generator-table-data-asset-name"],
                         }
                     }
                 }
