@@ -436,8 +436,9 @@ class SiteIndexPageRenderer(Renderer):
             sections.append(section)
 
         index_page_document = RenderedDocumentContent(**{
-                "utm_medium": "index-page",
-                "sections": sections
+            "renderer_type": "SiteIndexPageRenderer",
+            "utm_medium": "index-page",
+            "sections": sections
             })
         
         if cta_object:
