@@ -34,16 +34,16 @@ class ValidationResultsPageRenderer(Renderer):
         )
 
     def render(self, validation_results={}):
-        run_id = validation_results['meta']['run_id']
-        full_data_asset_identifier = validation_results['meta']['data_asset_name'] or ""
-        expectation_suite_name = validation_results['meta']['expectation_suite_name']
+        run_id = validation_results.meta['run_id']
+        full_data_asset_identifier = validation_results.meta['data_asset_name'] or ""
+        expectation_suite_name = validation_results.meta['expectation_suite_name']
         short_data_asset_name = full_data_asset_identifier.split('/')[-1]
     
         # Group EVRs by column
         columns = {}
-        for evr in validation_results["results"]:
-            if "column" in evr["expectation_config"]["kwargs"]:
-                column = evr["expectation_config"]["kwargs"]["column"]
+        for evr in validation_results.results:
+            if "column" in evr.expectation_config.kwargs:
+                column = evr.expectation_config.kwargs["column"]
             else:
                 column = "Table-Level Expectations"
         
@@ -59,7 +59,7 @@ class ValidationResultsPageRenderer(Renderer):
             self._render_validation_statistics(validation_results=validation_results)
         ]
     
-        if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
+        if "data_asset_name" in validation_results.meta and validation_results.meta["data_asset_name"]:
             data_asset_name = short_data_asset_name
         else:
             data_asset_name = None
@@ -108,11 +108,11 @@ class ValidationResultsPageRenderer(Renderer):
     
     @classmethod
     def _render_validation_info(cls, validation_results):
-        run_id = validation_results['meta']['run_id']
-        full_data_asset_identifier = validation_results['meta']['data_asset_name'] or ""
-        expectation_suite_name = validation_results['meta']['expectation_suite_name']
-        ge_version = validation_results["meta"]["great_expectations.__version__"]
-        success = validation_results["success"]
+        run_id = validation_results.meta['run_id']
+        full_data_asset_identifier = validation_results.meta['data_asset_name'] or ""
+        expectation_suite_name = validation_results.meta['expectation_suite_name']
+        ge_version = validation_results.meta["great_expectations.__version__"]
+        success = validation_results.success
         
         return RenderedComponentContent(**{
             "content_block_type": "table",
@@ -249,7 +249,7 @@ class ExpectationSuitePageRenderer(Renderer):
         full_data_asset_identifier = expectations.get("data_asset_name") or ""
         data_asset_type = expectations.get("data_asset_type")
         expectation_suite_name = expectations.get("expectation_suite_name")
-        ge_version = expectations["meta"]["great_expectations.__version__"]
+        ge_version = expectations.meta["great_expectations.__version__"]
 
         return RenderedComponentContent(**{
             "content_block_type": "table",
@@ -281,11 +281,11 @@ class ExpectationSuitePageRenderer(Renderer):
             # This if statement is a precaution in case the expectation suite doesn't contain expectations.
             # Once we have more strongly typed classes for suites, this shouldn't be necessary.
             
-            total_expectations = len(expectations["expectations"])
+            total_expectations = len(expectations.expectations)
             columns = []
-            for exp in expectations["expectations"]:
-                if "column" in exp["kwargs"]:
-                    columns.append(exp["kwargs"]["column"])
+            for exp in expectations.expectations:
+                if "column" in exp.kwargs:
+                    columns.append(exp.kwargs["column"])
             total_columns = len(set(columns))
             
             content = content + [
@@ -298,8 +298,8 @@ class ExpectationSuitePageRenderer(Renderer):
                 ),
             ]
         
-        if "notes" in expectations["meta"]:
-            notes = expectations["meta"]["notes"]
+        if "notes" in expectations.meta:
+            notes = expectations.meta["notes"]
             note_content = None
             
             if isinstance(notes, string_types):
@@ -388,9 +388,9 @@ class ProfilingResultsPageRenderer(Renderer):
         )
 
     def render(self, validation_results):
-        run_id = validation_results['meta']['run_id']
-        full_data_asset_identifier = validation_results['meta']['data_asset_name'] or ""
-        expectation_suite_name = validation_results['meta']['expectation_suite_name']
+        run_id = validation_results.meta['run_id']
+        full_data_asset_identifier = validation_results.meta['data_asset_name'] or ""
+        expectation_suite_name = validation_results.meta['expectation_suite_name']
         short_data_asset_name = full_data_asset_identifier.split('/')[-1]
 
         # Group EVRs by column
@@ -400,7 +400,7 @@ class ProfilingResultsPageRenderer(Renderer):
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
         column_types = self._overview_section_renderer._get_column_types(validation_results)
 
-        if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
+        if "data_asset_name" in validation_results.meta and validation_results.meta["data_asset_name"]:
             data_asset_name = short_data_asset_name
         else:
             data_asset_name = None

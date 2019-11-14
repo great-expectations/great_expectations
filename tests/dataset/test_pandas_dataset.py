@@ -52,7 +52,7 @@ def test_expect_column_values_to_be_dateutil_parseable():
     for t in T:
         out = D.expect_column_values_to_be_dateutil_parseable(**t['in'])
         if 'out' in t:
-            assert t['out']['success'] == out['success']
+            assert t['out']['success'] == out.success
             assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
             assert t['out']['unexpected_list'] == out['result']['unexpected_list']
         elif 'error' in t:
@@ -95,7 +95,7 @@ def test_expect_column_values_to_be_json_parseable():
 
     for t in T:
         out = D.expect_column_values_to_be_json_parseable(**t['in'])
-        assert t['out']['success'] == out['success']
+        assert t['out']['success'] == out.success
         assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
         assert t['out']['unexpected_list'] == out['result']['unexpected_list']
 
@@ -592,6 +592,6 @@ def test_pandas_deepcopy():
     df["a"] = [2, 3, 4]
 
     # Our copied dataframe should not be affected
-    assert df2.expect_column_to_exist("a")["success"] == True
+    assert df2.expect_column_to_exist("a").success == True
     assert list(df["a"]) == [2, 3, 4]
     assert list(df2["a"]) == [1, 2, 3]

@@ -24,19 +24,19 @@ class BasicDatasetProfiler(DatasetProfiler):
         # list of types is used to support pandas and sqlalchemy
         df.set_config_value("interactive_evaluation", True)
         try:
-            if df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.INT_TYPE_NAMES)))["success"]:
+            if df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.INT_TYPE_NAMES))).success:
                 type_ = "int"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.FLOAT_TYPE_NAMES)))["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.FLOAT_TYPE_NAMES))).success:
                 type_ = "float"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.STRING_TYPE_NAMES)))["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.STRING_TYPE_NAMES))).success:
                 type_ = "string"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.BOOLEAN_TYPE_NAMES)))["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.BOOLEAN_TYPE_NAMES))).success:
                 type_ = "bool"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.DATETIME_TYPE_NAMES)))["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.DATETIME_TYPE_NAMES))).success:
                 type_ = "datetime"
 
             else:
@@ -210,8 +210,8 @@ class BasicDatasetProfiler(DatasetProfiler):
         df.set_config_value("interactive_evaluation", True)
         expectation_suite = df.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=False)
         if not "meta" in expectation_suite:
-            expectation_suite["meta"] = {"columns": meta_columns}
+            expectation_suite.meta = {"columns": meta_columns}
         else:
-            expectation_suite["meta"]["columns"] = meta_columns
+            expectation_suite.meta["columns"] = meta_columns
 
         return expectation_suite

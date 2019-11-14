@@ -48,7 +48,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 }
             })
 
-        if evr["success"]:
+        if evr.success:
             return RenderedComponentContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
@@ -127,7 +127,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _get_unexpected_statement(cls, evr):
-        success = evr["success"]
+        success = evr.success
         result = evr.get("result", {})
 
         if ("expectation_config" in evr and
@@ -140,7 +140,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 "string_template": {
                     "template": template_str,
                     "params": {
-                        "expectation_type": evr["expectation_config"]["expectation_type"],
+                        "expectation_type": evr.expectation_config.expectation_type,
                         "exception_message": evr["exception_info"]["exception_message"]
                     },
                     "tag": "strong",
@@ -191,7 +191,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         except KeyError:
             return "--"
             
-        expectation_type = evr["expectation_config"]["expectation_type"]
+        expectation_type = evr.expectation_config.expectation_type
 
         if expectation_type == "expect_column_kl_divergence_to_be_less_than":
             if not evr["result"].get("details"):
@@ -286,7 +286,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
         #This function wraps expect_* methods from ExpectationStringRenderer to generate table classes
         def row_generator_fn(evr, styling=None, include_column_name=True):
-            expectation = evr["expectation_config"]
+            expectation = evr.expectation_config
             expectation_string_cell = expectation_string_fn(expectation, styling, include_column_name)
 
             status_cell = [cls._get_status_icon(evr)]

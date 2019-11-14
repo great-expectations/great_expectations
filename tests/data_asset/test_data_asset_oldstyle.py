@@ -175,22 +175,21 @@ def test_expectation_meta():
     result = df.expect_column_median_to_be_between(
         'x', 2, 2, meta={"notes": "This expectation is for lolz."})
     k = 0
-    assert True is result['success']
+    assert True is result.success
     suite = df.get_expectation_suite()
     for expectation_config in suite.expectations:
-        if expectation_config['expectation_type'] == 'expect_column_median_to_be_between':
+        if expectation_config.expectation_type == 'expect_column_median_to_be_between':
             k += 1
             assert {"notes": "This expectation is for lolz."} == expectation_config.meta
     assert 1 == k
 
     # This should raise an error because meta isn't serializable.
     with pytest.raises(InvalidExpectationConfigurationError) as exc:
-        df.expect_column_values_to_be_increasing(
-            "x", meta={"unserializable_array": np.array(range(10))})
+        df.expect_column_values_to_be_increasing("x", meta={"unserializable_array": np.array(range(10))})
         assert "is not json serializable." in exc.value.message
 
 
- def test_set_default_expectation_argument():
+def test_set_default_expectation_argument():
     df = ge.dataset.PandasDataset({
         'x': [1, 2, 4],
         'y': [1, 2, 5],
@@ -207,14 +206,13 @@ def test_expectation_meta():
             "include_config": False,
             "catch_exceptions": False,
             "result_format": 'SUMMARY',
-        } == df.get_default_expectation_arguments()
+    } == df.get_default_expectation_arguments()
+
 
 class TestDataAsset(unittest.TestCase):
     """
     Recognized weakness: these tests are overly dependent on the Pandas implementation of dataset.
     """
-
-
 
     def test_format_map_output(self):
         df = ge.dataset.PandasDataset({

@@ -39,20 +39,20 @@
 #             else:
 #                 # result_key_lookup_key = key if t==() else (t + (key,))
 #                 result_key_lookup_key = (t + (key,))
-#                 full_lookup_key = (result['expectation_config']['expectation_type'], result_key_lookup_key)
+#                 full_lookup_key = (result.expectation_config.expectation_type, result_key_lookup_key)
 #                 metric_kwargs_names = cls.EXPECTATION_DEFINED_METRICS_LOOKUP_TABLE.get(full_lookup_key)
 #                 if metric_kwargs_names:
 #                     metric_kwargs = {}
 #                     for metric_kwarg_name in metric_kwargs_names:
 #                         if isinstance(metric_kwarg_name, tuple):
-#                             set_nested_value_in_dict(metric_kwargs, metric_kwarg_name, get_nested_value_from_dict(result['expectation_config']['kwargs'], metric_kwarg_name))
+#                             set_nested_value_in_dict(metric_kwargs, metric_kwarg_name, get_nested_value_from_dict(result.expectation_config['kwargs'], metric_kwarg_name))
 #                         else:
-#                             metric_kwargs[metric_kwarg_name] = result['expectation_config']['kwargs'][metric_kwarg_name]
+#                             metric_kwargs[metric_kwarg_name] = result.expectation_config['kwargs'][metric_kwarg_name]
 #
 #                     metrics_store.add_single_batch_expectation_defined_metric(
 #                             data_asset_name,
 #                             batch_kwargs.batch_fingerprint,
-#                             result['expectation_config']['expectation_type'],
+#                             result.expectation_config.expectation_type,
 #                             result_key_lookup_key,
 #                             metric_kwargs,
 #                             value)
@@ -111,12 +111,12 @@
 #
 #         metrics = []
 #         if result.get('result'):
-#             entry = expectation_metrics.get(result['expectation_config']['expectation_type'])
+#             entry = expectation_metrics.get(result.expectation_config.expectation_type)
 #             if entry:
 #                 for key in result['result'].keys():
 #                     metric_name = entry.get(key)
 #                     if metric_name:
-#                         metric_kwargs = {"column": result['expectation_config']['kwargs']['column']} if result['expectation_config'][
+#                         metric_kwargs = {"column": result.expectation_config['kwargs']['column']} if result.expectation_config[
 #                     'kwargs'].get('column') else {}
 #
 #                         metrics_store.add_single_batch_metric(

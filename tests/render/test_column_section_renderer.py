@@ -30,9 +30,9 @@ def titanic_expectations():
 def test_render_profiling_results_column_section_renderer(titanic_validation_results):
     # Group EVRs by column
     evrs = {}
-    for evr in titanic_validation_results["results"]:
+    for evr in titanic_validation_results.results:
         try:
-            column = evr["expectation_config"]["kwargs"]["column"]
+            column = evr.expectation_config.kwargs["column"]
             if column not in evrs:
                 evrs[column] = []
             evrs[column].append(evr)
@@ -50,9 +50,9 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     # Group expectations by column
     exp_groups = {}
     # print(json.dumps(titanic_expectations, indent=2))
-    for exp in titanic_expectations["expectations"]:
+    for exp in titanic_expectations.expectations:
         try:
-            column = exp["kwargs"]["column"]
+            column = exp.kwargs["column"]
             if column not in exp_groups:
                 exp_groups[column] = []
             exp_groups[column].append(exp)
@@ -196,8 +196,8 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
 
 
 def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_profiled_evrs_1):
-    print(titanic_profiled_evrs_1["results"][0])
-    distinct_values_evrs = [evr for evr in titanic_profiled_evrs_1["results"] if evr["expectation_config"]["expectation_type"] == "expect_column_distinct_values_to_be_in_set"]
+    print(titanic_profiled_evrs_1.results[0])
+    distinct_values_evrs = [evr for evr in titanic_profiled_evrs_1.results if evr.expectation_config.expectation_type == "expect_column_distinct_values_to_be_in_set"]
     
     assert len(distinct_values_evrs) == 4
 
@@ -246,7 +246,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_pr
 
 def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_name_column_expectations):
     remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_header(
-        titanic_profiled_name_column_expectations,#["expectations"],
+        titanic_profiled_name_column_expectations,
     )
 
     assert content_blocks == RenderedComponentContent(**{
@@ -300,7 +300,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
 
 def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profiled_name_column_expectations):
     remaining_expectations, content_block = ExpectationSuiteColumnSectionRenderer()._render_bullet_list(
-        titanic_profiled_name_column_expectations,#["expectations"],
+        titanic_profiled_name_column_expectations,
     )
 
     assert content_block["content_block_type"] == "bullet_list"

@@ -1070,15 +1070,12 @@ class ConfigOnlyDataContext(object):
         """
         if data_asset_name is None:
             try:
-                data_asset_name = expectation_suite['data_asset_name']
+                data_asset_name = expectation_suite.data_asset_name
             except KeyError:
                 raise ge_exceptions.DataContextError(
                     "data_asset_name must either be specified or present in the provided expectation suite")
         else:
-            # Note: we ensure that the suite name is a string here, until we have typed ExpectationSuite
-            # objects that will know how to read the correct type back in
-            expectation_suite['data_asset_name'] = str(data_asset_name)
-            # expectation_suite['data_asset_name'] = data_asset_name
+            expectation_suite.data_asset_name = data_asset_name
 
         if expectation_suite_name is None:
             try:
@@ -1087,13 +1084,13 @@ class ConfigOnlyDataContext(object):
                 raise ge_exceptions.DataContextError(
                     "expectation_suite_name must either be specified or present in the provided expectation suite")
         else:
-            expectation_suite['expectation_suite_name'] = expectation_suite_name
+            expectation_suite.expectation_suite_name = expectation_suite_name
 
         if not isinstance(data_asset_name, DataAssetIdentifier):
             data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         self.stores[self.expectations_store_name].set(ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(*data_asset_name),
+            data_asset_name=data_asset_name,
             expectation_suite_name=expectation_suite_name,
         ), expectation_suite)
 
@@ -1104,10 +1101,7 @@ class ConfigOnlyDataContext(object):
         if not self._compiled:
             self._compile()
 
-        if ("meta" not in validation_results or
-                "data_asset_name" not in validation_results["meta"] or
-                "expectation_suite_name" not in validation_results["meta"]
-        ):
+        if "data_asset_name" not in validation_results.meta or "expectation_suite_name" not in validation_results.meta:
             logger.warning(
                 "Both data_asset_name and expectation_suite_name must be in validation results to "
                 "register evaluation parameters."
@@ -1119,26 +1113,28 @@ class ConfigOnlyDataContext(object):
             # This is fine; short-circuit since we do not need to register any results from this dataset.
             return
         
-        for result in validation_results['results']:
+        for result in validation_results.results:
             # Unoptimized: loop over all results and check if each is needed
-            expectation_type = result['expectation_config']['expectation_type']
+            expectation_type = result.expectation_config.expectation_type
             if expectation_type in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name]:
                 # First, bind column-style parameters
-                if (("column" in result['expectation_config']['kwargs']) and 
+                if (("column" in result.expectation_config.kwargs) and
                     ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]) and
-                    (result['expectation_config']['kwargs']["column"] in
+                    (result.expectation_config.kwargs["column"] in
                     self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
 
-                    column = result['expectation_config']['kwargs']["column"]
+                    column = result.expectation_config.kwargs["column"]
                     # Now that we have a small search space, invert logic, and look for the parameters in our result
                     for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"][column].items():
                         # value here is the set of desired parameters under the type_key
                         for desired_param in desired_parameters:
                             desired_key = desired_param.split(":")[-1]
-                            if type_key == "result" and desired_key in result['result']:
-                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"][desired_key])
-                            elif type_key == "details" and desired_key in result["result"]["details"]:
-                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"]["details"])
+                            if type_key == "result" and desired_key in result.result:
+                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+                                    run_id, desired_param, result.result[desired_key])
+                            elif type_key == "details" and desired_key in result.result["details"]:
+                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+                                    run_id, desired_param, result.result["details"])
                             else:
                                 logger.warning("Unrecognized key for parameter %s" % desired_param)
                 
@@ -1148,10 +1144,12 @@ class ConfigOnlyDataContext(object):
                         continue
                     for desired_param in desired_parameters:
                         desired_key = desired_param.split(":")[-1]
-                        if type_key == "result" and desired_key in result['result']:
-                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"][desired_key])
-                        elif type_key == "details" and desired_key in result["result"]["details"]:
-                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"]["details"])
+                        if type_key == "result" and desired_key in result.result:
+                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+                                run_id, desired_param, result.result[desired_key])
+                        elif type_key == "details" and desired_key in result.result["details"]:
+                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+                                run_id, desired_param, result.result["details"])
                         else:
                             logger.warning("Unrecognized key for parameter %s" % desired_param)
 
@@ -1256,7 +1254,7 @@ class ConfigOnlyDataContext(object):
 
         for key in self.stores[self.expectations_store_name].list_keys():
             config = self.stores[self.expectations_store_name].get(key)
-            for expectation in config["expectations"]:
+            for expectation in config.expectations:
                 for _, value in expectation.kwargs.items():
                     if isinstance(value, dict) and '$PARAMETER' in value:
                         # Compile *only* respects parameters in urn structure
@@ -1371,8 +1369,8 @@ class ConfigOnlyDataContext(object):
 
         #TODO: This should be a convenience method of ValidationResultSuite
         if failed_only:
-            failed_results_list = [result for result in results_dict["results"] if not result["success"]]
-            results_dict["results"] = failed_results_list
+            failed_results_list = [result for result in results_dict.results if not result.success]
+            results_dict.results = failed_results_list
             return results_dict
         else:
             return results_dict
@@ -1532,7 +1530,7 @@ class ConfigOnlyDataContext(object):
         else:
             logger.info("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
 
-        profiling_results['success'] = True
+        profiling_results.success = True
 
         if not dry_run:
             profiling_results['results'] = []
@@ -1595,10 +1593,10 @@ class ConfigOnlyDataContext(object):
                         # For datasets, we can produce some more detailed statistics
                         row_count = batch.get_row_count()
                         total_rows += row_count
-                        new_column_count = len(set([exp["kwargs"]["column"] for exp in expectation_suite["expectations"] if "column" in exp["kwargs"]]))
+                        new_column_count = len(set([exp.kwargs["column"] for exp in expectation_suite.expectations if "column" in exp.kwargs]))
                         total_columns += new_column_count
 
-                    new_expectation_count = len(expectation_suite["expectations"])
+                    new_expectation_count = len(expectation_suite.expectations)
                     total_expectations += new_expectation_count
 
                     self.save_expectation_suite(expectation_suite)
@@ -1632,7 +1630,7 @@ class ConfigOnlyDataContext(object):
             if skipped_data_assets > 0:
                 logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
 
-        profiling_results['success'] = True
+        profiling_results.success = True
         return profiling_results
 
 

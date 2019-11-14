@@ -226,7 +226,7 @@ def display_column_expectations_as_section(
     """
 
     #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
-    column_expectation_list = [ e for e in expectation_suite["expectations"] if "column" in e["kwargs"] and e["kwargs"]["column"] == column ]
+    column_expectation_list = [ e for e in expectation_suite.expectations if "column" in e.kwargs and e.kwargs["column"] == column ]
 
     #TODO: Handle the case where zero evrs match the column name
 
@@ -265,7 +265,7 @@ def display_column_evrs_as_section(
     """
 
     #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
-    column_evr_list = [ e for e in evrs["results"] if "column" in e["expectation_config"]["kwargs"] and e["expectation_config"]["kwargs"]["column"] == column ]
+    column_evr_list = [ e for e in evrs.results if "column" in e.expectation_config.kwargs and e.expectation_config.kwargs["column"] == column ]
 
     #TODO: Handle the case where zero evrs match the column name
 

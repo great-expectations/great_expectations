@@ -141,8 +141,8 @@ def test_evaluation_parameter_store_methods(data_context):
 
     data_context._extract_and_store_parameters_from_validation_results(
         source_patient_data_results,
-        data_asset_name=source_patient_data_results["meta"]["data_asset_name"],
-        expectation_suite_name=source_patient_data_results["meta"]["expectation_suite_name"],
+        data_asset_name=source_patient_data_results.meta["data_asset_name"],
+        expectation_suite_name=source_patient_data_results.meta["expectation_suite_name"],
         run_id=run_id,
     )
 
@@ -182,8 +182,8 @@ def test_evaluation_parameter_store_methods(data_context):
 
     data_context._extract_and_store_parameters_from_validation_results(
         source_diabetes_data_results,
-        data_asset_name=source_diabetes_data_results["meta"]["data_asset_name"],
-        expectation_suite_name=source_diabetes_data_results["meta"]["expectation_suite_name"],
+        data_asset_name=source_diabetes_data_results.meta["data_asset_name"],
+        expectation_suite_name=source_diabetes_data_results.meta["expectation_suite_name"],
         run_id=run_id,
     )
     bound_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
@@ -511,20 +511,20 @@ def test_data_context_result_store(titanic_data_context):
     for profiling_result in profiling_results['results']:
         data_asset_name = profiling_result[0]['data_asset_name']
         validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
-        assert repr(data_asset_name) in validation_result["meta"]["data_asset_name"]
+        assert repr(data_asset_name) in validation_result.meta["data_asset_name"]
 
     all_validation_result = titanic_data_context.get_validation_result(
         "mydatasource/mygenerator/Titanic",
         "BasicDatasetProfiler",
     )
-    assert len(all_validation_result["results"]) == 51
+    assert len(all_validation_result.results) == 51
 
     failed_validation_result = titanic_data_context.get_validation_result(
         "mydatasource/mygenerator/Titanic",
         "BasicDatasetProfiler",
         failed_only=True,
     )
-    assert len(failed_validation_result["results"]) == 8
+    assert len(failed_validation_result.results) == 8
 
 
 def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):

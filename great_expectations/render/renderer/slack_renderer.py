@@ -8,10 +8,10 @@ class SlackRenderer(Renderer):
     def __init__(self):
         pass
     
-    def render(self, validation_json=None):
+    def render(self, validation_result=None):
         # Defaults
         timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
-        default_text = "No validation occurred. Please ensure you passed a validation_json."
+        default_text = "No validation occurred. Please ensure you passed a validation_result."
         status = "Failed :x:"
 
         title_block = {
@@ -31,21 +31,21 @@ class SlackRenderer(Renderer):
         # TODO improve this nested logic
         expectation_suite_name = None
         data_asset_name = None
-        if validation_json:
-            if "meta" in validation_json:
-                data_asset_name = validation_json["meta"].get(
+        if validation_result:
+            if "meta" in validation_result:
+                data_asset_name = validation_result.meta.get(
                     "data_asset_name",
                     "no_name_provided_" + datetime.datetime.utcnow().isoformat().replace(":", "") + "Z"
                 )
-                expectation_suite_name = validation_json["meta"].get("expectation_suite_name", "default")
+                expectation_suite_name = validation_result.meta.get("expectation_suite_name", "default")
         
-            n_checks_succeeded = validation_json["statistics"]["successful_expectations"]
-            n_checks = validation_json["statistics"]["evaluated_expectations"]
-            run_id = validation_json["meta"].get("run_id", None)
+            n_checks_succeeded = validation_result.statistics["successful_expectations"]
+            n_checks = validation_result.statistics["evaluated_expectations"]
+            run_id = validation_result.meta.get("run_id", None)
             check_details_text = "*{}* of *{}* expectations were met".format(
                 n_checks_succeeded, n_checks)
         
-            if validation_json["success"]:
+            if validation_result.success:
                 status = "Success :tada:"
 
             summary_text = """*Batch Validation Status*: {}
@@ -65,26 +65,26 @@ class SlackRenderer(Renderer):
             # this abbreviated root level "text" will show up in the notification and not the message
             query["text"] = "{}: {}".format(data_asset_name, status)
 
-            if "result_reference" in validation_json["meta"]:
+            if "result_reference" in validation_result.meta:
                 report_element = {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "- *Validation Report*: {}".format(validation_json["meta"]["result_reference"])},
+                        "text": "- *Validation Report*: {}".format(validation_result.meta["result_reference"])},
                 }
                 query["blocks"].append(report_element)
         
-            if "dataset_reference" in validation_json["meta"]:
+            if "dataset_reference" in validation_result.meta:
                 dataset_element = {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "- *Validation data asset*: {}".format(validation_json["meta"]["dataset_reference"])
+                        "text": "- *Validation data asset*: {}".format(validation_result.meta["dataset_reference"])
                     },
                 }
                 query["blocks"].append(dataset_element)
 
-        custom_blocks = self._custom_blocks(evr=validation_json)
+        custom_blocks = self._custom_blocks(evr=validation_result)
         if custom_blocks:
             query["blocks"].append(custom_blocks)
 

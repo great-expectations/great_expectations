@@ -34,40 +34,40 @@ def test_ColumnsExistProfiler():
 
     expectations_config, evr_config = ColumnsExistProfiler.profile(toy_dataset)
 
-    assert len(expectations_config["expectations"]) == 1
-    assert expectations_config["expectations"][0]["expectation_type"] == "expect_column_to_exist"
-    assert expectations_config["expectations"][0]["kwargs"]["column"] == "x"
+    assert len(expectations_config.expectations) == 1
+    assert expectations_config.expectations[0].expectation_type == "expect_column_to_exist"
+    assert expectations_config.expectations[0].kwargs["column"] == "x"
 
 
 # noinspection PyPep8Naming
 def test_BasicDatasetProfiler():
     toy_dataset = PandasDataset({"x": [1, 2, 3]}, data_asset_name="toy_dataset")
     assert len(toy_dataset.get_expectation_suite(
-        suppress_warnings=True)["expectations"]) == 0
+        suppress_warnings=True).expectations) == 0
 
     expectations_config, evr_config = BasicDatasetProfiler.profile(toy_dataset)
 
     # print(json.dumps(expectations_config, indent=2))
 
     assert len(toy_dataset.get_expectation_suite(
-        suppress_warnings=True)["expectations"]) > 0
+        suppress_warnings=True).expectations) > 0
 
     assert expectations_config["data_asset_name"] == "toy_dataset"
-    assert "BasicDatasetProfiler" in expectations_config["meta"]
+    assert "BasicDatasetProfiler" in expectations_config.meta
 
-    assert set(expectations_config["meta"]["BasicDatasetProfiler"].keys()) == {
+    assert set(expectations_config.meta["BasicDatasetProfiler"].keys()) == {
         "created_by", "created_at"
     }
 
-    assert "notes" in expectations_config["meta"]
-    assert set(expectations_config["meta"]["notes"].keys()) == {"format", "content"}
-    assert "To add additional notes" in expectations_config["meta"]["notes"]["content"][0]
+    assert "notes" in expectations_config.meta
+    assert set(expectations_config.meta["notes"].keys()) == {"format", "content"}
+    assert "To add additional notes" in expectations_config.meta["notes"]["content"][0]
 
     added_expectations = set()
-    for exp in expectations_config["expectations"]:
-        added_expectations.add(exp["expectation_type"])
-        assert "BasicDatasetProfiler" in exp["meta"]
-        assert "confidence" in exp["meta"]["BasicDatasetProfiler"]
+    for exp in expectations_config.expectations:
+        added_expectations.add(exp.expectation_type)
+        assert "BasicDatasetProfiler" in exp.meta
+        assert "confidence" in exp.meta["BasicDatasetProfiler"]
 
     expected_expectations = {
         'expect_table_row_count_to_be_between',
@@ -92,18 +92,18 @@ def test_BasicDatasetProfiler_null_column():
     """
     toy_dataset = PandasDataset({"x": [1, 2, 3], "y": [None, None, None]}, data_asset_name="toy_dataset")
     assert len(toy_dataset.get_expectation_suite(
-        suppress_warnings=True)["expectations"]) == 0
+        suppress_warnings=True).expectations) == 0
 
     expectations_config, evr_config = BasicDatasetProfiler.profile(toy_dataset)
 
     # TODO: assert set - specific expectations
     assert len([result for result in evr_config['results'] if
-     result['expectation_config']['kwargs'].get('column') == 'y' and result['success']]) == 4
+     result.expectation_config['kwargs'].get('column') == 'y' and result.success]) == 4
 
     assert len([result for result in evr_config['results'] if
-                result['expectation_config']['kwargs'].get('column') == 'y' and result['success']]) < \
+                result.expectation_config['kwargs'].get('column') == 'y' and result.success]) < \
            len([result for result in evr_config['results'] if
-                result['expectation_config']['kwargs'].get('column') == 'x' and result['success']])
+                result.expectation_config['kwargs'].get('column') == 'x' and result.success])
 
 
 def test_BasicDatasetProfiler_partially_null_column(dataset):
@@ -117,7 +117,7 @@ def test_BasicDatasetProfiler_partially_null_column(dataset):
     expectations_config, evr_config = BasicDatasetProfiler.profile(dataset)
 
     assert set(["expect_column_to_exist", "expect_column_values_to_be_in_type_list", "expect_column_unique_value_count_to_be_between", "expect_column_proportion_of_unique_values_to_be_between", "expect_column_values_to_not_be_null", "expect_column_values_to_be_in_set", "expect_column_values_to_be_unique"]) == \
-           set([expectation['expectation_type'] for expectation in expectations_config["expectations"] if expectation["kwargs"].get("column") == "nulls"])
+           set([expectation.expectation_type for expectation in expectations_config.expectations if expectation.kwargs.get("column") == "nulls"])
 
 def test_BasicDatasetProfiler_non_numeric_low_cardinality(non_numeric_low_card_dataset):
     """
@@ -129,7 +129,7 @@ def test_BasicDatasetProfiler_non_numeric_low_cardinality(non_numeric_low_card_d
     expectations_config, evr_config = BasicDatasetProfiler.profile(non_numeric_low_card_dataset)
 
     assert set(["expect_column_to_exist", "expect_column_values_to_be_in_type_list", "expect_column_unique_value_count_to_be_between", "expect_column_proportion_of_unique_values_to_be_between", "expect_column_values_to_not_be_null", "expect_column_values_to_be_in_set", "expect_column_values_to_not_match_regex"]) == \
-           set([expectation['expectation_type'] for expectation in expectations_config["expectations"] if expectation["kwargs"].get("column") == "lowcardnonnum"])
+           set([expectation.expectation_type for expectation in expectations_config.expectations if expectation.kwargs.get("column") == "lowcardnonnum"])
 
 def test_BasicDatasetProfiler_non_numeric_high_cardinality(non_numeric_high_card_dataset):
     """
@@ -141,7 +141,7 @@ def test_BasicDatasetProfiler_non_numeric_high_cardinality(non_numeric_high_card
     expectations_config, evr_config = BasicDatasetProfiler.profile(non_numeric_high_card_dataset)
 
     assert set(["expect_column_to_exist", "expect_column_values_to_be_in_type_list", "expect_column_unique_value_count_to_be_between", "expect_column_proportion_of_unique_values_to_be_between", "expect_column_values_to_not_be_null", "expect_column_values_to_be_in_set", "expect_column_values_to_not_match_regex"]) == \
-           set([expectation['expectation_type'] for expectation in expectations_config["expectations"] if expectation["kwargs"].get("column") == "highcardnonnum"])
+           set([expectation.expectation_type for expectation in expectations_config.expectations if expectation.kwargs.get("column") == "highcardnonnum"])
 
 def test_BasicDatasetProfiler_numeric_high_cardinality(numeric_high_card_dataset):
     """
@@ -152,7 +152,7 @@ def test_BasicDatasetProfiler_numeric_high_cardinality(numeric_high_card_dataset
     """
     expectations_config, evr_config = BasicDatasetProfiler.profile(numeric_high_card_dataset)
 
-    assert set(["expect_column_to_exist", "expect_table_row_count_to_be_between", "expect_table_columns_to_match_ordered_list", "expect_column_values_to_be_in_type_list", "expect_column_unique_value_count_to_be_between", "expect_column_proportion_of_unique_values_to_be_between", "expect_column_values_to_not_be_null", "expect_column_values_to_be_in_set", "expect_column_values_to_be_unique"]) == set([expectation['expectation_type'] for expectation in expectations_config["expectations"]])
+    assert set(["expect_column_to_exist", "expect_table_row_count_to_be_between", "expect_table_columns_to_match_ordered_list", "expect_column_values_to_be_in_type_list", "expect_column_unique_value_count_to_be_between", "expect_column_proportion_of_unique_values_to_be_between", "expect_column_values_to_not_be_null", "expect_column_values_to_be_in_set", "expect_column_values_to_be_unique"]) == set([expectation.expectation_type for expectation in expectations_config.expectations])
 
 
 # noinspection PyPep8Naming
@@ -174,17 +174,17 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
 
     assert expectations_config["data_asset_name"] == "my_datasource/default/f1"
     assert expectations_config["expectation_suite_name"] == "default"
-    assert "BasicDatasetProfiler" in expectations_config["meta"]
-    assert set(expectations_config["meta"]["BasicDatasetProfiler"].keys()) == {
+    assert "BasicDatasetProfiler" in expectations_config.meta
+    assert set(expectations_config.meta["BasicDatasetProfiler"].keys()) == {
         "created_by", "created_at", "batch_kwargs"
     }
 
-    for exp in expectations_config["expectations"]:
-        assert "BasicDatasetProfiler" in exp["meta"]
-        assert "confidence" in exp["meta"]["BasicDatasetProfiler"]
+    for exp in expectations_config.expectations:
+        assert "BasicDatasetProfiler" in exp.meta
+        assert "confidence" in exp.meta["BasicDatasetProfiler"]
 
-    assert validation_results["meta"]["data_asset_name"] == "my_datasource/default/f1"
-    assert set(validation_results["meta"].keys()) == {
+    assert validation_results.meta["data_asset_name"] == "my_datasource/default/f1"
+    assert set(validation_results.meta.keys()) == {
         "great_expectations.__version__", "data_asset_name", "expectation_suite_name", "run_id", "batch_kwargs"
     }
 
@@ -207,15 +207,15 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
     profiled_expectations = not_so_empty_data_context.get_expectation_suite('f1', "BasicDatasetProfiler")
 
     print(json.dumps(profiled_expectations, indent=2))
-    for exp in profiled_expectations["expectations"]:
-        assert "BasicDatasetProfiler" in exp["meta"]
-        assert "confidence" in exp["meta"]["BasicDatasetProfiler"]
+    for exp in profiled_expectations.expectations:
+        assert "BasicDatasetProfiler" in exp.meta
+        assert "confidence" in exp.meta["BasicDatasetProfiler"]
 
     assert profiled_expectations["data_asset_name"] == "my_datasource/default/f1"
     assert profiled_expectations["expectation_suite_name"] == "BasicDatasetProfiler"
-    assert "batch_kwargs" in profiled_expectations["meta"]["BasicDatasetProfiler"]
+    assert "batch_kwargs" in profiled_expectations.meta["BasicDatasetProfiler"]
 
-    assert len(profiled_expectations["expectations"]) > 0
+    assert len(profiled_expectations.expectations) > 0
 
 
 # noinspection PyPep8Naming
@@ -230,13 +230,13 @@ def test_BasicDatasetProfiler_on_titanic():
     suite, evrs = df.profile(BasicDatasetProfiler)
 
     # Check to make sure BasicDatasetProfiler is adding meta.columns with a single "description" field for each column
-    print(json.dumps(suite["meta"], indent=2))
-    assert "columns" in suite["meta"]
-    for k,v in suite["meta"]["columns"].items():
+    print(json.dumps(suite.meta, indent=2))
+    assert "columns" in suite.meta
+    for k,v in suite.meta["columns"].items():
         assert v == {"description": ""}
 
     # Note: the above already produces an EVR; rerunning isn't strictly necessary just for EVRs
-    evrs = df.validate(result_format="SUMMARY")  # ["results"]
+    evrs = df.validate(result_format="SUMMARY")  # .results
 
     # with open('tests/test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json', 'w+') as file:
     #     file.write(json.dumps(evrs, indent=2))
@@ -253,11 +253,11 @@ def test_BasicDatasetProfiler_on_titanic():
     # We know that python 2 does not guarantee the order of value_counts, which causes a different
     # order for items in the partial_unexpected_value_counts list
     # Remove those before test.
-    for result in evrs["results"]:
+    for result in evrs.results:
         if "partial_unexpected_counts" in result["result"]:
             result["result"].pop("partial_unexpected_counts")
 
-    for result in expected_evrs["results"]:
+    for result in expected_evrs.results:
         if "partial_unexpected_counts" in result["result"]:
             result["result"].pop("partial_unexpected_counts")
 

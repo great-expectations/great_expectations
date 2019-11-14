@@ -1,4 +1,7 @@
 import pytest
+
+from great_expectations.core import ExpectationSuiteValidationResult
+
 try:
     from unittest import mock
 except ImportError:
@@ -49,8 +52,8 @@ def test_subclass_of_BasicValidationAction():
 
 def test_StoreAction():
     fake_in_memory_store = ValidationsStore(
-        root_directory = None,
-        store_backend = {
+        root_directory=None,
+        store_backend={
             "class_name": "InMemoryStoreBackend",
         }
     )
@@ -66,8 +69,8 @@ def test_StoreAction():
     data_context.stores = stores
 
     action = StoreAction(
-        data_context = data_context,
-        target_store_name = "fake_in_memory_store",
+        data_context=data_context,
+        target_store_name="fake_in_memory_store",
     )
     assert fake_in_memory_store.list_keys() == []
 
@@ -79,7 +82,10 @@ def test_StoreAction():
             ),
             run_id="prod_20190801"
         ),
-        validation_result_suite={"test": "value"},
+        validation_result_suite=ExpectationSuiteValidationResult(
+            success=False,
+            results=[]
+        ),
         data_asset=None
     )
 
@@ -97,7 +103,10 @@ def test_StoreAction():
                 expectation_suite_name="default_expectations"
             ),
             run_id="prod_20190801"
-        )) == {"test": "value"}
+        )) == ExpectationSuiteValidationResult(
+            success=False,
+            results=[]
+        )
 
 
 def test_SlackNotificationAction(data_context):

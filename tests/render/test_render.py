@@ -73,9 +73,9 @@ def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
 def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_1):
     # Group EVRs by column
     evrs = {}
-    for evr in titanic_profiled_evrs_1["results"]:
+    for evr in titanic_profiled_evrs_1.results:
         try:
-            column = evr["expectation_config"]["kwargs"]["column"]
+            column = evr.expectation_config.kwargs["column"]
             if column not in evrs:
                 evrs[column] = []
             evrs[column].append(evr)
@@ -100,9 +100,9 @@ def test_smoke_render_validation_results_page_renderer(titanic_profiler_evrs):
 def test_render_validation_results_column_section_renderer(titanic_profiler_evrs):
     # Group EVRs by column
     evrs = {}
-    for evr in titanic_profiler_evrs["results"]:
+    for evr in titanic_profiler_evrs.results:
         try:
-            column = evr["expectation_config"]["kwargs"]["column"]
+            column = evr.expectation_config.kwargs["column"]
             if column not in evrs:
                 evrs[column] = []
             evrs[column].append(evr)
@@ -120,9 +120,9 @@ def test_render_expectation_suite_column_section_renderer(titanic_profiled_expec
     # Group expectations by column
     exp_groups = {}
     # print(json.dumps(titanic_profiled_expectations_1, indent=2))
-    for exp in titanic_profiled_expectations_1["expectations"]:
+    for exp in titanic_profiled_expectations_1.expectations:
         try:
-            column = exp["kwargs"]["column"]
+            column = exp.kwargs["column"]
             if column not in exp_groups:
                 exp_groups[column] = []
             exp_groups[column].append(exp)
@@ -253,7 +253,7 @@ def test_smoke_render_profiling_results_page_renderer_with_exception(
 def test_full_oobe_flow():
     df = ge.read_csv("examples/data/Titanic.csv")
     df.profile(BasicDatasetProfiler)
-    evrs = df.validate()  # ["results"]
+    evrs = df.validate()  # .results
 
     rendered_json = ProfilingResultsPageRenderer().render(evrs)
     rendered_page = DefaultJinjaPageView().render(rendered_json)

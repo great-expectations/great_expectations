@@ -159,7 +159,7 @@ class TestCustomClass(unittest.TestCase):
         out = df.expect_column_values_to_be_prime('x')
         t = {'out': {'unexpected_list': [1, 1, 1, 1], 'unexpected_index_list': [
             0, 1, 2, 3], 'success': False}}
-        self.assertEqual(t['out']['success'], out['success'])
+        self.assertEqual(t['out']['success'], out.success)
         if 'unexpected_index_list' in t['out']:
             self.assertEqual(t['out']['unexpected_index_list'],
                              out['result']['unexpected_index_list'])
@@ -171,7 +171,7 @@ class TestCustomClass(unittest.TestCase):
         print(out)
         t = {'out': {'unexpected_list': [
             2], 'unexpected_index_list': [4], 'success': True}}
-        self.assertEqual(t['out']['success'], out['success'])
+        self.assertEqual(t['out']['success'], out.success)
         if 'unexpected_index_list' in t['out']:
             self.assertEqual(t['out']['unexpected_index_list'],
                              out['result']['unexpected_index_list'])
@@ -189,7 +189,7 @@ class TestCustomClass(unittest.TestCase):
 
         self.assertEqual(
             df.expect_column_values_to_be_between(
-                "aaa", min_value=1, max_value=5)['success'],
+                "aaa", min_value=1, max_value=5).success,
             True
         )
 
@@ -212,12 +212,12 @@ def test_validate():
     with open('./tests/test_sets/titanic_expected_data_asset_validate_results.json') as f:
         expected_results = expectationSuiteValidationResultSchema.loads(f.read()).data
 
-    del results["meta"]["great_expectations.__version__"]
+    del results.meta["great_expectations.__version__"]
 
     # order is not guaranteed (or important in this case) but sorting is possible in PY2
     if PY2:
-        results["results"] = sorted(results["results"])
-        expected_results["results"] = sorted(expected_results["results"])
+        results.results = sorted(results.results)
+        expected_results.results = sorted(expected_results.results)
 
     assert expected_results == results
 
@@ -230,7 +230,7 @@ def test_validate():
     with mock.patch("datetime.datetime") as mock_datetime:
         mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
         validation_results = my_df.validate(only_return_failures=True)
-        del validation_results["meta"]["great_expectations.__version__"]
+        del validation_results.meta["great_expectations.__version__"]
 
     expected_results = ExpectationSuiteValidationResult(
         meta={
@@ -258,7 +258,7 @@ def test_validate():
                 "unexpected_index_list": [456]
             })
         ],
-        success=expected_results["success"],  # unaffected
+        success=expected_results.success,  # unaffected
         statistics=expected_results["statistics"]  # unaffected
     )
     assert expected_results == validation_results

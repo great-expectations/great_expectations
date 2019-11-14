@@ -33,7 +33,7 @@ class ProfilingOverviewTableContentBlockRenderer(ContentBlockRenderer):
 
     @classmethod
     def expect_column_values_to_not_match_regex(cls, ge_object):
-        regex = ge_object["expectation_config"]["kwargs"]["regex"]
+        regex = ge_object.expectation_config.kwargs["regex"]
         unexpected_count = ge_object["result"]["unexpected_count"]
         if regex == '^\\s+|\\s+$':
             return [["Leading or trailing whitespace (n)", unexpected_count]]

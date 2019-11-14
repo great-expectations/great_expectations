@@ -64,8 +64,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             "string_template": {
                 "template": "$expectation_type(**$kwargs)",
                 "params": {
-                    "expectation_type": expectation["expectation_type"],
-                    "kwargs": expectation["kwargs"]
+                    "expectation_type": expectation.expectation_type,
+                    "kwargs": expectation.kwargs
                 },
                 "styling": {
                     "params": {
@@ -80,7 +80,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_to_exist(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "column_index"],
         )
         
@@ -108,7 +108,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_unique_value_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "min_value", "max_value", "mostly"],
         )
         
@@ -148,7 +148,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "min_value", "max_value", "mostly"]
         )
         
@@ -191,7 +191,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_pair_values_A_to_be_greater_than_B(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column_A", "column_B", "parse_strings_as_datetimes",
              "ignore_row_if", "mostly", "or_equal"]
         )
@@ -227,7 +227,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_pair_values_to_be_equal(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column_A", "column_B",
              "ignore_row_if", "mostly", ]
         )
@@ -256,7 +256,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_table_columns_to_match_ordered_list(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column_list"]
         )
         
@@ -284,7 +284,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_multicolumn_values_to_be_unique(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column_list", "ignore_row_if"]
         )
         
@@ -308,7 +308,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_table_column_count_to_equal(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["value"]
         )
         template_str = "Must have exactly $value columns."
@@ -324,7 +324,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_table_column_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["min_value", "max_value"]
         )
         if params["min_value"] is None and params["max_value"] is None:
@@ -348,7 +348,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_table_row_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["min_value", "max_value"]
         )
         
@@ -374,7 +374,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_table_row_count_to_equal(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["value"]
         )
         template_str = "Must have exactly $value rows."
@@ -391,7 +391,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_distinct_values_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "value_set"],
         )
         
@@ -427,7 +427,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_not_be_null(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "mostly"],
         )
 
@@ -456,7 +456,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_be_null(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "mostly"]
         )
         
@@ -482,7 +482,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_be_of_type(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "type_", "mostly"]
         )
         
@@ -508,7 +508,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_be_in_type_list(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "type_list", "mostly"],
         )
 
@@ -549,7 +549,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "value_set", "mostly", "parse_strings_as_datetimes"]
         )
         
@@ -590,7 +590,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_not_be_in_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "value_set", "mostly", "parse_strings_as_datetimes"]
         )
         
@@ -632,7 +632,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     def expect_column_proportion_of_unique_values_to_be_between(cls, expectation, styling=None,
                                                                 include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "min_value", "max_value"],
         )
         
@@ -662,7 +662,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_be_increasing(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "strictly", "mostly", "parse_strings_as_datetimes"]
         )
         
@@ -697,7 +697,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_be_decreasing(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "strictly", "mostly", "parse_strings_as_datetimes"]
         )
         
@@ -731,7 +731,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_value_lengths_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "min_value", "max_value", "mostly"],
         )
         
@@ -774,7 +774,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_value_lengths_to_equal(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "value", "mostly"]
         )
         
@@ -804,7 +804,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_match_regex(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "regex", "mostly"]
         )
         
@@ -834,7 +834,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_not_match_regex(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "regex", "mostly"],
         )
         
@@ -866,7 +866,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_match_regex_list(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "regex_list", "mostly", "match_on"],
         )
         
@@ -906,7 +906,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_not_match_regex_list(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "regex_list", "mostly"],
         )
         
@@ -943,7 +943,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_match_strftime_format(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "strftime_format", "mostly"],
         )
         
@@ -973,7 +973,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_be_dateutil_parseable(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "mostly"],
         )
         
@@ -1001,7 +1001,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_be_json_parseable(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "mostly"],
         )
         
@@ -1029,7 +1029,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_match_json_schema(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "mostly", "json_schema"],
         )
         
@@ -1066,7 +1066,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_distinct_values_to_contain_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "value_set", "parse_strings_as_datetimes"]
         )
         
@@ -1100,7 +1100,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_distinct_values_to_equal_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "value_set", "parse_strings_as_datetimes"]
         )
         
@@ -1134,7 +1134,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_mean_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "min_value", "max_value"]
         )
         
@@ -1163,7 +1163,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_median_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "min_value", "max_value"]
         )
     
@@ -1192,7 +1192,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_stdev_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "min_value", "max_value"]
         )
     
@@ -1221,7 +1221,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_max_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "min_value", "max_value", "parse_strings_as_datetimes"]
         )
     
@@ -1253,7 +1253,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_min_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "min_value", "max_value", "parse_strings_as_datetimes"]
         )
         
@@ -1285,7 +1285,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_sum_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "min_value", "max_value"]
         )
         
@@ -1314,7 +1314,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_most_common_value_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "value_set", "ties_okay"]
         )
         
@@ -1348,7 +1348,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_kl_divergence_to_be_less_than(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "partition_object", "threshold"]
         )
         
@@ -1434,7 +1434,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_be_unique(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
-            expectation["kwargs"],
+            expectation.kwargs,
             ["column", "mostly"],
         )
 

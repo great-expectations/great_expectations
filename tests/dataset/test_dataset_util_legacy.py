@@ -533,30 +533,30 @@ class TestUtilMethods(unittest.TestCase):
                                                                ['x', 'y'],
                                                                'expect_column_values_to_be_in_set',
                                                                value_set=[1, 2, 3, 4, 5, 6])
-        self.assertTrue(results[0]['success'])
-        self.assertFalse(results[1]['success'])
+        self.assertTrue(results[0].success)
+        self.assertFalse(results[1].success)
 
         # Test positional argument
         results = ge.dataset.util.create_multiple_expectations(D,
                                                                ['x', 'y'],
                                                                'expect_column_values_to_be_in_set',
                                                                [1, 2, 3, 4, 5, 6])
-        self.assertTrue(results[0]['success'])
-        self.assertFalse(results[1]['success'])
+        self.assertTrue(results[0].success)
+        self.assertFalse(results[1].success)
 
         results = ge.dataset.util.create_multiple_expectations(D,
                                                                ['z', 'zz'],
                                                                'expect_column_values_to_match_regex',
                                                                'h')
-        self.assertTrue(results[0]['success'])
-        self.assertFalse(results[1]['success'])
+        self.assertTrue(results[0].success)
+        self.assertFalse(results[1].success)
 
         # Non-argumentative expectation
         results = ge.dataset.util.create_multiple_expectations(D,
                                                                ['z', 'zz'],
                                                                'expect_column_values_to_not_be_null')
-        self.assertTrue(results[0]['success'])
-        self.assertTrue(results[1]['success'])
+        self.assertTrue(results[0].success)
+        self.assertTrue(results[1].success)
 
         # Key error when non-existant column is called
         with self.assertRaises(KeyError):

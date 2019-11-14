@@ -450,8 +450,8 @@ def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem
         cli, ["profile", "-d", project_root_dir, "--batch_kwargs", '{"sep": ",", "parse_dates": [0]}'])
     evr = not_so_empty_data_context.get_validation_result("f1", expectation_suite_name="BasicDatasetProfiler")
 
-    assert evr["meta"]["batch_kwargs"]["parse_dates"] == [0]
-    assert evr["meta"]["batch_kwargs"]["sep"] == ","
+    assert evr.meta["batch_kwargs"]["parse_dates"] == [0]
+    assert evr.meta["batch_kwargs"]["sep"] == ","
 
 def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource("my_datasource",

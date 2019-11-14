@@ -32,10 +32,10 @@ class ColumnSectionRenderer(Renderer):
         try:
             if "kwargs" in candidate_object:
                 # This is an expectation
-                return candidate_object["kwargs"]["column"]
+                return candidate_object.kwargs["column"]
             elif "expectation_config" in candidate_object:
                 # This is a validation
-                return candidate_object["expectation_config"]["kwargs"]["column"]
+                return candidate_object.expectation_config.kwargs["column"]
             else:
                 raise ValueError(
                     "Provide a column section renderer an expectation, list of expectations, evr, or list of evrs.")
@@ -95,7 +95,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
     def _render_header(cls, evrs, column_type=None):
         # NOTE: This logic is brittle
         try:
-            column_name = evrs[0]["expectation_config"]["kwargs"]["column"]
+            column_name = evrs[0].expectation_config.kwargs["column"]
         except KeyError:
             column_name = "Table-level expectations"
 
@@ -133,7 +133,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         # type_counts = defaultdict(int)
 
         # for evr in evrs:
-        #     type_counts[evr["expectation_config"]["expectation_type"]] += 1
+        #     type_counts[evr.expectation_config.expectation_type] += 1
 
         # bullet_list = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
 
@@ -142,8 +142,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "string_template": {
                 "template": "$expectation_type $is_passing",
                 "params": {
-                    "expectation_type": evr["expectation_config"]["expectation_type"],
-                    "is_passing": str(evr["success"]),
+                    "expectation_type": evr.expectation_config.expectation_type,
+                    "is_passing": str(evr.success),
                 },
                 "styling": {
                     "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
@@ -546,7 +546,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         unrendered_blocks = []
         new_block = None
         for evr in evrs:
-            if evr["expectation_config"]["expectation_type"] not in [
+            if evr.expectation_config.expectation_type not in [
                 "expect_column_to_exist",
                 "expect_column_values_to_be_of_type",
                 "expect_column_values_to_be_in_set",
