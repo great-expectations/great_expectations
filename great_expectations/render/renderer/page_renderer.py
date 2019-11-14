@@ -267,6 +267,7 @@ class ExpectationSuitePageRenderer(Renderer):
         ]
         return RenderedDocumentContent(**{
             # "data_asset_name": short_data_asset_name,
+            "renderer_type": "ExpectationSuitePageRenderer",
             "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": expectation_suite_name,
             "utm_medium": "expectation-suite-page",
