@@ -227,7 +227,7 @@ def init(target_directory, view):
 
         context = _slack_setup(context)
 
-        profile_datasource(context, data_source_name, open_docs=view)
+        profile_datasource(context, data_source_name, open_docs=view, additional_batch_kwargs={"limit": 1000})
         cli_message("""\n<cyan>Great Expectations is now set up in your project!</cyan>""")
 
 def _slack_setup(context):
@@ -340,7 +340,7 @@ def list_datasources(directory):
     help="The project's great_expectations directory."
 )
 @click.option('--batch_kwargs', default=None,
-              help='Additional keyword arguments to be provided to get_batch when loading the data asset.')
+              help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
 @click.option(
     "--view/--no-view",
     help="By default open in browser unless you specify the --no-view flag",
