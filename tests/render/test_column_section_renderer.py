@@ -413,7 +413,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         }
     }
     result = ValidationResultsTableContentBlockRenderer.render([evr])
-    # print(json.dumps(result, indent=2))
+    print(json.dumps(result, indent=2))
 
     #Note: A better approach to testing would separate out styling into a separate test.
     assert result == {
@@ -429,15 +429,22 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                         },
                         "styling": {
                             "params": {
-                            "icon": {
-                                "classes": [
-                                    "fas",
-                                    "fa-check-circle",
-                                    "text-success"
-                                ],
-                                "tag": "i"
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success"
+                                    ],
+                                    "tag": "i"
+                                }
                             }
-                            }
+                        }
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": [
+                                "hide-succeeded-validation-target-child"
+                            ]
                         }
                     }
                 },
@@ -462,8 +469,8 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             "params": {
                                 "column": {
                                     "classes": [
-                                    "badge",
-                                    "badge-primary"
+                                        "badge",
+                                        "badge-primary"
                                     ]
                                 }
                             }
