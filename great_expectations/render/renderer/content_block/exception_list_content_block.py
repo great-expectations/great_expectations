@@ -2,12 +2,13 @@ from .content_block import ContentBlockRenderer
 
 from great_expectations.render.types import (
     RenderedComponentContent,
-)
+    RenderedBulletListContent)
 
 
 class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     """Render a bullet list of exception messages raised for provided EVRs"""
 
+    _rendered_component_type = RenderedBulletListContent
     _content_block_type = "bullet_list"
 
     _default_header = 'Failed expectations <span class="mr-3 triangle"></span>'

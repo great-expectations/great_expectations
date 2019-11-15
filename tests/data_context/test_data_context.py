@@ -316,7 +316,7 @@ def test_compile(data_context):
 def test_normalize_data_asset_names_error(data_context):
     with pytest.raises(DataContextError) as exc:
         data_context.normalize_data_asset_name("this/should/never/work/because/it/is/so/long")
-        assert "found too many components using delimiter '/'" in exc.message
+    assert "found too many components using delimiter '/'" in exc.value.message
 
 
 def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_csv):
@@ -338,26 +338,26 @@ def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_cs
 
     with pytest.raises(DataContextError) as exc:
         data_context.data_asset_name_delimiter = "$"
-        assert "Invalid delimiter" in exc.message
+    assert "Invalid delimiter" in exc.value.message
 
     with pytest.raises(DataContextError) as exc:
         data_context.data_asset_name_delimiter = "//"
-        assert "Invalid delimiter" in exc.message
+    assert "Invalid delimiter" in exc.value.message
 
 
 def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_csv, tmp_path_factory):
     # If no datasource is configured, nothing should be allowed to normalize:
     with pytest.raises(DataContextError) as exc:
         empty_data_context.normalize_data_asset_name("f1")
-        assert "No datasource configured" in exc.message
+    assert "No datasource configured" in exc.value.message
 
     with pytest.raises(DataContextError) as exc:
         empty_data_context.normalize_data_asset_name("my_datasource/f1")
-        assert "No datasource configured" in exc.message
+    assert "No datasource configured" in exc.value.message
 
     with pytest.raises(DataContextError) as exc:
         empty_data_context.normalize_data_asset_name("my_datasource/default/f1")
-        assert "No datasource configured" in exc.message
+    assert "No datasource configured" in exc.value.message
 
     ###
     # Add a datasource
@@ -395,11 +395,11 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     # However, we cannot create against nonexisting datasources or generators:
     with pytest.raises(DataContextError) as exc:
         data_context.normalize_data_asset_name("my_fake_datasource/default/f7")
-        assert "no configured datasource 'my_fake_datasource' with generator 'default'" in exc.message
+    assert "no configured datasource 'my_fake_datasource' with generator 'default'" in exc.message
 
     with pytest.raises(DataContextError) as exc:
         data_context.normalize_data_asset_name("my_datasource/my_fake_generator/f7")
-        assert "no configured datasource 'my_datasource' with generator 'my_fake_generator'" in exc.message
+    assert "no configured datasource 'my_datasource' with generator 'my_fake_generator'" in exc.value.message
 
     ###
     # Add a second datasource

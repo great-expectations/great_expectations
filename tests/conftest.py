@@ -12,7 +12,7 @@ import great_expectations as ge
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.data_context.util import safe_mmkdir
 
-from .test_utils import get_dataset
+from .test_utils import get_dataset, expectationSuiteValidationResultSchema
 
 ###
 #
@@ -680,7 +680,9 @@ def filesystem_csv_4(tmp_path_factory):
 
 @pytest.fixture
 def titanic_profiled_evrs_1():
-    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
+    with open('./tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'r') as infile:
+        return expectationSuiteValidationResultSchema.loads(infile.read()).data
+    # return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
 
 
 @pytest.fixture

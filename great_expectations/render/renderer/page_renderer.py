@@ -10,8 +10,7 @@ from .renderer import Renderer
 from ..types import (
     RenderedDocumentContent,
     RenderedSectionContent,
-    RenderedComponentContent,
-)
+    RenderedHeaderContent, RenderedTableContent)
 from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
@@ -95,7 +94,7 @@ class ValidationResultsPageRenderer(Renderer):
     
     @classmethod
     def _render_validation_header(cls):
-        return RenderedComponentContent(**{
+        return RenderedHeaderContent(**{
             "content_block_type": "header",
             "header": "Validation Overview",
             "styling": {
@@ -114,7 +113,7 @@ class ValidationResultsPageRenderer(Renderer):
         ge_version = validation_results.meta["great_expectations.__version__"]
         success = validation_results.success
         
-        return RenderedComponentContent(**{
+        return RenderedTableContent(**{
             "content_block_type": "table",
             "header": "Info",
             "table": [
@@ -153,7 +152,7 @@ class ValidationResultsPageRenderer(Renderer):
                 else:
                     table_rows.append([value, statistics[key]])
         
-        return RenderedComponentContent(**{
+        return RenderedTableContent(**{
             "content_block_type": "table",
             "header": "Statistics",
             "table": table_rows,
@@ -233,7 +232,7 @@ class ExpectationSuitePageRenderer(Renderer):
         
     @classmethod
     def _render_asset_header(cls, expectations):
-        return RenderedComponentContent(**{
+        return RenderedHeaderContent(**{
             "content_block_type": "header",
             "header": "Expectation Suite Overview",
             "styling": {
@@ -251,7 +250,7 @@ class ExpectationSuitePageRenderer(Renderer):
         expectation_suite_name = expectations.get("expectation_suite_name")
         ge_version = expectations.meta["great_expectations.__version__"]
 
-        return RenderedComponentContent(**{
+        return RenderedTableContent(**{
             "content_block_type": "table",
             "header": "Info",
             "table": [
@@ -343,7 +342,7 @@ class ExpectationSuitePageRenderer(Renderer):
             if note_content != None:
                 content = content + note_content
 
-        return RenderedComponentContent(**{
+        return RenderedTextContent(**{
             "content_block_type": "text",
             "header": "Notes",
             "content": content,

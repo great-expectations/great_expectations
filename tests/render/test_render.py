@@ -185,8 +185,8 @@ def test_content_block_list_available_expectations():
 
 @pytest.mark.smoketest
 def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expectations):
-    rendered_json = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations)
-    rendered_page = DefaultJinjaPageView().render(rendered_json)
+    rendered_content = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations)
+    rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open('./tests/render/output/test_render_profiled_fixture_expectation_suite.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))
@@ -198,8 +198,8 @@ def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expe
 @pytest.mark.smoketest
 def test_render_profiled_fixture_expectation_suite_with_distribution(titanic_dataset_profiler_expectations_with_distribution):
     # Tests sparkline
-    rendered_json = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations_with_distribution)
-    rendered_page = DefaultJinjaPageView().render(rendered_json)
+    rendered_content = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations_with_distribution)
+    rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open('./tests/render/output/titanic_dataset_profiler_expectation_suite_with_distribution.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))
@@ -210,8 +210,8 @@ def test_render_profiled_fixture_expectation_suite_with_distribution(titanic_dat
 
 @pytest.mark.smoketest
 def test_render_profiling_results(titanic_profiled_evrs_1):
-    rendered_json = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
-    rendered_page = DefaultJinjaPageView().render(rendered_json)
+    rendered_content = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
+    rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open('./tests/render/output/test_render_profiling_results.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))
@@ -222,8 +222,8 @@ def test_render_profiling_results(titanic_profiled_evrs_1):
 
 @pytest.mark.smoketest
 def test_render_validation_results(titanic_profiled_evrs_1):
-    rendered_json = ValidationResultsPageRenderer().render(titanic_profiled_evrs_1)
-    rendered_page = DefaultJinjaPageView().render(rendered_json)
+    rendered_content = ValidationResultsPageRenderer().render(titanic_profiled_evrs_1)
+    rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open('./tests/render/output/test_render_validation_results.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))
@@ -238,8 +238,8 @@ def test_render_validation_results(titanic_profiled_evrs_1):
 @pytest.mark.smoketest
 def test_smoke_render_profiling_results_page_renderer_with_exception(
         titanic_profiler_evrs_with_exception):
-    rendered_json = ProfilingResultsPageRenderer().render(titanic_profiler_evrs_with_exception)
-    rendered_page = DefaultJinjaPageView().render(rendered_json)
+    rendered_content = ProfilingResultsPageRenderer().render(titanic_profiler_evrs_with_exception)
+    rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open('./tests/render/output/test_render_profiling_results_column_section_renderer_with_exception.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))
@@ -253,10 +253,10 @@ def test_smoke_render_profiling_results_page_renderer_with_exception(
 def test_full_oobe_flow():
     df = ge.read_csv("examples/data/Titanic.csv")
     df.profile(BasicDatasetProfiler)
-    evrs = df.validate()  # .results
+    evrs = df.validate()  # results
 
-    rendered_json = ProfilingResultsPageRenderer().render(evrs)
-    rendered_page = DefaultJinjaPageView().render(rendered_json)
+    rendered_content = ProfilingResultsPageRenderer().render(evrs)
+    rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open('./tests/render/output/test_full_oobe_flow.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))

@@ -116,7 +116,7 @@ class MetaDataset(DataAsset):
                     "Column aggregate expectation failed to return required information: observed_value")
 
             return_obj = {
-                'success': bool(evaluation_result.success)
+                'success': bool(evaluation_result['success'])
             }
 
             if result_format['result_format'] == 'BOOLEAN_ONLY':
@@ -138,8 +138,7 @@ class MetaDataset(DataAsset):
             if result_format['result_format'] in ["SUMMARY", "COMPLETE"]:
                 return return_obj
 
-            raise ValueError("Unknown result_format %s." %
-                                (result_format['result_format'],))
+            raise ValueError("Unknown result_format %s." % result_format['result_format'])
 
         return inner_wrapper
 

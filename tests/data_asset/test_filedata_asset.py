@@ -15,7 +15,7 @@ def test_autoinspect_filedata_asset():
 
     with pytest.raises(ge.exceptions.GreatExpectationsError) as exc:
         my_file_data.profile(ge.profile.ColumnsExistProfiler)
-        assert "Invalid data_asset for profiler; aborting" in exc.message
+    assert "Invalid data_asset for profiler; aborting" in exc.value.message
 
         # with warnings.catch_warnings(record=True):
         #     warnings.simplefilter("error")

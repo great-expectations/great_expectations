@@ -402,10 +402,10 @@ def test_render_section_page():
     })
 
     rendered_doc = ge.render.view.view.DefaultJinjaSectionView().render(
-        RenderedComponentContentWrapper(**{
+        {
             "section": section,
             "section_loop": {"index": 1},
-        })
+        }
     )#.replace(" ", "").replace("\t", "").replace("\n", "")
 
     print(rendered_doc)
@@ -455,10 +455,10 @@ def test_rendering_components_without_section_loop_index():
         "header": "Overview",
     })
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
-        RenderedComponentContentWrapper(**{
+        {
             "content_block": header_component_content,
             "content_block_loop": {"index": 2},
-        })
+        }
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -474,9 +474,9 @@ def test_rendering_components_without_section_loop_index():
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
-        RenderedComponentContentWrapper(**{
+        {
             "content_block": header_component_content,
-        })
+        }
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -490,10 +490,10 @@ def test_rendering_components_without_section_loop_index():
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
-        RenderedComponentContentWrapper(**{
+        {
             "content_block": header_component_content,
             "section_loop": {"index": 3},
-        })
+        }
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -575,11 +575,11 @@ def test_rendering_components_with_styling():
         }
     })
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
-        RenderedComponentContentWrapper(**{
+        {
             "content_block": header_component_content,
             "section_loop": {"index": 1},
             "content_block_loop": {"index": 2},
-        })
+        }
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -627,11 +627,11 @@ def test_render_header_component():
         "header": "Overview",
     })
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
-        RenderedComponentContentWrapper(**{
+        {
             "content_block": header_component_content,
             "section_loop": {"index": 1},
             "content_block_loop": {"index": 2},
-        })
+        }
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -661,11 +661,11 @@ def test_render_table_component():
         }
     })
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
-        RenderedComponentContentWrapper(**{
+        {
             "content_block": table_component_content,
             "section_loop": {"index": 1},
             "content_block_loop": {"index": 2},
-        })
+        }
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -717,11 +717,11 @@ def test_render_value_list():
     })
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
-        RenderedComponentContentWrapper(**{
+        {
             "content_block": value_list_component_content,
             "section_loop": {"index": 1},
             "content_block_loop": {"index": 2},
-        })
+        }
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -761,11 +761,11 @@ def test_render_graph():
     })
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
-        RenderedComponentContentWrapper(**{
+        {
             "content_block": graph_component_content,
             "section_loop": {"index": 1},
             "content_block_loop": {"index": 2},
-        })
+        }
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -802,11 +802,11 @@ def test_render_text():
     })
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
-        RenderedComponentContentWrapper(**{
+        {
             "content_block": text_component_content,
             "section_loop": {"index": 1},
             "content_block_loop": {"index": 2},
-        })
+        }
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -835,11 +835,11 @@ def test_render_text():
     })
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
-        RenderedComponentContentWrapper(**{
+        {
             "content_block": text_component_content,
             "section_loop": {"index": 1},
             "content_block_loop": {"index": 2},
-        })
+        }
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")

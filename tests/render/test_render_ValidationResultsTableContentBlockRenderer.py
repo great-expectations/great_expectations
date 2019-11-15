@@ -635,23 +635,19 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     
     # test for succeeded evr
     output_1 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_success)
-    print(output_1)
     assert output_1 is None
     
     # test for failed evr with no "result" key
     output_2 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_no_result)
-    print(output_2)
     assert output_2 is None
     
     # test for failed evr with no unexpected list or unexpected counts
     output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_no_unexpected_list_or_counts)
-    print(output_3)
     assert output_3 is None
     
     # test for failed evr with partial unexpected list
     output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_partial_unexpected_list)
-    print(json.dumps(output_4, indent=2))
-    assert output_4 == {
+    assert output_4.to_json_dict() == {
       "content_block_type": "table",
       "table": [
         [
@@ -731,8 +727,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     
     # test for failed evr with partial unexpected counts
     output_5 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_partial_unexpected_counts)
-    print(json.dumps(output_5, indent=2))
-    assert output_5 == {
+    assert output_5.to_json_dict() == {
       "content_block_type": "table",
       "table": [
         [
@@ -835,8 +830,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
 def test_ValidationResultsTableContentBlockRenderer_get_status_cell(evr_failed_with_exception, evr_success, evr_failed):
     # test for failed evr with exception
     output_1 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_failed_with_exception)
-    print(json.dumps(output_1, indent=2))
-    assert output_1 == {
+    assert output_1.to_json_dict() == {
       "content_block_type": "string_template",
       "string_template": {
         "template": "$icon",
@@ -860,8 +854,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(evr_failed_w
 
     # test for succeeded evr
     output_2 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_success)
-    print(json.dumps(output_2, indent=2))
-    assert output_2 == {
+    assert output_2.to_json_dict() == {
       "content_block_type": "string_template",
       "string_template": {
         "template": "$icon",
@@ -885,8 +878,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(evr_failed_w
     
     # test for failed evr
     output_3 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_failed)
-    print(json.dumps(output_3, indent=2))
-    assert output_3 == {
+    assert output_3.to_json_dict() == {
       "content_block_type": "string_template",
       "string_template": {
         "template": "$icon",
