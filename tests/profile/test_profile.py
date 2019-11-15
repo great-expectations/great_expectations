@@ -24,7 +24,7 @@ def test_DataSetProfiler_methods():
     assert DatasetProfiler.validate(1) == False
     assert DatasetProfiler.validate(toy_dataset)
 
-    with pytest.raises(NotImplementedError) as e_info:
+    with pytest.raises(NotImplementedError):
         DatasetProfiler.profile(toy_dataset)
 
 

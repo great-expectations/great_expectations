@@ -2,6 +2,8 @@ import json
 import base64
 import hashlib
 
+from great_expectations.core import ExpectationConfiguration, ExpectationValidationResult
+
 
 class Renderer(object):
     @classmethod
@@ -10,37 +12,12 @@ class Renderer(object):
 
     @classmethod
     def _get_expectation_type(cls, ge_object):
-        if "expectation_type" in ge_object:
-            # This is an expectation
+        if isinstance(ge_object, ExpectationConfiguration):
             return ge_object.expectation_type
 
-        elif "expectation_config" in ge_object:
+        elif isinstance(ge_object, ExpectationValidationResult):
             # This is a validation
             return ge_object.expectation_config.expectation_type
-
-    @classmethod
-    def _find_ge_object_type(cls, ge_object):
-        """We want upstream systems to have flexibility in what they provide
-        Options include an expectations config, a list of expectations, a single expectation,
-        a validation report, a list of evrs, or a single evr"""
-
-        if isinstance(ge_object, list):
-            if "result" in ge_object[0] or "exception_info" in ge_object[0]:
-                return "evr_list"
-            elif "expectation_type" in ge_object[0]:
-                return "expectation_list"
-        else:
-            if "results" in ge_object:
-                return "validation_report"
-            elif "expectations" in ge_object:
-                return "expectations"
-            elif "result" in ge_object or "exception_info" in ge_object:
-                return "evr"
-            elif "kwargs" in ge_object:
-                return "expectation"
-
-        # print(json.dumps(ge_object, indent=2))
-        raise ValueError("Unrecognized great expectations object.")
 
     #TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
@@ -77,7 +54,7 @@ class Renderer(object):
 
         expect_table_columns_to_match_ordered_list_evr = cls._find_evr_by_type(evrs_, "expect_table_columns_to_match_ordered_list")
         if expect_table_columns_to_match_ordered_list_evr:
-            ordered_columns = expect_table_columns_to_match_ordered_list_evr["result"]["observed_value"]
+            ordered_columns = expect_table_columns_to_match_ordered_list_evr.result["observed_value"]
         else:
             # Group EVRs by column
             columns = list(set([evr.expectation_config.kwargs["column"] for evr in evrs_ if "column" in evr.expectation_config.kwargs]))

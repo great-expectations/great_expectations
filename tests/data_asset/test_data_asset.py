@@ -42,25 +42,25 @@ def test_interactive_evaluation(dataset):
 def test_data_asset_name_inheritance(dataset):
     # A data_asset should have a generic type
     data_asset = DataAsset()
-    assert data_asset.get_expectation_suite()["data_asset_type"] == "DataAsset"
+    assert data_asset.get_expectation_suite().data_asset_type == "DataAsset"
 
     # A FileDataAsset should pick up its type
     data_asset = FileDataAsset()
-    assert data_asset.get_expectation_suite()["data_asset_type"] == "FileDataAsset"
+    assert data_asset.get_expectation_suite().data_asset_type == "FileDataAsset"
 
     # So should a Dataset
     data_asset = Dataset()
-    assert data_asset.get_expectation_suite()["data_asset_type"] == "Dataset"
+    assert data_asset.get_expectation_suite().data_asset_type == "Dataset"
 
     # Backends should *not* change the implementation
-    assert dataset.get_expectation_suite()["data_asset_type"] == "Dataset"
+    assert dataset.get_expectation_suite().data_asset_type == "Dataset"
 
     # But custom classes should choose to
     class MyCustomDataset(Dataset):
         _data_asset_type = "MyCustomDataset"
 
     data_asset = MyCustomDataset()
-    assert data_asset.get_expectation_suite()["data_asset_type"] == "MyCustomDataset"
+    assert data_asset.get_expectation_suite().data_asset_type == "MyCustomDataset"
 
 
 def test_catch_exceptions_with_bad_expectation_type():

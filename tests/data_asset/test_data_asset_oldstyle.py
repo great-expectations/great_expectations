@@ -185,8 +185,8 @@ def test_expectation_meta():
 
     # This should raise an error because meta isn't serializable.
     with pytest.raises(InvalidExpectationConfigurationError) as exc:
-        df.expect_column_values_to_be_increasing("x", meta={"unserializable_array": np.array(range(10))})
-        assert "is not json serializable." in exc.value.message
+        df.expect_column_values_to_be_increasing("x", meta={"unserializable_content": np.complex(0, 0)})
+    assert "which cannot be serialized to json" in exc.value.message
 
 
 def test_set_default_expectation_argument():
@@ -207,6 +207,24 @@ def test_set_default_expectation_argument():
             "catch_exceptions": False,
             "result_format": 'SUMMARY',
     } == df.get_default_expectation_arguments()
+
+
+def test_meta_version_warning():
+    asset = ge.data_asset.DataAsset()
+
+    with pytest.warns(UserWarning) as w:
+        out = asset.validate(expectation_suite=ExpectationSuite(expectations=[], data_asset_name="default",
+                                                                expectation_suite_name="test",
+                                                                meta={}))
+    assert w[0].message.args[0] == "WARNING: No great_expectations version found in configuration object."
+
+    with pytest.warns(UserWarning) as w:
+        out = asset.validate(expectation_suite=ExpectationSuite(expectations=[], data_asset_name="default",
+                                                                expectation_suite_name="test",
+                                                                meta={"great_expectations.__version__": "0.0.0"}))
+    assert w[0].message.args[0] == \
+            "WARNING: This configuration object was built using version 0.0.0 of great_expectations, but is currently "\
+            "being validated by version %s." % ge.__version__
 
 
 class TestDataAsset(unittest.TestCase):
@@ -1104,22 +1122,6 @@ class TestDataAsset(unittest.TestCase):
                 expect_second_value_to_be, 'y', 2, result_format="BOOLEAN_ONLY")),
             {'success': True}
         )
-
-    def test_meta_version_warning(self):
-        D = ge.data_asset.DataAsset()
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            out = D.validate(expectation_suite={"expectations": []})
-            self.assertEqual(str(w[0].message),
-                             "WARNING: No great_expectations version found in configuration object.")
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            out = D.validate(expectation_suite={
-                             "meta": {"great_expectations.__version__": "0.0.0"}, "expectations": []})
-            self.assertEqual(str(w[0].message),
-                             "WARNING: This configuration object was built using version 0.0.0 of great_expectations, but is currently being valided by version %s." % ge.__version__)
 
 
 if __name__ == "__main__":

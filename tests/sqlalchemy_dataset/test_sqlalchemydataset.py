@@ -83,19 +83,17 @@ def test_broken_decorator_errors(custom_dataset):
 
     with pytest.raises(ValueError) as err:
         custom_dataset.broken_aggregate_expectation('c1')
-        assert "Column aggregate expectation failed to return required information: success" in str(
-            err)
+    assert "Column aggregate expectation failed to return required information: success" in str(err.value)
 
     with pytest.raises(ValueError) as err:
         custom_dataset.another_broken_aggregate_expectation('c1')
-        assert "Column aggregate expectation failed to return required information: observed_value" in str(
-            err)
+    assert "Column aggregate expectation failed to return required information: observed_value" in str(err.value)
 
 
 def test_missing_engine_error(sa):
     with pytest.raises(ValueError) as err:
         SqlAlchemyDataset('test_engine', schema='example')
-        assert "Engine or connection_string must be provided." in str(err)
+    assert "Engine or connection_string must be provided." in str(err.value)
 
 
 def test_only_connection_string(sa):
@@ -108,7 +106,7 @@ def test_schema_custom_sql_error(sa):
     with pytest.raises(ValueError) as err:
         SqlAlchemyDataset('test_schema_custom', schema='example', engine=engine,
                           custom_sql='SELECT * FROM example.fake')
-        assert "Cannot specify both schema and custom_sql." in str(err)
+        assert "Cannot specify both schema and custom_sql." in str(err.value)
 
 
 def test_sqlalchemydataset_raises_error_on_missing_table_name(sa):

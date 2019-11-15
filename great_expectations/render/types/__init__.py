@@ -14,104 +14,193 @@ from great_expectations.render.exceptions import InvalidRenderedContentError
     # class RenderedComponentContentWrapper(RenderedContent):
 
 
-class RenderedContent(dict):
-    # TODO: complete refactor of rendered types to avoid dictionary base
-    pass
+class RenderedContent(object):
+    # # TODO: complete refactor of rendered types to avoid dictionary base
+    # def to_json_dict(self):
+    #     d = {}
+    #     for k, v in self.__dict__.items():
+    #         # Since we have many internal property names
+    #         if k.startswith('_'):
+    #             k = k[1:]
+    #         if isinstance(v, list):
+    #             d[k] = self.render_list_to_json(v)
+    #         elif isinstance(v, RenderedContent):
+    #             d[k] = v.to_json_dict()
+    #         else:
+    #             d[k] = v
+    #     return d
+    #
+    # def render_list_to_json(self, list_):
+    #     new_list = []
+    #     for item in list_:
+    #         if isinstance(item, RenderedContent):
+    #             new_list.append(item.to_json_dict())
+    #         elif isinstance(item, list):
+    #             new_list.append(self.render_list_to_json(item))
+    #         else:
+    #             new_list.append(item)
+    #     return new_list
+
+    def to_json_dict(self):
+        return {}
+
+    @classmethod
+    def rendered_content_list_to_json(cls, list_):
+        result_list = []
+        for item in list_:
+            if isinstance(item, RenderedContent):
+                result_list.append(item.to_json_dict())
+            elif isinstance(item, list):
+                result_list.append(RenderedContent.rendered_content_list_to_json(item))
+            else:
+                result_list.append(item)
+        return result_list
 
 
 class RenderedComponentContent(RenderedContent):
-    def __init__(self, content_block_type, styling=None, **kwargs):
-        self._content_block_type = content_block_type
-        self._styling = styling
-        self.update(kwargs)
+    def __init__(self, content_block_type, styling=None):
+        self.content_block_type = content_block_type
+        if styling is None:
+            styling = {}
+        self.styling = styling
 
-    @property
-    def content_block_type(self):
-        return self._content_block_type
-
-    @property
-    def styling(self):
-        return self._styling
+    def to_json_dict(self):
+        d = super(RenderedComponentContent, self).to_json_dict()
+        d["content_block_type"] = self.content_block_type
+        d["styling"] = self.styling
+        return d
 
 
 class RenderedHeaderContent(RenderedComponentContent):
-    def __init__(self, header, subheader=None, header_row=None, styling=None):
-        super(RenderedHeaderContent, self).__init__(content_block_type="header", styling=styling)
-        self._header = header
-        self._header_row = header_row
-        self._subheader = subheader
+    def __init__(self, header, subheader=None, header_row=None, styling=None, content_block_type="header"):
+        super(RenderedHeaderContent, self).__init__(content_block_type=content_block_type, styling=styling)
+        self.header = header
+        self.header_row = header_row
+        self.subheader = subheader
 
-    @property
-    def header(self):
-        return self._header
-
-    @property
-    def subheader(self):
-        return self._subheader
-
-    @property
-    def header_row(self):
-        return self._header_row
+    def to_json_dict(self):
+        d = super(RenderedHeaderContent, self).to_json_dict()
+        d["header"] = self.header
+        d["subheader"] = self.subheader
+        d["header_row"] = self.header_row
+        return d
 
 
 class RenderedGraphContent(RenderedComponentContent):
-    def __init__(self, graph, styling=None):
-        super(RenderedGraphContent, self).__init__(content_block_type="graph", styling=styling)
-        self._graph = graph
+    def __init__(self, graph, styling=None, content_block_type="graph"):
+        super(RenderedGraphContent, self).__init__(content_block_type=content_block_type, styling=styling)
+        self.graph = graph
 
-    @property
-    def graph(self):
-        return self._graph
+    def to_json_dict(self):
+        d = super(RenderedGraphContent, self).to_json_dict()
+        d["graph"] = self.graph
+        return d
 
 
 class RenderedTableContent(RenderedComponentContent):
-    def __init__(self, table, header_row=None, styling=None):
-        super(RenderedTableContent, self).__init__(content_block_type="table", styling=styling)
-        self._table = table
-        self._header_row = header_row
+    def __init__(self, table, header=None, header_row=None, styling=None, content_block_type="table"):
+        super(RenderedTableContent, self).__init__(content_block_type=content_block_type, styling=styling)
+        self.header = header
+        self.table = table
+        self.header_row = header_row
 
-    @property
-    def table(self):
-        return self._table
-
-    @property
-    def header_row(self):
-        return self._header_row
+    def to_json_dict(self):
+        d = super(RenderedTableContent, self).to_json_dict()
+        d["header"] = self.header
+        d["table"] = RenderedContent.rendered_content_list_to_json(self.table)
+        d["header_row"] = self.header_row
+        return d
 
 
 class RenderedStringTemplateContent(RenderedComponentContent):
-    def __init__(self, string_template, styling=None):
-        super(RenderedStringTemplateContent, self).__init__(content_block_type="string_template", styling=styling)
-        self._string_template = string_template
+    def __init__(self, string_template, styling=None, content_block_type="string_template"):
+        super(RenderedStringTemplateContent, self).__init__(content_block_type=content_block_type, styling=styling)
+        self.string_template = string_template
 
-    @property
-    def string_template(self):
-        return self._string_template
+    def to_json_dict(self):
+        d = super(RenderedStringTemplateContent, self).to_json_dict()
+        d["string_template"] = self.string_template
+        return d
 
 
 class RenderedBulletListContent(RenderedComponentContent):
-    def __init__(self, bullet_list, styling=None):
-        super(RenderedBulletListContent, self).__init__(content_block_type="bullet_list", styling=styling)
-        self._bullet_list = bullet_list
+    def __init__(self, bullet_list, styling=None, content_block_type="bullet_list"):
+        super(RenderedBulletListContent, self).__init__(content_block_type=content_block_type, styling=styling)
+        self.bullet_list = bullet_list
 
-    @property
-    def bullet_list(self):
-        return self._bullet_list
+    def to_json_dict(self):
+        d = super(RenderedBulletListContent, self).to_json_dict()
+        d["bullet_list"] = RenderedContent.rendered_content_list_to_json(self.bullet_list)
+        return d
 
 
 class ValueListContent(RenderedComponentContent):
-    def __init__(self, value_list, header=None, styling=None):
-        super(ValueListContent, self).__init__(content_block_type="value_list", styling=styling)
-        self._value_list = value_list
-        self._header = header
+    def __init__(self, value_list, header=None, styling=None, content_block_type="value_list"):
+        super(ValueListContent, self).__init__(content_block_type=content_block_type, styling=styling)
+        self.header = header
+        self.value_list = value_list
 
-    @property
-    def value_list(self):
-        return self._value_list
+    def to_json_dict(self):
+        d = super(ValueListContent, self).to_json_dict()
+        d["header"] = self.header
+        d["value_list"] = RenderedContent.rendered_content_list_to_json(self.value_list)
+        return d
 
-    @property
-    def header(self):
-        return self._header
+
+class TextContent(RenderedComponentContent):
+    def __init__(self, text, header=None, styling=None, content_block_type="text"):
+        super(TextContent, self).__init__(content_block_type=content_block_type, styling=styling)
+        self.text = text
+        self.header = header
+
+    def to_json_dict(self):
+        d = super(TextContent, self).to_json_dict()
+        d["header"] = self.header
+        d["text"] = self.text
+        return d
+
+
+class RenderedDocumentContent(RenderedContent):
+    # NOTE: JPC 20191028 - review these keys to consolidate and group
+    def __init__(self, sections, data_asset_name=None, full_data_asset_identifier=None, renderer_type=None,
+                 page_title=None, utm_medium=None):
+        if not isinstance(sections, list) and all([isinstance(section, RenderedSectionContent) for section in
+                                                   sections]):
+            raise InvalidRenderedContentError("RenderedDocumentContent requires a list of RenderedSectionContent for "
+                                              "sections.")
+        self.sections = sections
+        self.data_asset_name = data_asset_name
+        self.full_data_asset_identifier = full_data_asset_identifier
+        self.renderer_type = renderer_type
+        self.page_title = page_title
+        self.utm_medium = utm_medium
+
+    def to_json_dict(self):
+        d = super(RenderedDocumentContent, self).to_json_dict()
+        d["sections"] = RenderedContent.rendered_content_list_to_json(self.sections)
+        d["data_asset_name"] = self.data_asset_name
+        d["full_data_asset_identifier"] = self.full_data_asset_identifier
+        d["renderer_type"] = self.renderer_type
+        d["page_title"] = self.page_title
+        d["utm_medium"] = self.utm_medium
+        return d
+
+
+class RenderedSectionContent(RenderedContent):
+    def __init__(self, content_blocks, section_name=None):
+        if not isinstance(content_blocks, list) and all([isinstance(content_block, RenderedComponentContent) for
+                                                         content_block in content_blocks]):
+            raise InvalidRenderedContentError("Rendered section content requires a list of RenderedComponentContent "
+                                              "for content blocks.")
+        self.content_blocks = content_blocks
+        self.section_name = section_name
+
+    def to_json_dict(self):
+        d = super(RenderedSectionContent, self).to_json_dict()
+        d["content_blocks"] = RenderedContent.rendered_content_list_to_json(self.content_blocks)
+        d["section_name"] = self.section_name
+        return d
+
 
 #
 # class RenderedComponentContent(RenderedContent):
@@ -134,29 +223,6 @@ class ValueListContent(RenderedComponentContent):
 #         "content_block_type"
 #     })
 
-# TODO: REMOVE
-#### REMOVE ME########
-class RenderedComponentContentWrapper(dict):
-    pass
-
-
-class RenderedSectionContent(RenderedContent):
-    def __init__(self, content_blocks, section_name=None):
-        if not isinstance(content_blocks, list) and all([isinstance(content_block, RenderedComponentContent) for
-                                                         content_block in content_blocks]):
-            raise InvalidRenderedContentError("Rendered section content requires a list of RenderedComponentContent "
-                                              "for content blocks.")
-        self._content_blocks = content_blocks
-        self._section_name = section_name
-
-    @property
-    def content_blocks(self):
-        return self._content_blocks
-
-    @property
-    def section_name(self):
-        return self._section_name
-
 
     # _allowed_keys = set([
     #     "section_name",
@@ -168,46 +234,6 @@ class RenderedSectionContent(RenderedContent):
     # _key_types = {
     #     "content_blocks" : ListOf(RenderedComponentContent),
     # }
-
-
-class RenderedDocumentContent(RenderedContent):
-    # NOTE: JPC 20191028 - review these keys to consolidate and group
-    def __init__(self, sections, data_asset_name=None, full_data_asset_identifier=None, renderer_type=None,
-                 page_title=None, utm_medium=None):
-        if not isinstance(sections, list) and all([isinstance(section, RenderedSectionContent) for section in
-                                                   sections]):
-            raise InvalidRenderedContentError("RenderedDocumentContent requires a list of RenderedSectionContent for "
-                                              "sections.")
-        self._sections = sections
-        self._data_asset_name = data_asset_name
-        self._full_data_asset_identifier = full_data_asset_identifier
-        self._renderer_type = renderer_type
-        self._page_title = page_title
-        self._utm_medium = utm_medium
-
-    @property
-    def sections(self):
-        return self._sections
-
-    @property
-    def data_asset_name(self):
-        return self._data_asset_name
-
-    @property
-    def full_data_asset_identifier(self):
-        return self._full_data_asset_identifier
-
-    @property
-    def renderer_type(self):
-        return self._renderer_type
-
-    @property
-    def page_title(self):
-        return self._page_title
-
-    @property
-    def utm_medium(self):
-        return self._utm_medium
 
 
 # class RenderedDocumentContent(RenderedContent):

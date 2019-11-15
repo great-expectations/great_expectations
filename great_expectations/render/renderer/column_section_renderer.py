@@ -40,7 +40,7 @@ class ColumnSectionRenderer(Renderer):
                 raise ValueError(
                     "Provide a column section renderer an expectation, list of expectations, evr, or list of evrs.")
         except KeyError:
-            return None
+            return "Table-Level Expectations"
 
 
 class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
@@ -591,11 +591,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
     def _render_header(cls, validation_results):
         column = cls._get_column_name(validation_results)
         
-        if not column:
-            column = "Table-Level Expectations"
-        
         new_block = RenderedHeaderContent(**{
-            "content_block_type": "header",
             "header": convert_to_string_and_escape(column),
             "styling": {
                 "classes": ["col-12"],
@@ -615,7 +611,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         
         return [], new_block
     
-    def render(self, validation_results={}):
+    def render(self, validation_results):
         column = self._get_column_name(validation_results)
         content_blocks = []
         remaining_evrs, content_block = self._render_header(validation_results)
@@ -666,7 +662,7 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
 
         return [], new_block
 
-    def render(self, expectations={}):
+    def render(self, expectations):
         column = self._get_column_name(expectations)
 
         content_blocks = []

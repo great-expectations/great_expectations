@@ -1,7 +1,8 @@
 from six import integer_types
 
 from great_expectations.render.renderer.content_block.expectation_string import ExpectationStringRenderer
-from great_expectations.render.types import RenderedComponentContent
+from great_expectations.render.types import RenderedComponentContent, RenderedStringTemplateContent, \
+    RenderedTableContent, RenderedGraphContent
 from great_expectations.render.util import num_to_str
 
 import pandas as pd
@@ -10,6 +11,7 @@ import altair as alt
 
 class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     _content_block_type = "table"
+    _rendered_component_type = RenderedTableContent
 
     _default_element_styling = {
         "default": {
@@ -32,7 +34,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     @classmethod
     def _get_status_icon(cls, evr):
         if evr["exception_info"]["raised_exception"]:
-            return RenderedComponentContent(**{
+            return RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "$icon",
@@ -49,7 +51,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             })
 
         if evr.success:
-            return RenderedComponentContent(**{
+            return RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "$icon",
@@ -65,7 +67,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 }
             })
         else:
-            return RenderedComponentContent(**{
+            return RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "$icon",
@@ -112,7 +114,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 else:
                     table_rows.append(["null"])
                     
-        unexpected_table_content_block = RenderedComponentContent(**{
+        unexpected_table_content_block = RenderedTableContent(**{
             "content_block_type": "table",
             "table": table_rows,
             "header_row": header_row,
@@ -128,14 +130,12 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     @classmethod
     def _get_unexpected_statement(cls, evr):
         success = evr.success
-        result = evr.get("result", {})
+        result = evr.result
 
-        if ("expectation_config" in evr and
-                "exception_info" in evr and
-                evr["exception_info"]["raised_exception"] is True):
+        if evr.exception_info["raised_exception"]:
             template_str = "\n\n$expectation_type raised an exception:\n$exception_message"
 
-            return RenderedComponentContent(**{
+            return RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": template_str,
@@ -168,7 +168,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             template_str = "\n\n$unexpected_count unexpected values found. " \
                            "$unexpected_percent of $element_count total rows."
 
-            return RenderedComponentContent(**{
+            return RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": template_str,
@@ -238,7 +238,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 ).properties(width=width, height=height, autosize="fit")
                 chart = bars.to_json()
             
-            return {
+            return RenderedGraphContent(**{
                 "content_block_type": "graph",
                 "graph": chart,
                 "styling": {
@@ -247,7 +247,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                         "margin-top": "20px",
                     }
                 }
-            }
+            })
 
         if result.get("observed_value"):
             observed_value = result.get("observed_value")
@@ -274,9 +274,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     @classmethod
     def _process_content_block(cls, content_block):
         super(ValidationResultsTableContentBlockRenderer, cls)._process_content_block(content_block)
-        content_block.update({
-            "header_row": ["Status", "Expectation", "Observed Value"]
-        })
+        content_block.header_row = ["Status", "Expectation", "Observed Value"]
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
