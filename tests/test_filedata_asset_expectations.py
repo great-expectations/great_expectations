@@ -1,6 +1,7 @@
 #Test File Expectations
 from __future__ import division
 import pytest
+import platform
 import great_expectations as ge
 
 def test_expect_file_line_regex_match_count_to_be_between():
@@ -205,6 +206,9 @@ def test_expect_file_size_to_be_between():
 
     # Test file size in range
     good_range = titanic_file.expect_file_size_to_be_between(70000, 71000)
+    if platform.system() == 'Windows':
+        # size = 71680, WSL gives same number so still fails for WSL
+        good_range = titanic_file.expect_file_size_to_be_between(71000, 72000)
     assert good_range["success"]
 
 def test_expect_file_to_exist():

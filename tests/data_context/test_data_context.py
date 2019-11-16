@@ -12,6 +12,7 @@ import shutil
 import json
 from collections import OrderedDict
 from ruamel.yaml import YAML
+from pathlib import Path
 
 from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import (
@@ -753,8 +754,10 @@ def test_ConfigOnlyDataContext__initialization(tmp_path_factory, basic_data_cont
         config_path,
     )
 
-    assert context.root_directory.split("/")[-1] == "test_ConfigOnlyDataContext__initialization__dir0"
-    assert context.plugins_directory.split("/")[-3:] == ["test_ConfigOnlyDataContext__initialization__dir0", "plugins",""]
+    print(context.plugins_directory)
+    assert Path(context.root_directory).as_posix().split("/")[-1] == "test_ConfigOnlyDataContext__initialization__dir0"
+    assert context.plugins_directory.rstrip("/").split(os.path.sep)[-2:] == ["test_ConfigOnlyDataContext__initialization__dir0", "plugins"]
+    assert context.plugins_directory.endswith("/")
 
 
 def test_evaluation_parameter_store_methods(basic_data_context_config):
@@ -794,9 +797,9 @@ def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_conte
     )
 
     print(context._normalize_absolute_or_relative_path("yikes"))
-    assert "test__normalize_absolute_or_relative_path__dir0/yikes" in context._normalize_absolute_or_relative_path("yikes")
+    assert str(Path("test__normalize_absolute_or_relative_path__dir0/yikes")) in context._normalize_absolute_or_relative_path("yikes")
 
-    context._normalize_absolute_or_relative_path("/yikes")
+    print(context._normalize_absolute_or_relative_path("/yikes"))
     assert "test__normalize_absolute_or_relative_path__dir" not in context._normalize_absolute_or_relative_path("/yikes")
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
@@ -806,12 +809,13 @@ def test__get_normalized_data_asset_name_filepath(basic_data_context_config):
         project_config=basic_data_context_config,
         context_root_dir="testing/",
     )
-    assert context._get_normalized_data_asset_name_filepath(
+    actual = context._get_normalized_data_asset_name_filepath(
         NormalizedDataAssetName("my_db", "default", "my_table"),
         "default",
         "my/base/path",
         ".json"
-    ) == "my/base/path/my_db/default/my_table/default.json"
+    )
+    assert Path(actual).as_posix() == "my/base/path/my_db/default/my_table/default.json"
 
 
 def test_load_data_context_from_environment_variables(tmp_path_factory):
@@ -1164,7 +1168,7 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
 def test_build_batch_kwargs(titanic_multibatch_data_context):
     data_asset_name = titanic_multibatch_data_context.normalize_data_asset_name("titanic")
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(data_asset_name, "Titanic_1911")
-    assert "./data/titanic/Titanic_1911.csv" in batch_kwargs["path"]
+    assert str(Path("./data/titanic/Titanic_1911.csv")) in batch_kwargs["path"]
     assert "partition_id" in batch_kwargs
     assert batch_kwargs["partition_id"] == "Titanic_1911"
 
