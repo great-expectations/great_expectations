@@ -47,11 +47,11 @@ out the missing implementations!
 +-----------------------------------------------------------------------------------+----------+----------+----------+
 |`expect_column_values_to_match_regex`                                              | True     | True     | True     |
 +-----------------------------------------------------------------------------------+----------+----------+----------+
-|`expect_column_values_to_not_match_regex`                                          | True     | False    | True     |
+ |`expect_column_values_to_not_match_regex`                                          | True     | True     | True     |
 +-----------------------------------------------------------------------------------+----------+----------+----------+
 |`expect_column_values_to_match_regex_list`                                         | True     | True     | False    |
 +-----------------------------------------------------------------------------------+----------+----------+----------+
-|`expect_column_values_to_not_match_regex_list`                                     | True     | False    | False    |
+ |`expect_column_values_to_not_match_regex_list`                                     | True     | True     | False    |
 +-----------------------------------------------------------------------------------+----------+----------+----------+
 |`expect_column_values_to_match_strftime_format`                                    | True     | False    | False    |
 +-----------------------------------------------------------------------------------+----------+----------+----------+
