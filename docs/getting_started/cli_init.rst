@@ -50,15 +50,9 @@ If you inspect the ``great_expectations/`` directory after the init command has 
     ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── pandas
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   ├── spark
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   └── sql
-    │       ├── create_expectations.ipynb
-    │       └── validations_playground.ipynb
+    │   ├── pandas
+    │   ├── spark
+    │   └── sql
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -264,15 +258,9 @@ Still, it's useful to see how they're stored, to get a sense for how namespaces 
     ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── pandas
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   ├── spark
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   └── sql
-    │       ├── create_expectations.ipynb
-    │       └── validations_playground.ipynb
+    │   ├── pandas
+    │   ├── spark
+    │   └── sql
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -432,14 +420,8 @@ After the init command completes, you should see the following directory structu
     ├── great_expectations.yml
     ├── notebooks
     │   ├── pandas
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
     │   ├── spark
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
     │   └── sql
-    │       ├── create_expectations.ipynb
-    │       └── validations_playground.ipynb
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -449,7 +431,7 @@ After the init command completes, you should see the following directory structu
         │       │   └── data__dir
         │       │       └── default
         │       │           ├── npidata
-        │       │           │   └── BasicDatasetProfiler.html
+        │       │               └── BasicDatasetProfiler.html
         │       ├── index.html
         │       └── validations
         │           └── profiling
