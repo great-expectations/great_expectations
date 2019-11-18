@@ -1,6 +1,5 @@
 body {
   position: relative;
-  padding-bottom: 100px;
 }
 
 .container {
@@ -10,9 +9,8 @@ body {
 .sticky {
   position: -webkit-sticky;
   position: sticky;
-  max-height: 90vh;
-  overflow-y: auto;
-  top: 60px;
+  top: 80px;
+  z-index: 1;
 }
 
 .ge-section {
@@ -109,9 +107,9 @@ td .show-scrollbars {
   max-height: 335px;
 }
 
-.show-scrollbars ul {
-  padding-bottom: 20px
-}
+/*.show-scrollbars ul {*/
+/*  padding-bottom: 20px*/
+/*}*/
 
 .show-scrollbars::-webkit-scrollbar {
   -webkit-appearance: none;
