@@ -1164,7 +1164,7 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
 def test_build_batch_kwargs(titanic_multibatch_data_context):
     data_asset_name = titanic_multibatch_data_context.normalize_data_asset_name("titanic")
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(data_asset_name, "Titanic_1911")
-    assert "./data/titanic/Titanic_1911.csv" in batch_kwargs["path"]
+    assert os.path.relpath("./data/titanic/Titanic_1911.csv") in batch_kwargs["path"]
     assert "partition_id" in batch_kwargs
     assert batch_kwargs["partition_id"] == "Titanic_1911"
 
