@@ -139,7 +139,7 @@ class SubdirReaderGenerator(BatchGenerator):
                         self._build_batch_kwargs_from_path(path, reader_options=reader_options, limit=limit)
                     ])
             # If we haven't returned yet, raise
-            raise BatchKwargsError("No valid extensions found when searching {:s} using configured known_extensions: "
+            raise BatchKwargsError("No valid files found when searching {:s} using configured known_extensions: "
                                    "{:s} ".format(os.path.join(self.base_directory, generator_asset),
                                                   ', '.join(map(str, self.known_extensions))),
                                    batch_kwargs=PathBatchKwargs(

@@ -5,6 +5,7 @@ import os
 from great_expectations.data_context.util import safe_mmkdir
 
 from great_expectations.datasource.generator import SubdirReaderGenerator
+from great_expectations.exceptions import BatchKwargsError
 
 
 def test_subdir_reader_path_partitioning(tmp_path_factory):
@@ -37,7 +38,7 @@ def test_subdir_reader_path_partitioning(tmp_path_factory):
 
     asset_1_kwargs = [kwargs for kwargs in subdir_reader_generator.get_iterator("asset_1")]
     asset_2_kwargs = [kwargs for kwargs in subdir_reader_generator.get_iterator("asset_2")]
-    with pytest.raises(IOError):
+    with pytest.raises(BatchKwargsError):
         not_an_asset_kwargs = [kwargs for kwargs in subdir_reader_generator.get_iterator("not_an_asset")]
 
     assert len(asset_1_kwargs) == 3
