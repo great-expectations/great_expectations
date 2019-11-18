@@ -25,6 +25,8 @@
 * Add support to S3 generator for retrieving directories by specifying the `directory_assets` configuration
 * Fix warning regarding implicit class_name during init flow
 * Expose build_generator API publicly on datasources
+* Allow configuration of known extensions and return more informative message when SubdirReaderGenerator cannot find
+  relevant files.
 
 0.8.4.post0
 -----------------
@@ -40,7 +42,7 @@ locations.
 * Added a component with links to useful tutorials to the index page of the Data Docs website
 * Improved the UX of adding a SQL datasource in the CLI - now the CLI asks for specific credentials for Postgres,
   MySQL, Redshift and Snowflake, allows continuing debugging in the config file and has better error messages
-* Added batch_kwargs infomration to DataDocs validation results
+* Added batch_kwargs information to DataDocs validation results
 * Fix an issue affecting file stores on Windows
 
 
@@ -57,7 +59,6 @@ locations.
 0.8.2.post0
 ------------
 * Correct a packaging issue resulting in missing css files in tarball release
-
 
 
 0.8.2
