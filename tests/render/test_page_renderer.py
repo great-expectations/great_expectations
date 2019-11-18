@@ -150,47 +150,47 @@ def test_ValidationResultsPageRenderer_render_validation_header():
 def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_evrs_1):
     validation_info = ValidationResultsPageRenderer._render_validation_info(titanic_profiled_evrs_1)
     print(json.dumps(validation_info, indent=2))
-    
+
     expected_validation_info = {
-      "content_block_type": "table",
-      "header": "Info",
-      "table": [
-        [
-          "Full Data Asset Identifier",
-          ""
+        "content_block_type": "table",
+        "header": "Info",
+        "table": [
+            [
+                "Full Data Asset Identifier",
+                "my_datasource/my_generator/titanic_data"
+            ],
+            [
+                "Expectation Suite Name",
+                "default"
+            ],
+            [
+                "Great Expectations Version",
+                "__fixture__"
+            ],
+            [
+                "Run ID",
+                "__run_id_fixture__"
+            ],
+            [
+                "Validation Status",
+                "<i class=\"fas fa-times text-danger\" aria-hidden=\"true\"></i> Failed"
+            ]
         ],
-        [
-          "Expectation Suite Name",
-          "default"
-        ],
-        [
-          "Great Expectations Version",
-          "__fixture__"
-        ],
-        [
-          "Run ID",
-          "__run_id_fixture__"
-        ],
-        [
-          "Validation Succeeded",
-          False
-        ]
-      ],
-      "styling": {
-        "classes": [
-          "col-12",
-          "table-responsive"
-        ],
-        "styles": {
-          "margin-top": "20px"
-        },
-        "body": {
-          "classes": [
-            "table",
-            "table-sm"
-          ]
+        "styling": {
+            "classes": [
+                "col-12",
+                "table-responsive"
+            ],
+            "styles": {
+                "margin-top": "20px"
+            },
+            "body": {
+                "classes": [
+                    "table",
+                    "table-sm"
+                ]
+            }
         }
-      }
     }
 
     assert validation_info == expected_validation_info

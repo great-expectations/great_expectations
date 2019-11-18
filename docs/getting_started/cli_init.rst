@@ -50,15 +50,9 @@ If you inspect the ``great_expectations/`` directory after the init command has 
     ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── pandas
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   ├── spark
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   └── sql
-    │       ├── create_expectations.ipynb
-    │       └── validations_playground.ipynb
+    │   ├── pandas
+    │   ├── spark
+    │   └── sql
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -183,25 +177,6 @@ Note: the SQL credentials you entered are stored in the ``uncommitted/config_var
 Note that this file goes in the ``uncommitted/`` directory, which should *NOT* be committed to source control.
 The ${my_db} variable is substituted with the credentials at runtime.
 
-A Great Expectations Datasource brings the worlds of data and expectations together. Datasources produce
-Great Expectations DataAssets, which support the core GE api, including validation.
-Fully describing a DataAsset's "name" requires three parts:
-
-1. ``datasource`` (`my_postgresql_db`)
-2. ``generator`` (`queries`)
-3. ``generator_asset`` (`user_events_table`)
-
-In addition, to work with a specific batch of data and validate it against a particular set of expectations, you will
-need to specify:
-
-* ``batch_kwargs`` (`SELECT * FROM user_events_table WHERE created_at>2018-01-01`), and/or
-* ``expectation_suite_name`` (`BasicDatasetProfiler`).
-
-Together, these five elements completely allow you to reference all of the main entities within the DataContext.
-
-You can get started in Great Expectations without learning all the details of the DataContext. To start, you'll mainly
-use elements 1 and 3: ``datasource``s, (with names such as  `my_postgresql_db`) and ``generator_asset``s, which may
-conceptually be similar to a `user_events_table`, for example.
 
 Configuring Slack Notifications
 ----------------------------------------
@@ -239,20 +214,13 @@ please see :ref:`profiling`.
 
 Within the CLI, it's easy to profile our data.
 
-Warning: For large data sets, the current default profiler may run slowly and impose significant I/O and compute load.
-Be cautious when executing against shared databases.
+Note: the current default profiler uses first 1000 records of a table (or a file).
 
 .. code-block:: bash
 
     ========== Profiling ==========
 
     Profiling 'data__dir' will create expectations and documentation.
-
-    Please note: Profiling is still a beta feature in Great Expectations.  The current profiler will evaluate the entire 
-    data source (without sampling), which may be very time consuming. 
-    As a rule of thumb, we recommend starting with data smaller than 100MB.
-
-    To learn more about profiling, visit https://docs.greatexpectations.io/en/latest/reference/profiling.html
 
     Found 1 data assets from generator default
 
@@ -290,15 +258,9 @@ Still, it's useful to see how they're stored, to get a sense for how namespaces 
     ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── pandas
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   ├── spark
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   └── sql
-    │       ├── create_expectations.ipynb
-    │       └── validations_playground.ipynb
+    │   ├── pandas
+    │   ├── spark
+    │   └── sql
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -458,14 +420,8 @@ After the init command completes, you should see the following directory structu
     ├── great_expectations.yml
     ├── notebooks
     │   ├── pandas
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
     │   ├── spark
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
     │   └── sql
-    │       ├── create_expectations.ipynb
-    │       └── validations_playground.ipynb
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -475,7 +431,7 @@ After the init command completes, you should see the following directory structu
         │       │   └── data__dir
         │       │       └── default
         │       │           ├── npidata
-        │       │           │   └── BasicDatasetProfiler.html
+        │       │               └── BasicDatasetProfiler.html
         │       ├── index.html
         │       └── validations
         │           └── profiling
