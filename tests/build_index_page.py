@@ -1,7 +1,7 @@
 import glob
 
-html_files = glob.glob("tests/render/output/*.html")
-json_files = glob.glob("tests/render/output/*.json")
+json_files = glob.glob("tests/**/output/**/*.json", recursive=True)
+html_files = glob.glob("tests/**/output/**/*.html", recursive=True)
 
 html_list = ""
 for f_ in html_files:
