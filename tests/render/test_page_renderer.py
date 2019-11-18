@@ -241,8 +241,8 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_prof
     assert validation_statistics == expected_validation_statistics
 
 
-def test_ValidationResultsPageRenderer_render_batch_kwargs(titanic_profiled_evrs_1):
-    batch_kwargs_table = ValidationResultsPageRenderer._render_batch_kwargs(titanic_profiled_evrs_1)
+def test_ValidationResultsPageRenderer_render_nested_table_from_dict(titanic_profiled_evrs_1):
+    batch_kwargs_table = ValidationResultsPageRenderer._render_nested_table_from_dict(titanic_profiled_evrs_1["meta"]["batch_kwargs"], header="Batch Kwargs")
     print(json.dumps(batch_kwargs_table, indent=2))
 
     expected_batch_kwarg_table = {
@@ -250,13 +250,12 @@ def test_ValidationResultsPageRenderer_render_batch_kwargs(titanic_profiled_evrs
         "header": "Batch Kwargs",
         "table": [
             [
-                "engine",
                 {
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$value",
                         "params": {
-                            "value": "python"
+                            "value": "partition_id"
                         },
                         "styling": {
                             "default": {
@@ -269,14 +268,11 @@ def test_ValidationResultsPageRenderer_render_batch_kwargs(titanic_profiled_evrs
                     "styling": {
                         "parent": {
                             "classes": [
-                                "pl-3"
+                                "pr-3"
                             ]
                         }
                     }
-                }
-            ],
-            [
-                "partition_id",
+                },
                 {
                     "content_block_type": "string_template",
                     "string_template": {
@@ -294,15 +290,35 @@ def test_ValidationResultsPageRenderer_render_batch_kwargs(titanic_profiled_evrs
                     },
                     "styling": {
                         "parent": {
-                            "classes": [
-                                "pl-3"
-                            ]
+                            "classes": []
                         }
                     }
                 }
             ],
             [
-                "path",
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$value",
+                        "params": {
+                            "value": "path"
+                        },
+                        "styling": {
+                            "default": {
+                                "styles": {
+                                    "word-break": "break-all"
+                                }
+                            }
+                        }
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": [
+                                "pr-3"
+                            ]
+                        }
+                    }
+                },
                 {
                     "content_block_type": "string_template",
                     "string_template": {
@@ -320,21 +336,18 @@ def test_ValidationResultsPageRenderer_render_batch_kwargs(titanic_profiled_evrs
                     },
                     "styling": {
                         "parent": {
-                            "classes": [
-                                "pl-3"
-                            ]
+                            "classes": []
                         }
                     }
                 }
             ],
             [
-                "sep",
                 {
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$value",
                         "params": {
-                            "value": "None"
+                            "value": "reader_options"
                         },
                         "styling": {
                             "default": {
@@ -347,7 +360,124 @@ def test_ValidationResultsPageRenderer_render_batch_kwargs(titanic_profiled_evrs
                     "styling": {
                         "parent": {
                             "classes": [
-                                "pl-3"
+                                "pr-3"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "content_block_type": "table",
+                    "table": [
+                        [
+                            {
+                                "content_block_type": "string_template",
+                                "string_template": {
+                                    "template": "$value",
+                                    "params": {
+                                        "value": "engine"
+                                    },
+                                    "styling": {
+                                        "default": {
+                                            "styles": {
+                                                "word-break": "break-all"
+                                            }
+                                        }
+                                    }
+                                },
+                                "styling": {
+                                    "parent": {
+                                        "classes": [
+                                            "pr-3"
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                "content_block_type": "string_template",
+                                "string_template": {
+                                    "template": "$value",
+                                    "params": {
+                                        "value": "python"
+                                    },
+                                    "styling": {
+                                        "default": {
+                                            "styles": {
+                                                "word-break": "break-all"
+                                            }
+                                        }
+                                    }
+                                },
+                                "styling": {
+                                    "parent": {
+                                        "classes": []
+                                    }
+                                }
+                            }
+                        ],
+                        [
+                            {
+                                "content_block_type": "string_template",
+                                "string_template": {
+                                    "template": "$value",
+                                    "params": {
+                                        "value": "sep"
+                                    },
+                                    "styling": {
+                                        "default": {
+                                            "styles": {
+                                                "word-break": "break-all"
+                                            }
+                                        }
+                                    }
+                                },
+                                "styling": {
+                                    "parent": {
+                                        "classes": [
+                                            "pr-3"
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                "content_block_type": "string_template",
+                                "string_template": {
+                                    "template": "$value",
+                                    "params": {
+                                        "value": "None"
+                                    },
+                                    "styling": {
+                                        "default": {
+                                            "styles": {
+                                                "word-break": "break-all"
+                                            }
+                                        }
+                                    }
+                                },
+                                "styling": {
+                                    "parent": {
+                                        "classes": []
+                                    }
+                                }
+                            }
+                        ]
+                    ],
+                    "styling": {
+                        "classes": [
+                            "col-12",
+                            "table-responsive"
+                        ],
+                        "body": {
+                            "classes": [
+                                "table",
+                                "table-sm",
+                                "m-0"
+                            ]
+                        },
+                        "parent": {
+                            "classes": [
+                                "pt-0",
+                                "pl-0",
+                                "border-top-0"
                             ]
                         }
                     }
