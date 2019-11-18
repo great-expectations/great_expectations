@@ -3,7 +3,8 @@
 
 0.8.5__develop
 -----------------
-
+* Allow configuration of known extensions and return more informative message when SubdirReaderGenerator cannot find
+  relevant files.
 
 0.8.4.post0
 -----------------
