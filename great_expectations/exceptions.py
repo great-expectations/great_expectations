@@ -1,5 +1,3 @@
-import os
-
 from marshmallow import ValidationError
 
 
@@ -149,5 +147,5 @@ class DatasourceInitializationError(GreatExpectationsError):
         self.message = "Cannot initialize datasource %s, error: %s" % (datasource_name, message)
 
 
-class InvalidConfigValueTypeError(object):
+class InvalidConfigValueTypeError(DataContextError):
     pass

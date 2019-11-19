@@ -229,7 +229,8 @@ def test_render_validation_results(titanic_profiled_evrs_1):
     assert rendered_page[-7:] == "</html>"
     assert "Table-Level Expectations" in rendered_page
     assert 'Must have more than <span class="badge badge-secondary" >0</span> rows.' in rendered_page
-    assert 'Must have between <span class="badge badge-secondary" >0</span> and <span class="badge badge-secondary" >23</span> columns.' in rendered_page
+    assert 'This table should have a list of columns in a specific order, but that order is not specified.' \
+           in rendered_page
 
 
 @pytest.mark.smoketest

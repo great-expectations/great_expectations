@@ -1,7 +1,7 @@
 {
   "meta": {
     "great_expectations.__version__": "0.8.2.post0+33.ga701e12a.dirty",
-    "data_asset_name": "default",
+    "data_asset_name": "my_datasource/default/default",
     "expectation_suite_name": "default",
     "run_id": "20191119T192259.818518Z"
   },

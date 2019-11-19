@@ -6,7 +6,8 @@
         "column": "Name"
       }
     }
- ], 
- "data_asset_name": null,
- "expectation_suite_name": "default"
+  ],
+  "data_asset_name": "titanic",
+  "expectation_suite_name": "default",
+  "meta": {}
 }

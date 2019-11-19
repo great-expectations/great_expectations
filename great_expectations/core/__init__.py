@@ -679,6 +679,8 @@ class ExpectationValidationResult(object):
         self.expectation_config = expectation_config
         # TODO: re-add
         # assert_json_serializable(result, "result")
+        if result is None:
+            result = {}
         self.result = result
         if meta is None:
             meta = {}

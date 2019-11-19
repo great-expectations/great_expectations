@@ -1,4 +1,6 @@
 import logging
+
+from marshmallow import ValidationError
 from six import string_types
 
 import pypandoc
@@ -33,14 +35,23 @@ class ValidationResultsPageRenderer(Renderer):
             }
         )
 
-    def render(self, validation_results={}):
+    def render(self, validation_results):
         run_id = validation_results.meta['run_id']
         full_data_asset_identifier = validation_results.meta['data_asset_name'] or "//"
         if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
-            # This will cause a validation error if the data asset name is not properly formatted
-            full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
+            try:
+                # This will cause a validation error if the data asset name is not properly formatted
+                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
+            except ValidationError:
+                if isinstance(full_data_asset_identifier, string_types):
+                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
+                else:
+                    raise
+        if isinstance(full_data_asset_identifier, string_types):
+            short_data_asset_name = full_data_asset_identifier
+        else:
+            short_data_asset_name = full_data_asset_identifier.generator_asset
         expectation_suite_name = validation_results.meta['expectation_suite_name']
-        short_data_asset_name = full_data_asset_identifier.generator_asset
     
         # Group EVRs by column
         columns = {}
@@ -114,8 +125,14 @@ class ValidationResultsPageRenderer(Renderer):
         run_id = validation_results.meta['run_id']
         full_data_asset_identifier = validation_results.meta['data_asset_name'] or ""
         if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
-            # This will cause a validation error if the data asset name is not properly formatted
-            full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
+            try:
+                # This will cause a validation error if the data asset name is not properly formatted
+                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
+            except ValidationError:
+                if isinstance(full_data_asset_identifier, string_types):
+                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
+                else:
+                    raise
         expectation_suite_name = validation_results.meta['expectation_suite_name']
         ge_version = validation_results.meta["great_expectations.__version__"]
         success = validation_results.success
@@ -124,7 +141,7 @@ class ValidationResultsPageRenderer(Renderer):
             "content_block_type": "table",
             "header": "Info",
             "table": [
-                ["Full Data Asset Identifier", full_data_asset_identifier],
+                ["Full Data Asset Identifier", full_data_asset_identifier.to_path()],
                 ["Expectation Suite Name", expectation_suite_name],
                 ["Great Expectations Version", ge_version],
                 ["Run ID", run_id],
@@ -194,6 +211,15 @@ class ExpectationSuitePageRenderer(Renderer):
     def render(self, expectations):
         columns, ordered_columns = self._group_and_order_expectations_by_column(expectations)
         full_data_asset_identifier = expectations.data_asset_name
+        if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
+            try:
+                # This will cause a validation error if the data asset name is not properly formatted
+                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
+            except ValidationError:
+                if isinstance(full_data_asset_identifier, string_types):
+                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
+                else:
+                    raise
         expectation_suite_name = expectations.expectation_suite_name
 
         overview_content_blocks = [
@@ -253,6 +279,15 @@ class ExpectationSuitePageRenderer(Renderer):
     @classmethod
     def _render_asset_info(cls, expectations):
         full_data_asset_identifier = expectations.data_asset_name
+        if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
+            try:
+                # This will cause a validation error if the data asset name is not properly formatted
+                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
+            except ValidationError:
+                if isinstance(full_data_asset_identifier, string_types):
+                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
+                else:
+                    raise
         data_asset_type = expectations.data_asset_type
         expectation_suite_name = expectations.expectation_suite_name
         ge_version = expectations.meta["great_expectations.__version__"]
@@ -261,7 +296,7 @@ class ExpectationSuitePageRenderer(Renderer):
             "content_block_type": "table",
             "header": "Info",
             "table": [
-                ["Full Data Asset Identifier", full_data_asset_identifier],
+                ["Full Data Asset Identifier", full_data_asset_identifier.to_path()],
                 ["Data Asset Type", data_asset_type],
                 ["Expectation Suite Name", expectation_suite_name],
                 ["Great Expectations Version", ge_version]
@@ -342,7 +377,7 @@ class ExpectationSuitePageRenderer(Renderer):
                 else:
                     logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
             
-            if note_content != None:
+            if note_content is not None:
                 content = content + note_content
 
         return TextContent(**{
@@ -393,10 +428,19 @@ class ProfilingResultsPageRenderer(Renderer):
         run_id = validation_results.meta['run_id']
         full_data_asset_identifier = validation_results.meta['data_asset_name'] or "//"
         if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
-            # This will cause a validation error if the data asset name is not properly formatted
-            full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
+            try:
+                # This will cause a validation error if the data asset name is not properly formatted
+                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
+            except ValidationError:
+                if isinstance(full_data_asset_identifier, string_types):
+                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
+                else:
+                    raise
+        if isinstance(full_data_asset_identifier, string_types):
+            short_data_asset_name = full_data_asset_identifier
+        else:
+            short_data_asset_name = full_data_asset_identifier.generator_asset
         expectation_suite_name = validation_results.meta['expectation_suite_name']
-        short_data_asset_name = full_data_asset_identifier.generator_asset
 
         # Group EVRs by column
         #TODO: When we implement a ValidationResultSuite class, this method will move there.
