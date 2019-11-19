@@ -27,6 +27,7 @@ def titanic_expectations():
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_profiling_results_column_section_renderer(titanic_validation_results):
     # Group EVRs by column
     evrs = {}
@@ -46,6 +47,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     # Group expectations by column
     exp_groups = {}
@@ -70,6 +72,7 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     #         assert json.dumps(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]), indent=2) == infile
 
 
+@pytest.mark.smoketest
 def test_ProfilingResultsColumnSectionRenderer_render(titanic_profiled_evrs_1, titanic_profiled_name_column_evrs):
     #Smoke test for titanic names
     document = ProfilingResultsColumnSectionRenderer().render(titanic_profiled_name_column_evrs)
