@@ -104,7 +104,7 @@ ul {
 }
 
 td .show-scrollbars {
-  max-height: 335px;
+  max-height: 80vh;
 }
 
 /*.show-scrollbars ul {*/
