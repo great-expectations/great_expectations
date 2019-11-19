@@ -207,10 +207,13 @@ class ConfigOnlyDataContext(object):
         uncommitted_dir = os.path.join(base_dir, "uncommitted")
 
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
+            new_directory_path = os.path.join(uncommitted_dir, new_directory)
             safe_mmkdir(
-                os.path.join(uncommitted_dir, new_directory),
+                new_directory_path,
                 exist_ok=True
             )
+            if new_directory == "data_docs":
+                cls.scaffold_data_docs_static_assets_directory(new_directory_path)
 
         notebook_path = os.path.join(base_dir, "notebooks")
         for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
@@ -222,6 +225,13 @@ class ConfigOnlyDataContext(object):
         styles_template = file_relative_path(__file__, "../render/view/styles/data_docs_custom_styles_template.css")
         styles_destination_path = os.path.join(plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
         shutil.copyfile(styles_template, styles_destination_path)
+        
+    @classmethod
+    def scaffold_data_docs_static_assets_directory(cls, data_docs_dir):
+        """Copy static assets directory"""
+        static_assets_dir = file_relative_path(__file__, "../render/view/static")
+        static_assets_destination_path = os.path.join(data_docs_dir, "static")
+        shutil.copytree(static_assets_dir, static_assets_destination_path)
 
     @classmethod
     def scaffold_notebooks(cls, base_dir):
