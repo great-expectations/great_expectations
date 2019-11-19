@@ -1,9 +1,7 @@
 <div class="col-lg-2 col-md-2 d-none d-md-block">
   {% include 'ge_info.j2' %}
   <div class="sticky">
-    {% if renderer_type in ["ValidationResultsPageRenderer", "SiteIndexPageRenderer"] %}
-      {% include 'page_action_card.j2' %}
-    {% endif %}
+    {% include 'page_action_card.j2' %}
     {% if renderer_type != "SiteIndexPageRenderer" %}
       {% include 'table_of_contents.j2' %}
     {% endif %}
