@@ -98,7 +98,8 @@ class RenderedTableContent(RenderedComponentContent):
         if self.subheader is not None:
             d["subheader"] = self.subheader
         d["table"] = RenderedContent.rendered_content_list_to_json(self.table)
-        d["header_row"] = self.header_row
+        if self.header_row is not None:
+            d["header_row"] = self.header_row
         return d
 
 

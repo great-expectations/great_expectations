@@ -13,7 +13,7 @@ from .renderer import Renderer
 from ..types import (
     RenderedDocumentContent,
     RenderedSectionContent,
-    RenderedHeaderContent, RenderedTableContent, TextContent)
+    RenderedHeaderContent, RenderedTableContent, TextContent, RenderedStringTemplateContent)
 from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
@@ -187,7 +187,7 @@ class ValidationResultsPageRenderer(Renderer):
         for kwarg, value in input_dict.items():
             if not isinstance(value, (dict, OrderedDict)):
                 table_row = [
-                    {
+                    RenderedStringTemplateContent(**{
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "$value",
@@ -207,8 +207,8 @@ class ValidationResultsPageRenderer(Renderer):
                                 "classes": ["pr-3"],
                             }
                         }
-                    },
-                    {
+                    }),
+                    RenderedStringTemplateContent(**{
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "$value",
@@ -228,11 +228,11 @@ class ValidationResultsPageRenderer(Renderer):
                                 "classes": [],
                             }
                         }
-                    }
+                    })
                 ]
             else:
                 table_row = [
-                    {
+                    RenderedStringTemplateContent(**{
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "$value",
@@ -252,15 +252,15 @@ class ValidationResultsPageRenderer(Renderer):
                                 "classes": ["pr-3"],
                             }
                         }
-                    },
+                    }),
                     cls._render_nested_table_from_dict(value, sub_table=True)
                 ]
             table_rows.append(table_row)
 
-        table_rows.sort(key=lambda row: row[0]["string_template"]["params"]["value"])
+        table_rows.sort(key=lambda row: row[0].string_template["params"]["value"])
 
         if sub_table:
-            return RenderedComponentContent(**{
+            return RenderedTableContent(**{
                 "content_block_type": "table",
                 "table": table_rows,
                 "styling": {
@@ -274,7 +274,7 @@ class ValidationResultsPageRenderer(Renderer):
                 },
             })
         else:
-            return RenderedComponentContent(**{
+            return RenderedTableContent(**{
                 "content_block_type": "table",
                 "header": header,
                 "table": table_rows,

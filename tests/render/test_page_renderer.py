@@ -255,8 +255,8 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_prof
 
 
 def test_ValidationResultsPageRenderer_render_nested_table_from_dict(titanic_profiled_evrs_1):
-    batch_kwargs_table = ValidationResultsPageRenderer._render_nested_table_from_dict(titanic_profiled_evrs_1["meta"]["batch_kwargs"], header="Batch Kwargs")
-    print(json.dumps(batch_kwargs_table, indent=2))
+    batch_kwargs_table = ValidationResultsPageRenderer._render_nested_table_from_dict(
+        titanic_profiled_evrs_1.meta["batch_kwargs"], header="Batch Kwargs").to_json_dict()
 
     expected_batch_kwarg_table = {
         "content_block_type": "table",

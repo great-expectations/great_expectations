@@ -369,6 +369,7 @@ class SiteIndexPageRenderer(Renderer):
             for generator, data_assets in generators.items():
                 generator_header_block = RenderedHeaderContent(**{
                     "content_block_type": "header",
+                    "header": "",
                     "subheader": {
                         "template": "$title_prefix | $generator",
                         "params": {
@@ -461,6 +462,6 @@ class SiteIndexPageRenderer(Renderer):
             })
 
         if cta_object:
-            index_page_document["cta_footer"] = CallToActionRenderer.render(cta_object)
+            index_page_document.cta_footer = CallToActionRenderer.render(cta_object)
 
         return index_page_document
