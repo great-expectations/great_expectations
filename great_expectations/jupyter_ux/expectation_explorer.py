@@ -1373,7 +1373,7 @@ class ExpectationExplorer(object):
 
         # widget with result details
         result_detail_widget = widgets.VBox(children=self.generate_expectation_result_detail_widgets(
-            result=expectation_validation_result.get("result", {})
+            result=expectation_validation_result.result
         ))
 
         # accordion container for result_detail_widget

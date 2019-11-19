@@ -66,12 +66,12 @@ def test_DataContext_raises_error_on_old_config_version():
     with pytest.raises(ge_exceptions.InvalidDataContextConfigError) as exc:
         DataContext(local_dir)
 
-    assert 'BLARG' in exc.value.messages
+    assert 'Error while processing DataContextConfig' in exc.value.message
 
 
 def test_DataContext_raises_error_on_missing_config_version_aka_version_zero():
     local_dir = file_relative_path(
         __file__, os.path.join(BASE_DIR, "version_zero")
     )
-    with pytest.raises(ge_exceptions.ZeroDotSevenConfigVersionError):
+    with pytest.raises(ge_exceptions.InvalidDataContextConfigError):
         DataContext(local_dir)

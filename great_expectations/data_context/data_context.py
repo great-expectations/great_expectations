@@ -1079,7 +1079,7 @@ class ConfigOnlyDataContext(object):
 
         if expectation_suite_name is None:
             try:
-                expectation_suite_name = expectation_suite['expectation_suite_name']
+                expectation_suite_name = expectation_suite.expectation_suite_name
             except KeyError:
                 raise ge_exceptions.DataContextError(
                     "expectation_suite_name must either be specified or present in the provided expectation suite")
@@ -1530,7 +1530,7 @@ class ConfigOnlyDataContext(object):
         else:
             logger.info("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
 
-        profiling_results.success = True
+        profiling_results['success'] = True
 
         if not dry_run:
             profiling_results['results'] = []
@@ -1579,9 +1579,7 @@ class ConfigOnlyDataContext(object):
                     self.validations_store.set(
                         key=ValidationResultIdentifier(
                             expectation_suite_identifier=ExpectationSuiteIdentifier(
-                                data_asset_name=DataAssetIdentifier(
-                                    *normalized_data_asset_name
-                                ),
+                                data_asset_name=normalized_data_asset_name,
                                 expectation_suite_name=expectation_suite_name
                             ),
                             run_id=run_id
@@ -1630,7 +1628,7 @@ class ConfigOnlyDataContext(object):
             if skipped_data_assets > 0:
                 logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
 
-        profiling_results.success = True
+        profiling_results['success'] = True
         return profiling_results
 
 

@@ -73,9 +73,7 @@ class ContentBlockRenderer(Renderer):
     def _process_content_block(cls, content_block):
         header = cls._get_header()
         if header != "":
-            content_block.update({
-                "header": header
-            })
+            content_block.header = header
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):

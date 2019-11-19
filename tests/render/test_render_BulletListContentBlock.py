@@ -3,7 +3,7 @@ import glob
 import json
 from string import Template as pTemplate
 
-
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.render.renderer.content_block import (
     ExpectationSuiteBulletListContentBlockRenderer,
 )
@@ -43,36 +43,36 @@ def test_all_expectations_using_test_definitions():
     test_results = {}
     for filename in test_files:
         test_definitions = json.load(open(filename))
-        types.append(test_definitions.expectation_type)
+        types.append(test_definitions["expectation_type"])
 
-        test_results[test_definitions.expectation_type] = []
+        test_results[test_definitions["expectation_type"]] = []
 
         for dataset in test_definitions["datasets"]:
 
             for test in dataset["tests"]:
                 # Construct an expectation from the test.
                 if type(test["in"]) == dict:
-                    fake_expectation = {
-                        "expectation_type": test_definitions.expectation_type,
-                        "kwargs": test["in"],
-                    }
+                    fake_expectation = ExpectationConfiguration(
+                        expectation_type=test_definitions["expectation_type"],
+                        kwargs=test["in"],
+                    )
                 else:
                     # This would be a good place to put a kwarg-to-arg converter
                     continue
 
                 # Attempt to render it
                 render_result = ExpectationSuiteBulletListContentBlockRenderer.render(
-                    [fake_expectation])
+                    [fake_expectation]).to_json_dict()
    
                 assert isinstance(render_result, dict)
                 assert "content_block_type" in render_result
                 assert render_result["content_block_type"] in render_result
-                assert isinstance(render_result[render_result["content_block_type"]], list )
+                assert isinstance(render_result[render_result["content_block_type"]], list)
 
                 # TODO: Assert that the template is renderable, with all the right arguments, etc.
                 # rendered_template = pTemplate(el["template"]).substitute(el["params"])
 
-                test_results[test_definitions.expectation_type].append({
+                test_results[test_definitions["expectation_type"]].append({
                     test["title"]: render_result,
                     # "rendered_template":rendered_template
                     })

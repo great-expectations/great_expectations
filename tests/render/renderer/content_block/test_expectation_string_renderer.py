@@ -14,7 +14,7 @@ def test_expectation_string_renderer_styling():
         }
     ))
     assert len(result) == 1
-    assert result[0]["string_template"]["template"] == "$column values must be unique."
+    assert result[0].string_template["template"] == "$column values must be unique."
 
     result = renderer.render(ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_unique",
@@ -24,7 +24,7 @@ def test_expectation_string_renderer_styling():
         }
     ))
     assert len(result) == 1
-    template = result[0]["string_template"]
+    template = result[0].string_template
     assert template["template"] == "$column values must be unique, at least $mostly_pct % of the time."
     assert template["params"]["mostly_pct"] == '30'
 
@@ -36,6 +36,6 @@ def test_expectation_string_renderer_styling():
         }
     ))
     assert len(result) == 1
-    template = result[0]["string_template"]
+    template = result[0].string_template
     assert template["template"] == "$column values must be unique, at least $mostly_pct % of the time."
     assert template["params"]["mostly_pct"] == '32.345'

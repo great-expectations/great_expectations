@@ -180,7 +180,7 @@ class ValidationResultIdentifierSchema(Schema):
 class SiteSectionIdentifier(DataContextKey):
     def __init__(self, site_section_name, resource_identifier):
         self._site_section_name = site_section_name
-        if site_section_name == "validations":
+        if site_section_name in ["validations", "profiling"]:
             if isinstance(resource_identifier, ValidationResultIdentifier):
                 self._resource_identifier = resource_identifier
             elif isinstance(resource_identifier, (tuple, list)):

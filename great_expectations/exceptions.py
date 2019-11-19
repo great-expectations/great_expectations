@@ -147,3 +147,7 @@ class BatchKwargsError(DataContextError):
 class DatasourceInitializationError(GreatExpectationsError):
     def __init__(self, datasource_name, message):
         self.message = "Cannot initialize datasource %s, error: %s" % (datasource_name, message)
+
+
+class InvalidConfigValueTypeError(object):
+    pass

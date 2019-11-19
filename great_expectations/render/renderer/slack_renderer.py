@@ -32,12 +32,11 @@ class SlackRenderer(Renderer):
         expectation_suite_name = None
         data_asset_name = None
         if validation_result:
-            if "meta" in validation_result:
-                data_asset_name = validation_result.meta.get(
-                    "data_asset_name",
-                    "no_name_provided_" + datetime.datetime.utcnow().isoformat().replace(":", "") + "Z"
-                )
-                expectation_suite_name = validation_result.meta.get("expectation_suite_name", "default")
+            data_asset_name = validation_result.meta.get(
+                "data_asset_name",
+                "no_name_provided_" + datetime.datetime.utcnow().isoformat().replace(":", "") + "Z"
+            )
+            expectation_suite_name = validation_result.meta.get("expectation_suite_name", "default")
         
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]

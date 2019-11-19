@@ -8,6 +8,7 @@ import os
 from collections import OrderedDict
 
 import great_expectations as ge
+from great_expectations.core import expectationSuiteSchema
 from great_expectations.render.renderer import (
     ProfilingResultsPageRenderer,
     ProfilingResultsColumnSectionRenderer,
@@ -19,35 +20,31 @@ from great_expectations.render.renderer import (
 from great_expectations.render.view import DefaultJinjaPageView
 from great_expectations.render.renderer.content_block import ValidationResultsTableContentBlockRenderer
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-
-from great_expectations.data_context.util import safe_mmkdir
-from great_expectations.render.types import (
-    RenderedComponentContent
-)
+from tests.test_utils import expectationSuiteValidationResultSchema
 
 
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs():
     with open('./tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'r') as infile:
-        return json.load(infile, object_pairs_hook=OrderedDict)
+        return expectationSuiteValidationResultSchema.load(json.load(infile, object_pairs_hook=OrderedDict)).data
 
 
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs_with_exception():
     with open('./tests/render/fixtures/BasicDatasetProfiler_evrs_with_exception.json', 'r') as infile:
-        return json.load(infile)
+        return expectationSuiteValidationResultSchema.load(json.load(infile)).data
 
 
 @pytest.fixture(scope="module")
 def titanic_dataset_profiler_expectations():
     with open('./tests/render/fixtures/BasicDatasetProfiler_expectations.json', 'r') as infile:
-        return json.load(infile, object_pairs_hook=OrderedDict)
+        return expectationSuiteSchema.load(json.load(infile, object_pairs_hook=OrderedDict)).data
 
 
 @pytest.fixture(scope="module")
 def titanic_dataset_profiler_expectations_with_distribution():
     with open('./tests/render/fixtures/BasicDatasetProfiler_expectations_with_distribution.json', 'r') as infile:
-        return json.load(infile, encoding="utf-8", object_pairs_hook=OrderedDict)
+        return expectationSuiteSchema.load(json.load(infile, encoding="utf-8", object_pairs_hook=OrderedDict)).data
 
 
 # Deprecate this fixture until we migrate to fuller project structure
@@ -64,9 +61,9 @@ def titanic_dataset_profiler_expectations_with_distribution():
 def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
     rendered = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     with open('./tests/render/output/test_render_profiling_results_page_renderer.json', 'w') as outfile:
-        json.dump(rendered, outfile, indent=2)
+        json.dump(rendered.to_json_dict(), outfile, indent=2)
 
-    assert len(rendered["sections"]) > 5
+    assert len(rendered.sections) > 5
 
 
 @pytest.mark.smoketest
@@ -85,15 +82,15 @@ def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_
     for column in evrs.keys():
         with open('./tests/render/output/test_render_profiling_results_column_section_renderer__' + column + '.json', 'w') \
                 as outfile:
-            json.dump(ProfilingResultsColumnSectionRenderer().render(evrs[column]), outfile, indent=2)
+            json.dump(ProfilingResultsColumnSectionRenderer().render(evrs[column]).to_json_dict(), outfile, indent=2)
 
 
 @pytest.mark.smoketest
 def test_smoke_render_validation_results_page_renderer(titanic_profiler_evrs):
     rendered = ValidationResultsPageRenderer().render(titanic_profiler_evrs)
     with open('./tests/render/output/test_render_validation_results_page_renderer.json', 'w') as outfile:
-        json.dump(rendered, outfile, indent=2)
-    assert len(rendered["sections"]) > 5
+        json.dump(rendered.to_json_dict(), outfile, indent=2)
+    assert len(rendered.sections) > 5
 
 
 @pytest.mark.smoketest
@@ -112,7 +109,7 @@ def test_render_validation_results_column_section_renderer(titanic_profiler_evrs
     for column in evrs.keys():
         with open('./tests/render/output/test_render_validation_results_column_section_renderer__' + column + '.json', 'w') \
                 as outfile:
-            json.dump(ValidationResultsColumnSectionRenderer().render(evrs[column]), outfile, indent=2)
+            json.dump(ValidationResultsColumnSectionRenderer().render(evrs[column]).to_json_dict(), outfile, indent=2)
 
 
 @pytest.mark.smoketest
@@ -132,7 +129,7 @@ def test_render_expectation_suite_column_section_renderer(titanic_profiled_expec
     for column in exp_groups.keys():
         with open('./tests/render/output/test_render_expectation_suite_column_section_renderer' + column + '.json', 'w') \
                 as outfile:
-            json.dump(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]), outfile, indent=2)
+            json.dump(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]).to_json_dict(), outfile, indent=2)
 
 
 def test_content_block_list_available_expectations():
@@ -236,13 +233,14 @@ def test_render_validation_results(titanic_profiled_evrs_1):
 
 
 @pytest.mark.smoketest
-def test_smoke_render_profiling_results_page_renderer_with_exception(
-        titanic_profiler_evrs_with_exception):
+def test_smoke_render_profiling_results_page_renderer_with_exception(titanic_profiler_evrs_with_exception):
     rendered_content = ProfilingResultsPageRenderer().render(titanic_profiler_evrs_with_exception)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
-    with open('./tests/render/output/test_render_profiling_results_column_section_renderer_with_exception.html', 'wb') as f:
-        f.write(rendered_page.encode("utf-8"))
+    with open(
+            './tests/render/output/test_render_profiling_results_column_section_renderer_with_exception.html', 'wb'
+    ) as outfile:
+        outfile.write(rendered_page.encode("utf-8"))
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
     assert rendered_page[-7:] == "</html>"
@@ -252,6 +250,7 @@ def test_smoke_render_profiling_results_page_renderer_with_exception(
 @pytest.mark.smoketest
 def test_full_oobe_flow():
     df = ge.read_csv("examples/data/Titanic.csv")
+    df.data_asset_name = "my_datasource/my_generator/my_asset"
     df.profile(BasicDatasetProfiler)
     evrs = df.validate()  # results
 

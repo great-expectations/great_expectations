@@ -94,8 +94,8 @@ def test_pandas_column_map_decorator_partial_exception_counts():
     out = df.expect_column_values_to_be_between('a', 3, 4,
                                                 result_format={'result_format': 'COMPLETE', 'partial_unexpected_count': 1})
 
-    assert 1 == len(out['result']['partial_unexpected_counts'])
-    assert 3 == len(out['result']['unexpected_list'])
+    assert 1 == len(out.result['partial_unexpected_counts'])
+    assert 3 == len(out.result['unexpected_list'])
 
 
 def test_column_map_expectation_decorator():

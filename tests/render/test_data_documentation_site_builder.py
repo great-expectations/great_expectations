@@ -16,21 +16,21 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     context.add_validation_operator(
         "validate_and_store",
         {
-        "class_name": "ActionListValidationOperator",
-        "action_list": [{
-            "name": "store_validation_result",
-            "action": {
-                "class_name": "StoreAction",
-                "target_store_name": "validations_store",
+            "class_name": "ActionListValidationOperator",
+            "action_list": [{
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreAction",
+                    "target_store_name": "validations_store",
+                }
+            }, {
+                "name": "extract_and_store_eval_parameters",
+                "action": {
+                    "class_name": "ExtractAndStoreEvaluationParamsAction",
+                    "target_store_name": "evaluation_parameter_store",
+                }
+            }]
             }
-        }, {
-            "name": "extract_and_store_eval_parameters",
-            "action": {
-                "class_name": "ExtractAndStoreEvaluationParamsAction",
-                "target_store_name": "evaluation_parameter_store",
-            }
-        }]
-        }
     )
 
     # profiling the Titanic datasource will generate one expectation suite and one validation
@@ -50,7 +50,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         validation_operator_name="validate_and_store",
     )
 
-    data_docs_config = context._project_config.get('data_docs_sites')
+    data_docs_config = context._project_config.data_docs_sites
     local_site_config = data_docs_config['local_site']
     # local_site_config.pop('module_name')  # This isn't necessary
     local_site_config.pop('class_name')
@@ -98,10 +98,10 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     index_page_locator_info = res[0]
     index_links_dict = res[1]
 
-    print( json.dumps(index_page_locator_info, indent=2) )
+    print(json.dumps(index_page_locator_info, indent=2))
     assert index_page_locator_info == context.root_directory + '/uncommitted/data_docs/local_site/index.html'
 
-    print( json.dumps(index_links_dict, indent=2) )
+    print(json.dumps(index_links_dict, indent=2))
     assert json.loads(json.dumps(index_links_dict)) == json.loads("""\
 {
   "titanic": {

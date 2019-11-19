@@ -30,6 +30,7 @@ from great_expectations.data_context.types import (
     ValidationResultIdentifier
 )
 
+
 def test_subclass_of_BasicValidationAction():
     # I dunno. This is kind of a silly test.
 
@@ -58,7 +59,7 @@ def test_StoreAction():
         }
     )
     stores = {
-        "fake_in_memory_store" : fake_in_memory_store
+        "fake_in_memory_store": fake_in_memory_store
     }
 
     # NOTE: This is a hack meant to last until we implement runtime_configs
@@ -98,23 +99,22 @@ def test_StoreAction():
     assert stored_identifier.run_id == "prod_20190801"
 
     assert fake_in_memory_store.get(ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                data_asset_name=DataAssetIdentifier("my_db", "default_generator", "my_table"),
-                expectation_suite_name="default_expectations"
-            ),
-            run_id="prod_20190801"
-        )) == ExpectationSuiteValidationResult(
-            success=False,
-            results=[]
-        )
+        expectation_suite_identifier=ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier("my_db", "default_generator", "my_table"),
+            expectation_suite_name="default_expectations"
+        ),
+        run_id="prod_20190801"
+    )) == ExpectationSuiteValidationResult(
+        success=False,
+        results=[]
+    )
 
 
 def test_SlackNotificationAction(data_context):
-
     renderer = {
-                    "module_name": "great_expectations.render.renderer.slack_renderer",
-                    "class_name": "SlackRenderer",
-                }
+        "module_name": "great_expectations.render.renderer.slack_renderer",
+        "class_name": "SlackRenderer",
+    }
     slack_webhook = "https://hooks.slack.com/services/test/slack/webhook"
     notify_on = "all"
 
@@ -125,25 +125,29 @@ def test_SlackNotificationAction(data_context):
         notify_on=notify_on
     )
 
-    validation_result_suite = {'results': [], 'success': True,
-                               'statistics': {'evaluated_expectations': 0, 'successful_expectations': 0,
-                                              'unsuccessful_expectations': 0, 'success_percent': None},
-                               'meta': {'great_expectations.__version__': 'v0.8.0__develop',
-                                        'data_asset_name': {'datasource': 'x', 'generator': 'y',
-                                                            'generator_asset': 'z'},
-                                        'expectation_suite_name': 'default', 'run_id': '2019-09-25T060538.829112Z'}}
+    validation_result_suite = ExpectationSuiteValidationResult(results=[], success=True,
+                                                               statistics={'evaluated_expectations': 0,
+                                                                           'successful_expectations': 0,
+                                                                           'unsuccessful_expectations': 0,
+                                                                           'success_percent': None},
+                                                               meta={
+                                                                   'great_expectations.__version__': 'v0.8.0__develop',
+                                                                   'data_asset_name': {'datasource': 'x',
+                                                                                       'generator': 'y',
+                                                                                       'generator_asset': 'z'},
+                                                                   'expectation_suite_name': 'default',
+                                                                   'run_id': '2019-09-25T060538.829112Z'})
 
     validation_result_suite_id = ValidationResultIdentifier(**{'expectation_suite_identifier': {
         'data_asset_name': {'datasource': 'x', 'generator': 'y', 'generator_asset': 'z'},
         'expectation_suite_name': 'default'}, 'run_id': 'test_100'})
 
-    #TODO: improve this test - currently it is verifying a failed call to Slack
+    # TODO: improve this test - currently it is verifying a failed call to Slack
     assert slack_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
         data_asset=None
     ) == None
-
 
 # def test_ExtractAndStoreEvaluationParamsAction():
 #     fake_in_memory_store = ValidationsStore(
@@ -182,4 +186,3 @@ def test_SlackNotificationAction(data_context):
 #         from_string="ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
 #     )) == {}
 #
-
