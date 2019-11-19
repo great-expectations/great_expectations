@@ -2,7 +2,7 @@ branches:
   only:
   - master
   - develop
-  - /v\d.*/
+  - /^\d.*/
 # dist: xenial
 language: python
 os:

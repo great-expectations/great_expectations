@@ -2,6 +2,7 @@ import logging
 
 from collections import OrderedDict
 
+from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLASS
 from great_expectations.data_context.types import (
     ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
@@ -127,7 +128,8 @@ class SiteBuilder(object):
             },
             config_defaults={
                 "name": "site_index_builder",
-                "module_name": "great_expectations.render.renderer.site_builder"
+                "module_name": "great_expectations.render.renderer.site_builder",
+                "class_name": "DefaultSiteIndexBuilder"
             }
         )
 
@@ -261,7 +263,7 @@ class DefaultSiteSectionBuilder(object):
             if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.expectation_suite_name
                 data_asset_name = resource_key.data_asset_name.generator_asset
-                logger.info(
+                logger.debug(
                     "        Rendering expectation suite {} for data asset {}".format(
                         expectation_suite_name,
                         data_asset_name
@@ -271,10 +273,10 @@ class DefaultSiteSectionBuilder(object):
                 run_id = resource_key.run_id
                 expectation_suite_name = resource_key.expectation_suite_identifier.expectation_suite_name
                 if run_id == "profiling":
-                    logger.info("        Rendering profiling for data asset {}".format(data_asset_name))
+                    logger.debug("        Rendering profiling for data asset {}".format(data_asset_name))
                 else:
                     
-                    logger.info("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id,
+                    logger.debug("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id,
                                                                                                               expectation_suite_name,
                                                                                                               data_asset_name))
 
@@ -316,13 +318,15 @@ class DefaultSiteIndexBuilder(object):
             name,
             data_context,
             target_store,
+            show_cta_footer=True,
             renderer=None,
-            view=None
+            view=None,
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
         self.name = name
         self.data_context = data_context
         self.target_store = target_store
+        self.show_cta_footer = show_cta_footer
 
         if renderer is None:
             renderer = {
@@ -399,6 +403,85 @@ class DefaultSiteIndexBuilder(object):
     
         return index_links_dict
 
+    def get_calls_to_action(self):
+        telemetry = None
+        db_driver = None
+        datasource_classes_by_name = self.data_context.list_datasources()
+
+        if datasource_classes_by_name:
+            last_datasource_class_by_name = datasource_classes_by_name[-1]
+            last_datasource_class_name = last_datasource_class_by_name["class_name"]
+            last_datasource_name = last_datasource_class_by_name["name"]
+            last_datasource = self.data_context.datasources[last_datasource_name]
+
+            if last_datasource_class_name == "SqlAlchemyDatasource":
+                db_driver = last_datasource.drivername
+
+            datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
+            telemetry = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
+                "ge-init-datadocs-v2",
+                datasource_type,
+                db_driver,
+            )
+
+        return {
+            "header": "To continue exploring Great Expectations...",
+            "buttons": self._get_call_to_action_buttons(telemetry)
+        }
+
+    def _get_call_to_action_buttons(self, telemetry):
+        """
+        Build project and user specific calls to action buttons.
+
+        This can become progressively smarter about project and user specific
+        calls to action.
+        """
+        create_expectations = CallToActionButton(
+            "Create Expectations",
+            # TODO update this link to a proper tutorial
+            "https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html"
+        )
+        validation_playground = CallToActionButton(
+            "Play with Validations",
+            # TODO update this link to a proper tutorial
+            "https://docs.greatexpectations.io/en/latest/tutorials/pipeline_integration.html"
+        )
+        customize_data_docs = CallToActionButton(
+            "Customize Data Docs",
+            "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs"
+        )
+        s3_team_site = CallToActionButton(
+            "Set up a team site on AWS S3",
+            "https://docs.greatexpectations.io/en/latest/tutorials/publishing_data_docs_to_s3.html"
+        )
+        # TODO gallery does not yet exist
+        # gallery = CallToActionButton(
+        #     "Great Expectations Gallery",
+        #     "https://greatexpectations.io/gallery"
+        # )
+
+        results = []
+
+        expectations_store = self.data_context.stores["expectations_store"]
+        suites = expectations_store.list_keys()
+        # Ingore BasicDatasetProfiler. We want to know about user created suties
+        suites = [s for s in suites if s["expectation_suite_name"] != "BasicDatasetProfiler"]
+        if not suites:
+            # TODO this needs testing as complexity increases probably using mocked DataContext
+            logger.debug('No expectations found')
+            results.append(create_expectations)
+
+        # Show these no matter what
+        results.append(validation_playground)
+        results.append(customize_data_docs)
+        results.append(s3_team_site)
+
+        if telemetry:
+            for button in results:
+                button.link = button.link + telemetry
+
+        return results
+
     def build(self):
         # Loop over sections in the HtmlStore
         logger.debug("DefaultSiteIndexBuilder.build")
@@ -406,6 +489,9 @@ class DefaultSiteIndexBuilder(object):
         target_store = self.target_store
         resource_keys = target_store.list_keys()
         index_links_dict = OrderedDict()
+
+        if self.show_cta_footer:
+            index_links_dict["cta_object"] = self.get_calls_to_action()
 
         for key in resource_keys:
             key_resource_identifier = key.resource_identifier
@@ -455,3 +541,9 @@ class DefaultSiteIndexBuilder(object):
             self.target_store.write_index_page(viewable_content),
             index_links_dict
         )
+
+
+class CallToActionButton(object):
+    def __init__(self, title, link):
+        self.title = title
+        self.link = link

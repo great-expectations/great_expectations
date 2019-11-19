@@ -15,7 +15,7 @@ def test_basic_operation():
     )
 
     # Returned assets should be typed and processed by template language
-    batch_kwargs = generator.yield_batch_kwargs("my_asset", condition="foo")
+    batch_kwargs = generator.yield_batch_kwargs("my_asset", query_params={'condition': "foo"})
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceQueryBatchKwargs)
     assert batch_kwargs.query == "SELECT * FROM my_table WHERE value = foo"
 
@@ -28,14 +28,14 @@ def test_basic_operation():
     # fail with an informative message
     with pytest.raises(BatchKwargsError) as exc:
         generator.yield_batch_kwargs("my_asset")
-        assert "missing template key" in exc.message
+        assert "missing template key" in exc.value.message
 
 
 def test_add_query():
     generator = QueryGenerator()
     generator.add_query("my_asset", "select * from my_table where val > $condition")
 
-    batch_kwargs = generator.yield_batch_kwargs("my_asset", condition=5)
+    batch_kwargs = generator.yield_batch_kwargs("my_asset", query_params={"condition": 5})
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceQueryBatchKwargs)
     assert batch_kwargs.query == "select * from my_table where val > 5"
 

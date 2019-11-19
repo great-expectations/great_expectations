@@ -2,52 +2,31 @@
 from great_expectations import rtd_url_ge_version, DataContext
 
 # !!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
-GREETING = """<cyan>
-                            _____                _   
-                           / ____|              | |  
-                          | |  __ _ __ ___  __ _| |_ 
-                          | | |_ | '__/ _ \/ _` | __|
-                          | |__| | | |  __/ (_| | |_ 
-                           \_____|_|  \___|\__,_|\__|
-           ______                      _        _   _                 
-          |  ____|                    | |      | | (_)                
-          | |__  __  ___ __   ___  ___| |_ __ _| |_ _  ___  _ __  ___ 
-          |  __| \ \/ / '_ \ / _ \/ __| __/ _` | __| |/ _ \| '_ \/ __|
-          | |____ >  <| |_) |  __/ (__| || (_| | |_| | (_) | | | \__ \ 
-          |______/_/\_\ .__/ \___|\___|\__\__,_|\__|_|\___/|_| |_|___/
-                      | |                                             
-                      |_|                                             
-                  ~ Always know what to expect from your data ~
-</cyan>
-New to Great Expectations? Start with this tutorial!
-  - <blue>https://docs.greatexpectations.io/en/latest/getting_started/cli_init.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
-""".format(rtd_url_ge_version)
 
-LETS_BEGIN_PROMPT = """Let's add Great Expectations to your project, by scaffolding a new great_expectations directory
-that will look like this:
+GREETING = """<cyan>\
+  ___              _     ___                  _        _   _             
+ / __|_ _ ___ __ _| |_  | __|_ ___ __  ___ __| |_ __ _| |_(_)___ _ _  ___
+| (_ | '_/ -_) _` |  _| | _|\ \ / '_ \/ -_) _|  _/ _` |  _| / _ \ ' \(_-<
+ \___|_| \___\__,_|\__| |___/_\_\ .__/\___\__|\__\__,_|\__|_\___/_||_/__/
+                                |_|                                      
+             ~ Always know what to expect from your data ~             
+</cyan>""".format(rtd_url_ge_version)
+
+LETS_BEGIN_PROMPT = """Let's add Great Expectations to your project, by scaffolding a new great_expectations directory like this:
 
     great_expectations
-    ├── .gitignore
-    ├── datasources
     ├── expectations
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── create_expectations.ipynb
-    │   └── integrate_validation_into_pipeline.ipynb
+    │   ├── pandas
+    │   ├── spark
+    │   └── sql
     ├── plugins
-    │   └── custom_data_docs
-    │       ├── renderers
-    │       ├── styles
-    │       │   └── data_docs_custom_styles.css
-    │       └── views
+    │   └── ...
     └── uncommitted
         ├── config_variables.yml
-        ├── data_docs
-        ├── samples
-        └── validations
-    
-OK to proceed?
-"""
+        └── ...
+OK to proceed?"""
 
 PROJECT_IS_COMPLETE = "This looks like an existing project that <green>appears complete!</green> You are <green>ready to roll.</green>\n"
 
@@ -58,9 +37,8 @@ COMPLETE_ONBOARDING_PROMPT = """To run locally, we need some files that are not 
   - Would you like to fix this automatically?"""
 
 SLACK_SETUP_INTRO = """
-========== Slack Notifications ==========
-
-See <blue>https://docs.greatexpectations.io/en/latest/getting_started/cli_init.html?utm_source=cli&utm_medium=init&utm_campaign={}#configuring-slack-notifications</blue> for more information.""".format(rtd_url_ge_version)
+<cyan>========== Slack Notifications ==========</cyan>
+""".format(rtd_url_ge_version)
 
 SLACK_SETUP_PROMPT = "Would you like to set up Slack data quality notifications?"
 

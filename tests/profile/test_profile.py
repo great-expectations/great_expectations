@@ -191,7 +191,8 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
     assert validation_results.meta["data_asset_name"] == DataAssetIdentifier(datasource="my_datasource",
                                                                              generator="default", generator_asset="f1")
     assert set(validation_results.meta.keys()) == {
-        "great_expectations.__version__", "data_asset_name", "expectation_suite_name", "run_id", "batch_kwargs"
+        "great_expectations.__version__", "data_asset_name", "expectation_suite_name", "run_id", "batch_kwargs",
+        "batch_id"
     }
 
 

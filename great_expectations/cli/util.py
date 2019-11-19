@@ -42,3 +42,11 @@ def cli_message(string):
     )
 
     six.print_(colored(mod_string))
+
+
+def is_sane_slack_webhook(url):
+    """Really basic sanity checking."""
+    if url is None:
+        return False
+
+    return "https://hooks.slack.com/" in url.strip()

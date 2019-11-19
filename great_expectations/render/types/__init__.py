@@ -156,7 +156,7 @@ class TextContent(RenderedComponentContent):
 class RenderedDocumentContent(RenderedContent):
     # NOTE: JPC 20191028 - review these keys to consolidate and group
     def __init__(self, sections, data_asset_name=None, full_data_asset_identifier=None, renderer_type=None,
-                 page_title=None, utm_medium=None):
+                 page_title=None, utm_medium=None, cta_footer=None):
         if not isinstance(sections, list) and all([isinstance(section, RenderedSectionContent) for section in
                                                    sections]):
             raise InvalidRenderedContentError("RenderedDocumentContent requires a list of RenderedSectionContent for "
@@ -167,6 +167,7 @@ class RenderedDocumentContent(RenderedContent):
         self.renderer_type = renderer_type
         self.page_title = page_title
         self.utm_medium = utm_medium
+        self.cta_footer = cta_footer
 
     def to_json_dict(self):
         d = super(RenderedDocumentContent, self).to_json_dict()
@@ -177,6 +178,7 @@ class RenderedDocumentContent(RenderedContent):
         d["renderer_type"] = self.renderer_type
         d["page_title"] = self.page_title
         d["utm_medium"] = self.utm_medium
+        d["cta_footer"] = self.cta_footer
         return d
 
 

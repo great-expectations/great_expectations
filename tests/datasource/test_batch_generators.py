@@ -8,10 +8,7 @@ except ImportError:
     import mock
 
 from great_expectations.exceptions import DataContextError
-from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.generator import SubdirReaderGenerator, GlobReaderGenerator, DatabricksTableGenerator
-from great_expectations.datasource.types import PathBatchKwargs
-from great_expectations.exceptions import BatchKwargsError
 
 
 def test_file_kwargs_generator(data_context, filesystem_csv):
@@ -32,8 +29,10 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
     assert f1_batches[0] == {
             "path": os.path.join(base_dir, "f1.csv"),
             "partition_id": "f1",
-            "sep": None,
-            "engine": "python"
+            "reader_options": {
+                "sep": None,
+                "engine": "python"
+            }
         }
 
     f3_batches = [batch_kwargs["path"] for batch_kwargs in generator.get_iterator("f3")]

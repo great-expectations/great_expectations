@@ -58,6 +58,7 @@ def titanic_dataset_profiler_expectations_with_distribution():
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
     rendered = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     with open('./tests/render/output/test_render_profiling_results_page_renderer.json', 'w') as outfile:
@@ -67,6 +68,7 @@ def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_1):
     # Group EVRs by column
     evrs = {}
@@ -86,6 +88,7 @@ def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_smoke_render_validation_results_page_renderer(titanic_profiler_evrs):
     rendered = ValidationResultsPageRenderer().render(titanic_profiler_evrs)
     with open('./tests/render/output/test_render_validation_results_page_renderer.json', 'w') as outfile:
@@ -94,6 +97,7 @@ def test_smoke_render_validation_results_page_renderer(titanic_profiler_evrs):
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_validation_results_column_section_renderer(titanic_profiler_evrs):
     # Group EVRs by column
     evrs = {}
@@ -113,6 +117,7 @@ def test_render_validation_results_column_section_renderer(titanic_profiler_evrs
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_expectation_suite_column_section_renderer(titanic_profiled_expectations_1):
     # Group expectations by column
     exp_groups = {}
@@ -181,6 +186,7 @@ def test_content_block_list_available_expectations():
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expectations):
     rendered_content = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
@@ -193,6 +199,7 @@ def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expe
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_profiled_fixture_expectation_suite_with_distribution(titanic_dataset_profiler_expectations_with_distribution):
     # Tests sparkline
     rendered_content = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations_with_distribution)
@@ -206,6 +213,7 @@ def test_render_profiled_fixture_expectation_suite_with_distribution(titanic_dat
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_profiling_results(titanic_profiled_evrs_1):
     rendered_content = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
@@ -218,6 +226,7 @@ def test_render_profiling_results(titanic_profiled_evrs_1):
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_validation_results(titanic_profiled_evrs_1):
     rendered_content = ValidationResultsPageRenderer().render(titanic_profiled_evrs_1)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
@@ -234,7 +243,9 @@ def test_render_validation_results(titanic_profiled_evrs_1):
 
 
 @pytest.mark.smoketest
-def test_smoke_render_profiling_results_page_renderer_with_exception(titanic_profiler_evrs_with_exception):
+@pytest.mark.rendered_output
+def test_smoke_render_profiling_results_page_renderer_with_exception(
+        titanic_profiler_evrs_with_exception):
     rendered_content = ProfilingResultsPageRenderer().render(titanic_profiler_evrs_with_exception)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
@@ -249,6 +260,7 @@ def test_smoke_render_profiling_results_page_renderer_with_exception(titanic_pro
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_full_oobe_flow():
     df = ge.read_csv("examples/data/Titanic.csv")
     df.data_asset_name = "my_datasource/my_generator/my_asset"
@@ -372,6 +384,7 @@ def test_render_string_template():
             </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
     assert res == expected
+
 
 def test_render_string_template_bug_1():
     #Looks like string templates can't contain dollar signs. We need some kind of escaping

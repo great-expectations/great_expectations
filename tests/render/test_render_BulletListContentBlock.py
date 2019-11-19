@@ -30,6 +30,7 @@ def test_substitute_none_for_missing():
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_all_expectations_using_test_definitions():
     test_files = glob.glob(
         "tests/test_definitions/*/expect*.json"

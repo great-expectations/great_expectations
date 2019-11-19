@@ -100,8 +100,15 @@ project/
                         quarantine.json
                         warning.json
         notebooks/
-            create_expectations.ipynb
-            integrate_validation_into_pipeline.ipynb
+            pandas/
+                create_expectations.ipynb
+                validation_playground.ipynb
+            spark/
+                create_expectations.ipynb
+                validation_playground.ipynb
+            sql/
+                create_expectations.ipynb
+                validation_playground.ipynb
         uncommitted/
             documentation/
                 local_site/

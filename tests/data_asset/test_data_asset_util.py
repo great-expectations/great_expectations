@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 from functools import wraps
 import sys
+import platform
 
 import pytest
 
@@ -51,13 +52,14 @@ def test_recursively_convert_to_json_serializable():
         'np.float_': np.float_([3.2, 5.6, 7.8]),
         'np.float32': np.float32([5.999999999, 5.6]),
         'np.float64': np.float64([5.9999999999999999999, 10.2]),
-        'np.float128': np.float128([5.999999999998786324399999999, 20.4]),
         # 'np.complex64': np.complex64([10.9999999 + 4.9999999j, 11.2+7.3j]),
         # 'np.complex128': np.complex128([20.999999999978335216827+10.99999999j, 22.4+14.6j]),
         # 'np.complex256': np.complex256([40.99999999 + 20.99999999j, 44.8+29.2j]),
         'np.str': np.unicode_(["hello"]),
         'yyy': decimal.Decimal(123.456)
     }
+    if platform.system() != 'Windows':
+        x['np.float128'] = np.float128([5.999999999998786324399999999, 20.4])
 
     x = ge.data_asset.util.recursively_convert_to_json_serializable(x)
     assert isinstance(x['x'], list)
@@ -82,14 +84,16 @@ def test_recursively_convert_to_json_serializable():
 
     assert isinstance(x['np.float32'][0], float)
     assert isinstance(x['np.float64'][0], float)
-    assert isinstance(x['np.float128'][0], float)
+    if platform.system() != 'Windows':
+        assert isinstance(x['np.float128'][0], float)
     # self.assertEqual(type(x['np.complex64'][0]), complex)
     # self.assertEqual(type(x['np.complex128'][0]), complex)
     # self.assertEqual(type(x['np.complex256'][0]), complex)
     assert isinstance(x['np.float_'][0], float)
 
     # Make sure nothing is going wrong with precision rounding
-    assert np.allclose(x['np.float128'][0], 5.999999999998786324399999999, atol=10**(-sys.float_info.dig))
+    if platform.system() != 'Windows':
+        assert np.allclose(x['np.float128'][0], 5.999999999998786324399999999, atol=10**(-sys.float_info.dig))
 
     # TypeError when non-serializable numpy object is in dataset.
     with pytest.raises(TypeError):
@@ -99,7 +103,7 @@ def test_recursively_convert_to_json_serializable():
     try:
         x = unicode("abcdefg")
         x = ge.data_asset.util.recursively_convert_to_json_serializable(x)
-        self.assertEqual(type(x), unicode)
+        assert isinstance(x, unicode)
     except NameError:
         pass
 

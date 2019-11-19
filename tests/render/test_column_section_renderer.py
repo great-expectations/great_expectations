@@ -29,6 +29,7 @@ def titanic_expectations():
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_profiling_results_column_section_renderer(titanic_validation_results):
     # Group EVRs by column
     evrs = {}
@@ -48,6 +49,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     # Group expectations by column
     exp_groups = {}
@@ -434,15 +436,22 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                         },
                         "styling": {
                             "params": {
-                            "icon": {
-                                "classes": [
-                                    "fas",
-                                    "fa-check-circle",
-                                    "text-success"
-                                ],
-                                "tag": "i"
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success"
+                                    ],
+                                    "tag": "i"
+                                }
                             }
-                            }
+                        }
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": [
+                                "hide-succeeded-validation-target-child"
+                            ]
                         }
                     }
                 },
@@ -467,8 +476,8 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             "params": {
                                 "column": {
                                     "classes": [
-                                    "badge",
-                                    "badge-primary"
+                                        "badge",
+                                        "badge-primary"
                                     ]
                                 }
                             }

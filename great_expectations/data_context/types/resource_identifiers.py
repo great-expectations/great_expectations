@@ -1,62 +1,13 @@
 import logging
 
-from six import PY3, string_types
+from six import PY3
 
-from marshmallow import Schema, fields, ValidationError, pre_load, post_load, pre_dump, post_dump
+from marshmallow import Schema, fields, post_load
 
 from great_expectations.core import DataContextKey, DataAssetIdentifier, DataAssetIdentifierSchema
 from great_expectations.exceptions import InvalidDataContextKeyError
 
 logger = logging.getLogger(__name__)
-
-
-#
-# # TODO: Rename to DataAssetKey, for consistency
-# class DataAssetIdentifier(OrderedDataContextKey):
-#
-#     def __init__(self, *args, **kwargs):
-#         delimiter = kwargs.pop('delimiter', '/')
-#         super(DataAssetIdentifier, self).__init__(*args, **kwargs)
-#         self.__delimiter = delimiter
-#
-#     _key_order = [
-#         "datasource",
-#         "generator",
-#         "generator_asset"
-#     ]
-#     _key_types = {
-#         "datasource": string_types,
-#         "generator": string_types,
-#         "generator_asset": string_types
-#     }
-#     # NOTE: This pattern is kinda awkward. It would be nice to ONLY specify _key_order
-#     _required_keys = set(_key_order)
-#     _allowed_keys = set(_key_order) | {"_DataAssetIdentifier__delimiter"}
-#
-#     def __str__(self):
-#         return self.__delimiter.join(
-#             (self.datasource,
-#              self.generator,
-#              self.generator_asset)
-#         )
-#
-#     def __repr__(self):
-#         return str(self)
-
-
-# # TODO: Rename to ExpectationSuiteKey, for consistency
-# class ExpectationSuiteIdentifier(OrderedDataContextKey):
-#     _key_order = [
-#         "data_asset_name",
-#         "expectation_suite_name",
-#     ]
-#     _key_types = {
-#         "data_asset_name" : DataAssetIdentifier,
-#         "expectation_suite_name" : string_types,
-#     }
-#     # NOTE: This pattern is kinda awkward. It would be nice to ONLY specify _key_order
-#     _required_keys = set(_key_order)
-#     _allowed_keys = set(_key_order)
 
 
 class ExpectationSuiteIdentifier(DataContextKey):
