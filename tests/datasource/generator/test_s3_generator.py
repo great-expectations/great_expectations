@@ -53,6 +53,10 @@ def s3_generator(mock_s3_bucket):
                                     "delimiter": "",
                                     "regex_filter": r"data/for/.*\.csv"
                                 },
+                                "data_dirs": {
+                                    "prefix": "data/",
+                                    "directory_assets": True
+                                },
                                 "other": {
                                     "prefix": "other/",
                                     "regex_filter": r".*/you\.csv",
@@ -77,14 +81,14 @@ def s3_generator(mock_s3_bucket):
 def test_s3_generator_basic_operation(s3_generator):
     # S3 Generator sees *only* configured assets
     assets = s3_generator.get_available_data_asset_names()
-    assert set(assets) == {"data", "other", "other_empty_delimiter"}
+    assert set(assets) == {"data", "data_dirs", "other", "other_empty_delimiter"}
 
     # We should observe that glob, prefix, delimiter all work together
     # They can be defined in the generator or overridden by a particular asset
     # Under the hood, we use the S3 ContinuationToken options to lazily fetch data
     batch_kwargs = [kwargs for kwargs in s3_generator.get_iterator("data")]
     assert len(batch_kwargs) == 2
-    assert batch_kwargs[0]["sep"] == ","
+    assert batch_kwargs[0]["reader_options"]["sep"] == ","
     assert batch_kwargs[0]["s3"] in ["s3a://test_bucket/data/for/you.csv", "s3a://test_bucket/data/for/me.csv"]
 
     # When a prefix and delimiter do not yield objects, there are no objects returned; raise an error
@@ -112,3 +116,16 @@ def test_s3_generator_incremental_fetch(s3_generator, caplog):
     batch_kwargs = [kwargs for kwargs in s3_generator.get_iterator("other_empty_delimiter")]
     assert len(caplog.records) == 4
     assert len(batch_kwargs) == 3
+
+
+def test_s3_generator_get_directories(s3_generator):
+    # Verify that an asset configured to return directories can do so
+    batch_kwargs_list = [kwargs for kwargs in s3_generator.get_iterator("data_dirs")]
+    assert 3 == len(batch_kwargs_list)
+    paths = set([batch_kwargs["s3"] for batch_kwargs in batch_kwargs_list])
+    assert {"s3a://test_bucket/data/for/", "s3a://test_bucket/data/to/", "s3a://test_bucket/data/is/"} == paths
+
+
+def test_s3_generator_limit(s3_generator):
+    batch_kwargs_list = [kwargs for kwargs in s3_generator.get_iterator("data", limit=10)]
+    assert all(["limit" in batch_kwargs for batch_kwargs in batch_kwargs_list])

@@ -64,8 +64,10 @@ def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connecti
         "test_sparkdf_datasource/default/test",
         expectation_suite_name="default",
         batch_kwargs=batch_kwargs,
-        header=True,
-        inferSchema=True
+        reader_options={
+            'header': True,
+            'inferSchema': True
+        }
     )
     assert type(batch).__name__ == "CustomSparkDFDataset"
     res = batch.expect_column_approx_quantile_values_to_be_between("col_1", quantile_ranges={
@@ -141,6 +143,20 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
     assert isinstance(dataset, SparkDFDataset)
     # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
     assert dataset.spark_df.head()['col_1'] == 1
+    assert dataset.spark_df.count() == 5
+
+    # Limit should also work
+    dataset = datasource.get_batch('test',
+                                   expectation_suite_name="default",
+                                   batch_kwargs={
+                                       "path": os.path.join(test_parquet_folder_connection_path,
+                                                            'test.parquet'),
+                                       "limit": 2
+                                   })
+    assert isinstance(dataset, SparkDFDataset)
+    # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
+    assert dataset.spark_df.head()['col_1'] == 1
+    assert dataset.spark_df.count() == 2
 
 
 def test_standalone_spark_csv_datasource(test_folder_connection_path):
@@ -155,7 +171,7 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path):
                                        "path": os.path.join(test_folder_connection_path,
                                                             'test.csv')
                                    },
-                                   header=True)
+                                   reader_options={"header": True})
     assert isinstance(dataset, SparkDFDataset)
     # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
     assert dataset.spark_df.head()['col_1'] == '1'
@@ -191,7 +207,7 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
         with pytest.raises(BatchKwargsError) as exc:
             # noinspection PyUnusedLocal
             batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", batch_kwargs)
-            assert "Unrecognized batch_kwargs for spark_source" in exc.message
+            assert "Unrecognized batch_kwargs for spark_source" in exc.value.message
 
 
 def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
@@ -206,22 +222,22 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
         datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         })
-        assert "Unable to determine reader for path" in exc.message
+        assert "Unable to determine reader for path" in exc.value.message
 
     with pytest.raises(BatchKwargsError) as exc:
         datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         }, reader_method="blarg")
-        assert "Unknown reader method: blarg" in exc.message
+        assert "Unknown reader method: blarg" in exc.value.message
 
     with pytest.raises(BatchKwargsError) as exc:
         datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         }, reader_method="excel")
-        assert "Unsupported reader: excel" in exc.message
+        assert "Unsupported reader: excel" in exc.value.message
 
     dataset = datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
-            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
+            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"),
         },
-        reader_method="csv", header=True)
+        reader_method="csv", reader_options={'header': True})
     assert dataset.spark_df.head()["a"] == "1"

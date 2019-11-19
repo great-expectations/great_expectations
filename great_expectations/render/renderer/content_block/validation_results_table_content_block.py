@@ -64,6 +64,11 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                             }
                         }
                     }
+                },
+                "styling": {
+                    "parent": {
+                        "classes": ["hide-succeeded-validation-target-child"]
+                    }
                 }
             })
         else:

@@ -1,3 +1,5 @@
+import pytest
+
 import os
 import json
 import shutil
@@ -10,6 +12,7 @@ from great_expectations.data_context.types import (
 from great_expectations.data_context.util import safe_mmkdir
 
 
+@pytest.mark.rendered_output
 def test_configuration_driven_site_builder(site_builder_data_context_with_html_store_titanic_random):
     context = site_builder_data_context_with_html_store_titanic_random
 

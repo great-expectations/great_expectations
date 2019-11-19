@@ -215,11 +215,22 @@ class DefaultJinjaView(object):
         template["template"] = template.get("template", "").replace("\n", "<br>")
     
         if "tooltip" in template:
+            if template.get("styling", {}).get("classes"):
+                classes = template.get("styling", {}).get("classes")
+                classes.append("cooltip")
+                template["styling"]["classes"] = classes
+            elif template.get("styling"):
+                template["styling"]["classes"] = ["cooltip"]
+            else:
+                template["styling"] = {
+                    "classes": ["cooltip"]
+                }
+
             tooltip_content = template["tooltip"]["content"]
             tooltip_content.replace("\n", "<br>")
             placement = template["tooltip"].get("placement", "top")
             base_template_string = """
-                <{tag} class="cooltip" $styling>
+                <{tag} $styling>
                     $template
                     <span class={placement}>
                         {tooltip_content}

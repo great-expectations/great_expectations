@@ -6,7 +6,7 @@ PROJECT_HELP_COMMENT = """
 # 
 # Here you can define datasources, generators, integrations and more. This file
 # is intended to be committed to your repo. For help with configuration please:
-#   - Read our docs: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/reference/data_context_reference.html#configuration
+#   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#configuration
 #   - Join our slack channel: http://greatexpectations.io/slack
 #
 # NOTE: GE uses the names of configured `datasources` and `generators` to manage
@@ -18,7 +18,7 @@ config_version: 1
 
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations add-datasource` to help you
-# add a new datasource. Read more at https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/datasource.html
+# add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/features/datasource.html
 datasources: {}
 """
 
@@ -36,7 +36,7 @@ CONFIG_VARIABLES_INTRO = """
 # If the substitution value comes from the config variables file, it can be a
 # simple (non-nested) value or a nested value such as a dictionary. If it comes
 # from an environment variable, it must be a simple value. Read more at:
-# https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/reference/data_context_reference.html#managing-environment-and-secrets"""
+# https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets"""
 
 # This junky fake key keeps ruaml.yml from nuking the important comment block
 CONFIG_VARIABLES_TEMPLATE = "ge_comment_preservation_key: 1" + CONFIG_VARIABLES_INTRO
@@ -51,11 +51,11 @@ plugins_directory: plugins/
 # Validation Operators are customizable workflows that bundle the validation of
 # one or more expectation suites and subsequent actions. The example below
 # stores validations and send a slack notification. To read more about
-# customizing and extending these, read: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/validation_operators_and_actions.html
+# customizing and extending these, read: https://docs.greatexpectations.io/en/latest/features/validation_operators_and_actions.html
 validation_operators:
   action_list_operator:
     # To learn how to configure sending Slack notifications during evaluation
-    # (and other customizations), read: https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/reference/validation_operators/action_list_validation_operator.html
+    # (and other customizations), read: https://docs.greatexpectations.io/en/latest/reference/validation_operators/action_list_validation_operator.html
     class_name: ActionListValidationOperator
     action_list:
       - name: store_validation_result
@@ -99,7 +99,7 @@ stores:
 
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
-    # https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/reference/evaluation_parameters.html
+    # https://docs.greatexpectations.io/en/latest/reference/evaluation_parameters.html
     class_name: InMemoryEvaluationParameterStore
 
 expectations_store_name: expectations_store
@@ -110,12 +110,15 @@ data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These
   # include Expectations, Validations & Profiles. The are built for all
   # Datasources from JSON artifacts in the local repo including validations &
-  # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/en/""" + rtd_url_ge_version + """/features/data_docs.html
+  # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/en/latest/features/data_docs.html
   local_site:
     class_name: SiteBuilder
     store_backend:
         class_name: FixedLengthTupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
+    site_index_builder:
+        class_name: DefaultSiteIndexBuilder
+        show_cta_footer: True
 """
 
 PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT

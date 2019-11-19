@@ -1,9 +1,17 @@
 {
   "meta": {
-    "great_expectations.__version__": "0.8.2.post0+33.ga701e12a.dirty",
-    "data_asset_name": "my_datasource/default/default",
+    "great_expectations.__version__": "__fixture__",
+    "data_asset_name": "my_datasource/my_generator/titanic_data",
     "expectation_suite_name": "default",
-    "run_id": "20191119T192259.818518Z"
+    "run_id": "__run_id_fixture__",
+    "batch_kwargs": {
+      "path": "project_dir/project_path/data/titanic/Titanic.csv",
+      "partition_id": "Titanic",
+      "reader_options": {
+        "sep": null,
+        "engine": "python"
+      }
+    }
   },
   "evaluation_parameters": {},
   "results": [

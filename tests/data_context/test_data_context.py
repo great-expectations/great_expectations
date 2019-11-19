@@ -16,6 +16,7 @@ import os
 import shutil
 import json
 from collections import OrderedDict
+from ruamel.yaml import YAML
 
 from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import (
@@ -35,6 +36,8 @@ from great_expectations.data_context.store import (
 from great_expectations.util import (
     gen_directory_tree_str,
 )
+
+yaml = YAML()
 
 
 @pytest.fixture()
@@ -528,6 +531,7 @@ def test_data_context_result_store(titanic_data_context):
     assert len(failed_validation_result.results) == 8
 
 
+@pytest.mark.rendered_output
 def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
 
     # TODO : Use a standard test fixture
@@ -578,7 +582,9 @@ project_path/
 
     context.profile_datasource("titanic")
 
-    assert gen_directory_tree_str(project_dir) == """\
+    tree_str = gen_directory_tree_str(project_dir)
+    print(tree_str)
+    assert tree_str == """\
 project_path/
     data/
         random/
@@ -596,8 +602,15 @@ project_path/
                     Titanic/
                         BasicDatasetProfiler.json
         notebooks/
-            create_expectations.ipynb
-            integrate_validation_into_pipeline.ipynb
+            pandas/
+                create_expectations.ipynb
+                validation_playground.ipynb
+            spark/
+                create_expectations.ipynb
+                validation_playground.ipynb
+            sql/
+                create_expectations.ipynb
+                validation_playground.ipynb
         plugins/
             custom_data_docs/
                 renderers/
@@ -692,6 +705,7 @@ def basic_data_context_config():
         "evaluation_parameter_store_name": "evaluation_parameter_store",
         "validations_store_name": "does_not_have_to_be_real",
         "expectations_store_name": "expectations_store",
+        "config_variables_file_path": "uncommitted/config_variables.yml",
         "datasources": {},
         "stores": {
             "expectations_store": {
@@ -985,6 +999,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(tmp_pat
     # re-run create to simulate onboarding
     DataContext.create(project_path)
     obs = gen_directory_tree_str(ge_dir)
+    print(obs)
 
     assert os.path.isdir(uncommitted_dir), "No uncommitted directory created"
     assert obs == """\
@@ -994,8 +1009,15 @@ great_expectations/
     datasources/
     expectations/
     notebooks/
-        create_expectations.ipynb
-        integrate_validation_into_pipeline.ipynb
+        pandas/
+            create_expectations.ipynb
+            validation_playground.ipynb
+        spark/
+            create_expectations.ipynb
+            validation_playground.ipynb
+        sql/
+            create_expectations.ipynb
+            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
@@ -1018,8 +1040,15 @@ great_expectations/
     datasources/
     expectations/
     notebooks/
-        create_expectations.ipynb
-        integrate_validation_into_pipeline.ipynb
+        pandas/
+            create_expectations.ipynb
+            validation_playground.ipynb
+        spark/
+            create_expectations.ipynb
+            validation_playground.ipynb
+        sql/
+            create_expectations.ipynb
+            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
@@ -1037,6 +1066,7 @@ great_expectations/
 
     DataContext.create(project_path)
     fixture = gen_directory_tree_str(ge_dir)
+    print(fixture)
 
     assert fixture == expected
 
@@ -1112,15 +1142,169 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
         'data_docs',
         'validations'
     }
-    assert set(os.listdir(os.path.join(empty_directory, "notebooks"))) == {
-        "create_expectations.ipynb",
-        "integrate_validation_into_pipeline.ipynb"
-    }
+    for subdir in DataContext.NOTEBOOK_SUBDIRECTORIES:
+        subdir_path = os.path.join(empty_directory, "notebooks", subdir)
+        assert set(os.listdir(subdir_path)) == {
+            "create_expectations.ipynb",
+            "validation_playground.ipynb"
+        }
 
 
 def test_build_batch_kwargs(titanic_multibatch_data_context):
     data_asset_name = titanic_multibatch_data_context.normalize_data_asset_name("titanic")
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(data_asset_name, "Titanic_1911")
-    assert "./data/titanic/Titanic_1911.csv" in batch_kwargs["path"]
+    assert os.path.relpath("./data/titanic/Titanic_1911.csv") in batch_kwargs["path"]
     assert "partition_id" in batch_kwargs
     assert batch_kwargs["partition_id"] == "Titanic_1911"
+
+
+def test_existing_local_data_docs_urls_returns_nothing_on_empty_project(tmp_path_factory):
+    empty_directory = str(tmp_path_factory.mktemp("hey_there"))
+    DataContext.create(empty_directory)
+    context = DataContext(os.path.join(empty_directory, DataContext.GE_DIR))
+
+    obs = context.get_existing_local_data_docs_sites_urls()
+    assert obs == []
+
+
+def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_site(tmp_path_factory):
+    empty_directory = str(tmp_path_factory.mktemp("yo_yo"))
+    DataContext.create(empty_directory)
+    ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
+    context = DataContext(ge_dir)
+
+    context._project_config["data_docs_sites"] = {
+        "my_rad_site": {
+            "class_name": "SiteBuilder",
+            "store_backend": {
+                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "base_directory": "uncommitted/data_docs/some/local/path/"
+            }
+        }
+    }
+
+    # TODO Workaround project config programmatic config manipulation
+    #  statefulness issues by writing to disk and re-upping a new context
+    context._save_project_config()
+    context = DataContext(ge_dir)
+    context.build_data_docs()
+
+    expected_path = os.path.join(ge_dir, "uncommitted/data_docs/some/local/path/index.html")
+    assert os.path.isfile(expected_path)
+
+    obs = context.get_existing_local_data_docs_sites_urls()
+    assert obs == ["file://{}".format(expected_path)]
+
+
+def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_local_site(tmp_path_factory):
+    empty_directory = str(tmp_path_factory.mktemp("yo_yo_ma"))
+    DataContext.create(empty_directory)
+    ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
+    context = DataContext(ge_dir)
+
+    context._project_config["data_docs_sites"] = {
+        "my_rad_site": {
+            "class_name": "SiteBuilder",
+            "store_backend": {
+                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "base_directory": "uncommitted/data_docs/some/path/"
+            }
+        },
+        "another_just_amazing_site": {
+            "class_name": "SiteBuilder",
+            "store_backend": {
+                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "base_directory": "uncommitted/data_docs/another/path/"
+            }
+        }
+    }
+
+    # TODO Workaround project config programmatic config manipulation
+    #  statefulness issues by writing to disk and re-upping a new context
+    context._save_project_config()
+    context = DataContext(ge_dir)
+    context.build_data_docs()
+    data_docs_dir = os.path.join(ge_dir, "uncommitted/data_docs/")
+
+    path_1 = os.path.join(data_docs_dir, "some/path/index.html")
+    path_2 = os.path.join(data_docs_dir, "another/path/index.html")
+    for expected_path in [path_1, path_2]:
+        assert os.path.isfile(expected_path)
+
+    obs = context.get_existing_local_data_docs_sites_urls()
+    assert set(obs) == set([
+        "file://{}".format(path_1),
+        "file://{}".format(path_2),
+    ])
+
+
+def test_existing_local_data_docs_urls_returns_only_existing_urls_from_customized_local_site(tmp_path_factory):
+    """
+    This test ensures that the method only returns known-good urls where the
+    index.html file actually exists.
+    """
+    empty_directory = str(tmp_path_factory.mktemp("yo_yo_ma"))
+    DataContext.create(empty_directory)
+    ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
+    context = DataContext(ge_dir)
+
+    context._project_config["data_docs_sites"] = {
+        "my_rad_site": {
+            "class_name": "SiteBuilder",
+            "store_backend": {
+                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "base_directory": "uncommitted/data_docs/some/path/"
+            }
+        },
+        "another_just_amazing_site": {
+            "class_name": "SiteBuilder",
+            "store_backend": {
+                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "base_directory": "uncommitted/data_docs/another/path/"
+            }
+        }
+    }
+
+    # TODO Workaround project config programmatic config manipulation
+    #  statefulness issues by writing to disk and re-upping a new context
+    context._save_project_config()
+    context = DataContext(ge_dir)
+    context.build_data_docs()
+    data_docs_dir = os.path.join(ge_dir, "uncommitted/data_docs/")
+
+    # Mangle one of the local sites
+    shutil.rmtree(os.path.join(data_docs_dir, "some/"))
+    path_1 = os.path.join(data_docs_dir, "some/path/index.html")
+    assert not os.path.isfile(path_1)
+    path_2 = os.path.join(data_docs_dir, "another/path/index.html")
+    assert os.path.isfile(path_2)
+
+    obs = context.get_existing_local_data_docs_sites_urls()
+    assert obs == [
+        "file://{}".format(path_2),
+    ]
+
+def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
+    # Setup:
+    base_path = str(tmp_path_factory.mktemp('test_load_config_variables_file'))
+    safe_mmkdir(os.path.join(base_path, "uncommitted"))
+    with open(os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w") as outfile:
+        yaml.dump({'env': 'dev'}, outfile)
+    with open(os.path.join(base_path, "uncommitted", "prod_variables.yml"), "w") as outfile:
+        yaml.dump({'env': 'prod'}, outfile)
+    basic_data_context_config["config_variables_file_path"] = "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
+    context = ConfigOnlyDataContext(basic_data_context_config, context_root_dir=base_path)
+
+    try:
+        # We should be able to load different files based on an environment variable
+        os.environ["TEST_CONFIG_FILE_ENV"] = "dev"
+        vars = context._load_config_variables_file()
+        assert vars['env'] == 'dev'
+        os.environ["TEST_CONFIG_FILE_ENV"] = "prod"
+        vars = context._load_config_variables_file()
+        assert vars['env'] == 'prod'
+    except Exception:
+        raise
+    finally:
+        # Make sure we unset the environment variable we're using
+        del os.environ["TEST_CONFIG_FILE_ENV"]

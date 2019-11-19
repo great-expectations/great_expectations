@@ -1,6 +1,6 @@
 .. _tutorial_init:
 
-Step 1: Run ``great_expectations init``
+Run ``great_expectations init``
 ===============================================
 
 Video
@@ -50,8 +50,9 @@ If you inspect the ``great_expectations/`` directory after the init command has 
     ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── create_expectations.ipynb
-    │   └── integrate_validation_into_pipeline.ipynb
+    │   ├── pandas
+    │   ├── spark
+    │   └── sql
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -176,25 +177,6 @@ Note: the SQL credentials you entered are stored in the ``uncommitted/config_var
 Note that this file goes in the ``uncommitted/`` directory, which should *NOT* be committed to source control.
 The ${my_db} variable is substituted with the credentials at runtime.
 
-A Great Expectations Datasource is not the data itself, but part of a *pointer* to a data compute
-environment where Expectations can be evaluated: it brings the world of data and the world of expectations together.
-Fully describing the pointer requires a 3-ple:
-
-1. ``datasource`` (`my_postgresql_db`)
-2. ``generator`` (`queries`)
-3. ``generator_asset`` (`user_events_table`)
-
-In addition, for some operations you will need to specify:
-
-* ``batch_kwargs`` (`SELECT * FROM user_events_table WHERE created_at>2018-01-01`), and/or
-* ``expectation_suite_name`` (`BasicDatasetProfiler`).
-
-Together, these five elements completely allot you to reference all of the main entities within the DataContext.
-
-You can get started in Great Expectations without learning all the details of the DataContext. To start, you'll mainly
-use elements 1 and 3: ``datasource_names``, like `my_postgresql_db` and ``generator_assets``, like `user_events_table`.
-For most users, these names are already familiar and intuitive. From there, Great Expectations' defaults can usually
-fill in the gaps.
 
 Configuring Slack Notifications
 ----------------------------------------
@@ -219,33 +201,26 @@ feature later.
 Profiling data
 ----------------------------------------
 
-Now that we've configured a DataSource, the next step is to profile it. Profiling will generate a first set of
-candidate Expectations for your data. By default, they will cover a wide range of statistics and other characteristics
-of the Dataset that could be useful for future validation.
+Now that we've configured a DataSource, the next step is to profile it. Profiling will generate a very loose set of
+Expectations for your data. By default, they will cover a wide range of statistics and other characteristics
+of the Dataset that could be useful for future validation and data exploration.
 
-Profiling will also evaluate these candidate Expectations against your actual data, producing a set of Expectation
+Profiling will also evaluate those Expectations against your actual data, producing a set of Expectation
 Validation Results (EVRs), which will contain observed values and other context derived from the data itself.
 
-Together, profiled Expectations and EVRs provide a lot of useful information for creating the Expectations you will
-use in production. They also provide the raw materials for first-pass data documentation. For more details on profiling,
+Profiling results can provide a lot of useful information for creating the Expectations you will
+use later. They also provide the raw materials for first-pass data documentation. For more details on profiling,
 please see :ref:`profiling`.
 
 Within the CLI, it's easy to profile our data.
 
-Warning: For large data sets, the current default profiler may run slowly and impose significant I/O and compute load.
-Be cautious when executing against shared databases.
+Note: the current default profiler uses first 1000 records of a table (or a file).
 
 .. code-block:: bash
 
     ========== Profiling ==========
 
-    Profiling 'data__dir' will create candidate expectations and documentation.
-
-    Please note: Profiling is still a beta feature in Great Expectations.  The current profiler will evaluate the entire 
-    data source (without sampling), which may be very time consuming. 
-    As a rule of thumb, we recommend starting with data smaller than 100MB.
-
-    To learn more about profiling, visit https://docs.greatexpectations.io/en/latest/reference/profiling.html
+    Profiling 'data__dir' will create expectations and documentation.
 
     Found 1 data assets from generator default
 
@@ -263,13 +238,12 @@ Be cautious when executing against shared databases.
         Profiled 329 columns using 18877 rows from npidata (17.647 sec)
 
     Profiled 1 of 1 named data assets, with 18877 total rows and 329 columns in 17.65 seconds.
-    Generated, evaluated, and stored 2039 candidate Expectations.
-    Note: You will need to review and revise Expectations before using them in production.
+    Generated, evaluated, and stored 2039 Expectations. Please review results using data-docs.
 
 The default profiler (``BasicDatasetProfiler``) will add two JSON files in your ``great_expectations/`` directory.
-They will be placed in subdirectories that following our namespacing conventions. Great Expectations' DataContexts can
-fetch these objects by name, so you won't usually need to access these files directly. Still, it's useful to see how
-they're stored, to get a sense for how namespaces work.
+They will be placed in subdirectories that include the three components of names described above. Great
+Expectations' DataContexts can fetch these objects by name, so you won't usually need to access these files directly.
+Still, it's useful to see how they're stored, to get a sense for how namespaces work.
 
 .. code-block:: bash
 
@@ -284,8 +258,9 @@ they're stored, to get a sense for how namespaces work.
     ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── create_expectations.ipynb
-    │   └── integrate_validation_into_pipeline.ipynb
+    │   ├── pandas
+    │   ├── spark
+    │   └── sql
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -444,8 +419,9 @@ After the init command completes, you should see the following directory structu
     ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── create_expectations.ipynb
-    │   └── integrate_validation_into_pipeline.ipynb
+    │   ├── pandas
+    │   ├── spark
+    │   └── sql
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -455,7 +431,7 @@ After the init command completes, you should see the following directory structu
         │       │   └── data__dir
         │       │       └── default
         │       │           ├── npidata
-        │       │           │   └── BasicDatasetProfiler.html
+        │       │               └── BasicDatasetProfiler.html
         │       ├── index.html
         │       └── validations
         │           └── profiling
@@ -474,14 +450,5 @@ After the init command completes, you should see the following directory structu
 Next Steps
 -----------
 
-Before exiting, the init command points you to the notebooks that you can use to create expectations:
-
-::
-
-    To create expectations for your data, start Jupyter and open a tutorial notebook:
-
-    To launch with jupyter notebook:
-        jupyter notebook great_expectations/notebooks/create_expectations.ipynb
-
-    To launch with jupyter lab:
-        jupyter lab great_expectations/notebooks/create_expectations.ipynb
+Once you have opened datadocs, a prompt will suggest possible next steps, such as to :ref:`tutorial_create_expectations` or
+:ref:`tutorial_validate_data`.

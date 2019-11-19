@@ -2,6 +2,7 @@
 from __future__ import division
 import pytest
 import great_expectations as ge
+import platform
 
 
 def test_expect_file_line_regex_match_count_to_be_between():
@@ -207,7 +208,8 @@ def test_expect_file_size_to_be_between():
     assert not bad_range.success
 
     # Test file size in range
-    good_range = titanic_file.expect_file_size_to_be_between(70000, 71000)
+    lower, upper = (70000, 71000) if platform.system() != 'Windows' else (71000, 72000)
+    good_range = titanic_file.expect_file_size_to_be_between(lower, upper)
     assert good_range.success
 
 def test_expect_file_to_exist():

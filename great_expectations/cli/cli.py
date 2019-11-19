@@ -6,7 +6,6 @@ import os
 import shutil
 import sys
 import warnings
-import webbrowser
 
 from great_expectations.cli.init_messages import (
     BUILD_DOCS_PROMPT,
@@ -32,7 +31,7 @@ from .datasource import (
     build_docs as build_documentation_impl,
     MSG_GO_TO_NOTEBOOK,
 )
-from great_expectations.cli.util import cli_message
+from great_expectations.cli.util import cli_message, is_sane_slack_webhook
 from great_expectations.data_context import DataContext
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
@@ -179,7 +178,13 @@ validate the data.
     default="./",
     help='The root of the project directory where you want to initialize Great Expectations.'
 )
-def init(target_directory):
+@click.option(
+    # Note this --no-view option is mostly here for tests
+    "--view/--no-view",
+    help="By default open in browser unless you specify the --no-view flag",
+    default=True
+)
+def init(target_directory, view):
     """
     Create a new project and help with onboarding.
 
@@ -209,7 +214,7 @@ def init(target_directory):
             if context.list_expectation_suite_keys():
                 if click.confirm(BUILD_DOCS_PROMPT, default=True):
                     context.build_data_docs()
-                    _open_data_docs_in_browser(context.root_directory)
+                    context.open_data_docs()
         except ge_exceptions.DataContextError as e:
             cli_message("<red>{}</red>".format(e))
     else:
@@ -217,23 +222,14 @@ def init(target_directory):
             cli_message(RUN_INIT_AGAIN)
             exit(0)
 
-        context, data_source_name = _create_new_project(target_directory)
+        context, data_source_name, data_source_type = _create_new_project(target_directory)
         if not data_source_name:  # no datasource was created
             return
 
         context = _slack_setup(context)
 
-        profile_datasource(context, data_source_name)
-        cli_message(MSG_GO_TO_NOTEBOOK)
-
-
-def _is_sane_slack_webhook(url):
-    """Really basic sanity checking."""
-    if url is None:
-        return False
-
-    return "https://hooks.slack.com/" in url.strip()
-
+        profile_datasource(context, data_source_name, open_docs=view, additional_batch_kwargs={"limit": 1000})
+        cli_message("""\n<cyan>Great Expectations is now set up in your project!</cyan>""")
 
 def _slack_setup(context):
     webhook_url = None
@@ -244,7 +240,7 @@ def _slack_setup(context):
     else:
         webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default="")
 
-    while not _is_sane_slack_webhook(webhook_url):
+    while not is_sane_slack_webhook(webhook_url):
         cli_message("That URL was not valid.\n")
         if not click.confirm(SLACK_SETUP_PROMPT, default=True):
             cli_message(SLACK_LATER)
@@ -261,23 +257,11 @@ def _get_full_path_to_ge_dir(target_directory):
     return os.path.abspath(os.path.join(target_directory, DataContext.GE_DIR))
 
 
-def _open_data_docs_in_browser(ge_dir):
-    """A stdlib cross-platform way to open a file in a browser."""
-    ge_dir = os.path.abspath(ge_dir)
-    data_docs_index = os.path.join(
-        ge_dir,
-        "uncommitted/data_docs/local_site/index.html"
-    )
-    if os.path.isfile(data_docs_index):
-        cli_message("Opening Data Docs found here: {}".format("file://" + data_docs_index))
-        webbrowser.open("file://" + data_docs_index)
-
-
 def _create_new_project(target_directory):
     try:
         context = DataContext.create(target_directory)
-        data_source_name = add_datasource_impl(context)
-        return context, data_source_name
+        data_source_name, data_source_type = add_datasource_impl(context)
+        return context, data_source_name, data_source_type
     except ge_exceptions.DataContextError as err:
         logger.critical(err.message)
         sys.exit(-1)
@@ -299,7 +283,12 @@ def _complete_onboarding(target_dir):
     default=None,
     help="The project's great_expectations directory."
 )
-def add_datasource(directory):
+@click.option(
+    "--view/--no-view",
+    help="By default open in browser unless you specify the --no-view flag",
+    default=True
+)
+def add_datasource(directory, view):
     """Add a new datasource to the data context."""
     try:
         context = DataContext(directory)
@@ -309,12 +298,33 @@ def add_datasource(directory):
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         _offer_to_install_new_template(err, context.root_directory)
 
-    data_source_name = add_datasource_impl(context)
+    data_source_name, data_source_type = add_datasource_impl(context)
 
     if not data_source_name:  # no datasource was created
         return
 
-    profile_datasource(context, data_source_name)
+    profile_datasource(context, data_source_name, open_docs=view)
+
+
+@cli.command()
+@click.option(
+    '--directory',
+    '-d',
+    default=None,
+    help="The project's great_expectations directory."
+)
+def list_datasources(directory):
+    """List known datasources."""
+    try:
+        context = DataContext(directory)
+        datasources = context.list_datasources()
+        # TODO Pretty up this console output
+        cli_message(str([d for d in datasources]))
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, context.root_directory)
 
 
 @cli.command()
@@ -331,8 +341,13 @@ def add_datasource(directory):
     help="The project's great_expectations directory."
 )
 @click.option('--batch_kwargs', default=None,
-              help='Additional keyword arguments to be provided to get_batch when loading the data asset.')
-def profile(datasource_name, data_assets, profile_all_data_assets, directory, batch_kwargs):
+              help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
+@click.option(
+    "--view/--no-view",
+    help="By default open in browser unless you specify the --no-view flag",
+    default=True
+)
+def profile(datasource_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
     """
     Profile datasources from the specified context.
 
@@ -345,6 +360,7 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
     :param data_assets: if this comma-separated list of data asset names is provided, only the specified data assets will be profiled
     :param profile_all_data_assets: if provided, all data assets will be profiled
     :param directory:
+    :param view: Open the docs in a browser
     :param batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
     :return:
     """
@@ -373,9 +389,23 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, ba
             )
             sys.exit(-1)
         else:
-            profile_datasource(context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets, additional_batch_kwargs=batch_kwargs)
+            profile_datasource(
+                context,
+                datasources[0],
+                data_assets=data_assets,
+                profile_all_data_assets=profile_all_data_assets,
+                open_docs=view,
+                additional_batch_kwargs=batch_kwargs
+            )
     else:
-        profile_datasource(context, datasource_name, data_assets=data_assets, profile_all_data_assets=profile_all_data_assets, additional_batch_kwargs=batch_kwargs)
+        profile_datasource(
+            context,
+            datasource_name,
+            data_assets=data_assets,
+            profile_all_data_assets=profile_all_data_assets,
+            open_docs=view,
+            additional_batch_kwargs=batch_kwargs
+        )
 
 
 @cli.command()
@@ -403,7 +433,7 @@ def build_docs(directory, site_name, view=True):
             site_name=site_name
         )
         if view:
-            _open_data_docs_in_browser(context.root_directory)
+            context.open_data_docs()
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)

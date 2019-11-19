@@ -120,42 +120,59 @@ def setup_notebook_logging(logger=None):
 
 
 def list_available_data_asset_names(context, data_source_name=None):
-    """
-    TODO: Needs a docstring and tests.
+    """ List asset names found in the current context. """
+    # TODO: Needs tests.
+    styles = """
+    <style type='text/css'>
+    ul.data-assets {
+        margin-top: 0px;
+    }
+    ul.data-assets li {
+        line-height: 1.2em;
+        list-style-type: circle;
+    }
+    ul.data-assets li span.expectation-suite {
+        background: #ddd;
+    }
+    </style>
     """
 
+    print("Inspecting your data sources. This may take a moment...")
     expectation_suite_keys = context.list_expectation_suite_keys()
-
     datasources = context.list_datasources()
+    html = ""
     for datasource in datasources:
         if data_source_name and datasource['name'] != data_source_name:
             continue
-        print('datasource: {0:s} ({1:s})'.format(datasource['name'], datasource['class_name']))
+        html += "<h2 style='margin: 0'>Datasource: {0:s} ({1:s})</h2>".format(datasource['name'], datasource['class_name'])
         ds = context.get_datasource(datasource['name'])
         generators = ds.list_generators()
         for generator_info in generators:
-            print('  generator: {0:s} ({1:s})'.format(generator_info['name'], generator_info['class_name']))
+            html += "generator: {0:s} ({1:s})".format(generator_info['name'], generator_info['class_name'])
             generator = ds.get_generator(generator_info['name'])
             data_asset_names = sorted(generator.get_available_data_asset_names())
             if len(data_asset_names) > 0:
+                html += "<h3 style='margin: 0.2em 0'>Data Assets Found:</h3>"
+                html += styles
+                html += "<ul class='data-assets'>"
                 for data_asset_name in data_asset_names:
-                    print('    generator_asset: {0:s}'.format(data_asset_name))
+                    html += '<li>{0:s}</li>'.format(data_asset_name)
                     data_asset_expectation_suite_keys = [es_key for es_key in expectation_suite_keys if \
                                                          es_key.data_asset_name.datasource == datasource['name'] and \
                                                          es_key.data_asset_name.generator == generator_info['name'] and \
                                                          es_key.data_asset_name.generator_asset == data_asset_name]
                     if len(data_asset_expectation_suite_keys) > 0:
+                        html += "<ul>"
                         for es_key in data_asset_expectation_suite_keys:
-                            print('      expectation suite: {0:s}'.format(es_key.expectation_suite_name))
+                            html += "<li><span class='expectation-suite'>Expectation Suite</span>: {0:s}</li>".format(es_key.expectation_suite_name)
+                        html += "</ul>"
+                html += "</ul>"
             else:
-                display(HTML("""
-                <p>
-                No data assets found in this data source.
-                </p>
-                <p>
-                Read about how generators derive data assets from data sources: <a href="https://great-expectations.readthedocs.io/en/latest/how_to_add_data_source.html">Data assets</a>
-                </p>
-                            """))
+                display(HTML("""<p>No data assets found in this data source.</p>
+<p>Read about how generators derive data assets from data sources:
+<a href="https://great-expectations.readthedocs.io/en/latest/how_to_add_data_source.html">Data assets</a>
+</p>"""))
+        display(HTML(html))
 
     #TODO: add expectation suite names (existing)
 

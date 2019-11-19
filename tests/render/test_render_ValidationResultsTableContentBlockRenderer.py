@@ -149,6 +149,13 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                 }
               }
             }
+          },
+          "styling": {
+            "parent": {
+              "classes": [
+                 "hide-succeeded-validation-target-child"
+              ]
+            }
           }
         }),
         RenderedStringTemplateContent(**{
@@ -866,6 +873,13 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(evr_failed_w
               "tag": "i"
             }
           }
+        }
+      },
+      "styling": {
+        "parent": {
+          "classes": [
+            "hide-succeeded-validation-target-child"
+          ]
         }
       }
     }

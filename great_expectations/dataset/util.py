@@ -179,7 +179,7 @@ def continuous_partition_data(data, bins='auto', n_bins=10, **kwargs):
     }
 
 
-def build_continuous_partition_object(dataset, column, bins='auto', n_bins=10):
+def build_continuous_partition_object(dataset, column, bins='auto', n_bins=10, allow_relative_error=False):
     """Convenience method for building a partition object on continuous data from a dataset and column
 
     Args:
@@ -188,18 +188,24 @@ def build_continuous_partition_object(dataset, column, bins='auto', n_bins=10):
         bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto'
             (for automatically spaced bins)
         n_bins (int): Ignored if bins is auto.
+        allow_relative_error: passed to get_column_quantiles, set to False for only precise
+            values, True to allow approximate values on systems with only binary choice (e.g. Redshift), and to a
+            value between zero and one for systems that allow specification of relative error (e.g.
+            SparkDFDataset).
 
     Returns:
+
         A new partition_object::
 
-        {
-            "bins": (list) The endpoints of the partial partition of reals,
-            "weights": (list) The densities of the bins implied by the partition.
-        }
-        See :ref:`partition_object`.
+            {
+                "bins": (list) The endpoints of the partial partition of reals,
+                "weights": (list) The densities of the bins implied by the partition.
+            }
+
+            See :ref:`partition_object`.
     """
     # NOTE: we are *not* specifying a tail_weight_holdout by default.
-    bins = dataset.get_column_partition(column, bins, n_bins)
+    bins = dataset.get_column_partition(column, bins, n_bins, allow_relative_error)
     if isinstance(bins, np.ndarray):
         bins = bins.tolist()
     else:

@@ -13,32 +13,33 @@
     <style>{% include 'data_docs_default_styles.css' %}</style>
     <style>{% include 'data_docs_custom_styles.css' ignore missing %}</style>
 
-    <script src="https://cdn.jsdelivr.net/npm/vega@5.3.5/build/vega.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@3.2.1/build/vega-lite.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@4.0.0/build/vega-embed.js"></script>
-    <script src="https://kit.fontawesome.com/8217dffd95.js"></script>
+    {% include 'js_script_imports.j2' %}
   </head>
 
   <body
-        data-spy="scroll"
-        data-target="#navigation"
-        data-offset="50"
-    >
-    <div class="container-fluid p-4">
+          data-spy="scroll"
+          data-target="#navigation"
+          data-offset="50"
+  >
+    {% include 'top_navbar.j2' %}
+    <div class="container-fluid pt-4 pb-4 pl-5 pr-5">
       <div class="row">
-        <div class="col-md-10 col-lg-10 col-xs-12">
-        {% for section in sections %}
-          {% set section_loop = loop -%}
-          {% include 'section.j2' %}
-        {% endfor %}
+        {% include 'sidebar.j2' %}
+        <div class="col-md-10 col-lg-10 col-xs-12 pl-4 pr-3">
+          {% for section in sections %}
+            {% set section_loop = loop -%}
+            {% include 'section.j2' %}
+          {% endfor %}
         </div>
-        <div class="col-lg-2 col-md-2 col-xs-12">
-            {% include 'ge_info.j2' %}
+        <div class="d-block d-sm-none col-12">
+          {% include 'ge_info.j2' %}
         </div>
       </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    {% if cta_footer %}
+      {% include 'cta_footer.j2' %}
+    {% endif %}
+
   </body>
 </html>

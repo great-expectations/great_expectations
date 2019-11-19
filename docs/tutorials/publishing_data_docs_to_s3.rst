@@ -57,7 +57,7 @@ Modify the policy above and save it to a file called `ip-policy.json` in your lo
 
 .. code-block:: bash
 
-    > aws s3api put-bucket-policy --bucket data-docs.ge.test --policy file://ip-policy.json
+    > aws s3api put-bucket-policy --bucket data-docs.my_org --policy file://ip-policy.json
 
 
 2. Edit your `great_expectations.yml` file to change the `data_docs_sites` configuration for the site you will publish.
