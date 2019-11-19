@@ -1,5 +1,11 @@
 .. _changelog:
 
+
+0.8.6__develop
+-----------------
+
+
+
 0.8.5
 -----------------
 * BREAKING CHANGE: move all reader options from the top-level batch_kwargs object to a sub-dictionary called
