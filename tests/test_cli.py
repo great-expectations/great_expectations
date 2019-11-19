@@ -191,7 +191,7 @@ def test_cli_evaluation_parameters():
     assert json_result['evaluation_parameters'] == expected_evaluation_parameters
 
 
-def test_cli_init_on_new_project(tmp_path_factory, filesystem_csv_2):
+def test_cli_init_on_new_project(tmp_path_factory):
     try:
         basedir = tmp_path_factory.mktemp("test_cli_init_diff")
         basedir = str(basedir)
@@ -515,6 +515,7 @@ def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_
     assert "Some of the data assets you specified were not found: bad-bad-asset" in result.output
     
     logger.removeHandler(handler)
+
 
 def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource("my_datasource",

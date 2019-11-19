@@ -27,6 +27,9 @@ def pytest_configure(config):
         "markers", "smoketest: mark test as smoketest--it does not have useful assertions but may produce side effects "
                    "that require manual inspection."
     )
+    config.addinivalue_line(
+        "markers", "rendered_output: produces rendered output that should be manually reviewed."
+    )
 
 
 def pytest_addoption(parser):

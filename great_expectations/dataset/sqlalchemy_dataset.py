@@ -419,12 +419,49 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    def get_column_quantiles(self, column, quantiles):
-        selects = []
-        for quantile in quantiles:
-            selects.append(
-                sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
-            )
+    def _get_dialect_quantile_fn(self, allow_relative_error=False):
+        try:
+            # redshift
+            if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+                if allow_relative_error is True:
+                    return "approximate percentile_disc"
+                raise ValueError("Redshift does not support computing quantiles without approximation error; set "
+                                 "allow_relative_error to True to allow approximate quantiles.")
+        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+            pass
+
+        # The remaining databases do not support relative error
+        if allow_relative_error is not False:
+            raise ValueError("Your current dialect does not support approximate quantile computation.")
+
+        try:
+            # postgres
+            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+                return "percentile_disc"
+        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+            pass
+        try:
+            # Snowflake
+            if isinstance(self.engine.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect):
+                return "PERCENTILE_DISC"
+        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+            pass
+        try:
+            # Bigquery
+            if isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+                return "PERCENTILE_DISC"
+        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+            pass
+
+        # NOTE - JPC - 20191117: I do not believe mysql, for example, actually supports percentile_disc,
+        # but using this as a default replicates the previous behavior and can stand until we add more robust testing
+        # and/or develop an alternative
+        return "PERCENTILE_DISC"
+
+    def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
+        quantile_fn = self._get_dialect_quantile_fn(allow_relative_error=allow_relative_error)
+        selects = [sa.sql.functions.Function(quantile_fn, str(quantile)).within_group(
+            sa.column(column).asc()) for quantile in quantiles]
         quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
         return list(quantiles)
 
