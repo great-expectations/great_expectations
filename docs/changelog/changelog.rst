@@ -1,20 +1,53 @@
 .. _changelog:
 
+0.8.5
+-----------------
+* BREAKING CHANGE: move all reader options from the top-level batch_kwargs object to a sub-dictionary called
+  "reader_options" for SparkDFDatasource and PandasDatasource. This means it is no longer possible to specify
+  supplemental reader-specific options at the top-level of `get_batch`,  `yield_batch_kwargs` or `build_batch_kwargs`
+  calls, and instead, you must explicitly specify that they are reader_options, e.g. by a call such as:
+  `context.yield_batch_kwargs(data_asset_name, reader_options={'encoding': 'utf-8'})`.
+* BREAKING CHANGE: move all query_params from the top-level batch_kwargs object to a sub-dictionary called
+  "query_params" for SqlAlchemyDatasource. This means it is no longer possible to specify supplemental query_params at
+  the top-level of `get_batch`,  `yield_batch_kwargs` or `build_batch_kwargs`
+  calls, and instead, you must explicitly specify that they are query_params, e.g. by a call such as:
+  `context.yield_batch_kwargs(data_asset_name, query_params={'schema': 'foo'})`.
+* Add support for filtering validation result suites and validation result pages to show only failed expectations in
+  generated documentation
+* Add support for limit parameter to batch_kwargs for all datasources: Pandas, SqlAlchemy, and SparkDF; add support
+  to generators to support building batch_kwargs with limits specified.
+* Include raw_query and query_params in query_generator batch_kwargs
+* Rename generator keyword arguments from data_asset_name to generator_asset to avoid ambiguity with normalized names
+* Consistently migrate timestamp from batch_kwargs to batch_id
+* Include batch_id in validation results
+* Fix issue where batch_id was not included in some generated datasets
+* Fix rendering issue with expect_table_columns_to_match_ordered_list expectation
+* Add support for GCP, including BigQuery and GCS
+* Add support to S3 generator for retrieving directories by specifying the `directory_assets` configuration
+* Fix warning regarding implicit class_name during init flow
+* Expose build_generator API publicly on datasources
+* Allow configuration of known extensions and return more informative message when SubdirReaderGenerator cannot find
+  relevant files.
+* Add support for allow_relative_error on internal dataset quantile functions, and add support for
+  build_continuous_partition_objec in Redshift
+* Fix truncated scroll bars in value_counts graphs
+
 
 0.8.4.post0
 ----------------
 * Correct a packaging issue resulting in missing notebooks in tarball release; update docs to reflect new notebook
 locations.
 
+
 0.8.4
 -----------------
 * Improved the tutorials that walk new users through the process of creating expectations and validating data
 * Changed the flow of the init command - now it creates the scaffolding of the project and adds a datasource. After
-that users can choose their path.
+  that users can choose their path.
 * Added a component with links to useful tutorials to the index page of the Data Docs website
 * Improved the UX of adding a SQL datasource in the CLI - now the CLI asks for specific credentials for Postgres,
-MySQL, Redshift and Snowflake, allows continuing debugging in the config file and has better error messages
-* Added batch_kwargs infomration to DataDocs validation results
+  MySQL, Redshift and Snowflake, allows continuing debugging in the config file and has better error messages
+* Added batch_kwargs information to DataDocs validation results
 * Fix an issue affecting file stores on Windows
 
 
@@ -243,7 +276,7 @@ v.0.7.0
 Version 0.7 of Great Expectations is HUGE. It introduces several major new features
 and a large number of improvements, including breaking API changes.
 
-The core vocabulary of expectations remains consistent. Upgrading to 
+The core vocabulary of expectations remains consistent. Upgrading to
 the new version of GE will primarily require changes to code that
 uses data contexts; existing expectation suites will require only changes
 to top-level names.
@@ -322,7 +355,7 @@ v.0.6.0
 ------------
 * Add support for SparkDFDataset and caching (HUGE work from @cselig)
 * Migrate distributional expectations to new testing framework
-* Add support for two new expectations: expect_column_distinct_values_to_contain_set 
+* Add support for two new expectations: expect_column_distinct_values_to_contain_set
   and expect_column_distinct_values_to_equal_set (thanks @RoyalTS)
 * FUTURE BREAKING CHANGE: The new cache mechanism for Datasets, \
   when enabled, causes GE to assume that dataset does not change between evaluation of individual expectations. \

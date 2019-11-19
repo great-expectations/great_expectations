@@ -1,0 +1,34 @@
+<script>
+  $(window).on('activate.bs.scrollspy', function () {
+    document.querySelector(".nav-link.active").scrollIntoViewIfNeeded();
+  });
+</script>
+
+<div class="card bg-light" style="max-height: 90vh">
+  <div class="card-header p-2">
+    <strong>Table of Contents</strong>
+  </div>
+  <div class="card-body p-0" style="overflow: auto; height: 100%">
+    <nav id="navigation" class="rounded navbar navbar-light bg-light ge-navigation-sidebar-container p-1">
+      <ul class="nav nav-pills flex-column ge-navigation-sidebar-content col-12 p-0">
+        {% for section in sections %}
+          {% if section['section_name'] == "Overview" %}
+            <li class="nav-item">
+              <a class="nav-link ge-navigation-sidebar-link" href="#section-{{ loop.index }}"
+               style="white-space: normal; word-break: break-all;overflow-wrap: normal;">
+                <strong>{{ section['section_name'] }}</strong>
+              </a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link ge-navigation-sidebar-link ml-1" href="#section-{{ loop.index }}"
+                 style="white-space: normal; word-break: break-all;overflow-wrap: normal;">
+                {{ section['section_name'] }}
+              </a>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </nav>
+  </div>
+</div>

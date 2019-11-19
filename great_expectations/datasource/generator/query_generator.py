@@ -64,15 +64,17 @@ class QueryGenerator(BatchGenerator):
 
         return raw_query
 
-    def _get_iterator(self, generator_asset, **kwargs):
+    def _get_iterator(self, generator_asset, query_params=None):
         raw_query = self._get_raw_query(generator_asset)
         if raw_query is None:
             logger.warning("No query defined for generator asset: %s" % generator_asset)
             # There is no valid query path or temp query storage defined with the generator_asset
             return None
 
+        if query_params is None:
+            query_params = {}
         try:
-            substituted_query = Template(raw_query).substitute(kwargs)
+            substituted_query = Template(raw_query).substitute(query_params)
         except KeyError:
             raise BatchKwargsError(
                 "Unable to generate batch kwargs for asset '" + generator_asset + "': "
@@ -84,16 +86,18 @@ class QueryGenerator(BatchGenerator):
             )
         return iter([
             SqlAlchemyDatasourceQueryBatchKwargs(
-                query=substituted_query
+                query=substituted_query,
+                raw_query=raw_query,
+                query_params=query_params
             )])
 
-    def add_query(self, data_asset_name, query):
+    def add_query(self, generator_asset, query):
         if self._queries_path:
-            with open(os.path.join(self._queries_path, data_asset_name + ".sql"), "w") as queryfile:
+            with open(os.path.join(self._queries_path, generator_asset + ".sql"), "w") as queryfile:
                 queryfile.write(query)
         else:
             logger.info("Adding query to temporary storage only.")
-            self._queries[data_asset_name] = query
+            self._queries[generator_asset] = query
 
     def get_available_data_asset_names(self):
         if self._queries_path:
@@ -103,13 +107,16 @@ class QueryGenerator(BatchGenerator):
 
         return defined_queries
 
-    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, query_params=None):
         """Build batch kwargs from a partition id."""
         raw_query = self._get_raw_query(generator_asset)
         if "$partition_id" not in raw_query and "${partition_id}" not in raw_query:
             raise BatchKwargsError("No partition_id parameter found in the requested query.", {})
         try:
-            substituted_query = Template(raw_query).substitute({"partition_id": partition_id})
+            if query_params is None:
+                query_params = {}
+            query_params.update({'partition_id': partition_id})
+            substituted_query = Template(raw_query).substitute(query_params)
         except KeyError:
             raise BatchKwargsError(
                 "Unable to generate batch kwargs for asset '" + generator_asset + "': "
@@ -120,7 +127,9 @@ class QueryGenerator(BatchGenerator):
                 }
             )
         return SqlAlchemyDatasourceQueryBatchKwargs(
-            query=substituted_query
+            query=substituted_query,
+            raw_query=raw_query,
+            query_params=query_params
         )
 
     def get_available_partition_ids(self, generator_asset):

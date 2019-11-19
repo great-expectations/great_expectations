@@ -403,8 +403,9 @@ structure below.
     ├── expectations
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── create_expectations.ipynb
-    │   └── integrate_validation_into_pipeline.ipynb
+    │   ├── pandas
+    │   ├── spark
+    │   └── sql
     ├── plugins
     │   └── custom_module
     │       └── custom_dataset.py
