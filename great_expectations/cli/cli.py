@@ -27,6 +27,7 @@ from great_expectations.cli.init_messages import (
 from .datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
+    create_demo_expectation_suite,
     build_docs as build_documentation_impl,
     MSG_GO_TO_NOTEBOOK,
 )
@@ -227,7 +228,8 @@ def init(target_directory, view):
 
         context = _slack_setup(context)
 
-        profile_datasource(context, data_source_name, open_docs=view, additional_batch_kwargs={"limit": 1000})
+        create_demo_expectation_suite(context, data_source_name, open_docs=view, additional_batch_kwargs={"limit": 1000})
+        #profile_datasource(context, data_source_name, open_docs=view, additional_batch_kwargs={"limit": 1000})
         cli_message("""\n<cyan>Great Expectations is now set up in your project!</cyan>""")
 
 def _slack_setup(context):

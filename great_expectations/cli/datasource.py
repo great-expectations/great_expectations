@@ -2,11 +2,13 @@ import importlib
 import os
 import enum
 import click
+import datetime
 
 from great_expectations.datasource import PandasDatasource, SparkDFDatasource, SqlAlchemyDatasource
 from .util import cli_message
 from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.data_context import DataContext
+from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
 
 from great_expectations import rtd_url_ge_version
 
@@ -397,6 +399,110 @@ def _add_spark_datasource(context):
     configuration = SparkDFDatasource.build_configuration(base_directory=os.path.join("..", path))
     context.add_datasource(name=data_source_name, class_name='SparkDFDatasource', **configuration)
     return data_source_name
+
+
+def create_demo_expectation_suite(
+    context,
+    data_source_name,
+    additional_batch_kwargs=None,
+    open_docs=False,
+):
+    """"Profile a named datasource using the specified context"""
+    msg_intro = """
+<cyan>========== Demo ==========</cyan>
+
+Profiling '{0:s}' will create sample expectations and documentation from your data.
+"""
+
+    msg_confirm_ok_to_proceed = """Would you like to profile '{0:s}'?"""
+
+    msg_skipping = "Skipping profiling for now. You can always do this later " \
+                   "by running `<green>great_expectations profile</green>`."
+
+    msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
+"""
+
+    msg_too_many_data_assets = """There are {0:d} data assets in {1:s}. Profiling all of them might take too long.    
+"""
+
+    msg_prompt_enter_data_asset_list = """Enter comma-separated list of data asset names (e.g., {0:s})   
+"""
+
+    msg_options = """Choose how to proceed:
+  1. Specify a list of the data assets to profile
+  2. Exit and profile later
+"""
+
+    msg_data_doc_intro = """
+<cyan>========== Data Docs ==========</cyan>
+
+Great Expectations is building Data Docs from the data you just profiled!"""
+
+    cli_message(msg_intro.format(data_source_name, rtd_url_ge_version))
+
+    if click.confirm(msg_confirm_ok_to_proceed.format(data_source_name), default=True):
+
+        #TODO: ["default"] is a hack. since we are running in init, it might be ok to assume that only default exists
+        available_data_asset_names = context.get_available_data_asset_names(datasource_names=[data_source_name])[data_source_name]["default"]
+
+    # if data_assets:
+    #     data_assets = [item.strip() for item in data_assets.split(",")]
+
+        do_exit = False
+        it_0 = True
+        while not do_exit:
+            if it_0:
+                it_0 = False
+            else:
+                if profiling_results['success']: # data context is ready to profile
+                    break
+                elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND:
+                    cli_message(msg_some_data_assets_not_found.format("," .join(profiling_results['error']['not_found_data_assets'])))
+                elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS:
+                    cli_message(msg_too_many_data_assets.format(profiling_results['error']['num_data_assets'], data_source_name))
+                else: # unknown error
+                    raise ValueError("Unknown profiling error code: " + profiling_results['error']['code'])
+
+            option_selection = click.prompt(
+                msg_options,
+                type=click.Choice(["1", "2"]),
+                show_choices=False
+            )
+
+            if option_selection == "1":
+                data_assets = click.prompt(
+                    msg_prompt_enter_data_asset_list.format(", ".join(available_data_asset_names[:3])),
+                    default=None,
+                    show_default=False
+                )
+                if data_assets:
+                    data_assets = [item.strip() for item in data_assets.split(",")]
+            elif option_selection == "2": # skip
+                cli_message(msg_skipping)
+                return
+            else:
+                raise ValueError("Unrecognized option: " + option_selection)
+
+            # after getting the arguments from the user, let's try to run profiling again
+            # (no dry run this time)
+            profiling_results = context.profile_datasource(
+                data_source_name,
+                data_assets=data_assets,
+                profiler=SampleExpectationsDatasetProfiler,
+                dry_run=False,
+                run_id=datetime.datetime.now().isoformat().replace(":", "") + "Z",
+                additional_batch_kwargs=additional_batch_kwargs
+            )
+
+
+    cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
+    build_docs(context)
+    if open_docs:  # This is mostly to keep tests from spawning windows
+        context.open_data_docs()
+
+    else:
+        cli_message(msg_skipping)
+        return
 
 
 def profile_datasource(
