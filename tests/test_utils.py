@@ -581,11 +581,11 @@ def evaluate_json_test(data_asset, expectation_type, test):
                     "Invalid test specification: unknown key " + key + " in 'out'")
 
 
-def dict_to_ordered_dict(plain_dict):
-    ordered_dict = OrderedDict()
-    for key, val in plain_dict.items():
-        if isinstance(val, Mapping):
-            ordered_dict[key] = dict_to_ordered_dict(val)
-        else:
-            ordered_dict[key] = val
-    return ordered_dict
+# def dict_to_ordered_dict(plain_dict):
+#     ordered_dict = OrderedDict()
+#     for key, val in plain_dict.items():
+#         if isinstance(val, Mapping):
+#             ordered_dict[key] = dict_to_ordered_dict(val)
+#         else:
+#             ordered_dict[key] = val
+#     return ordered_dict

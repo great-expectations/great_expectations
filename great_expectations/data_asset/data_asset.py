@@ -1109,9 +1109,8 @@ class DataAsset(object):
         Returns:
             The current value of the evaluation parameter.
         """
-        if "evaluation_parameters" in self._expectation_suite and \
-                parameter_name in self._expectation_suite['evaluation_parameters']:
-            return self._expectation_suite['evaluation_parameters'][parameter_name]
+        if parameter_name in self._expectation_suite.evaluation_parameters:
+            return self._expectation_suite.evaluation_parameters[parameter_name]
         else:
             return default_value
 
@@ -1123,10 +1122,6 @@ class DataAsset(object):
             parameter_name (string): The name of the kwarg to be replaced at evaluation time
             parameter_value (any): The value to be used
         """
-
-        if 'evaluation_parameters' not in self._expectation_suite:
-            self._expectation_suite.evaluation_parameters = {}
-
         self._expectation_suite.evaluation_parameters.update(
             {parameter_name: parameter_value})
 

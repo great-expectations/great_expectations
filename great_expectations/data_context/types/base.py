@@ -1,8 +1,7 @@
-from collections import namedtuple
 from copy import deepcopy
 import logging
 
-from marshmallow import Schema, fields, ValidationError, pre_dump, post_load
+from marshmallow import Schema, fields, ValidationError, pre_dump, post_load, validates_schema
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
@@ -38,31 +37,6 @@ class DataContextConfig(DictDot):
             commented_map = CommentedMap()
         self._commented_map = commented_map
         self._config_version = config_version
-        if not isinstance(config_version, (int, float)):
-            raise ge_exceptions.InvalidConfigValueTypeError(
-                "The key `config_version` must be a number. Please check your config file.")
-
-        # When migrating from 0.7.x to 0.8.0
-        if config_version == 0 and (
-                "validations_store" in list(commented_map.keys()) or "validations_stores" in list(commented_map.keys())):
-            raise ge_exceptions.ZeroDotSevenConfigVersionError(
-                "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
-            )
-        elif config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
-            raise ge_exceptions.UnsupportedConfigVersionError(
-                "You appear to have an invalid config version ({}).\n    The version number must be between {} and {}.".format(
-                    config_version,
-                    MINIMUM_SUPPORTED_CONFIG_VERSION,
-                    CURRENT_CONFIG_VERSION,
-                )
-            )
-        elif config_version > CURRENT_CONFIG_VERSION:
-            raise ge_exceptions.InvalidConfigVersionError(
-                "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
-                    config_version,
-                    CURRENT_CONFIG_VERSION
-                )
-            )
         self.datasources = datasources
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
@@ -132,6 +106,7 @@ class DatasourceConfigSchema(Schema):
     # TODO: Update to generator-specific
     # generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))
     generators = fields.Dict(keys=fields.Str(), values=fields.Dict())
+    credentials = fields.Raw(allow_none=True)
 
     # noinspection PyUnusedLocal
     @post_load
@@ -140,7 +115,7 @@ class DatasourceConfigSchema(Schema):
 
 
 class DataContextConfigSchema(Schema):
-    config_version = fields.Number(validate=lambda x: x < 100, error_messages={"invalid": "BLARG!"})
+    config_version = fields.Number(validate=lambda x: 0 < x < 100, error_messages={"invalid": "BLARG!"})
     datasources = fields.Dict(keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema))
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
@@ -166,6 +141,48 @@ class DataContextConfigSchema(Schema):
         logger.error(exc.messages)
         raise ge_exceptions.InvalidDataContextConfigError("Error while processing DataContextConfig.",
                                                           exc)
+
+    @validates_schema
+    def validate_schema(self, data):
+        if 'config_version' not in data:
+            raise ge_exceptions.InvalidDataContextConfigError(
+                "The key `config_version` is missing; please check your config file.",
+                validation_error=ValidationError("no config_version key"))
+
+        if not isinstance(data['config_version'], (int, float)):
+            raise ge_exceptions.InvalidDataContextConfigError(
+                "The key `config_version` must be a number. Please check your config file.",
+                validation_error=ValidationError("config version not a number")
+            )
+
+        # When migrating from 0.7.x to 0.8.0
+        if data['config_version'] == 0 and (
+                "validations_store" in list(data.keys()) or "validations_stores" in list(data.keys())):
+            raise ge_exceptions.ZeroDotSevenConfigVersionError(
+                "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
+            )
+        elif data['config_version'] < MINIMUM_SUPPORTED_CONFIG_VERSION:
+            raise ge_exceptions.UnsupportedConfigVersionError(
+                "You appear to have an invalid config version ({}).\n    The version number must be between {} and {}.".format(
+                    data['config_version'],
+                    MINIMUM_SUPPORTED_CONFIG_VERSION,
+                    CURRENT_CONFIG_VERSION,
+                ),
+            )
+        elif data['config_version'] > CURRENT_CONFIG_VERSION:
+            raise ge_exceptions.InvalidDataContextConfigError(
+                "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
+                    data['config_version'],
+                    CURRENT_CONFIG_VERSION
+                ),
+                validation_error=ValidationError("config version too high")
+            )
+
+    #
+    # # noinspection PyUnusedLocal
+    # @post_load
+    # def make_data_context_config(self, data, **kwargs):
+    #     return DataContextConfig(**data)
 
 
 dataContextConfigSchema = DataContextConfigSchema(strict=True)

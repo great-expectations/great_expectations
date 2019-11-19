@@ -5,12 +5,13 @@ import re
 import altair as alt
 import pandas as pd
 
+from great_expectations.core import ExpectationConfiguration, ExpectationValidationResult
 from .renderer import Renderer
 from great_expectations.util import load_class
 from .content_block import ExceptionListContentBlockRenderer
 
 from ..types import RenderedSectionContent, RenderedHeaderContent, RenderedGraphContent, RenderedBulletListContent, \
-    RenderedTableContent, ValueListContent
+    RenderedTableContent, ValueListContent, TextContent
 
 from ..types import (
     RenderedComponentContent,
@@ -30,11 +31,9 @@ class ColumnSectionRenderer(Renderer):
         else:
             candidate_object = ge_object
         try:
-            if "kwargs" in candidate_object:
-                # This is an expectation
+            if isinstance(candidate_object, ExpectationConfiguration):
                 return candidate_object.kwargs["column"]
-            elif "expectation_config" in candidate_object:
-                # This is a validation
+            elif isinstance(candidate_object, ExpectationValidationResult):
                 return candidate_object.expectation_config.kwargs["column"]
             else:
                 raise ValueError(
@@ -198,12 +197,12 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             evrs,
             "expect_column_values_to_not_be_null"
         )
-        evrs = [evr for evr in [unique_n, unique_proportion, null_evr] if (evr is not None and "result" in evr)]
+        evrs = [evr for evr in [unique_n, unique_proportion, null_evr] if (evr is not None)]
 
         if len(evrs) > 0:
             new_content_block = self._overview_table_renderer.render(evrs)
-            new_content_block["header"] = "Properties"
-            new_content_block["styling"] = {
+            new_content_block.header = "Properties"
+            new_content_block.styling = {
                 "classes": ["col-4", ],
                 "styles": {
                     "margin-top": "20px"
@@ -227,11 +226,11 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_quantile_values_to_be_between"
         )
 
-        if not quantile_evr or "result" not in quantile_evr:
+        if not quantile_evr:
             return
 
-        quantiles = quantile_evr["result"]["observed_value"]["quantiles"]
-        quantile_ranges = quantile_evr["result"]["observed_value"]["values"]
+        quantiles = quantile_evr.result["observed_value"]["quantiles"]
+        quantile_ranges = quantile_evr.result["observed_value"]["values"]
 
         quantile_strings = {
             .25: "Q1",
@@ -254,7 +253,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 quantile_ranges[idx],
             ])
 
-        return RenderedHeaderContent(**{
+        return RenderedTableContent(**{
             "content_block_type": "table",
             "header": "Quantiles",
             "table": table_rows,
@@ -278,11 +277,11 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_mean_to_be_between"
         )
 
-        if not mean_evr or "result" not in mean_evr:
+        if not mean_evr:
             return
 
         mean_value = "{:.2f}".format(
-            mean_evr['result']['observed_value']) if mean_evr else None
+            mean_evr.result['observed_value']) if mean_evr else None
         if mean_value:
             table_rows.append([
                 {
@@ -302,7 +301,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_min_to_be_between"
         )
         min_value = "{:.2f}".format(
-            min_evr['result']['observed_value']) if min_evr else None
+            min_evr.result['observed_value']) if min_evr else None
         if min_value:
             table_rows.append([
                 {
@@ -322,7 +321,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_max_to_be_between"
         )
         max_value = "{:.2f}".format(
-            max_evr['result']['observed_value']) if max_evr else None
+            max_evr.result['observed_value']) if max_evr else None
         if max_value:
             table_rows.append([
                 {
@@ -362,14 +361,14 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_values_to_be_in_set"
         )
 
-        if not set_evr or "result" not in set_evr:
+        if not set_evr:
             return
 
-        if set_evr and "partial_unexpected_counts" in set_evr["result"]:
-            partial_unexpected_counts = set_evr["result"]["partial_unexpected_counts"]
+        if set_evr and "partial_unexpected_counts" in set_evr.result:
+            partial_unexpected_counts = set_evr.result["partial_unexpected_counts"]
             values = [str(v["value"]) for v in partial_unexpected_counts]
-        elif set_evr and "partial_unexpected_list" in set_evr["result"]:
-            values = [str(item) for item in set_evr["result"]["partial_unexpected_list"]]
+        elif set_evr and "partial_unexpected_list" in set_evr.result:
+            values = [str(item) for item in set_evr.result["partial_unexpected_list"]]
         else:
             return
 
@@ -427,16 +426,16 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_kl_divergence_to_be_less_than"
         )
         # print(json.dumps(kl_divergence_evr, indent=2))
-        if not kl_divergence_evr or "result" not in kl_divergence_evr or "details" not in kl_divergence_evr.get("result", {}):
+        if kl_divergence_evr is None or kl_divergence_evr.result is None or "details" not in kl_divergence_evr.result:
             return
 
-        bins = kl_divergence_evr["result"]["details"]["observed_partition"]["bins"]
+        bins = kl_divergence_evr.result["details"]["observed_partition"]["bins"]
         # bin_medians = [round((v+bins[i+1])/2, 1)
         #                for i, v in enumerate(bins[:-1])]
         # bin_medians = [(round(bins[i], 1), round(bins[i+1], 1)) for i, v in enumerate(bins[:-1])]
         bins_x1 = [round(value, 1) for value in bins[:-1]]
         bins_x2 = [round(value, 1) for value in bins[1:]]
-        weights = kl_divergence_evr["result"]["details"]["observed_partition"]["weights"]
+        weights = kl_divergence_evr.result["details"]["observed_partition"]["weights"]
 
         df = pd.DataFrame({
             "bin_min": bins_x1,
@@ -487,14 +486,16 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_distinct_values_to_be_in_set"
         )
         # print(json.dumps(kl_divergence_evr, indent=2))
-        if not distinct_values_set_evr or "result" not in distinct_values_set_evr:
+        if not distinct_values_set_evr:
             return
 
-        value_count_dicts = distinct_values_set_evr['result']['details']['value_counts']
-        values = [value_count_dict['value']
-                  for value_count_dict in value_count_dicts]
-        counts = [value_count_dict['count']
-                  for value_count_dict in value_count_dicts]
+        value_count_dicts = distinct_values_set_evr.result['details']['value_counts']
+        if isinstance(value_count_dicts, pd.Series):
+            values = value_count_dicts.index.to_list()
+            counts = value_count_dicts.to_list()
+        else:
+            values = [value_count_dict['value'] for value_count_dict in value_count_dicts]
+            counts = [value_count_dict['count'] for value_count_dict in value_count_dicts]
 
         df = pd.DataFrame({
             "value": values,
@@ -519,13 +520,12 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         new_block = RenderedGraphContent(**{
             "content_block_type": "graph",
-            "header":
-                {
-                    "template": "Value Counts",
-                    "tooltip": {
-                        "content": "expect_column_distinct_values_to_be_in_set"
-                    }
-                },
+            "header": {
+                "template": "Value Counts",
+                "tooltip": {
+                    "content": "expect_column_distinct_values_to_be_in_set"
+                }
+            },
             "graph": chart,
             "styling": {
                 "classes": ["col-" + str(col_width)],
@@ -557,9 +557,9 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 "expect_column_mean_to_be_between",
                 "expect_column_min_to_be_between"
             ]:
-                new_block = RenderedComponentContent(**{
+                new_block = TextContent(**{
                     "content_block_type": "text",
-                    "content": []
+                    "text": []
                 })
                 new_block["content"].append("""
     <div class="alert alert-primary" role="alert">

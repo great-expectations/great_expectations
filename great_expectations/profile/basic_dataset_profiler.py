@@ -55,10 +55,9 @@ class BasicDatasetProfiler(DatasetProfiler):
         df.set_config_value("interactive_evaluation", True)
 
         try:
-            num_unique = df.expect_column_unique_value_count_to_be_between(column, None, None)[
-                'result']['observed_value']
+            num_unique = df.expect_column_unique_value_count_to_be_between(column, None, None).result['observed_value']
             pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
-                column, None, None)['result']['observed_value']
+                column, None, None).result['observed_value']
         except KeyError:  # if observed_value value is not set
             logger.error("Failed to get cardinality of column {0:s} - continuing...".format(column))
 
@@ -165,11 +164,11 @@ class BasicDatasetProfiler(DatasetProfiler):
                     df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
 
                                                            threshold=None, result_format='COMPLETE')
-                else: # unknown cardinality - skip
+                else:  # unknown cardinality - skip
                     pass
 
             elif type_ == "string":
-                # Check for leading and tralining whitespace.
+                # Check for leading and trailing whitespace.
                 #!!! It would be nice to build additional Expectations here, but
                 #!!! the default logic for remove_expectations prevents us.
                 df.expect_column_values_to_not_match_regex(column, r"^\s+|\s+$")
@@ -209,9 +208,6 @@ class BasicDatasetProfiler(DatasetProfiler):
 
         df.set_config_value("interactive_evaluation", True)
         expectation_suite = df.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=False)
-        if not "meta" in expectation_suite:
-            expectation_suite.meta = {"columns": meta_columns}
-        else:
-            expectation_suite.meta["columns"] = meta_columns
+        expectation_suite.meta["columns"] = meta_columns
 
         return expectation_suite

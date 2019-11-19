@@ -22,7 +22,7 @@ from great_expectations.render.types import (
     RenderedSectionContent,
     RenderedComponentContent,
     # RenderedComponentContentWrapper,
-)
+    RenderedContent)
 
 
 class NoOpTemplate(object):
@@ -69,8 +69,9 @@ class DefaultJinjaView(object):
             template = self._template
 
         t = self._get_template(template)
-        d = document.to_json_dict()
-        return t.render(document.to_json_dict(), **kwargs)
+        if isinstance(document, RenderedContent):
+            document = document.to_json_dict()
+        return t.render(document, **kwargs)
 
     def _get_template(self, template):
         if template is None:
@@ -297,11 +298,11 @@ class DefaultJinjaSectionView(DefaultJinjaView):
     _template = "section.j2"
 
     def _validate_document(self, document):
-        assert isinstance(document.section, RenderedSectionContent)
+        assert isinstance(document["section"], dict)  # For now low-level views take dicts
 
 
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"
 
     def _validate_document(self, document):
-        assert isinstance(document.content_block, RenderedComponentContent)
+        assert isinstance(document["content_block"], dict)  # For now low-level views take dicts

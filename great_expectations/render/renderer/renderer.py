@@ -1,7 +1,3 @@
-import json
-import base64
-import hashlib
-
 from great_expectations.core import ExpectationConfiguration, ExpectationValidationResult
 
 
@@ -106,13 +102,3 @@ class Renderer(object):
             ordered_columns = sorted(list(columns.keys()))
         
         return columns, ordered_columns
-
-    #TODO: When we implement an ExpectationSuite class, this method will move there.
-    @classmethod
-    def _get_expectation_suite_name(cls, expectations):
-        if "expectation_suite_name" in expectations:
-            expectation_suite_name = expectations["expectation_suite_name"]
-        else:
-            expectation_suite_name = None
-                
-        return expectation_suite_name

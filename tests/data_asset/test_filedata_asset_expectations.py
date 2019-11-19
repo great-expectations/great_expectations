@@ -3,6 +3,7 @@ from __future__ import division
 import pytest
 import great_expectations as ge
 
+
 def test_expect_file_line_regex_match_count_to_be_between():
 
     #####Invlaid File Path######
@@ -74,8 +75,8 @@ def test_expect_file_line_regex_match_count_to_be_between():
                                                                            skip=1)
 
     assert not fail_trial.success
-    assert fail_trial['result']['unexpected_percent'] == 100
-    assert fail_trial['result']['missing_percent'] == 0
+    assert fail_trial.result['unexpected_percent'] == 100
+    assert fail_trial.result['missing_percent'] == 0
 
     #Count does fall in range
     success_trial = file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
@@ -84,8 +85,9 @@ def test_expect_file_line_regex_match_count_to_be_between():
                                                                               skip=1)
 
     assert success_trial.success
-    assert success_trial['result']['unexpected_percent'] == 0
-    assert success_trial['result']['missing_percent'] == 0
+    assert success_trial.result['unexpected_percent'] == 0
+    assert success_trial.result['missing_percent'] == 0
+
 
 def test_expect_file_line_regex_match_count_to_equal():
     complete_file_path = './tests/test_sets/toy_data_complete.csv'
@@ -117,9 +119,9 @@ def test_expect_file_line_regex_match_count_to_equal():
                                                                                  skip=1)
 
     assert not fail_trial.success
-    assert fail_trial['result']['unexpected_percent'] == (3/9 * 100)
-    assert fail_trial['result']['missing_percent'] == (2/9 * 100)
-    assert fail_trial['result']['unexpected_percent_nonmissing'] == (3/7 * 100)
+    assert fail_trial.result['unexpected_percent'] == (3/9 * 100)
+    assert fail_trial.result['missing_percent'] == (2/9 * 100)
+    assert fail_trial.result['unexpected_percent_nonmissing'] == (3/7 * 100)
 
     #Mostly success
     mostly_trial = file_incomplete_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",
@@ -135,9 +137,10 @@ def test_expect_file_line_regex_match_count_to_equal():
                                                                          skip=1)
 
     assert success_trial.success
-    assert success_trial['result']['unexpected_percent'] == 0
-    assert success_trial['result']['unexpected_percent_nonmissing'] == 0
-    assert success_trial['result']['missing_percent'] == 0
+    assert success_trial.result['unexpected_percent'] == 0
+    assert success_trial.result['unexpected_percent_nonmissing'] == 0
+    assert success_trial.result['missing_percent'] == 0
+
 
 def test_expect_file_hash_to_equal():
     # Test for non-existent file

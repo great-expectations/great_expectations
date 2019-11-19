@@ -91,7 +91,7 @@ def test_s3_generator_basic_operation(s3_generator):
     with pytest.raises(BatchKwargsError) as err:
         batch_kwargs = [kwargs for kwargs in s3_generator.get_iterator("other")]
         # The error should show the common prefixes
-    assert "CommonPrefixes" in err.value.batch_kwargs
+    assert "common_prefixes" in err.value.batch_kwargs
 
 
 def test_s3_generator_incremental_fetch(s3_generator, caplog):

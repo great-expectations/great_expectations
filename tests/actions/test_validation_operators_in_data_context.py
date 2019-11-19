@@ -64,7 +64,7 @@ def test_ActionListValidationOperator(basic_data_context_config_for_validation_o
     validation_result_store_keys = data_context.stores["validation_result_store"].list_keys()
     print(validation_result_store_keys)
     assert len(validation_result_store_keys) == 2
-    assert operator_result.success
+    assert operator_result["success"]
     assert len(operator_result['details'].keys()) == 2
 
     first_validation_result = data_context.stores["validation_result_store"].get(validation_result_store_keys[0])

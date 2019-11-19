@@ -258,7 +258,7 @@ class DefaultSiteSectionBuilder(object):
                 
             resource = self.source_store.get(resource_key)
 
-            if type(resource_key) is ExpectationSuiteIdentifier:
+            if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.expectation_suite_name
                 data_asset_name = resource_key.data_asset_name.generator_asset
                 logger.info(
@@ -266,7 +266,7 @@ class DefaultSiteSectionBuilder(object):
                         expectation_suite_name,
                         data_asset_name
                     ))
-            elif type(resource_key) is ValidationResultIdentifier:
+            elif isinstance(resource_key, ValidationResultIdentifier):
                 data_asset_name = resource_key.expectation_suite_identifier.data_asset_name.generator_asset
                 run_id = resource_key.run_id
                 expectation_suite_name = resource_key.expectation_suite_identifier.expectation_suite_name
@@ -433,7 +433,7 @@ class DefaultSiteIndexBuilder(object):
                     run_id=key_resource_identifier.run_id
                 )
                 
-                validation_success = validation.get("success")
+                validation_success = validation.success
                 
                 self.add_resource_info_to_index_links_dict(
                     data_context=self.data_context,

@@ -3,6 +3,7 @@ import copy
 import json
 
 from great_expectations.render.renderer.content_block.content_block import ContentBlockRenderer
+from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import ordinal, num_to_str
 
 import pandas as pd
@@ -54,7 +55,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
     @classmethod
     def _missing_content_block_fn(cls, expectation, styling=None, include_column_name=True):
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "styling": {
               "parent": {
@@ -75,7 +76,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     }
                 },
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_to_exist(cls, expectation, styling=None, include_column_name=True):
@@ -96,14 +97,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             else:
                 template_str = "must be the $column_indexth field"
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_unique_value_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
@@ -135,14 +136,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     # NOTE: This method is a pretty good example of good usage of `params`.
     @classmethod
@@ -179,14 +180,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_pair_values_A_to_be_greater_than_B(cls, expectation, styling=None, include_column_name=True):
@@ -215,14 +216,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_pair_values_to_be_equal(cls, expectation, styling=None, include_column_name=True):
@@ -244,14 +245,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_table_columns_to_match_ordered_list(cls, expectation, styling=None, include_column_name=True):
@@ -272,14 +273,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str += "$column_list_" + str(idx + 1)
             params["column_list_" + str(idx + 1)] = params["column_list"][idx + 1]
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_multicolumn_values_to_be_unique(cls, expectation, styling=None, include_column_name=True):
@@ -296,14 +297,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         template_str += "$column_list_" + str(idx + 1)
         params["column_list_" + str(idx + 1)] = params["column_list"][idx + 1]
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
 
     @classmethod
     def expect_table_column_count_to_equal(cls, expectation, styling=None, include_column_name=True):
@@ -312,14 +313,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             ["value"]
         )
         template_str = "Must have exactly $value columns."
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
 
     @classmethod
     def expect_table_column_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
@@ -336,14 +337,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "Must have less than than $max_value columns."
             elif params["max_value"] is None:
                 template_str = "Must have more than $min_value columns."
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_table_row_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
@@ -362,14 +363,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             elif params["max_value"] is None:
                 template_str = "Must have more than $min_value rows."
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_table_row_count_to_equal(cls, expectation, styling=None, include_column_name=True):
@@ -379,14 +380,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         )
         template_str = "Must have exactly $value rows."
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_distinct_values_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
@@ -415,14 +416,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             else:
                 template_str = "distinct values must belong to this set: " + values_string + "."
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_values_to_not_be_null(cls, expectation, styling=None, include_column_name=True):
@@ -444,14 +445,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             else:
                 template_str = "values must never be null."
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_values_to_be_null(cls, expectation, styling=None, include_column_name=True):
@@ -470,14 +471,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_values_to_be_of_type(cls, expectation, styling=None, include_column_name=True):
@@ -496,14 +497,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_values_to_be_in_type_list(cls, expectation, styling=None, include_column_name=True):
@@ -537,14 +538,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             else:
                 template_str = "value types may be any value, but observed value will be reported"
 
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
 
     @classmethod
     def expect_column_values_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
@@ -578,14 +579,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_values_to_not_be_in_set(cls, expectation, styling=None, include_column_name=True):
@@ -619,14 +620,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column"
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_proportion_of_unique_values_to_be_between(cls, expectation, styling=None,
@@ -649,14 +650,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     # TODO: test parse_strings_as_datetimes
     @classmethod
@@ -684,14 +685,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     # TODO: test parse_strings_as_datetimes
     @classmethod
@@ -719,14 +720,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_value_lengths_to_be_between(cls, expectation, styling=None, include_column_name=True):
@@ -762,14 +763,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_value_lengths_to_equal(cls, expectation, styling=None, include_column_name=True):
@@ -792,14 +793,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_values_to_match_regex(cls, expectation, styling=None, include_column_name=True):
@@ -822,14 +823,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_values_to_not_match_regex(cls, expectation, styling=None, include_column_name=True):
@@ -854,14 +855,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 else:
                     template_str = "values must not match this regular expression: $regex."
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_values_to_match_regex_list(cls, expectation, styling=None, include_column_name=True):
@@ -894,14 +895,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_values_to_not_match_regex_list(cls, expectation, styling=None, include_column_name=True):
@@ -931,14 +932,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_values_to_match_strftime_format(cls, expectation, styling=None, include_column_name=True):
@@ -961,14 +962,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_values_to_be_dateutil_parseable(cls, expectation, styling=None, include_column_name=True):
@@ -989,14 +990,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_values_to_be_json_parseable(cls, expectation, styling=None, include_column_name=True):
@@ -1017,14 +1018,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_values_to_match_json_schema(cls, expectation, styling=None, include_column_name=True):
@@ -1047,7 +1048,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
@@ -1061,7 +1062,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                         }
                 },
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_distinct_values_to_contain_set(cls, expectation, styling=None, include_column_name=True):
@@ -1088,14 +1089,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_distinct_values_to_equal_set(cls, expectation, styling=None, include_column_name=True):
@@ -1122,14 +1123,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_mean_to_be_between(cls, expectation, styling=None, include_column_name=True):
@@ -1151,14 +1152,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
 
     @classmethod
     def expect_column_median_to_be_between(cls, expectation, styling=None, include_column_name=True):
@@ -1180,14 +1181,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
     
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
         
     @classmethod
     def expect_column_stdev_to_be_between(cls, expectation, styling=None, include_column_name=True):
@@ -1209,14 +1210,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
     
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
         
     @classmethod
     def expect_column_max_to_be_between(cls, expectation, styling=None, include_column_name=True):
@@ -1241,14 +1242,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
     
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_min_to_be_between(cls, expectation, styling=None, include_column_name=True):
@@ -1273,14 +1274,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_sum_to_be_between(cls, expectation, styling=None, include_column_name=True):
@@ -1302,14 +1303,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_most_common_value_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
@@ -1336,14 +1337,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         if include_column_name:
             template_str = "$column " + template_str
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]
     
     @classmethod
     def expect_column_kl_divergence_to_be_less_than(cls, expectation, styling=None, include_column_name=True):
@@ -1450,11 +1451,11 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         else:
             template_str += "."
         
-        return [{
+        return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": template_str,
                 "params": params,
                 "styling": styling,
             }
-        }]
+        })]

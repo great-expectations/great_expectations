@@ -4,6 +4,7 @@ from six import PY2
 
 from freezegun import freeze_time
 
+from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.render.renderer import (
     SlackRenderer
 )
@@ -21,13 +22,15 @@ def test_SlackRenderer():
     if PY2:
         pytest.skip("skipping test_SlackRenderer for PY2")
 
-    validation_result_suite = {'results': [], 'success': True,
-                               'statistics': {'evaluated_expectations': 0, 'successful_expectations': 0,
-                                              'unsuccessful_expectations': 0, 'success_percent': None},
-                               'meta': {'great_expectations.__version__': 'v0.8.0__develop',
-                                        'data_asset_name': {'datasource': 'x', 'generator': 'y',
-                                                            'generator_asset': 'z'},
-                                        'expectation_suite_name': 'default', 'run_id': '2019-09-25T060538.829112Z'}}
+    validation_result_suite = ExpectationSuiteValidationResult(
+        results=[], success=True,
+        statistics={'evaluated_expectations': 0, 'successful_expectations': 0,
+                    'unsuccessful_expectations': 0, 'success_percent': None},
+        meta={'great_expectations.__version__': 'v0.8.0__develop',
+              'data_asset_name': {'datasource': 'x', 'generator': 'y', 'generator_asset': 'z'},
+              'expectation_suite_name': 'default', 'run_id': '2019-09-25T060538.829112Z'
+              }
+    )
     expected_renderer_output = {
         'blocks': [
             {

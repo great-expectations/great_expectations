@@ -1,7 +1,6 @@
 from .content_block import ContentBlockRenderer
 from great_expectations.render.types import (
-    RenderedComponentContent
-)
+    RenderedStringTemplateContent, RenderedTableContent)
 
 
 class ProfilingOverviewTableContentBlockRenderer(ContentBlockRenderer):
@@ -25,7 +24,7 @@ class ProfilingOverviewTableContentBlockRenderer(ContentBlockRenderer):
                 rows = extra_rows_fn(ge_object)
                 table_entries.extend(rows)
 
-        return RenderedComponentContent(**{
+        return RenderedTableContent(**{
             "content_block_type": "table",
             "header_row": header_row,
             "table": table_entries
@@ -34,7 +33,7 @@ class ProfilingOverviewTableContentBlockRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_not_match_regex(cls, ge_object):
         regex = ge_object.expectation_config.kwargs["regex"]
-        unexpected_count = ge_object["result"]["unexpected_count"]
+        unexpected_count = ge_object.result["unexpected_count"]
         if regex == '^\\s+|\\s+$':
             return [["Leading or trailing whitespace (n)", unexpected_count]]
         else:
@@ -42,10 +41,10 @@ class ProfilingOverviewTableContentBlockRenderer(ContentBlockRenderer):
 
     @classmethod
     def expect_column_unique_value_count_to_be_between(cls, ge_object):
-        observed_value = ge_object["result"]["observed_value"]
+        observed_value = ge_object.result["observed_value"]
         return [
             [
-                RenderedComponentContent(**{
+                RenderedStringTemplateContent(**{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "Distinct (n)",
@@ -60,8 +59,8 @@ class ProfilingOverviewTableContentBlockRenderer(ContentBlockRenderer):
 
     @classmethod
     def expect_column_proportion_of_unique_values_to_be_between(cls, ge_object):
-        observed_value = ge_object["result"]["observed_value"]
-        template_string_object = RenderedComponentContent(**{
+        observed_value = ge_object.result["observed_value"]
+        template_string_object = RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": "Distinct (%)",
@@ -77,19 +76,19 @@ class ProfilingOverviewTableContentBlockRenderer(ContentBlockRenderer):
 
     @classmethod
     def expect_column_max_to_be_between(cls, ge_object):
-        observed_value = ge_object["result"]["observed_value"]
+        observed_value = ge_object.result["observed_value"]
         return [["Max", observed_value]]
 
     @classmethod
     def expect_column_mean_to_be_between(cls, ge_object):
-        observed_value = ge_object["result"]["observed_value"]
+        observed_value = ge_object.result["observed_value"]
         return [["Mean", observed_value]]
 
     @classmethod
     def expect_column_values_to_not_be_null(cls, ge_object):
         return [
             [
-                RenderedComponentContent(**{
+                RenderedStringTemplateContent(**{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "Missing (n)",
@@ -98,10 +97,10 @@ class ProfilingOverviewTableContentBlockRenderer(ContentBlockRenderer):
                         }
                     }
                 }),
-                ge_object["result"]["unexpected_count"] if "unexpected_count" in ge_object["result"] and ge_object["result"]["unexpected_count"] is not None else "--",
+                ge_object.result["unexpected_count"] if "unexpected_count" in ge_object.result and ge_object.result["unexpected_count"] is not None else "--",
             ],
             [
-                RenderedComponentContent(**{
+                RenderedStringTemplateContent(**{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "Missing (%)",
@@ -110,14 +109,14 @@ class ProfilingOverviewTableContentBlockRenderer(ContentBlockRenderer):
                         }
                     }
                 }),
-                "%.1f%%" % ge_object["result"]["unexpected_percent"] if "unexpected_percent" in ge_object["result"] and ge_object["result"]["unexpected_percent"] is not None else "--",
+                "%.1f%%" % ge_object.result["unexpected_percent"] if "unexpected_percent" in ge_object.result and ge_object.result["unexpected_percent"] is not None else "--",
             ]
         ]
 
     @classmethod
     def expect_column_values_to_be_null(cls, ge_object):
         return [
-            ["Populated (n)", ge_object["result"]["unexpected_count"]],
+            ["Populated (n)", ge_object.result["unexpected_count"]],
             ["Populated (%)", "%.1f%%" %
-             ge_object["result"]["unexpected_percent"]]
+             ge_object.result["unexpected_percent"]]
         ]

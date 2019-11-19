@@ -466,6 +466,7 @@ class ExpectationConfigurationSchema(Schema):
         error_messages={"required": "expectation_type missing in expectation configuration"}
     )
     kwargs = fields.Dict()
+    meta = fields.Dict()
 
     # noinspection PyUnusedLocal
     @post_load
@@ -640,7 +641,9 @@ class ExpectationSuiteSchema(Schema):
     # noinspection PyUnusedLocal
     @pre_dump
     def prepare_dump(self, data, **kwargs):
-        data = self.clean_empty(deepcopy(data))
+        data = deepcopy(data)
+        data.meta = convert_to_json_serializable(data.meta)
+        data = self.clean_empty(data)
         if isinstance(data.data_asset_name, DataAssetIdentifier):
             logger.warning("Dumping a NamespaceAwareExpectationSuite using ExpectationSuiteSchema. Consider using "
                            "NamespaceAwareExpectationSuiteSchema instead.")
@@ -689,13 +692,20 @@ class ExpectationValidationResult(object):
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
-        return all((
-            self.success == other.success,
-            self.expectation_config == other.expectation_config,
-            self.result == other.result,
-            self.meta == other.meta,
-            self.exception_info == other.exception_info
-        ))
+        try:
+            return all((
+                self.success == other.success,
+                self.expectation_config == other.expectation_config,
+                # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
+                # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparision is
+                # handled appropriately.
+                (self.result is None and other.result is None) or (all(self.result) == all(other.result)),
+                self.meta == other.meta,
+                self.exception_info == other.exception_info
+            ))
+        except (ValueError, TypeError):
+            # if invalid comparisons are attempted, the objects are not equal.
+            return False
 
     def __repr__(self):
         return json.dumps(self.to_json_dict())
@@ -726,19 +736,19 @@ class ExpectationValidationResultSchema(Schema):
     # noinspection PyUnusedLocal
     @pre_dump
     def convert_result_to_serializable(self, data, **kwargs):
-        data = copy(data)
+        data = deepcopy(data)
         data.result = convert_to_json_serializable(data.result)
         return data
 
-    # noinspection PyUnusedLocal
-    @pre_dump
-    def clean_empty(self, data, **kwargs):
-        # if not hasattr(data, 'meta'):
-        #     pass
-        # elif len(data.meta) == 0:
-        #     del data.meta
-        # return data
-        pass
+    # # noinspection PyUnusedLocal
+    # @pre_dump
+    # def clean_empty(self, data, **kwargs):
+    #     # if not hasattr(data, 'meta'):
+    #     #     pass
+    #     # elif len(data.meta) == 0:
+    #     #     del data.meta
+    #     # return data
+    #     pass
 
     # noinspection PyUnusedLocal
     @post_load
@@ -760,7 +770,8 @@ class ExpectationSuiteValidationResult(DictDot):
         self.statistics = statistics
         if meta is None:
             meta = {}
-        self.meta = convert_to_json_serializable(meta)  # We require meta information to be serializable.
+        ensure_json_serializable(meta)  # We require meta information to be serializable.
+        self.meta = meta
 
     def __eq__(self, other):
         """ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."""
@@ -785,7 +796,6 @@ class ExpectationSuiteValidationResult(DictDot):
         myself = deepcopy(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
-        myself['results'] = convert_to_json_serializable(myself['results'])
         myself['evaluation_parameters'] = convert_to_json_serializable(myself['evaluation_parameters'])
         myself['statistics'] = convert_to_json_serializable(myself['statistics'])
         myself['meta'] = convert_to_json_serializable(myself['meta'])
@@ -802,17 +812,10 @@ class ExpectationSuiteValidationResultSchema(Schema):
 
     # noinspection PyUnusedLocal
     @pre_dump
-    def clean_empty(self, data, **kwargs):
-        # if not hasattr(data, 'evaluation_parameters'):
-        #     pass
-        # elif len(data.evaluation_parameters) == 0:
-        #     del data.evaluation_parameters
-        # if not hasattr(data, 'meta'):
-        #     pass
-        # elif len(data.meta) == 0:
-        #     del data.meta
-        # return data
-        pass
+    def prepare_dump(self, data, **kwargs):
+        data = deepcopy(data)
+        data.meta = convert_to_json_serializable(data.meta)
+        return data
 
     # noinspection PyUnusedLocal
     @post_load

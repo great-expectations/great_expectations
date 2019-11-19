@@ -33,7 +33,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _get_status_icon(cls, evr):
-        if evr["exception_info"]["raised_exception"]:
+        if evr.exception_info["raised_exception"]:
             return RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
@@ -86,8 +86,11 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     @classmethod
     def _get_unexpected_table(cls, evr):
         try:
-            result = evr["result"]
+            result = evr.result
         except KeyError:
+            return None
+
+        if result is None:
             return None
 
         if not result.get("partial_unexpected_list") and not result.get("partial_unexpected_counts"):
@@ -141,7 +144,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "template": template_str,
                     "params": {
                         "expectation_type": evr.expectation_config.expectation_type,
-                        "exception_message": evr["exception_info"]["exception_message"]
+                        "exception_message": evr.exception_info["exception_message"]
                     },
                     "tag": "strong",
                     "styling": {
@@ -187,17 +190,20 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     @classmethod
     def _get_observed_value(cls, evr):
         try:
-            result = evr["result"]
+            result = evr.result
         except KeyError:
             return "--"
-            
+
+        if result is None:
+            return "--"
+
         expectation_type = evr.expectation_config.expectation_type
 
         if expectation_type == "expect_column_kl_divergence_to_be_less_than":
-            if not evr["result"].get("details"):
+            if not evr.result.get("details"):
                 return "--"
 
-            weights = evr["result"]["details"]["observed_partition"]["weights"]
+            weights = evr.result["details"]["observed_partition"]["weights"]
             if len(weights) <= 10:
                 height = 200
                 width = 200
@@ -207,8 +213,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 width = 300
                 col_width = 6
                 
-            if evr["result"]["details"]["observed_partition"].get("bins"):
-                bins = evr["result"]["details"]["observed_partition"]["bins"]
+            if evr.result["details"]["observed_partition"].get("bins"):
+                bins = evr.result["details"]["observed_partition"]["bins"]
                 bins_x1 = [round(value, 1) for value in bins[:-1]]
                 bins_x2 = [round(value, 1) for value in bins[1:]]
         
@@ -224,8 +230,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     y="fraction:Q"
                 ).properties(width=width, height=height, autosize="fit")
                 chart = bars.to_json()
-            elif evr["result"]["details"]["observed_partition"].get("values"):
-                values = evr["result"]["details"]["observed_partition"]["values"]
+            elif evr.result["details"]["observed_partition"].get("values"):
+                values = evr.result["details"]["observed_partition"]["values"]
     
                 df = pd.DataFrame({
                     "values": values,

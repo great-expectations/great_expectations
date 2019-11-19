@@ -3,6 +3,8 @@ import json
 
 from collections import OrderedDict
 
+from great_expectations.core import expectationSuiteSchema, ExpectationConfiguration, ExpectationValidationResult, \
+    ExpectationSuiteValidationResult
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ProfilingResultsColumnSectionRenderer,
@@ -17,13 +19,13 @@ from great_expectations.render.view import (
 )
 from great_expectations.render.types import (
     RenderedComponentContent,
-)
+    RenderedHeaderContent)
 
 
 @pytest.fixture(scope="module")
 def titanic_expectations():
     with open("./tests/test_sets/titanic_expectations.json", "r") as infile:
-        return json.load(infile, object_pairs_hook=OrderedDict)
+        return expectationSuiteSchema.load(json.load(infile, object_pairs_hook=OrderedDict)).data
 
 
 @pytest.mark.smoketest
@@ -42,7 +44,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
     for column in evrs.keys():
         with open('./tests/render/output/test_render_profiling_results_column_section_renderer__' + column + '.json', 'w') \
                 as outfile:
-            json.dump(ProfilingResultsColumnSectionRenderer().render(evrs[column]), outfile, indent=2)
+            json.dump(ProfilingResultsColumnSectionRenderer().render(evrs[column]).to_json_dict(), outfile, indent=2)
 
 
 @pytest.mark.smoketest
@@ -62,7 +64,7 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     for column in exp_groups.keys():
         with open('./tests/render/output/test_render_expectation_suite_column_section_renderer' + column + '.json', 'w') \
                 as outfile:
-            json.dump(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]), outfile, indent=2)
+            json.dump(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]).to_json_dict(), outfile, indent=2)
 
     # # This can be used for regression testing
     # for column in exp_groups.keys():
@@ -70,17 +72,17 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     #         assert json.dumps(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]), indent=2) == infile
 
 
+@pytest.mark.smoketest
 def test_ProfilingResultsColumnSectionRenderer_render(titanic_profiled_evrs_1, titanic_profiled_name_column_evrs):
-    #Smoke test for titanic names
+    # Smoke test for titanic names
     document = ProfilingResultsColumnSectionRenderer().render(titanic_profiled_name_column_evrs)
     print(document)
     assert document != {}
 
+    # Smoke test for titanic Ages
 
-    #Smoke test for titanic Ages
-
-    #This is a janky way to fetch expectations matching a specific name from an EVR suite.
-    #TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
+    # This is a janky way to fetch expectations matching a specific name from an EVR suite.
+    # TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
     from great_expectations.render.renderer.renderer import (
         Renderer,
     )
@@ -88,7 +90,8 @@ def test_ProfilingResultsColumnSectionRenderer_render(titanic_profiled_evrs_1, t
     print(evrs_by_column.keys())
 
     age_column_evrs = evrs_by_column["Age"]
-    print(json.dumps(age_column_evrs, indent=2))
+    for evr in age_column_evrs:
+        print(evr)
 
     document = ProfilingResultsColumnSectionRenderer().render(age_column_evrs)
     print(document)
@@ -103,7 +106,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
     content_block = ProfilingResultsColumnSectionRenderer()._render_header(
         evrs=titanic_profiled_name_column_evrs,
         column_type = None
-    )
+    ).to_json_dict()
 
     assert content_block["content_block_type"] == "header"
     assert content_block["header"] == {
@@ -122,19 +125,19 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
 
 
 def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_dollar_sign(titanic_profiled_name_column_evrs):
-    evr_with_unescaped_dollar_sign = {
-        "success": True,
-        "result": {
+    evr_with_unescaped_dollar_sign = ExpectationValidationResult(
+        success=True,
+        result={
             "observed_value": "float64"
         },
-        "exception_info": {
+        exception_info={
             "raised_exception": False,
             "exception_message": None,
             "exception_traceback": None,
         },
-        "expectation_config": {
-            "expectation_type": "expect_column_values_to_be_in_type_list",
-            "kwargs": {
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_type_list",
+            kwargs={
                 "column": "Car Insurance Premiums ($)",
                 "type_list": [
                     "DOUBLE_PRECISION",
@@ -148,18 +151,18 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
                 ],
                 "result_format": "SUMMARY"
             },
-            "meta": {
+            meta={
                 "BasicDatasetProfiler": {
                 "confidence": "very low"
                 }
             }
-        }
-    }
+        )
+    )
 
     content_block = ProfilingResultsColumnSectionRenderer._render_header(
         [evr_with_unescaped_dollar_sign],
         column_type=[],
-    )
+    ).to_json_dict()
     assert content_block == {
         'content_block_type': 'header',
         'header': {
@@ -204,7 +207,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_pr
     content_blocks = []
     for evr in distinct_values_evrs:
         content_blocks.append(
-            ProfilingResultsColumnSectionRenderer()._render_bar_chart_table(distinct_values_evrs)
+            ProfilingResultsColumnSectionRenderer()._render_bar_chart_table(distinct_values_evrs).to_json_dict()
         )
 
     assert len(content_blocks) == 4
@@ -249,7 +252,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
         titanic_profiled_name_column_expectations,
     )
 
-    assert content_blocks == RenderedComponentContent(**{
+    assert content_blocks == RenderedHeaderContent(**{
             "content_block_type": "header",
             "header": "Name",
             "styling": {
@@ -266,9 +269,9 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
         })
 
 
-    expectation_with_unescaped_dollar_sign = {
-      "expectation_type": "expect_column_values_to_be_in_type_list",
-      "kwargs": {
+    expectation_with_unescaped_dollar_sign = ExpectationConfiguration(
+      expectation_type="expect_column_values_to_be_in_type_list",
+      kwargs={
         "column": "Car Insurance Premiums ($)",
         "type_list": [
           "DOUBLE_PRECISION",
@@ -282,16 +285,16 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
         ],
         "result_format": "SUMMARY"
       },
-      "meta": {
+      meta={
         "BasicDatasetProfiler": {
           "confidence": "very low"
         }
       }
-    }
+    )
     remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_header(
         [expectation_with_unescaped_dollar_sign],
     )
-    assert content_blocks == {
+    assert content_blocks.to_json_dict() == {
         'content_block_type': 'header',
         'header': 'Car Insurance Premiums ($$)',
         'styling': {'classes': ['col-12'], 'header': {'classes': ['alert', 'alert-secondary']}}
@@ -303,12 +306,14 @@ def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profil
         titanic_profiled_name_column_expectations,
     )
 
-    assert content_block["content_block_type"] == "bullet_list"
-    assert len(content_block["bullet_list"]) == 4
-    assert "value types must belong to this set" in json.dumps(content_block)
-    assert "may have any number of unique values" in json.dumps(content_block)
-    assert "may have any fraction of unique values" in json.dumps(content_block)
-    assert "values must not be null, at least $mostly_pct % of the time." in json.dumps(content_block)
+    stringified_dump = json.dumps(content_block.to_json_dict())
+
+    assert content_block.content_block_type == "bullet_list"
+    assert len(content_block.bullet_list) == 4
+    assert "value types must belong to this set" in stringified_dump
+    assert "may have any number of unique values" in stringified_dump
+    assert "may have any fraction of unique values" in stringified_dump
+    assert "values must not be null, at least $mostly_pct % of the time." in stringified_dump
     
     
 def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
@@ -316,7 +321,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_n
         validation_results=titanic_profiled_name_column_evrs,
     )
 
-    assert content_block == {
+    assert content_block.to_json_dict() == {
             'content_block_type': 'header',
             'header': 'Name',
             'styling': {
@@ -329,9 +334,9 @@ def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_n
 
 
 def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped_dollar_sign(titanic_profiled_name_column_evrs):
-    evr_with_unescaped_dollar_sign = {
-        'success': True,
-        'result': {
+    evr_with_unescaped_dollar_sign = ExpectationValidationResult(
+        success=True,
+        result={
             'element_count': 1313,
             'missing_count': 0,
             'missing_percent': 0.0,
@@ -342,25 +347,25 @@ def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped
             'partial_unexpected_index_list': [],
             'partial_unexpected_counts': []
         },
-        'exception_info': {
+        exception_info={
             'raised_exception': False,
             'exception_message': None,
             'exception_traceback': None
         },
-        'expectation_config': {
-            'expectation_type': 'expect_column_values_to_be_in_type_list',
-            'kwargs': {
+        expectation_config=ExpectationConfiguration(
+            expectation_type='expect_column_values_to_be_in_type_list',
+            kwargs={
                 'column': 'Name ($)',
                 'type_list': ['CHAR', 'StringType', 'TEXT', 'VARCHAR', 'str', 'string'],
                 'result_format': 'SUMMARY'
             }
-        }
-    }
+        )
+    )
 
     remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_header(
         validation_results=[evr_with_unescaped_dollar_sign],
     )
-    assert content_block == {
+    assert content_block == RenderedHeaderContent(**{
             'content_block_type': 'header',
             'header': 'Name ($$)',
             'styling': {
@@ -369,7 +374,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped
                     'classes': ['alert', 'alert-secondary']
                 }
             }
-        }
+        })
 
 
 # noinspection PyPep8Naming
@@ -378,10 +383,10 @@ def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_na
         validation_results=titanic_profiled_name_column_evrs,
     )
 
-    content_block_stringified = json.dumps(content_block)
+    content_block_stringified = json.dumps(content_block.to_json_dict())
 
-    assert content_block["content_block_type"] == "table"
-    assert len(content_block["table"]) == 6
+    assert content_block.content_block_type == "table"
+    assert len(content_block.table) == 6
     assert content_block_stringified.count("$icon") == 6
     assert "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5." in content_block_stringified
     assert "may have any number of unique values." in content_block_stringified
@@ -395,24 +400,24 @@ def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_na
 
 # noinspection PyPep8Naming
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path():
-    evr = {
-        'success': True,
-        'result': {
+    evr = ExpectationValidationResult(
+        success=True,
+        result={
             'observed_value': True,
             'element_count': 162, 'missing_count': 153, 'missing_percent': 94.44444444444444
         },
-        'exception_info': {
+        exception_info={
             'raised_exception': False, 'exception_message': None, 'exception_traceback': None
         },
-        'expectation_config': {
-            'expectation_type': 'expect_column_min_to_be_between',
-            'kwargs': {
+        expectation_config=ExpectationConfiguration(
+            expectation_type='expect_column_min_to_be_between',
+            kwargs={
                 'column': 'live', 'min_value': None, 'max_value': None, 'result_format': 'SUMMARY'
             },
-            'meta': {'BasicDatasetProfiler': {'confidence': 'very low'}}
-        }
-    }
-    result = ValidationResultsTableContentBlockRenderer.render([evr])
+            meta={'BasicDatasetProfiler': {'confidence': 'very low'}}
+        )
+    )
+    result = ValidationResultsTableContentBlockRenderer.render([evr]).to_json_dict()
     # print(json.dumps(result, indent=2))
 
     #Note: A better approach to testing would separate out styling into a separate test.
@@ -495,32 +500,32 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
 # noinspection PyPep8Naming
 def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
     # This rather specific test is a reaction to the error documented in #679
-    validation = {
-        "results": [
-            {
-                'success': True,
-                'result': {
-                    'observed_value': "VARIANT",  # Note this is NOT a recognized type
+    validation = ExpectationSuiteValidationResult(
+        results=[
+            ExpectationValidationResult(
+                success=True,
+                result={
+                    'observed_value': "VARIANT",  # Note this is NOT a recognized type by many backends
                 },
-                'exception_info': {
+                exception_info={
                     'raised_exception': False, 'exception_message': None, 'exception_traceback': None
                 },
-                'expectation_config': {
-                    'expectation_type': 'expect_column_values_to_be_in_type_list',
-                    'kwargs': {
+                expectation_config=ExpectationConfiguration(
+                    expectation_type='expect_column_values_to_be_in_type_list',
+                    kwargs={
                         'column': 'live', 'type_list': None, 'result_format': 'SUMMARY'
                     },
-                    'meta': {'BasicDatasetProfiler': {'confidence': 'very low'}}
-                }
-            }
+                    meta={'BasicDatasetProfiler': {'confidence': 'very low'}}
+                )
+            )
         ]
-    }
+    )
 
     result = ProfilingResultsOverviewSectionRenderer().render(validation)
 
     # Find the variable types content block:
     types_table = [
-        block["table"] for block in result["content_blocks"]
-        if block["content_block_type"] == "table" and block["header"] == "Variable types"
+        block.table for block in result.content_blocks
+        if block.content_block_type == "table" and block.header == "Variable types"
     ][0]
     assert ["unknown", "1"] in types_table

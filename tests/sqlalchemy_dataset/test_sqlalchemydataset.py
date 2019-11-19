@@ -69,11 +69,11 @@ def test_custom_sqlalchemydataset(custom_dataset):
 
     result = custom_dataset.expect_column_values_to_equal_2('c1')
     assert result.success is False
-    assert result['result']['unexpected_list'] == [0]
+    assert result.result['unexpected_list'] == [0]
 
     result = custom_dataset.expect_column_mode_to_equal_0('c2')
     assert result.success is False
-    assert result['result']['observed_value'] == 4
+    assert result.result['observed_value'] == 4
 
 
 def test_broken_decorator_errors(custom_dataset):
@@ -199,19 +199,19 @@ def test_sqlalchemy_dataset_unexpected_count_calculations(sa, unexpected_count_d
     res1 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "BASIC", "partial_unexpected_count": 2})
     res2 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "BASIC", "partial_unexpected_count": 10})
 
-    assert res1["result"]["unexpected_count"] == 5
-    assert res2["result"]["unexpected_count"] == 5
+    assert res1.result["unexpected_count"] == 5
+    assert res2.result["unexpected_count"] == 5
     # Note difference here
-    assert len(res1["result"]["partial_unexpected_list"]) == 2
-    assert len(res2["result"]["partial_unexpected_list"]) == 5
+    assert len(res1.result["partial_unexpected_list"]) == 2
+    assert len(res2.result["partial_unexpected_list"]) == 5
 
 
     # However, the "COMPLETE" result format ignores the limit.
     res1 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "COMPLETE", "partial_unexpected_count": 2})
     res2 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "COMPLETE", "partial_unexpected_count": 10})
 
-    assert res1["result"]["unexpected_count"] == 5
-    assert res2["result"]["unexpected_count"] == 5
+    assert res1.result["unexpected_count"] == 5
+    assert res2.result["unexpected_count"] == 5
 
 
 def test_result_format_warning(sa, unexpected_count_df):
