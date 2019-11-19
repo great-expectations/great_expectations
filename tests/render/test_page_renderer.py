@@ -164,6 +164,8 @@ def test_ValidationResultsPageRenderer_render_validation_header():
     
 def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_evrs_1):
     validation_info = ValidationResultsPageRenderer._render_validation_info(titanic_profiled_evrs_1)
+    validation_info.table[2][1] = "__fixture__"
+    validation_info.table[3][1] = "__run_id_fixture__"
     expected_validation_info = RenderedTableContent(**{
       "content_block_type": "table",
       "header": "Info",
