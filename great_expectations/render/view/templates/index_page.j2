@@ -21,6 +21,14 @@
           data-target="#navigation"
           data-offset="50"
   >
+    {% include 'carousel_modal.j2' %}
+
+    <script>
+      if (localStorage.getItem('ge-walkthrough-modal-dismissed') !== 'true') {
+        $(".ge-walkthrough-modal").modal();
+      }
+    </script>
+
     {% include 'top_navbar.j2' %}
     <div class="container-fluid pt-4 pb-4 pl-5 pr-5">
       <div class="row">
