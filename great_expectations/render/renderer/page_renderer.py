@@ -59,10 +59,22 @@ class ValidationResultsPageRenderer(Renderer):
             self._render_validation_statistics(validation_results=validation_results),
         ]
 
-        if validation_results["meta"].get("batch_kwargs"):
+        if validation_results["meta"].get("batch_id"):
             overview_content_blocks.insert(
                 2,
-                self._render_batch_kwargs(validation_results=validation_results)
+                self._render_nested_table_from_dict(
+                    input_dict=validation_results["meta"].get("batch_id"),
+                    header="Batch ID"
+                )
+            )
+
+        if validation_results["meta"].get("batch_kwargs"):
+            overview_content_blocks.insert(
+                3,
+                self._render_nested_table_from_dict(
+                    input_dict=validation_results["meta"].get("batch_kwargs"),
+                    header="Batch Kwargs"
+                )
             )
     
         if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
@@ -91,7 +103,7 @@ class ValidationResultsPageRenderer(Renderer):
         ]
     
         return RenderedDocumentContent(**{
-            "renderer_type": "ValidationResultsColumnSectionRenderer",
+            "renderer_type": "ValidationResultsPageRenderer",
             "data_asset_name": data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": run_id + "-" + expectation_suite_name + "-ValidationResults",
@@ -119,7 +131,11 @@ class ValidationResultsPageRenderer(Renderer):
         expectation_suite_name = validation_results['meta']['expectation_suite_name']
         ge_version = validation_results["meta"]["great_expectations.__version__"]
         success = validation_results["success"]
-        
+        if success:
+            success = '<i class="fas fa-check-circle text-success" aria-hidden="true"></i> Succeeded'
+        else:
+            success = '<i class="fas fa-times text-danger" aria-hidden="true"></i> Failed'
+
         return RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Info",
@@ -128,7 +144,7 @@ class ValidationResultsPageRenderer(Renderer):
                 ["Expectation Suite Name", expectation_suite_name],
                 ["Great Expectations Version", ge_version],
                 ["Run ID", run_id],
-                ["Validation Succeeded", success]
+                ["Validation Status", success]
             ],
             "styling": {
                 "classes": ["col-12", "table-responsive"],
@@ -142,50 +158,113 @@ class ValidationResultsPageRenderer(Renderer):
         })
     
     @classmethod
-    def _render_batch_kwargs(cls, validation_results):
-        batch_kwargs = validation_results["meta"].get("batch_kwargs")
-        table_rows = [
-            [
-                kwarg,
-                {
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$value",
-                        "params": {
-                            "value": str(value)
+    def _render_nested_table_from_dict(cls, input_dict, header=None, sub_table=False):
+        table_rows = []
+        
+        for kwarg, value in input_dict.items():
+            if not isinstance(value, (dict, OrderedDict)):
+                table_row = [
+                    {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "$value",
+                            "params": {
+                                "value": str(kwarg)
+                            },
+                            "styling": {
+                                "default": {
+                                    "styles": {
+                                        "word-break": "break-all"
+                                    }
+                                },
+                            }
                         },
                         "styling": {
-                            "default": {
-                                "styles": {
-                                    "word-break": "break-all"
-                                }
-                            },
+                            "parent": {
+                                "classes": ["pr-3"],
+                            }
                         }
                     },
-                    "styling": {
-                        "parent": {
-                            "classes": ["pl-3"],
+                    {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "$value",
+                            "params": {
+                                "value": str(value)
+                            },
+                            "styling": {
+                                "default": {
+                                    "styles": {
+                                        "word-break": "break-all"
+                                    }
+                                },
+                            }
+                        },
+                        "styling": {
+                            "parent": {
+                                "classes": [],
+                            }
                         }
                     }
-                }
-            ] for kwarg, value in batch_kwargs.items()
-        ]
-        table_rows.sort(key=lambda row: row[0])
-
-        return RenderedComponentContent(**{
-            "content_block_type": "table",
-            "header": "Batch Kwargs",
-            "table": table_rows,
-            "styling": {
-                "classes": ["col-12", "table-responsive"],
-                "styles": {
-                    "margin-top": "20px"
+                ]
+            else:
+                table_row = [
+                    {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "$value",
+                            "params": {
+                                "value": str(kwarg)
+                            },
+                            "styling": {
+                                "default": {
+                                    "styles": {
+                                        "word-break": "break-all"
+                                    }
+                                },
+                            }
+                        },
+                        "styling": {
+                            "parent": {
+                                "classes": ["pr-3"],
+                            }
+                        }
+                    },
+                    cls._render_nested_table_from_dict(value, sub_table=True)
+                ]
+            table_rows.append(table_row)
+            
+        table_rows.sort(key=lambda row: row[0]["string_template"]["params"]["value"])
+        
+        if sub_table:
+            return RenderedComponentContent(**{
+                "content_block_type": "table",
+                "table": table_rows,
+                "styling": {
+                    "classes": ["col-12", "table-responsive"],
+                    "body": {
+                        "classes": ["table", "table-sm", "m-0"]
+                    },
+                    "parent": {
+                        "classes": ["pt-0", "pl-0", "border-top-0"]
+                    }
                 },
-                "body": {
-                    "classes": ["table", "table-sm"]
-                }
-            },
-        })
+            })
+        else:
+            return RenderedComponentContent(**{
+                "content_block_type": "table",
+                "header": header,
+                "table": table_rows,
+                "styling": {
+                    "classes": ["col-12", "table-responsive"],
+                    "styles": {
+                        "margin-top": "20px"
+                    },
+                    "body": {
+                        "classes": ["table", "table-sm"]
+                    }
+                },
+            })
 
     @classmethod
     def _render_validation_statistics(cls, validation_results):
@@ -267,6 +346,7 @@ class ExpectationSuitePageRenderer(Renderer):
         ]
         return RenderedDocumentContent(**{
             # "data_asset_name": short_data_asset_name,
+            "renderer_type": "ExpectationSuitePageRenderer",
             "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": expectation_suite_name,
             "utm_medium": "expectation-suite-page",

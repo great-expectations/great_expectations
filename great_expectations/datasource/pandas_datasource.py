@@ -2,9 +2,6 @@ import time
 import hashlib
 import logging
 
-# from builtins import str
-from six import string_types
-
 try:
     from io import StringIO
 except ImportError:
@@ -109,13 +106,21 @@ class PandasDatasource(Datasource):
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
     def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
-        batch_kwargs.update(kwargs)
+        for k, v in kwargs.items():
+            if isinstance(v, dict):
+                if k in batch_kwargs and isinstance(batch_kwargs[k], dict):
+                    batch_kwargs[k].update(v)
+                else:
+                    batch_kwargs[k] = v
+            else:
+                batch_kwargs[k] = v
         # pandas cannot take unicode as a delimiter, which can happen in py2. Handle this case explicitly.
         # We handle it here so that the updated value will be in the batch_kwargs for transparency to the user.
-        if PY2 and "sep" in batch_kwargs and batch_kwargs["sep"] is not None:
-            batch_kwargs["sep"] = str(batch_kwargs["sep"])
+        if PY2 and "reader_options" in batch_kwargs and "sep" in batch_kwargs['reader_options'] and \
+                batch_kwargs['reader_options']['sep'] is not None:
+            batch_kwargs['reader_options']['sep'] = str(batch_kwargs['reader_options']['sep'])
         # We will use and manipulate reader_options along the way
-        reader_options = batch_kwargs.copy()
+        reader_options = batch_kwargs.get("reader_options", {})
 
         # We need to build a batch_id to be used in the dataframe
         batch_id = BatchId({
@@ -138,12 +143,12 @@ class PandasDatasource(Datasource):
             raise ValueError("PandasDatasource cannot instantiate batch with data_asset_type: '%s'. It "
                              "must be a subclass of PandasDataset." % data_asset_type.__name__)
 
-        if "path" in batch_kwargs:
-            path = reader_options.pop("path")  # We remove this so it is not used as a reader option
-            reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
-            reader_options.pop("partition_id", "")
+        if "limit" in batch_kwargs:
+            reader_options['nrows'] = batch_kwargs['limit']
 
-            reader_method = reader_options.pop("reader_method", None)
+        if "path" in batch_kwargs:
+            path = batch_kwargs['path']
+            reader_method = batch_kwargs.get("reader_method")
             reader_fn, reader_fn_options = self._get_reader_fn(reader_method, path, reader_options)
             try:
                 df = getattr(pd, reader_fn)(path, **reader_fn_options)
@@ -156,9 +161,8 @@ class PandasDatasource(Datasource):
                 s3 = boto3.client("s3")
             except ImportError:
                 raise BatchKwargsError("Unable to load boto3 client to read s3 asset.", batch_kwargs)
-            raw_url = reader_options.pop("s3")  # We need to remove from the reader
-            reader_options.pop("timestamp", "")  # ditto timestamp (but missing ok)
-            reader_method = reader_options.pop("reader_method", None)
+            raw_url = batch_kwargs["s3"]
+            reader_method = batch_kwargs.get("reader_method")
             url = S3Url(raw_url)
             logger.debug("Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key))
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
@@ -175,7 +179,9 @@ class PandasDatasource(Datasource):
                 raise
 
         elif "dataset" in batch_kwargs and isinstance(batch_kwargs["dataset"], (pd.DataFrame, pd.Series)):
-            df = batch_kwargs.pop("dataset")  # We don't want to store the actual dataframe in kwargs
+            df = batch_kwargs.get("dataset")
+            # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs
+            batch_kwargs = {k: batch_kwargs[k] for k in batch_kwargs if k != 'dataset'}
             # Record this in the kwargs *and* the id
             batch_kwargs["PandasInMemoryDF"] = True
             batch_id["PandasInMemoryDF"] = True

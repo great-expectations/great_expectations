@@ -191,7 +191,7 @@ def test_cli_evaluation_parameters():
     assert json_result['evaluation_parameters'] == expected_evaluation_parameters
 
 
-def test_cli_init_on_new_project(tmp_path_factory, filesystem_csv_2):
+def test_cli_init_on_new_project(tmp_path_factory):
     try:
         basedir = tmp_path_factory.mktemp("test_cli_init_diff")
         basedir = str(basedir)
@@ -439,6 +439,7 @@ def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
     assert "Please review results using data-docs." in captured.out
     logger.removeHandler(handler)
 
+
 def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource(
         "my_datasource",
@@ -450,11 +451,13 @@ def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem
 
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["profile", "-d", project_root_dir, "--batch_kwargs", '{"sep": ",", "parse_dates": [0]}', "--no-view"])
+        cli, ["profile", "-d", project_root_dir, "--batch_kwargs", '{"reader_options": {"sep": ",", "parse_dates": ['
+                                                                   '0]}}',
+              "--no-view"])
     evr = not_so_empty_data_context.get_validation_result("f1", expectation_suite_name="BasicDatasetProfiler")
 
-    assert evr["meta"]["batch_kwargs"]["parse_dates"] == [0]
-    assert evr["meta"]["batch_kwargs"]["sep"] == ","
+    assert evr["meta"]["batch_kwargs"]["reader_options"]["parse_dates"] == [0]
+    assert evr["meta"]["batch_kwargs"]["reader_options"]["sep"] == ","
 
 def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource("my_datasource",
@@ -512,6 +515,7 @@ def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_
     assert "Some of the data assets you specified were not found: bad-bad-asset" in result.output
     
     logger.removeHandler(handler)
+
 
 def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource("my_datasource",
