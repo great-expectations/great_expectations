@@ -52,7 +52,6 @@ def test_basic_operation():
     with pytest.raises(BatchKwargsError) as exc:
         table_generator.yield_batch_kwargs("my_asset")
     assert "missing template key" in exc.value.message
-        assert "missing template key" in exc.value.message
 
 
 def test_db_introspection(sqlalchemy_dataset, caplog):

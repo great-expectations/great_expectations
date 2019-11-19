@@ -51,6 +51,10 @@ class BatchKwargs(dict):
     }
 
     @property
+    def limit(self):
+        return self.get("limit")
+
+    @property
     def batch_fingerprint(self):
         partition_id = self.get(self._partition_id_key, None)
         # We do not allow a "None" partition_id, even if it's explicitly present as such in batch_kwargs

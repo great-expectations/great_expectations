@@ -17,7 +17,7 @@ import warnings
 
 from great_expectations.core import ExpectationSuite, NamespaceAwareExpectationSuite
 from great_expectations.data_context.types.base import DataContextConfig, dataContextConfigSchema
-from great_expectations.data_context.util import file_relative_path
+from great_expectations.data_context.util import file_relative_path, substitute_config_variable
 from .util import safe_mmkdir, substitute_all_config_variables
 from ..types.base import DotDict
 
@@ -385,7 +385,7 @@ class ConfigOnlyDataContext(object):
         """Get file urls for all built local data docs."""
         from great_expectations.data_context.store import FixedLengthTupleFilesystemStoreBackend
         ge_dir = os.path.abspath(self.root_directory)
-        sites = self.get_project_config().get("data_docs_sites")
+        sites = self._project_config_with_variables_substituted["data_docs_sites"]
 
         existing_sites = []
 
@@ -461,7 +461,9 @@ class ConfigOnlyDataContext(object):
 
     def _load_config_variables_file(self):
         """Get all config variables from the default location."""
-        # TODO: support stores
+        if not hasattr(self, "root_directory"):
+            # A ConfigOnlyDataContext does not have a directory in which to look
+            return {}
 
         config_variables_file_path = self.get_project_config().config_variables_file_path
         if config_variables_file_path:

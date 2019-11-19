@@ -464,8 +464,8 @@ class DefaultSiteIndexBuilder(object):
 
         expectations_store = self.data_context.stores["expectations_store"]
         suites = expectations_store.list_keys()
-        # Ingore BasicDatasetProfiler. We want to know about user created suties
-        suites = [s for s in suites if s["expectation_suite_name"] != "BasicDatasetProfiler"]
+        # Ingore BasicDatasetProfiler. We want to know about user created suites
+        suites = [s for s in suites if s.expectation_suite_name != "BasicDatasetProfiler"]
         if not suites:
             # TODO this needs testing as complexity increases probably using mocked DataContext
             logger.debug('No expectations found')
