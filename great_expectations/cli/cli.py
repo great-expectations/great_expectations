@@ -226,7 +226,7 @@ def init(target_directory, view):
         if not data_source_name:  # no datasource was created
             return
 
-        context = _slack_setup(context)
+        # context = _slack_setup(context)
 
         create_demo_expectation_suite(context, data_source_name, open_docs=view, additional_batch_kwargs={"limit": 1000})
         #profile_datasource(context, data_source_name, open_docs=view, additional_batch_kwargs={"limit": 1000})
