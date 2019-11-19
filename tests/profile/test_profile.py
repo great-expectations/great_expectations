@@ -265,6 +265,12 @@ def test_BasicDatasetProfiler_on_titanic():
         if "partial_unexpected_counts" in result.result:
             result.result.pop("partial_unexpected_counts")
 
+    # Version and RUN-ID will be different
+    del expected_evrs.meta['great_expectations.__version__']
+    del evrs.meta['great_expectations.__version__']
+    del expected_evrs.meta['run_id']
+    del evrs.meta['run_id']
+
     # DISABLE TEST IN PY2 BECAUSE OF ORDER ISSUE AND NEAR-EOL
     if not PY2:
         assert expected_evrs == evrs

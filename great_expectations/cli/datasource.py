@@ -268,20 +268,20 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_d
         additional_batch_kwargs=additional_batch_kwargs
     )
 
-    if profiling_results.success:  # data context is ready to profile - run profiling
+    if profiling_results["success"] is True:  # data context is ready to profile - run profiling
         if data_assets or profile_all_data_assets or click.confirm(msg_confirm_ok_to_proceed.format(data_source_name), default=True):
             profiling_results = context.profile_datasource(
-            data_source_name,
-            data_assets=data_assets,
-            profile_all_data_assets=profile_all_data_assets,
-            max_data_assets=max_data_assets,
-            dry_run=False,
-            additional_batch_kwargs=additional_batch_kwargs
-        )
+                data_source_name,
+                data_assets=data_assets,
+                profile_all_data_assets=profile_all_data_assets,
+                max_data_assets=max_data_assets,
+                dry_run=False,
+                additional_batch_kwargs=additional_batch_kwargs
+            )
         else:
             cli_message(msg_skipping)
             return
-    else: # we need to get arguments from user interactively
+    else:  # we need to get arguments from user interactively
         do_exit = False
         while not do_exit:
             if profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND:
@@ -325,7 +325,6 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/features/data_d
 
             if profiling_results.success:  # data context is ready to profile
                 break
-
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
 

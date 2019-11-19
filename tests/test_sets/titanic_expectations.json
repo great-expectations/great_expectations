@@ -73,5 +73,6 @@
     }
   ],
   "data_asset_name": "titanic",
-  "expectation_suite_name": "default"
+  "expectation_suite_name": "default",
+  "meta": {}
 }

@@ -170,7 +170,7 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
       "table": [
         [
           "Full Data Asset Identifier",
-          ""
+          "my_datasource/default/default"
         ],
         [
           "Expectation Suite Name",
@@ -206,7 +206,7 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
       }
     })
 
-    assert validation_info == expected_validation_info
+    assert validation_info.to_json_dict() == expected_validation_info.to_json_dict()
 
 
 def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_profiled_evrs_1):

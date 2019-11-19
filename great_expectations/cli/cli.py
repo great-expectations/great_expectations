@@ -25,6 +25,7 @@ from great_expectations.cli.init_messages import (
     SLACK_SETUP_PROMPT,
     SLACK_WEBHOOK_PROMPT,
 )
+from great_expectations.core import expectationSuiteValidationResultSchema, expectationSuiteSchema
 from .datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
@@ -119,8 +120,8 @@ validate the data.
     :return: The number of unsuccessful expectations
     """
     expectation_suite_file = expectation_suite_file
-
-    expectation_suite = json.load(open(expectation_suite_file))
+    with open(expectation_suite_file, 'r') as infile:
+        expectation_suite = expectationSuiteSchema.load(json.load(infile)).data
 
     if evaluation_parameters is not None:
         evaluation_parameters = json.load(
@@ -135,19 +136,19 @@ validate the data.
         custom_module = __import__(str(module_name))
         dataset_class = getattr(
             custom_module, custom_dataset_class)
-    elif "data_asset_type" in expectation_suite:
-        if (expectation_suite["data_asset_type"] == "Dataset" or
-                expectation_suite["data_asset_type"] == "PandasDataset"):
+    elif expectation_suite.data_asset_type is not None:
+        if (expectation_suite.data_asset_type == "Dataset" or
+                expectation_suite.data_asset_type == "PandasDataset"):
             dataset_class = PandasDataset
-        elif expectation_suite["data_asset_type"].endswith("Dataset"):
+        elif expectation_suite.data_asset_type.endswith("Dataset"):
             logger.info("Using PandasDataset to validate dataset of type %s." %
-                        expectation_suite["data_asset_type"])
+                        expectation_suite.data_asset_type)
             dataset_class = PandasDataset
-        elif expectation_suite["data_asset_type"] == "FileDataAsset":
+        elif expectation_suite.data_asset_type == "FileDataAsset":
             dataset_class = FileDataAsset
         else:
             logger.critical("Unrecognized data_asset_type %s. You may need to specify custom_dataset_module and \
-                custom_dataset_class." % expectation_suite["data_asset_type"])
+                custom_dataset_class." % expectation_suite.data_asset_type)
             return -1
     else:
         dataset_class = PandasDataset
@@ -167,7 +168,7 @@ validate the data.
 
     # Note: Should this be rendered through cli_message?
     # Probably not, on the off chance that the JSON object contains <color> tags
-    print(json.dumps(result, indent=2))
+    print(json.dumps(expectationSuiteValidationResultSchema.dump(result).data, indent=2))
     sys.exit(result['statistics']['unsuccessful_expectations'])
 
 
@@ -475,7 +476,6 @@ def do_config_check(target_directory):
             ge_exceptions.InvalidTopLevelConfigKeyError,
             ge_exceptions.MissingTopLevelConfigKeyError,
             ge_exceptions.InvalidConfigValueTypeError,
-            ge_exceptions.InvalidConfigVersionError,
             ge_exceptions.UnsupportedConfigVersionError,
             ge_exceptions.DataContextError,
             ge_exceptions.PluginClassNotFoundError
