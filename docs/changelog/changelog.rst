@@ -27,6 +27,7 @@
 * Expose build_generator API publicly on datasources
 * Allow configuration of known extensions and return more informative message when SubdirReaderGenerator cannot find
   relevant files.
+* Add support for allow_relative_error on internal dataset quantile functions
 
 0.8.4.post0
 -----------------
