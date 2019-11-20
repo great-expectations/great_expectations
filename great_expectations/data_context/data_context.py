@@ -327,7 +327,6 @@ class ConfigOnlyDataContext(object):
             raise ge_exceptions.DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
 
-
     def _init_stores(self, store_configs):
         """Initialize all Stores for this DataContext.
 

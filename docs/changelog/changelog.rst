@@ -3,7 +3,7 @@
 
 0.8.6__develop
 -----------------
-
+* Raise informative error if config variables are declared but unavailable.
 
 
 0.8.5

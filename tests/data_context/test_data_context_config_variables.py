@@ -64,5 +64,7 @@ def test_substitute_config_variable():
     assert substitute_config_variable("abc$arg0", config_variables_dict) == "abcval_of_arg_0"
     assert substitute_config_variable("${arg0}", config_variables_dict) == "val_of_arg_0"
     assert substitute_config_variable("hhhhhhh", config_variables_dict) == "hhhhhhh"
-    assert substitute_config_variable("abc${arg1}", config_variables_dict) == "abc${arg1}"
+    with pytest.raises(InvalidConfigError) as exc:
+        substitute_config_variable("abc${arg1}", config_variables_dict)  # does NOT equal "abc${arg1}"
+    assert exc.value.message == "Unable to find match for config variable arg1"
     assert substitute_config_variable("${arg2}", config_variables_dict) == config_variables_dict["arg2"]
