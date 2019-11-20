@@ -81,16 +81,16 @@ Great Expectations connected to the datasource successfully."""
 
             data_source_type = DatasourceTypes.PANDAS
 
-            data_source_name = _add_pandas_datasource(context, prompt_for_datasource_name=False)
+            data_source_name = _add_pandas_datasource(context, prompt_for_datasource_name=True)
 
         elif data_source_compute_selection == "2":  # Spark
 
             data_source_type = DatasourceTypes.SPARK
 
-            data_source_name = _add_spark_datasource(context, prompt_for_datasource_name=False)
+            data_source_name = _add_spark_datasource(context, prompt_for_datasource_name=True)
     else:
         data_source_type = DatasourceTypes.SQL
-        data_source_name = _add_sqlalchemy_datasource(context, prompt_for_datasource_name=False)
+        data_source_name = _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True)
 
     cli_message(msg_success_datasource_added)
 
