@@ -81,16 +81,16 @@ Great Expectations connected to the datasource successfully."""
 
             data_source_type = DatasourceTypes.PANDAS
 
-            data_source_name = _add_pandas_datasource(context, prompt_for_datasource_name=False)
+            data_source_name = _add_pandas_datasource(context, prompt_for_datasource_name=True)
 
         elif data_source_compute_selection == "2":  # Spark
 
             data_source_type = DatasourceTypes.SPARK
 
-            data_source_name = _add_spark_datasource(context, prompt_for_datasource_name=False)
+            data_source_name = _add_spark_datasource(context, prompt_for_datasource_name=True)
     else:
         data_source_type = DatasourceTypes.SQL
-        data_source_name = _add_sqlalchemy_datasource(context, prompt_for_datasource_name=False)
+        data_source_name = _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True)
 
     cli_message(msg_success_datasource_added)
 
@@ -441,8 +441,10 @@ Profiling '{0:s}' will create sample expectations and documentation from your da
 
     msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
 """
+    msg_available_data_assets = """Great Expectations discovered the following data it can profile:\n\n{0:s}"""
 
-    msg_prompt_enter_data_asset_name = """Enter the name of the data asset to profile (e.g., {0:s})   
+    msg_prompt_enter_data_asset_name = """
+Enter the name of {0:s} to profile (from the list above)   
 """
 
     msg_data_doc_intro = """
@@ -454,10 +456,10 @@ Great Expectations is building Data Docs from the data you just profiled!"""
 
 
     #TODO: ["default"] is a hack. since we are running in init, it might be ok to assume that only default exists
-    available_data_asset_names = context.get_available_data_asset_names(datasource_names=[data_source_name])[data_source_name]["default"]
-
-# if data_assets:
-#     data_assets = [item.strip() for item in data_assets.split(",")]
+    available_data_asset_names_obj = context.get_available_data_asset_names(datasource_names=[data_source_name])[data_source_name]["default"]
+    available_data_asset_names_str = ",\n".join(sorted(["{0:s} ({1:s})".format(name[0], name[1]) for name in available_data_asset_names_obj["names"]]))
+    data_asset_labels_str = " or ".join(set([name[1]for name in available_data_asset_names_obj["names"]]))
+    cli_message(msg_available_data_assets.format(available_data_asset_names_str))
 
     do_exit = False
     it_0 = True
@@ -473,7 +475,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 raise ValueError("Unknown profiling error code: " + profiling_results['error']['code'])
 
         data_assets = click.prompt(
-            msg_prompt_enter_data_asset_name.format(", ".join(available_data_asset_names[:3])),
+            msg_prompt_enter_data_asset_name.format(data_asset_labels_str),
             default=None,
             show_default=False
         )
@@ -682,7 +684,7 @@ Give your new data source a short name.
 
 msg_db_config = """
 Next, we will configure database credentials and store them in the "{0:s}" section
-of this config file: great_expectations/uncommitted/credentials/profiles.yml:
+of this config file: great_expectations/uncommitted/config_variables.yml:
 """
 
 msg_unknown_data_source = """
