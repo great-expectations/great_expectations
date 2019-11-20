@@ -1708,7 +1708,7 @@ class ConfigOnlyDataContext(object):
         if generator_name not in data_asset_names[datasource_name]:
             raise ge_exceptions.ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
 
-        data_asset_name_list = list(data_asset_names[datasource_name][generator_name])
+        data_asset_name_list = [name[0] for name in data_asset_names[datasource_name][generator_name]["names"]]
         total_data_assets = len(data_asset_name_list)
 
         if data_assets and len(data_assets) > 0:

@@ -149,6 +149,8 @@ class TableGenerator(BatchGenerator):
         return
 
     def get_available_data_asset_names(self):
+        # TODO: limit and is_complete_list logic
+        is_complete_list = True
         defined_assets = list(self._assets.keys())
         tables = []
         if self.engine is not None and self.inspector is not None:
@@ -167,16 +169,16 @@ class TableGenerator(BatchGenerator):
                     continue
 
                 tables.extend(
-                    [table_name if self.inspector.default_schema_name == schema_name else
-                     schema_name + "." + table_name
+                    [(table_name, "table") if self.inspector.default_schema_name == schema_name else
+                     (schema_name + "." + table_name, "table")
                      for table_name in self.inspector.get_table_names(schema=schema_name)
                      if table_name not in known_system_tables
                      ]
                 )
                 try:
                     tables.extend(
-                        [table_name if self.inspector.default_schema_name == schema_name else
-                        schema_name + "." + table_name
+                        [(table_name, "view") if self.inspector.default_schema_name == schema_name else
+                         (schema_name + "." + table_name, "view")
                         for table_name in self.inspector.get_view_names(schema=schema_name)
                         if table_name not in known_system_tables
                         ]
@@ -185,7 +187,9 @@ class TableGenerator(BatchGenerator):
                     # Not implemented by bigquery dialect
                     pass
 
-        return defined_assets + tables
+        return {"names": defined_assets + tables,
+                "is_complete_list": is_complete_list
+                }
 
     def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, limit=None, offset=None,
                                              query_params=None):

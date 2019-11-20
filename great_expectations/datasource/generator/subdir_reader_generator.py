@@ -102,6 +102,25 @@ class SubdirReaderGenerator(BatchGenerator):
         return self._build_batch_kwargs_from_path(path, reader_options=reader_options, limit=limit,
                                                   partition_id=partition_id)
 
+    # def _get_valid_file_options(self, base_directory=None):
+    #     valid_options = []
+    #     if base_directory is None:
+    #         base_directory = self.base_directory
+    #     file_options = os.listdir(base_directory)
+    #     for file_option in file_options:
+    #         for extension in self.known_extensions:
+    #             if (file_option.endswith(extension) and not file_option.startswith(".") and
+    #                     file_option[:-len(extension)] not in valid_options):
+    #                 valid_options.append(file_option[:-len(extension)])
+    #             elif os.path.isdir(os.path.join(self.base_directory, file_option)):
+    #                 # Make sure there's at least one valid file inside the subdir
+    #                 subdir_options = self._get_valid_file_options(base_directory=os.path.join(base_directory,
+    #                                                                                           file_option))
+    #                 if len(subdir_options) > 0 and file_option not in valid_options:
+    #                     valid_options.append(file_option)
+    #     return valid_options
+
+
     def _get_valid_file_options(self, base_directory=None):
         valid_options = []
         if base_directory is None:
@@ -110,13 +129,13 @@ class SubdirReaderGenerator(BatchGenerator):
         for file_option in file_options:
             for extension in self.known_extensions:
                 if (file_option.endswith(extension) and not file_option.startswith(".") and
-                        file_option[:-len(extension)] not in valid_options):
+                        (file_option[:-len(extension)], "file") not in valid_options):
                     valid_options.append((file_option[:-len(extension)], "file"))
                 elif os.path.isdir(os.path.join(self.base_directory, file_option)):
                     # Make sure there's at least one valid file inside the subdir
                     subdir_options = self._get_valid_file_options(base_directory=os.path.join(base_directory,
                                                                                               file_option))
-                    if len(subdir_options) > 0 and file_option not in valid_options:
+                    if len(subdir_options) > 0 and (file_option, "directory") not in valid_options:
                         valid_options.append((file_option, "directory"))
         return valid_options
 
