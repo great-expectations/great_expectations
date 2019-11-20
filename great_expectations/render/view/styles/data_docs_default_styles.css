@@ -133,3 +133,9 @@ td .show-scrollbars {
   opacity: 0.9;
   border-left-width: 4px
 }
+
+.carousel-caption {
+    position: relative;
+    left: 0;
+    top: 0;
+}
