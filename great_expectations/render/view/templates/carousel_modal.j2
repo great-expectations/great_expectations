@@ -1,28 +1,22 @@
-{% if renderer_type == "ExpectationSuitePageRenderer" %}
-  {% set static_images_dir = "../../../../../static/images/" -%}
-{% elif renderer_type in ["ValidationResultsPageRenderer", "ProfilingResultsPageRenderer"] %}
-  {% set static_images_dir = "../../../../../../static/images/" -%}
-{% elif renderer_type == "SiteIndexPageRenderer" %}
-  {% set static_images_dir = "../static/images/" -%}
-{% endif %}
+{% set static_images_dir = static_assets_dir + "/images/" -%}
 
-<div class="modal fade ge-walkthrough-modal" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel"
+<div class="modal fade ge-walkthrough-modal" tabindex="-1" role="dialog" aria-labelledby="ge-walkthrough-modal-title"
      aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Great Expectations Data Docs Walkthrough</h5>
+        <h5 class="modal-title" id="ge-walkthrough-modal-title">Great Expectations Data Docs Walkthrough</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
         <div class="bd-example">
-          <div id="carouselExampleCaptions" class="carousel slide" data-ride="carousel">
+          <div id="ge-walkthrough-carousel-captions" class="carousel slide" data-interval="false">
             <ol class="carousel-indicators my-4">
-              <li data-target="#carouselExampleCaptions" data-slide-to="0" class="active"></li>
-              <li data-target="#carouselExampleCaptions" data-slide-to="1"></li>
-              <li data-target="#carouselExampleCaptions" data-slide-to="2"></li>
+              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="0" class="active"></li>
+              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="1"></li>
+              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="2"></li>
             </ol>
             <div class="carousel-inner">
               <div class="carousel-item active">
@@ -47,12 +41,12 @@
                 </div>
               </div>
             </div>
-            <a class="carousel-control-prev" href="#carouselExampleCaptions" role="button" data-slide="prev">
-              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <a class="carousel-control-prev" href="#ge-walkthrough-carousel-captions" role="button" data-slide="prev">
+              <span class="carousel-control-prev-icon bg-dark rounded" aria-hidden="true"></span>
               <span class="sr-only">Previous</span>
             </a>
-            <a class="carousel-control-next" href="#carouselExampleCaptions" role="button" data-slide="next">
-              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <a class="carousel-control-next" href="#ge-walkthrough-carousel-captions" role="button" data-slide="next">
+              <span class="carousel-control-next-icon bg-dark rounded" aria-hidden="true"></span>
               <span class="sr-only">Next</span>
             </a>
           </div>
