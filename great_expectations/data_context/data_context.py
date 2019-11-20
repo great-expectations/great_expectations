@@ -37,6 +37,7 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
+from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
 
 from .types import (
     NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
@@ -1667,8 +1668,9 @@ class ConfigOnlyDataContext(object):
                            data_assets=None,
                            max_data_assets=20,
                            profile_all_data_assets=True,
-                           profiler=BasicDatasetProfiler,
+                           profiler=SampleExpectationsDatasetProfiler,
                            dry_run=False,
+                           run_id="profiling",
                            additional_batch_kwargs=None):
         """Profile the named datasource using the named profiler.
 
@@ -1754,8 +1756,6 @@ class ConfigOnlyDataContext(object):
             profiling_results['results'] = []
             total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
             total_start_time = datetime.datetime.now()
-            # run_id = total_start_time.isoformat().replace(":", "") + "Z"
-            run_id = "profiling"
 
             for name in data_asset_name_list:
                 logger.info("\tProfiling '%s'..." % name)

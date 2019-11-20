@@ -1,18 +1,15 @@
 import logging
 from .base import DatasetProfiler
+from ..dataset.util import categorical_partition_data
 
 logger = logging.getLogger(__name__)
 
 
-class BasicDatasetProfiler(DatasetProfiler):
-    """BasicDatasetProfiler is inspired by the beloved pandas_profiling project.
-
-    The profiler examines a batch of data and creates a report that answers the basic questions
-    most data practitioners would ask about a dataset during exploratory data analysis.
-    The profiler reports how unique the values in the column are, as well as the percentage of empty values in it.
-    Based on the column's type it provides a description of the column by computing a number of statistics,
-    such as min, max, mean and median, for numeric columns, and distribution of values, when appropriate.
+class BasicDatasetProfilerBase(DatasetProfiler):
+    """BasicDatasetProfilerBase provides basic logic of inferring the type and the cardinality of columns
+    that is used by the dataset profiler classes that extend this class.
     """
+
     INT_TYPE_NAMES = {"INTEGER", "int", "INT", "TINYINT", "BYTEINT", "SMALLINT", "BIGINT", "IntegerType", "LongType", "DECIMAL"}
     FLOAT_TYPE_NAMES = {"FLOAT", "FLOAT4", "FLOAT8", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"}
     STRING_TYPE_NAMES = {"CHAR", "VARCHAR", "TEXT", "StringType", "string", "str"}
@@ -95,6 +92,19 @@ class BasicDatasetProfiler(DatasetProfiler):
         df.set_config_value('interactive_evaluation', False)
 
         return cardinality
+
+
+
+
+class BasicDatasetProfiler(BasicDatasetProfilerBase):
+    """BasicDatasetProfiler is inspired by the beloved pandas_profiling project.
+
+    The profiler examines a batch of data and creates a report that answers the basic questions
+    most data practitioners would ask about a dataset during exploratory data analysis.
+    The profiler reports how unique the values in the column are, as well as the percentage of empty values in it.
+    Based on the column's type it provides a description of the column by computing a number of statistics,
+    such as min, max, mean and median, for numeric columns, and distribution of values, when appropriate.
+    """
 
     @classmethod
     def _profile(cls, dataset):
@@ -215,3 +225,140 @@ class BasicDatasetProfiler(DatasetProfiler):
             expectation_suite["meta"]["columns"] = meta_columns
 
         return expectation_suite
+
+
+class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
+    """The goal of SampleExpectationsDatasetProfiler is to generate an expectation suite that
+    contains one instance of every interesting expectation type.
+
+    This expectation suite is intended to serve as a demo of the expressive power of expectations
+    and provide a service similar to the one expectations glossary documentation page, but on
+    users' own data.
+
+    Ranges of acceptable values in the expectations created by this profiler (e.g., min/max
+    of the median in expect_column_median_to_be_between) are created only to demonstrate
+    the functionality and should not be taken as the actual ranges outside which the data
+    should be considered incorrect.
+    """
+
+    @classmethod
+    def _get_column_type_with_caching(cls, dataset, column_name, cache):
+        column_cache_entry = cache.get(column_name)
+        if not column_cache_entry:
+            column_cache_entry = {}
+            cache[column_name] = column_cache_entry
+        column_type = column_cache_entry.get("type")
+        if not column_type:
+            column_type = cls._get_column_type(dataset, column_name)
+            column_cache_entry["type"] = column_type
+            # remove the expectation
+            dataset.remove_expectation(expectation_type="expect_column_values_to_be_in_type_list")
+            dataset.set_config_value('interactive_evaluation', True)
+
+        return column_type
+
+    @classmethod
+    def _get_column_cardinality_with_caching(cls, dataset, column_name, cache):
+        column_cache_entry = cache.get(column_name)
+        if not column_cache_entry:
+            column_cache_entry = {}
+            cache[column_name] = column_cache_entry
+        column_cardinality = column_cache_entry.get("cardinality")
+        if not column_cardinality:
+            column_cardinality = cls._get_column_cardinality(dataset, column_name)
+            column_cache_entry["cardinality"] = column_cardinality
+            # remove the expectations
+            dataset.remove_expectation(expectation_type="expect_column_unique_value_count_to_be_between")
+            dataset.remove_expectation(expectation_type="expect_column_proportion_of_unique_values_to_be_between")
+            dataset.set_config_value('interactive_evaluation', True)
+
+        return column_cardinality
+
+    @classmethod
+    def _profile(cls, dataset):
+
+        dataset.set_default_expectation_argument("catch_exceptions", True)
+
+        value = dataset.expect_table_row_count_to_be_between(min_value=0, max_value=None)["result"]["observed_value"]
+        dataset.expect_table_row_count_to_be_between(min_value=max(0, value-10), max_value=value+10)
+
+        dataset.set_config_value('interactive_evaluation', True)
+
+        columns = dataset.get_table_columns()
+
+        dataset.expect_table_columns_to_match_ordered_list(columns)
+
+        meta_columns = {}
+        for column in columns:
+            meta_columns[column] = {"description": ""}
+
+        column_cache = {}
+
+
+        for column in columns:
+            cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
+            if cardinality == "unique":
+                dataset.expect_column_values_to_be_unique(column)
+                break
+
+        for column in columns:
+            if dataset.expect_column_values_to_not_be_null(column)["success"]:
+                break
+
+
+        for column in columns:
+            if dataset.expect_column_values_to_be_null(column)["success"]:
+                break
+
+        for column in columns:
+            cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
+            type = cls._get_column_type_with_caching(dataset, column, column_cache)
+
+            if cardinality in ["many", "very many", "unique"] and type in ["int", "float"]:
+                value = dataset.expect_column_min_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY")["result"]["observed_value"]
+                value = dataset.expect_column_min_to_be_between(column, min_value=value-1, max_value=value+1)
+
+                value = dataset.expect_column_max_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY")["result"]["observed_value"]
+                value = dataset.expect_column_max_to_be_between(column, min_value=value - 1, max_value=value + 1)
+
+                value = dataset.expect_column_mean_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY")["result"]["observed_value"]
+                dataset.expect_column_mean_to_be_between(column, min_value=value-1, max_value=value+1)
+
+                value = dataset.expect_column_median_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY")["result"]["observed_value"]
+                dataset.expect_column_median_to_be_between(column, min_value=value-1, max_value=value+1)
+
+                result = dataset.expect_column_quantile_values_to_be_between(column,
+                                                               quantile_ranges={
+                                                                   "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                                                                   "value_ranges": [[None, None], [None, None],
+                                                                                    [None, None], [None, None],
+                                                                                    [None, None]]
+                                                               },
+                                                                result_format = "SUMMARY"
+                                                               )
+                dataset.expect_column_quantile_values_to_be_between(column,
+                                                               quantile_ranges={
+                                                                   "quantiles": result["result"]["observed_value"]["quantiles"],
+                                                                   "value_ranges": [[v-1, v+1] for v in result["result"]["observed_value"]["values"]]
+                                                               }
+                                                               )
+                break
+
+        for column in columns:
+            cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
+            if cardinality in ["two", "very few", "few"]:
+                dataset.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
+                partition_object = categorical_partition_data(dataset[column])
+                dataset.expect_column_kl_divergence_to_be_less_than(column, partition_object=partition_object,
+                                                       threshold=0.6)
+
+                break
+
+        expectation_suite = dataset.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=True)
+        if not "meta" in expectation_suite:
+            expectation_suite["meta"] = {"columns": meta_columns}
+        else:
+            expectation_suite["meta"]["columns"] = meta_columns
+
+        return expectation_suite
+
