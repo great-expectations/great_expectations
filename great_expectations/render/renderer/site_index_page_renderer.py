@@ -37,7 +37,7 @@ class SiteIndexPageRenderer(Renderer):
                 "styling": {
                     "params": {
                         "data_asset": {
-                            "classes": ["blockquote", "ge-index-page-generator-table-data-asset-name"],
+                            "classes": ["h6", "ge-index-page-generator-table-data-asset-name"],
                         }
                     }
                 }
@@ -162,6 +162,12 @@ class SiteIndexPageRenderer(Renderer):
                                 },
                                 "classes": ["ge-index-page-generator-table-validation-links-item"]
                             }
+                        },
+                        "styling": {
+                            "parent": {
+                                "classes": ["hide-succeeded-validation-target"] if not link_dict[
+                                            "validation_success"] else []
+                            }
                         }
                     }) for link_dict in sorted_validations_links if
                     link_dict["expectation_suite_name"] == expectation_suite_name
@@ -208,6 +214,12 @@ class SiteIndexPageRenderer(Renderer):
                                 }
                             },
                             "classes": ["ge-index-page-generator-table-validation-links-item"]
+                        }
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": ["hide-succeeded-validation-target"] if not link_dict[
+                                "validation_success"] else []
                         }
                     }
                 }) for link_dict in sorted_validations_links
@@ -286,6 +298,12 @@ class SiteIndexPageRenderer(Renderer):
                                         }
                                     },
                                     "classes": ["ge-index-page-generator-table-validation-links-item"]
+                                }
+                            },
+                            "styling": {
+                                "parent": {
+                                    "classes": ["hide-succeeded-validation-target"] if link_dict[
+                                        "validation_success"] else []
                                 }
                             }
                         }) for link_dict in sorted_validations_links if
@@ -436,8 +454,9 @@ class SiteIndexPageRenderer(Renderer):
             sections.append(section)
 
         index_page_document = RenderedDocumentContent(**{
-                "utm_medium": "index-page",
-                "sections": sections
+            "renderer_type": "SiteIndexPageRenderer",
+            "utm_medium": "index-page",
+            "sections": sections
             })
         
         if cta_object:

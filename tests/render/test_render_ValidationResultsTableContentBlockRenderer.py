@@ -129,44 +129,51 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
     content_block_fn = ValidationResultsTableContentBlockRenderer._get_content_block_fn("expect_table_row_count_to_be_between")
     content_block_fn_output = content_block_fn(evr_success)
     print(json.dumps(content_block_fn_output, indent=2))
-    
+
     content_block_fn_expected_output = [
-      [
-        {
-          "content_block_type": "string_template",
-          "string_template": {
-            "template": "$icon",
-            "params": {
-              "icon": ""
-            },
-            "styling": {
-              "params": {
-                "icon": {
-                  "classes": [
-                    "fas",
-                    "fa-check-circle",
-                    "text-success"
-                  ],
-                  "tag": "i"
+        [
+            {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "$icon",
+                    "params": {
+                        "icon": ""
+                    },
+                    "styling": {
+                        "params": {
+                            "icon": {
+                                "classes": [
+                                    "fas",
+                                    "fa-check-circle",
+                                    "text-success"
+                                ],
+                                "tag": "i"
+                            }
+                        }
+                    }
+                },
+                "styling": {
+                    "parent": {
+                        "classes": [
+                            "hide-succeeded-validation-target-child"
+                        ]
+                    }
                 }
-              }
-            }
-          }
-        },
-        {
-          "content_block_type": "string_template",
-          "string_template": {
-            "template": "Must have more than $min_value rows.",
-            "params": {
-              "min_value": 0,
-              "max_value": None,
-              "result_format": "SUMMARY"
             },
-            "styling": None
-          }
-        },
-        "1,313"
-      ]
+            {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Must have more than $min_value rows.",
+                    "params": {
+                        "min_value": 0,
+                        "max_value": None,
+                        "result_format": "SUMMARY"
+                    },
+                    "styling": None
+                }
+            },
+            "1,313"
+        ]
     ]
     assert content_block_fn_output == content_block_fn_expected_output
     
@@ -862,25 +869,32 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(evr_failed_w
     output_2 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_success)
     print(json.dumps(output_2, indent=2))
     assert output_2 == {
-      "content_block_type": "string_template",
-      "string_template": {
-        "template": "$icon",
-        "params": {
-          "icon": ""
+        "content_block_type": "string_template",
+        "string_template": {
+            "template": "$icon",
+            "params": {
+                "icon": ""
+            },
+            "styling": {
+                "params": {
+                    "icon": {
+                        "classes": [
+                            "fas",
+                            "fa-check-circle",
+                            "text-success"
+                        ],
+                        "tag": "i"
+                    }
+                }
+            }
         },
         "styling": {
-          "params": {
-            "icon": {
-              "classes": [
-                "fas",
-                "fa-check-circle",
-                "text-success"
-              ],
-              "tag": "i"
+            "parent": {
+                "classes": [
+                    "hide-succeeded-validation-target-child"
+                ]
             }
-          }
         }
-      }
     }
     
     # test for failed evr

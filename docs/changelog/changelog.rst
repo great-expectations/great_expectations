@@ -1,7 +1,12 @@
 .. _changelog:
 
 
-0.8.5__develop
+0.8.6__develop
+-----------------
+
+
+
+0.8.5
 -----------------
 * BREAKING CHANGE: move all reader options from the top-level batch_kwargs object to a sub-dictionary called
   "reader_options" for SparkDFDatasource and PandasDatasource. This means it is no longer possible to specify
@@ -13,6 +18,8 @@
   the top-level of `get_batch`,  `yield_batch_kwargs` or `build_batch_kwargs`
   calls, and instead, you must explicitly specify that they are query_params, e.g. by a call such as:
   `context.yield_batch_kwargs(data_asset_name, query_params={'schema': 'foo'})`.
+* Add support for filtering validation result suites and validation result pages to show only failed expectations in
+  generated documentation
 * Add support for limit parameter to batch_kwargs for all datasources: Pandas, SqlAlchemy, and SparkDF; add support
   to generators to support building batch_kwargs with limits specified.
 * Include raw_query and query_params in query_generator batch_kwargs
@@ -25,9 +32,15 @@
 * Add support to S3 generator for retrieving directories by specifying the `directory_assets` configuration
 * Fix warning regarding implicit class_name during init flow
 * Expose build_generator API publicly on datasources
+* Allow configuration of known extensions and return more informative message when SubdirReaderGenerator cannot find
+  relevant files.
+* Add support for allow_relative_error on internal dataset quantile functions, and add support for
+  build_continuous_partition_objec in Redshift
+* Fix truncated scroll bars in value_counts graphs
+
 
 0.8.4.post0
------------------
+----------------
 * Correct a packaging issue resulting in missing notebooks in tarball release; update docs to reflect new notebook
 locations.
 
@@ -40,7 +53,7 @@ locations.
 * Added a component with links to useful tutorials to the index page of the Data Docs website
 * Improved the UX of adding a SQL datasource in the CLI - now the CLI asks for specific credentials for Postgres,
   MySQL, Redshift and Snowflake, allows continuing debugging in the config file and has better error messages
-* Added batch_kwargs infomration to DataDocs validation results
+* Added batch_kwargs information to DataDocs validation results
 * Fix an issue affecting file stores on Windows
 
 
@@ -57,7 +70,6 @@ locations.
 0.8.2.post0
 ------------
 * Correct a packaging issue resulting in missing css files in tarball release
-
 
 
 0.8.2

@@ -1,6 +1,5 @@
 body {
   position: relative;
-  padding-bottom: 100px;
 }
 
 .container {
@@ -10,9 +9,8 @@ body {
 .sticky {
   position: -webkit-sticky;
   position: sticky;
-  max-height: 90vh;
-  overflow-y: auto;
-  top: 60px;
+  top: 80px;
+  z-index: 1;
 }
 
 .ge-section {
@@ -106,12 +104,12 @@ ul {
 }
 
 td .show-scrollbars {
-  max-height: 335px;
+  max-height: 80vh;
 }
 
-.show-scrollbars ul {
-  padding-bottom: 20px
-}
+/*.show-scrollbars ul {*/
+/*  padding-bottom: 20px*/
+/*}*/
 
 .show-scrollbars::-webkit-scrollbar {
   -webkit-appearance: none;
@@ -134,4 +132,10 @@ td .show-scrollbars {
 #ge-cta-footer {
   opacity: 0.9;
   border-left-width: 4px
+}
+
+.carousel-caption {
+    position: relative;
+    left: 0;
+    top: 0;
 }

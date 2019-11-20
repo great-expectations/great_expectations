@@ -310,8 +310,12 @@ class SparkDFDataset(MetaSparkDFDataset):
         result = self.spark_df.approxQuantile(column, [0.5, 0.5 + (1 / (2 + (2 * self.get_row_count())))], 0)
         return np.mean(result)
 
-    def get_column_quantiles(self, column, quantiles):
-        return self.spark_df.approxQuantile(column, list(quantiles), 0)
+    def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
+        if allow_relative_error is False:
+            allow_relative_error = 0.
+        if not isinstance(allow_relative_error, float) or allow_relative_error < 0 or allow_relative_error > 1:
+            raise ValueError("SparkDFDataset requires relative error to be False or to be a float between 0 and 1.")
+        return self.spark_df.approxQuantile(column, list(quantiles), allow_relative_error)
 
     def get_column_stdev(self, column):
         return self.spark_df.select(stddev_samp(col(column))).collect()[0][0]
