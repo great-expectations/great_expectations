@@ -527,6 +527,7 @@ def test_data_context_result_store(titanic_data_context):
     assert len(failed_validation_result["results"]) == 8
 
 
+@pytest.mark.rendered_output
 def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
 
     # TODO : Use a standard test fixture

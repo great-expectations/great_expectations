@@ -31,6 +31,7 @@ def expectations():
 
 # noinspection PyPep8Naming
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_DefaultJinjaPageView_meta_info():
     validation_results = {
         "results": [],
