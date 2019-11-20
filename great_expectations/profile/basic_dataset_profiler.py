@@ -1,6 +1,6 @@
 import logging
 from .base import DatasetProfiler
-from ..dataset.util import categorical_partition_data
+from ..dataset.util import build_categorical_partition_object
 
 logger = logging.getLogger(__name__)
 
@@ -348,7 +348,8 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
             cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
             if cardinality in ["two", "very few", "few"]:
                 dataset.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
-                partition_object = categorical_partition_data(dataset[column])
+                partition_object = build_categorical_partition_object(dataset, column)
+
                 dataset.expect_column_kl_divergence_to_be_less_than(column, partition_object=partition_object,
                                                        threshold=0.6)
 
