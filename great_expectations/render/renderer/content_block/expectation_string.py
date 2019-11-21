@@ -241,10 +241,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         )
         
         if params["column_list"] is None:
-            template_str = "This table should have a list of columns in a specific order, but that order is not specified."
+            template_str = "Must have a list of columns in a specific order, but that order is not specified."
         
         else:
-            template_str = "This table should have these columns in this order: "
+            template_str = "Must have these columns in this order: "
             for idx in range(len(params["column_list"]) - 1):
                 template_str += "$column_list_" + str(idx) + ", "
                 params["column_list_" + str(idx)] = params["column_list"][idx]

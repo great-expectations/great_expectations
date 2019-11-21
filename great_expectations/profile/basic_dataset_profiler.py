@@ -286,6 +286,7 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
 
         columns = dataset.get_table_columns()
 
+        dataset.expect_table_column_count_to_equal(len(columns))
         dataset.expect_table_columns_to_match_ordered_list(columns)
 
         meta_columns = {}
@@ -357,9 +358,21 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
 
         expectation_suite = dataset.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=True)
         if not "meta" in expectation_suite:
-            expectation_suite["meta"] = {"columns": meta_columns}
+            expectation_suite["meta"] = {"columns": meta_columns, "notes": {""}}
         else:
             expectation_suite["meta"]["columns"] = meta_columns
+
+        expectation_suite["meta"]["notes"] = {
+            "format": "markdown",
+            "content": [
+                """#### This is an _example_ suite
+
+- This suite was made by quickly glancing at 1000 rows of your data.
+- This is **not a production suite**. It is meant to show examples of expectations.
+- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.
+"""
+            ]
+        }
 
         return expectation_suite
 

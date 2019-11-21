@@ -417,7 +417,7 @@ def _add_spark_datasource(context, prompt_for_datasource_name=True):
     return data_source_name
 
 
-def create_demo_expectation_suite(
+def create_sample_expectation_suite(
     context,
     data_source_name,
     additional_batch_kwargs=None,
@@ -425,7 +425,7 @@ def create_demo_expectation_suite(
 ):
     """"Profile a named datasource using the specified context"""
     msg_intro = """
-<cyan>========== Create sample Expectations & see Data Docs ==========</cyan>
+<cyan>========== Create sample Expectations ==========</cyan>
 """
 
     msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
@@ -435,15 +435,14 @@ def create_demo_expectation_suite(
         "Note you may choose more than like this: 1,3\n"
 
     msg_data_doc_intro = """
-<cyan>========== Data Docs ==========</cyan>
-
-Great Expectations is building Data Docs from the data you just profiled!"""
-
+<cyan>========== Data Docs ==========</cyan>"""
     cli_message(msg_intro)
 
 
     #TODO: ["default"] is a hack. since we are running in init, it might be ok to assume that only default exists
     available_data_assets = context.get_available_data_asset_names(datasource_names=[data_source_name])[data_source_name]["default"]
+    # TODO tell the user how many data assets are found and provide a sane picker
+    # print("Found {} datas".format(len(available_data_assets["names"])))
     available_data_asset_names = ["{} ({})".format(name[0], name[1]) for name in available_data_assets["names"]]
 
     do_exit = False
@@ -459,18 +458,18 @@ Great Expectations is building Data Docs from the data you just profiled!"""
             else: # unknown error
                 raise ValueError("Unknown profiling error code: " + profiling_results['error']['code'])
 
-        choices = "\n".join(["    {}. {}".format(i, name) for i, name in enumerate(available_data_asset_names[:3], 1)])
+        choices = "\n".join(["    {}. {}".format(i, name) for i, name in enumerate(available_data_asset_names[:5], 1)])
         prompt = msg_prompt_enter_data_asset_name + choices + "\n"
 
         selections = click.prompt(prompt, default=None, show_default=False)
 
-        data_asset_indices = []
+        data_asset_indices = set()
         if selections:
             # sanitize the inputs down to integers
             selections = [item.strip() for item in selections.split(",")]
             for item in selections:
                 try:
-                    data_asset_indices.append(int(item) - 1)
+                    data_asset_indices.add(int(item) - 1)
                 except ValueError:
                     pass
 
@@ -633,7 +632,7 @@ def build_docs(context, site_name=None):
 
     index_page_locator_infos = context.build_data_docs(site_names=site_names)
 
-    msg = "The following Data Docs sites were generated:\n"
+    msg = "The following Data Docs sites were built:\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         if os.path.isfile(index_page_locator_info):
             msg += "- " + site_name + ":\n"
@@ -641,6 +640,7 @@ def build_docs(context, site_name=None):
         else:
             msg += site_name + "\n"
 
+    msg = msg.rstrip("\n")
     cli_message(msg)
 
 
@@ -686,9 +686,3 @@ Do we not have the type of data source you want?
     - Please create a GitHub issue here so we can discuss it!
     - <blue>https://github.com/great-expectations/great_expectations/issues/new</blue>"""
 
-# TODO also maybe add validation playground notebook or wait for the full onboarding flow
-MSG_GO_TO_NOTEBOOK = """
-To create expectations for your data, start Jupyter and open a tutorial notebook:
-    - To launch with jupyter notebooks:
-        <green>jupyter notebook great_expectations/notebooks/{}/create_expectations.ipynb</green>
-"""
