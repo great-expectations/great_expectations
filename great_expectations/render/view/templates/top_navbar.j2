@@ -2,19 +2,31 @@
   {% set identifier_list = full_data_asset_identifier.split("/") -%}
 {% endif %}
 
-<nav class="navbar bg-light navbar-expand-md sticky-top border-bottom">
+{% set static_images_dir = static_assets_dir + "/images/" -%}
+
+{% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
+  {% set home_url = "../../../../../index.html" -%}
+{% elif utm_medium == "expectation-suite-page" %}
+  {% set home_url = "../../../../index.html" -%}
+{% elif utm_medium == "index-page" %}
+  {% set home_url = "#" -%}
+{% endif %}
+
+<nav class="navbar bg-light navbar-expand-md sticky-top border-bottom" style="height: 70px">
   <div class="mr-auto">
-    <nav aria-label="breadcrumb" class="d-flex align-items-center">
-      <div class="float-left navbar-brand m-0">
-        <h4>Great Expectations Data Docs</h4>
+    <nav class="d-flex align-items-center">
+      <div class="float-left navbar-brand m-0 h-100">
+        <a href="{{ home_url }}">
+          <img
+            src="{{ static_images_dir + "logo-long.png" }}"
+            alt="Great Expectations"
+            style="width: auto; height: 50px"
+          />
+        </a>
       </div>
       {% if identifier_list %}
-        <ol class="ge-breadcrumbs breadcrumb d-inline-flex bg-light m-0 pt-0 pb-0">
-            {% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
-              <li class="ge-breadcrumbs-item breadcrumb-item"><a href="../../../../../index.html">Home</a></li>
-            {% else %}
-              <li class="ge-breadcrumbs-item breadcrumb-item"><a href="../../../../index.html">Home</a></li>
-            {% endif %}
+        <ol class="ge-breadcrumbs breadcrumb d-inline-flex bg-light ml-2 mr-0 mt-0 mb-0 pt-0 pb-0">
+            <li class="ge-breadcrumbs-item breadcrumb-item"><a href="{{ home_url }}">Home</a></li>
             {% for el in identifier_list %}
                 <li class="ge-breadcrumbs-item breadcrumb-item">{{ el }}</li>
             {% endfor %}
