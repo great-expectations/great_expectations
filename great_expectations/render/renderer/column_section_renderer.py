@@ -429,20 +429,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         if not kl_divergence_evr or "result" not in kl_divergence_evr or "details" not in kl_divergence_evr.get("result", {}):
             return
 
-        bins = kl_divergence_evr["result"]["details"]["observed_partition"]["bins"]
-        # bin_medians = [round((v+bins[i+1])/2, 1)
-        #                for i, v in enumerate(bins[:-1])]
-        # bin_medians = [(round(bins[i], 1), round(bins[i+1], 1)) for i, v in enumerate(bins[:-1])]
-        bins_x1 = [round(value, 1) for value in bins[:-1]]
-        bins_x2 = [round(value, 1) for value in bins[1:]]
         weights = kl_divergence_evr["result"]["details"]["observed_partition"]["weights"]
-
-        df = pd.DataFrame({
-            "bin_min": bins_x1,
-            "bin_max": bins_x2,
-            "weight": weights,
-        })
-        df.weight *= 100
 
         if len(weights) > 60:
             return None
@@ -462,14 +449,40 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         if len(weights) == 1:
             mark_bar_args["size"] = 20
 
-        bars = alt.Chart(df).mark_bar(**mark_bar_args).encode(
-            x='bin_min:O',
-            x2='bin_max:O',
-            y="weight:Q",
-            tooltip=["bin_min", "bin_max", "weight"]
-        ).properties(width=chart_pixel_width, height=400, autosize="fit")
-
-        chart = bars.to_json()
+        if kl_divergence_evr["result"]["details"]["observed_partition"].get("bins"):
+            bins = kl_divergence_evr["result"]["details"]["observed_partition"]["bins"]
+            bins_x1 = [round(value, 1) for value in bins[:-1]]
+            bins_x2 = [round(value, 1) for value in bins[1:]]
+    
+            df = pd.DataFrame({
+                "bin_min": bins_x1,
+                "bin_max": bins_x2,
+                "fraction": weights,
+            })
+            df.fraction *= 100
+    
+            bars = alt.Chart(df).mark_bar(**mark_bar_args).encode(
+                x='bin_min:O',
+                x2='bin_max:O',
+                y="fraction:Q",
+                tooltip = ["bin_min", "bin_max", "fraction"]
+            ).properties(width=chart_pixel_width, height=400, autosize="fit")
+            chart = bars.to_json()
+        elif kl_divergence_evr["result"]["details"]["observed_partition"].get("values"):
+            values = kl_divergence_evr["result"]["details"]["observed_partition"]["values"]
+    
+            df = pd.DataFrame({
+                "values": values,
+                "fraction": weights
+            })
+            df.fraction *= 100
+    
+            bars = alt.Chart(df).mark_bar(**mark_bar_args).encode(
+                x='values:N',
+                y="fraction:Q",
+                tooltip=["values", "fraction"]
+            ).properties(width=chart_pixel_width, height=400, autosize="fit")
+            chart = bars.to_json()
 
         return RenderedComponentContent(**{
             "content_block_type": "graph",
