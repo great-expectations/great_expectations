@@ -1,3 +1,15 @@
+@font-face {
+  font-family: HKGroteskPro;
+  src: url("{{ static_assets_dir +  '/fonts/HKGrotesk/HKGrotesk-Regular.otf'}}");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: HKGrotesk-Light;
+  src: url("{{ static_assets_dir +  '/fonts/HKGrotesk/HKGrotesk-Light.otf'}}");
+  font-weight: 300;
+}
+
 body {
   position: relative;
 }
@@ -9,7 +21,7 @@ body {
 .sticky {
   position: -webkit-sticky;
   position: sticky;
-  top: 80px;
+  top: 90px;
   z-index: 1;
 }
 
