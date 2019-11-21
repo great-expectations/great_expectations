@@ -16,27 +16,31 @@
   </div>
   <div class="card-body p-3">
     {% if renderer_type in ["ValidationResultsPageRenderer", "SiteIndexPageRenderer"] %}
-      <p class="card-text col-12 p-0 mb-1">
-        Validation Filter:
-      </p>
-      <div class="d-flex justify-content-center">
-        <div class="btn-group btn-group-toggle" data-toggle="buttons">
-          <label class="btn btn-info btn-sm active" onclick="showAllValidations()">
-            <input type="radio" name="options" id="option1" autocomplete="off" checked> Show All
-          </label>
-          <label class="btn btn-info btn-sm" onclick="hideSucceededValidations()">
-            <input type="radio" name="options" id="option2" autocomplete="off"> Failed Only
-          </label>
+      <div class="mb-2">
+        <p class="card-text col-12 p-0 mb-1">
+          Validation Filter:
+        </p>
+        <div class="d-flex justify-content-center">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-info btn-sm active" onclick="showAllValidations()">
+              <input type="radio" name="options" id="option1" autocomplete="off" checked> Show All
+            </label>
+            <label class="btn btn-info btn-sm" onclick="hideSucceededValidations()">
+              <input type="radio" name="options" id="option2" autocomplete="off"> Failed Only
+            </label>
+          </div>
         </div>
       </div>
     {% endif %}
-    <p class="card-text col-12 p-0 mb-1">
-      Walkthrough:
-    </p>
-    <div class="d-flex justify-content-center">
-      <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target=".ge-walkthrough-modal">
-        Show Walkthrough
-      </button>
+    <div class="mb-2">
+      <p class="card-text col-12 p-0 mb-1">
+        Walkthrough:
+      </p>
+      <div class="d-flex justify-content-center">
+        <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target=".ge-walkthrough-modal">
+          Show Walkthrough
+        </button>
+      </div>
     </div>
   </div>
 </div>
