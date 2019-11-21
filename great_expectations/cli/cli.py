@@ -27,9 +27,8 @@ from great_expectations.cli.init_messages import (
 from .datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
-    create_demo_expectation_suite,
+    create_sample_expectation_suite,
     build_docs as build_documentation_impl,
-    MSG_GO_TO_NOTEBOOK,
 )
 from great_expectations.cli.util import cli_message, is_sane_slack_webhook
 from great_expectations.data_context import DataContext
@@ -226,10 +225,12 @@ def init(target_directory, view):
         if not data_source_name:  # no datasource was created
             return
 
-        # context = _slack_setup(context)
-
-        create_demo_expectation_suite(context, data_source_name, open_docs=view, additional_batch_kwargs={"limit": 1000})
-        #profile_datasource(context, data_source_name, open_docs=view, additional_batch_kwargs={"limit": 1000})
+        create_sample_expectation_suite(
+            context,
+            data_source_name,
+            additional_batch_kwargs={"limit": 1000},
+            open_docs=view,
+        )
         cli_message("""\n<cyan>Great Expectations is now set up in your project!</cyan>""")
 
 def _slack_setup(context):
@@ -304,6 +305,7 @@ def add_datasource(directory, view):
     if not data_source_name:  # no datasource was created
         return
 
+    # TODO do we really want to "profile" every new datasource?
     profile_datasource(context, data_source_name, open_docs=view)
 
 

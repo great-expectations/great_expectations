@@ -12,7 +12,7 @@ GREETING = """<cyan>\
              ~ Always know what to expect from your data ~             
 </cyan>""".format(rtd_url_ge_version)
 
-LETS_BEGIN_PROMPT = """Let's add Great Expectations to your project, by scaffolding a new great_expectations directory like this:
+LETS_BEGIN_PROMPT = """Let's add Great Expectations to your project by creating a new directory:
 
     great_expectations
     ├── expectations
