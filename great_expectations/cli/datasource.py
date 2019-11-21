@@ -51,7 +51,7 @@ def add_datasource(context):
     2. PySpark
 """
 
-    msg_success_datasource_added = "<green>Great Expectations connected to your data!</green>"
+    msg_success_datasource_added = "\n<green>Great Expectations connected to your data!</green>"
 
     cli_message("\n<cyan>========== Where is your data? ===========</cyan>")
     data_source_location_selection = click.prompt(
@@ -431,8 +431,8 @@ def create_sample_expectation_suite(
     msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
 """
 
-    msg_prompt_enter_data_asset_name = "Which data would you like to use? " \
-        "Note you may choose more than like this: 1,3\n"
+    msg_prompt_enter_data_asset_name = "Here are a few chunks of data - which would you like to use? " \
+        "Note you select multiple like this: 1,3\n"
 
     msg_data_doc_intro = """
 <cyan>========== Data Docs ==========</cyan>"""
@@ -653,7 +653,7 @@ msg_prompt_choose_datasource = """Configure a datasource:
 
 
 msg_prompt_choose_database = """
-Which database?
+Which database backend are you using?
 {}
 """.format("\n".join(["    {}. {}".format(i, db.value) for i, db in enumerate(SupportedDatabases, 1)]))
 
