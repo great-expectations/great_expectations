@@ -37,6 +37,7 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
+from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
 
 from .types import (
     NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
@@ -1667,8 +1668,9 @@ class ConfigOnlyDataContext(object):
                            data_assets=None,
                            max_data_assets=20,
                            profile_all_data_assets=True,
-                           profiler=BasicDatasetProfiler,
+                           profiler=SampleExpectationsDatasetProfiler,
                            dry_run=False,
+                           run_id="profiling",
                            additional_batch_kwargs=None):
         """Profile the named datasource using the named profiler.
 
@@ -1694,7 +1696,7 @@ class ConfigOnlyDataContext(object):
         """
 
         if not dry_run:
-            logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
+            logger.debug("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
 
         profiling_results = {}
 
@@ -1706,7 +1708,7 @@ class ConfigOnlyDataContext(object):
         if generator_name not in data_asset_names[datasource_name]:
             raise ge_exceptions.ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
 
-        data_asset_name_list = list(data_asset_names[datasource_name][generator_name])
+        data_asset_name_list = [name[0] for name in data_asset_names[datasource_name][generator_name]["names"]]
         total_data_assets = len(data_asset_name_list)
 
         if data_assets and len(data_assets) > 0:
@@ -1727,7 +1729,7 @@ class ConfigOnlyDataContext(object):
             data_asset_name_list.sort()
             total_data_assets = len(data_asset_name_list)
             if not dry_run:
-                logger.info("Profiling the white-listed data assets: %s, alphabetically." % (",".join(data_asset_name_list)))
+                logger.debug("Profiling the white-listed data assets: %s, alphabetically." % (",".join(data_asset_name_list)))
         else:
             if profile_all_data_assets:
                 data_asset_name_list.sort()
@@ -1744,7 +1746,7 @@ class ConfigOnlyDataContext(object):
                     return profiling_results
 
         if not dry_run:
-            logger.info("Profiling all %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
+            logger.debug("Profiling all %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
         else:
             logger.debug("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
 
@@ -1754,11 +1756,9 @@ class ConfigOnlyDataContext(object):
             profiling_results['results'] = []
             total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
             total_start_time = datetime.datetime.now()
-            # run_id = total_start_time.isoformat().replace(":", "") + "Z"
-            run_id = "profiling"
 
             for name in data_asset_name_list:
-                logger.info("\tProfiling '%s'..." % name)
+                logger.debug("\tProfiling '%s'..." % name)
                 try:
                     start_time = datetime.datetime.now()
 
@@ -1819,7 +1819,7 @@ class ConfigOnlyDataContext(object):
 
                     self.save_expectation_suite(expectation_suite)
                     duration = (datetime.datetime.now() - start_time).total_seconds()
-                    logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
+                    logger.debug("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
                                 (new_column_count, row_count, name, duration))
 
                 except ge_exceptions.ProfilerError as err:
@@ -1834,7 +1834,7 @@ class ConfigOnlyDataContext(object):
                     skipped_data_assets += 1
 
             total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
-            logger.info("""
+            logger.debug("""
     Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
     Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs.""" % (
                 len(data_asset_name_list),

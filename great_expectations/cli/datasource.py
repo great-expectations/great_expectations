@@ -2,11 +2,13 @@ import importlib
 import os
 import enum
 import click
+import datetime
 
 from great_expectations.datasource import PandasDatasource, SparkDFDatasource, SqlAlchemyDatasource
 from .util import cli_message
 from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.data_context import DataContext
+from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
 
 from great_expectations import rtd_url_ge_version
 
@@ -39,48 +41,56 @@ class SupportedDatabases(enum.Enum):
 
 
 def add_datasource(context):
-    cli_message(
-        """
-<cyan>========== Datasources ===========</cyan>
-""".format(rtd_url_ge_version)
-    )
-    data_source_selection = click.prompt(
-        msg_prompt_choose_datasource,
-        type=click.Choice(["1", "2", "3", "4"]),
+    msg_prompt_where_is_your_data = """\
+    1. Files on a filesystem (for processing with Pandas or Spark)
+    2. Relational database (SQL)
+"""
+
+    msg_prompt_files_compute_engine = """What are you processing your files with?
+    1. Pandas
+    2. PySpark
+"""
+
+    msg_success_datasource_added = "\n<green>Great Expectations connected to your data!</green>"
+
+    cli_message("\n<cyan>========== Where is your data? ===========</cyan>")
+    data_source_location_selection = click.prompt(
+        msg_prompt_where_is_your_data,
+        type=click.Choice(["1", "2"]),
         show_choices=False
     )
 
-    cli_message(data_source_selection)
     data_source_name = None
     data_source_type = None
 
-    if data_source_selection == "1":  # pandas
-        data_source_type = DatasourceTypes.PANDAS
-        data_source_name = _add_pandas_datasource(context)
-    elif data_source_selection == "2":  # sqlalchemy
-        data_source_type = DatasourceTypes.SQL
-        data_source_name = _add_sqlalchemy_datasource(context)
-    elif data_source_selection == "3":  # Spark
-        data_source_type = DatasourceTypes.SPARK
-        data_source_name = _add_spark_datasource(context)
-    # if data_source_selection == "5": # dbt
-    #     data_source_type = DatasourceTypes.DBT
-    #     dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
-    #     log_message(msg_dbt_go_to_notebook, color="blue")
-    #     context.add_datasource("dbt", "dbt", profile=dbt_profile)
-    if data_source_selection == "4":  # None of the above
-        cli_message(msg_unknown_data_source)
-        cli_message("""
-Skipping datasource configuration.
-    - Add one by running `<green>great_expectations add-datasource</green>` or
-    - ... by editing the `{}` file
-""".format(DataContext.GE_YML)
+    if data_source_location_selection == "1":
+        data_source_compute_selection = click.prompt(
+            msg_prompt_files_compute_engine,
+            type=click.Choice(["1", "2"]),
+            show_choices=False
         )
+
+        if data_source_compute_selection == "1":  # pandas
+
+            data_source_type = DatasourceTypes.PANDAS
+
+            data_source_name = _add_pandas_datasource(context, prompt_for_datasource_name=True)
+
+        elif data_source_compute_selection == "2":  # Spark
+
+            data_source_type = DatasourceTypes.SPARK
+
+            data_source_name = _add_spark_datasource(context, prompt_for_datasource_name=True)
+    else:
+        data_source_type = DatasourceTypes.SQL
+        data_source_name = _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True)
+
+    cli_message(msg_success_datasource_added)
 
     return data_source_name, data_source_type
 
 
-def _add_pandas_datasource(context):
+def _add_pandas_datasource(context, prompt_for_datasource_name=True):
     path = click.prompt(
         msg_prompt_filesys_enter_base_path,
         # default='/data/',
@@ -100,12 +110,13 @@ def _add_pandas_datasource(context):
     else:
         basenamepath = path
 
-    default_data_source_name = os.path.basename(basenamepath) + "__dir"
-    data_source_name = click.prompt(
-        msg_prompt_datasource_name,
-        default=default_data_source_name,
-        show_default=True
-    )
+    data_source_name = os.path.basename(basenamepath) + "__dir"
+    if prompt_for_datasource_name:
+        data_source_name = click.prompt(
+            msg_prompt_datasource_name,
+            default=data_source_name,
+            show_default=True
+        )
 
     configuration = PandasDatasource.build_configuration(base_directory=os.path.join("..", path))
     context.add_datasource(name=data_source_name, class_name='PandasDatasource', **configuration)
@@ -141,7 +152,7 @@ def load_library(library_name, install_instructions_string=None):
         return False
 
 
-def _add_sqlalchemy_datasource(context):
+def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
     if not load_library("sqlalchemy"):
         return None
 
@@ -156,11 +167,13 @@ def _add_sqlalchemy_datasource(context):
 
     selected_database = list(SupportedDatabases)[selected_database]
 
-    data_source_name = click.prompt(
-        msg_prompt_datasource_name,
-        default="my_{}_db".format(selected_database.value.lower()),
-        show_default=True
-    )
+    data_source_name = "my_{}_db".format(selected_database.value.lower())
+    if prompt_for_datasource_name:
+        data_source_name = click.prompt(
+            msg_prompt_datasource_name,
+            default=data_source_name,
+            show_default=True
+        )
 
     credentials = {}
     # Since we don't want to save the database credentials in the config file that will be
@@ -373,7 +386,7 @@ def _collect_redshift_credentials(default_credentials={}):
 
     return credentials
 
-def _add_spark_datasource(context):
+def _add_spark_datasource(context, prompt_for_datasource_name=True):
     path = click.prompt(
         msg_prompt_filesys_enter_base_path,
         # default='/data/',
@@ -390,13 +403,99 @@ def _add_spark_datasource(context):
 
     if path.endswith("/"):
         path = path[:-1]
-    default_data_source_name = os.path.basename(path) + "__dir"
-    data_source_name = click.prompt(
-        msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
+
+    data_source_name = os.path.basename(path) + "__dir"
+    if prompt_for_datasource_name:
+        data_source_name = click.prompt(
+            msg_prompt_datasource_name,
+            default=data_source_name,
+            show_default=True
+        )
 
     configuration = SparkDFDatasource.build_configuration(base_directory=os.path.join("..", path))
     context.add_datasource(name=data_source_name, class_name='SparkDFDatasource', **configuration)
     return data_source_name
+
+
+def create_sample_expectation_suite(
+    context,
+    data_source_name,
+    additional_batch_kwargs=None,
+    open_docs=False,
+):
+    """"Profile a named datasource using the specified context"""
+    msg_intro = """
+<cyan>========== Create sample Expectations ==========</cyan>
+"""
+
+    msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
+"""
+
+    msg_prompt_enter_data_asset_name = "Here are a few chunks of data - which would you like to use? " \
+        "Note you select multiple like this: 1,3\n"
+
+    msg_data_doc_intro = """
+<cyan>========== Data Docs ==========</cyan>"""
+    cli_message(msg_intro)
+
+
+    #TODO: ["default"] is a hack. since we are running in init, it might be ok to assume that only default exists
+    available_data_assets = context.get_available_data_asset_names(datasource_names=[data_source_name])[data_source_name]["default"]
+    # TODO tell the user how many data assets are found and provide a sane picker
+    # print("Found {} datas".format(len(available_data_assets["names"])))
+    available_data_asset_names = ["{} ({})".format(name[0], name[1]) for name in available_data_assets["names"]]
+
+    do_exit = False
+    it_0 = True
+    while not do_exit:
+        if it_0:
+            it_0 = False
+        else:
+            if profiling_results['success']: # data context is ready to profile
+                break
+            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND:
+                cli_message(msg_some_data_assets_not_found.format("," .join(profiling_results['error']['not_found_data_assets'])))
+            else: # unknown error
+                raise ValueError("Unknown profiling error code: " + profiling_results['error']['code'])
+
+        choices = "\n".join(["    {}. {}".format(i, name) for i, name in enumerate(available_data_asset_names[:5], 1)])
+        prompt = msg_prompt_enter_data_asset_name + choices + "\n"
+
+        selections = click.prompt(prompt, default=None, show_default=False)
+
+        data_asset_indices = set()
+        if selections:
+            # sanitize the inputs down to integers
+            selections = [item.strip() for item in selections.split(",")]
+            for item in selections:
+                try:
+                    data_asset_indices.add(int(item) - 1)
+                except ValueError:
+                    pass
+
+        data_assets = []
+        for i in data_asset_indices:
+            try:
+                data_assets.append(available_data_assets["names"][i][0])
+            except IndexError:
+                pass
+
+        # after getting the arguments from the user, let's try to run profiling again
+        # (no dry run this time)
+        profiling_results = context.profile_datasource(
+            data_source_name,
+            data_assets=data_assets,
+            profiler=SampleExpectationsDatasetProfiler,
+            dry_run=False,
+            run_id=datetime.datetime.now().isoformat().replace(":", "") + "Z",
+            additional_batch_kwargs=additional_batch_kwargs
+        )
+
+    cli_message(msg_data_doc_intro)
+
+    build_docs(context)
+    if open_docs:  # This is mostly to keep tests from spawning windows
+        context.open_data_docs()
 
 
 def profile_datasource(
@@ -533,7 +632,7 @@ def build_docs(context, site_name=None):
 
     index_page_locator_infos = context.build_data_docs(site_names=site_names)
 
-    msg = "The following Data Docs sites were generated:\n"
+    msg = "The following Data Docs sites were built:\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         if os.path.isfile(index_page_locator_info):
             msg += "- " + site_name + ":\n"
@@ -541,6 +640,7 @@ def build_docs(context, site_name=None):
         else:
             msg += site_name + "\n"
 
+    msg = msg.rstrip("\n")
     cli_message(msg)
 
 
@@ -553,7 +653,7 @@ msg_prompt_choose_datasource = """Configure a datasource:
 
 
 msg_prompt_choose_database = """
-Which database?
+Which database backend are you using?
 {}
 """.format("\n".join(["    {}. {}".format(i, db.value) for i, db in enumerate(SupportedDatabases, 1)]))
 
@@ -569,8 +669,7 @@ Which database?
 #     """
 
 msg_prompt_filesys_enter_base_path = """
-Enter the path of the root directory where the data files are stored.
-(The path may be either absolute or relative to current directory.)
+Enter the path (relative or absolute) of the root directory where the data files are stored.
 """
 
 msg_prompt_datasource_name = """
@@ -579,7 +678,7 @@ Give your new data source a short name.
 
 msg_db_config = """
 Next, we will configure database credentials and store them in the "{0:s}" section
-of this config file: great_expectations/uncommitted/credentials/profiles.yml:
+of this config file: great_expectations/uncommitted/config_variables.yml:
 """
 
 msg_unknown_data_source = """
@@ -587,9 +686,3 @@ Do we not have the type of data source you want?
     - Please create a GitHub issue here so we can discuss it!
     - <blue>https://github.com/great-expectations/great_expectations/issues/new</blue>"""
 
-# TODO also maybe add validation playground notebook or wait for the full onboarding flow
-MSG_GO_TO_NOTEBOOK = """
-To create expectations for your data, start Jupyter and open a tutorial notebook:
-    - To launch with jupyter notebooks:
-        <green>jupyter notebook great_expectations/notebooks/{}/create_expectations.ipynb</green>
-"""

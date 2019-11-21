@@ -326,14 +326,14 @@ class ExpectationSuitePageRenderer(Renderer):
             self._render_asset_info(expectations)
         ]
         
-        table_level_expectations_content_block = self._render_table_level_expectations(columns)
-        if table_level_expectations_content_block is not None:
-            overview_content_blocks.append(table_level_expectations_content_block)
-        
         asset_notes_content_block = self._render_asset_notes(expectations)
         if asset_notes_content_block is not None:
             overview_content_blocks.append(asset_notes_content_block)
-        
+
+        table_level_expectations_content_block = self._render_table_level_expectations(columns)
+        if table_level_expectations_content_block is not None:
+            overview_content_blocks.append(table_level_expectations_content_block)
+
         sections = [
             RenderedSectionContent(**{
                 "section_name": "Overview",
