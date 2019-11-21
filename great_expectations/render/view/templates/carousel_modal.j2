@@ -17,29 +17,44 @@
               <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="0" class="active"></li>
               <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="1"></li>
               <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="2"></li>
+              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="3"></li>
             </ol>
             <div class="carousel-inner">
+
               <div class="carousel-item active">
-                <img src="{{ static_images_dir + "validation_failed_unexpected_values.gif" }}" class="d-block w-100" alt="...">
+                <img src="{{ static_images_dir + "values_not_null_html_en.jpg" }}" class="d-block w-100" alt="...">
                 <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>First slide label</h5>
-                  <p>Nulla vitae elit libero, a pharetra augue mollis interdum.</p>
+                  <h5>What are Expectations?</h5>
+                  <p>An expectation is a falsifiable, verifiable statement about data.</p>
+                  <p>Expectations provide a language to talk about data characteristics and data quality - humans-humans, humans-machines and machines-machines.</p>
+                  <p>Expectations are both tests of data and its documentation.</p>
                 </div>
               </div>
+
+              <div class="carousel-item">
+                <img src="{{ static_images_dir + "values_not_null_json.jpg" }}" class="d-block w-100" alt="...">
+                <div class="carousel-caption d-block bg-dark mb-4">
+                  <h5>An expectation can be presented in a machine-friendly JSON</h5>
+                  <p>A machine can test if a dataset conforms to the expectation.</p>
+                </div>
+              </div>
+
+              <div class="carousel-item">
+                <img src="{{ static_images_dir + "values_not_null_validation_result_json.jpg" }}" class="d-block w-100" alt="...">
+                <div class="carousel-caption d-block bg-dark mb-4">
+                  <h5>Validation produces a validation result object</h5>
+                  <p>This object has rich context about the test failure.</p>
+                </div>
+              </div>
+
               <div class="carousel-item">
                 <img src="{{ static_images_dir + "validation_failed_unexpected_values.gif" }}" class="d-block w-100" alt="...">
                 <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>Second slide label</h5>
-                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                  <h5>Validation results save you time.</h5>
+                  <p>This is a single failed Expectation. Note the observed value includes unexpected values from your data. This helps you debug pipeines faster.</p>
                 </div>
               </div>
-              <div class="carousel-item">
-                <img src="{{ static_images_dir + "validation_failed_unexpected_values.gif" }}" class="d-block w-100" alt="...">
-                <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>Third slide label</h5>
-                  <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur.</p>
-                </div>
-              </div>
+
             </div>
             <a class="carousel-control-prev" href="#ge-walkthrough-carousel-captions" role="button" data-slide="prev">
               <span class="carousel-control-prev-icon bg-dark rounded" aria-hidden="true"></span>
