@@ -81,7 +81,7 @@ class DefaultJinjaView(object):
         )
         styles_loader = PackageLoader(
             'great_expectations',
-            'render/view/styles'
+            'render/view/static/styles'
         )
 
         loaders = [
