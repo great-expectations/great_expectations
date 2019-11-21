@@ -5,7 +5,7 @@
   <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="ge-walkthrough-modal-title">Great Expectations Data Docs Walkthrough</h5>
+        <h5 class="modal-title" id="ge-walkthrough-modal-title">Data Docs Walkthrough</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -19,122 +19,48 @@
               <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="2"></li>
               <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="3"></li>
               <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="4"></li>
-              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="5"></li>
-              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="6"></li>
-              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="7"></li>
-              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="8"></li>
-              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="9"></li>
-              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="10"></li>
-              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="11"></li>
-              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="12"></li>
-              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="13"></li>
-              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="14"></li>
-              <li data-target="#ge-walkthrough-carousel-captions" data-slide-to="15"></li>
             </ol>
             <div class="carousel-inner">
+
               <div class="carousel-item active">
-                <img src="{{ static_images_dir + "0_values_not_null_html_en.jpg" }}" class="d-block w-100" alt="...">
+                <img src="{{ static_images_dir + "values_not_null_html_en.jpg" }}" class="d-block w-100" alt="...">
                 <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>This is an expectation presented as a human-friendly HTML</h5>
+                  <h5>What are Expectations?</h5>
                   <p>An expectation is a falsifiable, verifiable statement about data.</p>
                   <p>Expectations provide a language to talk about data characteristics and data quality - humans-humans, humans-machines and machines-machines.</p>
-                  <p>Expectations are both tests of data and its documentation.</p>
+                  <p>Expectations are both data tests and documentation.</p>
                 </div>
               </div>
+
               <div class="carousel-item">
-                <img src="{{ static_images_dir + "1_values_not_null_html_de.jpg" }}" class="d-block w-100" alt="...">
+                <img src="{{ static_images_dir + "values_not_null_json.jpg" }}" class="d-block w-100" alt="...">
                 <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>Expectations can be presented in other languages</h5>
-                </div>
-              </div>
-              <div class="carousel-item">
-                <img src="{{ static_images_dir + "2_values_not_null_json.jpg" }}" class="d-block w-100" alt="...">
-                <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>As well as machine-friendly JSON</h5>
+                  <h5>An expectation can be presented in a machine-friendly JSON</h5>
                   <p>A machine can test if a dataset conforms to the expectation.</p>
                 </div>
               </div>
+
               <div class="carousel-item">
-                <img src="{{ static_images_dir + "3_values_not_null_validation_result_json.jpg" }}" class="d-block w-100" alt="...">
+                <img src="{{ static_images_dir + "values_not_null_validation_result_json.jpg" }}" class="d-block w-100" alt="...">
                 <div class="carousel-caption d-block bg-dark mb-4">
                   <h5>Validation produces a validation result object</h5>
                   <p>This object has rich context about the test failure.</p>
                 </div>
               </div>
+
               <div class="carousel-item">
-                <img src="{{ static_images_dir + "4_values_not_null_validation_result_html_en.jpg" }}" class="d-block w-100" alt="...">
+                <img src="{{ static_images_dir + "2_values_not_null_json.jpg" }}" class="d-block w-100" alt="...">
                 <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>The validation result can be rendered in HTML</h5>
-                  <p>Data team members can use this HTML to communicate about test failures.</p>
+                  <h5>Validation results save you time.</h5>
+                  <p>This is a single failed Expectation. Note the failure includes unexpected values from your data. This helps you debug pipeines faster.</p>
                 </div>
               </div>
+
               <div class="carousel-item">
-                <img src="{{ static_images_dir + "5_home.png" }}" class="d-block w-100" alt="...">
                 <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>This is the Data Docs home page</h5>
-                </div>
-              </div>
-              <div class="carousel-item">
-                <img src="{{ static_images_dir + "6_home_tables.jpeg" }}" class="d-block w-100" alt="...">
-                <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>These are the chunks of data that you have told Great Expectations about</h5>
-                </div>
-              </div>
-              <div class="carousel-item">
-                <img src="{{ static_images_dir + "7_home_suites.jpeg" }}" class="d-block w-100" alt="...">
-                <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>These are the Expectations Suites</h5>
-                  <p>Expectation Suites are collections of Expectations - think test suites</p>
-                </div>
-              </div>
-              <div class="carousel-item">
-                <img src="{{ static_images_dir + "8_home_validation_results_succeeded.jpeg" }}" class="d-block w-100" alt="...">
-                <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>These are Validations that passed</h5>
-                </div>
-              </div>
-              <div class="carousel-item">
-                <img src="{{ static_images_dir + "9_suite_overview.png" }}" class="d-block w-100" alt="...">
-                <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>This is an overview of an Expectation Suite</h5>
-                </div>
-              </div>
-              <div class="carousel-item">
-                <img src="{{ static_images_dir + "10_suite_toc.jpeg" }}" class="d-block w-100" alt="...">
-                <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>This lists all the fields in your data</h5>
-                </div>
-              </div>
-              <div class="carousel-item">
-                <img src="{{ static_images_dir + "11_home_validation_results_failed.jpeg" }}" class="d-block w-100" alt="...">
-                <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>These are Validations that failed</h5>
-                </div>
-              </div>
-              <div class="carousel-item">
-                <img src="{{ static_images_dir + "12_validation_overview.png" }}" class="d-block w-100" alt="...">
-                <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>This is the overview of a Validation</h5>
-                </div>
-              </div>
-              <div class="carousel-item">
-                <img src="{{ static_images_dir + "13_validation_passed.jpeg" }}" class="d-block w-100" alt="...">
-                <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>This is a single passed Expectation. Note the observed value.</h5>
-                </div>
-              </div>
-              <div class="carousel-item">
-                <img src="{{ static_images_dir + "14_validation_failed.jpeg" }}" class="d-block w-100" alt="...">
-                <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>This is a single failed Expectation</h5>
-                  <p>Note the observed value.</p>
-                </div>
-              </div>
-              <div class="carousel-item">
-                <img src="{{ static_images_dir + "16_validation_failed_unexpected_values (1)" }}" class="d-block w-100" alt="...">
-                <div class="carousel-caption d-block bg-dark mb-4">
-                  <h5>This is a single failed Expectation</h5>
-                  <p>Note the observed value includes unexpected values from your data. This helps you debug pipeines faster.</p>
+                  <h5>Now explore the sample suite!</h5>
+                  <p>This sample suite shows you a few examples of expectations.</p>
+                  <p>Note this is not a production suite and was autogenerated using only a small snippet of your data.</p>
                 </div>
               </div>
 
