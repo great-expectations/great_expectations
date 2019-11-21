@@ -348,7 +348,8 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
         for column in columns:
             cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
             if cardinality in ["two", "very few", "few"]:
-                dataset.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
+                value_set = dataset.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")["result"]["observed_value"]
+                dataset.expect_column_distinct_values_to_be_in_set(column, value_set=value_set, result_format="SUMMARY")
                 partition_object = build_categorical_partition_object(dataset, column)
 
                 dataset.expect_column_kl_divergence_to_be_less_than(column, partition_object=partition_object,
