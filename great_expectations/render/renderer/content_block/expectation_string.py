@@ -1352,11 +1352,18 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         table_header_row = ["Quantile", "Min Value", "Max Value"]
         table_rows = []
         
+        quantile_strings = {
+            .25: "Q1",
+            .75: "Q3",
+            .50: "Median"
+        }
+        
         for idx, quantile in enumerate(quantiles):
+            quantile_string = quantile_strings.get(quantile)
             table_rows.append([
-                quantile,
-                str(value_ranges[idx][0]),
-                str(value_ranges[idx][1]),
+                quantile_string if quantile_string else "{:3.2f}".format(quantile),
+                str(value_ranges[idx][0]) if value_ranges[idx][0] else "Any",
+                str(value_ranges[idx][1]) if value_ranges[idx][1] else "Any",
             ])
             
         quantile_range_table = {
@@ -1364,7 +1371,6 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             "header_row": table_header_row,
             "table": table_rows,
             "styling": {
-                # "classes": ["col-4"],
                 "body": {
                     "classes": ["table", "table-sm", "table-unbordered", "col-4"],
                 },
