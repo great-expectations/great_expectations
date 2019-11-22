@@ -235,7 +235,27 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             ).properties(width=width, height=height, autosize="fit")
             chart = bars.to_json()
     
-        return {
+        observed_value = evr["result"].get("observed_value")
+    
+        observed_value_content_block = {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "$observed_value_title $observed_value",
+                    "params": {
+                        "observed_value_title": "Observed Value:",
+                        "observed_value": str(observed_value),
+                    },
+                    "styling": {
+                        "params": {
+                            "observed_value_title": {
+                                "tag": "strong"
+                            }
+                        }
+                    }
+                }
+        }
+    
+        graph_content_block = {
             "content_block_type": "graph",
             "graph": chart,
             "styling": {
@@ -244,6 +264,14 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "margin-top": "20px",
                 }
             }
+        }
+    
+        return {
+            "content_block_type": "content_block_container",
+            "content_blocks": [
+                observed_value_content_block,
+                graph_content_block
+            ]
         }
 
     @classmethod
