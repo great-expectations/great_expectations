@@ -222,7 +222,7 @@ class ConfigOnlyDataContext(object):
     @classmethod
     def scaffold_custom_data_docs(cls, plugins_dir):
         """Copy custom data docs templates"""
-        styles_template = file_relative_path(__file__, "../render/view/styles/data_docs_custom_styles_template.css")
+        styles_template = file_relative_path(__file__, "../render/view/static/styles/data_docs_custom_styles_template.css")
         styles_destination_path = os.path.join(plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
         shutil.copyfile(styles_template, styles_destination_path)
         
