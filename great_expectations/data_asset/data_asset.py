@@ -785,7 +785,7 @@ class DataAsset(object):
             settings_message += " settings filtered."
 
         expectation_suite["expectations"] = expectations
-        logger.debug(message + settings_message)
+        logger.info(message + settings_message)
         return expectation_suite
 
     def save_expectation_suite(
