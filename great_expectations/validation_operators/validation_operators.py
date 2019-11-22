@@ -201,7 +201,6 @@ class ActionListValidationOperator(ValidationOperator):
         return result_object
 
 
-
 class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationOperator):
     """WarningAndFailureExpectationSuitesValidationOperator is a validation operator
     that accepts a list batches of data assets (or the information necessary to fetch these batches).
