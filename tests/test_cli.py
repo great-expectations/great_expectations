@@ -269,6 +269,31 @@ great_expectations/
                             default/
                                 Titanic/
                                     BasicDatasetProfiler.html
+            static/
+                .DS_Store
+                fonts/
+                    HKGrotesk/
+                        HKGrotesk-Bold.otf
+                        HKGrotesk-BoldItalic.otf
+                        HKGrotesk-Italic.otf
+                        HKGrotesk-Light.otf
+                        HKGrotesk-LightItalic.otf
+                        HKGrotesk-Medium.otf
+                        HKGrotesk-MediumItalic.otf
+                        HKGrotesk-Regular.otf
+                        HKGrotesk-SemiBold.otf
+                        HKGrotesk-SemiBoldItalic.otf
+                images/
+                    .DS_Store
+                    favicon.ico
+                    logo-long-vector.svg
+                    logo-long.png
+                    short-logo-vector.svg
+                    short-logo.png
+                    validation_failed_unexpected_values.gif
+                styles/
+                    data_docs_custom_styles_template.css
+                    data_docs_default_styles.css
         samples/
         validations/
             profiling/
@@ -668,6 +693,31 @@ great_expectations/
     uncommitted/
         config_variables.yml
         data_docs/
+            static/
+                .DS_Store
+                fonts/
+                    HKGrotesk/
+                        HKGrotesk-Bold.otf
+                        HKGrotesk-BoldItalic.otf
+                        HKGrotesk-Italic.otf
+                        HKGrotesk-Light.otf
+                        HKGrotesk-LightItalic.otf
+                        HKGrotesk-Medium.otf
+                        HKGrotesk-MediumItalic.otf
+                        HKGrotesk-Regular.otf
+                        HKGrotesk-SemiBold.otf
+                        HKGrotesk-SemiBoldItalic.otf
+                images/
+                    .DS_Store
+                    favicon.ico
+                    logo-long-vector.svg
+                    logo-long.png
+                    short-logo-vector.svg
+                    short-logo.png
+                    validation_failed_unexpected_values.gif
+                styles/
+                    data_docs_custom_styles_template.css
+                    data_docs_default_styles.css
         samples/
         validations/
 """

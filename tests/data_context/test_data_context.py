@@ -616,6 +616,31 @@ project_path/
         uncommitted/
             config_variables.yml
             data_docs/
+                static/
+                    .DS_Store
+                    fonts/
+                        HKGrotesk/
+                            HKGrotesk-Bold.otf
+                            HKGrotesk-BoldItalic.otf
+                            HKGrotesk-Italic.otf
+                            HKGrotesk-Light.otf
+                            HKGrotesk-LightItalic.otf
+                            HKGrotesk-Medium.otf
+                            HKGrotesk-MediumItalic.otf
+                            HKGrotesk-Regular.otf
+                            HKGrotesk-SemiBold.otf
+                            HKGrotesk-SemiBoldItalic.otf
+                    images/
+                        .DS_Store
+                        favicon.ico
+                        logo-long-vector.svg
+                        logo-long.png
+                        short-logo-vector.svg
+                        short-logo.png
+                        validation_failed_unexpected_values.gif
+                    styles/
+                        data_docs_custom_styles_template.css
+                        data_docs_default_styles.css
             samples/
             validations/
                 profiling/
@@ -658,6 +683,31 @@ data_docs/
                     default/
                         Titanic/
                             BasicDatasetProfiler.html
+    static/
+        .DS_Store
+        fonts/
+            HKGrotesk/
+                HKGrotesk-Bold.otf
+                HKGrotesk-BoldItalic.otf
+                HKGrotesk-Italic.otf
+                HKGrotesk-Light.otf
+                HKGrotesk-LightItalic.otf
+                HKGrotesk-Medium.otf
+                HKGrotesk-MediumItalic.otf
+                HKGrotesk-Regular.otf
+                HKGrotesk-SemiBold.otf
+                HKGrotesk-SemiBoldItalic.otf
+        images/
+            .DS_Store
+            favicon.ico
+            logo-long-vector.svg
+            logo-long.png
+            short-logo-vector.svg
+            short-logo.png
+            validation_failed_unexpected_values.gif
+        styles/
+            data_docs_custom_styles_template.css
+            data_docs_default_styles.css
 """
 
     # save data_docs locally
@@ -1039,6 +1089,31 @@ great_expectations/
     uncommitted/
         config_variables.yml
         data_docs/
+            static/
+                .DS_Store
+                fonts/
+                    HKGrotesk/
+                        HKGrotesk-Bold.otf
+                        HKGrotesk-BoldItalic.otf
+                        HKGrotesk-Italic.otf
+                        HKGrotesk-Light.otf
+                        HKGrotesk-LightItalic.otf
+                        HKGrotesk-Medium.otf
+                        HKGrotesk-MediumItalic.otf
+                        HKGrotesk-Regular.otf
+                        HKGrotesk-SemiBold.otf
+                        HKGrotesk-SemiBoldItalic.otf
+                images/
+                    .DS_Store
+                    favicon.ico
+                    logo-long-vector.svg
+                    logo-long.png
+                    short-logo-vector.svg
+                    short-logo.png
+                    validation_failed_unexpected_values.gif
+                styles/
+                    data_docs_custom_styles_template.css
+                    data_docs_default_styles.css
         samples/
         validations/
 """
@@ -1070,6 +1145,31 @@ great_expectations/
     uncommitted/
         config_variables.yml
         data_docs/
+            static/
+                .DS_Store
+                fonts/
+                    HKGrotesk/
+                        HKGrotesk-Bold.otf
+                        HKGrotesk-BoldItalic.otf
+                        HKGrotesk-Italic.otf
+                        HKGrotesk-Light.otf
+                        HKGrotesk-LightItalic.otf
+                        HKGrotesk-Medium.otf
+                        HKGrotesk-MediumItalic.otf
+                        HKGrotesk-Regular.otf
+                        HKGrotesk-SemiBold.otf
+                        HKGrotesk-SemiBoldItalic.otf
+                images/
+                    .DS_Store
+                    favicon.ico
+                    logo-long-vector.svg
+                    logo-long.png
+                    short-logo-vector.svg
+                    short-logo.png
+                    validation_failed_unexpected_values.gif
+                styles/
+                    data_docs_custom_styles_template.css
+                    data_docs_default_styles.css
         samples/
         validations/
 """
@@ -1094,6 +1194,31 @@ def test_data_context_do_all_uncommitted_dirs_exist(tmp_path_factory):
 uncommitted/
     config_variables.yml
     data_docs/
+        static/
+            .DS_Store
+            fonts/
+                HKGrotesk/
+                    HKGrotesk-Bold.otf
+                    HKGrotesk-BoldItalic.otf
+                    HKGrotesk-Italic.otf
+                    HKGrotesk-Light.otf
+                    HKGrotesk-LightItalic.otf
+                    HKGrotesk-Medium.otf
+                    HKGrotesk-MediumItalic.otf
+                    HKGrotesk-Regular.otf
+                    HKGrotesk-SemiBold.otf
+                    HKGrotesk-SemiBoldItalic.otf
+            images/
+                .DS_Store
+                favicon.ico
+                logo-long-vector.svg
+                logo-long.png
+                short-logo-vector.svg
+                short-logo.png
+                validation_failed_unexpected_values.gif
+            styles/
+                data_docs_custom_styles_template.css
+                data_docs_default_styles.css
     samples/
     validations/
 """
@@ -1102,6 +1227,7 @@ uncommitted/
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
     DataContext.create(project_path)
     fixture = gen_directory_tree_str(uncommitted_dir)
+    print(fixture)
     assert fixture == expected
 
     # Test that all exist

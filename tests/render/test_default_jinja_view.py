@@ -32,7 +32,7 @@ def expectations():
 # noinspection PyPep8Naming
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
-def test_render_DefaultJinjaPageView_meta_info():
+def test_render_DefaultJinjaPageView_meta_info(titanic_data_context):
     validation_results = {
         "results": [],
         "statistics": {
@@ -54,12 +54,12 @@ def test_render_DefaultJinjaPageView_meta_info():
     }
 
     document = RenderedDocumentContent(dict_to_ordered_dict(ProfilingResultsPageRenderer().render(validation_results)))
-    html = DefaultJinjaPageView().render(document)
+    html = DefaultJinjaPageView(data_context=titanic_data_context).render(document)
     with open('./tests/render/output/test_render_DefaultJinjaPageView_meta_info.html', 'w') as outfile:
         outfile.write(html)
 
 
-def test_render_section_page():
+def test_render_section_page(titanic_data_context):
     section = RenderedSectionContent(**{
         "section_name": None,
         "content_blocks": [
@@ -93,7 +93,7 @@ def test_render_section_page():
         ]
     })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaSectionView().render(
+    rendered_doc = ge.render.view.view.DefaultJinjaSectionView(data_context=titanic_data_context).render(
         RenderedComponentContentWrapper(**{
             "section": section,
             "section_loop": {"index": 1},
@@ -104,14 +104,14 @@ def test_render_section_page():
     
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """<div id="section-1" class="ge-section container-fluid">
-    <div class="row">
-        
+    <div class="row" >
+    
 
 <div id="content-block-1" >
 
-    <div id="content-block-1-header" ><h3>
+    <div id="content-block-1-header" ><h4>
           Overview
-      </h3>
+      </h4>
     </div>
 
 </div>
@@ -140,13 +140,13 @@ def test_render_section_page():
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_rendering_components_without_section_loop_index():
+def test_rendering_components_without_section_loop_index(titanic_data_context):
     header_component_content = RenderedComponentContent(**{
         # "component_type": "header",
         "content_block_type": "header",
         "header": "Overview",
     })
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
         RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
             "content_block_loop": {"index": 2},
@@ -158,14 +158,14 @@ def test_rendering_components_without_section_loop_index():
         """
 <div id="content-block-2" >
 
-    <div id="content-block-2-header" >
-    <h3>
-        Overview
-    </h3></div>
+    <div id="content-block-2-header" ><h4>
+          Overview
+      </h4>
+    </div>
 
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
         RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
         })
@@ -175,13 +175,15 @@ def test_rendering_components_without_section_loop_index():
     assert rendered_doc == \
         """
 <div id="content-block" >
-    <div id="content-block-header" >
-        <h3>
-            Overview
-        </h3></div>
+
+    <div id="content-block-header" ><h4>
+          Overview
+      </h4>
+    </div>
+
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
         RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
             "section_loop": {"index": 3},
@@ -192,14 +194,16 @@ def test_rendering_components_without_section_loop_index():
     assert rendered_doc == \
         """
 <div id="content-block" >
-    <div id="content-block-header" >
-        <h3>
-            Overview
-        </h3></div>
+
+    <div id="content-block-header" ><h4>
+          Overview
+      </h4>
+    </div>
+
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_rendering_components_with_styling():
+def test_rendering_components_with_styling(titanic_data_context):
     # Medium-complicated example to verify that all the things are correctly piped to all the places
 
     header_component_content = RenderedComponentContent(**{
@@ -266,7 +270,7 @@ def test_rendering_components_with_styling():
             }
         }
     })
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
         RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
             "section_loop": {"index": 1},
@@ -312,13 +316,13 @@ def test_rendering_components_with_styling():
 ### Test all the component types ###
 
 
-def test_render_header_component():
+def test_render_header_component(titanic_data_context):
     header_component_content = RenderedComponentContent(**{
         # "component_type": "header",
         "content_block_type": "header",
         "header": "Overview",
     })
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
         RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
             "section_loop": {"index": 1},
@@ -331,15 +335,15 @@ def test_render_header_component():
         """
 <div id="section-1-content-block-2" >
 
-    <div id="section-1-content-block-2-header" >
-    <h3>
-        Overview
-    </h3></div>
+    <div id="section-1-content-block-2-header" ><h4>
+          Overview
+      </h4>
+    </div>
 
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_render_table_component():
+def test_render_table_component(titanic_data_context):
     table_component_content = RenderedComponentContent(**{
         # "component_type": "header",
         "content_block_type": "table",
@@ -352,7 +356,7 @@ def test_render_table_component():
             "classes": ["col-4"],
         }
     })
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
         RenderedComponentContentWrapper(**{
             "content_block": table_component_content,
             "section_loop": {"index": 1},
@@ -383,7 +387,7 @@ def test_render_table_component():
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_render_value_list():
+def test_render_value_list(titanic_data_context):
     value_list_component_content = RenderedComponentContent(**{
         'content_block_type': 'value_list',
         'header': 'Example values',
@@ -408,7 +412,7 @@ def test_render_value_list():
         }
     })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
         RenderedComponentContentWrapper(**{
             "content_block": value_list_component_content,
             "section_loop": {"index": 1},
@@ -442,7 +446,7 @@ def test_render_value_list():
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_render_graph():
+def test_render_graph(titanic_data_context):
     graph_component_content = RenderedComponentContent(**{
         "content_block_type": "graph",
         "header": "Histogram",
@@ -452,7 +456,7 @@ def test_render_graph():
         }
     })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
         RenderedComponentContentWrapper(**{
             "content_block": graph_component_content,
             "section_loop": {"index": 1},
@@ -486,7 +490,7 @@ def test_render_graph():
 """.replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_render_text():
+def test_render_text(titanic_data_context):
     text_component_content = RenderedComponentContent(**{
         "content_block_type": "text",
         "header": "Histogram",
@@ -496,7 +500,7 @@ def test_render_text():
         }
     })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
         RenderedComponentContentWrapper(**{
             "content_block": text_component_content,
             "section_loop": {"index": 1},
@@ -529,7 +533,7 @@ def test_render_text():
         }
     })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
         RenderedComponentContentWrapper(**{
             "content_block": text_component_content,
             "section_loop": {"index": 1},
