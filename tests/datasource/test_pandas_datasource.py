@@ -35,7 +35,7 @@ def test_folder_connection_path(tmp_path_factory):
 def test_standalone_pandas_datasource(test_folder_connection_path):
     datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
 
-    assert datasource.get_available_data_asset_names() == {"default": ["test"]}
+    assert datasource.get_available_data_asset_names() == {'default': {'names': [('test', 'file')], 'is_complete_list': True}}
     manual_batch_kwargs = PathBatchKwargs(path=os.path.join(str(test_folder_connection_path), "test.csv"))
 
     # Get the default (subdir_path) generator
