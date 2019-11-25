@@ -429,7 +429,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         if kl_divergence_evr is None or kl_divergence_evr.result is None or "details" not in kl_divergence_evr.result:
             return
 
-        weights = kl_divergence_evr["result"]["details"]["observed_partition"]["weights"]
+        weights = kl_divergence_evr.result["details"]["observed_partition"]["weights"]
 
         if len(weights) > 60:
             return None
@@ -449,8 +449,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         if len(weights) == 1:
             mark_bar_args["size"] = 20
 
-        if kl_divergence_evr["result"]["details"]["observed_partition"].get("bins"):
-            bins = kl_divergence_evr["result"]["details"]["observed_partition"]["bins"]
+        if kl_divergence_evr.result["details"]["observed_partition"].get("bins"):
+            bins = kl_divergence_evr.result["details"]["observed_partition"]["bins"]
             bins_x1 = [round(value, 1) for value in bins[:-1]]
             bins_x2 = [round(value, 1) for value in bins[1:]]
 
@@ -468,8 +468,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 tooltip = ["bin_min", "bin_max", "fraction"]
             ).properties(width=chart_pixel_width, height=400, autosize="fit")
             chart = bars.to_json()
-        elif kl_divergence_evr["result"]["details"]["observed_partition"].get("values"):
-            values = kl_divergence_evr["result"]["details"]["observed_partition"]["values"]
+        elif kl_divergence_evr.result["details"]["observed_partition"].get("values"):
+            values = kl_divergence_evr.result["details"]["observed_partition"]["values"]
 
             df = pd.DataFrame({
                 "values": values,
