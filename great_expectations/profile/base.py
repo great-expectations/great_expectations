@@ -42,7 +42,7 @@ class DatasetProfiler(DataAssetProfiler):
             exp) for exp in expectation_suite.expectations]
         expectation_suite.expectations = new_expectations
 
-        if not "notes" in expectation_suite.meta["notes"]:
+        if not "notes" in expectation_suite.meta:
             expectation_suite.meta["notes"] = {
                 "format": "markdown",
                 "content": [
