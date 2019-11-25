@@ -105,7 +105,7 @@ def test_render_section_page(titanic_data_context):
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """<div id="section-1" class="ge-section container-fluid">
     <div class="row" >
-    
+
 
 <div id="content-block-1" >
 

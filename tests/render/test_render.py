@@ -203,7 +203,8 @@ def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expe
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
-def test_render_profiled_fixture_expectation_suite_with_distribution(titanic_dataset_profiler_expectations_with_distribution, empty_data_context):
+def test_render_profiled_fixture_expectation_suite_with_distribution(
+        titanic_dataset_profiler_expectations_with_distribution, empty_data_context):
     # Tests sparkline
     rendered_json = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations_with_distribution)
     rendered_page = DefaultJinjaPageView(data_context=empty_data_context).render(rendered_json)
@@ -335,7 +336,9 @@ def test_render_string_template(empty_data_context):
         }
     }
 
-    res = DefaultJinjaPageView(data_context=empty_data_context).render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
+    res = DefaultJinjaPageView(
+        data_context=empty_data_context).render_string_template(
+        template).replace(" ", "").replace("\t", "").replace("\n", "")
     expected = u"""<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >█▄▁</span>
             </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
@@ -377,7 +380,9 @@ def test_render_string_template(empty_data_context):
         }
     }
 
-    res = DefaultJinjaPageView(data_context=empty_data_context).render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
+    res = DefaultJinjaPageView(
+        data_context=empty_data_context).render_string_template(
+        template).replace(" ", "").replace("\t", "").replace("\n", "")
     expected = u"""<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >▃▆▁█</span>
             </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
