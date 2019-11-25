@@ -7,10 +7,11 @@ import copy
 import re
 from collections import OrderedDict
 
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import (
     PluginModuleNotFoundError,
     PluginClassNotFoundError,
-)
+    DataContextError)
 
 logger = logging.getLogger(__name__)
 
@@ -32,18 +33,18 @@ def safe_mmkdir(directory, exist_ok=True):
             raise
 
 
-# TODO : Consider moving this into types.resource_identifiers.DataContextKey.
-# NOTE : We **don't** want to encourage stringification of keys, other than in tests, etc.
-# TODO : Rename to parse_string_to_data_context_key
-def parse_string_to_data_context_resource_identifier(string, separator="."):
-    string_elements = string.split(separator)
-
-    loaded_module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
-    class_ = getattr(loaded_module, string_elements[0])
-
-    class_instance = class_(*(string_elements[1:]))
-
-    return class_instance
+# # TODO : Consider moving this into types.resource_identifiers.DataContextKey.
+# # NOTE : We **don't** want to encourage stringification of keys, other than in tests, etc.
+# # TODO : Rename to parse_string_to_data_context_key
+# def parse_string_to_data_context_resource_identifier(string, separator="."):
+#     string_elements = string.split(separator)
+#
+#     loaded_module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
+#     class_ = getattr(loaded_module, string_elements[0])
+#
+#     class_instance = class_(*(string_elements[1:]))
+#
+#     return class_instance
 
 
 def load_class(class_name, module_name):
@@ -169,8 +170,6 @@ def substitute_config_variable(template_str, config_variables_dict):
     return ret
 
 
-
-
 def substitute_all_config_variables(data, replace_variables_dict):
     """
     Substitute all config variables of the form ${SOME_VARIABLE} in a dictionary-like
@@ -182,8 +181,26 @@ def substitute_all_config_variables(data, replace_variables_dict):
     :param replace_variables_dict:
     :return: a dictionary with all the variables replaced with their values
     """
+    if isinstance(data, DataContextConfig):
+        data = data.as_dict()
+
     if isinstance(data, dict) or isinstance(data, OrderedDict):
-        return {k : substitute_all_config_variables(v, replace_variables_dict) for k, v in data.items()}
+        return {k: substitute_all_config_variables(v, replace_variables_dict) for k, v in data.items()}
     elif isinstance(data, list):
         return [substitute_all_config_variables(v, replace_variables_dict) for v in data]
     return substitute_config_variable(data, replace_variables_dict)
+
+
+def file_relative_path(dunderfile, relative_path):
+    """
+    This function is useful when one needs to load a file that is
+    relative to the position of the current file. (Such as when
+    you encode a configuration file path in source file and want
+    in runnable in any current working directory)
+
+    It is meant to be used like the following:
+    file_relative_path(__file__, 'path/relative/to/file')
+
+    H/T https://github.com/dagster-io/dagster/blob/8a250e9619a49e8bff8e9aa7435df89c2d2ea039/python_modules/dagster/dagster/utils/__init__.py#L34
+    """
+    return os.path.join(os.path.dirname(dunderfile), relative_path)

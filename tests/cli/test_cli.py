@@ -29,7 +29,8 @@ from six import PY2
 from great_expectations.cli import cli
 from great_expectations.util import gen_directory_tree_str
 from great_expectations import __version__ as ge_version
-from .test_utils import assertDeepAlmostEqual
+from tests.test_utils import assertDeepAlmostEqual, expectationSuiteValidationResultSchema
+
 yaml = YAML()
 yaml.default_flow_style = False
 
@@ -138,11 +139,12 @@ def test_validate_basic_operation():
                                          "./tests/test_sets/titanic_expectations.json"])
 
             assert result.exit_code == 1
-            json_result = json.loads(str(result.output))
+            print(result.output)
+            json_result = expectationSuiteValidationResultSchema.load(json.loads(str(result.output))).data
 
     del json_result["meta"]["great_expectations.__version__"]
     with open('./tests/test_sets/expected_cli_results_default.json', 'r') as f:
-        expected_cli_results = json.load(f)
+        expected_cli_results = expectationSuiteValidationResultSchema.load(json.load(f)).data
 
     # In PY2 sorting is possible and order is wonky. Order doesn't matter. So sort in that case
     if PY2:
@@ -171,7 +173,8 @@ def test_validate_custom_dataset():
     with open('./tests/test_sets/expected_cli_results_custom.json', 'r') as f:
         expected_cli_results = json.load(f)
 
-    assert json_result == expected_cli_results
+    assert expectationSuiteValidationResultSchema.load(json_result).data == \
+        expectationSuiteValidationResultSchema.load(expected_cli_results).data
 
 
 def test_cli_evaluation_parameters():
@@ -456,8 +459,8 @@ def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem
               "--no-view"])
     evr = not_so_empty_data_context.get_validation_result("f1", expectation_suite_name="BasicDatasetProfiler")
 
-    assert evr["meta"]["batch_kwargs"]["reader_options"]["parse_dates"] == [0]
-    assert evr["meta"]["batch_kwargs"]["reader_options"]["sep"] == ","
+    assert evr.meta["batch_kwargs"]["reader_options"]["parse_dates"] == [0]
+    assert evr.meta["batch_kwargs"]["reader_options"]["sep"] == ","
 
 def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource("my_datasource",
@@ -523,8 +526,6 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
                                     class_name="PandasDatasource",
                                     base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
-
-    print(json.dumps(not_so_empty_data_context.get_project_config(), indent=2))
 
     project_root_dir = not_so_empty_data_context.root_directory
 

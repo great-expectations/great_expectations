@@ -113,7 +113,7 @@ class SlackNotificationAction(NamespacedValidationAction):
                 type(validation_result_suite_identifier)
             ))
 
-        validation_success = validation_result_suite["success"]
+        validation_success = validation_result_suite.success
         
         if self.notify_on == "all" or \
                 self.notify_on == "success" and validation_success or \

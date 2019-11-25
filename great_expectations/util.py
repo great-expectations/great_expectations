@@ -5,6 +5,9 @@ import logging
 
 from six import string_types
 
+from great_expectations import __version__ as ge_version
+from great_expectations.core import expectationSuiteSchema, ExpectationSuite
+
 logger = logging.getLogger(__name__)
 
 
@@ -378,12 +381,15 @@ def validate(
             expectation_suite_name=expectation_suite_name
         )
     else:
-        data_asset_name = expectation_suite.get("data_asset_name", data_asset_name)
-        expectation_suite["data_asset_name"] = data_asset_name
-        expectation_suite_name = expectation_suite.get("expectation_suite_name", expectation_suite_name)
-        expectation_suite["expectation_suite_name"] = expectation_suite_name
+        if isinstance(expectation_suite, dict):
+            expectation_suite = expectationSuiteSchema.load(expectation_suite).data
+        if data_asset_name is not None:
+            raise ValueError("When providing an expectation suite, data_asset_name cannot also be provided.")
+        if expectation_suite_name is not None:
+            raise ValueError("When providing an expectation suite, expectation_suite_name cannot also be provided.")
         logger.info(
-            "Validating data_asset_name %s with expectation_suite_name %s" % (data_asset_name, expectation_suite_name)
+            "Validating data_asset_name %s with expectation_suite_name %s" % (expectation_suite.data_asset_name,
+                                                                              expectation_suite.expectation_suite_name)
         )
 
     # If the object is already a DataAsset type, then this is purely a convenience method
@@ -453,18 +459,3 @@ def gen_directory_tree_str(startpath):
             output_str += '{}{}\n'.format(subindent, f)
     
     return output_str
-
-
-def file_relative_path(dunderfile, relative_path):
-    """
-    This function is useful when one needs to load a file that is
-    relative to the position of the current file. (Such as when
-    you encode a configuration file path in source file and want
-    in runnable in any current working directory)
-
-    It is meant to be used like the following:
-    file_relative_path(__file__, 'path/relative/to/file')
-
-    H/T https://github.com/dagster-io/dagster/blob/8a250e9619a49e8bff8e9aa7435df89c2d2ea039/python_modules/dagster/dagster/utils/__init__.py#L34
-    """
-    return os.path.join(os.path.dirname(dunderfile), relative_path)

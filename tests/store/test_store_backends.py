@@ -1,16 +1,12 @@
 import pytest
-import json
-import importlib
 import os
-import re
 import boto3
 from moto import mock_s3
 from mock import patch
 
 import six
-if six.PY2: FileNotFoundError = IOError
-
-import pandas as pd
+if six.PY2:
+    FileNotFoundError = IOError
 
 
 from great_expectations.data_context.store import (
@@ -23,6 +19,7 @@ from great_expectations.data_context.store import (
 from great_expectations.util import (
     gen_directory_tree_str,
 )
+
 
 def test_StoreBackendValidation():
     backend = StoreBackend({})

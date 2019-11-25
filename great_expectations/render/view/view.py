@@ -21,8 +21,8 @@ from great_expectations.render.types import (
     RenderedDocumentContent,
     RenderedSectionContent,
     RenderedComponentContent,
-    RenderedComponentContentWrapper,
-)
+    # RenderedComponentContentWrapper,
+    RenderedContent)
 
 
 class NoOpTemplate(object):
@@ -66,9 +66,11 @@ class DefaultJinjaView(object):
         self._validate_document(document)
 
         if template is None:
-            template = type(self)._template
+            template = self._template
 
         t = self._get_template(template)
+        if isinstance(document, RenderedContent):
+            document = document.to_json_dict()
         return t.render(document, **kwargs)
 
     def _get_template(self, template):
@@ -135,7 +137,6 @@ class DefaultJinjaView(object):
         template = self._get_template(template="{content_block_type}.j2".format(content_block_type=content_block_type))
         return template.render(context, content_block=content_block, index=index)
 
-
     def render_styling(self, styling):
         """Adds styling information suitable for an html tag.
 
@@ -164,7 +165,7 @@ class DefaultJinjaView(object):
         """
     
         class_list = styling.get("classes", None)
-        if class_list == None:
+        if class_list is None:
             class_str = ""
         else:
             if type(class_list) == str:
@@ -172,7 +173,7 @@ class DefaultJinjaView(object):
             class_str = 'class="' + ' '.join(class_list) + '" '
     
         attribute_dict = styling.get("attributes", None)
-        if attribute_dict == None:
+        if attribute_dict is None:
             attribute_str = ""
         else:
             attribute_str = ""
@@ -180,7 +181,7 @@ class DefaultJinjaView(object):
                 attribute_str += k + '="' + v + '" '
     
         style_dict = styling.get("styles", None)
-        if style_dict == None:
+        if style_dict is None:
             style_str = ""
         else:
             style_str = 'style="'
@@ -294,13 +295,17 @@ class DefaultJinjaView(object):
             pTemplate(base_template_string).substitute(
                 {"template": template.get("template", ""), "styling": self.render_styling(template.get("styling", {}))})
         ).substitute(template.get("params", {}))
-    
-    
+
+    def _validate_document(self, document):
+        raise NotImplementedError
+
+
 class DefaultJinjaPageView(DefaultJinjaView):
     _template = "page.j2"
 
     def _validate_document(self, document):
         assert isinstance(document, RenderedDocumentContent)
+
 
 class DefaultJinjaIndexPageView(DefaultJinjaPageView):
     _template = "index_page.j2"
@@ -310,12 +315,11 @@ class DefaultJinjaSectionView(DefaultJinjaView):
     _template = "section.j2"
 
     def _validate_document(self, document):
-        assert isinstance(document, RenderedComponentContentWrapper)
-        assert isinstance(document.section, RenderedSectionContent)
+        assert isinstance(document["section"], dict)  # For now low-level views take dicts
+
 
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"
 
     def _validate_document(self, document):
-        assert isinstance(document, RenderedComponentContentWrapper)
-        assert isinstance(document.content_block, RenderedComponentContent)
+        assert isinstance(document["content_block"], dict)  # For now low-level views take dicts

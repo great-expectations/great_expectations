@@ -1,9 +1,17 @@
 {
+  "meta": {
+    "great_expectations.__version__": "0.8.2.post0+33.ga701e12a.dirty",
+    "data_asset_name": "default",
+    "expectation_suite_name": "default",
+    "run_id": "20191119T192259.818518Z"
+  },
+  "evaluation_parameters": {},
   "results": [
     {
-      "success": true,
-      "result": {
-        "observed_value": 1313
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
       },
       "expectation_config": {
         "expectation_type": "expect_table_row_count_to_be_between",
@@ -11,16 +19,30 @@
           "min_value": 0,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 1313
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_table_columns_to_match_ordered_list",
+        "kwargs": {
+          "column_list": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "observed_value": [
           "Unnamed: 0",
@@ -32,23 +54,13 @@
           "SexCode"
         ]
       },
-      "expectation_config": {
-        "expectation_type": "expect_table_columns_to_match_ordered_list",
-        "kwargs": {
-          "column_list": null,
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": "int64"
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -67,21 +79,20 @@
             "int"
           ],
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": "int64"
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 1313,
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0
       },
       "expectation_config": {
         "expectation_type": "expect_column_unique_value_count_to_be_between",
@@ -90,21 +101,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 1313,
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 1.0,
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0
       },
       "expectation_config": {
         "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
@@ -113,21 +126,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 1.0,
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "element_count": 1313,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "partial_unexpected_list": []
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_not_be_null",
@@ -135,16 +150,34 @@
           "column": "Unnamed: 0",
           "mostly": 0.5,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "element_count": 1313,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": []
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": false,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "Unnamed: 0",
+          "value_set": [],
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "element_count": 1313,
         "missing_count": 0,
@@ -279,48 +312,23 @@
           }
         ]
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
-        "kwargs": {
-          "column": "Unnamed: 0",
-          "value_set": [],
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": false
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "unexpected_percent_nonmissing": 0.0,
-        "partial_unexpected_list": [],
-        "partial_unexpected_index_list": [],
-        "partial_unexpected_counts": []
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_be_unique",
         "kwargs": {
           "column": "Unnamed: 0",
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
-      "exception_info": {
-        "raised_exception": false,
-        "exception_message": null,
-        "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
+      "meta": {},
       "result": {
         "element_count": 1313,
         "missing_count": 0,
@@ -331,6 +339,14 @@
         "partial_unexpected_list": [],
         "partial_unexpected_index_list": [],
         "partial_unexpected_counts": []
+      },
+      "success": true
+    },
+    {
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -345,21 +361,28 @@
             "string"
           ],
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "unexpected_percent_nonmissing": 0.0,
+        "partial_unexpected_list": [],
+        "partial_unexpected_index_list": [],
+        "partial_unexpected_counts": []
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 1310,
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0
       },
       "expectation_config": {
         "expectation_type": "expect_column_unique_value_count_to_be_between",
@@ -368,21 +391,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 1310,
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 0.9977151561309977,
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0
       },
       "expectation_config": {
         "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
@@ -391,21 +416,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 0.9977151561309977,
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "element_count": 1313,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "partial_unexpected_list": []
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_not_be_null",
@@ -413,16 +440,34 @@
           "column": "Name",
           "mostly": 0.5,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "element_count": 1313,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": []
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": false,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "Name",
+          "value_set": [],
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "element_count": 1313,
         "missing_count": 0,
@@ -557,22 +602,24 @@
           }
         ]
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
-        "kwargs": {
-          "column": "Name",
-          "value_set": [],
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": false
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": false,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_not_match_regex",
+        "kwargs": {
+          "column": "Name",
+          "regex": "^\\s+|\\s+$",
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "element_count": 1313,
         "missing_count": 0,
@@ -605,32 +652,13 @@
           }
         ]
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_match_regex",
-        "kwargs": {
-          "column": "Name",
-          "regex": "^\\s+|\\s+$",
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": false
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "unexpected_percent_nonmissing": 0.0,
-        "partial_unexpected_list": [],
-        "partial_unexpected_index_list": [],
-        "partial_unexpected_counts": []
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -645,21 +673,28 @@
             "string"
           ],
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "unexpected_percent_nonmissing": 0.0,
+        "partial_unexpected_list": [],
+        "partial_unexpected_index_list": [],
+        "partial_unexpected_counts": []
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 4,
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0
       },
       "expectation_config": {
         "expectation_type": "expect_column_unique_value_count_to_be_between",
@@ -668,21 +703,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 4,
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 0.0030464584920030465,
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0
       },
       "expectation_config": {
         "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
@@ -691,21 +728,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 0.0030464584920030465,
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "element_count": 1313,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "partial_unexpected_list": []
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_not_be_null",
@@ -713,16 +752,34 @@
           "column": "PClass",
           "mostly": 0.5,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "element_count": 1313,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": []
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": false,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "PClass",
+          "value_set": [],
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "element_count": 1313,
         "missing_count": 0,
@@ -793,22 +850,24 @@
           }
         ]
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
-        "kwargs": {
-          "column": "PClass",
-          "value_set": [],
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": false
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_not_match_regex",
+        "kwargs": {
+          "column": "PClass",
+          "regex": "^\\s+|\\s+$",
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "element_count": 1313,
         "missing_count": 0,
@@ -820,22 +879,24 @@
         "partial_unexpected_index_list": [],
         "partial_unexpected_counts": []
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_match_regex",
-        "kwargs": {
-          "column": "PClass",
-          "regex": "^\\s+|\\s+$",
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "kwargs": {
+          "column": "PClass",
+          "value_set": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "observed_value": [
           "*",
@@ -867,24 +928,13 @@
           ]
         }
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
-        "kwargs": {
-          "column": "PClass",
-          "value_set": null,
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": "float64"
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -901,21 +951,20 @@
             "float"
           ],
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": "float64"
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 75,
-        "element_count": 1313,
-        "missing_count": 557,
-        "missing_percent": 42.421934501142424
       },
       "expectation_config": {
         "expectation_type": "expect_column_unique_value_count_to_be_between",
@@ -924,21 +973,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 75,
+        "element_count": 1313,
+        "missing_count": 557,
+        "missing_percent": 42.421934501142424
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 0.0992063492063492,
-        "element_count": 1313,
-        "missing_count": 557,
-        "missing_percent": 42.421934501142424
       },
       "expectation_config": {
         "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
@@ -947,21 +998,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 0.0992063492063492,
+        "element_count": 1313,
+        "missing_count": 557,
+        "missing_percent": 42.421934501142424
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "element_count": 1313,
-        "unexpected_count": 557,
-        "unexpected_percent": 42.421934501142424,
-        "partial_unexpected_list": []
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_not_be_null",
@@ -969,16 +1022,34 @@
           "column": "Age",
           "mostly": 0.5,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "element_count": 1313,
+        "unexpected_count": 557,
+        "unexpected_percent": 42.421934501142424,
+        "partial_unexpected_list": []
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": false,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "Age",
+          "value_set": [],
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "element_count": 1313,
         "missing_count": 557,
@@ -1113,27 +1184,13 @@
           }
         ]
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
-        "kwargs": {
-          "column": "Age",
-          "value_set": [],
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": false
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 0.17,
-        "element_count": 1313,
-        "missing_count": 557,
-        "missing_percent": 42.421934501142424
       },
       "expectation_config": {
         "expectation_type": "expect_column_min_to_be_between",
@@ -1142,21 +1199,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 0.17,
+        "element_count": 1313,
+        "missing_count": 557,
+        "missing_percent": 42.421934501142424
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 71.0,
-        "element_count": 1313,
-        "missing_count": 557,
-        "missing_percent": 42.421934501142424
       },
       "expectation_config": {
         "expectation_type": "expect_column_max_to_be_between",
@@ -1165,21 +1224,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 71.0,
+        "element_count": 1313,
+        "missing_count": 557,
+        "missing_percent": 42.421934501142424
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 30.397989417989418,
-        "element_count": 1313,
-        "missing_count": 557,
-        "missing_percent": 42.421934501142424
       },
       "expectation_config": {
         "expectation_type": "expect_column_mean_to_be_between",
@@ -1188,21 +1249,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 30.397989417989418,
+        "element_count": 1313,
+        "missing_count": 557,
+        "missing_percent": 42.421934501142424
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 28.0,
-        "element_count": 1313,
-        "missing_count": 557,
-        "missing_percent": 42.421934501142424
       },
       "expectation_config": {
         "expectation_type": "expect_column_median_to_be_between",
@@ -1211,45 +1274,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 28.0,
+        "element_count": 1313,
+        "missing_count": 557,
+        "missing_percent": 42.421934501142424
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": {
-          "quantiles": [
-            0.05,
-            0.25,
-            0.5,
-            0.75,
-            0.95
-          ],
-          "values": [
-            6.0,
-            21.0,
-            28.0,
-            39.0,
-            57.0
-          ]
-        },
-        "element_count": 1313,
-        "missing_count": 557,
-        "missing_percent": 42.421934501142424,
-        "details": {
-          "success_details": [
-            true,
-            true,
-            true,
-            true,
-            true
-          ]
-        }
       },
       "expectation_config": {
         "expectation_type": "expect_column_quantile_values_to_be_between",
@@ -1287,16 +1328,59 @@
             ]
           },
           "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
+      "result": {
+        "observed_value": {
+          "quantiles": [
+            0.05,
+            0.25,
+            0.5,
+            0.75,
+            0.95
+          ],
+          "values": [
+            6.0,
+            21.0,
+            28.0,
+            39.0,
+            57.0
+          ]
+        },
+        "element_count": 1313,
+        "missing_count": 557,
+        "missing_percent": 42.421934501142424,
+        "details": {
+          "success_details": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
         }
       },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+        "kwargs": {
+          "column": "Age",
+          "partition_object": null,
+          "threshold": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "observed_value": 0.0,
         "element_count": 1313,
@@ -1399,33 +1483,13 @@
           }
         }
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
-        "kwargs": {
-          "column": "Age",
-          "partition_object": null,
-          "threshold": null,
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "unexpected_percent_nonmissing": 0.0,
-        "partial_unexpected_list": [],
-        "partial_unexpected_index_list": [],
-        "partial_unexpected_counts": []
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1440,21 +1504,28 @@
             "string"
           ],
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "unexpected_percent_nonmissing": 0.0,
+        "partial_unexpected_list": [],
+        "partial_unexpected_index_list": [],
+        "partial_unexpected_counts": []
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 2,
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0
       },
       "expectation_config": {
         "expectation_type": "expect_column_unique_value_count_to_be_between",
@@ -1463,21 +1534,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 2,
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 0.0015232292460015233,
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0
       },
       "expectation_config": {
         "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
@@ -1486,21 +1559,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 0.0015232292460015233,
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "element_count": 1313,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "partial_unexpected_list": []
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_not_be_null",
@@ -1508,16 +1583,34 @@
           "column": "Sex",
           "mostly": 0.5,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "element_count": 1313,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": []
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": false,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "Sex",
+          "value_set": [],
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "element_count": 1313,
         "missing_count": 0,
@@ -1580,22 +1673,24 @@
           }
         ]
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
-        "kwargs": {
-          "column": "Sex",
-          "value_set": [],
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": false
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_not_match_regex",
+        "kwargs": {
+          "column": "Sex",
+          "regex": "^\\s+|\\s+$",
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "element_count": 1313,
         "missing_count": 0,
@@ -1607,22 +1702,24 @@
         "partial_unexpected_index_list": [],
         "partial_unexpected_counts": []
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_match_regex",
-        "kwargs": {
-          "column": "Sex",
-          "regex": "^\\s+|\\s+$",
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "kwargs": {
+          "column": "Sex",
+          "value_set": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "observed_value": [
           "female",
@@ -1644,24 +1741,13 @@
           ]
         }
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
-        "kwargs": {
-          "column": "Sex",
-          "value_set": null,
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": "int64"
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1680,21 +1766,20 @@
             "int"
           ],
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": "int64"
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 2,
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0
       },
       "expectation_config": {
         "expectation_type": "expect_column_unique_value_count_to_be_between",
@@ -1703,21 +1788,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 2,
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 0.0015232292460015233,
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0
       },
       "expectation_config": {
         "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
@@ -1726,21 +1813,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 0.0015232292460015233,
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "element_count": 1313,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "partial_unexpected_list": []
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_not_be_null",
@@ -1748,16 +1837,34 @@
           "column": "Survived",
           "mostly": 0.5,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "element_count": 1313,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": []
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": false,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "Survived",
+          "value_set": [],
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "element_count": 1313,
         "missing_count": 0,
@@ -1820,22 +1927,24 @@
           }
         ]
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
-        "kwargs": {
-          "column": "Survived",
-          "value_set": [],
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": false
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "kwargs": {
+          "column": "Survived",
+          "value_set": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "observed_value": [
           0,
@@ -1857,24 +1966,13 @@
           ]
         }
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
-        "kwargs": {
-          "column": "Survived",
-          "value_set": null,
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": "int64"
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1893,21 +1991,20 @@
             "int"
           ],
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": "int64"
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 2,
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0
       },
       "expectation_config": {
         "expectation_type": "expect_column_unique_value_count_to_be_between",
@@ -1916,21 +2013,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 2,
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "observed_value": 0.0015232292460015233,
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0
       },
       "expectation_config": {
         "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
@@ -1939,21 +2038,23 @@
           "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "observed_value": 0.0015232292460015233,
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
-      "result": {
-        "element_count": 1313,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "partial_unexpected_list": []
       },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_not_be_null",
@@ -1961,16 +2062,34 @@
           "column": "SexCode",
           "mostly": 0.5,
           "result_format": "SUMMARY"
-        }
+        },
+        "meta": {}
       },
+      "meta": {},
+      "result": {
+        "element_count": 1313,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": []
+      },
+      "success": true
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": false,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "SexCode",
+          "value_set": [],
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "element_count": 1313,
         "missing_count": 0,
@@ -2033,22 +2152,24 @@
           }
         ]
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
-        "kwargs": {
-          "column": "SexCode",
-          "value_set": [],
-          "result_format": "SUMMARY"
-        }
-      },
+      "success": false
+    },
+    {
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
         "exception_traceback": null
-      }
-    },
-    {
-      "success": true,
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "kwargs": {
+          "column": "SexCode",
+          "value_set": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {}
+      },
+      "meta": {},
       "result": {
         "observed_value": [
           0,
@@ -2070,19 +2191,7 @@
           ]
         }
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
-        "kwargs": {
-          "column": "SexCode",
-          "value_set": null,
-          "result_format": "SUMMARY"
-        }
-      },
-      "exception_info": {
-        "raised_exception": false,
-        "exception_message": null,
-        "exception_traceback": null
-      }
+      "success": true
     }
   ],
   "success": false,
@@ -2091,11 +2200,5 @@
     "successful_expectations": 43,
     "unsuccessful_expectations": 8,
     "success_percent": 84.31372549019608
-  },
-  "meta": {
-    "great_expectations.__version__": "0.8.0a3+77.g3d45e52a.dirty",
-    "data_asset_name": null,
-    "expectation_suite_name": "default",
-    "run_id": "2019-10-10T180859.234695Z"
   }
 }

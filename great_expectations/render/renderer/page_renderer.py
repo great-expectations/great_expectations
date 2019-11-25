@@ -1,8 +1,11 @@
 import logging
+
+from marshmallow import ValidationError
 from six import string_types
 
 import pypandoc
 
+from great_expectations.core import DataAssetIdentifier, dataAssetIdentifierSchema
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import num_to_str
 
@@ -10,8 +13,7 @@ from .renderer import Renderer
 from ..types import (
     RenderedDocumentContent,
     RenderedSectionContent,
-    RenderedComponentContent,
-)
+    RenderedHeaderContent, RenderedTableContent, TextContent, RenderedStringTemplateContent)
 from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
@@ -33,17 +35,29 @@ class ValidationResultsPageRenderer(Renderer):
             }
         )
 
-    def render(self, validation_results={}):
-        run_id = validation_results['meta']['run_id']
-        full_data_asset_identifier = validation_results['meta']['data_asset_name'] or ""
-        expectation_suite_name = validation_results['meta']['expectation_suite_name']
-        short_data_asset_name = full_data_asset_identifier.split('/')[-1]
+    def render(self, validation_results):
+        run_id = validation_results.meta['run_id']
+        full_data_asset_identifier = validation_results.meta['data_asset_name'] or "//"
+        if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
+            try:
+                # This will cause a validation error if the data asset name is not properly formatted
+                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
+            except ValidationError:
+                if isinstance(full_data_asset_identifier, string_types):
+                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
+                else:
+                    raise
+        if isinstance(full_data_asset_identifier, string_types):
+            short_data_asset_name = full_data_asset_identifier
+        else:
+            short_data_asset_name = full_data_asset_identifier.generator_asset
+        expectation_suite_name = validation_results.meta['expectation_suite_name']
     
         # Group EVRs by column
         columns = {}
-        for evr in validation_results["results"]:
-            if "column" in evr["expectation_config"]["kwargs"]:
-                column = evr["expectation_config"]["kwargs"]["column"]
+        for evr in validation_results.results:
+            if "column" in evr.expectation_config.kwargs:
+                column = evr.expectation_config.kwargs["column"]
             else:
                 column = "Table-Level Expectations"
         
@@ -76,8 +90,8 @@ class ValidationResultsPageRenderer(Renderer):
                     header="Batch Kwargs"
                 )
             )
-    
-        if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
+
+        if "data_asset_name" in validation_results.meta and validation_results.meta["data_asset_name"]:
             data_asset_name = short_data_asset_name
         else:
             data_asset_name = None
@@ -113,7 +127,7 @@ class ValidationResultsPageRenderer(Renderer):
     
     @classmethod
     def _render_validation_header(cls):
-        return RenderedComponentContent(**{
+        return RenderedHeaderContent(**{
             "content_block_type": "header",
             "header": "Validation Overview",
             "styling": {
@@ -126,21 +140,30 @@ class ValidationResultsPageRenderer(Renderer):
     
     @classmethod
     def _render_validation_info(cls, validation_results):
-        run_id = validation_results['meta']['run_id']
-        full_data_asset_identifier = validation_results['meta']['data_asset_name'] or ""
-        expectation_suite_name = validation_results['meta']['expectation_suite_name']
-        ge_version = validation_results["meta"]["great_expectations.__version__"]
-        success = validation_results["success"]
+        run_id = validation_results.meta['run_id']
+        full_data_asset_identifier = validation_results.meta['data_asset_name'] or ""
+        if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
+            try:
+                # This will cause a validation error if the data asset name is not properly formatted
+                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
+            except ValidationError:
+                if isinstance(full_data_asset_identifier, string_types):
+                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
+                else:
+                    raise
+        expectation_suite_name = validation_results.meta['expectation_suite_name']
+        ge_version = validation_results.meta["great_expectations.__version__"]
+        success = validation_results.success
         if success:
             success = '<i class="fas fa-check-circle text-success" aria-hidden="true"></i> Succeeded'
         else:
             success = '<i class="fas fa-times text-danger" aria-hidden="true"></i> Failed'
 
-        return RenderedComponentContent(**{
+        return RenderedTableContent(**{
             "content_block_type": "table",
             "header": "Info",
             "table": [
-                ["Full Data Asset Identifier", full_data_asset_identifier],
+                ["Full Data Asset Identifier", full_data_asset_identifier.to_path()],
                 ["Expectation Suite Name", expectation_suite_name],
                 ["Great Expectations Version", ge_version],
                 ["Run ID", run_id],
@@ -160,11 +183,11 @@ class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def _render_nested_table_from_dict(cls, input_dict, header=None, sub_table=False):
         table_rows = []
-        
+
         for kwarg, value in input_dict.items():
             if not isinstance(value, (dict, OrderedDict)):
                 table_row = [
-                    {
+                    RenderedStringTemplateContent(**{
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "$value",
@@ -184,8 +207,8 @@ class ValidationResultsPageRenderer(Renderer):
                                 "classes": ["pr-3"],
                             }
                         }
-                    },
-                    {
+                    }),
+                    RenderedStringTemplateContent(**{
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "$value",
@@ -205,11 +228,11 @@ class ValidationResultsPageRenderer(Renderer):
                                 "classes": [],
                             }
                         }
-                    }
+                    })
                 ]
             else:
                 table_row = [
-                    {
+                    RenderedStringTemplateContent(**{
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "$value",
@@ -229,15 +252,15 @@ class ValidationResultsPageRenderer(Renderer):
                                 "classes": ["pr-3"],
                             }
                         }
-                    },
+                    }),
                     cls._render_nested_table_from_dict(value, sub_table=True)
                 ]
             table_rows.append(table_row)
-            
-        table_rows.sort(key=lambda row: row[0]["string_template"]["params"]["value"])
-        
+
+        table_rows.sort(key=lambda row: row[0].string_template["params"]["value"])
+
         if sub_table:
-            return RenderedComponentContent(**{
+            return RenderedTableContent(**{
                 "content_block_type": "table",
                 "table": table_rows,
                 "styling": {
@@ -251,7 +274,7 @@ class ValidationResultsPageRenderer(Renderer):
                 },
             })
         else:
-            return RenderedComponentContent(**{
+            return RenderedTableContent(**{
                 "content_block_type": "table",
                 "header": header,
                 "table": table_rows,
@@ -284,7 +307,7 @@ class ValidationResultsPageRenderer(Renderer):
                 else:
                     table_rows.append([value, statistics[key]])
         
-        return RenderedComponentContent(**{
+        return RenderedTableContent(**{
             "content_block_type": "table",
             "header": "Statistics",
             "table": table_rows,
@@ -318,8 +341,17 @@ class ExpectationSuitePageRenderer(Renderer):
 
     def render(self, expectations):
         columns, ordered_columns = self._group_and_order_expectations_by_column(expectations)
-        full_data_asset_identifier = expectations.get("data_asset_name") or ""
-        expectation_suite_name = self._get_expectation_suite_name(expectations)
+        full_data_asset_identifier = expectations.data_asset_name
+        if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
+            try:
+                # This will cause a validation error if the data asset name is not properly formatted
+                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
+            except ValidationError:
+                if isinstance(full_data_asset_identifier, string_types):
+                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
+                else:
+                    raise
+        expectation_suite_name = expectations.expectation_suite_name
 
         overview_content_blocks = [
             self._render_asset_header(expectations),
@@ -360,12 +392,12 @@ class ExpectationSuitePageRenderer(Renderer):
         else:
             expectation_bullet_list = self._column_section_renderer.render(
                 expectations=table_level_expectations).content_blocks[1]
-            expectation_bullet_list["header"] = "Table-Level Expectations"
+            expectation_bullet_list.header = "Table-Level Expectations"
             return expectation_bullet_list
         
     @classmethod
     def _render_asset_header(cls, expectations):
-        return RenderedComponentContent(**{
+        return RenderedHeaderContent(**{
             "content_block_type": "header",
             "header": "Expectation Suite Overview",
             "styling": {
@@ -378,16 +410,25 @@ class ExpectationSuitePageRenderer(Renderer):
       
     @classmethod
     def _render_asset_info(cls, expectations):
-        full_data_asset_identifier = expectations.get("data_asset_name") or ""
-        data_asset_type = expectations.get("data_asset_type")
-        expectation_suite_name = expectations.get("expectation_suite_name")
-        ge_version = expectations["meta"]["great_expectations.__version__"]
+        full_data_asset_identifier = expectations.data_asset_name
+        if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
+            try:
+                # This will cause a validation error if the data asset name is not properly formatted
+                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
+            except ValidationError:
+                if isinstance(full_data_asset_identifier, string_types):
+                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
+                else:
+                    raise
+        data_asset_type = expectations.data_asset_type
+        expectation_suite_name = expectations.expectation_suite_name
+        ge_version = expectations.meta["great_expectations.__version__"]
 
-        return RenderedComponentContent(**{
+        return RenderedTableContent(**{
             "content_block_type": "table",
             "header": "Info",
             "table": [
-                ["Full Data Asset Identifier", full_data_asset_identifier],
+                ["Full Data Asset Identifier", full_data_asset_identifier.to_path()],
                 ["Data Asset Type", data_asset_type],
                 ["Expectation Suite Name", expectation_suite_name],
                 ["Great Expectations Version", ge_version]
@@ -408,30 +449,26 @@ class ExpectationSuitePageRenderer(Renderer):
     def _render_asset_notes(cls, expectations):
         
         content = []
+
+        total_expectations = len(expectations.expectations)
+        columns = []
+        for exp in expectations.expectations:
+            if "column" in exp.kwargs:
+                columns.append(exp.kwargs["column"])
+        total_columns = len(set(columns))
+
+        content = content + [
+            # TODO: Leaving these two paragraphs as placeholders for later development.
+            # "This Expectation suite was first generated by {BasicDatasetProfiler} on {date}, using version {xxx} of Great Expectations.",
+            # "{name}, {name}, and {name} have also contributed additions and revisions.",
+            "This Expectation suite currently contains %d total Expectations across %d columns." % (
+                total_expectations,
+                total_columns,
+            ),
+        ]
         
-        if "expectations" in expectations:
-            # This if statement is a precaution in case the expectation suite doesn't contain expectations.
-            # Once we have more strongly typed classes for suites, this shouldn't be necessary.
-            
-            total_expectations = len(expectations["expectations"])
-            columns = []
-            for exp in expectations["expectations"]:
-                if "column" in exp["kwargs"]:
-                    columns.append(exp["kwargs"]["column"])
-            total_columns = len(set(columns))
-            
-            content = content + [
-                # TODO: Leaving these two paragraphs as placeholders for later development.
-                # "This Expectation suite was first generated by {BasicDatasetProfiler} on {date}, using version {xxx} of Great Expectations.",
-                # "{name}, {name}, and {name} have also contributed additions and revisions.",
-                "This Expectation suite currently contains %d total Expectations across %d columns." % (
-                    total_expectations,
-                    total_columns,
-                ),
-            ]
-        
-        if "notes" in expectations["meta"]:
-            notes = expectations["meta"]["notes"]
+        if "notes" in expectations.meta:
+            notes = expectations.meta["notes"]
             note_content = None
             
             if isinstance(notes, string_types):
@@ -472,13 +509,13 @@ class ExpectationSuitePageRenderer(Renderer):
                 else:
                     logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
             
-            if note_content != None:
+            if note_content is not None:
                 content = content + note_content
 
-        return RenderedComponentContent(**{
+        return TextContent(**{
             "content_block_type": "text",
             "header": "Notes",
-            "content": content,
+            "text": content,
             "styling": {
                 "classes": ["col-12", "table-responsive"],
                 "styles": {
@@ -520,10 +557,22 @@ class ProfilingResultsPageRenderer(Renderer):
         )
 
     def render(self, validation_results):
-        run_id = validation_results['meta']['run_id']
-        full_data_asset_identifier = validation_results['meta']['data_asset_name'] or ""
-        expectation_suite_name = validation_results['meta']['expectation_suite_name']
-        short_data_asset_name = full_data_asset_identifier.split('/')[-1]
+        run_id = validation_results.meta['run_id']
+        full_data_asset_identifier = validation_results.meta['data_asset_name'] or "//"
+        if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
+            try:
+                # This will cause a validation error if the data asset name is not properly formatted
+                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
+            except ValidationError:
+                if isinstance(full_data_asset_identifier, string_types):
+                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
+                else:
+                    raise
+        if isinstance(full_data_asset_identifier, string_types):
+            short_data_asset_name = full_data_asset_identifier
+        else:
+            short_data_asset_name = full_data_asset_identifier.generator_asset
+        expectation_suite_name = validation_results.meta['expectation_suite_name']
 
         # Group EVRs by column
         #TODO: When we implement a ValidationResultSuite class, this method will move there.
@@ -532,7 +581,7 @@ class ProfilingResultsPageRenderer(Renderer):
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
         column_types = self._overview_section_renderer._get_column_types(validation_results)
 
-        if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
+        if "data_asset_name" in validation_results.meta and validation_results.meta["data_asset_name"]:
             data_asset_name = short_data_asset_name
         else:
             data_asset_name = None
