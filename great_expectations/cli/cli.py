@@ -55,21 +55,8 @@ except ImportError:
 # Take over the entire GE module logging namespace when running CLI
 logger = logging.getLogger("great_expectations")
 
-# class NaturalOrderGroup(click.Group):
-#     def __init__(self, name=None, commands=None, **attrs):
-#         if commands is None:
-#             commands = OrderedDict()
-#         elif not isinstance(commands, OrderedDict):
-#             commands = OrderedDict(commands)
-#         click.Group.__init__(self, name=name,
-#                              commands=commands,
-#                              **attrs)
-#
-#     def list_commands(self, ctx):
-#         return self.commands.keys()
 
 # TODO: consider using a specified-order supporting class for help (but wasn't working with python 2)
-# @click.group(cls=NaturalOrderGroup)
 @click.group()
 @click.version_option(version=ge_version)
 @click.option('--verbose', '-v', is_flag=True, default=False,
@@ -77,6 +64,9 @@ logger = logging.getLogger("great_expectations")
 def cli(verbose):
     """great_expectations command-line interface"""
     if verbose:
+        # Note we are explicitly not using a logger in all CLI output to have
+        # more control over console UI.
+        _set_up_logger()
         logger.setLevel(logging.DEBUG)
 
 
@@ -139,14 +129,16 @@ validate the data.
                 expectation_suite["data_asset_type"] == "PandasDataset"):
             dataset_class = PandasDataset
         elif expectation_suite["data_asset_type"].endswith("Dataset"):
-            logger.info("Using PandasDataset to validate dataset of type %s." %
+            cli_message("Using PandasDataset to validate dataset of type %s." %
                         expectation_suite["data_asset_type"])
             dataset_class = PandasDataset
         elif expectation_suite["data_asset_type"] == "FileDataAsset":
             dataset_class = FileDataAsset
         else:
-            logger.critical("Unrecognized data_asset_type %s. You may need to specify custom_dataset_module and \
-                custom_dataset_class." % expectation_suite["data_asset_type"])
+            cli_message(
+                "Unrecognized data_asset_type %s. You may need to specify "
+                "custom_dataset_module and custom_dataset_class." % expectation_suite["data_asset_type"]
+            )
             return -1
     else:
         dataset_class = PandasDataset
@@ -265,7 +257,7 @@ def _create_new_project(target_directory):
         data_source_name, data_source_type = add_datasource_impl(context)
         return context, data_source_name, data_source_type
     except ge_exceptions.DataContextError as err:
-        logger.critical(err.message)
+        cli_message("<red>{}</red>".format(err.message))
         sys.exit(-1)
 
 
@@ -427,8 +419,6 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, vi
 )
 def build_docs(directory, site_name, view=True):
     """Build Data Docs for a project."""
-    logger.debug("Starting cli.build_docs")
-
     try:
         context = DataContext(directory)
         build_documentation_impl(
@@ -517,15 +507,15 @@ def do_config_check(target_directory):
         return False, err.message
 
 
-def main():
+def _set_up_logger():
     handler = logging.StreamHandler()
-    # Just levelname and message Could re-add other info if we want
-    formatter = logging.Formatter(
-        '%(message)s')
-    # '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+    formatter = logging.Formatter('%(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
+
+
+def main():
     cli()
 
 

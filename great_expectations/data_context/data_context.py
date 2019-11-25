@@ -223,7 +223,7 @@ class ConfigOnlyDataContext(object):
     @classmethod
     def scaffold_custom_data_docs(cls, plugins_dir):
         """Copy custom data docs templates"""
-        styles_template = file_relative_path(__file__, "../render/view/styles/data_docs_custom_styles_template.css")
+        styles_template = file_relative_path(__file__, "../render/view/static/styles/data_docs_custom_styles_template.css")
         styles_destination_path = os.path.join(plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
         shutil.copyfile(styles_template, styles_destination_path)
         
@@ -1696,7 +1696,7 @@ class ConfigOnlyDataContext(object):
         """
 
         if not dry_run:
-            logger.debug("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
+            logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
 
         profiling_results = {}
 
@@ -1729,7 +1729,7 @@ class ConfigOnlyDataContext(object):
             data_asset_name_list.sort()
             total_data_assets = len(data_asset_name_list)
             if not dry_run:
-                logger.debug("Profiling the white-listed data assets: %s, alphabetically." % (",".join(data_asset_name_list)))
+                logger.info("Profiling the white-listed data assets: %s, alphabetically." % (",".join(data_asset_name_list)))
         else:
             if profile_all_data_assets:
                 data_asset_name_list.sort()
@@ -1746,9 +1746,9 @@ class ConfigOnlyDataContext(object):
                     return profiling_results
 
         if not dry_run:
-            logger.debug("Profiling all %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
+            logger.info("Profiling all %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
         else:
-            logger.debug("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
+            logger.info("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
 
         profiling_results['success'] = True
 
@@ -1758,7 +1758,7 @@ class ConfigOnlyDataContext(object):
             total_start_time = datetime.datetime.now()
 
             for name in data_asset_name_list:
-                logger.debug("\tProfiling '%s'..." % name)
+                logger.info("\tProfiling '%s'..." % name)
                 try:
                     start_time = datetime.datetime.now()
 
@@ -1819,7 +1819,7 @@ class ConfigOnlyDataContext(object):
 
                     self.save_expectation_suite(expectation_suite)
                     duration = (datetime.datetime.now() - start_time).total_seconds()
-                    logger.debug("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
+                    logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
                                 (new_column_count, row_count, name, duration))
 
                 except ge_exceptions.ProfilerError as err:
@@ -1834,7 +1834,7 @@ class ConfigOnlyDataContext(object):
                     skipped_data_assets += 1
 
             total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
-            logger.debug("""
+            logger.info("""
     Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
     Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs.""" % (
                 len(data_asset_name_list),
