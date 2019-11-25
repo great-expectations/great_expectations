@@ -231,7 +231,12 @@ class ConfigOnlyDataContext(object):
         """Copy static assets directory"""
         static_assets_dir = file_relative_path(__file__, "../render/view/static")
         static_assets_destination_path = os.path.join(data_docs_dir, "static")
-        shutil.copytree(static_assets_dir, static_assets_destination_path)
+        if os.path.isdir(static_assets_destination_path):
+            message = """Warning. An existing static assets directory was found here: {}.
+            - Static assets were not copied.""".format(static_assets_destination_path)
+            warnings.warn(message)
+        else:
+            shutil.copytree(static_assets_dir, static_assets_destination_path)
 
     @classmethod
     def scaffold_notebooks(cls, base_dir):
