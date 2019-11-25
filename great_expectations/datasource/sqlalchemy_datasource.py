@@ -3,7 +3,11 @@ import logging
 from string import Template
 
 from great_expectations.datasource import Datasource
-from great_expectations.datasource.types import BatchId
+from great_expectations.datasource.types import (
+    SqlAlchemyDatasourceQueryBatchKwargs,
+    SqlAlchemyDatasourceTableBatchKwargs,
+    BatchId
+)
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
 from .generator.query_generator import QueryGenerator
 from great_expectations.exceptions import DatasourceInitializationError
@@ -221,7 +225,7 @@ class SqlAlchemyDatasource(Datasource):
                 table_name = batch_kwargs.get("bigquery_temp_table")
             else:
                 table_name = None
-            
+
             query = Template(batch_kwargs["query"]).safe_substitute(**kwargs)
             return data_asset_type(
                 custom_sql=query,

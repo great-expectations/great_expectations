@@ -67,15 +67,6 @@ class TestUtilMethods(unittest.TestCase):
         with open('./tests/test_sets/test_partitions.json', 'r') as file:
             self.test_partitions = json.loads(file.read())
 
-    def test_DotDict(self):
-        D = ge.types.DotDict({
-            'x': [1, 2, 4],
-            'y': [1, 2, 5],
-            'z': ['hello', 'jello', 'mello'],
-        })
-        self.assertEqual(D.x[0], D.y[0])
-        self.assertNotEqual(D.x[0], D.z[0])
-
     def test_continuous_partition_data_error(self):
         with self.assertRaises(ValueError):
             test_partition = ge.dataset.util.continuous_partition_data(
@@ -542,30 +533,30 @@ class TestUtilMethods(unittest.TestCase):
                                                                ['x', 'y'],
                                                                'expect_column_values_to_be_in_set',
                                                                value_set=[1, 2, 3, 4, 5, 6])
-        self.assertTrue(results[0]['success'])
-        self.assertFalse(results[1]['success'])
+        self.assertTrue(results[0].success)
+        self.assertFalse(results[1].success)
 
         # Test positional argument
         results = ge.dataset.util.create_multiple_expectations(D,
                                                                ['x', 'y'],
                                                                'expect_column_values_to_be_in_set',
                                                                [1, 2, 3, 4, 5, 6])
-        self.assertTrue(results[0]['success'])
-        self.assertFalse(results[1]['success'])
+        self.assertTrue(results[0].success)
+        self.assertFalse(results[1].success)
 
         results = ge.dataset.util.create_multiple_expectations(D,
                                                                ['z', 'zz'],
                                                                'expect_column_values_to_match_regex',
                                                                'h')
-        self.assertTrue(results[0]['success'])
-        self.assertFalse(results[1]['success'])
+        self.assertTrue(results[0].success)
+        self.assertFalse(results[1].success)
 
         # Non-argumentative expectation
         results = ge.dataset.util.create_multiple_expectations(D,
                                                                ['z', 'zz'],
                                                                'expect_column_values_to_not_be_null')
-        self.assertTrue(results[0]['success'])
-        self.assertTrue(results[1]['success'])
+        self.assertTrue(results[0].success)
+        self.assertTrue(results[1].success)
 
         # Key error when non-existant column is called
         with self.assertRaises(KeyError):

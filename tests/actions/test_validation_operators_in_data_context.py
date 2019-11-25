@@ -18,56 +18,6 @@ from great_expectations.util import (
     gen_directory_tree_str
 )
 
-@pytest.fixture()
-def basic_data_context_config_for_validation_operator():
-    # return DataContextConfig(**{
-    return {
-        "plugins_directory": "plugins/",
-        "evaluation_parameter_store_name" : "evaluation_parameter_store",
-        "validations_store_name": "validation_result_store",
-        "expectations_store_name": "expectations_store",
-        "datasources": {},
-        "stores": {
-            "expectations_store" : {
-                "class_name": "ExpectationsStore",
-                "store_backend": {
-                    "class_name": "InMemoryStoreBackend",
-                }
-            },
-            # This isn't currently used for Validation Actions, but it's required for DataContext to work.
-            "evaluation_parameter_store" : {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "InMemoryEvaluationParameterStore",
-            },
-            "validation_result_store" : {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "ValidationsStore",
-                "store_backend": {
-                    "class_name": "InMemoryStoreBackend",
-                }
-            },
-        },
-        "data_docs_sites": {},
-        "validation_operators": {
-            "store_val_res_and_extract_eval_params" : {
-                "class_name" : "ActionListValidationOperator",
-                "action_list" : [{
-                    "name": "store_validation_result",
-                    "action" : {
-                        "class_name" : "StoreAction",
-                        "target_store_name": "validation_result_store",
-                    }
-                },{
-                    "name": "extract_and_store_eval_parameters",
-                    "action" : {
-                        "class_name" : "ExtractAndStoreEvaluationParamsAction",
-                        "target_store_name": "evaluation_parameter_store",
-                    }
-                }]
-            }
-        }
-    }
-    # })
 
 def test_ActionListValidationOperator(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
     project_path = str(tmp_path_factory.mktemp('great_expectations'))
@@ -95,10 +45,6 @@ def test_ActionListValidationOperator(basic_data_context_config_for_validation_o
     data_context.save_expectation_suite(warning_expectations, data_asset_name="my_datasource/default/f1",
                                         expectation_suite_name="warning")
 
-    print("W"*80)
-    print(json.dumps(warning_expectations, indent=2))
-    print(json.dumps(failure_expectations, indent=2))
-
     validator_batch_kwargs = data_context.yield_batch_kwargs("my_datasource/default/f1")
     batch = data_context.get_batch("my_datasource/default/f1",
                                    expectation_suite_name="failure",
@@ -118,12 +64,11 @@ def test_ActionListValidationOperator(basic_data_context_config_for_validation_o
     validation_result_store_keys = data_context.stores["validation_result_store"].list_keys()
     print(validation_result_store_keys)
     assert len(validation_result_store_keys) == 2
-    assert operator_result['success']
+    assert operator_result["success"]
     assert len(operator_result['details'].keys()) == 2
 
     first_validation_result = data_context.stores["validation_result_store"].get(validation_result_store_keys[0])
-    print(json.dumps(first_validation_result, indent=2))
-    assert data_context.stores["validation_result_store"].get(validation_result_store_keys[0])["success"] is True
+    assert data_context.stores["validation_result_store"].get(validation_result_store_keys[0]).success is True
 
 
 def test_WarningAndFailureExpectationSuitesValidationOperator_with_file_structure(tmp_path_factory):

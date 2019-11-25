@@ -21,19 +21,19 @@ class BasicDatasetProfilerBase(DatasetProfiler):
         # list of types is used to support pandas and sqlalchemy
         df.set_config_value("interactive_evaluation", True)
         try:
-            if df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.INT_TYPE_NAMES)))["success"]:
+            if df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.INT_TYPE_NAMES))).success:
                 type_ = "int"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.FLOAT_TYPE_NAMES)))["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.FLOAT_TYPE_NAMES))).success:
                 type_ = "float"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.STRING_TYPE_NAMES)))["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.STRING_TYPE_NAMES))).success:
                 type_ = "string"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.BOOLEAN_TYPE_NAMES)))["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.BOOLEAN_TYPE_NAMES))).success:
                 type_ = "bool"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.DATETIME_TYPE_NAMES)))["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.DATETIME_TYPE_NAMES))).success:
                 type_ = "datetime"
 
             else:
@@ -52,10 +52,9 @@ class BasicDatasetProfilerBase(DatasetProfiler):
         df.set_config_value("interactive_evaluation", True)
 
         try:
-            num_unique = df.expect_column_unique_value_count_to_be_between(column, None, None)[
-                'result']['observed_value']
+            num_unique = df.expect_column_unique_value_count_to_be_between(column, None, None).result['observed_value']
             pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
-                column, None, None)['result']['observed_value']
+                column, None, None).result['observed_value']
         except KeyError:  # if observed_value value is not set
             logger.error("Failed to get cardinality of column {0:s} - continuing...".format(column))
 
@@ -129,7 +128,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
             # df.expect_column_to_exist(column)
 
             type_ = cls._get_column_type(df, column)
-            cardinality= cls._get_column_cardinality(df, column)
+            cardinality = cls._get_column_cardinality(df, column)
             df.expect_column_values_to_not_be_null(column, mostly=0.5) # The renderer will show a warning for columns that do not meet this expectation
             df.expect_column_values_to_be_in_set(column, [], result_format="SUMMARY")
 
@@ -175,11 +174,11 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
 
                                                            threshold=None, result_format='COMPLETE')
-                else: # unknown cardinality - skip
+                else:  # unknown cardinality - skip
                     pass
 
             elif type_ == "string":
-                # Check for leading and tralining whitespace.
+                # Check for leading and trailing whitespace.
                 #!!! It would be nice to build additional Expectations here, but
                 #!!! the default logic for remove_expectations prevents us.
                 df.expect_column_values_to_not_match_regex(column, r"^\s+|\s+$")
@@ -219,10 +218,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
 
         df.set_config_value("interactive_evaluation", True)
         expectation_suite = df.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=False)
-        if not "meta" in expectation_suite:
-            expectation_suite["meta"] = {"columns": meta_columns}
-        else:
-            expectation_suite["meta"]["columns"] = meta_columns
+        expectation_suite.meta["columns"] = meta_columns
 
         return expectation_suite
 

@@ -6,6 +6,7 @@ import logging
 import shutil
 import webbrowser
 
+from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
 import sys
 import copy
@@ -14,8 +15,10 @@ from six import string_types
 import datetime
 import warnings
 
-from great_expectations.util import file_relative_path
-from .util import safe_mmkdir, substitute_all_config_variables, substitute_config_variable
+from great_expectations.core import ExpectationSuite, NamespaceAwareExpectationSuite
+from great_expectations.data_context.types.base import DataContextConfig, dataContextConfigSchema
+from great_expectations.data_context.util import file_relative_path, substitute_config_variable
+from .util import safe_mmkdir, substitute_all_config_variables
 from ..types.base import DotDict
 
 import great_expectations.exceptions as ge_exceptions
@@ -28,7 +31,6 @@ try:
 except ImportError:
     from urlparse import urlparse
 
-from great_expectations.data_asset.util import get_empty_expectation_suite
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     PandasDatasource,
@@ -40,7 +42,6 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
 
 from .types import (
-    NormalizedDataAssetName,     # TODO : Replace this with DataAssetIdentifier.
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -69,9 +70,6 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 ALLOWED_DELIMITERS = ['.', '/']
-
-CURRENT_CONFIG_VERSION = 1
-MINIMUM_SUPPORTED_CONFIG_VERSION = 1
 
 
 class ConfigOnlyDataContext(object):
@@ -248,42 +246,14 @@ class ConfigOnlyDataContext(object):
 
     @classmethod
     def validate_config(cls, project_config):
-        required_keys = {
-            # TODO next version re-introduce config_version as required
-            # "config_version",
-            "plugins_directory",
-            "expectations_store_name",
-            "validations_store_name",
-            "evaluation_parameter_store_name",
-            "datasources",
-            "stores",
-            "data_docs_sites",
-            "validation_operators"
-        }
-        for key in required_keys:
-            if key not in project_config:
-                raise ge_exceptions.MissingTopLevelConfigKeyError("Missing top-level key %s" % key)
-
-        allowed_keys = {
-            "config_version",
-            "config_variables_file_path",
-            "plugins_directory",
-            "expectations_store_name",
-            "validations_store_name",
-            "evaluation_parameter_store_name",
-            "datasources",
-            "stores",
-            "data_docs_sites",
-            "validation_operators",
-        }
-        for key in project_config.keys():
-            if key not in allowed_keys:
-                raise ge_exceptions.InvalidTopLevelConfigKeyError("Invalid top-level config key %s" % key)
-
+        if isinstance(project_config, DataContextConfig):
+            return True
+        try:
+            dataContextConfigSchema.load(project_config)
+        except ValidationError:
+            raise
         return True
 
-
-    # TODO : Migrate to an expressive __init__ method, with the top level of configs unpacked into named arguments.
     def __init__(self, project_config, context_root_dir, data_asset_name_delimiter='/'):
         """DataContext constructor
 
@@ -301,13 +271,11 @@ class ConfigOnlyDataContext(object):
 
         self._project_config = project_config
         # FIXME: This should just be a property
+        self._project_config_with_variables_substituted = copy.deepcopy(self.get_config_with_variables_substituted())
         self._context_root_directory = os.path.abspath(context_root_dir)
-        self._project_config_with_variables_substituted = dict(**self.get_config_with_variables_substituted())
-
 
         # Init plugins
         sys.path.append(self.plugins_directory)
-
 
         # Init data sources
         self._datasources = {}
@@ -325,8 +293,7 @@ class ConfigOnlyDataContext(object):
         # However, for now, I'm adding this check, to avoid having to migrate all the test fixtures
         # while still experimenting with the workings of validation operators and actions.
         if "validation_operators" in self._project_config:
-            for validation_operator_name, validation_operator_config in \
-                    self._project_config_with_variables_substituted["validation_operators"].items():
+            for validation_operator_name, validation_operator_config in self._project_config_with_variables_substituted["validation_operators"].items():
                 self.add_validation_operator(
                     validation_operator_name,
                     validation_operator_config,
@@ -337,7 +304,6 @@ class ConfigOnlyDataContext(object):
         if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
             raise ge_exceptions.DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
-
 
     def _init_stores(self, store_configs):
         """Initialize all Stores for this DataContext.
@@ -375,8 +341,7 @@ class ConfigOnlyDataContext(object):
         """
 
         self._project_config["stores"][store_name] = store_config
-        self._project_config_with_variables_substituted["stores"][store_name] = \
-            self.get_config_with_variables_substituted(config=store_config)
+        self._project_config_with_variables_substituted["stores"][store_name] = self.get_config_with_variables_substituted(config=store_config)
         new_store = instantiate_class_from_config(
             config=self._project_config_with_variables_substituted["stores"][store_name],
             runtime_config={
@@ -401,8 +366,7 @@ class ConfigOnlyDataContext(object):
         """
 
         self._project_config["validation_operators"][validation_operator_name] = validation_operator_config
-        self._project_config_with_variables_substituted["validation_operators"][validation_operator_name] = \
-            self.get_config_with_variables_substituted(config=validation_operator_config)
+        self._project_config_with_variables_substituted["validation_operators"][validation_operator_name] = self.get_config_with_variables_substituted(config=validation_operator_config)
         new_validation_operator = instantiate_class_from_config(
             config=self._project_config_with_variables_substituted["validation_operators"][validation_operator_name],
             runtime_config={
@@ -432,7 +396,7 @@ class ConfigOnlyDataContext(object):
         """Get file urls for all built local data docs."""
         from great_expectations.data_context.store import FixedLengthTupleFilesystemStoreBackend
         ge_dir = os.path.abspath(self.root_directory)
-        sites = self.get_project_config().get("data_docs_sites")
+        sites = self._project_config_with_variables_substituted["data_docs_sites"]
 
         existing_sites = []
 
@@ -489,7 +453,7 @@ class ConfigOnlyDataContext(object):
     @property
     def data_asset_name_delimiter(self):
         """Configurable delimiter character used to parse data asset name strings into \
-        ``NormalizedDataAssetName`` objects."""
+        ``DataAssetIdentifier`` objects."""
         return self._data_asset_name_delimiter
     
     @data_asset_name_delimiter.setter
@@ -506,53 +470,13 @@ class ConfigOnlyDataContext(object):
     #
     #####
 
-    # TODO : This method should be deprecated in favor of NamespaceReadWriteStore.
-    def _get_normalized_data_asset_name_filepath(self, data_asset_name,
-                                                 expectation_suite_name,
-                                                 base_path=None,
-                                                 file_extension=".json"):
-        """Get the path where the project-normalized data_asset_name expectations are stored. This method is used
-        internally for constructing all absolute and relative paths for asset_name-based paths.
-
-        Args:
-            data_asset_name: name of data asset for which to construct the path
-            expectation_suite_name: name of expectation suite for which to construct the path
-            base_path: base path from which to construct the path. If None, uses the DataContext root directory
-            file_extension: the file extension to append to the path
-
-        Returns:
-            path (str): path for the requsted object.
-        """
-        if base_path is None:
-            base_path = os.path.join(self.root_directory, "expectations")
-
-        # We need to ensure data_asset_name is a valid filepath no matter its current state
-        if isinstance(data_asset_name, NormalizedDataAssetName):
-            name_parts = [name_part.replace("/", "__") for name_part in data_asset_name]
-            relative_path = "/".join(name_parts)
-        elif isinstance(data_asset_name, string_types):
-            # if our delimiter is not '/', we need to first replace any slashes that exist in the name
-            # to avoid extra layers of nesting (e.g. for dbt models)
-            relative_path = data_asset_name
-            if self.data_asset_name_delimiter != "/":
-                relative_path.replace("/", "__")
-                relative_path = relative_path.replace(self.data_asset_name_delimiter, "/")
-        else:
-            raise ge_exceptions.DataContextError("data_assset_name must be a NormalizedDataAssetName or string")
-
-        expectation_suite_name += file_extension
-
-        return os.path.join(
-            base_path,
-            relative_path,
-            expectation_suite_name
-        )
-
     def _load_config_variables_file(self):
         """Get all config variables from the default location."""
-        # TODO: support stores
+        if not hasattr(self, "root_directory"):
+            # A ConfigOnlyDataContext does not have a directory in which to look
+            return {}
 
-        config_variables_file_path = self.get_project_config().get("config_variables_file_path")
+        config_variables_file_path = self.get_project_config().config_variables_file_path
         if config_variables_file_path:
             try:
                 with open(os.path.join(self.root_directory,
@@ -593,7 +517,7 @@ class ConfigOnlyDataContext(object):
         """
         config_variables = self._load_config_variables_file()
         config_variables[config_variable_name] = value
-        config_variables_filepath = self.get_project_config().get("config_variables_file_path")
+        config_variables_filepath = self.get_project_config().config_variables_file_path
         if not config_variables_filepath:
             raise ge_exceptions.InvalidConfigError("'config_variables_file_path' property is not found in config - setting it is required to use this feature")
 
@@ -667,14 +591,14 @@ class ConfigOnlyDataContext(object):
         """Yields a the next batch_kwargs for the provided data_asset_name, supplemented by any kwargs provided inline.
 
         Args:
-            data_asset_name (str or NormalizedDataAssetName): the name from which to provide batch_kwargs
+            data_asset_name (str or DataAssetIdentifier): the name from which to provide batch_kwargs
             **kwargs: additional kwargs to supplement the returned batch_kwargs
 
         Returns:
             BatchKwargs
 
         """
-        if not isinstance(data_asset_name, NormalizedDataAssetName):
+        if not isinstance(data_asset_name, DataAssetIdentifier):
             data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(data_asset_name.datasource)
@@ -690,7 +614,7 @@ class ConfigOnlyDataContext(object):
         build_batch_kwargs relies on the generator's implementation
 
         Args:
-            data_asset_name (str or NormalizedDataAssetName): the name from which to provide batch_kwargs
+            data_asset_name (str or DataAssetIdentifier): the name from which to provide batch_kwargs
             partition_id (str): partition_id to use when building batch_kwargs
             **kwargs: additional kwargs to supplement the returned batch_kwargs
 
@@ -698,7 +622,7 @@ class ConfigOnlyDataContext(object):
             BatchKwargs
 
         """
-        if not isinstance(data_asset_name, (NormalizedDataAssetName, DataAssetIdentifier)):
+        if not isinstance(data_asset_name, DataAssetIdentifier):
             data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(data_asset_name.datasource)
@@ -944,17 +868,11 @@ class ConfigOnlyDataContext(object):
                 according to the currently-configured data_asset_name_delimiter
 
         Returns:
-            NormalizedDataAssetName
+            DataAssetIdentifier
         """
 
-        if isinstance(data_asset_name, NormalizedDataAssetName):
+        if isinstance(data_asset_name, DataAssetIdentifier):
             return data_asset_name
-        elif isinstance(data_asset_name, DataAssetIdentifier):
-            return NormalizedDataAssetName(
-                datasource=data_asset_name.datasource,
-                generator=data_asset_name.generator,
-                generator_asset=data_asset_name.generator_asset
-            )
 
         split_name = data_asset_name.split(self.data_asset_name_delimiter)
 
@@ -962,7 +880,7 @@ class ConfigOnlyDataContext(object):
         existing_namespaces = []
         for key in existing_expectation_suite_keys:
             existing_namespaces.append(
-                NormalizedDataAssetName(
+                DataAssetIdentifier(
                     key.data_asset_name.datasource,
                     key.data_asset_name.generator,
                     key.data_asset_name.generator_asset,
@@ -983,7 +901,7 @@ class ConfigOnlyDataContext(object):
             provider_names = set()
             generator_asset = split_name[0]
             for normalized_identifier in existing_namespaces:
-                curr_generator_asset = normalized_identifier[2]
+                curr_generator_asset = normalized_identifier.generator_asset
                 if generator_asset == curr_generator_asset:
                     provider_names.add(
                         normalized_identifier
@@ -1012,7 +930,7 @@ class ConfigOnlyDataContext(object):
                     names_set = available_names[datasource][generator]
                     if generator_asset in names_set:
                         provider_names.add(
-                            NormalizedDataAssetName(datasource, generator, generator_asset)
+                            DataAssetIdentifier(datasource, generator, generator_asset)
                         )
             
             if len(provider_names) == 1:
@@ -1029,7 +947,7 @@ class ConfigOnlyDataContext(object):
             # namespace.
             if (len(available_names.keys()) == 1 and  # in this case, we know that the datasource name is valid
                     len(available_names[datasource].keys()) == 1):
-                return NormalizedDataAssetName(
+                return DataAssetIdentifier(
                     datasource,
                     generator,
                     generator_asset
@@ -1051,8 +969,8 @@ class ConfigOnlyDataContext(object):
             # If the data_asset_name is already defined by a config in that datasource, return that normalized name.
             provider_names = set()
             for normalized_identifier in existing_namespaces:
-                curr_datasource_name = normalized_identifier[0]
-                curr_generator_asset = normalized_identifier[2]
+                curr_datasource_name = normalized_identifier.datasource
+                curr_generator_asset = normalized_identifier.generator_asset
                 if curr_datasource_name == split_name[0] and curr_generator_asset == split_name[1]:
                     provider_names.add(normalized_identifier)
 
@@ -1078,7 +996,7 @@ class ConfigOnlyDataContext(object):
                 for generator in available_names[datasource_name].keys():
                     generator_assets = available_names[datasource_name][generator]
                     if split_name[0] == datasource_name and split_name[1] in generator_assets:
-                        provider_names.add(NormalizedDataAssetName(datasource_name, generator, split_name[1]))
+                        provider_names.add(DataAssetIdentifier(datasource_name, generator, split_name[1]))
 
             if len(provider_names) == 1:
                 return provider_names.pop()
@@ -1094,7 +1012,7 @@ class ConfigOnlyDataContext(object):
             # namespace.
             if split_name[0] in available_names and len(available_names[split_name[0]]) == 1:
                 logger.info("Normalizing to a new generator name.")
-                return NormalizedDataAssetName(
+                return DataAssetIdentifier(
                     split_name[0],
                     list(available_names[split_name[0]].keys())[0],
                     split_name[1]
@@ -1120,7 +1038,7 @@ class ConfigOnlyDataContext(object):
 
                 generators = [generator["name"] for generator in datasource.list_generators()]
                 if split_name[1] in generators:
-                    return NormalizedDataAssetName(*split_name)
+                    return DataAssetIdentifier(*split_name)
 
             raise ge_exceptions.DataContextError(
                 "Invalid data_asset_name: no configured datasource '{datasource_name}' "
@@ -1141,24 +1059,23 @@ class ConfigOnlyDataContext(object):
         Returns:
             A new (empty) expectation suite.
         """
-        if not isinstance(data_asset_name, NormalizedDataAssetName):
+        if not isinstance(data_asset_name, DataAssetIdentifier):
             data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
-        expectation_suite = get_empty_expectation_suite(
-            # FIXME: For now, we just cast this to a string to be close to the old behavior
-            self.data_asset_name_delimiter.join(data_asset_name),
-            expectation_suite_name
+        expectation_suite = NamespaceAwareExpectationSuite(
+            data_asset_name=data_asset_name,
+            expectation_suite_name=expectation_suite_name
         )
 
         key = ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(*data_asset_name),
+            data_asset_name=data_asset_name,
             expectation_suite_name=expectation_suite_name,
         )
 
         if self._stores[self.expectations_store_name].has_key(key) and not overwrite_existing:
             raise ge_exceptions.DataContextError(
-                "expectation_suite with name {} already exists for data_asset "\
-                "{}. If you would like to overwrite this expectation_suite, "\
+                "expectation_suite with name {} already exists for data_asset "
+                "{}. If you would like to overwrite this expectation_suite, "
                 "set overwrite_existing=True.".format(
                     expectation_suite_name,
                     data_asset_name
@@ -1173,17 +1090,17 @@ class ConfigOnlyDataContext(object):
         """Get a named expectation suite for the provided data_asset_name.
 
         Args:
-            data_asset_name (str or NormalizedDataAssetName): the data asset name to which the expectation suite belongs
+            data_asset_name (str or DataAssetIdentifier): the data asset name to which the expectation suite belongs
             expectation_suite_name (str): the name for the expectation suite
 
         Returns:
             expectation_suite
         """
-        if not isinstance(data_asset_name, NormalizedDataAssetName):
+        if not isinstance(data_asset_name, DataAssetIdentifier):
             data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         key = ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(*data_asset_name),
+            data_asset_name=data_asset_name,
             expectation_suite_name=expectation_suite_name,
         )
 
@@ -1210,30 +1127,27 @@ class ConfigOnlyDataContext(object):
         """
         if data_asset_name is None:
             try:
-                data_asset_name = expectation_suite['data_asset_name']
+                data_asset_name = expectation_suite.data_asset_name
             except KeyError:
                 raise ge_exceptions.DataContextError(
                     "data_asset_name must either be specified or present in the provided expectation suite")
         else:
-            # Note: we ensure that the suite name is a string here, until we have typed ExpectationSuite
-            # objects that will know how to read the correct type back in
-            expectation_suite['data_asset_name'] = str(data_asset_name)
-            # expectation_suite['data_asset_name'] = data_asset_name
+            expectation_suite.data_asset_name = data_asset_name
 
         if expectation_suite_name is None:
             try:
-                expectation_suite_name = expectation_suite['expectation_suite_name']
+                expectation_suite_name = expectation_suite.expectation_suite_name
             except KeyError:
                 raise ge_exceptions.DataContextError(
                     "expectation_suite_name must either be specified or present in the provided expectation suite")
         else:
-            expectation_suite['expectation_suite_name'] = expectation_suite_name
+            expectation_suite.expectation_suite_name = expectation_suite_name
 
-        if not isinstance(data_asset_name, NormalizedDataAssetName):
+        if not isinstance(data_asset_name, DataAssetIdentifier):
             data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         self.stores[self.expectations_store_name].set(ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(*data_asset_name),
+            data_asset_name=data_asset_name,
             expectation_suite_name=expectation_suite_name,
         ), expectation_suite)
 
@@ -1244,10 +1158,7 @@ class ConfigOnlyDataContext(object):
         if not self._compiled:
             self._compile()
 
-        if ("meta" not in validation_results or
-                "data_asset_name" not in validation_results["meta"] or
-                "expectation_suite_name" not in validation_results["meta"]
-        ):
+        if "data_asset_name" not in validation_results.meta or "expectation_suite_name" not in validation_results.meta:
             logger.warning(
                 "Both data_asset_name and expectation_suite_name must be in validation results to "
                 "register evaluation parameters."
@@ -1259,26 +1170,28 @@ class ConfigOnlyDataContext(object):
             # This is fine; short-circuit since we do not need to register any results from this dataset.
             return
         
-        for result in validation_results['results']:
+        for result in validation_results.results:
             # Unoptimized: loop over all results and check if each is needed
-            expectation_type = result['expectation_config']['expectation_type']
+            expectation_type = result.expectation_config.expectation_type
             if expectation_type in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name]:
                 # First, bind column-style parameters
-                if (("column" in result['expectation_config']['kwargs']) and 
+                if (("column" in result.expectation_config.kwargs) and
                     ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]) and
-                    (result['expectation_config']['kwargs']["column"] in
+                    (result.expectation_config.kwargs["column"] in
                     self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
 
-                    column = result['expectation_config']['kwargs']["column"]
+                    column = result.expectation_config.kwargs["column"]
                     # Now that we have a small search space, invert logic, and look for the parameters in our result
                     for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"][column].items():
                         # value here is the set of desired parameters under the type_key
                         for desired_param in desired_parameters:
                             desired_key = desired_param.split(":")[-1]
-                            if type_key == "result" and desired_key in result['result']:
-                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"][desired_key])
-                            elif type_key == "details" and desired_key in result["result"]["details"]:
-                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"]["details"])
+                            if type_key == "result" and desired_key in result.result:
+                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+                                    run_id, desired_param, result.result[desired_key])
+                            elif type_key == "details" and desired_key in result.result["details"]:
+                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+                                    run_id, desired_param, result.result["details"])
                             else:
                                 logger.warning("Unrecognized key for parameter %s" % desired_param)
                 
@@ -1288,10 +1201,12 @@ class ConfigOnlyDataContext(object):
                         continue
                     for desired_param in desired_parameters:
                         desired_key = desired_param.split(":")[-1]
-                        if type_key == "result" and desired_key in result['result']:
-                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"][desired_key])
-                        elif type_key == "details" and desired_key in result["result"]["details"]:
-                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(run_id, desired_param, result["result"]["details"])
+                        if type_key == "result" and desired_key in result.result:
+                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+                                run_id, desired_param, result.result[desired_key])
+                        elif type_key == "details" and desired_key in result.result["details"]:
+                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+                                run_id, desired_param, result.result["details"])
                         else:
                             logger.warning("Unrecognized key for parameter %s" % desired_param)
 
@@ -1396,8 +1311,8 @@ class ConfigOnlyDataContext(object):
 
         for key in self.stores[self.expectations_store_name].list_keys():
             config = self.stores[self.expectations_store_name].get(key)
-            for expectation in config["expectations"]:
-                for _, value in expectation["kwargs"].items():
+            for expectation in config.expectations:
+                for _, value in expectation.kwargs.items():
                     if isinstance(value, dict) and '$PARAMETER' in value:
                         # Compile *only* respects parameters in urn structure
                         # beginning with urn:great_expectations:validations
@@ -1453,89 +1368,12 @@ class ConfigOnlyDataContext(object):
 
         self._compiled = True
 
-    # # TDOD : Deprecate this method in favor of Stores.
-    # def write_resource(
-    #         self,
-    #         resource,  # bytes
-    #         resource_name,  # name to be used inside namespace, e.g. "my_file.html"
-    #         resource_store,  # store to use to write the resource
-    #         resource_namespace=None,  # An arbitrary name added to the resource namespace
-    #         data_asset_name=None,  # A name that will be normalized by the data_context and used in the namespace
-    #         expectation_suite_name=None,  # A string that is part of the namespace
-    #         run_id=None
-    # ):  # A string that is part of the namespace
-    #     """Writes the bytes in "resource" according to the resource_store's writing method, with a name constructed
-    #     as follows:
-    #
-    #     resource_namespace/run_id/data_asset_name/expectation_suite_name/resource_name
-    #
-    #     If any of those components is None, it is omitted from the namespace.
-    #
-    #     Args:
-    #         resource:
-    #         resource_name:
-    #         resource_store:
-    #         resource_namespace:
-    #         data_asset_name:
-    #         expectation_suite_name:
-    #         run_id:
-    #
-    #     Returns:
-    #         A dictionary describing how to locate the resource (specific to resource_store type)
-    #     """
-    #     logger.debug("Starting DatContext.write_resource")
-    #
-    #     if resource_store is None:
-    #         logger.error("No resource store specified")
-    #         return
-    #
-    #     resource_locator_info = {}
-    #
-    #     if resource_store['type'] == "s3":
-    #         raise NotImplementedError("s3 is not currently a supported resource_store type for writing")
-    #     elif resource_store['type'] == 'filesystem':
-    #         resource_store = self._normalize_store_path(resource_store)
-    #         path_components = [resource_store['base_directory']]
-    #         if resource_namespace is not None:
-    #             path_components.append(resource_namespace)
-    #         if run_id is not None:
-    #             path_components.append(run_id)
-    #         if data_asset_name is not None:
-    #             if not isinstance(data_asset_name, NormalizedDataAssetName):
-    #                 normalized_name = self.normalize_data_asset_name(data_asset_name)
-    #             else:
-    #                 normalized_name = data_asset_name
-    #             if expectation_suite_name is not None:
-    #                 path_components.append(self._get_normalized_data_asset_name_filepath(normalized_name, expectation_suite_name, base_path="", file_extension=""))
-    #             else:
-    #                 path_components.append(
-    #                     self._get_normalized_data_asset_name_filepath(normalized_name, "",
-    #                                                                   base_path="", file_extension=""))
-    #         else:
-    #             if expectation_suite_name is not None:
-    #                 path_components.append(expectation_suite_name)
-    #
-    #         path_components.append(resource_name)
-    #
-    #         path = os.path.join(
-    #             *path_components
-    #         )
-    #         safe_mmkdir(os.path.dirname(path))
-    #         with open(path, "w") as writer:
-    #             writer.write(resource)
-    #
-    #         resource_locator_info['path'] = path
-    #     else:
-    #         raise ge_exceptions.DataContextError("Unrecognized resource store type.")
-    #
-    #     return resource_locator_info
-
     def get_validation_result(
         self,
         data_asset_name,
         expectation_suite_name="default",
         run_id=None,
-        validations_store_name="validations_store",
+        validations_store_name=None,
         failed_only=False,
     ):
         """Get validation results from a configured store.
@@ -1551,9 +1389,10 @@ class ConfigOnlyDataContext(object):
             validation_result
 
         """
-
+        if validations_store_name is None:
+            validations_store_name = self.validations_store_name
         selected_store = self.stores[validations_store_name]
-        if not isinstance(data_asset_name, NormalizedDataAssetName):
+        if not isinstance(data_asset_name, DataAssetIdentifier):
             data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
         if not isinstance(data_asset_name, DataAssetIdentifier):
@@ -1563,8 +1402,7 @@ class ConfigOnlyDataContext(object):
                 generator_asset=data_asset_name.generator_asset
             )
 
-
-        if run_id == None:
+        if run_id is None:
             #Get most recent run id
             # NOTE : This method requires a (potentially very inefficient) list_keys call.
             # It should probably move to live in an appropriate Store class,
@@ -1588,8 +1426,8 @@ class ConfigOnlyDataContext(object):
 
         #TODO: This should be a convenience method of ValidationResultSuite
         if failed_only:
-            failed_results_list = [result for result in results_dict["results"] if not result["success"]]
-            results_dict["results"] = failed_results_list
+            failed_results_list = [result for result in results_dict.results if not result.success]
+            results_dict.results = failed_results_list
             return results_dict
         else:
             return results_dict
@@ -1797,9 +1635,7 @@ class ConfigOnlyDataContext(object):
                     self.validations_store.set(
                         key=ValidationResultIdentifier(
                             expectation_suite_identifier=ExpectationSuiteIdentifier(
-                                data_asset_name=DataAssetIdentifier(
-                                    *normalized_data_asset_name
-                                ),
+                                data_asset_name=normalized_data_asset_name,
                                 expectation_suite_name=expectation_suite_name
                             ),
                             run_id=run_id
@@ -1811,10 +1647,10 @@ class ConfigOnlyDataContext(object):
                         # For datasets, we can produce some more detailed statistics
                         row_count = batch.get_row_count()
                         total_rows += row_count
-                        new_column_count = len(set([exp["kwargs"]["column"] for exp in expectation_suite["expectations"] if "column" in exp["kwargs"]]))
+                        new_column_count = len(set([exp.kwargs["column"] for exp in expectation_suite.expectations if "column" in exp.kwargs]))
                         total_columns += new_column_count
 
-                    new_expectation_count = len(expectation_suite["expectations"])
+                    new_expectation_count = len(expectation_suite.expectations)
                     total_expectations += new_expectation_count
 
                     self.save_expectation_suite(expectation_suite)
@@ -1908,7 +1744,6 @@ class DataContext(ConfigOnlyDataContext):
             data_asset_name_delimiter,
         )
 
-    # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
     def _load_project_config(self):
         """
         Reads the project configuration from the project configuration file.
@@ -1929,49 +1764,19 @@ class DataContext(ConfigOnlyDataContext):
         except IOError:
             raise ge_exceptions.ConfigNotFoundError()
 
-        version = config_dict.get("config_version", 0)
+        try:
+            return DataContextConfig.from_commented_map(config_dict)
+        except ge_exceptions.InvalidDataContextConfigError:
+            # Just to be explicit about what we intended to catch
+            raise
 
-        # TODO clean this up once type-checking configs is more robust
-        if not isinstance(version, int):
-            raise ge_exceptions.InvalidConfigValueTypeError("The key `config_version` must be an integer. Please check your config file.")
-
-        # When migrating from 0.7.x to 0.8.0
-        if version == 0 and ("validations_store" in list(config_dict.keys()) or "validations_stores" in list(config_dict.keys())):
-            raise ge_exceptions.ZeroDotSevenConfigVersionError(
-                "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
-            )
-        elif version < MINIMUM_SUPPORTED_CONFIG_VERSION:
-            raise ge_exceptions.UnsupportedConfigVersionError(
-                "You appear to have an invalid config version ({}).\n    The version number must be between {} and {}.".format(
-                    version,
-                    MINIMUM_SUPPORTED_CONFIG_VERSION,
-                    CURRENT_CONFIG_VERSION,
-                )
-            )
-        elif version > CURRENT_CONFIG_VERSION:
-            raise ge_exceptions.InvalidConfigVersionError(
-                "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
-                    version,
-                    CURRENT_CONFIG_VERSION
-                )
-            )
-
-        # return DataContextConfig(**config_dict)
-        return config_dict
-
-
-    # TODO : This should use a Store so that the DataContext doesn't need to be aware of reading and writing to disk.
     def _save_project_config(self):
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
 
         config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as data:
-            config = copy.deepcopy(
-                self._project_config
-            )
-
-            yaml.dump(config, data)
+        with open(config_filepath, "w") as outfile:
+            self._project_config.to_yaml(outfile)
 
     def add_store(self, store_name, store_config):
         logger.debug("Starting DataContext.add_store")

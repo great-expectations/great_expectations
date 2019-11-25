@@ -4,6 +4,7 @@ import pytest
 import great_expectations as ge
 import platform
 
+
 def test_expect_file_line_regex_match_count_to_be_between():
 
     #####Invlaid File Path######
@@ -74,9 +75,9 @@ def test_expect_file_line_regex_match_count_to_be_between():
                                                                            expected_max_count=12,
                                                                            skip=1)
 
-    assert not fail_trial["success"]
-    assert fail_trial['result']['unexpected_percent'] == 100
-    assert fail_trial['result']['missing_percent'] == 0
+    assert not fail_trial.success
+    assert fail_trial.result['unexpected_percent'] == 100
+    assert fail_trial.result['missing_percent'] == 0
 
     #Count does fall in range
     success_trial = file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
@@ -84,9 +85,10 @@ def test_expect_file_line_regex_match_count_to_be_between():
                                                                               expected_max_count=4,
                                                                               skip=1)
 
-    assert success_trial["success"]
-    assert success_trial['result']['unexpected_percent'] == 0
-    assert success_trial['result']['missing_percent'] == 0
+    assert success_trial.success
+    assert success_trial.result['unexpected_percent'] == 0
+    assert success_trial.result['missing_percent'] == 0
+
 
 def test_expect_file_line_regex_match_count_to_equal():
     complete_file_path = './tests/test_sets/toy_data_complete.csv'
@@ -117,10 +119,10 @@ def test_expect_file_line_regex_match_count_to_equal():
                                                                                  expected_count=3,
                                                                                  skip=1)
 
-    assert not fail_trial["success"]
-    assert fail_trial['result']['unexpected_percent'] == (3/9 * 100)
-    assert fail_trial['result']['missing_percent'] == (2/9 * 100)
-    assert fail_trial['result']['unexpected_percent_nonmissing'] == (3/7 * 100)
+    assert not fail_trial.success
+    assert fail_trial.result['unexpected_percent'] == (3/9 * 100)
+    assert fail_trial.result['missing_percent'] == (2/9 * 100)
+    assert fail_trial.result['unexpected_percent_nonmissing'] == (3/7 * 100)
 
     #Mostly success
     mostly_trial = file_incomplete_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",
@@ -128,17 +130,18 @@ def test_expect_file_line_regex_match_count_to_equal():
                                                                                    skip=1,
                                                                                    mostly=0.57)
 
-    assert mostly_trial["success"]
+    assert mostly_trial.success
 
     #Count does fall in range
     success_trial = file_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",
                                                                          expected_count=3,
                                                                          skip=1)
 
-    assert success_trial["success"]
-    assert success_trial['result']['unexpected_percent'] == 0
-    assert success_trial['result']['unexpected_percent_nonmissing'] == 0
-    assert success_trial['result']['missing_percent'] == 0
+    assert success_trial.success
+    assert success_trial.result['unexpected_percent'] == 0
+    assert success_trial.result['unexpected_percent_nonmissing'] == 0
+    assert success_trial.result['missing_percent'] == 0
+
 
 def test_expect_file_hash_to_equal():
     # Test for non-existent file
@@ -157,18 +160,18 @@ def test_expect_file_hash_to_equal():
 
     # Test non-matching hash value
     fake_hash_value = titanic_file.expect_file_hash_to_equal(value="abc")
-    assert not fake_hash_value["success"]
+    assert not fake_hash_value.success
 
     # Test matching hash value with default algorithm
     hash_value = '63188432302f3a6e8c9e9c500ff27c8a'
     good_hash_default_alg = titanic_file.expect_file_hash_to_equal(value=hash_value)
-    assert good_hash_default_alg["success"]
+    assert good_hash_default_alg.success
 
     # Test matching hash value with specified algorithm
     hash_value = 'f89f46423b017a1fc6a4059d81bddb3ff64891e3c81250fafad6f3b3113ecc9b'
     good_hash_new_alg = titanic_file.expect_file_hash_to_equal(value=hash_value,
                                                                hash_alg='sha256')
-    assert good_hash_new_alg["success"]
+    assert good_hash_new_alg.success
 
 def test_expect_file_size_to_be_between():
     fake_file = ge.data_asset.FileDataAsset("abc")
@@ -202,23 +205,23 @@ def test_expect_file_size_to_be_between():
 
     # Test file size not in range
     bad_range = titanic_file.expect_file_size_to_be_between(0, 10000)
-    assert not bad_range["success"]
+    assert not bad_range.success
 
     # Test file size in range
     lower, upper = (70000, 71000) if platform.system() != 'Windows' else (71000, 72000)
     good_range = titanic_file.expect_file_size_to_be_between(lower, upper)
-    assert good_range["success"]
+    assert good_range.success
 
 def test_expect_file_to_exist():
     # Test for non-existent file
     fake_file = ge.data_asset.FileDataAsset("abc")
     fake_file_existence = fake_file.expect_file_to_exist()
-    assert not fake_file_existence["success"]
+    assert not fake_file_existence.success
 
     # Test for existing file
     real_file = ge.data_asset.FileDataAsset('./tests/test_sets/Titanic.csv')
     real_file_existence = real_file.expect_file_to_exist()
-    assert real_file_existence["success"]
+    assert real_file_existence.success
 
 def test_expect_file_to_have_valid_table_header():
     # Test for non-existent file
@@ -230,12 +233,12 @@ def test_expect_file_to_have_valid_table_header():
     invalid_header_dat = ge.data_asset.FileDataAsset('./tests/test_sets/same_column_names.csv')
     invalid_header_dat_expectation = invalid_header_dat.expect_file_to_have_valid_table_header(regex='\|',
                                                                                                skip=2)
-    assert not invalid_header_dat_expectation["success"]
+    assert not invalid_header_dat_expectation.success
 
     # Test for unique column names
     valid_header_dat = ge.data_asset.FileDataAsset('./tests/test_sets/Titanic.csv')
     valid_header_dat_expectation = valid_header_dat.expect_file_to_have_valid_table_header(regex=',')
-    assert valid_header_dat_expectation["success"]
+    assert valid_header_dat_expectation.success
 
 def test_expect_file_to_be_valid_json():
 
@@ -247,21 +250,21 @@ def test_expect_file_to_be_valid_json():
     # Test invalid JSON file
     invalid_JSON_file = ge.data_asset.FileDataAsset('./tests/test_sets/invalid_json_file.json')
     invalid_JSON_expectation = invalid_JSON_file.expect_file_to_be_valid_json()
-    assert not invalid_JSON_expectation["success"]
+    assert not invalid_JSON_expectation.success
 
     # Test valid JSON file
     valid_JSON_file = ge.data_asset.FileDataAsset('./tests/test_sets/titanic_expectations.json')
     valid_JSON_expectation = valid_JSON_file.expect_file_to_be_valid_json()
-    assert valid_JSON_expectation["success"]
+    assert valid_JSON_expectation.success
 
     # Test valid JSON file with non-matching schema
     schema_file = './tests/test_sets/sample_schema.json'
     test_file = ge.data_asset.FileDataAsset('./tests/test_sets/json_test1_against_schema.json')
     test_file_expectation = test_file.expect_file_to_be_valid_json(schema=schema_file)
-    assert not test_file_expectation["success"]
+    assert not test_file_expectation.success
 
     # Test valid JSON file with valid schema
     test_file = ge.data_asset.FileDataAsset('./tests/test_sets/json_test2_against_schema.json')
     schema_file = './tests/test_sets/sample_schema.json'
     test_file_expectation = test_file.expect_file_to_be_valid_json(schema=schema_file)
-    assert test_file_expectation["success"]
+    assert test_file_expectation.success
