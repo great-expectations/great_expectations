@@ -187,7 +187,7 @@ class SqlAlchemyDatasource(Datasource):
             limit = batch_kwargs.get('limit')
             offset = batch_kwargs.get('offset')
             if limit is not None or offset is not None:
-                logger.debug("Generating query from table batch_kwargs based on limit and offset")
+                logger.info("Generating query from table batch_kwargs based on limit and offset")
                 raw_query = sqlalchemy.select([sqlalchemy.text("*")])\
                     .select_from(sqlalchemy.schema.Table(batch_kwargs['table'], sqlalchemy.MetaData(), schema=schema))\
                     .offset(offset)\
