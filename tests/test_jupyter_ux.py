@@ -44,7 +44,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite, empty_d
 
 
 <ul id="content-block-2-body" >
-    
+
         
         
         <li >
@@ -53,14 +53,14 @@ def test_display_column_expectations_as_section(basic_expectation_suite, empty_d
                 </span>
             </li>
     
-            
+           
         
         <li >
                 <span >
                     values must be unique.
                 </span>
             </li>
-    
+
 </ul>
 
 </div>
@@ -148,9 +148,9 @@ def test_display_column_expectations_as_section(basic_expectation_suite, empty_d
 
 
 <ul id="content-block-2-body" >
-    
-        
-        
+
+
+
         <li >
                 <span >
                     is a required field.

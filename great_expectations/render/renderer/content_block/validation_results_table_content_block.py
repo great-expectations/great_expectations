@@ -193,7 +193,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     def _get_kl_divergence_observed_value(cls, evr):
         if not evr["result"].get("details"):
             return "--"
-    
+
         weights = evr["result"]["details"]["observed_partition"]["weights"]
         if len(weights) <= 10:
             height = 200
@@ -203,18 +203,18 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             height = 300
             width = 300
             col_width = 6
-    
+
         if evr["result"]["details"]["observed_partition"].get("bins"):
             bins = evr["result"]["details"]["observed_partition"]["bins"]
             bins_x1 = [round(value, 1) for value in bins[:-1]]
             bins_x2 = [round(value, 1) for value in bins[1:]]
-        
+
             df = pd.DataFrame({
                 "bin_min": bins_x1,
                 "bin_max": bins_x2,
                 "fraction": weights,
             })
-        
+
             bars = alt.Chart(df).mark_bar().encode(
                 x='bin_min:O',
                 x2='bin_max:O',
@@ -223,30 +223,31 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             chart = bars.to_json()
         elif evr["result"]["details"]["observed_partition"].get("values"):
             values = evr["result"]["details"]["observed_partition"]["values"]
-        
+
             df = pd.DataFrame({
                 "values": values,
                 "fraction": weights
             })
-        
+
             bars = alt.Chart(df).mark_bar().encode(
                 x='values:N',
                 y="fraction:Q"
             ).properties(width=width, height=height, autosize="fit")
             chart = bars.to_json()
-    
+
         observed_value = evr["result"].get("observed_value")
-    
+
         observed_value_content_block = {
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "KL Divergence: $observed_value",
                     "params": {
-                        "observed_value": str(observed_value) if observed_value else "None (-infinity, infinity, or NaN)",
+                        "observed_value": str(
+                            observed_value) if observed_value else "None (-infinity, infinity, or NaN)",
                     },
                 }
         }
-    
+
         graph_content_block = {
             "content_block_type": "graph",
             "graph": chart,
