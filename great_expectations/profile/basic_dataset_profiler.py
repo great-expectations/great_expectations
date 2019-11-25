@@ -275,7 +275,7 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
 
         dataset.set_default_expectation_argument("catch_exceptions", True)
 
-        value = dataset.expect_table_row_count_to_be_between(min_value=0, max_value=None)["result"]["observed_value"]
+        value = dataset.expect_table_row_count_to_be_between(min_value=0, max_value=None).result["observed_value"]
         dataset.expect_table_row_count_to_be_between(min_value=max(0, value-10), max_value=value+10)
 
         dataset.set_config_value('interactive_evaluation', True)
@@ -299,12 +299,12 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
                 break
 
         for column in columns:
-            if dataset.expect_column_values_to_not_be_null(column)["success"]:
+            if dataset.expect_column_values_to_not_be_null(column).success:
                 break
 
 
         for column in columns:
-            if dataset.expect_column_values_to_be_null(column)["success"]:
+            if dataset.expect_column_values_to_be_null(column).success:
                 break
 
         for column in columns:
@@ -312,16 +312,16 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
             type = cls._get_column_type_with_caching(dataset, column, column_cache)
 
             if cardinality in ["many", "very many", "unique"] and type in ["int", "float"]:
-                value = dataset.expect_column_min_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY")["result"]["observed_value"]
+                value = dataset.expect_column_min_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY").result["observed_value"]
                 value = dataset.expect_column_min_to_be_between(column, min_value=value-1, max_value=value+1)
 
-                value = dataset.expect_column_max_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY")["result"]["observed_value"]
+                value = dataset.expect_column_max_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY").result["observed_value"]
                 value = dataset.expect_column_max_to_be_between(column, min_value=value - 1, max_value=value + 1)
 
-                value = dataset.expect_column_mean_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY")["result"]["observed_value"]
+                value = dataset.expect_column_mean_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY").result["observed_value"]
                 dataset.expect_column_mean_to_be_between(column, min_value=value-1, max_value=value+1)
 
-                value = dataset.expect_column_median_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY")["result"]["observed_value"]
+                value = dataset.expect_column_median_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY").result["observed_value"]
                 dataset.expect_column_median_to_be_between(column, min_value=value-1, max_value=value+1)
 
                 result = dataset.expect_column_quantile_values_to_be_between(column,
@@ -335,8 +335,8 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
                                                                )
                 dataset.expect_column_quantile_values_to_be_between(column,
                                                                quantile_ranges={
-                                                                   "quantiles": result["result"]["observed_value"]["quantiles"],
-                                                                   "value_ranges": [[v-1, v+1] for v in result["result"]["observed_value"]["values"]]
+                                                                   "quantiles": result.result["observed_value"]["quantiles"],
+                                                                   "value_ranges": [[v-1, v+1] for v in result.result["observed_value"]["values"]]
                                                                }
                                                                )
                 break
@@ -344,7 +344,7 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
         for column in columns:
             cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
             if cardinality in ["two", "very few", "few"]:
-                value_set = dataset.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")["result"]["observed_value"]
+                value_set = dataset.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY").result["observed_value"]
                 dataset.expect_column_distinct_values_to_be_in_set(column, value_set=value_set, result_format="SUMMARY")
                 partition_object = build_categorical_partition_object(dataset, column)
 
@@ -354,12 +354,12 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
                 break
 
         expectation_suite = dataset.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=True)
-        if not "meta" in expectation_suite:
-            expectation_suite["meta"] = {"columns": meta_columns, "notes": {""}}
+        if not expectation_suite.meta:
+            expectation_suite.meta = {"columns": meta_columns, "notes": {""}}
         else:
-            expectation_suite["meta"]["columns"] = meta_columns
+            expectation_suite.meta["columns"] = meta_columns
 
-        expectation_suite["meta"]["notes"] = {
+        expectation_suite.meta["notes"] = {
             "format": "markdown",
             "content": [
                 """#### This is an _example_ suite
