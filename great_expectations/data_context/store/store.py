@@ -2,18 +2,16 @@ import logging
 
 from marshmallow import ValidationError
 
-logger = logging.getLogger(__name__)
 
 from six import string_types
 import json
 
 import pandas as pd
 
-from great_expectations.data_context.util import (
-    instantiate_class_from_config
-)
+from great_expectations.data_context.util import instantiate_class_from_config
 
-# TODO : Add a ConfigReadWriteStore.
+logger = logging.getLogger(__name__)
+
 
 class WriteOnlyStore(object):
     """This base class supports writing, but not reading.

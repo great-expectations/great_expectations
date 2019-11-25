@@ -70,11 +70,11 @@ class MetricIdentifier(DataContextKey):
 
 
 class ExpectationDefinedMetricIdentifier(DataContextKey):
-    def __init__(self, data_asset_name, batch_fingerprint, expectation_type, result_key, metric_kwargs):
+    def __init__(self, data_asset_name, expectation_suite_name, expectation_type, metric_name, metric_kwargs):
         self._data_asset_name = data_asset_name
-        self._batch_fingerprint = batch_fingerprint
+        self._expectation_suite_name = expectation_suite_name
         self._expectation_type = expectation_type,
-        self._result_key = result_key
+        self._metric_name = metric_name
         self._metric_kwargs = metric_kwargs
 
     @property
@@ -82,31 +82,35 @@ class ExpectationDefinedMetricIdentifier(DataContextKey):
         return self._data_asset_name
 
     @property
-    def batch_fingerprint(self):
-        return self._batch_fingerprint
+    def expectation_suite_name(self):
+        return self._expectation_suite_name
 
     @property
     def expectation_type(self):
         return self._expectation_type
 
     @property
-    def result_key(self):
-        return self._result_key
+    def metric_name(self):
+        return self._metric_name
 
     @property
     def metric_kwargs(self):
         return self._metric_kwargs
 
     def to_tuple(self):
-        return (self.data_asset_name, self.batch_fingerprint, self.expectation_type, self.result_key,
-                make_dictionary_key(self.metric_kwargs))
+        return (self.data_asset_name, self.expectation_suite_name, self.expectation_type,
+                self.metric_name, kwargs_to_tuple(self.metric_kwargs))
 
 
 class ExpectationDefinedValidationMetric(object):
-    def __init__(self, metric_identifier, metric_value):
-        # TODO: validate and raise error
+    def __init__(self, run_id, metric_identifier, metric_value):
+        self._run_id = run_id
         self._metric_identifier = metric_identifier
         self._metric_value = metric_value
+
+    @property
+    def run_id(self):
+        return self._run_id
 
     @property
     def metric_identifier(self):

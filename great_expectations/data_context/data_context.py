@@ -243,7 +243,7 @@ class ConfigOnlyDataContext(object):
             raise
         return True
 
-    def __init__(self, project_config, context_root_dir, data_asset_name_delimiter='/'):
+    def __init__(self, project_config, context_root_dir=None, data_asset_name_delimiter='/'):
         """DataContext constructor
 
         Args:
@@ -808,7 +808,10 @@ class ConfigOnlyDataContext(object):
             
     def list_expectation_suite_keys(self):
         """Return a list of available expectation suite keys."""
-        keys = self.stores[self.expectations_store_name].list_keys()
+        try:
+            keys = self.stores[self.expectations_store_name].list_keys()
+        except KeyError as e:
+            raise ge_exceptions.InvalidConfigError("Unable to find configured store: %s" % str(e))
         return keys
 
     def list_datasources(self):

@@ -92,20 +92,6 @@ class NamespacedReadWriteStore(ReadWriteStore):
 
         return tuple(list_)
 
-    # def _convert_resource_identifier_to_list(self, key):
-    #     # The logic in this function is recursive, so it can't return a tuple
-    #     list_ = []
-    #
-    #     #Fetch keys in _key_order to guarantee tuple ordering in both python 2 and 3
-    #     for key_name in key._key_order:
-    #         key_element = key[key_name]
-    #         if isinstance( key_element, DataContextKey ):
-    #             list_ += self._convert_resource_identifier_to_list(key_element)
-    #         else:
-    #             list_.append(key_element)
-    #
-    #     return list_
-
     def _convert_tuple_to_resource_identifier(self, tuple_):
         new_identifier = self.key_class.from_tuple(tuple_)
         return new_identifier
