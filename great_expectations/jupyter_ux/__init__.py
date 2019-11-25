@@ -229,6 +229,7 @@ cooltip_style_element = """<style type="text/css">
 def display_column_expectations_as_section(
     expectation_suite,
     column,
+    data_context,
     include_styling=True,
     return_without_displaying=False,
 ):
@@ -248,7 +249,7 @@ def display_column_expectations_as_section(
     #TODO: Handle the case where zero evrs match the column name
 
     document = render.renderer.ExpectationSuiteColumnSectionRenderer().render(column_expectation_list)
-    view = render.view.DefaultJinjaSectionView().render(
+    view = render.view.DefaultJinjaSectionView(data_context=data_context).render(
         render.types.RenderedComponentContentWrapper(**{
             "section": document,
             "section_loop": {"index": 1},
@@ -269,6 +270,7 @@ def display_column_expectations_as_section(
 def display_column_evrs_as_section(
     evrs,
     column,
+    data_context,
     include_styling=True,
     return_without_displaying=False,
 ):
@@ -287,7 +289,7 @@ def display_column_evrs_as_section(
     #TODO: Handle the case where zero evrs match the column name
 
     document = render.renderer.ProfilingResultsColumnSectionRenderer().render(column_evr_list)
-    view = render.view.DefaultJinjaSectionView().render(
+    view = render.view.DefaultJinjaSectionView(data_context=data_context).render(
         render.types.RenderedComponentContentWrapper(**{
             "section": document,
             "section_loop": {"index": 1},
