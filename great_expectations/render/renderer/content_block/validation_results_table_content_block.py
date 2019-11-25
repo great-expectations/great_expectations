@@ -240,18 +240,10 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         observed_value_content_block = {
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": "$observed_value_title $observed_value",
+                    "template": "KL Divergence: $observed_value",
                     "params": {
-                        "observed_value_title": "Observed Value:",
-                        "observed_value": str(observed_value),
+                        "observed_value": str(observed_value) if observed_value else "None (-infinity, infinity, or NaN)",
                     },
-                    "styling": {
-                        "params": {
-                            "observed_value_title": {
-                                "tag": "strong"
-                            }
-                        }
-                    }
                 }
         }
     
