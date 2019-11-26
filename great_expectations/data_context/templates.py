@@ -67,15 +67,15 @@ validation_operators:
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
-      - name: send_slack_notification_on_validation_result
-        action:
-          class_name: SlackNotificationAction
-          # put the actual webhook URL in the uncommitted/config_variables.yml file
-          slack_webhook: ${validation_notification_slack_webhook}
-          notify_on: all # possible values: "all", "failure", "success"
-          renderer:
-            module_name: great_expectations.render.renderer.slack_renderer
-            class_name: SlackRenderer
+      # - name: send_slack_notification_on_validation_result
+      #   action:
+      #     class_name: SlackNotificationAction
+      #     # put the actual webhook URL in the uncommitted/config_variables.yml file
+      #     slack_webhook: ${validation_notification_slack_webhook}
+      #     notify_on: all # possible values: "all", "failure", "success"
+      #     renderer:
+      #       module_name: great_expectations.render.renderer.slack_renderer
+      #       class_name: SlackRenderer
     
 stores:
 # Stores are configurable places to store things like Expectations, Validations
