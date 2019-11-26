@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-from great_expectations import rtd_url_ge_version
-
-PROJECT_HELP_COMMENT = """
 # Welcome to Great Expectations! Always know what to expect from your data.
 # 
 # Here you can define datasources, generators, integrations and more. This file
@@ -19,10 +15,16 @@ config_version: 1
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations add-datasource` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/features/datasource.html
-datasources: {}
-"""
+datasources:
+  my_postgres_db:
+    class_name: SqlAlchemyDatasource
+    credentials: ${my_postgres_db}
+    data_asset_type:
+      class_name: SqlAlchemyDataset
+    generators:
+      default:
+        class_name: TableGenerator
 
-CONFIG_VARIABLES_INTRO = """
 # This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes
 # such as staging vs prod.
@@ -36,12 +38,7 @@ CONFIG_VARIABLES_INTRO = """
 # If the substitution value comes from the config variables file, it can be a
 # simple (non-nested) value or a nested value such as a dictionary. If it comes
 # from an environment variable, it must be a simple value. Read more at:
-# https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets"""
-
-# This junky fake key keeps ruaml.yml from nuking the important comment block
-CONFIG_VARIABLES_TEMPLATE = "ge_comment_preservation_key: 1" + CONFIG_VARIABLES_INTRO
-
-PROJECT_OPTIONAL_CONFIG_COMMENT = CONFIG_VARIABLES_INTRO + """
+# https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets
 config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory will be added to your python path for custom modules
@@ -67,16 +64,14 @@ validation_operators:
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
-      # - name: send_slack_notification_on_validation_result
-      #   action:
-      #     class_name: SlackNotificationAction
-      #     # put the actual webhook URL in the uncommitted/config_variables.yml file
-      #     slack_webhook: ${validation_notification_slack_webhook}
-      #     notify_on: all # possible values: "all", "failure", "success"
-      #     renderer:
-      #       module_name: great_expectations.render.renderer.slack_renderer
-      #       class_name: SlackRenderer
-    
+      - name: send_slack_notification_on_validation_result
+        action:
+          class_name: SlackNotificationAction
+          slack_webhook: ${validation_notification_slack_webhook}
+          notify_on: all
+          renderer:
+            module_name: great_expectations.render.renderer.slack_renderer
+            class_name: SlackRenderer
 stores:
 # Stores are configurable places to store things like Expectations, Validations
 # Data Docs, and more. These are for advanced users only - most users can simply
@@ -90,18 +85,15 @@ stores:
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: expectations/
-
   validations_store:
     class_name: ValidationsStore
     store_backend:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
-
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/en/latest/reference/evaluation_parameters.html
     class_name: InMemoryEvaluationParameterStore
-
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 evaluation_parameter_store_name: evaluation_parameter_store
@@ -114,11 +106,8 @@ data_docs_sites:
   local_site:
     class_name: SiteBuilder
     store_backend:
-        class_name: FixedLengthTupleFilesystemStoreBackend
-        base_directory: uncommitted/data_docs/local_site/
+      class_name: FixedLengthTupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
-        class_name: DefaultSiteIndexBuilder
-        show_cta_footer: True
-"""
-
-PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT
+      class_name: DefaultSiteIndexBuilder
+      show_cta_footer: true
