@@ -1,19 +1,20 @@
 import nbformat
 
+from great_expectations.render.renderer.renderer import Renderer
 
-class SuiteToNotebookConverter(object):
+
+class NotebookRenderer(Renderer):
     """
-    A quick and dirty experiment to convert a suite to a notebook that can create the suite.
+    Render a notebook that can re-create or edit the suite.
 
-    It's a real chicken and egg thing.
-
-    Usage: SuiteToNotebookConverter().run(critical_suite, notebook_file_path)
+    Possible use cases:
+    - Make an easy path to edit a suite that a Profiler created.
+    - Make it easy to edit a suite where only JSON exists.
     """
 
-    def __init__(self, context=None, data_asset_name=None, suite_name=None):
-        self.context = context
-        self.suite_name = suite_name
+    def __init__(self, data_asset_name=None, suite_name=None):
         self.data_asset_name = data_asset_name
+        self.suite_name = suite_name
 
     @classmethod
     def _get_expectations_by_column(cls, suite):
@@ -132,9 +133,9 @@ batch = context.get_batch(\""""
         with open(notebook_file_path, "w") as f:
             nbformat.write(notebook, f)
 
-    def create_notebook_dictionary_from_suite(self, suite):
+    def render(self, suite):
         """
-        Create a notebook dict from an expectation suite in dict form.
+        Render a notebook dict from an expectation suite in dict form.
 
         :type suite: dict
         """
@@ -146,12 +147,12 @@ batch = context.get_batch(\""""
         ] + self._convert_expectation_suite_to_notebook_cells(suite)
         return notebook
 
-    def run(self, suite, notebook_file_path):
+    def render_to_disk(self, suite, notebook_file_path):
         """
         Create a notebook on disk from an expectation suite in dict form.
 
         :type suite: dict
         :type notebook_file_path: str
         """
-        notebook = self.create_notebook_dictionary_from_suite(suite)
+        notebook = self.render(suite)
         self._write_notebook_to_disk(notebook, notebook_file_path)
