@@ -6,7 +6,8 @@
 * Raise informative error if config variables are declared but unavailable.
 * Update ExpectationsStore defaults to be consistent across all FixedLengthTupleStoreBackend objects
 * Include tail_weights by default when using build_continuous_partition_object
-* Fix Redshift quantiles computation
+* Fix Redshift quantiles computation and type detection
+
 
 0.8.5
 -----------------
