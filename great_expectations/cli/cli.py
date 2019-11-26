@@ -203,7 +203,13 @@ def init(target_directory, view):
     if os.path.isfile(ge_yml):
         if DataContext.all_uncommitted_directories_exist(ge_dir) and \
                 DataContext.config_variables_yml_exist(ge_dir):
-            cli_message(PROJECT_IS_COMPLETE)
+            # Ensure the context can be instantiated
+            try:
+                _ = DataContext(ge_dir)
+                cli_message(PROJECT_IS_COMPLETE)
+            except ge_exceptions.DataContextError as e:
+                cli_message("<red>{}</red>".format(e))
+                exit(5)
         else:
             _complete_onboarding(target_directory)
 
@@ -224,8 +230,6 @@ def init(target_directory, view):
         context, data_source_name, data_source_type = _create_new_project(target_directory)
         if not data_source_name:  # no datasource was created
             return
-
-        context = _slack_setup(context)
 
         profile_datasource(context, data_source_name, open_docs=view, additional_batch_kwargs={"limit": 1000})
         cli_message("""\n<cyan>Great Expectations is now set up in your project!</cyan>""")
