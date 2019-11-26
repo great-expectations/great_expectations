@@ -25,32 +25,48 @@ def test_setting_config_variables_is_visible_immediately(data_context_with_varia
 
     assert config_variables_file_path == "uncommitted/config_variables.yml"
 
-    # verify the that config variables file does not exist in this fixture - we will check later that
-    # it is automatically created on the first write
-    assert not os.path.isfile(os.path.join(context._context_root_directory, config_variables_file_path))
+    # The config variables must have been present to instantiate the config
+    assert os.path.isfile(os.path.join(context._context_root_directory, config_variables_file_path))
 
     # the context's config has two config variables - one using the ${} syntax and the other - $.
-    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"]["mygenerator"]["reader_options"]["test_variable_sub1"] == "${replace_me}"
-    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"]["mygenerator"]["reader_options"]["test_variable_sub2"] == "$replace_me"
+    assert context.get_project_config()["datasources"]["mydatasource"]["generators"]["mygenerator"][
+               "reader_options"]["test_variable_sub1"] == "${replace_me}"
+    assert context.get_project_config()["datasources"]["mydatasource"]["generators"]["mygenerator"][
+               "reader_options"]["test_variable_sub2"] == "$replace_me"
+
+    config_variables = context._load_config_variables_file()
+    assert config_variables["replace_me"] == {"n1": "v1"}
+
+    # the context's config has two config variables - one using the ${} syntax and the other - $.
+    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"][
+               "mygenerator"]["reader_options"]["test_variable_sub1"] == {"n1": "v1"}
+    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"][
+               "mygenerator"]["reader_options"]["test_variable_sub2"] == {"n1": "v1"}
 
     # verify that we can save a config variable in the config variables file
     # and the value is retrievable
-    context.save_config_variable("replace_me", {"n1": "v1"})
-    config_variables = context._load_config_variables_file()
-    assert config_variables["replace_me"] == {"n1": "v1"}
+    context.save_config_variable("replace_me_2", {"n2": "v2"})
+    # Update the config itself
+    context._project_config["datasources"]["mydatasource"]["generators"]["mygenerator"]["reader_options"][
+        "test_variable_sub1"] = "${replace_me_2}"
 
     # verify that the value of the config variable is immediately updated.
     # verify that the config variable will be substituted with the value from the file if the
     # env variable is not set (for both ${} and $ syntax variations)
-    context._project_config_with_variables_substituted["datasources"]["mydatasource"]["generators"]["mygenerator"][
-               "reader_options"]["test_variable_sub1"] == {"n1": "v1"}
-    context._project_config_with_variables_substituted["datasources"]["mydatasource"]["generators"]["mygenerator"][
-               "reader_options"]["test_variable_sub2"] == {"n1": "v1"}
+    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"][
+        "mygenerator"]["reader_options"]["test_variable_sub1"] == {"n2": "v2"}
+    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"][
+        "mygenerator"]["reader_options"]["test_variable_sub2"] == {"n1": "v1"}
 
-    # verify that the value of the env var takes precedence over the one from the config variables file
-    os.environ["replace_me"] = "value_from_env_var"
-    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"]["mygenerator"][
-               "reader_options"]["test_variable_sub1"] == "value_from_env_var"
+    try:
+        # verify that the value of the env var takes precedence over the one from the config variables file
+        os.environ["replace_me_2"] = "value_from_env_var"
+        assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"]["mygenerator"][
+                   "reader_options"]["test_variable_sub1"] == "value_from_env_var"
+    except Exception:
+        raise
+    finally:
+        del os.environ["replace_me_2"]
 
 
 def test_substitute_config_variable():

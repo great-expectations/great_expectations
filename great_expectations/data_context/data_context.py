@@ -573,8 +573,8 @@ class ConfigOnlyDataContext(object):
         """Save config variable value
 
         Args:
-            property_name: name of the property
-            **value: the value to save
+            config_variable_name: name of the property
+            value: the value to save for the property
 
         Returns:
             None
