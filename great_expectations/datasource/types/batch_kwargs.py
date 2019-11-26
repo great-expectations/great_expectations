@@ -2,17 +2,11 @@ import logging
 import copy
 from hashlib import md5
 import datetime
-import time
 
 import pandas as pd
 from six import string_types
-from great_expectations.types import RequiredKeysDotDict, AllowedKeysDotDict, ClassConfig
-from great_expectations.datasource.types.reader_methods import ReaderMethods
-from great_expectations.data_context.types.base_resource_identifiers import (
-    OrderedDataContextKey,
-    DataContextKey,
-)
-# from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.types import RequiredKeysDotDict, ClassConfig
+from great_expectations.data_context.types.base_resource_identifiers import OrderedDataContextKey
 
 try:
     import pyspark
@@ -122,12 +116,9 @@ class PathBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs)
     _required_keys = {
         "path"
     }
-    # NOTE: JPC - 20190821: Eventually, we will probably want to have some logic that decides to use, say,
-    # an md5 hash of a file instead of a path to decide when it's the same, or to differentiate paths
-    # from s3 from paths on a local filesystem
     _key_types = {
         "path": string_types,
-        "reader_method": ReaderMethods
+        "reader_method": string_types
     }
 
 
@@ -136,12 +127,9 @@ class S3BatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
     _required_keys = {
         "s3"
     }
-    # NOTE: JPC - 20190821: Eventually, we will probably want to have some logic that decides to use, say,
-    # an md5 hash of a file instead of a path to decide when it's the same, or to differentiate paths
-    # from s3 from paths on a local filesystem
     _key_types = {
         "s3": string_types,
-        "reader_method": ReaderMethods
+        "reader_method": string_types
     }
 
 
