@@ -2,14 +2,15 @@
   {% set identifier_list = full_data_asset_identifier.split("/") -%}
 {% endif %}
 
-{% set static_images_dir = static_assets_dir + "/images/" -%}
-
 {% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
   {% set home_url = "../../../../../index.html" -%}
+  {% set static_images_dir = "../../../../../static/images/" -%}
 {% elif utm_medium == "expectation-suite-page" %}
   {% set home_url = "../../../../index.html" -%}
+  {% set static_images_dir = "../../../../static/images/" -%}
 {% elif utm_medium == "index-page" %}
   {% set home_url = "#" -%}
+  {% set static_images_dir = "./static/images/" -%}
 {% endif %}
 
 <nav class="navbar bg-light navbar-expand-md sticky-top border-bottom" style="height: 70px">
