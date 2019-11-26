@@ -1,5 +1,5 @@
 import pytest
-from great_expectations.suite_to_notebook import SuiteToNotebookConverter
+from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 
 
 @pytest.fixture
@@ -242,7 +242,7 @@ def warning_suite():
 
 
 def test_simple_suite(critical_suite):
-    obs = SuiteToNotebookConverter().create_notebook_dictionary_from_suite(critical_suite)
+    obs = NotebookRenderer().render(critical_suite)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -305,7 +305,7 @@ def test_simple_suite(critical_suite):
 
 
 def test_complex_suite(warning_suite):
-    obs = SuiteToNotebookConverter().create_notebook_dictionary_from_suite(warning_suite)
+    obs = NotebookRenderer().render(warning_suite)
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
