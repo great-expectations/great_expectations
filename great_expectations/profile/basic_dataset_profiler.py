@@ -253,6 +253,7 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
 
         return column_type
 
+
     @classmethod
     def _get_column_cardinality_with_caching(cls, dataset, column_name, cache):
         column_cache_entry = cache.get(column_name)
@@ -269,6 +270,115 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
             dataset.set_config_value('interactive_evaluation', True)
 
         return column_cardinality
+
+    @classmethod
+    def _create_expectations_for_low_card_column(cls, dataset, column):
+        cls._create_non_nullity_expectations(dataset, column)
+
+        value_set = \
+        dataset.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY").result[
+            "observed_value"]
+        dataset.expect_column_distinct_values_to_be_in_set(column, value_set=value_set, result_format="SUMMARY")
+        partition_object = build_categorical_partition_object(dataset, column)
+
+        dataset.expect_column_kl_divergence_to_be_less_than(column, partition_object=partition_object,
+                                                            threshold=0.6)
+
+    @classmethod
+    def _create_non_nullity_expectations(cls, dataset, column):
+        not_null_result = dataset.expect_column_values_to_not_be_null(column)
+        if not not_null_result.success:
+            mostly_value = max(0.001, (100.0 - not_null_result.result["unexpected_percent"] - 10) / 100.0)
+            dataset.expect_column_values_to_not_be_null(column, mostly=mostly_value)
+
+    @classmethod
+    def _create_expectations_for_numeric_column(cls, dataset, column):
+        cls._create_non_nullity_expectations(dataset, column)
+
+        value = \
+        dataset.expect_column_min_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY").result[
+            "observed_value"]
+        value = dataset.expect_column_min_to_be_between(column, min_value=value - 1, max_value=value + 1)
+
+        value = \
+        dataset.expect_column_max_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY").result[
+            "observed_value"]
+        value = dataset.expect_column_max_to_be_between(column, min_value=value - 1, max_value=value + 1)
+
+        value = dataset.expect_column_mean_to_be_between(column, min_value=None, max_value=None,
+                                                         result_format="SUMMARY").result["observed_value"]
+        dataset.expect_column_mean_to_be_between(column, min_value=value - 1, max_value=value + 1)
+
+        value = dataset.expect_column_median_to_be_between(column, min_value=None, max_value=None,
+                                                           result_format="SUMMARY").result["observed_value"]
+        dataset.expect_column_median_to_be_between(column, min_value=value - 1, max_value=value + 1)
+
+        result = dataset.expect_column_quantile_values_to_be_between(column,
+                                                                     quantile_ranges={
+                                                                         "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                                                                         "value_ranges": [[None, None], [None, None],
+                                                                                          [None, None], [None, None],
+                                                                                          [None, None]]
+                                                                     },
+                                                                     result_format="SUMMARY"
+                                                                     )
+        dataset.expect_column_quantile_values_to_be_between(column,
+                                                            quantile_ranges={
+                                                                "quantiles": result.result["observed_value"][
+                                                                    "quantiles"],
+                                                                "value_ranges": [[v - 1, v + 1] for v in
+                                                                                 result.result["observed_value"][
+                                                                                     "values"]]
+                                                            }
+                                                            )
+
+    @classmethod
+    def _create_expectations_for_string_column(cls, dataset, column):
+        cls._create_non_nullity_expectations(dataset, column)
+        dataset.expect_column_value_lengths_to_be_between(column, min_value=1)
+
+
+    @classmethod
+    def _find_next_low_card_column(cls, dataset, columns, profiled_columns, column_cache):
+        for column in columns:
+            if column in profiled_columns["low_card"]:
+                continue
+            cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
+            if cardinality in ["two", "very few", "few"]:
+                return column
+
+        return None
+
+
+    @classmethod
+    def _find_next_numeric_column(cls, dataset, columns, profiled_columns, column_cache):
+        for column in columns:
+            if column in profiled_columns["numeric"]:
+                continue
+            if column.lower().strip() == "id" or column.lower().strip().find("_id") > -1:
+                continue
+
+            cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
+            type = cls._get_column_type_with_caching(dataset, column, column_cache)
+
+            if cardinality in ["many", "very many", "unique"] and type in ["int", "float"]:
+                return column
+
+        return None
+
+    @classmethod
+    def _find_next_string_column(cls, dataset, columns, profiled_columns, column_cache):
+        for column in columns:
+            if column in profiled_columns["string"]:
+                continue
+
+            cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
+            type = cls._get_column_type_with_caching(dataset, column, column_cache)
+
+            if cardinality in ["many", "very many", "unique"] and type not in ["int", "float"]:
+                return column
+
+        return None
 
     @classmethod
     def _profile(cls, dataset):
@@ -290,68 +400,31 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
             meta_columns[column] = {"description": ""}
 
         column_cache = {}
+        profiled_columns = {
+            "numeric": [],
+            "low_card": [],
+            "string": []
+        }
+
+        column = cls._find_next_low_card_column(dataset, columns, profiled_columns, column_cache)
+        if column:
+            cls._create_expectations_for_low_card_column(dataset, column)
+            profiled_columns["low_card"].append(column)
 
 
-        for column in columns:
-            cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
-            if cardinality == "unique":
-                dataset.expect_column_values_to_be_unique(column)
-                break
-
-        for column in columns:
-            if dataset.expect_column_values_to_not_be_null(column).success:
-                break
+        column = cls._find_next_numeric_column(dataset, columns, profiled_columns, column_cache)
+        if column:
+            cls._create_expectations_for_numeric_column(dataset, column)
+            profiled_columns["low_card"].append(column)
 
 
-        for column in columns:
-            if dataset.expect_column_values_to_be_null(column).success:
-                break
+        column = cls._find_next_string_column(dataset, columns, profiled_columns, column_cache)
+        if column:
+            cls._create_expectations_for_string_column(dataset, column)
+            profiled_columns["low_card"].append(column)
 
-        for column in columns:
-            cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
-            type = cls._get_column_type_with_caching(dataset, column, column_cache)
 
-            if cardinality in ["many", "very many", "unique"] and type in ["int", "float"]:
-                value = dataset.expect_column_min_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY").result["observed_value"]
-                value = dataset.expect_column_min_to_be_between(column, min_value=value-1, max_value=value+1)
 
-                value = dataset.expect_column_max_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY").result["observed_value"]
-                value = dataset.expect_column_max_to_be_between(column, min_value=value - 1, max_value=value + 1)
-
-                value = dataset.expect_column_mean_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY").result["observed_value"]
-                dataset.expect_column_mean_to_be_between(column, min_value=value-1, max_value=value+1)
-
-                value = dataset.expect_column_median_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY").result["observed_value"]
-                dataset.expect_column_median_to_be_between(column, min_value=value-1, max_value=value+1)
-
-                result = dataset.expect_column_quantile_values_to_be_between(column,
-                                                               quantile_ranges={
-                                                                   "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
-                                                                   "value_ranges": [[None, None], [None, None],
-                                                                                    [None, None], [None, None],
-                                                                                    [None, None]]
-                                                               },
-                                                                result_format = "SUMMARY"
-                                                               )
-                dataset.expect_column_quantile_values_to_be_between(column,
-                                                               quantile_ranges={
-                                                                   "quantiles": result.result["observed_value"]["quantiles"],
-                                                                   "value_ranges": [[v-1, v+1] for v in result.result["observed_value"]["values"]]
-                                                               }
-                                                               )
-                break
-
-        for column in columns:
-            cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
-            if cardinality in ["two", "very few", "few"]:
-                value_set = dataset.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY").result["observed_value"]
-                dataset.expect_column_distinct_values_to_be_in_set(column, value_set=value_set, result_format="SUMMARY")
-                partition_object = build_categorical_partition_object(dataset, column)
-
-                dataset.expect_column_kl_divergence_to_be_less_than(column, partition_object=partition_object,
-                                                       threshold=0.6)
-
-                break
 
         expectation_suite = dataset.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=True)
         if not expectation_suite.meta:
