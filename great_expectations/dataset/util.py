@@ -204,16 +204,17 @@ def build_continuous_partition_object(dataset, column, bins='auto', n_bins=10, a
 
             See :ref:`partition_object`.
     """
-    # NOTE: we are *not* specifying a tail_weight_holdout by default.
     bins = dataset.get_column_partition(column, bins, n_bins, allow_relative_error)
     if isinstance(bins, np.ndarray):
         bins = bins.tolist()
     else:
         bins = list(bins)
     weights = list(np.array(dataset.get_column_hist(column, tuple(bins))) / dataset.get_column_nonnull_count(column))
+    tail_weights = (1 - sum(weights)) / 2
     partition_object = {
         "bins": bins,
-        "weights": weights
+        "weights": weights,
+        "tail_weights": [tail_weights, tail_weights]
     }
     return partition_object
 
