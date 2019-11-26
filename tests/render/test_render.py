@@ -190,9 +190,9 @@ def test_content_block_list_available_expectations():
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
-def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expectations, empty_data_context):
+def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expectations):
     rendered_json = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations)
-    rendered_page = DefaultJinjaPageView(data_context=empty_data_context).render(rendered_json)
+    rendered_page = DefaultJinjaPageView().render(rendered_json)
 
     with open('./tests/render/output/test_render_profiled_fixture_expectation_suite.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))
@@ -204,10 +204,10 @@ def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expe
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
 def test_render_profiled_fixture_expectation_suite_with_distribution(
-        titanic_dataset_profiler_expectations_with_distribution, empty_data_context):
+        titanic_dataset_profiler_expectations_with_distribution):
     # Tests sparkline
     rendered_json = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations_with_distribution)
-    rendered_page = DefaultJinjaPageView(data_context=empty_data_context).render(rendered_json)
+    rendered_page = DefaultJinjaPageView().render(rendered_json)
 
     with open('./tests/render/output/titanic_dataset_profiler_expectation_suite_with_distribution.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))
@@ -218,9 +218,9 @@ def test_render_profiled_fixture_expectation_suite_with_distribution(
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
-def test_render_profiling_results(titanic_profiled_evrs_1, empty_data_context):
+def test_render_profiling_results(titanic_profiled_evrs_1):
     rendered_json = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
-    rendered_page = DefaultJinjaPageView(data_context=empty_data_context).render(rendered_json)
+    rendered_page = DefaultJinjaPageView().render(rendered_json)
 
     with open('./tests/render/output/test_render_profiling_results.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))
@@ -231,9 +231,9 @@ def test_render_profiling_results(titanic_profiled_evrs_1, empty_data_context):
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
-def test_render_validation_results(titanic_profiled_evrs_1, empty_data_context):
+def test_render_validation_results(titanic_profiled_evrs_1):
     rendered_json = ValidationResultsPageRenderer().render(titanic_profiled_evrs_1)
-    rendered_page = DefaultJinjaPageView(data_context=empty_data_context).render(rendered_json)
+    rendered_page = DefaultJinjaPageView().render(rendered_json)
 
     with open('./tests/render/output/test_render_validation_results.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))
@@ -247,10 +247,9 @@ def test_render_validation_results(titanic_profiled_evrs_1, empty_data_context):
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
-def test_smoke_render_profiling_results_page_renderer_with_exception(
-        titanic_profiler_evrs_with_exception, empty_data_context):
+def test_smoke_render_profiling_results_page_renderer_with_exception(titanic_profiler_evrs_with_exception):
     rendered_json = ProfilingResultsPageRenderer().render(titanic_profiler_evrs_with_exception)
-    rendered_page = DefaultJinjaPageView(data_context=empty_data_context).render(rendered_json)
+    rendered_page = DefaultJinjaPageView().render(rendered_json)
 
     with open('./tests/render/output/test_render_profiling_results_column_section_renderer_with_exception.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))
@@ -262,13 +261,13 @@ def test_smoke_render_profiling_results_page_renderer_with_exception(
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
-def test_full_oobe_flow(empty_data_context):
+def test_full_oobe_flow():
     df = ge.read_csv("examples/data/Titanic.csv")
     df.profile(BasicDatasetProfiler)
     evrs = df.validate()  # ["results"]
 
     rendered_json = ProfilingResultsPageRenderer().render(evrs)
-    rendered_page = DefaultJinjaPageView(data_context=empty_data_context).render(rendered_json)
+    rendered_page = DefaultJinjaPageView().render(rendered_json)
 
     with open('./tests/render/output/test_full_oobe_flow.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))
@@ -299,7 +298,7 @@ def test_full_oobe_flow(empty_data_context):
 #         assert "This Expectation suite currently contains 19 total Expectations across 3 columns." in html
 #         assert "To add additional notes" in html
 
-def test_render_string_template(empty_data_context):
+def test_render_string_template():
     template = {
         "template": "$column Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram",
         "params": {
@@ -336,9 +335,7 @@ def test_render_string_template(empty_data_context):
         }
     }
 
-    res = DefaultJinjaPageView(
-        data_context=empty_data_context).render_string_template(
-        template).replace(" ", "").replace("\t", "").replace("\n", "")
+    res = DefaultJinjaPageView().render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
     expected = u"""<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >█▄▁</span>
             </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
@@ -380,9 +377,7 @@ def test_render_string_template(empty_data_context):
         }
     }
 
-    res = DefaultJinjaPageView(
-        data_context=empty_data_context).render_string_template(
-        template).replace(" ", "").replace("\t", "").replace("\n", "")
+    res = DefaultJinjaPageView().render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
     expected = u"""<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >▃▆▁█</span>
             </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
@@ -390,8 +385,8 @@ def test_render_string_template(empty_data_context):
     assert res == expected
 
 
-def test_render_string_template_bug_1(empty_data_context):
+def test_render_string_template_bug_1():
     #Looks like string templates can't contain dollar signs. We need some kind of escaping
     with pytest.raises(ValueError):
         template = {'template': 'Car Insurance Premiums ($)', 'tooltip': {'content': 'expect_column_to_exist', 'placement': 'top'}}
-        DefaultJinjaPageView(data_context=empty_data_context).render_string_template(template)
+        DefaultJinjaPageView().render_string_template(template)

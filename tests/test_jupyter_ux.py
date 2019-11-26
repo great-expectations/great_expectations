@@ -14,11 +14,10 @@ def test_styling_elements_exist():
     assert ".cooltip" in jux.cooltip_style_element
 
 
-def test_display_column_expectations_as_section(basic_expectation_suite, empty_data_context):
+def test_display_column_expectations_as_section(basic_expectation_suite):
     html_to_display = jux.display_column_expectations_as_section(
         basic_expectation_suite,
         "naturals",
-        data_context=empty_data_context,
         include_styling=False,
         return_without_displaying=True
     )
@@ -72,7 +71,6 @@ def test_display_column_expectations_as_section(basic_expectation_suite, empty_d
     html_to_display = jux.display_column_expectations_as_section(
         basic_expectation_suite,
         "naturals",
-        data_context=empty_data_context,
         return_without_displaying=True
     )
     print(html_to_display)
@@ -183,7 +181,6 @@ def test_display_column_evrs_as_section(empty_data_context):
     html_to_display = jux.display_column_evrs_as_section(
         evrs,
         "Name",
-        data_context=empty_data_context,
         include_styling=False,
         return_without_displaying=True
     )
