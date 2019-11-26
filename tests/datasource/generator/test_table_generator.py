@@ -102,10 +102,10 @@ def test_query_generator_view(sqlite_view_engine):
             "class_name": "TableGenerator"
         }
     })  # Build a datasource with a queries generator to introspect our database with a view
-    names = set(datasource.get_available_data_asset_names()["table"])
+    names = set(datasource.get_available_data_asset_names()["table"]["names"])
 
     # We should see both the table *and* the primary view, but *not* the temp view
     assert names == {
-        "main.test_table",
-        "main.test_view"
+        ("main.test_table", "table"),
+        ("main.test_view", "view")
     }
