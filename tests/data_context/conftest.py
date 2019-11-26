@@ -38,8 +38,11 @@ def data_context_with_variables_in_config(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     safe_mmkdir(os.path.join(asset_config_path,
                              "mydatasource/mygenerator/my_dag_node"), exist_ok=True)
+    safe_mmkdir(os.path.join(context_path, "uncommitted"), exist_ok=True)
     shutil.copy("./tests/test_fixtures/great_expectations_basic_with_variables.yml",
                 str(os.path.join(context_path, "great_expectations.yml")))
+    shutil.copy("./tests/test_fixtures/config_variables.yml",
+                str(os.path.join(context_path, "uncommitted/config_variables.yml")))
     shutil.copy("./tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
                 os.path.join(asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"))
 
