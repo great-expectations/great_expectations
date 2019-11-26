@@ -212,8 +212,6 @@ class ConfigOnlyDataContext(object):
                 new_directory_path,
                 exist_ok=True
             )
-            if new_directory == "data_docs":
-                cls.scaffold_data_docs_static_assets_directory(new_directory_path)
 
         notebook_path = os.path.join(base_dir, "notebooks")
         for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
@@ -227,18 +225,6 @@ class ConfigOnlyDataContext(object):
         styles_destination_path = os.path.join(
             plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
         shutil.copyfile(styles_template, styles_destination_path)
-        
-    @classmethod
-    def scaffold_data_docs_static_assets_directory(cls, data_docs_dir):
-        """Copy static assets directory"""
-        static_assets_dir = file_relative_path(__file__, "../render/view/static")
-        static_assets_destination_path = os.path.join(data_docs_dir, "static")
-        if os.path.isdir(static_assets_destination_path):
-            message = """Warning. An existing static assets directory was found here: {}.
-            - Static assets were not copied.""".format(static_assets_destination_path)
-            warnings.warn(message)
-        else:
-            shutil.copytree(static_assets_dir, static_assets_destination_path)
 
     @classmethod
     def scaffold_notebooks(cls, base_dir):
