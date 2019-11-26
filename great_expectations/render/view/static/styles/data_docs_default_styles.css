@@ -1,12 +1,20 @@
+{% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
+  {% set static_fonts_dir = "../../../../../static/fonts/" -%}
+{% elif utm_medium == "expectation-suite-page" %}
+  {% set static_fonts_dir = "../../../../static/fonts/" -%}
+{% elif utm_medium == "index-page" %}
+  {% set static_fonts_dir = "./static/fonts/" -%}
+{% endif %}
+
 @font-face {
   font-family: HKGroteskPro;
-  src: url("{{ static_assets_dir +  '/fonts/HKGrotesk/HKGrotesk-Regular.otf'}}");
+  src: url("{{ static_fonts_dir +  'HKGrotesk/HKGrotesk-Regular.otf'}}");
   font-weight: normal;
 }
 
 @font-face {
   font-family: HKGrotesk-Light;
-  src: url("{{ static_assets_dir +  '/fonts/HKGrotesk/HKGrotesk-Light.otf'}}");
+  src: url("{{ static_fonts_dir +  'HKGrotesk/HKGrotesk-Light.otf'}}");
   font-weight: 300;
 }
 
