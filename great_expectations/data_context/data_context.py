@@ -327,7 +327,6 @@ class ConfigOnlyDataContext(object):
             raise ge_exceptions.DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
 
-
     def _init_stores(self, store_configs):
         """Initialize all Stores for this DataContext.
 
@@ -574,8 +573,8 @@ class ConfigOnlyDataContext(object):
         """Save config variable value
 
         Args:
-            property_name: name of the property
-            **value: the value to save
+            config_variable_name: name of the property
+            value: the value to save for the property
 
         Returns:
             None
