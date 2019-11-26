@@ -617,10 +617,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if self.dialect is None:
             logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
             return sa
-        elif isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
-            return self.dialect.sa
-        else:
-            return self.dialect
+        try:
+            # Redshift does not (yet) export types to top level; only recognize base SA types
+            if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+                return self.dialect.sa
+        except (TypeError, AttributeError):
+            pass
+
+        return self.dialect
 
     @DocInherit
     @DataAsset.expectation(['column', 'type_', 'mostly'])
@@ -656,8 +660,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # vacuously true
                 success = True
             else:
-                    type_module = self._get_dialect_type_module()
-                    success = issubclass(col_type, getattr(type_module, type_))
+                type_module = self._get_dialect_type_module()
+                success = issubclass(col_type, getattr(type_module, type_))
 
             return {
                     "success": success,
@@ -702,9 +706,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             success = True
         else:
             types = []
+            type_module = self._get_dialect_type_module()
             for type_ in type_list:
                 try:
-                    type_module = self._get_dialect_type_module()
                     type_class = getattr(type_module, type_)
                     types.append(type_class)
                 except AttributeError:
@@ -713,7 +717,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 logger.warning("No recognized sqlalchemy types in type_list for dialect %s" %
                                type_module.__name__)
             types = tuple(types)
-        success = issubclass(col_type, types)
+            success = issubclass(col_type, types)
 
         return {
                 "success": success,
