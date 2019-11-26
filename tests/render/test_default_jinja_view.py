@@ -32,7 +32,7 @@ def expectations():
 # noinspection PyPep8Naming
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
-def test_render_DefaultJinjaPageView_meta_info(titanic_data_context):
+def test_render_DefaultJinjaPageView_meta_info():
     validation_results = {
         "results": [],
         "statistics": {
@@ -54,12 +54,12 @@ def test_render_DefaultJinjaPageView_meta_info(titanic_data_context):
     }
 
     document = RenderedDocumentContent(dict_to_ordered_dict(ProfilingResultsPageRenderer().render(validation_results)))
-    html = DefaultJinjaPageView(data_context=titanic_data_context).render(document)
+    html = DefaultJinjaPageView().render(document)
     with open('./tests/render/output/test_render_DefaultJinjaPageView_meta_info.html', 'w') as outfile:
         outfile.write(html)
 
 
-def test_render_section_page(titanic_data_context):
+def test_render_section_page():
     section = RenderedSectionContent(**{
         "section_name": None,
         "content_blocks": [
@@ -93,7 +93,7 @@ def test_render_section_page(titanic_data_context):
         ]
     })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaSectionView(data_context=titanic_data_context).render(
+    rendered_doc = ge.render.view.view.DefaultJinjaSectionView().render(
         RenderedComponentContentWrapper(**{
             "section": section,
             "section_loop": {"index": 1},
@@ -140,13 +140,13 @@ def test_render_section_page(titanic_data_context):
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_rendering_components_without_section_loop_index(titanic_data_context):
+def test_rendering_components_without_section_loop_index():
     header_component_content = RenderedComponentContent(**{
         # "component_type": "header",
         "content_block_type": "header",
         "header": "Overview",
     })
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
         RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
             "content_block_loop": {"index": 2},
@@ -165,7 +165,7 @@ def test_rendering_components_without_section_loop_index(titanic_data_context):
 
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
         RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
         })
@@ -183,7 +183,7 @@ def test_rendering_components_without_section_loop_index(titanic_data_context):
 
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
         RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
             "section_loop": {"index": 3},
@@ -203,7 +203,7 @@ def test_rendering_components_without_section_loop_index(titanic_data_context):
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_rendering_components_with_styling(titanic_data_context):
+def test_rendering_components_with_styling():
     # Medium-complicated example to verify that all the things are correctly piped to all the places
 
     header_component_content = RenderedComponentContent(**{
@@ -270,7 +270,7 @@ def test_rendering_components_with_styling(titanic_data_context):
             }
         }
     })
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
         RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
             "section_loop": {"index": 1},
@@ -316,13 +316,13 @@ def test_rendering_components_with_styling(titanic_data_context):
 ### Test all the component types ###
 
 
-def test_render_header_component(titanic_data_context):
+def test_render_header_component():
     header_component_content = RenderedComponentContent(**{
         # "component_type": "header",
         "content_block_type": "header",
         "header": "Overview",
     })
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
         RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
             "section_loop": {"index": 1},
@@ -343,7 +343,7 @@ def test_render_header_component(titanic_data_context):
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_render_table_component(titanic_data_context):
+def test_render_table_component():
     table_component_content = RenderedComponentContent(**{
         # "component_type": "header",
         "content_block_type": "table",
@@ -356,7 +356,7 @@ def test_render_table_component(titanic_data_context):
             "classes": ["col-4"],
         }
     })
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
         RenderedComponentContentWrapper(**{
             "content_block": table_component_content,
             "section_loop": {"index": 1},
@@ -387,7 +387,7 @@ def test_render_table_component(titanic_data_context):
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_render_value_list(titanic_data_context):
+def test_render_value_list():
     value_list_component_content = RenderedComponentContent(**{
         'content_block_type': 'value_list',
         'header': 'Example values',
@@ -412,7 +412,7 @@ def test_render_value_list(titanic_data_context):
         }
     })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
         RenderedComponentContentWrapper(**{
             "content_block": value_list_component_content,
             "section_loop": {"index": 1},
@@ -446,7 +446,7 @@ def test_render_value_list(titanic_data_context):
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_render_graph(titanic_data_context):
+def test_render_graph():
     graph_component_content = RenderedComponentContent(**{
         "content_block_type": "graph",
         "header": "Histogram",
@@ -456,7 +456,7 @@ def test_render_graph(titanic_data_context):
         }
     })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
         RenderedComponentContentWrapper(**{
             "content_block": graph_component_content,
             "section_loop": {"index": 1},
@@ -490,7 +490,7 @@ def test_render_graph(titanic_data_context):
 """.replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_render_text(titanic_data_context):
+def test_render_text():
     text_component_content = RenderedComponentContent(**{
         "content_block_type": "text",
         "header": "Histogram",
@@ -500,7 +500,7 @@ def test_render_text(titanic_data_context):
         }
     })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
         RenderedComponentContentWrapper(**{
             "content_block": text_component_content,
             "section_loop": {"index": 1},
@@ -533,7 +533,7 @@ def test_render_text(titanic_data_context):
         }
     })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView(data_context=titanic_data_context).render(
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
         RenderedComponentContentWrapper(**{
             "content_block": text_component_content,
             "section_loop": {"index": 1},
