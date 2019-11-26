@@ -43,8 +43,8 @@ class NamespacedReadWriteStore(ReadWriteStore):
     def _init_store_backend(self, store_backend_config, runtime_config):
         if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
             config_defaults = {
-                "key_length" : 5,
-                "module_name" : "great_expectations.data_context.store",
+                "key_length": 5,
+                "module_name": "great_expectations.data_context.store",
             }
         elif store_backend_config["class_name"] == "FixedLengthTupleS3StoreBackend":
             config_defaults = {
@@ -315,6 +315,6 @@ class HtmlSiteStore(NamespacedReadWriteStore):
                [self._convert_tuple_to_resource_identifier(("validations", key)) for key in self.store_backends[ValidationResultIdentifier].list_keys()]
 
     def write_index_page(self, page):
-        """This third store has a special method, which uses a zero-length tuple as a key."""
+        """This third param_store has a special method, which uses a zero-length tuple as a key."""
         return self.store_backends["index_page"].set((), page, content_encoding='utf-8', content_type='text/html; '
                                                                                                       'charset=utf-8')

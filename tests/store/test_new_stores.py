@@ -215,22 +215,3 @@ def test_BasicInMemoryStore():
     assert my_store.has_key("A") == True
     assert my_store.has_key("C") == False
     assert my_store.list_keys() == ["A", "B"]
-
-def test_EvaluationParameterStore():
-    my_store = InMemoryEvaluationParameterStore()
-
-    my_key = "A"
-    with pytest.raises(KeyError):
-        my_store.get(my_key)
-    
-    my_store.set(my_key, "aaa")
-    assert my_store.get(my_key) == "aaa"
-
-    my_store.set("B", {"x":1})
-
-    assert my_store.has_key(my_key) == True
-    assert my_store.has_key("B") == True
-    assert my_store.has_key("C") == False
-    assert my_store.has_key("A") == True
-    
-    # assert my_store.list_keys() == ["A", "B"]

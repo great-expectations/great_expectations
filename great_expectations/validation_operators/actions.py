@@ -127,7 +127,7 @@ class SlackNotificationAction(NamespacedValidationAction):
 class StoreAction(NamespacedValidationAction):
     """
     StoreAction is a namespeace-aware validation action that stores a validation result
-    in the store.
+    in the param_store.
     """
 
     def __init__(self,
@@ -137,13 +137,13 @@ class StoreAction(NamespacedValidationAction):
         """
 
         :param data_context: data context
-        :param target_store_name: the name of the store in the data context which
-                should be used to store the validation result
+        :param target_store_name: the name of the param_store in the data context which
+                should be used to param_store the validation result
         """
 
         super(StoreAction, self).__init__(data_context)
 
-        # NOTE: Eventually, we probably need a check to verify that this store is compatible with validation_result_suite_identifiers.
+        # NOTE: Eventually, we probably need a check to verify that this param_store is compatible with validation_result_suite_identifiers.
         # Unless ALL stores are compatible...
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
@@ -168,7 +168,7 @@ class StoreAction(NamespacedValidationAction):
 class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
     """
     ExtractAndStoreEvaluationParamsAction is a namespeace-aware validation action that
-    extracts evaluation parameters from a validation result and stores them in the store
+    extracts evaluation parameters from a validation result and stores them in the param_store
     configured for this action.
 
     Evaluation parameters allow expectations to refer to statistics/metrics computed
@@ -183,12 +183,12 @@ class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
 
         :param data_context: data context
         :param target_store_name: the name of the store in the data context which
-                should be used to store the validation result
+                should be used to store the evaluation parameters
         """
         super(ExtractAndStoreEvaluationParamsAction, self).__init__(data_context)
 
         if target_store_name is None:
-            self.target_store = data_context.stores[data_context.evaluation_parameter_store_name]
+            self.target_store = data_context.evaluation_parameter_store
         else:
             self.target_store = data_context.stores[target_store_name]
 
@@ -203,13 +203,13 @@ class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
                 type(validation_result_suite_identifier)
             ))
 
-
         self.data_context._extract_and_store_parameters_from_validation_results(
             validation_result_suite,
             validation_result_suite_identifier.expectation_suite_identifier.data_asset_name,
             validation_result_suite_identifier.expectation_suite_identifier.expectation_suite_name,
             validation_result_suite_identifier.run_id,
         )
+
 
 class UpdateDataDocsAction(NamespacedValidationAction):
     """
@@ -223,7 +223,6 @@ class UpdateDataDocsAction(NamespacedValidationAction):
         :param data_context: data context
         """
         super(UpdateDataDocsAction, self).__init__(data_context)
-
 
     def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
         logger.debug("UpdateDataDocsAction.run")

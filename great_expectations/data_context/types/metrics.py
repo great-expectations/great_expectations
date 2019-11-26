@@ -1,5 +1,5 @@
 from great_expectations.core import DataContextKey
-from great_expectations.profile.metrics_utils import make_dictionary_key
+from great_expectations.profile.metrics_utils import kwargs_to_tuple
 
 try:
     from urllib.parse import urlencode
@@ -66,16 +66,21 @@ class MetricIdentifier(DataContextKey):
 
     def to_tuple(self):
         return (self.data_asset_name, self.batch_fingerprint, self.metric_name,
-                make_dictionary_key(self.metric_kwargs))
+                kwargs_to_tuple(self.metric_kwargs))
 
 
 class ExpectationDefinedMetricIdentifier(DataContextKey):
-    def __init__(self, data_asset_name, expectation_suite_name, expectation_type, metric_name, metric_kwargs):
+    def __init__(self, run_id, data_asset_name, expectation_suite_name, expectation_type, metric_name, metric_kwargs):
+        self._run_id = run_id
         self._data_asset_name = data_asset_name
         self._expectation_suite_name = expectation_suite_name
-        self._expectation_type = expectation_type,
+        self._expectation_type = expectation_type
         self._metric_name = metric_name
         self._metric_kwargs = metric_kwargs
+
+    @property
+    def run_id(self):
+        return self._run_id
 
     @property
     def data_asset_name(self):
@@ -101,10 +106,20 @@ class ExpectationDefinedMetricIdentifier(DataContextKey):
         return (self.data_asset_name, self.expectation_suite_name, self.expectation_type,
                 self.metric_name, kwargs_to_tuple(self.metric_kwargs))
 
+    def to_urn(self):
+        urn = "urn:great_expectations:validations:" + \
+            self.data_asset_name.to_path() + ":" + \
+            self.expectation_suite_name + ":" + \
+            "expectations" + ":" + \
+            self.expectation_type + ":"
+        if "column" in self.metric_kwargs:
+            urn += "columns:" + self.metric_kwargs["column"] + ":"
+        urn += self.metric_name
+        return urn
 
-class ExpectationDefinedValidationMetric(object):
-    def __init__(self, run_id, metric_identifier, metric_value):
-        self._run_id = run_id
+
+class ExpectationDefinedMetric(object):
+    def __init__(self, metric_identifier, metric_value):
         self._metric_identifier = metric_identifier
         self._metric_value = metric_value
 
