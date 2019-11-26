@@ -234,6 +234,7 @@ def init(target_directory, view):
         profile_datasource(context, data_source_name, open_docs=view, additional_batch_kwargs={"limit": 1000})
         cli_message("""\n<cyan>Great Expectations is now set up in your project!</cyan>""")
 
+
 def _slack_setup(context):
     webhook_url = None
     cli_message(SLACK_SETUP_INTRO)
