@@ -113,88 +113,6 @@ def test_save_expectation_suite(data_context):
     assert expectation_suite.expectations == expectation_suite_saved.expectations
 
 
-def test_evaluation_parameter_store_methods(data_context):
-    run_id = "460d61be-7266-11e9-8848-1681be663d3e"
-    source_patient_data_results = {
-        "meta": {
-            "data_asset_name": "mydatasource/mygenerator/source_patient_data",
-            "expectation_suite_name": "default"
-        },
-        "results": [
-            {
-                "expectation_config": {
-                    "expectation_type": "expect_table_row_count_to_equal",
-                    "kwargs": {
-                        "value": 1024,
-                    }
-                },
-                "success": True,
-                "exception_info": {"exception_message": None,
-                    "exception_traceback": None,
-                    "raised_exception": False},
-                "result": {
-                    "observed_value": 1024,
-                    "element_count": 1024,
-                    "missing_percent": 0.0,
-                    "missing_count": 0
-                }
-            }
-        ],
-        "success": True
-    }
-
-    data_context._extract_and_store_parameters_from_validation_results(
-        source_patient_data_results,
-        data_asset_name=source_patient_data_results.meta["data_asset_name"],
-        expectation_suite_name=source_patient_data_results.meta["expectation_suite_name"],
-        run_id=run_id,
-    )
-
-    bound_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
-    assert bound_parameters == {
-        'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024
-    }
-    source_diabetes_data_results = {
-        "meta": {
-            "data_asset_name": "mydatasource/mygenerator/source_diabetes_data",
-            "expectation_suite_name": "default"
-        },
-        "results": [
-            {
-                "expectation_config": {
-                    "expectation_type": "expect_column_unique_value_count_to_be_between",
-                    "kwargs": {
-                        "column": "patient_nbr",
-                        "min": 2048,
-                        "max": 2048
-                    }
-                },
-                "success": True,
-                "exception_info": {"exception_message": None,
-                    "exception_traceback": None,
-                    "raised_exception": False},
-                "result": {
-                    "observed_value": 2048,
-                    "element_count": 5000,
-                    "missing_percent": 0.0,
-                    "missing_count": 0
-                }
-            }
-        ],
-        "success": True
-    }
-
-    data_context._extract_and_store_parameters_from_validation_results(
-        source_diabetes_data_results,
-        data_asset_name=source_diabetes_data_results.meta["data_asset_name"],
-        expectation_suite_name=source_diabetes_data_results.meta["expectation_suite_name"],
-        run_id=run_id,
-    )
-    bound_parameters = data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
-    assert bound_parameters == {
-        'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024,
-        'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value': 2048
-    }
 
     #TODO: Add a test that specifies a data_asset_name
 
@@ -762,35 +680,6 @@ def test_ConfigOnlyDataContext__initialization(tmp_path_factory, basic_data_cont
     assert context.root_directory.split("/")[-1] == "test_ConfigOnlyDataContext__initialization__dir0"
     assert context.plugins_directory.split("/")[-3:] == ["test_ConfigOnlyDataContext__initialization__dir0", "plugins",""]
 
-
-def test_evaluation_parameter_store_methods(basic_data_context_config):
-    context = ConfigOnlyDataContext(
-        basic_data_context_config,
-        "testing",
-    )
-
-    assert isinstance(context.evaluation_parameter_store, InMemoryEvaluationParameterStore)
-
-    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {}
-    context.set_parameters_in_evaluation_parameter_store_by_run_id_and_key("foo", "bar", "baz")
-    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {
-        "bar" : "baz"
-    }
-
-    context.set_parameters_in_evaluation_parameter_store_by_run_id_and_key("foo", "car", "caz")
-    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {
-        "bar" : "baz",
-        "car" : "caz"
-    }
-
-    context.set_parameters_in_evaluation_parameter_store_by_run_id_and_key("goo", "dar", "daz")
-    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("foo") == {
-        "bar" : "baz",
-        "car" : "caz"
-    }
-    assert context.get_parameters_in_evaluation_parameter_store_by_run_id("goo") == {
-        "dar" : "daz",
-    }
 
 def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_context_config):
     config_path = str(tmp_path_factory.mktemp('test__normalize_absolute_or_relative_path__dir'))

@@ -43,8 +43,8 @@ class NamespacedReadWriteStore(ReadWriteStore):
     def _init_store_backend(self, store_backend_config, runtime_config):
         if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
             config_defaults = {
-                "key_length" : 5,
-                "module_name" : "great_expectations.data_context.store",
+                "key_length": 5,
+                "module_name": "great_expectations.data_context.store",
             }
         elif store_backend_config["class_name"] == "FixedLengthTupleS3StoreBackend":
             config_defaults = {
@@ -91,20 +91,6 @@ class NamespacedReadWriteStore(ReadWriteStore):
         list_ += self._convert_resource_identifier_to_list(key)
 
         return tuple(list_)
-
-    # def _convert_resource_identifier_to_list(self, key):
-    #     # The logic in this function is recursive, so it can't return a tuple
-    #     list_ = []
-    #
-    #     #Fetch keys in _key_order to guarantee tuple ordering in both python 2 and 3
-    #     for key_name in key._key_order:
-    #         key_element = key[key_name]
-    #         if isinstance( key_element, DataContextKey ):
-    #             list_ += self._convert_resource_identifier_to_list(key_element)
-    #         else:
-    #             list_.append(key_element)
-    #
-    #     return list_
 
     def _convert_tuple_to_resource_identifier(self, tuple_):
         new_identifier = self.key_class.from_tuple(tuple_)
@@ -329,6 +315,6 @@ class HtmlSiteStore(NamespacedReadWriteStore):
                [self._convert_tuple_to_resource_identifier(("validations", key)) for key in self.store_backends[ValidationResultIdentifier].list_keys()]
 
     def write_index_page(self, page):
-        """This third store has a special method, which uses a zero-length tuple as a key."""
+        """This third param_store has a special method, which uses a zero-length tuple as a key."""
         return self.store_backends["index_page"].set((), page, content_encoding='utf-8', content_type='text/html; '
                                                                                                       'charset=utf-8')
