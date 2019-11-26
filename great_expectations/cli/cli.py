@@ -225,8 +225,6 @@ def init(target_directory, view):
         if not data_source_name:  # no datasource was created
             return
 
-        context = _slack_setup(context)
-
         profile_datasource(context, data_source_name, open_docs=view, additional_batch_kwargs={"limit": 1000})
         cli_message("""\n<cyan>Great Expectations is now set up in your project!</cyan>""")
 
