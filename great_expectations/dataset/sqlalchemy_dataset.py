@@ -613,6 +613,19 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return sa.column(column) != None
 
+    def _get_dialect_type_module(self):
+        if self.dialect is None:
+            logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+            return sa
+        try:
+            # Redshift does not (yet) export types to top level; only recognize base SA types
+            if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+                return self.dialect.sa
+        except (TypeError, AttributeError):
+            pass
+
+        return self.dialect
+
     @DocInherit
     @DataAsset.expectation(['column', 'type_', 'mostly'])
     def expect_column_values_to_be_of_type(
@@ -647,11 +660,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # vacuously true
                 success = True
             else:
-                if self.dialect is None:
-                    logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
-                    success = issubclass(col_type, getattr(sa, type_))
-                else:
-                    success = issubclass(col_type, getattr(self.dialect, type_))
+                type_module = self._get_dialect_type_module()
+                success = issubclass(col_type, getattr(type_module, type_))
 
             return {
                     "success": success,
@@ -695,30 +705,18 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if type_list is None:
             success = True
         else:
-            if self.dialect is None:
-                logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
-                types = []
-                for type_ in type_list:
-                    try:
-                        type_class = getattr(sa, type_)
-                        types.append(type_class)
-                    except AttributeError:
-                        logger.debug("Unrecognized type: %s" % type_)
-                if len(types) == 0:
-                    logger.warning("No recognized sqlalchemy types in type_list")
-                types = tuple(types)
-            else:
-                types = []
-                for type_ in type_list:
-                    try:
-                        type_class = getattr(self.dialect, type_)
-                        types.append(type_class)
-                    except AttributeError:
-                        logger.debug("Unrecognized type: %s" % type_)
-                if len(types) == 0:
-                    logger.warning("No recognized sqlalchemy types in type_list for dialect %s" %
-                                   self.dialect.__name__)
-                types = tuple(types)
+            types = []
+            type_module = self._get_dialect_type_module()
+            for type_ in type_list:
+                try:
+                    type_class = getattr(type_module, type_)
+                    types.append(type_class)
+                except AttributeError:
+                    logger.debug("Unrecognized type: %s" % type_)
+            if len(types) == 0:
+                logger.warning("No recognized sqlalchemy types in type_list for dialect %s" %
+                               type_module.__name__)
+            types = tuple(types)
             success = issubclass(col_type, types)
 
         return {
