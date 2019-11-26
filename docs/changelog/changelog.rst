@@ -4,6 +4,7 @@
 0.8.6__develop
 -----------------
 * Raise informative error if config variables are declared but unavailable.
+* Update ExpectationsStore defaults to be consistent across all FixedLengthTupleStoreBackend objects
 
 
 0.8.5
