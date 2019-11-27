@@ -63,13 +63,8 @@ def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
                                       class_name="PandasDatasource",
                                       base_directory=str(filesystem_csv))
     available_asset_names = empty_data_context.get_available_data_asset_names()
-    available_asset_names["my_datasource"]["default"] = set(available_asset_names["my_datasource"]["default"])
 
-    assert available_asset_names == {
-        "my_datasource": {
-            "default": {"f1", "f2", "f3"}
-        }
-    }
+    assert set(available_asset_names["my_datasource"]["default"]["names"]) == {('f3', 'directory'), ('f2', 'file'), ('f1', 'file')}
 
 
 def test_list_expectation_suite_keys(data_context):
@@ -650,6 +645,49 @@ data_docs/
                 default/
                     Titanic/
                         BasicDatasetProfiler.html
+        static/
+            fonts/
+                HKGrotesk/
+                    HKGrotesk-Bold.otf
+                    HKGrotesk-BoldItalic.otf
+                    HKGrotesk-Italic.otf
+                    HKGrotesk-Light.otf
+                    HKGrotesk-LightItalic.otf
+                    HKGrotesk-Medium.otf
+                    HKGrotesk-MediumItalic.otf
+                    HKGrotesk-Regular.otf
+                    HKGrotesk-SemiBold.otf
+                    HKGrotesk-SemiBoldItalic.otf
+            images/
+                0_values_not_null_html_en.jpg
+                10_suite_toc.jpeg
+                11_home_validation_results_failed.jpeg
+                12_validation_overview.png
+                13_validation_passed.jpeg
+                14_validation_failed.jpeg
+                15_validation_failed_unexpected_values.jpeg
+                16_validation_failed_unexpected_values (1).gif
+                1_values_not_null_html_de.jpg
+                2_values_not_null_json.jpg
+                3_values_not_null_validation_result_json.jpg
+                4_values_not_null_validation_result_html_en.jpg
+                5_home.png
+                6_home_tables.jpeg
+                7_home_suites.jpeg
+                8_home_validation_results_succeeded.jpeg
+                9_suite_overview.png
+                favicon.ico
+                logo-long-vector.svg
+                logo-long.png
+                short-logo-vector.svg
+                short-logo.png
+                validation_failed_unexpected_values.gif
+                values_not_null_html_en.jpg
+                values_not_null_validation_result_html_en.jpg
+                values_not_null_validation_result_json.jpg
+            styles/
+                data_docs_custom_styles_template.css
+                data_docs_default_styles.css
         validations/
             profiling/
                 random/
@@ -1090,6 +1128,7 @@ uncommitted/
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
     DataContext.create(project_path)
     fixture = gen_directory_tree_str(uncommitted_dir)
+    print(fixture)
     assert fixture == expected
 
     # Test that all exist

@@ -1,4 +1,10 @@
-{% set static_images_dir = static_assets_dir + "/images/" -%}
+{% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
+  {% set static_images_dir = "../../../../../static/images/" -%}
+{% elif utm_medium == "expectation-suite-page" %}
+  {% set static_images_dir = "../../../../static/images/" -%}
+{% elif utm_medium == "index-page" %}
+  {% set static_images_dir = "./static/images/" -%}
+{% endif %}
 
 <div class="modal fade ge-walkthrough-modal" tabindex="-1" role="dialog" aria-labelledby="ge-walkthrough-modal-title"
      aria-hidden="true">

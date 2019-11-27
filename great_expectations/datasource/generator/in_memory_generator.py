@@ -20,7 +20,7 @@ class InMemoryGenerator(BatchGenerator):
         logger.warning(
             "InMemoryGenerator cannot identify data_asset_names, but can accept any object as a valid data_asset."
         )
-        return []
+        return {"names": []}
 
     def get_available_partition_ids(self, generator_asset):
         logger.warning(

@@ -211,8 +211,6 @@ class ConfigOnlyDataContext(object):
                 new_directory_path,
                 exist_ok=True
             )
-            if new_directory == "data_docs":
-                cls.scaffold_data_docs_static_assets_directory(new_directory_path)
 
         notebook_path = os.path.join(base_dir, "notebooks")
         for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
@@ -221,16 +219,11 @@ class ConfigOnlyDataContext(object):
     @classmethod
     def scaffold_custom_data_docs(cls, plugins_dir):
         """Copy custom data docs templates"""
-        styles_template = file_relative_path(__file__, "../render/view/static/styles/data_docs_custom_styles_template.css")
-        styles_destination_path = os.path.join(plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
+        styles_template = file_relative_path(
+            __file__, "../render/view/static/styles/data_docs_custom_styles_template.css")
+        styles_destination_path = os.path.join(
+            plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
         shutil.copyfile(styles_template, styles_destination_path)
-        
-    @classmethod
-    def scaffold_data_docs_static_assets_directory(cls, data_docs_dir):
-        """Copy static assets directory"""
-        static_assets_dir = file_relative_path(__file__, "../render/view/static")
-        static_assets_destination_path = os.path.join(data_docs_dir, "static")
-        shutil.copytree(static_assets_dir, static_assets_destination_path)
 
     @classmethod
     def scaffold_notebooks(cls, base_dir):
@@ -927,7 +920,7 @@ class ConfigOnlyDataContext(object):
             available_names = self.get_available_data_asset_names()
             for datasource in available_names.keys():
                 for generator in available_names[datasource].keys():
-                    names_set = available_names[datasource][generator]
+                    names_set = set([n[0] for n in available_names[datasource][generator]["names"]])
                     if generator_asset in names_set:
                         provider_names.add(
                             DataAssetIdentifier(datasource, generator, generator_asset)
@@ -994,7 +987,8 @@ class ConfigOnlyDataContext(object):
             available_names = self.get_available_data_asset_names()
             for datasource_name in available_names.keys():
                 for generator in available_names[datasource_name].keys():
-                    generator_assets = available_names[datasource_name][generator]
+                    generator_assets = set([n[0] for n in available_names[datasource_name][generator]["names"]])
+
                     if split_name[0] == datasource_name and split_name[1] in generator_assets:
                         provider_names.add(DataAssetIdentifier(datasource_name, generator, split_name[1]))
 
@@ -1506,7 +1500,7 @@ class ConfigOnlyDataContext(object):
                            data_assets=None,
                            max_data_assets=20,
                            profile_all_data_assets=True,
-                           profiler=SampleExpectationsDatasetProfiler,
+                           profiler=BasicDatasetProfiler,
                            dry_run=False,
                            run_id="profiling",
                            additional_batch_kwargs=None):

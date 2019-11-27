@@ -54,13 +54,8 @@ class DefaultJinjaView(object):
     """
     _template = NoOpTemplate
 
-    def __init__(self, data_context=None):
-        self.data_context = data_context
-        self.custom_styles_directory = None
-        if data_context:
-            plugins_directory = data_context.plugins_directory
-            if os.path.isdir(os.path.join(plugins_directory, "custom_data_docs", "styles")):
-                self.custom_styles_directory = os.path.join(plugins_directory, "custom_data_docs/styles")
+    def __init__(self, custom_styles_directory=None):
+        self.custom_styles_directory = custom_styles_directory
 
     def render(self, document, template=None, **kwargs):
         self._validate_document(document)
@@ -103,12 +98,6 @@ class DefaultJinjaView(object):
         env.filters['render_styling'] = self.render_styling
         env.filters['render_content_block'] = self.render_content_block
         env.globals['ge_version'] = ge_version
-        env.globals['static_assets_dir'] = os.path.join(
-            self.data_context.root_directory,
-            "uncommitted",
-            "data_docs",
-            "static"
-        )
 
         template = env.get_template(template)
         template.globals['now'] = datetime.datetime.utcnow

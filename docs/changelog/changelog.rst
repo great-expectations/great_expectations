@@ -5,7 +5,7 @@
 
 0.8.6__develop
 -----------------
-
+* Update ExpectationsStore defaults to be consistent across all FixedLengthTupleStoreBackend objects
 
 
 0.8.5
