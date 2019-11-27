@@ -30,7 +30,8 @@ class SubdirReaderGenerator(BatchGenerator):
                  datasource=None,
                  base_directory="/data",
                  reader_options=None,
-                 known_extensions=None):
+                 known_extensions=None,
+                 reader_method=None):
         super(SubdirReaderGenerator, self).__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = self._default_reader_options
@@ -40,6 +41,7 @@ class SubdirReaderGenerator(BatchGenerator):
 
         self._known_extensions = known_extensions
         self._reader_options = reader_options
+        self._reader_method = reader_method
         self._base_directory = base_directory
 
     @property
@@ -49,6 +51,10 @@ class SubdirReaderGenerator(BatchGenerator):
     @property
     def known_extensions(self):
         return self._known_extensions
+
+    @property
+    def reader_method(self):
+        return self._reader_method
 
     @property
     def base_directory(self):
@@ -61,7 +67,9 @@ class SubdirReaderGenerator(BatchGenerator):
 
     def get_available_data_asset_names(self):
         if not os.path.isdir(self.base_directory):
-            return []
+            return {"names": [],
+                    "is_complete_list": True
+                    }
         known_assets = self._get_valid_file_options(base_directory=self.base_directory)
         return {"names": known_assets,
                 "is_complete_list": True
@@ -199,6 +207,9 @@ class SubdirReaderGenerator(BatchGenerator):
 
         if limit is not None:
             batch_kwargs['limit'] = limit
+
+        if self.reader_method is not None:
+            batch_kwargs['reader_method'] = self.reader_method
 
         return batch_kwargs
 
