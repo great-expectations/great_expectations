@@ -242,3 +242,22 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
         },
         reader_method="csv", reader_options={'header': True})
     assert dataset.spark_df.head()["a"] == "1"
+
+
+def test_spark_config():
+    source = SparkDFDatasource()
+    conf = source.spark.sparkContext.getConf().getAll()
+    # Without specifying any spark_config values we get defaults
+    assert ("spark.app.name", "pyspark-shell") in conf
+
+    source = SparkDFDatasource(spark_config={
+        "spark.app.name": "great_expectations",
+        "spark.sql.catalogImplementation": "hive",
+        "spark.executor.memory": "128m"
+    })
+
+    # Test that our values were set
+    conf = source.spark.sparkContext.getConf().getAll()
+    assert ("spark.app.name", "great_expectations") in conf
+    assert ("spark.sql.catalogImplementation", "hive") in conf
+    assert ("spark.executor.memory", "128m") in conf
