@@ -258,7 +258,7 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         # HtmlSiteStore instance leaves scope.
         # Doing it this way allows us to prevent namespace collisions among keys while still having multiple
         # backends that write to the same directory structure.
-        # It's a pretty reasonable way for HtmlSiteStore to do its job---you just ahve to remember that it
+        # It's a pretty reasonable way for HtmlSiteStore to do its job---you just have to remember that it
         # can't necessarily set and list_keys like most other Stores.
         self.keys = set()
 
@@ -320,3 +320,4 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         """This third store has a special method, which uses a zero-length tuple as a key."""
         return self.store_backends["index_page"].set((), page, content_encoding='utf-8', content_type='text/html; '
                                                                                                       'charset=utf-8')
+    
