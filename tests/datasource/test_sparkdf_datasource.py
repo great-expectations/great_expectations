@@ -12,7 +12,7 @@ from great_expectations.datasource import SparkDFDatasource
 from great_expectations.dataset import SparkDFDataset
 from great_expectations.datasource.types import InMemoryBatchKwargs
 
-yaml = YAML(typ='safe')
+yaml = YAML()
 
 
 @pytest.fixture(scope="module")
@@ -74,7 +74,7 @@ def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connecti
         "quantiles": [0., 1.],
         "value_ranges": [[1, 1], [5, 5]]
     })
-    assert res["success"] is True
+    assert res.success is True
 
 
 def test_create_sparkdf_datasource(data_context, tmp_path_factory):
@@ -131,9 +131,7 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
     assert spark_session  # Ensure a sparksession exists
     datasource = SparkDFDatasource('SparkParquet', base_directory=test_parquet_folder_connection_path)
 
-    assert datasource.get_available_data_asset_names() == {
-        "default": ['test']
-    }
+    assert datasource.get_available_data_asset_names()["default"]["names"] == [('test', 'file')]
     dataset = datasource.get_batch('test',
                                    expectation_suite_name="default",
                                    batch_kwargs={
@@ -162,9 +160,7 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
 def test_standalone_spark_csv_datasource(test_folder_connection_path):
     pyspark_skip = pytest.importorskip("pyspark")
     datasource = SparkDFDatasource('SparkParquet', base_directory=test_folder_connection_path)
-    assert datasource.get_available_data_asset_names() == {
-        "default": ['test']
-    }
+    assert datasource.get_available_data_asset_names()["default"]["names"] == [('test', 'file')]
     dataset = datasource.get_batch('test',
                                    expectation_suite_name="default",
                                    batch_kwargs={
@@ -179,11 +175,10 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path):
 
 def test_standalone_spark_passthrough_generator_datasource(data_context, dataset):
     pyspark_skip = pytest.importorskip("pyspark")
-    # noinspection PyUnusedLocal
     datasource = data_context.add_datasource("spark_source",
-                                            module_name="great_expectations.datasource",
-                                            class_name="SparkDFDatasource",
-                                            generators={"passthrough": {"type": "memory"}})
+                                             module_name="great_expectations.datasource",
+                                             class_name="SparkDFDatasource",
+                                             generators={"passthrough": {"class_name": "InMemoryGenerator"}})
 
     # We want to ensure that an externally-created spark DataFrame can be successfully instantiated using the
     # datasource built in a data context
@@ -195,9 +190,9 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
         # We should be smart enough to figure out this is a batch:
         batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", batch_kwargs)
         res = batch.expect_column_to_exist("infinities")
-        assert res["success"] is True
+        assert res.success is True
         res = batch.expect_column_to_exist("not_a_column")
-        assert res["success"] is False
+        assert res.success is False
         batch.save_expectation_suite()
         assert os.path.isfile(os.path.join(
             data_context.root_directory,

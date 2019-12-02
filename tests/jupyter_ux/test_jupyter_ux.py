@@ -25,33 +25,48 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
     html_to_display = html_to_display.replace(" ", "").replace("\t", "").replace("\n", "")
     assert html_to_display == """\
 <div id="section-1" class="ge-section container-fluid">
-    <div class="row">
+    <div class="row" >
     
+
 <div id="content-block-1" class="col-12" >
-    <div id="content-block-1-header" class="alert alert-secondary" >
-        <h3>
-            naturals
-        </h3></div>
+
+    <div id="content-block-1-header" class="alert alert-secondary" ><h4>
+          naturals
+      </h4>
+    </div>
+
 </div>
 
+
 <div id="content-block-2" class="col-12" >
-    <ul id="content-block-2-body" >
-            <li >
-            <span>
-                is a required field.
-            </span>
-        </li>
-            <li >
-            <span>
-                values must be unique.
-            </span>
-        </li>
+
+
+
+<ul id="content-block-2-body" >
+
         
-        </ul>
+        
+        <li >
+                <span >
+                    is a required field.
+                </span>
+            </li>
+    
+           
+        
+        <li >
+                <span >
+                    values must be unique.
+                </span>
+            </li>
+
+</ul>
+
 </div>
     
     </div>
-</div>""".replace(" ", "").replace("\t", "").replace("\n", "")
+</div>
+""".replace(" ", "").replace("\t", "").replace("\n", "")
 
     html_to_display = jux.display_column_expectations_as_section(
         basic_expectation_suite,
@@ -111,30 +126,45 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
     box-shadow:0 1px 8px rgba(0,0,0,0.5);
 }
 </style>
+
 <div id="section-1" class="ge-section container-fluid">
-    <div class="row">
+    <div class="row" >
     
+
 <div id="content-block-1" class="col-12" >
-    <div id="content-block-1-header" class="alert alert-secondary" >
-        <h3>
-            naturals
-        </h3></div>
+
+    <div id="content-block-1-header" class="alert alert-secondary" ><h4>
+          naturals
+      </h4>
+    </div>
+
 </div>
 
+
 <div id="content-block-2" class="col-12" >
-    <ul id="content-block-2-body" >
-            <li >
-            <span>
-                is a required field.
-            </span>
-        </li>
-            <li >
-            <span>
-                values must be unique.
-            </span>
-        </li>
+
+
+
+<ul id="content-block-2-body" >
+
+
+
+        <li >
+                <span >
+                    is a required field.
+                </span>
+            </li>
+    
+            
         
-        </ul>
+        <li >
+                <span >
+                    values must be unique.
+                </span>
+            </li>
+    
+</ul>
+
 </div>
     
     </div>
@@ -142,30 +172,32 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 """.replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_display_column_evrs_as_section():
-    #TODO: We should add a fixture that contains EVRs
-    df = ge.read_csv("./tests/test_sets/Titanic.csv")
-    df.profile(BasicDatasetProfiler)
-    evrs = df.validate(result_format="SUMMARY")  # ["results"]
-
-    html_to_display = jux.display_column_evrs_as_section(
-        evrs,
-        "Name",
-        include_styling=False,
-        return_without_displaying=True
-    )
-    print(html_to_display)
-
-    #FIXME: This isn't a full snapshot test.
-    assert '<div id="section-1" class="ge-section container-fluid">' in html_to_display
-    assert '<span class="badge badge-info" style="word-break:break-all;" >Carlsson, Mr Frans Olof</span>' in html_to_display
-    assert """\
-    <span class="cooltip" >
-                    Type: None
-                    <span class=top>
-                        expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list
-                    </span>
-                </span>""" in html_to_display
+# JPC - Removed on 20191118 based on its non-use in the codebase and fact that both test and implementation contain
+# multiple _FIXME_ and _TODO_ items
+# def test_display_column_evrs_as_section(titanic_profiled_evrs_1):
+#     #TODO: We should add a fixture that contains EVRs
+#     df = ge.read_csv("./tests/test_sets/Titanic.csv")
+#     df.profile(BasicDatasetProfiler)
+#     titanic_profiled_evrs_1 = df.validate(result_format="SUMMARY")  # ["results"]
+#
+#     html_to_display = jux.display_column_evrs_as_section(
+#         titanic_profiled_evrs_1,
+#         "Name",
+#         include_styling=False,
+#         return_without_displaying=True
+#     )
+#     print(html_to_display)
+#
+#     #FIXME: This isn't a full snapshot test.
+#     assert '<div id="section-1" class="ge-section container-fluid">' in html_to_display
+#     assert '<span class="badge badge-info" style="word-break:break-all;" >Carlsson, Mr Frans Olof</span>' in html_to_display
+#     assert """\
+#     <span class="cooltip" >
+#                     Type: None
+#                     <span class=top>
+#                         expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list
+#                     </span>
+#                 </span>""" in html_to_display
 
 
 def test_configure_logging(caplog):

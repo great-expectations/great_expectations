@@ -1,8 +1,8 @@
 { 
   "meta": {
-    "data_asset_name": null,
+    "data_asset_name": "titanic",
     "expectation_suite_name": "default",
-    "run_id": "1955-11-05T000000Z"
+    "run_id": "19551105T000000.000000Z"
   },
   "results": [
     {

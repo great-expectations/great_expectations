@@ -15,7 +15,7 @@ def test_config_variables_on_context_without_config_variables_filepath_configure
 
     with pytest.raises(InvalidConfigError) as exc:
         context.save_config_variable("var_name_1", {"n1": "v1"})
-        assert "'config_variables_file_path' property is not found in config" in exc.message
+    assert "'config_variables_file_path' property is not found in config" in exc.value.message
 
 
 def test_setting_config_variables_is_visible_immediately(data_context_with_variables_in_config):

@@ -1,4 +1,7 @@
 import logging
+
+from marshmallow import ValidationError
+
 logger = logging.getLogger(__name__)
 
 from six import string_types
@@ -32,7 +35,10 @@ class WriteOnlyStore(object):
             serialization_method = self._get_serialization_method(
                 self.serialization_type)
 
-        serialized_value = serialization_method(value)
+        try:
+            serialized_value = serialization_method(value)
+        except ValidationError:
+            raise
         return self._set(key, serialized_value)
 
 
@@ -116,6 +122,7 @@ class ReadWriteStore(WriteOnlyStore):
             raise NotImplementedError
 
         # TODO: Add more serialization methods as needed
+
 
 class BasicInMemoryStore(ReadWriteStore):
     """Like a dict, but much harder to write.

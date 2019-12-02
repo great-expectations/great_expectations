@@ -22,7 +22,7 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
     known_data_asset_names = datasource.get_available_data_asset_names()
 
     # Use set to avoid order dependency
-    assert set(known_data_asset_names["default"]) == {"f1", "f2", "f3"}
+    assert set(known_data_asset_names["default"]["names"]) == {('f1', 'file'), ('f2', 'file'), ('f3', 'directory')}
 
     f1_batches = [batch_kwargs for batch_kwargs in generator.get_iterator("f1")]
     assert len(f1_batches) == 1
@@ -58,7 +58,7 @@ def test_file_kwargs_generator_error(data_context, filesystem_csv):
 
     with pytest.raises(DataContextError) as exc:
         data_context.yield_batch_kwargs("f4")
-        assert "f4" in exc.message
+    assert "Ambiguous data_asset_name" in exc.value.message
 
 
 def test_glob_reader_generator(tmp_path_factory):
@@ -168,7 +168,7 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
 
     g1_assets = g1.get_available_data_asset_names()
     # Use set in test to avoid order issues
-    assert set(g1_assets) == {"f2", "f4", "f6", "f7", "f8", "f9", "f0"}
+    assert set(g1_assets["names"]) == {('f7', 'file'), ('f4', 'directory'), ('f6', 'file'), ('f0', 'file'), ('f2', 'file'), ('f9', 'file'), ('f8', 'file')}
 
 
 def test_databricks_generator():

@@ -8,7 +8,7 @@ import pandas as pd
 from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 
-yaml = YAML(typ='safe')
+yaml = YAML()
 
 
 @pytest.fixture
@@ -66,14 +66,14 @@ def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connectio
     )
     assert type(batch).__name__ == "CustomSqlAlchemyDataset"
     res = batch.expect_column_func_value_to_be("col_1", 1)
-    assert res["success"] is True
+    assert res.success is True
 
 
 def test_standalone_sqlalchemy_datasource(test_db_connection_string):
     datasource = SqlAlchemyDatasource(
         'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
 
-    assert datasource.get_available_data_asset_names() == {"default": ["main.table_1", "main.table_2"]}
+    assert set(datasource.get_available_data_asset_names()["default"]["names"]) == {("main.table_1", "table"), ("main.table_2", "table")}
     dataset1 = datasource.get_data_asset("main.table_1", "default")
     dataset2 = datasource.get_data_asset("main.table_2", "default")
     assert isinstance(dataset1, SqlAlchemyDataset)
@@ -148,9 +148,9 @@ def test_sqlalchemy_source_templating(sqlitedb_engine):
                               generator.yield_batch_kwargs("test", query_params={'col_name': "animal_name"})
                               )
     res = df.expect_column_to_exist("animal_name")
-    assert res["success"] is True
+    assert res.success is True
     res = df.expect_column_values_to_be_in_set('animal_name', ['cat'])
-    assert res["success"] is True
+    assert res.success is True
 
 
 def test_sqlalchemy_source_limit(sqlitedb_engine):

@@ -4,127 +4,142 @@ from __future__ import unicode_literals
 import json
 import pypandoc
 
+from great_expectations.core import ExpectationSuite, ExpectationConfiguration
 from great_expectations.render.renderer import (
     ExpectationSuitePageRenderer,
     ProfilingResultsPageRenderer,
     ValidationResultsPageRenderer
 )
+from great_expectations.render.types import RenderedHeaderContent, RenderedTableContent
 
 
 def test_ExpectationSuitePageRenderer_render_asset_notes():
     # import pypandoc
     # print(pypandoc.convert_text("*hi*", to='html', format="md"))
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta": {
+    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+        data_asset_name="test", expectation_suite_name="test",
+        meta={
             "notes": "*hi*"
         }
-    })
+    ))
     print(result)
-    assert result["content"] == ["*hi*"]
+    assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.', "*hi*"]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta": {
+    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+        data_asset_name="test", expectation_suite_name="test",
+        meta={
             "notes": ["*alpha*", "_bravo_", "charlie"]
         }
-    })
+    ))
     print(result)
-    assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
+    assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
+                              "*alpha*", "_bravo_", "charlie"]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta": {
+    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+        data_asset_name="test", expectation_suite_name="test",
+        meta={
             "notes": {
                 "format": "string",
                 "content": ["*alpha*", "_bravo_", "charlie"]
             }
         }
-    })
+    ))
     print(result)
-    assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
+    assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
+                           "*alpha*", "_bravo_", "charlie"]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta": {
+    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+        data_asset_name="test", expectation_suite_name="test",
+        meta={
             "notes": {
                 "format": "markdown",
                 "content": "*alpha*"
             }
         }
-    })
+    ))
     print(result)
     
     try:
         pypandoc.convert_text("*test*", format='md', to="html")
-        assert result["content"] == ["<p><em>alpha</em></p>\n"]
+        assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
+                               "<p><em>alpha</em></p>\n"]
     except OSError:
-        assert result["content"] == ["*alpha*"]
+        assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
+                               "*alpha*"]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta": {
+    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+        data_asset_name="test", expectation_suite_name="test",
+        meta={
             "notes": {
                 "format": "markdown",
                 "content": ["*alpha*", "_bravo_", "charlie"]
             }
         }
-    })
+    ))
     print(result)
     
     try:
         pypandoc.convert_text("*test*", format='md', to="html")
-        assert result["content"] == ["<p><em>alpha</em></p>\n", "<p><em>bravo</em></p>\n", "<p>charlie</p>\n"]
+        assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
+                               "<p><em>alpha</em></p>\n", "<p><em>bravo</em></p>\n", "<p>charlie</p>\n"]
     except OSError:
-        assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
+        assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
+                               "*alpha*", "_bravo_", "charlie"]
 
 
 def test_expectation_summary_in_ExpectationSuitePageRenderer_render_asset_notes():
-    result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {},
-        "expectations" : {}
-    })
+    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+        data_asset_name="test", expectation_suite_name="test",
+        meta={},
+        expectations=None
+    ))
     print(result)
-    assert result["content"] == ['This Expectation suite currently contains 0 total Expectations across 0 columns.']
+    assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.']
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {
-            "notes" : {
+    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+        data_asset_name="test", expectation_suite_name="test",
+        meta={
+            "notes": {
                 "format": "markdown",
                 "content": ["hi"]
             }
-        },
-        "expectations" : {}
-    })
+        }
+    ))
     print(result)
     
     try:
         pypandoc.convert_text("*test*", format='md', to="html")
-        assert result["content"] == [
+        assert result.text == [
             'This Expectation suite currently contains 0 total Expectations across 0 columns.',
             '<p>hi</p>\n',
         ]
     except OSError:
-        assert result["content"] == [
+        assert result.text == [
             'This Expectation suite currently contains 0 total Expectations across 0 columns.',
             'hi',
         ]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes({
-        "meta" : {},
-        "expectations" : [
-            {
-                "expectation_type": "expect_table_row_count_to_be_between",
-                "kwargs": { "min_value": 0, "max_value": None, }
-            },
-            {
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": { "column": "x", }
-            },
-            {
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": { "column": "y", }
-            },
+    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+        data_asset_name="test", expectation_suite_name="test",
+        meta={},
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_table_row_count_to_be_between",
+                kwargs={"min_value": 0, "max_value": None}
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={"column": "x"}
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={"column": "y"}
+            )
         ]
-    })
+    ))
     print(result)
-    assert result["content"][0] == 'This Expectation suite currently contains 3 total Expectations across 2 columns.'
+    assert result.text[0] == 'This Expectation suite currently contains 3 total Expectations across 2 columns.'
 
 
 def test_ProfilingResultsPageRenderer(titanic_profiled_evrs_1):
@@ -134,7 +149,7 @@ def test_ProfilingResultsPageRenderer(titanic_profiled_evrs_1):
     
     
 def test_ValidationResultsPageRenderer_render_validation_header():
-    validation_header = {
+    validation_header = RenderedHeaderContent(**{
         "content_block_type": "header",
         "header": "Validation Overview",
         "styling": {
@@ -143,15 +158,15 @@ def test_ValidationResultsPageRenderer_render_validation_header():
                 "classes": ["alert", "alert-secondary"]
             }
         }
-    }
+    })
     assert ValidationResultsPageRenderer._render_validation_header() == validation_header
     
     
 def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_evrs_1):
     validation_info = ValidationResultsPageRenderer._render_validation_info(titanic_profiled_evrs_1)
-    print(json.dumps(validation_info, indent=2))
-
-    expected_validation_info = {
+    validation_info.table[2][1] = "__fixture__"
+    validation_info.table[3][1] = "__run_id_fixture__"
+    expected_validation_info = RenderedTableContent(**{
         "content_block_type": "table",
         "header": "Info",
         "table": [
@@ -191,16 +206,14 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
                 ]
             }
         }
-    }
+    })
 
-    assert validation_info == expected_validation_info
+    assert validation_info.to_json_dict() == expected_validation_info.to_json_dict()
 
 
 def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_profiled_evrs_1):
     validation_statistics = ValidationResultsPageRenderer._render_validation_statistics(titanic_profiled_evrs_1)
-    print(json.dumps(validation_statistics, indent=2))
-    
-    expected_validation_statistics = {
+    expected_validation_statistics = RenderedTableContent(**{
       "content_block_type": "table",
       "header": "Statistics",
       "table": [
@@ -236,14 +249,14 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_prof
           ]
         }
       }
-    }
+    })
 
     assert validation_statistics == expected_validation_statistics
 
 
 def test_ValidationResultsPageRenderer_render_nested_table_from_dict(titanic_profiled_evrs_1):
-    batch_kwargs_table = ValidationResultsPageRenderer._render_nested_table_from_dict(titanic_profiled_evrs_1["meta"]["batch_kwargs"], header="Batch Kwargs")
-    print(json.dumps(batch_kwargs_table, indent=2))
+    batch_kwargs_table = ValidationResultsPageRenderer._render_nested_table_from_dict(
+        titanic_profiled_evrs_1.meta["batch_kwargs"], header="Batch Kwargs").to_json_dict()
 
     expected_batch_kwarg_table = {
         "content_block_type": "table",

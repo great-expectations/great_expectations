@@ -2,10 +2,11 @@ from collections import OrderedDict
 
 from .renderer import Renderer
 from great_expectations.render.types import (
-    RenderedComponentContent,
     RenderedSectionContent,
-    RenderedDocumentContent
+    RenderedDocumentContent,
+    RenderedHeaderContent, RenderedStringTemplateContent, RenderedTableContent, RenderedBulletListContent
 )
+
 from .call_to_action_renderer import CallToActionRenderer
 
 # FIXME : This class needs to be rebuilt to accept SiteSectionIdentifiers as input.
@@ -26,7 +27,7 @@ class SiteIndexPageRenderer(Renderer):
         first_row = []
         rowspan = str(len(expectations_links)) if expectations_links else "1"
         
-        data_asset_name = RenderedComponentContent(**{
+        data_asset_name = RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": "$data_asset",
@@ -62,7 +63,7 @@ class SiteIndexPageRenderer(Renderer):
         
         if "profiling_links" in link_list_keys_to_render:
             profiling_results_bullets = [
-                RenderedComponentContent(**{
+                RenderedStringTemplateContent(**{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$link_text",
@@ -79,7 +80,7 @@ class SiteIndexPageRenderer(Renderer):
                     }
                 }) for link_dict in profiling_links
             ]
-            profiling_results_bullet_list = RenderedComponentContent(**{
+            profiling_results_bullet_list = RenderedBulletListContent(**{
                 "content_block_type": "bullet_list",
                 "bullet_list": profiling_results_bullets,
                 "styling": {
@@ -109,7 +110,7 @@ class SiteIndexPageRenderer(Renderer):
 
             expectation_suite_name = expectation_suite_link_dict["expectation_suite_name"]
 
-            expectation_suite_link = RenderedComponentContent(**{
+            expectation_suite_link = RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "$link_text",
@@ -140,7 +141,7 @@ class SiteIndexPageRenderer(Renderer):
                     if link_dict["expectation_suite_name"] == expectation_suite_name
                 ]
                 validation_link_bullets = [
-                    RenderedComponentContent(**{
+                    RenderedStringTemplateContent(**{
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "${validation_success} $link_text",
@@ -172,7 +173,7 @@ class SiteIndexPageRenderer(Renderer):
                     }) for link_dict in sorted_validations_links if
                     link_dict["expectation_suite_name"] == expectation_suite_name
                 ]
-                validation_link_bullet_list = RenderedComponentContent(**{
+                validation_link_bullet_list = RenderedBulletListContent(**{
                     "content_block_type": "bullet_list",
                     "bullet_list": validation_link_bullets,
                     "styling": {
@@ -193,7 +194,7 @@ class SiteIndexPageRenderer(Renderer):
                 link_dict for link_dict in sorted(validations_links, key=lambda x: x["run_id"], reverse=True)
             ]
             validation_link_bullets = [
-                RenderedComponentContent(**{
+                RenderedStringTemplateContent(**{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "${validation_success} $link_text",
@@ -224,7 +225,7 @@ class SiteIndexPageRenderer(Renderer):
                     }
                 }) for link_dict in sorted_validations_links
             ]
-            validation_link_bullet_list = RenderedComponentContent(**{
+            validation_link_bullet_list = RenderedBulletListContent(**{
                 "content_block_type": "bullet_list",
                 "bullet_list": validation_link_bullets,
                 "styling": {
@@ -247,7 +248,7 @@ class SiteIndexPageRenderer(Renderer):
                 expectation_suite_row = []
                 expectation_suite_name = expectation_suite_link_dict["expectation_suite_name"]
     
-                expectation_suite_link = RenderedComponentContent(**{
+                expectation_suite_link = RenderedStringTemplateContent(**{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$link_text",
@@ -278,7 +279,7 @@ class SiteIndexPageRenderer(Renderer):
                         if link_dict["expectation_suite_name"] == expectation_suite_name
                     ]
                     validation_link_bullets = [
-                        RenderedComponentContent(**{
+                        RenderedStringTemplateContent(**{
                             "content_block_type": "string_template",
                             "string_template": {
                                 "template": "${validation_success} $link_text",
@@ -309,7 +310,7 @@ class SiteIndexPageRenderer(Renderer):
                         }) for link_dict in sorted_validations_links if
                         link_dict["expectation_suite_name"] == expectation_suite_name
                     ]
-                    validation_link_bullet_list = RenderedComponentContent(**{
+                    validation_link_bullet_list = RenderedBulletListContent(**{
                         "content_block_type": "bullet_list",
                         "bullet_list": validation_link_bullets,
                         "styling": {
@@ -339,7 +340,7 @@ class SiteIndexPageRenderer(Renderer):
             content_blocks = []
 
             # datasource header
-            source_header_block = RenderedComponentContent(**{
+            source_header_block = RenderedHeaderContent(**{
                 "content_block_type": "header",
                 "header": {
                     "template": "$title_prefix | $source",
@@ -366,8 +367,9 @@ class SiteIndexPageRenderer(Renderer):
 
             # generator header
             for generator, data_assets in generators.items():
-                generator_header_block = RenderedComponentContent(**{
+                generator_header_block = RenderedHeaderContent(**{
                     "content_block_type": "header",
+                    "header": "",
                     "subheader": {
                         "template": "$title_prefix | $generator",
                         "params": {
@@ -389,7 +391,7 @@ class SiteIndexPageRenderer(Renderer):
                 content_blocks.append(generator_header_block)
 
                 generator_table_rows = []
-                generator_table_header_row = [RenderedComponentContent(**{
+                generator_table_header_row = [RenderedStringTemplateContent(**{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "Data Asset",
@@ -414,7 +416,7 @@ class SiteIndexPageRenderer(Renderer):
                         if link_lists.get(link_lists_key):
                             class_header_str = link_lists_key.replace("_", "-")
                             class_str = "ge-index-page-generator-table-{}-header".format(class_header_str)
-                            header = RenderedComponentContent(**{
+                            header = RenderedStringTemplateContent(**{
                                 "content_block_type": "string_template",
                                 "string_template": {
                                     "template": header,
@@ -427,7 +429,7 @@ class SiteIndexPageRenderer(Renderer):
                             generator_table_header_row.append(header)
                             link_list_keys_to_render.append(link_lists_key)
                 
-                generator_table = RenderedComponentContent(**{
+                generator_table = RenderedTableContent(**{
                     "content_block_type": "table",
                     "header_row": generator_table_header_row,
                     "table": generator_table_rows,
@@ -458,8 +460,8 @@ class SiteIndexPageRenderer(Renderer):
             "utm_medium": "index-page",
             "sections": sections
             })
-        
+
         if cta_object:
-            index_page_document["cta_footer"] = CallToActionRenderer.render(cta_object)
-            
+            index_page_document.cta_footer = CallToActionRenderer.render(cta_object)
+
         return index_page_document

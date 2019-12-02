@@ -54,7 +54,7 @@ def result_contains_unexpected_pct(result):
     :return:
     """
     return 'unexpected_percent' in result['result'] \
-           and result['expectation_config']['expectation_type'] != 'expect_column_values_to_be_in_set'
+           and result.expectation_config.expectation_type != 'expect_column_values_to_be_in_set'
 
 
 

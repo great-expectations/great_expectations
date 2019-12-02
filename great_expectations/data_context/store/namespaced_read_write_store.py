@@ -1,11 +1,9 @@
 import logging
 
 import copy
-import os
 
-from ..types.base_resource_identifiers import (
-    DataContextKey,
-)
+from great_expectations.core import ExpectationSuiteSchema, ExpectationSuiteValidationResultSchema, \
+    NamespaceAwareExpectationSuiteSchema, DataContextKey
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -21,8 +19,7 @@ from great_expectations.data_context.util import (
     load_class,
     instantiate_class_from_config
 )
-from great_expectations.exceptions import DataContextError
-
+from great_expectations.exceptions import DataContextError, StoreConfigurationError
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +48,12 @@ class NamespacedReadWriteStore(ReadWriteStore):
             }
         elif store_backend_config["class_name"] == "FixedLengthTupleS3StoreBackend":
             config_defaults = {
-                "key_length": 5, # NOTE: Eugene: 2019-09-06: ???
+                "key_length": 5,  # NOTE: Eugene: 2019-09-06: ???
                 "module_name": "great_expectations.data_context.store",
             }
         else:
             config_defaults = {
-                "module_name" : "great_expectations.data_context.store",
+                "module_name": "great_expectations.data_context.store",
             }
 
         return instantiate_class_from_config(
@@ -87,27 +84,30 @@ class NamespacedReadWriteStore(ReadWriteStore):
     def _convert_resource_identifier_to_tuple(self, key):
         # TODO : Optionally prepend a source_id (the frontend Store name) to the tuple.
 
+        if isinstance(key, DataContextKey):
+            return key.to_tuple()
+
         list_ = []
         list_ += self._convert_resource_identifier_to_list(key)
 
         return tuple(list_)
 
-    def _convert_resource_identifier_to_list(self, key):
-        # The logic in this function is recursive, so it can't return a tuple
-
-        list_ = []
-        #Fetch keys in _key_order to guarantee tuple ordering in both python 2 and 3
-        for key_name in key._key_order:
-            key_element = key[key_name]
-            if isinstance( key_element, DataContextKey ):
-                list_ += self._convert_resource_identifier_to_list(key_element)
-            else:
-                list_.append(key_element)
-
-        return list_
+    # def _convert_resource_identifier_to_list(self, key):
+    #     # The logic in this function is recursive, so it can't return a tuple
+    #     list_ = []
+    #
+    #     #Fetch keys in _key_order to guarantee tuple ordering in both python 2 and 3
+    #     for key_name in key._key_order:
+    #         key_element = key[key_name]
+    #         if isinstance( key_element, DataContextKey ):
+    #             list_ += self._convert_resource_identifier_to_list(key_element)
+    #         else:
+    #             list_.append(key_element)
+    #
+    #     return list_
 
     def _convert_tuple_to_resource_identifier(self, tuple_):
-        new_identifier = self.key_class(*tuple_)
+        new_identifier = self.key_class.from_tuple(tuple_)
         return new_identifier
 
     def _validate_key(self, key):
@@ -125,12 +125,19 @@ class ExpectationsStore(NamespacedReadWriteStore):
 
     def _init_store_backend(self, store_backend_config, runtime_config):
         self.key_class = ExpectationSuiteIdentifier
+        self.namespaceAwareExpectationSuiteSchema = NamespaceAwareExpectationSuiteSchema(strict=True)
 
-        if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
+        store_backend_class_name = store_backend_config.get("class_name", "FixedLengthTupleFilesystemStoreBackend")
+        store_backend_module_name = store_backend_config.get("module_name", "great_expectations.data_context.store")
+        store_backend_class = load_class(
+            class_name=store_backend_class_name,
+            module_name=store_backend_module_name
+        )
+        if issubclass(store_backend_class, FixedLengthTupleStoreBackend):
             config_defaults = {
                 "key_length": 4,
                 "module_name": "great_expectations.data_context.store",
-                "filepath_template": "{0}/{1}/{2}/{3}.json",
+                "filepath_template": "{0}/{1}/{2}/{3}.json"
             }
         else:
             config_defaults = {
@@ -143,11 +150,20 @@ class ExpectationsStore(NamespacedReadWriteStore):
             config_defaults=config_defaults,
         )
 
+    def _get_serialization_method(self, serialization_type):
+        # TODO: warn in init if serialization_type is attempted to be set
+        return lambda x: self.namespaceAwareExpectationSuiteSchema.dumps(x).data
+
+    def _get_deserialization_method(self, serialization_type):
+        # TODO: warn in init if serialization_type is attempted to be set
+        return lambda x: self.namespaceAwareExpectationSuiteSchema.loads(x).data
+
 
 class ValidationsStore(NamespacedReadWriteStore):
     
     def _init_store_backend(self, store_backend_config, runtime_config):
         self.key_class = ValidationResultIdentifier
+        self.expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema(strict=True)
 
         store_backend_class_name = store_backend_config.get("class_name", "FixedLengthTupleFilesystemStoreBackend")
         store_backend_module_name = store_backend_config.get("module_name", "great_expectations.data_context.store")
@@ -171,6 +187,14 @@ class ValidationsStore(NamespacedReadWriteStore):
             runtime_config=runtime_config,
             config_defaults=config_defaults,
         )
+
+    def _get_serialization_method(self, serialization_type):
+        # TODO: warn in init if serialization_type is attempted to be set
+        return lambda x: self.expectationSuiteValidationResultSchema.dumps(x).data
+
+    def _get_deserialization_method(self, serialization_type):
+        # TODO: warn in init if serialization_type is attempted to be set
+        return lambda x: self.expectationSuiteValidationResultSchema.loads(x).data
 
 
 class HtmlSiteStore(NamespacedReadWriteStore):
@@ -258,9 +282,9 @@ class HtmlSiteStore(NamespacedReadWriteStore):
 
     def _convert_tuple_to_resource_identifier(self, tuple_):
         if tuple_[0] == "expectations":
-            resource_identifier = ExpectationSuiteIdentifier(*tuple_[1])
+            resource_identifier = ExpectationSuiteIdentifier.from_tuple(tuple_[1])
         elif tuple_[0] == "validations":
-            resource_identifier = ValidationResultIdentifier(*tuple_[1])
+            resource_identifier = ValidationResultIdentifier.from_tuple(tuple_[1])
         else:
             raise Exception("unknown section name: " + tuple_[0])
         new_identifier = SiteSectionIdentifier(site_section_name=tuple_[0], resource_identifier=resource_identifier)

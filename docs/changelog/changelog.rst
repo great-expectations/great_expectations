@@ -1,9 +1,11 @@
 .. _changelog:
 
+* INTERNAL TYPES
+* Change data_asset get_data_asset_name and save_data_asset_name to be properties.
 
 0.8.6__develop
 -----------------
-
+* Update ExpectationsStore defaults to be consistent across all FixedLengthTupleStoreBackend objects
 
 
 0.8.5

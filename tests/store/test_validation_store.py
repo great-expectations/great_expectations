@@ -2,6 +2,7 @@ import pytest
 from moto import mock_s3
 import boto3
 
+from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.store import (
     ValidationsStore,
 )
@@ -10,7 +11,7 @@ from great_expectations.data_context.types import (
     DataAssetIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions import MissingTopLevelConfigKeyError
+
 from great_expectations.util import (
     gen_directory_tree_str,
 )
@@ -38,9 +39,6 @@ def test_ValidationsStore_with_FixedLengthTupleS3StoreBackend():
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
 
-    with pytest.raises(MissingTopLevelConfigKeyError):
-        my_store.get(ValidationResultIdentifier(**{}))
-
     ns_1 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
             data_asset_name=DataAssetIdentifier(
@@ -52,8 +50,8 @@ def test_ValidationsStore_with_FixedLengthTupleS3StoreBackend():
         ),
         run_id="20191007T151224.1234Z_prod_100"
     )
-    my_store.set(ns_1, {"A": "aaa"})
-    assert my_store.get(ns_1) == {"A": "aaa"}
+    my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
+    assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
 
     ns_2 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
@@ -67,8 +65,8 @@ def test_ValidationsStore_with_FixedLengthTupleS3StoreBackend():
         run_id="20191007T151224.1234Z_prod_200"
     )
 
-    my_store.set(ns_2, "bbb")
-    assert my_store.get(ns_2) == "bbb"
+    my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
+    assert my_store.get(ns_2) == ExpectationSuiteValidationResult(success=False, statistics={}, results=[])
 
     # Verify that internals are working as expected, including the default filepath
     assert set(
@@ -88,39 +86,25 @@ def test_ValidationsStore_with_FixedLengthTupleS3StoreBackend():
 def test_ValidationsStore_with_InMemoryStoreBackend():
 
     my_store = ValidationsStore(
-        store_backend = {
-            "module_name" : "great_expectations.data_context.store",
-            "class_name" : "InMemoryStoreBackend",
-            "separator" : ".",
+        store_backend={
+            "module_name": "great_expectations.data_context.store",
+            "class_name": "InMemoryStoreBackend",
+            "separator": ".",
         },
-        root_directory=None,#"dummy/path/",
+        root_directory=None,
     )
 
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
-
-    with pytest.raises(MissingTopLevelConfigKeyError):
-        my_store.get(ValidationResultIdentifier(**{}))
     
-    ns_1 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100"
-    )
-    my_store.set(ns_1,{"A": "aaa"})
-    assert my_store.get(ns_1) == {"A": "aaa"}
+    ns_1 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-100"))
+    my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
+    assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
 
-    ns_2 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-200"
-    )
-    my_store.set(ns_2, "bbb")
-    assert my_store.get(ns_2) == "bbb"
+    ns_2 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-200"))
+    my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
+    assert my_store.get(ns_2) == ExpectationSuiteValidationResult(success=False, statistics={}, results=[])
 
-    # Verify that internals are working as expected
-    assert my_store.store_backend.store == {
-        'a.b.c.quarantine.prod-100': '{"A": "aaa"}',
-        'a.b.c.quarantine.prod-200': '"bbb"',
-    }
-
-    print(my_store.list_keys())
     assert set(my_store.list_keys()) == {
         ns_1,
         ns_2,
@@ -130,16 +114,14 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
 def test_ValidationsStore__convert_resource_identifier_to_list():
 
     my_store = ValidationsStore(
-        store_backend = {
-            "module_name" : "great_expectations.data_context.store",
-            "class_name" : "InMemoryStoreBackend",
+        store_backend={
+            "module_name": "great_expectations.data_context.store",
+            "class_name": "InMemoryStoreBackend",
         },
         root_directory=None,
     )
 
-    ns_1 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100"
-    )
+    ns_1 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-100"))
     assert my_store._convert_resource_identifier_to_tuple(ns_1) == ('a', 'b', 'c', 'quarantine', 'prod-100')
 
 
@@ -148,32 +130,25 @@ def test_ValidationsStore_with_FixedLengthTupleFileSystemStoreBackend(tmp_path_f
     project_path = str(tmp_path_factory.mktemp('my_dir'))
 
     my_store = ValidationsStore(
-        store_backend = {
-            "module_name" : "great_expectations.data_context.store",
-            "class_name" : "FixedLengthTupleFilesystemStoreBackend",
-            "base_directory" : "my_store/",
-            "filepath_template" : "{4}/{0}/{1}/{2}/{3}.txt",
+        store_backend={
+            "module_name": "great_expectations.data_context.store",
+            "class_name": "FixedLengthTupleFilesystemStoreBackend",
+            "base_directory": "my_store/",
+            "filepath_template": "{4}/{0}/{1}/{2}/{3}.txt",
         },
-        root_directory = path,
+        root_directory=path,
     )
 
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
-
-    with pytest.raises(MissingTopLevelConfigKeyError):
-        my_store.get(ValidationResultIdentifier(**{}))
     
-    ns_1 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-100"
-    )
-    my_store.set(ns_1, {"A": "aaa"})
-    assert my_store.get(ns_1) == {"A": "aaa"}
+    ns_1 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-100"))
+    my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
+    assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
 
-    ns_2 = ValidationResultIdentifier(
-        from_string="ValidationResultIdentifier.a.b.c.quarantine.prod-20"
-    )
-    my_store.set(ns_2, {"B": "bbb"})
-    assert my_store.get(ns_2) == {"B": "bbb"}
+    ns_2 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-20"))
+    my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
+    assert my_store.get(ns_2) == ExpectationSuiteValidationResult(success=False, statistics={}, results=[])
 
     print(my_store.list_keys())
     assert set(my_store.list_keys()) == {

@@ -7,15 +7,12 @@ import logging
 
 from ruamel.yaml import YAML
 
-from great_expectations.data_context.types import (
-    DataAssetIdentifier,
-    NormalizedDataAssetName,
-)
+from great_expectations.core import ExpectationSuite
+from great_expectations.data_context.types import DataAssetIdentifier
 from great_expectations.data_context.util import (
     load_class,
     instantiate_class_from_config
 )
-from great_expectations.data_asset.util import get_empty_expectation_suite
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource.types import ReaderMethods
 from great_expectations.types import ClassConfig
@@ -257,7 +254,7 @@ class Datasource(object):
             A data_asset consisting of the specified batch of data with the named expectation suite connected.
 
         """
-        if isinstance(data_asset_name, NormalizedDataAssetName):  # this richer type can include more metadata
+        if isinstance(data_asset_name, DataAssetIdentifier):  # this richer type can include more metadata
             if self._data_context is not None:
                 expectation_suite = self._data_context.get_expectation_suite(
                     data_asset_name,
@@ -268,12 +265,12 @@ class Datasource(object):
                 # If data_context is not set, we cannot definitely use a fully normalized data_asset reference.
                 # This would mean someone got a normalized name without a data context which is unusual
                 logger.warning(
-                    "Using NormalizedDataAssetName type without a data_context could result in unexpected behavior: "
+                    "Using DataAssetIdentifier type without a data_context could result in unexpected behavior: "
                     "using '/' as a default delimiter."
                 )
         else:
-            expectation_suite = get_empty_expectation_suite(data_asset_name=data_asset_name,
-                                                            expectation_suite_name=expectation_suite_name)
+            expectation_suite = ExpectationSuite(data_asset_name=data_asset_name,
+                                                 expectation_suite_name=expectation_suite_name)
 
         # Support partition_id or other mechanisms of building batch_kwargs
         if not isinstance(batch_kwargs, dict):
@@ -367,7 +364,7 @@ class Datasource(object):
             A PandasDatasourceBatchKwargs object suitable for building a batch of data from this datasource
 
         """
-        if isinstance(data_asset_name, (NormalizedDataAssetName, DataAssetIdentifier)):
+        if isinstance(data_asset_name, DataAssetIdentifier):
             generator_name = data_asset_name.generator
             generator_asset = data_asset_name.generator_asset
         elif len(self._datasource_config["generators"]) == 1:
@@ -472,10 +469,11 @@ class Datasource(object):
                 raise InvalidConfigError("Unable to find data_asset_type: '%s'." % data_asset_type)
         elif isinstance(data_asset_type, ClassConfig):
             try:
-                if data_asset_type.module_name is None:
-                    data_asset_type.module_name = "great_expectations.dataset"
+                module_name = data_asset_type.module_name
+                if module_name is None:
+                    module_name = "great_expectations.dataset"
 
-                loaded_module = import_module(data_asset_type.module_name)
+                loaded_module = import_module(module_name)
                 data_asset_type_class = getattr(loaded_module, data_asset_type.class_name)
                 return data_asset_type_class
             except ImportError:

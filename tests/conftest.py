@@ -9,10 +9,12 @@ import pandas as pd
 import numpy as np
 
 import great_expectations as ge
+from great_expectations.core import ExpectationConfiguration, ExpectationValidationResult, expectationSuiteSchema, \
+    ExpectationSuite
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.data_context.util import safe_mmkdir
 
-from .test_utils import get_dataset
+from .test_utils import get_dataset, expectationSuiteValidationResultSchema
 
 ###
 #
@@ -130,39 +132,37 @@ def empty_expectation_suite():
 
 @pytest.fixture
 def basic_expectation_suite():
-    expectation_suite = {
-        'data_asset_name': "basic_suite_fixture",
-        'expectation_suite_name': "default",
-        'meta': {},
-        'expectations': [
-            # Removing this from list of expectations, since mysql doesn't support infinities and we want generic fixtures
-            # TODO: mysql cannot handle columns with infinities....re-handle this case
-            {
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
+    expectation_suite = ExpectationSuite(
+        data_asset_name="basic_suite_fixture",
+        expectation_suite_name="default",
+        meta={},
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={
                     "column": "infinities"
                 }
-            },
-            {
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={
                     "column": "nulls"
                 }
-            },
-            {
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={
                     "column": "naturals"
                 }
-            },
-            {
-                "expectation_type": "expect_column_values_to_be_unique",
-                "kwargs": {
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_unique",
+                kwargs={
                     "column": "naturals"
                 }
-            }
+            )
         ]
-    }
+    )
     return expectation_suite
 
 
@@ -683,7 +683,8 @@ def filesystem_csv_4(tmp_path_factory):
 
 @pytest.fixture
 def titanic_profiled_evrs_1():
-    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
+    with open('./tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'r') as infile:
+        return expectationSuiteValidationResultSchema.loads(infile.read()).data
 
 
 @pytest.fixture
@@ -695,34 +696,34 @@ def titanic_profiled_name_column_evrs():
         Renderer,
     )
 
-    titanic_profiled_evrs_1 =  json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
-    evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
-    print(evrs_by_column.keys())
+    with open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json", "r") as infile:
+        titanic_profiled_evrs_1 = expectationSuiteValidationResultSchema.load(json.load(infile)).data
 
+    evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
     name_column_evrs = evrs_by_column["Name"]
-    print(json.dumps(name_column_evrs, indent=2))
 
     return name_column_evrs
 
 
 @pytest.fixture
 def titanic_profiled_expectations_1():
-    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json"))
+    with open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json", 'r') as infile:
+        return expectationSuiteSchema.load(json.load(infile)).data
 
 
 @pytest.fixture
 def titanic_profiled_name_column_expectations():
-    from great_expectations.render.renderer.renderer import (
-        Renderer,
-    )
+    from great_expectations.render.renderer.renderer import Renderer
 
-    titanic_profiled_expectations =  json.load(open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json"))
+    with open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json", 'r') as infile:
+        titanic_profiled_expectations = expectationSuiteSchema.load(json.load(infile)).data
+
     columns, ordered_columns = Renderer()._group_and_order_expectations_by_column(titanic_profiled_expectations)
-    print(columns)
-    print(ordered_columns)
+    # print(columns)
+    # print(ordered_columns)
 
     name_column_expectations = columns["Name"]
-    print(json.dumps(name_column_expectations, indent=2))
+    # print(json.dumps(name_column_expectations, indent=2))
 
     return name_column_expectations
 
@@ -730,15 +731,15 @@ def titanic_profiled_name_column_expectations():
 @pytest.fixture
 def titanic_validation_results():
     with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
-        return json.load(infile)
+        return expectationSuiteValidationResultSchema.load(json.load(infile)).data
 
 
 # various types of evr
 @pytest.fixture
 def evr_failed():
-    return {
-      "success": False,
-      "result": {
+    return ExpectationValidationResult(
+      success=False,
+      result={
         "element_count": 1313,
         "missing_count": 0,
         "missing_percent": 0.0,
@@ -770,12 +771,12 @@ def evr_failed():
           }
         ]
       },
-      "exception_info": {
+      exception_info={
         "raised_exception": False,
         "exception_message": None,
         "exception_traceback": None
       },
-      "expectation_config": {
+      expectation_config={
         "expectation_type": "expect_column_values_to_not_match_regex",
         "kwargs": {
           "column": "Name",
@@ -783,54 +784,54 @@ def evr_failed():
           "result_format": "SUMMARY"
         }
       }
-    }
+    )
 
 
 @pytest.fixture
 def evr_failed_with_exception():
-    return {
-        'success': False,
-        'exception_info': {
+    return ExpectationValidationResult(
+        success=False,
+        exception_info={
             'raised_exception': True,
             'exception_message': 'Invalid partition object.',
             'exception_traceback': 'Traceback (most recent call last):\n  File "/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n'
         },
-        'expectation_config': {
-            'expectation_type': 'expect_column_kl_divergence_to_be_less_than',
-            'kwargs': {
+        expectation_config=ExpectationConfiguration(
+            expectation_type='expect_column_kl_divergence_to_be_less_than',
+            kwargs={
                 'column': 'live',
                 'partition_object': None,
                 'threshold': None,
                 'result_format': 'SUMMARY'
             },
-            'meta': {
+            meta={
                 'BasicDatasetProfiler': {'confidence': 'very low'}
             }
-        }
-    }
+        )
+    )
 
 
 @pytest.fixture
 def evr_success():
-    return {
-      "success": True,
-      "result": {
+    return ExpectationValidationResult(
+      success=True,
+      result={
         "observed_value": 1313
       },
-      "exception_info": {
+      exception_info={
         "raised_exception": False,
         "exception_message": None,
         "exception_traceback": None
       },
-      "expectation_config": {
-        "expectation_type": "expect_table_row_count_to_be_between",
-        "kwargs": {
+      expectation_config=ExpectationConfiguration(
+        expectation_type="expect_table_row_count_to_be_between",
+        kwargs={
           "min_value": 0,
           "max_value": None,
           "result_format": "SUMMARY"
         }
-      }
-    }
+      )
+    )
 
 
 @pytest.fixture
