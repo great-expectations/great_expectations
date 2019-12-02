@@ -49,8 +49,8 @@ class NotebookRenderer(Renderer):
             f"""# Create & Edit Expectation Suite
 Use this notebook to recreate and modify your expectation suite.
 
-### Data Asset: `{data_asset_name}`
-### Expectation Suite: `{suite_name}`
+##### Data Asset: `{data_asset_name}`
+##### Expectation Suite: `{suite_name}`
 
 We'd love it if you **reach out for help on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)
 """
@@ -69,15 +69,6 @@ This represents your **project** that you just created using `great_expectations
         """
         )
         self.add_code_cell("context = ge.data_context.DataContext()")
-
-    def add_hardcoded_cruft(self):
-        # TODO deal with hard coded project root
-        self.add_code_cell(
-            """\
-project_root = "/Users/taylor/repos/demo_public_data_test/great_expectations"
-context = ge.data_context.DataContext(project_root)
-# context.get_available_data_asset_names()"""
-        )
 
     def add_footer(self):
         self.add_markdown_cell(
@@ -168,7 +159,6 @@ context.open_data_docs()"""
 
         # Compose the notebook sections from generic + backend-specific cells
         self.add_header(data_asset_name, suite_name)
-        self.add_hardcoded_cruft()
         self.add_batch_cells(data_asset_name, suite_name)
         self.add_authoring_intro()
         self.add_expectation_cells_from_suite(suite)
