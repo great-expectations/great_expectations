@@ -3,16 +3,16 @@
 from __future__ import unicode_literals
 import json
 
+from great_expectations.core import ExpectationConfiguration, ExpectationValidationResult
 from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 
-from great_expectations.render.types import RenderedComponentContent
+from great_expectations.render.types import RenderedComponentContent, RenderedStringTemplateContent
 
 
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(evr_failed_with_exception):
-    result = ValidationResultsTableContentBlockRenderer.render([evr_failed_with_exception])
-    print(json.dumps(result, indent=2))
+    result = ValidationResultsTableContentBlockRenderer.render([evr_failed_with_exception]).to_json_dict()
     assert result == {
       "content_block_type": "table",
       "table": [
@@ -105,13 +105,12 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
     
 def test_ValidationResultsTableContentBlockRenderer_render(titanic_profiled_name_column_evrs):
     validation_results_table = ValidationResultsTableContentBlockRenderer.render(titanic_profiled_name_column_evrs)
-    print(json.dumps(validation_results_table, indent=2))
 
-    assert type(validation_results_table) is RenderedComponentContent
-    assert validation_results_table["content_block_type"] == "table"
-    assert len(validation_results_table["table"]) == 6
-    assert validation_results_table["header_row"] == ["Status", "Expectation", "Observed Value"]
-    assert validation_results_table["styling"] == {
+    assert isinstance(validation_results_table, RenderedComponentContent)
+    assert validation_results_table.content_block_type == "table"
+    assert len(validation_results_table.table) == 6
+    assert validation_results_table.header_row == ["Status", "Expectation", "Observed Value"]
+    assert validation_results_table.styling == {
         "body": {
           "classes": [
             "table"
@@ -122,164 +121,159 @@ def test_ValidationResultsTableContentBlockRenderer_render(titanic_profiled_name
           "table-responsive"
         ]
     }
-    assert json.dumps(validation_results_table).count("$icon") == 6
+    assert json.dumps(validation_results_table.to_json_dict()).count("$icon") == 6
     
     
 def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_success):
     content_block_fn = ValidationResultsTableContentBlockRenderer._get_content_block_fn("expect_table_row_count_to_be_between")
     content_block_fn_output = content_block_fn(evr_success)
-    print(json.dumps(content_block_fn_output, indent=2))
 
     content_block_fn_expected_output = [
-        [
-            {
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "$icon",
-                    "params": {
-                        "icon": ""
-                    },
-                    "styling": {
-                        "params": {
-                            "icon": {
-                                "classes": [
-                                    "fas",
-                                    "fa-check-circle",
-                                    "text-success"
-                                ],
-                                "tag": "i"
-                            }
-                        }
-                    }
-                },
-                "styling": {
-                    "parent": {
-                        "classes": [
-                            "hide-succeeded-validation-target-child"
-                        ]
-                    }
-                }
+      [
+        RenderedStringTemplateContent(**{
+          "content_block_type": "string_template",
+          "string_template": {
+            "template": "$icon",
+            "params": {
+              "icon": ""
             },
-            {
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "Must have more than $min_value rows.",
-                    "params": {
-                        "min_value": 0,
-                        "max_value": None,
-                        "result_format": "SUMMARY"
-                    },
-                    "styling": None
+            "styling": {
+              "params": {
+                "icon": {
+                  "classes": [
+                    "fas",
+                    "fa-check-circle",
+                    "text-success"
+                  ],
+                  "tag": "i"
                 }
+              }
+            }
+          },
+          "styling": {
+            "parent": {
+              "classes": [
+                 "hide-succeeded-validation-target-child"
+              ]
+            }
+          }
+        }),
+        RenderedStringTemplateContent(**{
+          "content_block_type": "string_template",
+          "string_template": {
+            "template": "Must have more than $min_value rows.",
+            "params": {
+              "min_value": 0,
+              "max_value": None,
+              "result_format": "SUMMARY"
             },
-            "1,313"
-        ]
+            "styling": None
+          }
+        }),
+        "1,313"
+      ]
     ]
     assert content_block_fn_output == content_block_fn_expected_output
     
 
 def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_success):
-    evr_no_result_key = {
-      "success": True,
-      "exception_info": {
+    evr_no_result_key = ExpectationValidationResult(
+      success=True,
+      exception_info={
         "raised_exception": False,
         "exception_message": None,
         "exception_traceback": None
       },
-      "expectation_config": {
-        "expectation_type": "expect_table_row_count_to_be_between",
-        "kwargs": {
+      expectation_config=ExpectationConfiguration(
+        expectation_type="expect_table_row_count_to_be_between",
+        kwargs={
           "min_value": 0,
           "max_value": None,
           "result_format": "SUMMARY"
         }
-      }
-    }
+      )
+    )
     
-    evr_expect_column_values_to_not_be_null = {
-      "success": True,
-      "result": {
+    evr_expect_column_values_to_not_be_null = ExpectationValidationResult(
+      success=True,
+      result={
         "element_count": 1313,
         "unexpected_count": 1050,
         "unexpected_percent": 79.96953541508,
         "partial_unexpected_list": []
       },
-      "exception_info": {
+      exception_info={
         "raised_exception": False,
         "exception_message": None,
         "exception_traceback": None
       },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_be_null",
-        "kwargs": {
+      expectation_config=ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs={
           "column": "Unnamed: 0",
           "mostly": 0.5,
           "result_format": "SUMMARY"
         }
-      }
-    }
+        )
+    )
 
-    evr_expect_column_values_to_be_null = {
-        "success": True,
-        "result": {
+    evr_expect_column_values_to_be_null = ExpectationValidationResult(
+        success=True,
+        result={
             "element_count": 1313,
             "unexpected_count": 0,
             "unexpected_percent": 0.0,
             "partial_unexpected_list": []
         },
-        "exception_info": {
+        exception_info={
             "raised_exception": False,
             "exception_message": None,
             "exception_traceback": None
         },
-        "expectation_config": {
-            "expectation_type": "expect_column_values_to_be_null",
-            "kwargs": {
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_null",
+            kwargs={
                 "column": "Unnamed: 0",
                 "mostly": 0.5,
                 "result_format": "SUMMARY"
             }
-        }
-    }
+        )
+    )
     
-    # test _get_observed_value when evr["result"]["observed_value"] exists
+    # test _get_observed_value when evr.result["observed_value"] exists
     output_1 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_success)
-    print(output_1)
     assert output_1 == "1,313"
-    # test _get_observed_value when evr["result"] does not exist
+    # test _get_observed_value when evr.result does not exist
     output_2 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_no_result_key)
-    print(output_2)
     assert output_2 == "--"
     # test _get_observed_value for expect_column_values_to_not_be_null expectation type
     output_3 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_not_be_null)
-    print(output_3)
     assert output_3 == "≈20.03% not null"
     # test _get_observed_value for expect_column_values_to_be_null expectation type
     output_4 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_be_null)
-    print(output_4)
     assert output_4 == "100% null"
 
     
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr_success, evr_failed):
-    evr_no_result = {
-      "success": True,
-      "exception_info": {
+    evr_no_result = ExpectationValidationResult(
+      success=True,
+      exception_info={
         "raised_exception": False,
         "exception_message": None,
         "exception_traceback": None
       },
-      "expectation_config": {
-        "expectation_type": "expect_table_row_count_to_be_between",
-        "kwargs": {
+      expectation_config=ExpectationConfiguration(
+        expectation_type="expect_table_row_count_to_be_between",
+        kwargs={
           "min_value": 0,
           "max_value": None,
           "result_format": "SUMMARY"
         }
-      }
-    }
-    evr_failed_no_unexpected_count = {
-        "success": False,
-        "result": {
+      )
+    )
+    evr_failed_no_unexpected_count = ExpectationValidationResult(
+        success=False,
+        result={
             "element_count": 1313,
             "missing_count": 0,
             "missing_percent": 0.0,
@@ -310,20 +304,20 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
                 }
             ]
         },
-        "exception_info": {
+        exception_info={
             "raised_exception": False,
             "exception_message": None,
             "exception_traceback": None
         },
-        "expectation_config": {
-            "expectation_type": "expect_column_values_to_not_match_regex",
-            "kwargs": {
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_not_match_regex",
+            kwargs={
                 "column": "Name",
                 "regex": "^\\s+|\\s+$",
                 "result_format": "SUMMARY"
             }
-        }
-    }
+    )
+    )
     
     # test for succeeded evr
     output_1 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_success)
@@ -331,7 +325,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
     
     # test for failed evr
     output_2 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed)
-    assert output_2 == {
+    assert output_2 == RenderedStringTemplateContent(**{
       "content_block_type": "string_template",
       "string_template": {
         "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",
@@ -347,12 +341,12 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
           ]
         }
       }
-    }
+    })
     
     # test for evr with no "result" key
     output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_no_result)
     print(json.dumps(output_3, indent=2))
-    assert output_3 == None
+    assert output_3 is None
     
     # test for evr with no unexpected count
     output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed_no_unexpected_count)
@@ -360,25 +354,25 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
     assert output_4 is None
 
     # test for evr with exception
-    evr_failed_exception = {
-        "success": False,
-        "exception_info": {
+    evr_failed_exception = ExpectationValidationResult(
+        success=False,
+        exception_info={
             "raised_exception": True,
             "exception_message": "Unrecognized column: not_a_real_column",
             "exception_traceback": "Traceback (most recent call last):\n...more_traceback..."
         },
-        "expectation_config": {
-            "expectation_type": "expect_column_values_to_not_match_regex",
-            "kwargs": {
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_not_match_regex",
+            kwargs={
                 "column": "Name",
                 "regex": "^\\s+|\\s+$",
                 "result_format": "SUMMARY"
             }
-        }
-    }
+        )
+)
 
     output_5 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed_exception)
-    assert output_5 == {
+    assert output_5 == RenderedStringTemplateContent(**{
         'content_block_type': 'string_template',
         'string_template': {
             'template': '\n\n$expectation_type raised an exception:\n$exception_message',
@@ -396,30 +390,30 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
                 }
             }
         }
-    }
+    })
 
 
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_success):
-    evr_failed_no_result = {
-        "success": False,
-        "exception_info": {
+    evr_failed_no_result = ExpectationValidationResult(
+        success=False,
+        exception_info={
             "raised_exception": False,
             "exception_message": None,
             "exception_traceback": None
         },
-        "expectation_config": {
-            "expectation_type": "expect_column_values_to_be_in_set",
-            "kwargs": {
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
                 "column": "Unnamed: 0",
                 "value_set": [],
                 "result_format": "SUMMARY"
             }
-        }
-    }
+    )
+    )
 
-    evr_failed_no_unexpected_list_or_counts = {
-        "success": False,
-        "result": {
+    evr_failed_no_unexpected_list_or_counts = ExpectationValidationResult(
+        success=False,
+        result={
             "element_count": 1313,
             "missing_count": 0,
             "missing_percent": 0.0,
@@ -427,24 +421,24 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "unexpected_percent": 100.0,
             "unexpected_percent_nonmissing": 100.0,
         },
-        "exception_info": {
+        exception_info={
             "raised_exception": False,
             "exception_message": None,
             "exception_traceback": None
         },
-        "expectation_config": {
-            "expectation_type": "expect_column_values_to_be_in_set",
-            "kwargs": {
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
                 "column": "Unnamed: 0",
                 "value_set": [],
                 "result_format": "SUMMARY"
             }
-        }
-    }
+    )
+    )
 
-    evr_failed_partial_unexpected_list = {
-        "success": False,
-        "result": {
+    evr_failed_partial_unexpected_list = ExpectationValidationResult(
+        success=False,
+        result={
             "element_count": 1313,
             "missing_count": 0,
             "missing_percent": 0.0,
@@ -474,24 +468,24 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
                 20
             ],
         },
-        "exception_info": {
+        exception_info={
             "raised_exception": False,
             "exception_message": None,
             "exception_traceback": None
         },
-        "expectation_config": {
-            "expectation_type": "expect_column_values_to_be_in_set",
-            "kwargs": {
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
                 "column": "Unnamed: 0",
                 "value_set": [],
                 "result_format": "SUMMARY"
             }
-        }
-    }
+)
+)
 
-    evr_failed_partial_unexpected_counts = {
-        "success": False,
-        "result": {
+    evr_failed_partial_unexpected_counts = ExpectationValidationResult(
+        success=False,
+        result={
             "element_count": 1313,
             "missing_count": 0,
             "missing_percent": 0.0,
@@ -625,40 +619,36 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
                 }
             ]
         },
-        "exception_info": {
+        exception_info={
             "raised_exception": False,
             "exception_message": None,
             "exception_traceback": None
         },
-        "expectation_config": {
-            "expectation_type": "expect_column_values_to_be_in_set",
-            "kwargs": {
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
                 "column": "Unnamed: 0",
                 "value_set": [],
                 "result_format": "SUMMARY"
             }
-        }
-    }
+)
+)
     
     # test for succeeded evr
     output_1 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_success)
-    print(output_1)
     assert output_1 is None
     
     # test for failed evr with no "result" key
     output_2 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_no_result)
-    print(output_2)
     assert output_2 is None
     
     # test for failed evr with no unexpected list or unexpected counts
     output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_no_unexpected_list_or_counts)
-    print(output_3)
     assert output_3 is None
     
     # test for failed evr with partial unexpected list
     output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_partial_unexpected_list)
-    print(json.dumps(output_4, indent=2))
-    assert output_4 == {
+    assert output_4.to_json_dict() == {
       "content_block_type": "table",
       "table": [
         [
@@ -738,8 +728,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     
     # test for failed evr with partial unexpected counts
     output_5 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_partial_unexpected_counts)
-    print(json.dumps(output_5, indent=2))
-    assert output_5 == {
+    assert output_5.to_json_dict() == {
       "content_block_type": "table",
       "table": [
         [
@@ -842,8 +831,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
 def test_ValidationResultsTableContentBlockRenderer_get_status_cell(evr_failed_with_exception, evr_success, evr_failed):
     # test for failed evr with exception
     output_1 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_failed_with_exception)
-    print(json.dumps(output_1, indent=2))
-    assert output_1 == {
+    assert output_1.to_json_dict() == {
       "content_block_type": "string_template",
       "string_template": {
         "template": "$icon",
@@ -867,40 +855,38 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(evr_failed_w
 
     # test for succeeded evr
     output_2 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_success)
-    print(json.dumps(output_2, indent=2))
-    assert output_2 == {
-        "content_block_type": "string_template",
-        "string_template": {
-            "template": "$icon",
-            "params": {
-                "icon": ""
-            },
-            "styling": {
-                "params": {
-                    "icon": {
-                        "classes": [
-                            "fas",
-                            "fa-check-circle",
-                            "text-success"
-                        ],
-                        "tag": "i"
-                    }
-                }
-            }
+    assert output_2.to_json_dict() == {
+      "content_block_type": "string_template",
+      "string_template": {
+        "template": "$icon",
+        "params": {
+          "icon": ""
         },
         "styling": {
-            "parent": {
-                "classes": [
-                    "hide-succeeded-validation-target-child"
-                ]
+          "params": {
+            "icon": {
+              "classes": [
+                "fas",
+                "fa-check-circle",
+                "text-success"
+              ],
+              "tag": "i"
             }
+          }
         }
+      },
+      "styling": {
+        "parent": {
+          "classes": [
+            "hide-succeeded-validation-target-child"
+          ]
+        }
+      }
     }
     
     # test for failed evr
     output_3 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_failed)
-    print(json.dumps(output_3, indent=2))
-    assert output_3 == {
+    assert output_3.to_json_dict() == {
       "content_block_type": "string_template",
       "string_template": {
         "template": "$icon",

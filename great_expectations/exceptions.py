@@ -1,9 +1,19 @@
-import os
+from marshmallow import ValidationError
 
 
 class GreatExpectationsError(Exception):
     def __init__(self, message):
-        self.message = message  
+        self.message = message
+
+
+class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
+    def __init__(self, message, validation_error):
+        self.message = message
+        self.messages = validation_error.messages
+        self.data = validation_error.data
+        self.field_names = validation_error.field_names
+        self.fields = validation_error.fields
+        self.kwargs = validation_error.kwargs
 
 
 class DataContextError(GreatExpectationsError):
@@ -18,15 +28,23 @@ class InvalidTopLevelConfigKeyError(GreatExpectationsError):
     pass
 
 
-class MissingTopLevelConfigKeyError(GreatExpectationsError):
+class MissingTopLevelConfigKeyError(GreatExpectationsValidationError):
     pass
 
 
-class InvalidConfigValueTypeError(GreatExpectationsError):
+class InvalidDataContextConfigError(GreatExpectationsValidationError):
     pass
 
 
-class InvalidConfigVersionError(GreatExpectationsError):
+class InvalidBatchKwargsError(GreatExpectationsError):
+    pass
+
+
+class InvalidBatchIdError(GreatExpectationsError):
+    pass
+
+
+class InvalidDataContextKeyError(DataContextError):
     pass
 
 
@@ -45,6 +63,26 @@ class ProfilerError(GreatExpectationsError):
 class InvalidConfigError(DataContextError):
     def __init__(self, message):
         self.message = message
+
+
+class StoreConfigurationError(DataContextError):
+    pass
+
+
+class InvalidExpectationKwargsError(GreatExpectationsError):
+    pass
+
+
+class InvalidExpectationConfigurationError(GreatExpectationsError):
+    pass
+
+
+class InvalidValidationResultError(GreatExpectationsError):
+    pass
+
+
+class GreatExpectationsTypeError(TypeError):
+    pass
 
 
 class ConfigNotFoundError(DataContextError):
@@ -107,3 +145,7 @@ class BatchKwargsError(DataContextError):
 class DatasourceInitializationError(GreatExpectationsError):
     def __init__(self, datasource_name, message):
         self.message = "Cannot initialize datasource %s, error: %s" % (datasource_name, message)
+
+
+class InvalidConfigValueTypeError(DataContextError):
+    pass

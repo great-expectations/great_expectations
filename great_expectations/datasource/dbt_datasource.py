@@ -8,7 +8,7 @@ from ruamel.yaml import YAML
 from .sqlalchemy_datasource import SqlAlchemyDatasource
 from great_expectations.datasource.generator.batch_generator import BatchGenerator
 
-yaml = YAML(typ='safe')
+yaml = YAML()
 logger = logging.getLogger(__name__)
 
 try:

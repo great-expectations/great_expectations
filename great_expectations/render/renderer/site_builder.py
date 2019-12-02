@@ -1,6 +1,8 @@
 import logging
 
 from collections import OrderedDict
+import os
+import shutil
 
 from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLASS
 from great_expectations.data_context.types import (
@@ -14,6 +16,7 @@ from great_expectations.data_context.store.namespaced_read_write_store import (
 )
 
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.data_context.util import file_relative_path
 import great_expectations.exceptions as exceptions
 
 logger = logging.getLogger(__name__)
@@ -100,6 +103,13 @@ class SiteBuilder(object):
                  datasource_whitelist=None
     ):
         self.data_context = data_context
+        self.store_backend = store_backend
+        
+        # set custom_styles_directory if present
+        custom_styles_directory = None
+        plugins_directory = data_context.plugins_directory
+        if os.path.isdir(os.path.join(plugins_directory, "custom_data_docs", "styles")):
+            custom_styles_directory = os.path.join(plugins_directory, "custom_data_docs/styles")
 
         # The site builder is essentially a frontend store. We'll open up three types of backends using the base
         # type of the configuration defined in the store_backend section
@@ -124,6 +134,7 @@ class SiteBuilder(object):
             config=site_index_builder,
             runtime_config={
                 "data_context": data_context,
+                "custom_styles_directory": custom_styles_directory,
                 "target_store": target_store,
             },
             config_defaults={
@@ -169,7 +180,8 @@ class SiteBuilder(object):
                 config=site_section_config,
                 runtime_config={
                     "data_context": data_context,
-                    "target_store": target_store
+                    "target_store": target_store,
+                    "custom_styles_directory": custom_styles_directory
                 },
                 config_defaults={
                     "name": site_section_name,
@@ -188,7 +200,20 @@ class SiteBuilder(object):
                             and avoids full rebuild.
         :return:
         """
-
+        
+        # copy static assets
+        project_root_dir = self.data_context.root_directory
+        site_base_dir = self.store_backend["base_directory"]
+        site_dir = os.path.join(project_root_dir, site_base_dir)
+        static_assets_source_dir = file_relative_path(__file__, "../view/static")
+        static_assets_destination_path = os.path.join(site_dir, "static")
+        if os.path.isdir(static_assets_destination_path):
+            message = """Warning. An existing static assets directory was found here: {}.
+                    - Static assets were not copied.""".format(static_assets_destination_path)
+            logger.warning(message)
+        else:
+            shutil.copytree(static_assets_source_dir, static_assets_destination_path)
+        
         for site_section, site_section_builder in self.site_section_builders.items():
             site_section_builder.build(datasource_whitelist=self.datasource_whitelist,
                                        resource_identifiers=resource_identifiers
@@ -204,6 +229,7 @@ class DefaultSiteSectionBuilder(object):
                  data_context,
                  target_store,
                  source_store_name,
+                 custom_styles_directory=None,
                  # NOTE: Consider allowing specification of ANY element (or combination of elements) within an ID key?
                  run_id_filter=None,
                  renderer=None,
@@ -234,7 +260,7 @@ class DefaultSiteSectionBuilder(object):
         self.view_class = instantiate_class_from_config(
             config=view,
             runtime_config={
-                "data_context": data_context
+                "custom_styles_directory": custom_styles_directory
             },
             config_defaults={
                 "module_name": "great_expectations.render.view"
@@ -260,7 +286,7 @@ class DefaultSiteSectionBuilder(object):
                 
             resource = self.source_store.get(resource_key)
 
-            if type(resource_key) is ExpectationSuiteIdentifier:
+            if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.expectation_suite_name
                 data_asset_name = resource_key.data_asset_name.generator_asset
                 logger.debug(
@@ -268,7 +294,7 @@ class DefaultSiteSectionBuilder(object):
                         expectation_suite_name,
                         data_asset_name
                     ))
-            elif type(resource_key) is ValidationResultIdentifier:
+            elif isinstance(resource_key, ValidationResultIdentifier):
                 data_asset_name = resource_key.expectation_suite_identifier.data_asset_name.generator_asset
                 run_id = resource_key.run_id
                 expectation_suite_name = resource_key.expectation_suite_identifier.expectation_suite_name
@@ -318,6 +344,7 @@ class DefaultSiteIndexBuilder(object):
             name,
             data_context,
             target_store,
+            custom_styles_directory=None,
             show_cta_footer=True,
             renderer=None,
             view=None,
@@ -349,7 +376,7 @@ class DefaultSiteIndexBuilder(object):
         self.view_class = instantiate_class_from_config(
             config=view,
             runtime_config={
-                "data_context": data_context
+                "custom_styles_directory": custom_styles_directory
             },
             config_defaults={
                 "module_name": "great_expectations.render.view"
@@ -368,13 +395,15 @@ class DefaultSiteIndexBuilder(object):
                                               run_id=None,
                                               validation_success=None
                                               ):
-        if not datasource in index_links_dict:
+        import os
+
+        if datasource not in index_links_dict:
             index_links_dict[datasource] = OrderedDict()
     
-        if not generator in index_links_dict[datasource]:
+        if generator not in index_links_dict[datasource]:
             index_links_dict[datasource][generator] = OrderedDict()
     
-        if not generator_asset in index_links_dict[datasource][generator]:
+        if generator_asset not in index_links_dict[datasource][generator]:
             index_links_dict[datasource][generator][generator_asset] = {
                 'profiling_links': [],
                 'validations_links': [],
@@ -388,14 +417,9 @@ class DefaultSiteIndexBuilder(object):
     
         index_links_dict[datasource][generator][generator_asset][section_name + "_links"].append(
             {
-                "full_data_asset_name": data_asset_name,
+                "full_data_asset_name": str(data_asset_name),
                 "expectation_suite_name": expectation_suite_name,
-                "filepath": data_context._get_normalized_data_asset_name_filepath(
-                    data_asset_name,
-                    expectation_suite_name,
-                    base_path=base_path,
-                    file_extension=".html"
-                ),
+                "filepath": os.path.join(base_path, data_asset_name.to_path(), expectation_suite_name + ".html"),
                 "source": datasource,
                 "generator": generator,
                 "asset": generator_asset,
@@ -472,7 +496,7 @@ class DefaultSiteIndexBuilder(object):
         expectations_store = self.data_context.stores["expectations_store"]
         suites = expectations_store.list_keys()
         # Ingore BasicDatasetProfiler. We want to know about user created suties
-        suites = [s for s in suites if s["expectation_suite_name"] != "BasicDatasetProfiler"]
+        suites = [s for s in suites if s.expectation_suite_name != "BasicDatasetProfiler"]
         # if not suites:
         #     # TODO this needs testing as complexity increases probably using mocked DataContext
         #     logger.debug('No expectations found')
@@ -508,10 +532,7 @@ class DefaultSiteIndexBuilder(object):
                 self.add_resource_info_to_index_links_dict(
                     data_context=self.data_context,
                     index_links_dict=index_links_dict,
-                    data_asset_name=key_resource_identifier.data_asset_name.to_string(
-                        include_class_prefix=False,
-                        separator=self.data_context.data_asset_name_delimiter
-                    ),
+                    data_asset_name=key_resource_identifier.data_asset_name,
                     datasource=key_resource_identifier.data_asset_name.datasource,
                     generator=key_resource_identifier.data_asset_name.generator,
                     generator_asset=key_resource_identifier.data_asset_name.generator_asset,
@@ -519,38 +540,29 @@ class DefaultSiteIndexBuilder(object):
                     section_name=key.site_section_name
                 )
             elif type(key_resource_identifier) == ValidationResultIdentifier:
-                data_asset_name = key_resource_identifier.expectation_suite_identifier.data_asset_name.to_string(
-                        include_class_prefix=False,
-                        separator=self.data_context.data_asset_name_delimiter
-                    )
-                expectation_suite_name = key_resource_identifier.expectation_suite_identifier.expectation_suite_name
-                run_id = key_resource_identifier.run_id
-                if run_id == "profiling":
+                # FIXME: review and correct this hardcoded logic
+                if key_resource_identifier.run_id == "profiling":
                     section_name = "profiling"
                 else:
                     section_name = "validations"
                 validation = self.data_context.get_validation_result(
-                    data_asset_name=data_asset_name,
-                    expectation_suite_name=expectation_suite_name,
-                    validations_store_name="validations_store",
-                    run_id=run_id
+                    data_asset_name=key_resource_identifier.expectation_suite_identifier.data_asset_name,
+                    expectation_suite_name=key_resource_identifier.expectation_suite_identifier.expectation_suite_name,
+                    run_id=key_resource_identifier.run_id
                 )
                 
-                validation_success = validation.get("success")
+                validation_success = validation.success
                 
                 self.add_resource_info_to_index_links_dict(
                     data_context=self.data_context,
                     index_links_dict=index_links_dict,
-                    data_asset_name=key_resource_identifier.expectation_suite_identifier.data_asset_name.to_string(
-                        include_class_prefix=False,
-                        separator=self.data_context.data_asset_name_delimiter
-                    ),
+                    data_asset_name=key_resource_identifier.expectation_suite_identifier.data_asset_name,
                     datasource=key_resource_identifier.expectation_suite_identifier.data_asset_name.datasource,
                     generator=key_resource_identifier.expectation_suite_identifier.data_asset_name.generator,
                     generator_asset=key_resource_identifier.expectation_suite_identifier.data_asset_name.generator_asset,
-                    expectation_suite_name=expectation_suite_name,
+                    expectation_suite_name=key_resource_identifier.expectation_suite_identifier.expectation_suite_name,
                     section_name=section_name,
-                    run_id=run_id,
+                    run_id=key_resource_identifier.run_id,
                     validation_success=validation_success
                 )
 

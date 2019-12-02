@@ -24,16 +24,16 @@ def test_subdir_reader_path_partitioning(tmp_path_factory):
     subdir_reader_generator = SubdirReaderGenerator("test_generator", base_directory=base_directory)
 
     # We should see two assets
-    known_assets = subdir_reader_generator.get_available_data_asset_names()
+    known_assets = subdir_reader_generator.get_available_data_asset_names()["names"]
     # Use set in test to avoid order issues
-    assert set(known_assets) == {"asset_1", "asset_2"}
+    assert set(known_assets) == {('asset_2', 'directory'), ('asset_1', 'directory')}
 
     # We should see three partitions for the first:
     known_partitions = subdir_reader_generator.get_available_partition_ids("asset_1")
     assert set(known_partitions) == {
-        "20190101__asset_1",
-        "20190102__asset_1",
-        "20190103__asset_1"
+        ("20190101__asset_1", "file"),
+        ("20190102__asset_1", "file"),
+        ("20190103__asset_1", "file")
     }
 
     asset_1_kwargs = [kwargs for kwargs in subdir_reader_generator.get_iterator("asset_1")]
@@ -89,12 +89,12 @@ def test_subdir_reader_file_partitioning(tmp_path_factory):
     # If we have files, we should see them as individual assets
     subdir_reader_generator = SubdirReaderGenerator("test_generator", base_directory=base_directory)
 
-    known_assets = subdir_reader_generator.get_available_data_asset_names()
+    known_assets = subdir_reader_generator.get_available_data_asset_names()["names"]
     assert set(known_assets) == {
-        "20190101__asset_1",
-        "20190102__asset_1",
-        "20190103__asset_1",
-        "asset_2"
+        ("20190101__asset_1", "file"),
+        ("20190102__asset_1", "file"),
+        ("20190103__asset_1", "file"),
+        ("asset_2", "directory")
     }
 
     # SubdirReaderGenerator uses the filename as partition name for root files
@@ -109,3 +109,24 @@ def test_subdir_reader_file_partitioning(tmp_path_factory):
                                                                           limit=10)
     assert kwargs["path"] == os.path.join(base_directory, "20190101__asset_1.csv")
     assert kwargs["limit"] == 10
+
+
+def test_subdir_reader_configurable_reader_method(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_folder_connection_path"))
+    mock_files = [
+        "20190101__asset_1.dat",
+        "20190102__asset_1.dat",
+        "20190103__asset_1.dat",
+        "asset_2/20190101__asset_2.dat",
+        "asset_2/20190102__asset_2.dat"
+    ]
+    for file in mock_files:
+        if "/" in file:
+            safe_mmkdir(os.path.join(base_directory, file.split("/")[0]))
+        open(os.path.join(base_directory, file), "w").close()
+
+    # If we have files, we should see them as individual assets
+    subdir_reader_generator = SubdirReaderGenerator("test_generator", base_directory=base_directory,
+                                                    reader_method='csv', known_extensions=['.dat'])
+    batch_kwargs = next(subdir_reader_generator.get_iterator('asset_2'))
+    assert batch_kwargs['reader_method'] == 'csv'

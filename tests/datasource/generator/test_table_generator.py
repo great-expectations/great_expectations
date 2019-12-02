@@ -51,7 +51,7 @@ def test_basic_operation():
     # fail with an informative message
     with pytest.raises(BatchKwargsError) as exc:
         table_generator.yield_batch_kwargs("my_asset")
-        assert "missing template key" in exc.value.message
+    assert "missing template key" in exc.value.message
 
 
 def test_db_introspection(sqlalchemy_dataset, caplog):
@@ -102,10 +102,10 @@ def test_query_generator_view(sqlite_view_engine):
             "class_name": "TableGenerator"
         }
     })  # Build a datasource with a queries generator to introspect our database with a view
-    names = set(datasource.get_available_data_asset_names()["table"])
+    names = set(datasource.get_available_data_asset_names()["table"]["names"])
 
     # We should see both the table *and* the primary view, but *not* the temp view
     assert names == {
-        "main.test_table",
-        "main.test_view"
+        ("main.test_table", "table"),
+        ("main.test_view", "view")
     }

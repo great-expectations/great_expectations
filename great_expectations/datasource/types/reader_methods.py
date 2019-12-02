@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class ReaderMethods(Enum):
     CSV = 1
     csv = 1

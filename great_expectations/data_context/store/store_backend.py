@@ -1,37 +1,21 @@
 import random
-
-from ..types import (
-    DataAssetIdentifier,
-    ValidationResultIdentifier,
-)
-from ..types.base_resource_identifiers import (
-    DataContextKey,
-)
-from ..util import safe_mmkdir
-import pandas as pd
-import six
-import io
 import os
-import json
 import logging
-logger = logging.getLogger(__name__)
-import importlib
 import re
 from six import string_types
 
-from ..util import (
-    parse_string_to_data_context_resource_identifier
-)
-from ...types import (
-    ListOf,
-    AllowedKeysDotDict,
-)
+from great_expectations.data_context.types.resource_identifiers import DataContextKey
+
+from ..util import safe_mmkdir
+
+logger = logging.getLogger(__name__)
 
 # TODO : Add docstrings to these classes.
 # TODO : Implement S3StoreBackend with mocks and tests
 
 # NOTE : Abe 2019/08/30 : Currently, these classes behave as key-value stores.
 # We almost certainly want to extend that functionality to allow other operations
+
 
 class StoreBackend(object):
     """a key-value store, to abstract away reading and writing to a persistence layer
@@ -59,20 +43,23 @@ class StoreBackend(object):
         return self._has_key(key)
 
     def _validate_key(self, key):
-        if not isinstance(key, tuple):
+        if isinstance(key, DataContextKey):
+            pass
+        elif isinstance(key, tuple):
+            for key_element in key:
+                if not isinstance(key_element, string_types):
+                    raise TypeError(
+                        "Elements within tuples passed as keys to {0} must be instances of {1}, not {2}".format(
+                            self.__class__.__name__,
+                            string_types,
+                            type(key_element),
+                        ))
+        else:
             raise TypeError("Keys in {0} must be instances of {1}, not {2}".format(
                 self.__class__.__name__,
                 tuple,
                 type(key),
             ))
-        
-        for key_element in key:
-            if not isinstance(key_element, string_types):
-                raise TypeError("Elements within tuples passed as keys to {0} must be instances of {1}, not {2}".format(
-                    self.__class__.__name__,
-                    string_types,
-                    type(key_element),
-                ))
 
     def _validate_value(self, value):
         pass
@@ -167,6 +154,8 @@ class FixedLengthTupleStoreBackend(StoreBackend):
     def _validate_key(self, key):
         super(FixedLengthTupleStoreBackend, self)._validate_key(key)
 
+        if isinstance(key, DataContextKey):
+            return
         for key_element in key:
             for substring in self.forbidden_substrings:
                 if substring in key_element:

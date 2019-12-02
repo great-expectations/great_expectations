@@ -8,6 +8,7 @@ from freezegun import freeze_time
 import pandas as pd
 
 import great_expectations as ge
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.validation_operators.validation_operators import (
     ActionListValidationOperator,
     WarningAndFailureExpectationSuitesValidationOperator
@@ -18,40 +19,6 @@ from great_expectations.data_context import (
 )
 from great_expectations.data_context.types import DataAssetIdentifier
 from ..test_utils import modify_locale
-
-
-@pytest.fixture()
-def basic_data_context_config_for_validation_operator():
-    return {
-        "plugins_directory": "plugins/",
-        "evaluation_parameter_store_name" : "evaluation_parameter_store",
-        "expectations_store_name": "expectations_store",
-        "datasources": {},
-        "stores": {
-            "expectations_store" : {
-                "class_name": "ExpectationsStore",
-                "store_backend": {
-                    "class_name": "FixedLengthTupleFilesystemStoreBackend",
-                    "base_directory": "expectations/",
-                }
-            },
-            # This isn't currently used for Validation Actions, but it's required for DataContext to work.
-            "evaluation_parameter_store" : {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "InMemoryStoreBackend",
-            },
-            "validation_result_store" : {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "ValidationsStore",
-                "store_backend": {
-                    "class_name": "InMemoryStoreBackend",
-                }
-            }
-        },
-        "validations_store_name": "validation_result_store",
-        "data_docs_sites": {},
-        "validation_operators" : {},
-    }
 
 
 @modify_locale
@@ -117,16 +84,16 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
     )
 
     my_df_1 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, None]})
-    my_ge_df_1 = ge.from_pandas(my_df_1)
-    my_ge_df_1._expectation_suite["data_asset_name"] = DataAssetIdentifier("my_datasource","default","f1")
+    my_ge_df_1 = ge.dataset.PandasDataset(my_df_1, data_asset_name=DataAssetIdentifier("my_datasource", "default",
+                                                                                       "f1"))
 
     my_df_2 = pd.DataFrame({"x": [1, 2, 3, 4, 99], "y": [1, 2, 3, 4, 5]})
-    my_ge_df_2 = ge.from_pandas(my_df_2)
-    my_ge_df_2._expectation_suite["data_asset_name"] = DataAssetIdentifier("my_datasource", "default", "f2")
+    my_ge_df_2 = ge.dataset.PandasDataset(my_df_2, data_asset_name=DataAssetIdentifier("my_datasource", "default",
+                                                                                       "f2"))
 
     my_df_3 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, 5]})
-    my_ge_df_3 = ge.from_pandas(my_df_3)
-    my_ge_df_3._expectation_suite["data_asset_name"] = DataAssetIdentifier("my_datasource", "default", "f3")
+    my_ge_df_3 = ge.dataset.PandasDataset(my_df_3, data_asset_name=DataAssetIdentifier("my_datasource", "default",
+                                                                                       "f3"))
 
     return_obj = vo.run(
         assets_to_validate=[

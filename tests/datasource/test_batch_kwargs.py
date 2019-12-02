@@ -66,3 +66,32 @@ def test_batch_kwargs_from_dict():
     assert BatchKwargs.build_batch_fingerprint(test_batch_kwargs) == BatchFingerprint(
         partition_id="1",
         fingerprint="path:/data/test.csv")
+
+
+def test_batch_kwargs_attributes_and_keys():
+    # When BatchKwargs are typed, the required keys should become accessible via dot notation and immutable
+    test_batch_kwargs = PathBatchKwargs(
+        {
+            "path": "/data/test.csv",
+            "iterator": True,
+            "partition_id": "3",
+            "chunksize": 2e7,
+            "parse_dates": [0, 3],
+            "names": ["start", "type", "quantity", "end"]
+        }
+    )
+    assert test_batch_kwargs.path == "/data/test.csv"
+    assert test_batch_kwargs["path"] == test_batch_kwargs.path
+
+    # We do not allow setting the special attributes this way
+    with pytest.raises(AttributeError):
+        test_batch_kwargs.path = "/a/new/path.csv"
+
+    # Nor do we provide attribute-style access to unreserved names
+    with pytest.raises(AttributeError):
+        assert test_batch_kwargs.names == ["start", "type", "quantity", "end"]
+
+    # But we can access and set even protected names using dictionary notation
+    assert test_batch_kwargs["names"] == ["start", "type", "quantity", "end"]
+    test_batch_kwargs["path"] = "/a/new/path.csv"
+    assert test_batch_kwargs.path == "/a/new/path.csv"

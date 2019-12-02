@@ -18,6 +18,10 @@ import numpy as np
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 from great_expectations.profile import ColumnsExistProfiler
+from great_expectations.core import ExpectationValidationResultSchema, ExpectationSuiteValidationResultSchema
+
+expectationValidationResultSchema = ExpectationValidationResultSchema(strict=True)
+expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema(strict=True)
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
@@ -84,6 +88,13 @@ def modify_locale(func):
             locale.setlocale(locale.LC_TIME, old_locale)
 
     return locale_wrapper
+
+
+def convert_test_obj_to_json_dict(test_obj):
+    if isinstance(test_obj, list):
+        return [x.to_json_dict() for x in test_obj]
+    else:
+        return test_obj.to_json_dict()
 
 
 # Taken from the following stackoverflow:
@@ -246,7 +257,6 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
             "NullType": sparktypes.NullType
         }
 
-
         spark = SparkSession.builder.getOrCreate()
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
@@ -370,8 +380,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_median_to_be_between",
             # "expect_column_quantile_values_to_be_between",
             "expect_column_stdev_to_be_between",
-            #"expect_column_unique_value_count_to_be_between",
-            #"expect_column_proportion_of_unique_values_to_be_between",
+            # "expect_column_unique_value_count_to_be_between",
+            # "expect_column_proportion_of_unique_values_to_be_between",
             "expect_column_most_common_value_to_be_in_set",
             # "expect_column_sum_to_be_between",
             # "expect_column_min_to_be_between",
@@ -487,8 +497,12 @@ def evaluate_json_test(data_asset, expectation_type, test):
 
     # Check results
     if test['exact_match_out'] is True:
-        assert test['out'] == result
+        assert expectationValidationResultSchema.load(test['out']).data == result
     else:
+        # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
+        # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
+        # representations, serializations, and objects should interact and how much of that is shown to the user.
+        result = result.to_json_dict()
         for key, value in test['out'].items():
             # Apply our great expectations-specific test logic
 
@@ -499,7 +513,7 @@ def evaluate_json_test(data_asset, expectation_type, test):
                 if 'tolerance' in test:
                     if isinstance(value, dict):
                         assert set(value.keys()) == set(result["result"]["observed_value"].keys())
-                        for k,v in value.items():
+                        for k, v in value.items():
                             assert np.allclose(result["result"]["observed_value"][k], v, rtol=test["tolerance"])
                     else:
                         assert np.allclose(result['result']['observed_value'], value, rtol=test['tolerance'])
@@ -567,11 +581,11 @@ def evaluate_json_test(data_asset, expectation_type, test):
                     "Invalid test specification: unknown key " + key + " in 'out'")
 
 
-def dict_to_ordered_dict(plain_dict):
-    ordered_dict = OrderedDict()
-    for key, val in plain_dict.items():
-        if isinstance(val, Mapping):
-            ordered_dict[key] = dict_to_ordered_dict(val)
-        else:
-            ordered_dict[key] = val
-    return ordered_dict
+# def dict_to_ordered_dict(plain_dict):
+#     ordered_dict = OrderedDict()
+#     for key, val in plain_dict.items():
+#         if isinstance(val, Mapping):
+#             ordered_dict[key] = dict_to_ordered_dict(val)
+#         else:
+#             ordered_dict[key] = val
+#     return ordered_dict

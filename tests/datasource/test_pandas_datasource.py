@@ -19,7 +19,7 @@ from great_expectations.datasource.types.batch_kwargs import (
 )
 from great_expectations.dataset import PandasDataset
 
-yaml = YAML(typ='safe')
+yaml = YAML()
 
 
 @pytest.fixture(scope="module")
@@ -35,7 +35,7 @@ def test_folder_connection_path(tmp_path_factory):
 def test_standalone_pandas_datasource(test_folder_connection_path):
     datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
 
-    assert datasource.get_available_data_asset_names() == {"default": ["test"]}
+    assert datasource.get_available_data_asset_names() == {'default': {'names': [('test', 'file')], 'is_complete_list': True}}
     manual_batch_kwargs = PathBatchKwargs(path=os.path.join(str(test_folder_connection_path), "test.csv"))
 
     # Get the default (subdir_path) generator
@@ -120,7 +120,7 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
     )
     assert type(batch).__name__ == "CustomPandasDataset"
     res = batch.expect_column_values_to_have_odd_lengths("col_2")
-    assert res["success"] is True
+    assert res.success is True
 
 
 def test_pandas_source_read_csv(data_context, tmp_path_factory):
