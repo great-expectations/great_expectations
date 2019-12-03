@@ -354,6 +354,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         key_length,
         bucket,
         prefix="",
+        boto3_options=None,
         forbidden_substrings=None,
         platform_specific_separator=False
     ):
@@ -366,6 +367,9 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         )
         self.bucket = bucket
         self.prefix = prefix
+        if boto3_options is None:
+            boto3_options = {}
+        self._boto3_options = boto3_options
 
     def _get(self, key):
         s3_object_key = os.path.join(
@@ -374,7 +378,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         )
 
         import boto3
-        s3 = boto3.client('s3')
+        s3 = boto3.client('s3', **self._boto3_options)
         s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
         return s3_response_object['Body'].read().decode(s3_response_object.get("ContentEncoding", 'utf-8'))
 
@@ -385,7 +389,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         )
 
         import boto3
-        s3 = boto3.resource('s3')
+        s3 = boto3.resource('s3', **self._boto3_options)
         result_s3 = s3.Object(self.bucket, s3_object_key)
         result_s3.put(Body=value.encode(content_encoding), ContentEncoding=content_encoding, ContentType=content_type)
         return s3_object_key
@@ -394,7 +398,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         key_list = []
 
         import boto3
-        s3 = boto3.client('s3')
+        s3 = boto3.client('s3', **self._boto3_options)
 
         for s3_object_info in s3.list_objects(Bucket=self.bucket, Prefix=self.prefix)['Contents']:
             s3_object_key = s3_object_info['Key']
