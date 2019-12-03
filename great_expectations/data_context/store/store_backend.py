@@ -311,7 +311,10 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
 
         safe_mmkdir(str(path))
         with open(filepath, "wb") as outfile:
-            outfile.write(value.encode("utf-8"))
+            if type(value) is bytes:
+                outfile.write(value)
+            else:
+                outfile.write(value.encode("utf-8"))
         return filepath
 
     def list_keys(self):
@@ -384,7 +387,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
         return s3_response_object['Body'].read().decode(s3_response_object.get("ContentEncoding", 'utf-8'))
 
-    def _set(self, key, value, content_encoding='utf-8', content_type='application/json'):
+    def _set(self, key, value, content_encoding='utf-8', content_type='application/json', **kwargs):
         s3_object_key = os.path.join(
             self.prefix,
             self._convert_key_to_filepath(key)
@@ -393,7 +396,10 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         import boto3
         s3 = boto3.resource('s3')
         result_s3 = s3.Object(self.bucket, s3_object_key)
-        result_s3.put(Body=value.encode(content_encoding), ContentEncoding=content_encoding, ContentType=content_type)
+        if type(value) is bytes:
+            result_s3.put(Body=value)
+        else:
+            result_s3.put(Body=value.encode(content_encoding), ContentEncoding=content_encoding, ContentType=content_type)
         return s3_object_key
 
     def list_keys(self):
@@ -466,7 +472,7 @@ class FixedLengthTupleGCSStoreBackend(FixedLengthTupleStoreBackend):
         gcs_response_object = bucket.get_blob(gcs_object_key)
         return gcs_response_object.download_as_string().decode("utf-8")
 
-    def _set(self, key, value, content_encoding='utf-8', content_type='application/json'):
+    def _set(self, key, value, content_encoding='utf-8', content_type='application/json', **kwargs):
         gcs_object_key = os.path.join(
             self.prefix,
             self._convert_key_to_filepath(key)
@@ -476,7 +482,10 @@ class FixedLengthTupleGCSStoreBackend(FixedLengthTupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
-        blob.upload_from_string(value.encode(content_encoding), content_type=content_type)
+        if type(value) is bytes:
+            blob.upload_from_string(value)
+        else:
+            blob.upload_from_string(value.encode(content_encoding), content_type=content_type)
         return gcs_object_key
 
     def list_keys(self):
