@@ -190,9 +190,13 @@ class FixedLengthTupleStoreBackend(StoreBackend):
         # That seems more correct, but the configs will be a lot less intuitive.
         # In the meantime, there is some chance that configs will not be cross-OS compatible.
 
-        # NOTE : These methods support fixed-length keys, but not variable.
+        # NOTE : These methods support variable-length keys if no filepath template is provided, in which case
+        # all key elements are joined to generate the filepath
         self._validate_key(key)
-        converted_string = self.filepath_template.format(*list(key))
+        if self.filepath_template:
+            converted_string = self.filepath_template.format(*list(key))
+        else:
+            converted_string = '/'.join(key)
         if self.platform_specific_separator:
             converted_string = os.path.join(*converted_string.split('/'))
         return converted_string
@@ -200,6 +204,9 @@ class FixedLengthTupleStoreBackend(StoreBackend):
     def _convert_filepath_to_key(self, filepath):
         # filepath_template (for now) is always specified with forward slashes, but it is then
         # used to (1) dynamically construct and evaluate a regex, and (2) split the provided (observed) filepath
+        if not self.filepath_template:
+            return tuple(filepath.split(os.sep))
+        
         if self.platform_specific_separator:
             filepath_template = os.path.join(*self.filepath_template.split('/'))
             filepath_template = filepath_template.replace('\\', '\\\\')
