@@ -136,9 +136,8 @@ class InMemoryStoreBackend(StoreBackend):
 
 class FixedLengthTupleStoreBackend(StoreBackend):
     """
-
-    The key to this StoreBackend abstract class must be a tuple with fixed length equal to key_length.
-    The filepath_template is a string template used to convert the key to a filepath.
+    If key_length is provided, the key to this StoreBackend abstract class must be a tuple with fixed length equal
+    to key_length. The filepath_template is a string template used to convert the key to a filepath.
     There's a bit of regex magic in _convert_filepath_to_key that reverses this process,
     so that we can write AND read using filenames as keys.
 
@@ -154,7 +153,7 @@ class FixedLengthTupleStoreBackend(StoreBackend):
         forbidden_substrings=None,
         platform_specific_separator=True
     ):
-        assert isinstance(key_length, int)
+        assert isinstance(key_length, int) or key_length is None
         self.key_length = key_length
         if forbidden_substrings is None:
             forbidden_substrings = ["/", "\\"]
@@ -162,7 +161,8 @@ class FixedLengthTupleStoreBackend(StoreBackend):
         self.platform_specific_separator = platform_specific_separator
 
         self.filepath_template = filepath_template
-        self.verify_that_key_to_filepath_operation_is_reversible()
+        if key_length:
+            self.verify_that_key_to_filepath_operation_is_reversible()
 
     def _validate_key(self, key):
         super(FixedLengthTupleStoreBackend, self)._validate_key(key)
