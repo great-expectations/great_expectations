@@ -647,7 +647,6 @@ data_docs/
                     Titanic/
                         BasicDatasetProfiler.html
         static/
-            .DS_Store
             fonts/
                 HKGrotesk/
                     HKGrotesk-Bold.otf
@@ -661,7 +660,6 @@ data_docs/
                     HKGrotesk-SemiBold.otf
                     HKGrotesk-SemiBoldItalic.otf
             images/
-                .DS_Store
                 favicon.ico
                 logo-long-vector.svg
                 logo-long.png
