@@ -42,6 +42,8 @@ class DataContextConfig(DictDot):
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.plugins_directory = plugins_directory
+        if not isinstance(validation_operators, dict):
+            raise ValueError("validation_operators must be configured with a dictionary")
         self.validation_operators = validation_operators
         self.stores = stores
         self.data_docs_sites = data_docs_sites
@@ -101,6 +103,8 @@ class DatasourceConfig(DictDot):
 
 class DatasourceConfigSchema(Schema):
     class_name = fields.Str()
+    # REMOVE WHEN SUPPORT FOR TYPE CONFIGURATION NO LONGER NEEDED
+    type = fields.Str(allow_none=True)
     module_name = fields.Str(allow_none=True)
     data_asset_type = fields.Nested(ClassConfigSchema)
     # TODO: Update to generator-specific
@@ -177,12 +181,6 @@ class DataContextConfigSchema(Schema):
                 ),
                 validation_error=ValidationError("config version too high")
             )
-
-    #
-    # # noinspection PyUnusedLocal
-    # @post_load
-    # def make_data_context_config(self, data, **kwargs):
-    #     return DataContextConfig(**data)
 
 
 dataContextConfigSchema = DataContextConfigSchema(strict=True)

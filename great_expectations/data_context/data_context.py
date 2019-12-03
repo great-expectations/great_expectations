@@ -81,9 +81,6 @@ class ConfigOnlyDataContext(object):
         into DataContext class.
 
     Together, these changes make ConfigOnlyDataContext class more testable.
-
-    DataContext itself inherits from ConfigOnlyDataContext. It behaves essentially the same as the v0.7.*
-        implementation of DataContext.
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
@@ -260,12 +257,14 @@ class ConfigOnlyDataContext(object):
             raise ge_exceptions.InvalidConfigError("Your project_config is not valid. Try using the CLI check-config command.")
 
         self._project_config = project_config
-        # FIXME: This should just be a property
-        self._project_config_with_variables_substituted = copy.deepcopy(self.get_config_with_variables_substituted())
-        self._context_root_directory = os.path.abspath(context_root_dir)
+        if context_root_dir is not None:
+            self._context_root_directory = os.path.abspath(context_root_dir)
+        else:
+            self._context_root_directory = context_root_dir
 
-        # Init plugins
-        sys.path.append(self.plugins_directory)
+        # Init plugin support
+        if self.plugins_directory is not None:
+            sys.path.append(self.plugins_directory)
 
         # Init data sources
         self._datasources = {}
@@ -278,16 +277,11 @@ class ConfigOnlyDataContext(object):
 
         # Init validation operators
         self.validation_operators = {}
-        # TODO : This key should NOT be optional in the project config.
-        # It can be empty, but not missing.
-        # However, for now, I'm adding this check, to avoid having to migrate all the test fixtures
-        # while still experimenting with the workings of validation operators and actions.
-        if "validation_operators" in self._project_config:
-            for validation_operator_name, validation_operator_config in self._project_config_with_variables_substituted["validation_operators"].items():
-                self.add_validation_operator(
-                    validation_operator_name,
-                    validation_operator_config,
-                )
+        for validation_operator_name, validation_operator_config in self._project_config_with_variables_substituted["validation_operators"].items():
+            self.add_validation_operator(
+                validation_operator_name,
+                validation_operator_config,
+            )
 
         self._compiled = False
 
@@ -331,7 +325,6 @@ class ConfigOnlyDataContext(object):
         """
 
         self._project_config["stores"][store_name] = store_config
-        self._project_config_with_variables_substituted["stores"][store_name] = self.get_config_with_variables_substituted(config=store_config)
         new_store = instantiate_class_from_config(
             config=self._project_config_with_variables_substituted["stores"][store_name],
             runtime_config={
@@ -356,21 +349,21 @@ class ConfigOnlyDataContext(object):
         """
 
         self._project_config["validation_operators"][validation_operator_name] = validation_operator_config
-        self._project_config_with_variables_substituted["validation_operators"][validation_operator_name] = self.get_config_with_variables_substituted(config=validation_operator_config)
         new_validation_operator = instantiate_class_from_config(
             config=self._project_config_with_variables_substituted["validation_operators"][validation_operator_name],
             runtime_config={
-                "data_context" : self,
+                "data_context": self,
             },
             config_defaults={
-                "module_name" : "great_expectations.validation_operators"
+                "module_name": "great_expectations.validation_operators"
             }
         )
         self.validation_operators[validation_operator_name] = new_validation_operator
         return new_validation_operator
 
-
     def _normalize_absolute_or_relative_path(self, path):
+        if path is None:
+            return
         if os.path.isabs(path):
             return path
         else:
@@ -424,6 +417,10 @@ class ConfigOnlyDataContext(object):
         return self._normalize_absolute_or_relative_path(
             self._project_config_with_variables_substituted["plugins_directory"]
         )
+
+    @property
+    def _project_config_with_variables_substituted(self):
+        return self.get_config_with_variables_substituted()
 
     @property
     def stores(self):
@@ -700,6 +697,7 @@ class ConfigOnlyDataContext(object):
             initialize - if False, add the datasource to the config, but do not
                                 initialize it. Example: user needs to debug database connectivity.
             kwargs (keyword arguments): the configuration for the new datasource
+
         Note:
             the type_ parameter is still supported as a way to add a datasource, but support will
             be removed in a future release. Please update to using class_name instead.
@@ -725,12 +723,13 @@ class ConfigOnlyDataContext(object):
         # by implementing a classmethod called build_configuration
         if hasattr(datasource_class, "build_configuration"):
             config = datasource_class.build_configuration(**kwargs)
+        else:
+            config = kwargs
 
         # We perform variable substitution in the datasource's config here before using the config
         # to instantiate the datasource object. Variable substitution is a service that the data
         # context provides. Datasources should not see unsubstituted variables in their config.
-        self._project_config_with_variables_substituted["datasources"][
-            name] = self.get_config_with_variables_substituted(config)
+        self._project_config["datasources"][name] = config
 
         if initialize:
             datasource = self._build_datasource_from_config(
@@ -738,8 +737,6 @@ class ConfigOnlyDataContext(object):
             self._datasources[name] = datasource
         else:
             datasource = None
-
-        self._project_config["datasources"][name] = config
 
         return datasource
 
@@ -1820,7 +1817,7 @@ class DataContext(ConfigOnlyDataContext):
             self._project_config.to_yaml(outfile)
 
     def add_store(self, store_name, store_config):
-        logger.debug("Starting DataContext.add_store")
+        logger.debug("Starting DataContext.add_store for store %s" % store_name)
 
         new_store = super(DataContext, self).add_store(store_name, store_config)
         self._save_project_config()
