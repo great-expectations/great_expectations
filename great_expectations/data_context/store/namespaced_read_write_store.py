@@ -113,11 +113,17 @@ class ExpectationsStore(NamespacedReadWriteStore):
         self.key_class = ExpectationSuiteIdentifier
         self.namespaceAwareExpectationSuiteSchema = NamespaceAwareExpectationSuiteSchema(strict=True)
 
-        if store_backend_config["class_name"] == "FixedLengthTupleFilesystemStoreBackend":
+        store_backend_class_name = store_backend_config.get("class_name", "FixedLengthTupleFilesystemStoreBackend")
+        store_backend_module_name = store_backend_config.get("module_name", "great_expectations.data_context.store")
+        store_backend_class = load_class(
+            class_name=store_backend_class_name,
+            module_name=store_backend_module_name
+        )
+        if issubclass(store_backend_class, FixedLengthTupleStoreBackend):
             config_defaults = {
                 "key_length": 4,
                 "module_name": "great_expectations.data_context.store",
-                "filepath_template": "{0}/{1}/{2}/{3}.json",
+                "filepath_template": "{0}/{1}/{2}/{3}.json"
             }
         else:
             config_defaults = {
