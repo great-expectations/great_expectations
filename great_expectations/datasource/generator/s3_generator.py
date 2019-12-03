@@ -34,6 +34,8 @@ class S3Generator(BatchGenerator):
                 reader_options:  # Note that reader options can be specified globally or per-asset
                   sep: ","
                 delimiter: "/"  # Note that this is the delimiter for the BUCKET KEYS. By default it is "/"
+                boto3_options:
+                  endpoint_url: $S3_ENDPOINT  # Use the S3_ENDPOINT environment variable to determine which endpoint to use
                 max_keys: 100  # The maximum number of keys to fetch in a single list_objects request to s3. When accessing batch_kwargs through an iterator, the iterator will silently refetch if more keys were available
                 assets:
                   my_first_asset:
@@ -56,6 +58,7 @@ class S3Generator(BatchGenerator):
                  assets=None,
                  delimiter="/",
                  reader_method=None,
+                 boto3_options=None,
                  max_keys=1000):
         """Initialize a new S3Generator
 
@@ -66,6 +69,8 @@ class S3Generator(BatchGenerator):
             reader_options: options passed to the datasource reader method
             assets: asset configuration (see class docstring for more information)
             delimiter: the BUCKET KEY delimiter
+            reader_method: the reader_method to include in generated batch_kwargs
+            boto3_options: dictionary of key-value pairs to use when creating boto3 client or resource objects
             max_keys: the maximum number of keys to fetch in a single list_objects request to s3
         """
         super(S3Generator, self).__init__(name, datasource=datasource)
@@ -85,10 +90,12 @@ class S3Generator(BatchGenerator):
         self._reader_options = reader_options
         self._assets = assets
         self._delimiter = delimiter
+        if boto3_options is None:
+            boto3_options = {}
         self._max_keys = max_keys
         self._iterators = {}
         try:
-            self._s3 = boto3.client('s3')
+            self._s3 = boto3.client('s3', **boto3_options)
         except TypeError:
             raise(ImportError("Unable to load boto3, which is required for S3 generator"))
 
