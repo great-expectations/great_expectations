@@ -247,6 +247,17 @@ class HtmlSiteStore(NamespacedReadWriteStore):
                     "filepath_template": 'index.html',
                 }
             ),
+            "static_assets": instantiate_class_from_config(
+                config=store_backend,
+                runtime_config={
+                    "root_directory": root_directory
+                },
+                config_defaults={
+                    "module_name": "great_expectations.data_context.store",
+                    "key_length": None,
+                    "filepath_template": None,
+                }
+            ),
         }
 
         self.root_directory = root_directory
