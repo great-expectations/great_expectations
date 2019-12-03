@@ -1322,6 +1322,7 @@ def test_existing_local_data_docs_urls_returns_only_existing_urls_from_customize
         "file://{}".format(path_2),
     ]
 
+
 def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
     # Setup:
     base_path = str(tmp_path_factory.mktemp('test_load_config_variables_file'))
@@ -1331,16 +1332,17 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
     with open(os.path.join(base_path, "uncommitted", "prod_variables.yml"), "w") as outfile:
         yaml.dump({'env': 'prod'}, outfile)
     basic_data_context_config["config_variables_file_path"] = "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
-    context = ConfigOnlyDataContext(basic_data_context_config, context_root_dir=base_path)
 
     try:
         # We should be able to load different files based on an environment variable
         os.environ["TEST_CONFIG_FILE_ENV"] = "dev"
-        vars = context._load_config_variables_file()
-        assert vars['env'] == 'dev'
+        context = ConfigOnlyDataContext(basic_data_context_config, context_root_dir=base_path)
+        config_vars = context._load_config_variables_file()
+        assert config_vars['env'] == 'dev'
         os.environ["TEST_CONFIG_FILE_ENV"] = "prod"
-        vars = context._load_config_variables_file()
-        assert vars['env'] == 'prod'
+        context = ConfigOnlyDataContext(basic_data_context_config, context_root_dir=base_path)
+        config_vars = context._load_config_variables_file()
+        assert config_vars['env'] == 'prod'
     except Exception:
         raise
     finally:
