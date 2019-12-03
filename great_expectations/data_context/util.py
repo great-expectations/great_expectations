@@ -11,7 +11,8 @@ from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import (
     PluginModuleNotFoundError,
     PluginClassNotFoundError,
-    DataContextError)
+    DataContextError,
+    InvalidConfigError)
 
 logger = logging.getLogger(__name__)
 
@@ -154,20 +155,20 @@ def substitute_config_variable(template_str, config_variables_dict):
         # If the value is not a string (e.g., a boolean), we should return it as is
         return template_str
 
-    ret = template_str
-
     if match:
         config_variable_value = os.getenv(match.group(1))
         if not config_variable_value:
             config_variable_value = config_variables_dict.get(match.group(1))
 
         if config_variable_value:
-                if match.start() == 0 and match.end() == len(template_str):
-                    ret = config_variable_value
-                else:
-                    ret = template_str[:match.start()] + config_variable_value + template_str[match.end():]
+            if match.start() == 0 and match.end() == len(template_str):
+                return config_variable_value
+            else:
+                return template_str[:match.start()] + config_variable_value + template_str[match.end():]
 
-    return ret
+        raise InvalidConfigError("Unable to find match for config variable {:s}".format(match.group(1)))
+
+    return template_str
 
 
 def substitute_all_config_variables(data, replace_variables_dict):
@@ -185,7 +186,8 @@ def substitute_all_config_variables(data, replace_variables_dict):
         data = data.as_dict()
 
     if isinstance(data, dict) or isinstance(data, OrderedDict):
-        return {k: substitute_all_config_variables(v, replace_variables_dict) for k, v in data.items()}
+        return {k: substitute_all_config_variables(v, replace_variables_dict) for
+                k, v in data.items()}
     elif isinstance(data, list):
         return [substitute_all_config_variables(v, replace_variables_dict) for v in data]
     return substitute_config_variable(data, replace_variables_dict)

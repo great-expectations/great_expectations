@@ -236,10 +236,6 @@ great_expectations/
     great_expectations.yml
     datasources/
     expectations/
-        data__dir/
-            default/
-                Titanic/
-                    BasicDatasetProfiler.json
     notebooks/
         pandas/
             create_expectations.ipynb
@@ -259,55 +255,10 @@ great_expectations/
     uncommitted/
         config_variables.yml
         data_docs/
-            local_site/
-                index.html
-                expectations/
-                    data__dir/
-                        default/
-                            Titanic/
-                                BasicDatasetProfiler.html
-                validations/
-                    profiling/
-                        data__dir/
-                            default/
-                                Titanic/
-                                    BasicDatasetProfiler.html
         samples/
         validations/
-            profiling/
-                data__dir/
-                    default/
-                        Titanic/
-                            BasicDatasetProfiler.json
 """
 
-        assert os.path.isfile(
-            os.path.join(
-                basedir,
-                "great_expectations/expectations/data__dir/default/Titanic/BasicDatasetProfiler.json"
-            )
-        )
-
-        fnames = []
-        path = os.path.join(basedir, "great_expectations/uncommitted/validations/profiling/data__dir/default/Titanic")
-        for (dirpath, dirnames, filenames) in os.walk(path):
-            for filename in filenames:
-                fnames.append(filename)
-        assert fnames == ["BasicDatasetProfiler.json"]
-
-        assert os.path.isfile(
-            os.path.join(
-                basedir,
-                "great_expectations/uncommitted/data_docs/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html")
-        )
-
-        assert os.path.getsize(
-            os.path.join(
-                basedir,
-                "great_expectations/uncommitted/data_docs/local_site/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
-            )
-        ) > 0
-        print(result)
     except:
         raise
     finally:
