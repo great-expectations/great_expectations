@@ -337,18 +337,25 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         Copies static assets, using a special "static_assets" backend store that accepts variable-length tuples as
         keys, with no filepath_template.
         """
+        file_exclusions = [".DS_Store"]
+        dir_exclusions = []
+        
         if not static_assets_source_dir:
             static_assets_source_dir = file_relative_path(__file__, "../../render/view/static")
 
         for item in os.listdir(static_assets_source_dir):
             # Directory
             if os.path.isdir(os.path.join(static_assets_source_dir, item)):
+                if item in dir_exclusions:
+                    continue
                 # Recurse
                 new_source_dir = os.path.join(static_assets_source_dir, item)
                 self.copy_static_assets(new_source_dir)
             # File
             else:
                 # Copy file over using static assets store backend
+                if item in file_exclusions:
+                    continue
                 source_name = os.path.join(static_assets_source_dir, item)
                 with open(source_name, 'rb') as f:
                     # Only use path elements starting from static/ for key
