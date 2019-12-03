@@ -177,12 +177,11 @@ class FixedLengthTupleStoreBackend(StoreBackend):
                     ))
 
     def _validate_value(self, value):
-        # NOTE: We may want to allow bytes here as well.
-
-        if not isinstance(value, string_types):
-            raise TypeError("Values in {0} must be instances of {1}, not {2}".format(
+        if not isinstance(value, string_types) and not isinstance(value, bytes):
+            raise TypeError("Values in {0} must be instances of {1} or {2}, not {3}".format(
                 self.__class__.__name__,
                 string_types,
+                bytes,
                 type(value),
             ))
 
