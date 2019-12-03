@@ -114,7 +114,7 @@ class SiteBuilder(object):
         # The site builder is essentially a frontend store. We'll open up three types of backends using the base
         # type of the configuration defined in the store_backend section
 
-        target_store = HtmlSiteStore(
+        self.target_store = HtmlSiteStore(
             root_directory=data_context.root_directory,
             serialization_type=None,
             store_backend=store_backend
@@ -135,7 +135,7 @@ class SiteBuilder(object):
             runtime_config={
                 "data_context": data_context,
                 "custom_styles_directory": custom_styles_directory,
-                "target_store": target_store,
+                "target_store": self.target_store,
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -180,7 +180,7 @@ class SiteBuilder(object):
                 config=site_section_config,
                 runtime_config={
                     "data_context": data_context,
-                    "target_store": target_store,
+                    "target_store": self.target_store,
                     "custom_styles_directory": custom_styles_directory
                 },
                 config_defaults={
@@ -202,17 +202,7 @@ class SiteBuilder(object):
         """
         
         # copy static assets
-        project_root_dir = self.data_context.root_directory
-        site_base_dir = self.store_backend["base_directory"]
-        site_dir = os.path.join(project_root_dir, site_base_dir)
-        static_assets_source_dir = file_relative_path(__file__, "../view/static")
-        static_assets_destination_path = os.path.join(site_dir, "static")
-        if os.path.isdir(static_assets_destination_path):
-            message = """Warning. An existing static assets directory was found here: {}.
-                    - Static assets were not copied.""".format(static_assets_destination_path)
-            logger.warning(message)
-        else:
-            shutil.copytree(static_assets_source_dir, static_assets_destination_path)
+        self.target_store.copy_static_assets()
         
         for site_section, site_section_builder in self.site_section_builders.items():
             site_section_builder.build(datasource_whitelist=self.datasource_whitelist,
