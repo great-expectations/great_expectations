@@ -203,7 +203,8 @@ def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expe
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
-def test_render_profiled_fixture_expectation_suite_with_distribution(titanic_dataset_profiler_expectations_with_distribution):
+def test_render_profiled_fixture_expectation_suite_with_distribution(
+        titanic_dataset_profiler_expectations_with_distribution):
     # Tests sparkline
     rendered_json = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations_with_distribution)
     rendered_page = DefaultJinjaPageView().render(rendered_json)
@@ -246,8 +247,7 @@ def test_render_validation_results(titanic_profiled_evrs_1):
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
-def test_smoke_render_profiling_results_page_renderer_with_exception(
-        titanic_profiler_evrs_with_exception):
+def test_smoke_render_profiling_results_page_renderer_with_exception(titanic_profiler_evrs_with_exception):
     rendered_json = ProfilingResultsPageRenderer().render(titanic_profiler_evrs_with_exception)
     rendered_page = DefaultJinjaPageView().render(rendered_json)
 

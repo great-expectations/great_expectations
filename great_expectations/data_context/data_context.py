@@ -207,8 +207,9 @@ class ConfigOnlyDataContext(object):
         uncommitted_dir = os.path.join(base_dir, "uncommitted")
 
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
+            new_directory_path = os.path.join(uncommitted_dir, new_directory)
             safe_mmkdir(
-                os.path.join(uncommitted_dir, new_directory),
+                new_directory_path,
                 exist_ok=True
             )
 
@@ -219,8 +220,10 @@ class ConfigOnlyDataContext(object):
     @classmethod
     def scaffold_custom_data_docs(cls, plugins_dir):
         """Copy custom data docs templates"""
-        styles_template = file_relative_path(__file__, "../render/view/styles/data_docs_custom_styles_template.css")
-        styles_destination_path = os.path.join(plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
+        styles_template = file_relative_path(
+            __file__, "../render/view/static/styles/data_docs_custom_styles_template.css")
+        styles_destination_path = os.path.join(
+            plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
         shutil.copyfile(styles_template, styles_destination_path)
 
     @classmethod

@@ -646,6 +646,29 @@ data_docs/
                 default/
                     Titanic/
                         BasicDatasetProfiler.html
+        static/
+            fonts/
+                HKGrotesk/
+                    HKGrotesk-Bold.otf
+                    HKGrotesk-BoldItalic.otf
+                    HKGrotesk-Italic.otf
+                    HKGrotesk-Light.otf
+                    HKGrotesk-LightItalic.otf
+                    HKGrotesk-Medium.otf
+                    HKGrotesk-MediumItalic.otf
+                    HKGrotesk-Regular.otf
+                    HKGrotesk-SemiBold.otf
+                    HKGrotesk-SemiBoldItalic.otf
+            images/
+                favicon.ico
+                logo-long-vector.svg
+                logo-long.png
+                short-logo-vector.svg
+                short-logo.png
+                validation_failed_unexpected_values.gif
+            styles/
+                data_docs_custom_styles_template.css
+                data_docs_default_styles.css
         validations/
             profiling/
                 random/
@@ -1102,6 +1125,7 @@ uncommitted/
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
     DataContext.create(project_path)
     fixture = gen_directory_tree_str(uncommitted_dir)
+    print(fixture)
     assert fixture == expected
 
     # Test that all exist

@@ -1,0 +1,9 @@
+{% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
+  {% set static_images_dir = "../../../../../static/images/" -%}
+{% elif utm_medium == "expectation-suite-page" %}
+  {% set static_images_dir = "../../../../static/images/" -%}
+{% elif utm_medium == "index-page" %}
+  {% set static_images_dir = "./static/images/" -%}
+{% endif %}
+
+<link rel="shortcut icon" href="{{ static_images_dir + "favicon.ico" }}" type="image/x-icon"/>
