@@ -958,7 +958,7 @@ class DataAsset(object):
 
             if data_context is not None:
                 runtime_evaluation_parameters = \
-                    data_context.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
+                    data_context.evaluation_parameter_store.get_bind_params(run_id)
             else:
                 runtime_evaluation_parameters = {}
 

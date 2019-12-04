@@ -447,6 +447,8 @@ def create_sample_expectation_suite(
 
     do_exit = False
     it_0 = True
+    data_assets = []
+    profiler = SampleExpectationsDatasetProfiler
     while not do_exit:
         if it_0:
             it_0 = False
@@ -473,7 +475,6 @@ def create_sample_expectation_suite(
                 except ValueError:
                     pass
 
-        data_assets = []
         for i in data_asset_indices:
             try:
                 data_assets.append(available_data_assets["names"][i][0])
@@ -485,17 +486,19 @@ def create_sample_expectation_suite(
         profiling_results = context.profile_datasource(
             data_source_name,
             data_assets=data_assets,
-            profiler=SampleExpectationsDatasetProfiler,
+            profiler=profiler,
             dry_run=False,
             run_id=datetime.datetime.now().isoformat().replace(":", "") + "Z",
             additional_batch_kwargs=additional_batch_kwargs
         )
 
     cli_message(msg_data_doc_intro)
-
     build_docs(context)
     if open_docs:  # This is mostly to keep tests from spawning windows
         context.open_data_docs()
+
+    # TODO remove crap here
+    return data_assets, profiler, profiling_results
 
 
 def profile_datasource(

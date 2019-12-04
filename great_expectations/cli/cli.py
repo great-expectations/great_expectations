@@ -24,7 +24,13 @@ from great_expectations.cli.init_messages import (
     SLACK_SETUP_PROMPT,
     SLACK_WEBHOOK_PROMPT,
 )
-from great_expectations.core import expectationSuiteValidationResultSchema, expectationSuiteSchema
+from great_expectations.core import (
+    expectationSuiteSchema,
+    ExpectationSuiteValidationResult,
+    expectationSuiteValidationResultSchema,
+    NamespaceAwareExpectationSuite,
+)
+from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 from .datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
@@ -218,13 +224,65 @@ def init(target_directory, view):
         if not data_source_name:  # no datasource was created
             return
 
-        create_sample_expectation_suite(
+        # TODO remove crap here - don't need all these returns
+        data_assets, profiler, profiling_results = create_sample_expectation_suite(
             context,
             data_source_name,
             additional_batch_kwargs={"limit": 1000},
             open_docs=view,
         )
+
+        notebook_renderer = NotebookRenderer()
+
+        for result in profiling_results["results"]:
+            # TODO brittle
+            suite = result[0]
+            assert isinstance(suite, NamespaceAwareExpectationSuite)
+            suite_name = suite.expectation_suite_name
+
+            validation_result = result[1]
+            assert isinstance(validation_result, ExpectationSuiteValidationResult)
+            batch_kwargs = validation_result.meta.get("batch_kwargs")
+            data_asset_identifier = validation_result.meta.get("data_asset_name")
+            human_data_asset_name = data_asset_identifier.generator_asset
+
+            logger.debug(f"\nRendering a notebook for {human_data_asset_name} and suite {suite_name}")
+            logger.debug(f"batch_kwargs: {batch_kwargs}")
+            logger.debug(f"data_source_name: {data_source_name}")
+
+            notebook_name = f"{human_data_asset_name}_{suite_name}.ipynb"
+            notebook_path = os.path.join(context.root_directory, "notebooks", notebook_name)
+            notebook_renderer.render_to_disk(suite, batch_kwargs, notebook_path)
+
+
+        # TODO maybe loop over profiling results since they contain suites and validation results
+        # for data_asset in data_assets:
+        #     # TODO brittle
+        #     # print("\n\n\n")
+        #     # print(profiling_results)
+        #     # print("\n\n\n")
+        #     # sys.exit(1)
+        #     # batch_kwargs = profiling_results["results"][0][1]["meta"]["batch_kwargs"]
+        #
+        #     print(f"data_asset: {data_asset}")
+        #     suite = context.get_expectation_suite(
+        #         data_asset_name=data_asset,
+        #         expectation_suite_name=str(profiler.__name__)
+        #     )
+        #     suite_name = suite.expectation_suite_name
+        #
+        #     print(f"\nRendering a notebook for {data_asset} and suite {suite_name}")
+        #
+        #     # batch_kwargs = context.build_batch_kwargs(data_asset, partition_id="profiler")
+        #     batch_kwargs = context.yield_batch_kwargs(data_asset)
+        #     batch_kwargs_by_data_asset[data_asset] = batch_kwargs
+        #     print(f"batch_kwargs: {batch_kwargs}")
+        #     print(f"data_source_name: {data_source_name}")
+        #
+        #     notebook_name = f"{data_asset}_{suite_name}.ipynb"
+        #     notebook_renderer.render_to_disk(suite, batch_kwargs, os.path.join(context.root_directory, notebook_name))
         cli_message("""\n<cyan>Great Expectations is now set up in your project!</cyan>""")
+
 
 def _slack_setup(context):
     webhook_url = None
