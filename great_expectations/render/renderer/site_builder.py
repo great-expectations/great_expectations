@@ -452,7 +452,7 @@ class DefaultSiteIndexBuilder(object):
             )
 
         return {
-            "header": "To continue exploring Great Expectations...",
+            "header": "To continue exploring Great Expectations check out one of these tutorials...",
             "buttons": self._get_call_to_action_buttons(telemetry)
         }
 
@@ -464,25 +464,25 @@ class DefaultSiteIndexBuilder(object):
         calls to action.
         """
         create_expectations = CallToActionButton(
-            "Create Expectations",
+            "How To Create Expectations",
             # TODO update this link to a proper tutorial
             "https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html"
         )
         see_glossary = CallToActionButton(
-            "See more Expectations",
+            "See more kinds of Expectations",
             "http://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html"
         )
         validation_playground = CallToActionButton(
-            "Validate data",
+            "How To Validate data",
             # TODO update this link to a proper tutorial
             "https://docs.greatexpectations.io/en/latest/tutorials/validate_data.html"
         )
         customize_data_docs = CallToActionButton(
-            "Customize Data Docs",
+            "How To Customize Data Docs",
             "https://docs.greatexpectations.io/en/latest/reference/data_docs_reference.html#customizing-data-docs"
         )
         s3_team_site = CallToActionButton(
-            "Set up a team site on AWS S3",
+            "How To Set up a team site on AWS S3",
             "https://docs.greatexpectations.io/en/latest/tutorials/publishing_data_docs_to_s3.html"
         )
         # TODO gallery does not yet exist
