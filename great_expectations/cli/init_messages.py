@@ -12,7 +12,9 @@ GREETING = """<cyan>\
              ~ Always know what to expect from your data ~             
 </cyan>""".format(rtd_url_ge_version)
 
-LETS_BEGIN_PROMPT = """Let's add Great Expectations to your project by creating a new directory:
+LETS_BEGIN_PROMPT = """In just a couple of minutes you will see Great Expectations in action on your data.
+
+First, Great Expectations will create a new directory:
 
     great_expectations
     ├── expectations
@@ -26,6 +28,7 @@ LETS_BEGIN_PROMPT = """Let's add Great Expectations to your project by creating 
     └── uncommitted
         ├── config_variables.yml
         └── ...
+
 OK to proceed?"""
 
 PROJECT_IS_COMPLETE = "This looks like an existing project that <green>appears complete!</green> You are <green>ready to roll.</green>\n"
