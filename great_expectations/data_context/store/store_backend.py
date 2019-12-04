@@ -401,7 +401,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         s3 = boto3.resource('s3', **self._boto3_options)
         result_s3 = s3.Object(self.bucket, s3_object_key)
         if isinstance(value, bytes):
-            result_s3.put(Body=value)
+            result_s3.put(Body=value, ContentEncoding=content_encoding, ContentType=content_type)
         else:
             result_s3.put(Body=value.encode(content_encoding), ContentEncoding=content_encoding, ContentType=content_type)
         return s3_object_key
@@ -487,7 +487,7 @@ class FixedLengthTupleGCSStoreBackend(FixedLengthTupleStoreBackend):
         bucket = gcs.get_bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
         if isinstance(value, bytes):
-            blob.upload_from_string(value)
+            blob.upload_from_string(value, content_encoding=content_encoding, content_type=content_type)
         else:
             blob.upload_from_string(value.encode(content_encoding), content_type=content_type)
         return gcs_object_key
