@@ -1,7 +1,12 @@
+import logging
+
 from ..renderer import Renderer
 from ...types import (
     RenderedComponentContent,
     TextContent)
+from ....core import ExpectationValidationResult
+
+logger = logging.getLogger(__name__)
 
 
 class ContentBlockRenderer(Renderer):
@@ -31,13 +36,27 @@ class ContentBlockRenderer(Renderer):
                 content_block_fn = cls._get_content_block_fn(expectation_type)
 
                 if content_block_fn is not None:
-                    result = content_block_fn(
-                        obj_,
-                        styling=cls._get_element_styling(),
-                        **kwargs
-                    )
-                    blocks += result
-
+                    try:
+                        result = content_block_fn(
+                            obj_,
+                            styling=cls._get_element_styling(),
+                            **kwargs
+                        )
+                        blocks += result
+                    except Exception as e:
+                        logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+                        
+                        if type(obj_) == ExpectationValidationResult:
+                            content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
+                        else:
+                            content_block_fn = cls._missing_content_block_fn
+                        result = content_block_fn(
+                            obj_,
+                            cls._get_element_styling(),
+                            **kwargs
+                        )
+                        if result is not None:
+                            blocks += result
                 else:
                     result = cls._missing_content_block_fn(
                         obj_,
@@ -63,11 +82,29 @@ class ContentBlockRenderer(Renderer):
 
             content_block_fn = getattr(cls, expectation_type, None)
             if content_block_fn is not None:
-                return content_block_fn(render_object,
-                                        styling=cls._get_element_styling(),
-                                        **kwargs)
+                try:
+                    result = content_block_fn(render_object,
+                                            styling=cls._get_element_styling(),
+                                            **kwargs)
+                    return result
+                except Exception as e:
+                    logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+                    
+                    if type(render_object) == ExpectationValidationResult:
+                        content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
+                    else:
+                        content_block_fn = cls._missing_content_block_fn
+                    return content_block_fn(
+                        render_object,
+                        cls._get_element_styling(),
+                        **kwargs
+                    )
             else:
-                return None
+                return cls._missing_content_block_fn(
+                            render_object,
+                            cls._get_element_styling(),
+                            **kwargs
+                        )
 
     @classmethod
     def _process_content_block(cls, content_block):
