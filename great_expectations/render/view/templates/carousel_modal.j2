@@ -6,6 +6,179 @@
   {% set static_images_dir = "./static/images/" -%}
 {% endif %}
 
+<div class="card walkthrough-card bg-dark text-white walkthrough-1">
+<div class="card-header text-center">Data Docs Walkthrough</div>
+<div class="card-body">
+  <h5 class="card-title text-center">Welcome to Great Expectations Data Docs!</h5>
+  <p>This quick walkthrough will show you around.</p>
+  <p>
+</div>
+<div class="card-footer walkthrough-links">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        &nbsp;
+      </div>
+      <div class="col-6 text-center text-secondary">
+        1 of 6
+        <div class="progress" style="height: 2px">
+          <div class="progress-bar bg-info" role="progressbar" style="width: 16%" aria-valuenow="16" aria-valuemin="0" aria-valuemax="16"></div>
+        </div>
+      </div>
+      <div class="col-sm">
+        <a href="#" class="next-link btn btn-primary float-right" onclick="go_to_slide(2)">Next</a>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<div class="card walkthrough-card bg-dark text-white walkthrough-2">
+<div class="card-header text-center">Data Docs Walkthrough</div>
+<img src="{{ static_images_dir + "values_not_null_html_en.jpg" }}" class="card-img-top" alt="...">
+<!--<img src="../static/images/values_not_null_html_en.jpg" }}" class="card-img-top" alt="...">-->
+<div class="card-body">
+  <h5 class="card-title text-center">What are Expectations?</h5>
+  <p>An expectation is a falsifiable, verifiable statement about data.</p>
+  <p>Expectations provide a language to talk about data characteristics and data quality - humans-humans, humans-machines and machines-machines.</p>
+  <p>Expectations are both data tests and documentation.</p>
+</div>
+<div class="card-footer walkthrough-links">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <a href="#" class="next-link btn btn-secondary float-left" onclick="go_to_slide(1)">Back</a>
+      </div>
+      <div class="col-6 text-center text-secondary">
+        2 of 6
+        <div class="progress" style="height: 2px">
+          <div class="progress-bar bg-info" role="progressbar" style="width: 32%" aria-valuenow="32" aria-valuemin="0" aria-valuemax="32"></div>
+        </div>
+      </div>
+      <div class="col-sm">
+        <a href="#" class="next-link btn btn-primary float-right" onclick="go_to_slide(3)">Next</a>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<div class="card walkthrough-card bg-dark text-white walkthrough-3">
+<div class="card-header text-center">Data Docs Walkthrough</div>
+<img src="{{ static_images_dir + "values_not_null_json.jpg" }}" class="card-img-top" alt="...">
+<!--<img src="../static/images/values_not_null_json.jpg" }}" class="card-img-top" alt="...">-->
+<div class="card-body">
+  <h5 class="card-title text-center">An expectation can be presented in a machine-friendly JSON</h5>
+  <p>A machine can test if a dataset conforms to the expectation.</p>
+</div>
+<div class="card-footer walkthrough-links">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <a href="#" class="next-link btn btn-secondary float-left" onclick="go_to_slide(2)">Back</a>
+      </div>
+      <div class="col-6 text-center text-secondary">
+        3 of 6
+        <div class="progress" style="height: 2px">
+          <div class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="50"></div>
+        </div>
+      </div>
+      <div class="col-sm">
+        <a href="#" class="next-link btn btn-primary float-right" onclick="go_to_slide(4)">Next</a>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="card walkthrough-card bg-dark text-white walkthrough-4">
+<div class="card-header text-center">Data Docs Walkthrough</div>
+<img src="{{ static_images_dir + "values_not_null_validation_result_json.jpg" }}" class="card-img-top" alt="...">
+<!--<img src="../static/images/values_not_null_validation_result_json.jpg" }}" class="card-img-top" alt="...">-->
+<div class="card-body">
+  <h5 class="card-title text-center">Validation produces a validation result object</h5>
+  <p>This object has rich context about the test failure.</p>
+</div>
+<div class="card-footer walkthrough-links">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <a href="#" class="next-link btn btn-secondary float-left" onclick="go_to_slide(3)">Back</a>
+      </div>
+      <div class="col-6 text-center text-secondary">
+        4 of 6
+        <div class="progress" style="height: 2px">
+          <div class="progress-bar bg-info" role="progressbar" style="width: 68%" aria-valuenow="68" aria-valuemin="0" aria-valuemax="68"></div>
+        </div>
+      </div>
+      <div class="col-sm">
+        <a href="#" class="next-link btn btn-primary float-right" onclick="go_to_slide(5)">Next</a>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="card walkthrough-card bg-dark text-white walkthrough-5">
+<div class="card-header text-center">Data Docs Walkthrough</div>
+<img src="{{ static_images_dir + "validation_failed_unexpected_values.gif" }}" class="card-img-top" alt="...">-->
+<!--<img src="../static/images/validation_failed_unexpected_values.gif" }}" class="card-img-top" alt="...">-->
+<div class="card-body">
+  <h5 class="card-title text-center">Validation results save you time.</h5>
+  <p>This is a single failed Expectation. Note the failure includes unexpected values from your data. This helps you debug pipeines faster.</p>
+</div>
+<div class="card-footer walkthrough-links">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <a href="#" class="next-link btn btn-secondary float-left" onclick="go_to_slide(4)">Back</a>
+      </div>
+      <div class="col-6 text-center text-secondary">
+        5 of 6
+        <div class="progress" style="height: 2px">
+          <div class="progress-bar bg-info" role="progressbar" style="width: 84%" aria-valuenow="84" aria-valuemin="0" aria-valuemax="84"></div>
+        </div>
+      </div>
+      <div class="col-sm">
+        <a href="#" class="next-link btn btn-primary float-right" onclick="go_to_slide(6)">Next</a>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="card walkthrough-card bg-dark text-white walkthrough-6">
+<div class="card-header text-center">Data Docs Walkthrough</div>
+<div class="card-body">
+  <h5 class="card-title text-center">Now explore the sample suite!</h5>
+  <p>This sample suite shows you a few examples of expectations.</p>
+  <p>Note this is not a production suite and was autogenerated using only a small snippet of your data.</p>
+</div>
+<div class="card-footer walkthrough-links">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <a href="#" class="next-link btn btn-secondary float-left" onclick="go_to_slide(5)">Back</a>
+      </div>
+      <div class="col-6 text-center text-secondary">
+        6 of 6
+        <div class="progress" style="height: 2px">
+          <div class="progress-bar bg-info" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+      <div class="col-sm">
+        <button type="button" class="btn btn-primary" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">Done</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!--
 <div class="modal fade ge-walkthrough-modal" tabindex="-1" role="dialog" aria-labelledby="ge-walkthrough-modal-title"
      aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-l">
@@ -88,9 +261,19 @@
     </div>
   </div>
 </div>
-
-<script>
+-->
+<script type="text/JavaScript">
   $(".ge-walkthrough-modal").on('hide.bs.modal', function (e) {
     localStorage.setItem('ge-walkthrough-modal-dismissed', 'true')
   })
+</script>
+
+<script type="text/JavaScript">
+function go_to_slide(slide_number) {
+  hide_cards();
+  $('.walkthrough-' + slide_number).show();
+};
+function hide_cards(){
+  $('.walkthrough-card').hide();
+}
 </script>
