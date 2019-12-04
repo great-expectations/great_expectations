@@ -47,6 +47,8 @@ click.disable_unicode_literals_warning = True
 
 warnings.filterwarnings('ignore')
 
+logging.getLogger("great_expectations.datasource.generator.in_memory_generator").setLevel(logging.CRITICAL)
+
 try:
     from termcolor import colored
 except ImportError:

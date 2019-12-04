@@ -6,7 +6,6 @@ from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
 
-
 class InMemoryGenerator(BatchGenerator):
     """A basic generator that simply captures an existing object."""
 

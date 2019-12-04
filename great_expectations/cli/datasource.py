@@ -11,6 +11,7 @@ from great_expectations.data_context import DataContext
 from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
 
 from great_expectations import rtd_url_ge_version
+from great_expectations.datasource.types import ReaderMethods
 
 import logging
 logger = logging.getLogger(__name__)
@@ -74,12 +75,12 @@ def add_datasource(context):
 
             data_source_type = DatasourceTypes.PANDAS
 
-            data_source_name = _add_pandas_datasource(context, prompt_for_datasource_name=True)
-
+            data_source_name = _add_pandas_datasource_with_in_memory_generator(context)
         elif data_source_compute_selection == "2":  # Spark
 
             data_source_type = DatasourceTypes.SPARK
 
+            # TODO: create a Spark datasource with an in-memory generator
             data_source_name = _add_spark_datasource(context, prompt_for_datasource_name=True)
     else:
         data_source_type = DatasourceTypes.SQL
@@ -89,6 +90,33 @@ def add_datasource(context):
 
     return data_source_name, data_source_type
 
+
+def _add_pandas_datasource_with_in_memory_generator(context):
+    """
+    Add a Pandas datasource to the context without configuring any "opinionated" generators.
+    Only an in-memory generator is added.
+
+    :param context:
+    :return:
+    """
+
+    data_source_name = "pandas"
+    # data_source_name = click.prompt(
+    #     msg_prompt_datasource_name,
+    #     default=data_source_name,
+    #     show_default=True
+    # )
+
+    configuration = PandasDatasource.build_configuration(generators={
+                                                             "default": {
+                                                                 "class_name": "InMemoryGenerator",
+                                                             }
+                                                         }
+                                                         )
+    datasource = context.add_datasource(name=data_source_name,
+                                        class_name='PandasDatasource',
+                                        **configuration)
+    return data_source_name
 
 def _add_pandas_datasource(context, prompt_for_datasource_name=True):
     path = click.prompt(
@@ -426,6 +454,8 @@ def create_sample_expectation_suite(
     """"Profile a named datasource using the specified context"""
     msg_intro = """
 <cyan>========== Create sample Expectations ==========</cyan>
+
+
 """
 
     msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
@@ -438,6 +468,8 @@ def create_sample_expectation_suite(
 <cyan>========== Data Docs ==========</cyan>"""
     cli_message(msg_intro)
 
+    batch_kwargs = None
+    data_asset_name = None
 
     #TODO: ["default"] is a hack. since we are running in init, it might be ok to assume that only default exists
     available_data_assets = context.get_available_data_asset_names(datasource_names=[data_source_name])[data_source_name]["default"]
@@ -445,19 +477,10 @@ def create_sample_expectation_suite(
     # print("Found {} datas".format(len(available_data_assets["names"])))
     available_data_asset_names = ["{} ({})".format(name[0], name[1]) for name in available_data_assets["names"]]
 
-    do_exit = False
-    it_0 = True
-    while not do_exit:
-        if it_0:
-            it_0 = False
-        else:
-            if profiling_results['success']: # data context is ready to profile
-                break
-            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND:
-                cli_message(msg_some_data_assets_not_found.format("," .join(profiling_results['error']['not_found_data_assets'])))
-            else: # unknown error
-                raise ValueError("Unknown profiling error code: " + profiling_results['error']['code'])
-
+    if len(available_data_asset_names) == 0:
+        if "PandasDatasource" == type(context.get_datasource(data_source_name)).__name__:
+            data_asset_name, batch_kwargs = _load_file_as_data_asset_from_pandas_datasource(context, data_source_name)
+    else:
         choices = "\n".join(["    {}. {}".format(i, name) for i, name in enumerate(available_data_asset_names[:5], 1)])
         prompt = msg_prompt_enter_data_asset_name + choices + "\n"
 
@@ -480,22 +503,110 @@ def create_sample_expectation_suite(
             except IndexError:
                 pass
 
-        # after getting the arguments from the user, let's try to run profiling again
-        # (no dry run this time)
-        profiling_results = context.profile_datasource(
-            data_source_name,
-            data_assets=data_assets,
-            profiler=SampleExpectationsDatasetProfiler,
-            dry_run=False,
-            run_id=datetime.datetime.now().isoformat().replace(":", "") + "Z",
-            additional_batch_kwargs=additional_batch_kwargs
-        )
+        if len(data_assets) > 0:
+            data_asset_name = data_assets[0]
 
-    cli_message(msg_data_doc_intro)
+    # after getting the arguments from the user, let's try to run profiling again
+    # (no dry run this time)
+    profiling_results = context.profile_data_asset(
+        data_source_name,
+        generator_name=None,
+        data_asset_name=data_asset_name,
+        batch_kwargs=batch_kwargs,
+        profiler=SampleExpectationsDatasetProfiler,
+        run_id=datetime.datetime.now().isoformat().replace(":", "") + "Z",
+        additional_batch_kwargs=additional_batch_kwargs
+    )
 
-    build_docs(context)
-    if open_docs:  # This is mostly to keep tests from spawning windows
-        context.open_data_docs()
+    if profiling_results['success']:  # data context is ready to profile
+        cli_message(msg_data_doc_intro)
+        build_docs(context)
+        if open_docs:  # This is mostly to keep tests from spawning windows
+            context.open_data_docs()
+    elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND:
+        cli_message(
+            msg_some_data_assets_not_found.format(",".join(profiling_results['error']['not_found_data_assets'])))
+    else:  # unknown error
+        raise ValueError("Unknown profiling error code: " + profiling_results['error']['code'])
+
+
+def _load_file_as_data_asset_from_pandas_datasource(context, data_source_name):
+    msg_prompt_filesys_enter_base_path = """Enter the path (relative or absolute) of a data file
+"""
+
+    msg_prompt_data_asset_name = """
+Give your new data asset a short name
+"""
+
+    msg_prompt_file_type = """What is the format of the file?
+    1. CSV
+    2. Parguet
+    3. Excel
+    4. JSON
+"""
+
+    reader_methods = {
+        "1": "csv", # ReaderMethods.csv
+        "2": "parquet", # ReaderMethods.parquet
+        "3": "excel", # ReaderMethods.excel
+        "4": "json", # ReaderMethods.json
+    }
+
+    path = click.prompt(
+        msg_prompt_filesys_enter_base_path,
+        type=click.Path(
+            exists=True,
+            file_okay=True,
+            dir_okay=False,
+            readable=True
+        ),
+        show_default=True
+    )
+
+    if path.startswith("./"):
+        path = path[2:]
+
+    if path.endswith("/"):
+        basenamepath = path[:-1]
+    else:
+        basenamepath = path
+
+    data_asset_name = os.path.splitext(os.path.basename(basenamepath))[0]
+    # data_asset_name = click.prompt(
+    #     msg_prompt_data_asset_name,
+    #     default=data_asset_name,
+    #     show_default=True
+    # )
+
+    datasource = context.get_datasource(data_source_name)
+
+    batch_kwargs = {"path": path}
+
+    reader_method = None
+    reader_method = datasource.guess_reader_method_from_path(path)
+
+    if reader_method is None:
+
+        while True:
+
+            option_selection = click.prompt(
+                msg_prompt_file_type,
+                type=click.Choice(["1", "2", "3", "4"]),
+                show_choices=False
+            )
+
+            batch_kwargs["reader_method"] = reader_methods[option_selection]
+
+            batch = datasource.get_data_asset(data_asset_name, batch_kwargs=batch_kwargs)
+
+            break
+    else:
+        batch = datasource.get_data_asset(
+            None,
+            batch_kwargs=batch_kwargs)
+
+
+    return (data_asset_name, batch_kwargs)
 
 
 def profile_datasource(
@@ -547,7 +658,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
     # Call the data context's profiling method to check if the arguments are valid
     profiling_results = context.profile_datasource(
         data_source_name,
-        data_assets=data_assets,
+        data_asset_names=data_assets,
         profile_all_data_assets=profile_all_data_assets,
         max_data_assets=max_data_assets,
         dry_run=True,
@@ -558,7 +669,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         if data_assets or profile_all_data_assets or click.confirm(msg_confirm_ok_to_proceed.format(data_source_name), default=True):
             profiling_results = context.profile_datasource(
                 data_source_name,
-                data_assets=data_assets,
+                data_asset_names=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 max_data_assets=max_data_assets,
                 dry_run=False,
@@ -603,7 +714,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
             # (no dry run this time)
             profiling_results = context.profile_datasource(
                 data_source_name,
-                data_assets=data_assets,
+                data_asset_names=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 max_data_assets=max_data_assets,
                 dry_run=False,

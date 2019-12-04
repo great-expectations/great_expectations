@@ -1680,6 +1680,173 @@ class ConfigOnlyDataContext(object):
         profiling_results['success'] = True
         return profiling_results
 
+    def profile_data_asset(self,
+                           datasource_name,
+                           generator_name=None,
+                           data_asset_name=None,
+                           batch_kwargs=None,
+                           profiler=BasicDatasetProfiler,
+                           run_id="profiling",
+                           additional_batch_kwargs=None):
+        """Profile the named datasource using the named profiler.
+
+        Args:
+            datasource_name: the name of the datasource for which to profile data_assets
+            generator_name: the name of the generator to use to get batches
+            data_assets: list of data asset names to profile
+            max_data_assets: if the number of data assets the generator yields is greater than this max_data_assets,
+                profile_all_data_assets=True is required to profile all
+            profile_all_data_assets: when True, all data assets are profiled, regardless of their number
+            profiler: the profiler class to use
+            dry_run: when true, the method checks arguments and reports if can profile or specifies the arguments that are missing
+            additional_batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
+        Returns:
+            A dictionary::
+
+                {
+                    "success": True/False,
+                    "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
+                }
+
+            When success = False, the error details are under "error" key
+        """
+
+        logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
+
+        profiling_results = {}
+
+        if batch_kwargs is None:
+            # Get data_asset_name_list
+            data_asset_names = self.get_available_data_asset_names(datasource_name)
+            if generator_name is None:
+                if len(data_asset_names[datasource_name].keys()) == 1:
+                    generator_name = list(data_asset_names[datasource_name].keys())[0]
+            if generator_name not in data_asset_names[datasource_name]:
+                raise ge_exceptions.ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
+
+            data_asset_name_list = [name[0] for name in data_asset_names[datasource_name][generator_name]["names"]]
+            total_data_assets = len(data_asset_name_list)
+
+            if data_asset_name not in data_asset_name_list:
+                not_found_data_assets = [data_asset_name]
+                if len(not_found_data_assets) > 0:
+                    profiling_results = {
+                        'success': False,
+                        'error': {
+                            'code': DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
+                            'not_found_data_assets': not_found_data_assets,
+                            'data_assets': data_asset_name_list
+                        }
+                    }
+                    return profiling_results
+
+
+                data_asset_name_list = [data_asset_name]
+                data_asset_name_list.sort()
+                total_data_assets = len(data_asset_name_list)
+
+
+        profiling_results['success'] = True
+
+        profiling_results['results'] = []
+        total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
+        total_start_time = datetime.datetime.now()
+
+        name = data_asset_name
+        # logger.info("\tProfiling '%s'..." % name)
+        try:
+            start_time = datetime.datetime.now()
+
+            # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
+            if additional_batch_kwargs is None:
+                additional_batch_kwargs = {}
+
+            normalized_data_asset_name = self.normalize_data_asset_name(name)
+            expectation_suite_name = profiler.__name__
+            self.create_expectation_suite(
+                data_asset_name=normalized_data_asset_name,
+                expectation_suite_name=expectation_suite_name,
+                overwrite_existing=True
+            )
+
+            if batch_kwargs is None:
+
+                batch_kwargs = self.yield_batch_kwargs(
+                    data_asset_name=normalized_data_asset_name,
+                    **additional_batch_kwargs
+                )
+            else:
+                batch_kwargs.update(additional_batch_kwargs)
+
+            batch = self.get_batch(
+                data_asset_name=normalized_data_asset_name,
+                expectation_suite_name=expectation_suite_name,
+                batch_kwargs=batch_kwargs
+            )
+
+            if not profiler.validate(batch):
+                raise ge_exceptions.ProfilerError(
+                    "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
+                )
+
+            # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
+            # will have more to unpack.
+            expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
+            profiling_results['results'].append((expectation_suite, validation_results))
+
+            self.validations_store.set(
+                key=ValidationResultIdentifier(
+                    expectation_suite_identifier=ExpectationSuiteIdentifier(
+                        data_asset_name=normalized_data_asset_name,
+                        expectation_suite_name=expectation_suite_name
+                    ),
+                    run_id=run_id
+                ),
+                value=validation_results
+            )
+
+            if isinstance(batch, Dataset):
+                # For datasets, we can produce some more detailed statistics
+                row_count = batch.get_row_count()
+                total_rows += row_count
+                new_column_count = len(set([exp.kwargs["column"] for exp in expectation_suite.expectations if "column" in exp.kwargs]))
+                total_columns += new_column_count
+
+            new_expectation_count = len(expectation_suite.expectations)
+            total_expectations += new_expectation_count
+
+            self.save_expectation_suite(expectation_suite)
+            duration = (datetime.datetime.now() - start_time).total_seconds()
+            logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
+                        (new_column_count, row_count, name, duration))
+
+        except ge_exceptions.ProfilerError as err:
+            logger.warning(err.message)
+        except IOError as err:
+            logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % name)
+            logger.debug(str(err))
+            skipped_data_assets += 1
+        except SQLAlchemyError as e:
+            logger.warning("SqlAlchemyError while profiling %s. Skipping." % name)
+            logger.debug(str(e))
+            skipped_data_assets += 1
+
+            total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+            logger.info("""
+    Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
+    Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs.""" % (
+                len(data_asset_name_list),
+                total_data_assets,
+                total_rows,
+                total_columns,
+                total_duration,
+                total_expectations,
+            ))
+            if skipped_data_assets > 0:
+                logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
+
+        profiling_results['success'] = True
+        return profiling_results
 
 class DataContext(ConfigOnlyDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
