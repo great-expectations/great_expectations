@@ -190,6 +190,119 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             })
 
     @classmethod
+    def _get_kl_divergence_observed_value(cls, evr):
+        if not evr["result"].get("details"):
+            return "--"
+
+        weights = evr["result"]["details"]["observed_partition"]["weights"]
+        if len(weights) <= 10:
+            height = 200
+            width = 200
+            col_width = 4
+        else:
+            height = 300
+            width = 300
+            col_width = 6
+
+        if evr["result"]["details"]["observed_partition"].get("bins"):
+            bins = evr["result"]["details"]["observed_partition"]["bins"]
+            bins_x1 = [round(value, 1) for value in bins[:-1]]
+            bins_x2 = [round(value, 1) for value in bins[1:]]
+
+            df = pd.DataFrame({
+                "bin_min": bins_x1,
+                "bin_max": bins_x2,
+                "fraction": weights,
+            })
+
+            bars = alt.Chart(df).mark_bar().encode(
+                x='bin_min:O',
+                x2='bin_max:O',
+                y="fraction:Q"
+            ).properties(width=width, height=height, autosize="fit")
+            chart = bars.to_json()
+        elif evr["result"]["details"]["observed_partition"].get("values"):
+            values = evr["result"]["details"]["observed_partition"]["values"]
+
+            df = pd.DataFrame({
+                "values": values,
+                "fraction": weights
+            })
+
+            bars = alt.Chart(df).mark_bar().encode(
+                x='values:N',
+                y="fraction:Q"
+            ).properties(width=width, height=height, autosize="fit")
+            chart = bars.to_json()
+
+        observed_value = evr["result"].get("observed_value")
+
+        observed_value_content_block = {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "KL Divergence: $observed_value",
+                    "params": {
+                        "observed_value": str(
+                            observed_value) if observed_value else "None (-infinity, infinity, or NaN)",
+                    },
+                }
+        }
+
+        graph_content_block = {
+            "content_block_type": "graph",
+            "graph": chart,
+            "styling": {
+                "classes": ["col-" + str(col_width)],
+                "styles": {
+                    "margin-top": "20px",
+                }
+            }
+        }
+    
+        return {
+            "content_block_type": "content_block_container",
+            "content_blocks": [
+                observed_value_content_block,
+                graph_content_block
+            ]
+        }
+
+    @classmethod
+    def _get_quantile_values_observed_value(cls, evr):
+        if "result" not in evr:
+            return "--"
+
+        quantiles = evr["result"]["observed_value"]["quantiles"]
+        value_ranges = evr["result"]["observed_value"]["values"]
+
+        table_header_row = ["Value"]
+        table_rows = []
+
+        quantile_strings = {
+            .25: "Q1",
+            .75: "Q3",
+            .50: "Median"
+        }
+
+        for idx, quantile in enumerate(quantiles):
+            quantile_string = quantile_strings.get(quantile)
+            table_rows.append([
+                quantile_string if quantile_string else "{:3.2f}".format(quantile),
+                str(value_ranges[idx])
+            ])
+
+        return {
+            "content_block_type": "table",
+            "header_row": table_header_row,
+            "table": table_rows,
+            "styling": {
+                "body": {
+                    "classes": ["table", "table-sm", "table-unbordered", "col-4"],
+                }
+            }
+        }
+
+    @classmethod
     def _get_observed_value(cls, evr):
         try:
             result = evr["result"]
@@ -199,60 +312,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         expectation_type = evr["expectation_config"]["expectation_type"]
 
         if expectation_type == "expect_column_kl_divergence_to_be_less_than":
-            if not evr["result"].get("details"):
-                return "--"
-
-            weights = evr["result"]["details"]["observed_partition"]["weights"]
-            if len(weights) <= 10:
-                height = 200
-                width = 200
-                col_width = 4
-            else:
-                height = 300
-                width = 300
-                col_width = 6
-                
-            if evr["result"]["details"]["observed_partition"].get("bins"):
-                bins = evr["result"]["details"]["observed_partition"]["bins"]
-                bins_x1 = [round(value, 1) for value in bins[:-1]]
-                bins_x2 = [round(value, 1) for value in bins[1:]]
-        
-                df = pd.DataFrame({
-                    "bin_min": bins_x1,
-                    "bin_max": bins_x2,
-                    "fraction": weights,
-                })
-
-                bars = alt.Chart(df).mark_bar().encode(
-                    x='bin_min:O',
-                    x2='bin_max:O',
-                    y="fraction:Q"
-                ).properties(width=width, height=height, autosize="fit")
-                chart = bars.to_json()
-            elif evr["result"]["details"]["observed_partition"].get("values"):
-                values = evr["result"]["details"]["observed_partition"]["values"]
-    
-                df = pd.DataFrame({
-                    "values": values,
-                    "fraction": weights
-                })
-
-                bars = alt.Chart(df).mark_bar().encode(
-                    x='values:N',
-                    y="fraction:Q"
-                ).properties(width=width, height=height, autosize="fit")
-                chart = bars.to_json()
-            
-            return {
-                "content_block_type": "graph",
-                "graph": chart,
-                "styling": {
-                    "classes": ["col-" + str(col_width)],
-                    "styles": {
-                        "margin-top": "20px",
-                    }
-                }
-            }
+            return cls._get_kl_divergence_observed_value(evr)
+        elif expectation_type == "expect_column_quantile_values_to_be_between":
+            return cls._get_quantile_values_observed_value(evr)
 
         if result.get("observed_value"):
             observed_value = result.get("observed_value")

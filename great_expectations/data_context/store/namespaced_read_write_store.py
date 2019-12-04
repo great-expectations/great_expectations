@@ -1,6 +1,7 @@
 import logging
 
 import copy
+from mimetypes import guess_type
 import os
 
 from ..types.base_resource_identifiers import (
@@ -22,7 +23,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config
 )
 from great_expectations.exceptions import DataContextError
-
+from great_expectations.util import file_relative_path
 
 logger = logging.getLogger(__name__)
 
@@ -247,6 +248,17 @@ class HtmlSiteStore(NamespacedReadWriteStore):
                     "filepath_template": 'index.html',
                 }
             ),
+            "static_assets": instantiate_class_from_config(
+                config=store_backend,
+                runtime_config={
+                    "root_directory": root_directory
+                },
+                config_defaults={
+                    "module_name": "great_expectations.data_context.store",
+                    "key_length": None,
+                    "filepath_template": None,
+                }
+            ),
         }
 
         self.root_directory = root_directory
@@ -258,7 +270,7 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         # HtmlSiteStore instance leaves scope.
         # Doing it this way allows us to prevent namespace collisions among keys while still having multiple
         # backends that write to the same directory structure.
-        # It's a pretty reasonable way for HtmlSiteStore to do its job---you just ahve to remember that it
+        # It's a pretty reasonable way for HtmlSiteStore to do its job---you just have to remember that it
         # can't necessarily set and list_keys like most other Stores.
         self.keys = set()
 
@@ -320,3 +332,40 @@ class HtmlSiteStore(NamespacedReadWriteStore):
         """This third store has a special method, which uses a zero-length tuple as a key."""
         return self.store_backends["index_page"].set((), page, content_encoding='utf-8', content_type='text/html; '
                                                                                                       'charset=utf-8')
+    
+    def copy_static_assets(self, static_assets_source_dir=None):
+        """
+        Copies static assets, using a special "static_assets" backend store that accepts variable-length tuples as
+        keys, with no filepath_template.
+        """
+        file_exclusions = [".DS_Store"]
+        dir_exclusions = []
+        
+        if not static_assets_source_dir:
+            static_assets_source_dir = file_relative_path(__file__, "../../render/view/static")
+
+        for item in os.listdir(static_assets_source_dir):
+            # Directory
+            if os.path.isdir(os.path.join(static_assets_source_dir, item)):
+                if item in dir_exclusions:
+                    continue
+                # Recurse
+                new_source_dir = os.path.join(static_assets_source_dir, item)
+                self.copy_static_assets(new_source_dir)
+            # File
+            else:
+                # Copy file over using static assets store backend
+                if item in file_exclusions:
+                    continue
+                source_name = os.path.join(static_assets_source_dir, item)
+                with open(source_name, 'rb') as f:
+                    # Only use path elements starting from static/ for key
+                    store_key = tuple(os.path.normpath(source_name).split(os.sep))
+                    store_key = store_key[store_key.index('static'):]
+                    content_type, content_encoding = guess_type(item, strict=False)
+                    self.store_backends["static_assets"].set(
+                        store_key,
+                        f.read(),
+                        content_encoding=content_encoding,
+                        content_type=content_type
+                    )

@@ -104,14 +104,14 @@ def test_render_section_page():
     
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """<div id="section-1" class="ge-section container-fluid">
-    <div class="row">
-        
+    <div class="row" >
+
 
 <div id="content-block-1" >
 
-    <div id="content-block-1-header" ><h3>
+    <div id="content-block-1-header" ><h4>
           Overview
-      </h3>
+      </h4>
     </div>
 
 </div>
@@ -158,10 +158,10 @@ def test_rendering_components_without_section_loop_index():
         """
 <div id="content-block-2" >
 
-    <div id="content-block-2-header" >
-    <h3>
-        Overview
-    </h3></div>
+    <div id="content-block-2-header" ><h4>
+          Overview
+      </h4>
+    </div>
 
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
@@ -175,10 +175,12 @@ def test_rendering_components_without_section_loop_index():
     assert rendered_doc == \
         """
 <div id="content-block" >
-    <div id="content-block-header" >
-        <h3>
-            Overview
-        </h3></div>
+
+    <div id="content-block-header" ><h4>
+          Overview
+      </h4>
+    </div>
+
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
@@ -192,10 +194,12 @@ def test_rendering_components_without_section_loop_index():
     assert rendered_doc == \
         """
 <div id="content-block" >
-    <div id="content-block-header" >
-        <h3>
-            Overview
-        </h3></div>
+
+    <div id="content-block-header" ><h4>
+          Overview
+      </h4>
+    </div>
+
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
@@ -331,10 +335,10 @@ def test_render_header_component():
         """
 <div id="section-1-content-block-2" >
 
-    <div id="section-1-content-block-2-header" >
-    <h3>
-        Overview
-    </h3></div>
+    <div id="section-1-content-block-2-header" ><h4>
+          Overview
+      </h4>
+    </div>
 
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 

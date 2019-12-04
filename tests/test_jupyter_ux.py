@@ -25,33 +25,48 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
     html_to_display = html_to_display.replace(" ", "").replace("\t", "").replace("\n", "")
     assert html_to_display == """\
 <div id="section-1" class="ge-section container-fluid">
-    <div class="row">
+    <div class="row" >
     
+
 <div id="content-block-1" class="col-12" >
-    <div id="content-block-1-header" class="alert alert-secondary" >
-        <h3>
-            naturals
-        </h3></div>
+
+    <div id="content-block-1-header" class="alert alert-secondary" ><h4>
+          naturals
+      </h4>
+    </div>
+
 </div>
 
+
 <div id="content-block-2" class="col-12" >
-    <ul id="content-block-2-body" >
-            <li >
-            <span>
-                is a required field.
-            </span>
-        </li>
-            <li >
-            <span>
-                values must be unique.
-            </span>
-        </li>
+
+
+
+<ul id="content-block-2-body" >
+
         
-        </ul>
+        
+        <li >
+                <span >
+                    is a required field.
+                </span>
+            </li>
+    
+           
+        
+        <li >
+                <span >
+                    values must be unique.
+                </span>
+            </li>
+
+</ul>
+
 </div>
     
     </div>
-</div>""".replace(" ", "").replace("\t", "").replace("\n", "")
+</div>
+""".replace(" ", "").replace("\t", "").replace("\n", "")
 
     html_to_display = jux.display_column_expectations_as_section(
         basic_expectation_suite,
@@ -111,30 +126,45 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
     box-shadow:0 1px 8px rgba(0,0,0,0.5);
 }
 </style>
+
 <div id="section-1" class="ge-section container-fluid">
-    <div class="row">
+    <div class="row" >
     
+
 <div id="content-block-1" class="col-12" >
-    <div id="content-block-1-header" class="alert alert-secondary" >
-        <h3>
-            naturals
-        </h3></div>
+
+    <div id="content-block-1-header" class="alert alert-secondary" ><h4>
+          naturals
+      </h4>
+    </div>
+
 </div>
 
+
 <div id="content-block-2" class="col-12" >
-    <ul id="content-block-2-body" >
-            <li >
-            <span>
-                is a required field.
-            </span>
-        </li>
-            <li >
-            <span>
-                values must be unique.
-            </span>
-        </li>
+
+
+
+<ul id="content-block-2-body" >
+
+
+
+        <li >
+                <span >
+                    is a required field.
+                </span>
+            </li>
+    
+            
         
-        </ul>
+        <li >
+                <span >
+                    values must be unique.
+                </span>
+            </li>
+    
+</ul>
+
 </div>
     
     </div>
@@ -142,7 +172,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 """.replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-def test_display_column_evrs_as_section():
+def test_display_column_evrs_as_section(empty_data_context):
     #TODO: We should add a fixture that contains EVRs
     df = ge.read_csv("./tests/test_sets/Titanic.csv")
     df.profile(BasicDatasetProfiler)
