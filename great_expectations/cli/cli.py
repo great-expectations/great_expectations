@@ -53,6 +53,8 @@ click.disable_unicode_literals_warning = True
 
 warnings.filterwarnings('ignore')
 
+logging.getLogger("great_expectations.datasource.generator.in_memory_generator").setLevel(logging.CRITICAL)
+
 try:
     from termcolor import colored
 except ImportError:
@@ -281,7 +283,7 @@ def init(target_directory, view):
         #
         #     notebook_name = f"{data_asset}_{suite_name}.ipynb"
         #     notebook_renderer.render_to_disk(suite, batch_kwargs, os.path.join(context.root_directory, notebook_name))
-        cli_message("""\n<cyan>Great Expectations is now set up in your project!</cyan>""")
+            cli_message("""\n<cyan>Great Expectations is now set up.</cyan>""")
 
 
 def _slack_setup(context):
