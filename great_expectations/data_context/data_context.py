@@ -1739,19 +1739,17 @@ class ConfigOnlyDataContext(object):
                            profiler=BasicDatasetProfiler,
                            run_id="profiling",
                            additional_batch_kwargs=None):
-        """Profile the named datasource using the named profiler.
-
-        Args:
-            datasource_name: the name of the datasource for which to profile data_assets
-            generator_name: the name of the generator to use to get batches
-            data_assets: list of data asset names to profile
-            max_data_assets: if the number of data assets the generator yields is greater than this max_data_assets,
-                profile_all_data_assets=True is required to profile all
-            profile_all_data_assets: when True, all data assets are profiled, regardless of their number
-            profiler: the profiler class to use
-            dry_run: when true, the method checks arguments and reports if can profile or specifies the arguments that are missing
-            additional_batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
-        Returns:
+        """
+        Profile a data asset
+        
+        :param datasource_name: the name of the datasource to which the profiled data asset belongs
+        :param generator_name: the name of the generator to use to get batches (only if batch_kwargs are not provided)
+        :param data_asset_name: the name of the profiled data asset
+        :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the generator (generator_name arg) will choose a batch
+        :param profiler: the profiler class to use
+        :param run_id: optional - if set, the validation result created by the profiler will be under the provided run_id
+        :param additional_batch_kwargs:
+        :returns
             A dictionary::
 
                 {
