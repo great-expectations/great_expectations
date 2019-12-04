@@ -1,5 +1,6 @@
 import json
 from builtins import str  # PY2 compatibility
+import logging
 import re
 
 import altair as alt
@@ -16,6 +17,8 @@ from ..types import RenderedSectionContent, RenderedHeaderContent, RenderedGraph
 from ..types import (
     RenderedComponentContent,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def convert_to_string_and_escape(var):
@@ -53,6 +56,16 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             class_name=overview_table_renderer.get("class_name"),
             module_name=overview_table_renderer.get("module_name", "great_expectations.render.renderer.content_block")
         )
+        self.content_block_function_names = [
+            "_render_header",
+            "_render_overview_table",
+            "_render_quantile_table",
+            "_render_stats_table",
+            "_render_histogram",
+            "_render_values_set",
+            "_render_bar_chart_table",
+            "_render_failed"
+        ]
 
     #Note: Seems awkward to pass section_name and column_type into this renderer.
     #Can't we figure that out internally?
@@ -64,14 +77,14 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks = []
 
-        content_blocks.append(self._render_header(evrs, column_type))
-        # content_blocks.append(cls._render_column_type(evrs))
-        content_blocks.append(self._render_overview_table(evrs))
-        content_blocks.append(self._render_quantile_table(evrs))
-        content_blocks.append(self._render_stats_table(evrs))
-        content_blocks.append(self._render_histogram(evrs))
-        content_blocks.append(self._render_values_set(evrs))
-        content_blocks.append(self._render_bar_chart_table(evrs))
+        for content_block_function_name in self.content_block_function_names:
+            try:
+                if content_block_function_name == "_render_header":
+                    content_blocks.append(getattr(self, content_block_function_name)(evrs, column_type))
+                else:
+                    content_blocks.append(getattr(self, content_block_function_name)(evrs))
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
 
         # content_blocks.append(cls._render_statistics(evrs))
         # content_blocks.append(cls._render_common_values(evrs))
@@ -81,7 +94,6 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         # content_blocks.append(cls._render_expectation_types(evrs))
         # content_blocks.append(cls._render_unrecognized(evrs))
 
-        content_blocks.append(self._render_failed(evrs))
         # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))
 
