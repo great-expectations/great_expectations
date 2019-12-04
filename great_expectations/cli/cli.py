@@ -204,7 +204,13 @@ def init(target_directory, view):
     if os.path.isfile(ge_yml):
         if DataContext.all_uncommitted_directories_exist(ge_dir) and \
                 DataContext.config_variables_yml_exist(ge_dir):
-            cli_message(PROJECT_IS_COMPLETE)
+            # Ensure the context can be instantiated
+            try:
+                _ = DataContext(ge_dir)
+                cli_message(PROJECT_IS_COMPLETE)
+            except ge_exceptions.DataContextError as e:
+                cli_message("<red>{}</red>".format(e))
+                exit(5)
         else:
             _complete_onboarding(target_directory)
 
@@ -284,6 +290,7 @@ def init(target_directory, view):
         #     notebook_name = f"{data_asset}_{suite_name}.ipynb"
         #     notebook_renderer.render_to_disk(suite, batch_kwargs, os.path.join(context.root_directory, notebook_name))
             cli_message("""\n<cyan>Great Expectations is now set up.</cyan>""")
+
 
 
 def _slack_setup(context):
