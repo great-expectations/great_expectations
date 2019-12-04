@@ -246,12 +246,13 @@ def init(target_directory, view):
             data_asset_identifier = validation_result.meta.get("data_asset_name")
             human_data_asset_name = data_asset_identifier.generator_asset
 
-            print(f"\nRendering a notebook for {human_data_asset_name} and suite {suite_name}")
-            print(f"batch_kwargs: {batch_kwargs}")
-            print(f"data_source_name: {data_source_name}")
+            logger.debug(f"\nRendering a notebook for {human_data_asset_name} and suite {suite_name}")
+            logger.debug(f"batch_kwargs: {batch_kwargs}")
+            logger.debug(f"data_source_name: {data_source_name}")
 
             notebook_name = f"{human_data_asset_name}_{suite_name}.ipynb"
-            notebook_renderer.render_to_disk(suite, batch_kwargs, os.path.join(context.root_directory, notebook_name))
+            notebook_path = os.path.join(context.root_directory, "notebooks", notebook_name)
+            notebook_renderer.render_to_disk(suite, batch_kwargs, notebook_path)
 
 
         # TODO maybe loop over profiling results since they contain suites and validation results
