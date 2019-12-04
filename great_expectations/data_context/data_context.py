@@ -17,6 +17,7 @@ import warnings
 
 from great_expectations.core import ExpectationSuite, NamespaceAwareExpectationSuite
 from great_expectations.data_context.types.base import DataContextConfig, dataContextConfigSchema
+from great_expectations.data_context.types.metrics import ExpectationDefinedMetricIdentifier
 from great_expectations.data_context.util import file_relative_path, substitute_config_variable
 from .util import safe_mmkdir, substitute_all_config_variables
 from ..types.base import DotDict
@@ -247,7 +248,7 @@ class ConfigOnlyDataContext(object):
             raise
         return True
 
-    def __init__(self, project_config, context_root_dir, data_asset_name_delimiter='/'):
+    def __init__(self, project_config, context_root_dir=None, data_asset_name_delimiter='/'):
         """DataContext constructor
 
         Args:
@@ -338,10 +339,10 @@ class ConfigOnlyDataContext(object):
         new_store = instantiate_class_from_config(
             config=self._project_config_with_variables_substituted["stores"][store_name],
             runtime_config={
-                "root_directory" : self.root_directory,
+                "root_directory": self.root_directory,
             },
             config_defaults={
-                "module_name" : "great_expectations.data_context.store"
+                "module_name": "great_expectations.data_context.store"
             }
         )
         self._stores[store_name] = new_store
@@ -812,7 +813,10 @@ class ConfigOnlyDataContext(object):
             
     def list_expectation_suite_keys(self):
         """Return a list of available expectation suite keys."""
-        keys = self.stores[self.expectations_store_name].list_keys()
+        try:
+            keys = self.stores[self.expectations_store_name].list_keys()
+        except KeyError as e:
+            raise ge_exceptions.InvalidConfigError("Unable to find configured store: %s" % str(e))
         return keys
 
     def list_datasources(self):
@@ -1163,7 +1167,7 @@ class ConfigOnlyDataContext(object):
               expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]):
             # This is fine; short-circuit since we do not need to register any results from this dataset.
             return
-        
+
         for result in validation_results.results:
             # Unoptimized: loop over all results and check if each is needed
             expectation_type = result.expectation_config.expectation_type
@@ -1172,7 +1176,7 @@ class ConfigOnlyDataContext(object):
                 if (("column" in result.expectation_config.kwargs) and
                     ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]) and
                     (result.expectation_config.kwargs["column"] in
-                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
+                        self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
 
                     column = result.expectation_config.kwargs["column"]
                     # Now that we have a small search space, invert logic, and look for the parameters in our result
@@ -1180,12 +1184,36 @@ class ConfigOnlyDataContext(object):
                         # value here is the set of desired parameters under the type_key
                         for desired_param in desired_parameters:
                             desired_key = desired_param.split(":")[-1]
-                            if type_key == "result" and desired_key in result.result:
-                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
-                                    run_id, desired_param, result.result[desired_key])
-                            elif type_key == "details" and desired_key in result.result["details"]:
-                                self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
-                                    run_id, desired_param, result.result["details"])
+                            metric_id = ExpectationDefinedMetricIdentifier(
+                                run_id=run_id,
+                                data_asset_name=data_asset_name,
+                                expectation_suite_name=expectation_suite_name,
+                                expectation_type=expectation_type,
+                                metric_name=desired_key,
+                                metric_kwargs={
+                                    "column": column
+                                }
+                            )
+                            if desired_key in ["observed_value", "unexpected_count", "unexpected_percent"]:
+                                # if type_key == "result" and desired_key in result.result:
+                                try:
+                                    metric_value = result.result[desired_key]
+                                    self.evaluation_parameter_store.set(metric_id, metric_value)
+                                except KeyError:
+                                    logger.warning("Unable to locate metric %s: not found in expected validation "
+                                                   "result." % desired_key)
+                                # self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+                                #     run_id, desired_param, result.result[desired_key])
+                            # elif type_key == "details" and desired_key in result.result["details"]:
+                            elif desired_key in ["expected_partition", "observed_partition"]:
+                                try:
+                                    metric_value = result.result["details"][desired_key]
+                                    self.evaluation_parameter_store.set(metric_id, metric_value)
+                                except KeyError:
+                                    logger.warning("Unable to locate metric %s: not found in expected validation "
+                                                   "result." % desired_key)
+                                # self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+                                #     run_id, desired_param, result.result["details"])
                             else:
                                 logger.warning("Unrecognized key for parameter %s" % desired_param)
                 
@@ -1195,14 +1223,37 @@ class ConfigOnlyDataContext(object):
                         continue
                     for desired_param in desired_parameters:
                         desired_key = desired_param.split(":")[-1]
-                        if type_key == "result" and desired_key in result.result:
-                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
-                                run_id, desired_param, result.result[desired_key])
-                        elif type_key == "details" and desired_key in result.result["details"]:
-                            self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
-                                run_id, desired_param, result.result["details"])
-                        else:
-                            logger.warning("Unrecognized key for parameter %s" % desired_param)
+                        metric_id = ExpectationDefinedMetricIdentifier(
+                            run_id=run_id,
+                            data_asset_name=data_asset_name,
+                            expectation_suite_name=expectation_suite_name,
+                            expectation_type=expectation_type,
+                            metric_name=desired_key,
+                            metric_kwargs={}
+                        )
+                        if desired_key in ["observed_value", "unexpected_count", "unexpected_percent"]:
+                            if desired_key in ["observed_value", "unexpected_count", "unexpected_percent"]:
+                                # if type_key == "result" and desired_key in result.result:
+                                try:
+                                    metric_value = result.result[desired_key]
+                                    self.evaluation_parameter_store.set(metric_id, metric_value)
+                                except KeyError:
+                                    logger.warning("Unable to locate metric %s: not found in expected validation "
+                                                   "result." % desired_key)
+                                # self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+                                #     run_id, desired_param, result.result[desired_key])
+                            # elif type_key == "details" and desired_key in result.result["details"]:
+                            elif desired_key in ["expected_partition", "observed_partition"]:
+                                try:
+                                    metric_value = result.result["details"][desired_key]
+                                    self.evaluation_parameter_store.set(metric_id, metric_value)
+                                except KeyError:
+                                    logger.warning("Unable to locate metric %s: not found in expected validation "
+                                                   "result." % desired_key)
+                                # self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+                                #     run_id, desired_param, result.result["details"])
+                            else:
+                                logger.warning("Unrecognized key for parameter %s" % desired_param)
 
     @property
     def evaluation_parameter_store(self):
@@ -1220,36 +1271,36 @@ class ConfigOnlyDataContext(object):
     def validations_store(self):
         return self.stores[self.validations_store_name]
 
-    def set_parameters_in_evaluation_parameter_store_by_run_id_and_key(self, run_id, key, value):
-        """Store a new validation parameter.
-
-        Args:
-            run_id: current run_id
-            key: parameter key
-            value: parameter value
-
-        Returns:
-            None
-        """
-        run_params = self.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
-        run_params[key] = value
-        self.evaluation_parameter_store.set(run_id, run_params)
-
-    def get_parameters_in_evaluation_parameter_store_by_run_id(self, run_id):
-        """Fetches all validation parameters for a given run_id.
-
-        Args:
-            run_id: current run_id
-
-        Returns:
-            value stored in evaluation_parameter_store for the provided run_id and key
-        """
-        if self.evaluation_parameter_store.has_key(run_id):
-            return copy.deepcopy(
-                self.evaluation_parameter_store.get(run_id)
-            )
-        else:
-            return {}
+    # def set_parameters_in_evaluation_parameter_store_by_run_id_and_key(self, run_id, key, value):
+    #     """Store a new validation parameter.
+    #
+    #     Args:
+    #         run_id: current run_id
+    #         key: parameter key
+    #         value: parameter value
+    #
+    #     Returns:
+    #         None
+    #     """
+    #     run_params = self.get_parameters_in_evaluation_parameter_store_by_run_id(run_id)
+    #     run_params[key] = value
+    #     self.evaluation_parameter_store.set(run_id, run_params)
+    #
+    # def get_parameters_in_evaluation_parameter_store_by_run_id(self, run_id):
+    #     """Fetches all validation parameters for a given run_id.
+    #
+    #     Args:
+    #         run_id: current run_id
+    #
+    #     Returns:
+    #         value stored in evaluation_parameter_store for the provided run_id and key
+    #     """
+    #     if self.evaluation_parameter_store.has_key(run_id):
+    #         return copy.deepcopy(
+    #             self.evaluation_parameter_store.get(run_id)
+    #         )
+    #     else:
+    #         return {}
 
     #NOTE: Abe 2019/08/22 : Can we rename this to _compile_all_evaluation_parameters_from_expectation_suites, or something similar?
     # A more descriptive name would have helped me grok this faster when I first encountered it

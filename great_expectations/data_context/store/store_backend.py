@@ -11,7 +11,6 @@ from ..util import safe_mmkdir
 logger = logging.getLogger(__name__)
 
 # TODO : Add docstrings to these classes.
-# TODO : Implement S3StoreBackend with mocks and tests
 
 # NOTE : Abe 2019/08/30 : Currently, these classes behave as key-value stores.
 # We almost certainly want to extend that functionality to allow other operations
