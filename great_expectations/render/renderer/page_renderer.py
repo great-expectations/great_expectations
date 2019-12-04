@@ -121,6 +121,7 @@ class ValidationResultsPageRenderer(Renderer):
             "data_asset_name": data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": run_id + "-" + expectation_suite_name + "-ValidationResults",
+            "expectation_suite_name": expectation_suite_name,
             "sections": sections,
             "utm_medium": "validation-results-page",
         })

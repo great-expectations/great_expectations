@@ -1,0 +1,42 @@
+{% if full_data_asset_identifier %}
+  {% set identifier_list = full_data_asset_identifier.split("/") -%}
+{% endif %}
+
+{% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
+  {% set static_images_dir = "../../../../../static/images/" -%}
+{% elif utm_medium == "expectation-suite-page" %}
+  {% set static_images_dir = "../../../../static/images/" -%}
+{% elif utm_medium == "index-page" %}
+  {% set static_images_dir = "./static/images/" -%}
+{% endif %}
+
+{% set generator_asset_name = identifier_list[2] %}
+
+{% if renderer_type == "ExpectationSuitePageRenderer" %}
+  {% set expectation_suite_name = page_title %}
+{% endif %}
+{% if renderer_type == "ValidationResultPageRenderer" %}
+  {% set expectation_suite_name = expectation_suite_name %}
+{% endif %}
+
+<div class="modal fade ge-expectation-editing-instructions-modal" tabindex="-1" role="dialog" aria-labelledby="ge-expectation-editing-instructions-modal-title"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="ge-expectation-editing-instructions-modal-title">How to Edit This Expectation Suite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Expectations are best edited interactively w/ jupyter notebooks. There is a notebook already set up to do this!</p>
+        <p>To do this, run one of the following from the command line:</p>
+        <ul>
+          <li>Jupyter Notebook: <code>jupyter notebook "great_expectations/notebooks/{{ generator_asset_name }}_{{ expectation_suite_name }}.ipynb"</code></li>
+          <li>Jupyter Lab: <code>jupyter lab "great_expectations/notebooks/{{ generator_asset_name }}_{{ expectation_suite_name }}.ipynb"</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
