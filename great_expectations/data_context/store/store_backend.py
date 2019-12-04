@@ -311,7 +311,7 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
 
         safe_mmkdir(str(path))
         with open(filepath, "wb") as outfile:
-            if type(value) is bytes:
+            if isinstance(value, bytes):
                 outfile.write(value)
             else:
                 outfile.write(value.encode("utf-8"))
@@ -400,7 +400,7 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         import boto3
         s3 = boto3.resource('s3', **self._boto3_options)
         result_s3 = s3.Object(self.bucket, s3_object_key)
-        if type(value) is bytes:
+        if isinstance(value, bytes):
             result_s3.put(Body=value)
         else:
             result_s3.put(Body=value.encode(content_encoding), ContentEncoding=content_encoding, ContentType=content_type)
@@ -486,7 +486,7 @@ class FixedLengthTupleGCSStoreBackend(FixedLengthTupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
-        if type(value) is bytes:
+        if isinstance(value, bytes):
             blob.upload_from_string(value)
         else:
             blob.upload_from_string(value.encode(content_encoding), content_type=content_type)
