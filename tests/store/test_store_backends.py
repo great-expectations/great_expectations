@@ -267,7 +267,7 @@ def test_FixedLengthTupleGCSStoreBackend():
         mock_bucket = mock_client.get_bucket.return_value
         mock_blob = mock_bucket.blob.return_value
     
-        my_store_with_no_filepath_template.set(("AAA",), b"aaa", content_type="image/png")
+        my_store_with_no_filepath_template.set(("AAA",), b"aaa", content_encoding=None, content_type="image/png")
     
         mock_gcs_client.assert_called_once_with('dummy-project')
         mock_client.get_bucket.assert_called_once_with("leakybucket")
