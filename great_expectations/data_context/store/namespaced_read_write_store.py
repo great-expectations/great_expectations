@@ -1,6 +1,7 @@
 import logging
 
 import copy
+from mimetypes import guess_type
 import os
 
 from ..types.base_resource_identifiers import (
@@ -361,4 +362,10 @@ class HtmlSiteStore(NamespacedReadWriteStore):
                     # Only use path elements starting from static/ for key
                     store_key = tuple(os.path.normpath(source_name).split(os.sep))
                     store_key = store_key[store_key.index('static'):]
-                    self.store_backends["static_assets"].set(store_key, f.read(), is_file=True)
+                    content_type, content_encoding = guess_type(item, strict=False)
+                    self.store_backends["static_assets"].set(
+                        store_key,
+                        f.read(),
+                        content_encoding=content_encoding,
+                        content_type=content_type
+                    )
