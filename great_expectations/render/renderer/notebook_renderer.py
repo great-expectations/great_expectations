@@ -59,6 +59,7 @@ We'd love it if you **reach out for help on** the [**Great Expectations Slack Ch
             """\
 import os
 import json
+from datetime import datetime
 import great_expectations as ge
 import great_expectations.jupyter_ux"""
         )
@@ -84,7 +85,7 @@ If you decide not to save some expectations that you created, use [remove_expect
 
 The following method will save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project:"""
         )
-        self.add_code_cell("batch.save_expectation_suite()")
+        self.add_code_cell("batch.save_expectation_suite(discard_failed_expectations=False)")
         self.add_markdown_cell(
             """\
 ## 5. View the Expectations in Data Docs
@@ -94,13 +95,36 @@ Let's now build and look at your Data Docs. These will now include an **Expectat
         )
         self.add_code_cell(
             """\
-context.build_data_docs()
+# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
+run_id = datetime.utcnow().isoformat().replace(":", "") + "Z"
+
+results = context.run_validation_operator(
+    assets_to_validate=[batch],
+    run_id=run_id,
+    validation_operator_name="action_list_operator",
+)
 context.open_data_docs()"""
         )
 
-    def add_batch_cells(self, data_asset_name=None, suite_name=None):
-        """Add backend-specific batch cells."""
-        raise NotImplementedError
+    def add_batch_cells(self, data_asset_name, batch_kwargs, suite_name=None):
+        """Add backend-specific batch cells.
+        :param batch_kwargs:
+        """
+        self.add_markdown_cell(
+                """\
+## 2. Load a batch of data you want to use to create `Expectations`
+
+To learn more about batches and `get_batch`, see [this tutorial](https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html?utm_source=notebook&utm_medium=create_expectations#load-a-batch-of-data-to-create-expectations)"""
+            )
+
+        self.add_code_cell(
+            "batch_kwargs = " + str(batch_kwargs) + """   
+batch = context.get_batch(\""""
+            + str(data_asset_name)
+            + '", "'
+            + str(suite_name)
+            + '", batch_kwargs)'
+        )
 
     def add_code_cell(self, code):
         """
@@ -147,13 +171,17 @@ context.open_data_docs()"""
         with open(notebook_file_path, "w") as f:
             nbformat.write(notebook, f)
 
-    def render(self, suite):
+    def render(self, suite, batch_kwargs):
         """
         Render a notebook dict from an expectation suite.
         """
         if not isinstance(suite, NamespaceAwareExpectationSuite):
             raise RuntimeWarning(
                 "render must be given a NamespaceAwareExpectationSuite."
+            )
+        if not isinstance(batch_kwargs, dict):
+            raise RuntimeWarning(
+                "render must be given a dictionary of batch_kwargs."
             )
 
         self.notebook = nbformat.v4.new_notebook()
@@ -163,21 +191,22 @@ context.open_data_docs()"""
 
         # Compose the notebook sections from generic + backend-specific cells
         self.add_header(data_asset_name, suite_name)
-        self.add_batch_cells(data_asset_name, suite_name)
+        self.add_batch_cells(data_asset_name, batch_kwargs, suite_name)
         self.add_authoring_intro()
         self.add_expectation_cells_from_suite(suite.expectations)
         self.add_footer()
 
         return self.notebook
 
-    def render_to_disk(self, suite, notebook_file_path):
+    def render_to_disk(self, suite, batch_kwargs, notebook_file_path):
         """
         Render a notebook to disk from an expectation suite.
 
+        :param batch_kwargs:
         :type suite: dict
         :type notebook_file_path: str
         """
-        self.render(suite)
+        self.render(suite, batch_kwargs)
         self._write_notebook_to_disk(self.notebook, notebook_file_path)
 
     def add_authoring_intro(self):
@@ -192,23 +221,23 @@ You can also see available expectations by hovering over data elements in DataDo
         )
 
 
-class SQLNotebookRenderer(NotebookRenderer):
-    def add_batch_cells(self, data_asset_name=None, suite_name=None):
-        self.add_markdown_cell(
-            """\
-## 2. Load a batch of data you want to use to create `Expectations`
-
-To learn more about batches and `get_batch`, see [this tutorial](https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html?utm_source=notebook&utm_medium=create_expectations#load-a-batch-of-data-to-create-expectations)"""
-        )
-        table_name = data_asset_name.split("/")[-1]
-        self.add_code_cell(
-            """\
-batch_kwargs = {"query": "SELECT * FROM """
-            + table_name
-            + """\"}
-batch = context.get_batch(\""""
-            + str(data_asset_name)
-            + '", "'
-            + str(suite_name)
-            + '", batch_kwargs)'
-        )
+# class SQLNotebookRenderer(NotebookRenderer):
+#     def add_batch_cells(self, context, data_asset_name, suite_name=None):
+#         self.add_markdown_cell(
+#             """\
+# ## 2. Load a batch of data you want to use to create `Expectations`
+#
+# To learn more about batches and `get_batch`, see [this tutorial](https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html?utm_source=notebook&utm_medium=create_expectations#load-a-batch-of-data-to-create-expectations)"""
+#         )
+#         table_name = data_asset_name.split("/")[-1]
+#         self.add_code_cell(
+#             """\
+# batch_kwargs = {"query": "SELECT * FROM """
+#             + table_name
+#             + """\"}
+# batch = context.get_batch(\""""
+#             + str(data_asset_name)
+#             + '", "'
+#             + str(suite_name)
+#             + '", batch_kwargs)'
+#         )
