@@ -1,3 +1,4 @@
+import logging
 from six import integer_types
 
 from great_expectations.render.renderer.content_block.expectation_string import ExpectationStringRenderer
@@ -7,6 +8,8 @@ from great_expectations.render.util import num_to_str
 
 import pandas as pd
 import altair as alt
+
+logger = logging.getLogger(__name__)
 
 
 class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
@@ -278,7 +281,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         quantiles = evr.result["observed_value"]["quantiles"]
         value_ranges = evr.result["observed_value"]["values"]
 
-        table_header_row = ["Value"]
+        table_header_row = ["Quantile", "Value"]
         table_rows = []
 
         quantile_strings = {
@@ -307,10 +310,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _get_observed_value(cls, evr):
-        try:
-            result = evr.result
-        except KeyError:
-            return "--"
+        result = evr.result
 
         expectation_type = evr.expectation_config["expectation_type"]
 
@@ -358,11 +358,24 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             expectation_string_cell = expectation_string_fn(expectation, styling, include_column_name)
 
             status_cell = [cls._get_status_icon(evr)]
-            unexpected_statement = cls._get_unexpected_statement(evr)
-            unexpected_table = cls._get_unexpected_table(evr)
-            observed_value = [cls._get_observed_value(evr)]
+            unexpected_statement = None
+            unexpected_table = None
+            observed_value = ["--"]
+            
+            try:
+                unexpected_statement = cls._get_unexpected_statement(evr)
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+            try:
+                unexpected_table = cls._get_unexpected_table(evr)
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+            try:
+                observed_value = [cls._get_observed_value(evr)]
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
 
-            #If the expectation has some unexpected values...:
+            # If the expectation has some unexpected values...:
             if unexpected_statement or unexpected_table:
                 expectation_string_cell.append(unexpected_statement)
                 expectation_string_cell.append(unexpected_table)
