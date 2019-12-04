@@ -42,19 +42,21 @@ class SupportedDatabases(enum.Enum):
 
 
 def add_datasource(context):
-    msg_prompt_where_is_your_data = """\
+    msg_prompt_where_is_your_data = """
+What data would you like Great Expectations to connect to?    
     1. Files on a filesystem (for processing with Pandas or Spark)
     2. Relational database (SQL)
 """
 
-    msg_prompt_files_compute_engine = """What are you processing your files with?
+    msg_prompt_files_compute_engine = """
+What are you processing your files with?
     1. Pandas
     2. PySpark
 """
 
-    msg_success_datasource_added = "\n<green>Great Expectations connected to your data!</green>"
+    msg_success_database = "\n<green>Great Expectations connected to your database!</green>"
 
-    cli_message("\n<cyan>========== Where is your data? ===========</cyan>")
+    # cli_message("\n<cyan>========== Where is your data? ===========</cyan>")
     data_source_location_selection = click.prompt(
         msg_prompt_where_is_your_data,
         type=click.Choice(["1", "2"]),
@@ -85,8 +87,7 @@ def add_datasource(context):
     else:
         data_source_type = DatasourceTypes.SQL
         data_source_name = _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True)
-
-    cli_message(msg_success_datasource_added)
+        cli_message(msg_success_database)
 
     return data_source_name, data_source_type
 
@@ -100,7 +101,7 @@ def _add_pandas_datasource_with_in_memory_generator(context):
     :return:
     """
 
-    data_source_name = "pandas"
+    data_source_name = "files_datasource"
     # data_source_name = click.prompt(
     #     msg_prompt_datasource_name,
     #     default=data_source_name,
@@ -449,6 +450,7 @@ def create_sample_expectation_suite(
     context,
     data_source_name,
     additional_batch_kwargs=None,
+    show_intro_message=False,
     open_docs=False,
 ):
     """"Profile a named datasource using the specified context"""
@@ -466,7 +468,9 @@ def create_sample_expectation_suite(
 
     msg_data_doc_intro = """
 <cyan>========== Data Docs ==========</cyan>"""
-    cli_message(msg_intro)
+
+    if show_intro_message:
+        cli_message(msg_intro)
 
     batch_kwargs = None
     data_asset_name = None
@@ -519,7 +523,7 @@ def create_sample_expectation_suite(
     )
 
     if profiling_results['success']:  # data context is ready to profile
-        cli_message(msg_data_doc_intro)
+        # cli_message(msg_data_doc_intro)
         build_docs(context)
         if open_docs:  # This is mostly to keep tests from spawning windows
             context.open_data_docs()
@@ -531,16 +535,18 @@ def create_sample_expectation_suite(
 
 
 def _load_file_as_data_asset_from_pandas_datasource(context, data_source_name):
-    msg_prompt_filesys_enter_base_path = """Enter the path (relative or absolute) of a data file
+    msg_prompt_file_path = """
+Enter the path (relative or absolute) of a data file
 """
 
     msg_prompt_data_asset_name = """
 Give your new data asset a short name
 """
 
-    msg_prompt_file_type = """What is the format of the file?
+    msg_prompt_file_type = """
+What is the format of the file?
     1. CSV
-    2. Parguet
+    2. Parquet
     3. Excel
     4. JSON
 """
@@ -553,7 +559,7 @@ Give your new data asset a short name
     }
 
     path = click.prompt(
-        msg_prompt_filesys_enter_base_path,
+        msg_prompt_file_path,
         type=click.Path(
             exists=True,
             file_okay=True,

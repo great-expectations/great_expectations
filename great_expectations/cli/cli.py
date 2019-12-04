@@ -226,7 +226,7 @@ def init(target_directory, view):
             additional_batch_kwargs={"limit": 1000},
             open_docs=view,
         )
-        cli_message("""\n<cyan>Great Expectations is now set up in your project!</cyan>""")
+        cli_message("""\n<cyan>Great Expectations is now set up. Open the HTML file above.</cyan>""")
 
 def _slack_setup(context):
     webhook_url = None
