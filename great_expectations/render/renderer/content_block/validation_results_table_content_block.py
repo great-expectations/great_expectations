@@ -278,7 +278,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         quantiles = evr.result["observed_value"]["quantiles"]
         value_ranges = evr.result["observed_value"]["values"]
 
-        table_header_row = ["Value"]
+        table_header_row = ["Quantile", "Value"]
         table_rows = []
 
         quantile_strings = {
