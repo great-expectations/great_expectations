@@ -488,8 +488,12 @@ class FixedLengthTupleGCSStoreBackend(FixedLengthTupleStoreBackend):
         bucket = gcs.get_bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
         if isinstance(value, string_types):
-            blob.upload_from_string(value.encode(content_encoding), content_encoding=content_encoding,
-                                    content_type=content_type)
+            # Following try/except is to support py2, since both str and bytes objects pass above condition
+            try:
+                blob.upload_from_string(value.encode(content_encoding), content_encoding=content_encoding,
+                                        content_type=content_type)
+            except TypeError:
+                blob.upload_from_string(value, content_type=content_type)
         else:
             blob.upload_from_string(value, content_type=content_type)
         return gcs_object_key
