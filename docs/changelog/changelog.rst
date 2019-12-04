@@ -1,6 +1,10 @@
 .. _changelog:
 
 
+0.8.7__develop
+-----------------
+
+
 0.8.6
 -----------------
 * Raise informative error if config variables are declared but unavailable
