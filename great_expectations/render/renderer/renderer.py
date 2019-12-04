@@ -84,8 +84,8 @@ class Renderer(object):
     #TODO: When we implement an ExpectationSuite class, this method will move there.
     @classmethod
     def _group_and_order_expectations_by_column(cls, expectations):
-        # Group expectations by column
-        columns = {}
+        """Group expectations by column."""
+        expectations_by_column = {}
         ordered_columns = []
 
         for expectation in expectations.expectations:
@@ -93,9 +93,9 @@ class Renderer(object):
                 column = expectation.kwargs["column"]
             else:
                 column = "_nocolumn"
-            if column not in columns:
-                columns[column] = []
-            columns[column].append(expectation)
+            if column not in expectations_by_column:
+                expectations_by_column[column] = []
+            expectations_by_column[column].append(expectation)
 
             # if possible, get the order of columns from expect_table_columns_to_match_ordered_list
             if expectation.expectation_type == "expect_table_columns_to_match_ordered_list":
@@ -103,12 +103,12 @@ class Renderer(object):
                 if exp_column_list and len(exp_column_list) > 0:
                     ordered_columns = exp_column_list
 
-        # Group EVRs by column
-        sorted_columns = sorted(list(columns.keys()))
+        # Group items by column
+        sorted_columns = sorted(list(expectations_by_column.keys()))
 
         # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column
         # names from entire evr, else use alphabetic sort
         if set(sorted_columns) == set(ordered_columns):
-            return columns, ordered_columns
+            return expectations_by_column, ordered_columns
         else:
-            return columns, sorted_columns
+            return expectations_by_column, sorted_columns

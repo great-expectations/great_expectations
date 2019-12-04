@@ -150,7 +150,14 @@ def list_available_data_asset_names(context, data_source_name=None):
         for generator_info in generators:
             html += "generator: {0:s} ({1:s})".format(generator_info['name'], generator_info['class_name'])
             generator = ds.get_generator(generator_info['name'])
-            data_asset_names = sorted(generator.get_available_data_asset_names())
+
+            # TODO hacks to deal w/ inconsistent return types. Remove urgently
+            mystery_object = generator.get_available_data_asset_names()
+            if isinstance(mystery_object, dict) and "names" in mystery_object.keys():
+                data_asset_names = sorted([name[0] for name in mystery_object["names"]])
+            elif isinstance(mystery_object, list):
+                data_asset_names = sorted(mystery_object)
+
             if len(data_asset_names) > 0:
                 html += "<h3 style='margin: 0.2em 0'>Data Assets Found:</h3>"
                 html += styles

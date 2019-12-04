@@ -123,8 +123,9 @@ def convert_to_json_serializable(data):
         return convert_to_json_serializable(data.to_dict(orient='records'))
 
     elif isinstance(data, decimal.Decimal):
-        # FIXME: warn about lossy conversion here only when appropriate
-        logger.warning("Converting decimal %d to float object to support serialization. This may be lossy." % data)
+        if not (-1e-55 < decimal.Decimal.from_float(float(data)) - data < 1e-55):
+            logger.warning("Using lossy conversion for decimal %s to float object to support serialization." % str(
+                data))
         return float(data)
 
     else:

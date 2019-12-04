@@ -461,10 +461,9 @@ def create_sample_expectation_suite(
 """
 
     msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
-"""
+    """
 
-    msg_prompt_enter_data_asset_name = "Here are a few chunks of data - which would you like to use? " \
-        "Note you select multiple like this: 1,3\n"
+    msg_prompt_enter_data_asset_name = "Which data would you like to use? (Choose one)\n"
 
     msg_data_doc_intro = """
 <cyan>========== Data Docs ==========</cyan>"""
@@ -474,6 +473,7 @@ def create_sample_expectation_suite(
 
     batch_kwargs = None
     data_asset_name = None
+    data_assets = []
 
     #TODO: ["default"] is a hack. since we are running in init, it might be ok to assume that only default exists
     available_data_assets = context.get_available_data_asset_names(datasource_names=[data_source_name])[data_source_name]["default"]
@@ -481,9 +481,12 @@ def create_sample_expectation_suite(
     # print("Found {} datas".format(len(available_data_assets["names"])))
     available_data_asset_names = ["{} ({})".format(name[0], name[1]) for name in available_data_assets["names"]]
 
+    profiler = SampleExpectationsDatasetProfiler
+
     if len(available_data_asset_names) == 0:
         if "PandasDatasource" == type(context.get_datasource(data_source_name)).__name__:
             data_asset_name, batch_kwargs = _load_file_as_data_asset_from_pandas_datasource(context, data_source_name)
+            data_assets = [data_asset_name]
     else:
         choices = "\n".join(["    {}. {}".format(i, name) for i, name in enumerate(available_data_asset_names[:5], 1)])
         prompt = msg_prompt_enter_data_asset_name + choices + "\n"
@@ -510,6 +513,8 @@ def create_sample_expectation_suite(
         if len(data_assets) > 0:
             data_asset_name = data_assets[0]
 
+    cli_message("\nProfiling {0:s}...".format(data_assets[0]))
+
     # after getting the arguments from the user, let's try to run profiling again
     # (no dry run this time)
     profiling_results = context.profile_data_asset(
@@ -517,7 +522,7 @@ def create_sample_expectation_suite(
         generator_name=None,
         data_asset_name=data_asset_name,
         batch_kwargs=batch_kwargs,
-        profiler=SampleExpectationsDatasetProfiler,
+        profiler=profiler,
         run_id=datetime.datetime.now().isoformat().replace(":", "") + "Z",
         additional_batch_kwargs=additional_batch_kwargs
     )
@@ -533,6 +538,8 @@ def create_sample_expectation_suite(
     else:  # unknown error
         raise ValueError("Unknown profiling error code: " + profiling_results['error']['code'])
 
+    return data_assets, profiler, profiling_results
+
 
 def _load_file_as_data_asset_from_pandas_datasource(context, data_source_name):
     msg_prompt_file_path = """
@@ -544,7 +551,7 @@ Give your new data asset a short name
 """
 
     msg_prompt_file_type = """
-What is the format of the file?
+We could not determine the format of the file. What is it?
     1. CSV
     2. Parquet
     3. Excel
@@ -613,6 +620,9 @@ What is the format of the file?
 
 
     return (data_asset_name, batch_kwargs)
+
+    # TODO remove crap here
+    return data_assets, profiler, profiling_results
 
 
 def profile_datasource(
