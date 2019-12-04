@@ -1,7 +1,7 @@
 .. _changelog:
 
 
-0.8.6__develop
+0.8.6
 -----------------
 * Raise informative error if config variables are declared but unavailable
 * Update ExpectationsStore defaults to be consistent across all FixedLengthTupleStoreBackend objects
@@ -39,7 +39,7 @@
 * Allow configuration of known extensions and return more informative message when SubdirReaderGenerator cannot find
   relevant files.
 * Add support for allow_relative_error on internal dataset quantile functions, and add support for
-  build_continuous_partition_objec in Redshift
+  build_continuous_partition_object in Redshift
 * Fix truncated scroll bars in value_counts graphs
 
 
