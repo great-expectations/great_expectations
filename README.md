@@ -99,11 +99,14 @@ You can also test out profiling on your own data [here]().
 
 **Pluggable and extensible**
 
-Every component of the framework is designed to be extensible: Expectations, storage, profilers, renderers for documentation, actions taken after validation, etc.
+Every component of the framework is designed to be extensible: Expectations, storage, profilers, renderers for documentation, actions taken after validation, etc.  This design choice gives a lot of creative freedom to developers working with Great Expectations.
 
-We’ll be releasing “official” plugin libraries, and—more importantly—publishing guides on how to build and share your own. Many alpha users of the new framework are excited to share plugins. Each one takes a clever hack for thinking or communicating about data, and captures it in a tidy, shareable package.
+Recent extensions include:
+* [Renderers for data dictionaries](https://greatexpectations.io/blog/20191004_data_dictionary_plugin)
+* [BigQuery and GCS integration](https://github.com/great-expectations/great_expectations/pull/841)
+* [Notifications to MatterMost](https://github.com/great-expectations/great_expectations/issues/902)
 
-We're very excited to see what the data community comes up with once we make this capability widely available.
+We're very excited to see what other plugins the data community comes up with!
 
 Integrations
 -------------------------------------------------------------------------------
