@@ -23,11 +23,12 @@ Software developers have long known that testing and documentation are essential
 See [Down with Pipeline Debt!]() for an introduction to the philosophy of pipeline testing.
 
 
+<!--
 --------------------------------------------------
 <<<A bunch of logos go here for social proof>>>
 
 --------------------------------------------------
-
+-->
 
 Key features
 --------------------------------------------------
@@ -45,7 +46,9 @@ Expectations are assertions for data. They are the workhorse abstraction in Grea
 
 Expectations are [declarative, flexible and extensible](). To test out Expectations on your own data, check out the [<<step-1 tutorial>>]().
 
+<!--
 <<animated gif showing typing an Expectation in a notebook cell, running it, and getting an informative result>>
+-->
 
 **Full-stack data validation**
 
@@ -53,9 +56,13 @@ Expectations are a great start, but it takes more to get to production-ready dat
 
 Great Expectations supports all of these use cases out of the box. Instead of building these components for yourself over weeks or months, you will be able to add production-ready validation to your pipeline in a day. This “Expectations on rails” framework plays nice with other data engineering tools, respects your existing name spaces, and is designed for extensibility.
 
+<!--
 Check out [The Era of DIY Data Validation is Over]() for more details.
+-->
 
+<!--
 <<animated gif showing slack message, plus click through to validation results, a la: https://docs.google.com/presentation/d/1ZqFXsoOyW2KIkMBNij3c7KOM0RhajhAHKesdCL_BKHw/edit#slide=id.g6b0ff79464_0_183>>
+-->
 
 **Render tests to documentation**
 
@@ -63,26 +70,32 @@ Many data teams struggle to maintain up-to-date data documentation. Great Expect
 
 Since docs are rendered from tests, and tests are run against new data as it arrives, your documentation is guaranteed to never go stale. Additional renderers allow Great Expectations to generate other type of "documentataion", including [slack notifications](), [data dictionaries](), [customized notebooks](), etc.
 
+<!--
 <<Pic, similar to slide 32: https://docs.google.com/presentation/d/1ZqFXsoOyW2KIkMBNij3c7KOM0RhajhAHKesdCL_BKHw/edit#slide=id.g6af8c4cd70_0_38>>
 
 <<Pic, showing an Expectation that renders a graph>>
 
 Check out [Down with Documentation Rot!]() for more details.
+-->
 
 **Automated data profiling**
 
 Wouldn't it be great if your tests could write themselves? Run your data through one of Great Expectations' data profilers and it will automatically generate Expectations and data documentation. Profiling provides the double benefit of helping you explore data faster, and capturing knowledge for future documentation and testing.
 
+<!--
 <<<pretty pics of profiled data>>>
 <<<esp. multi-batch profiling>>>
+-->
 
 Automated profiling doesn't replace domain expertise---you will almost certainly tune and augment your auto-generated Expectations over time---but it's a great way to jump start the process of capturing and sharing domain knowledge across your team.
 
+<!--
 <<<Note: this feature is still in early beta. Expect changes.>>>
 
 Visit our gallery of expectations and documentation generated via automatic data profiling [here]().
 
 You can also test out profiling on your own data [here]().
+-->
 
 **Pluggable and extensible**
 
@@ -118,7 +131,7 @@ Great Expectations works with the tools and systems that you're already using wi
 	</tbody>
 </table>
 
-
+<!--
 Quick start
 -------------------------------------------------------------
 
@@ -134,6 +147,7 @@ Looking at production deployment? [Go here]()
 <<<More social proof: pics and quotes of power users>>>
 
 -------------------------------------------------------------
+-->
 
 What does Great Expectations _not_ do?
 -------------------------------------------------------------
