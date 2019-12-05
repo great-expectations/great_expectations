@@ -52,8 +52,7 @@ Use this notebook to recreate and modify your expectation suite for:
 - **Data Asset**: `{data_asset_name}`
 - **Expectation Suite Name**: `{suite_name}`
 
-We'd love it if you **reach out for help on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)
-"""
+We'd love it if you **reach out for help on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)"""
         )
         self.add_code_cell(
             """\
@@ -66,8 +65,7 @@ import great_expectations.jupyter_ux"""
         self.add_markdown_cell(
             """\
 ## 1. Get a DataContext
-This represents your **project** that you just created using `great_expectations init`. [Read more in the tutorial](https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html?utm_source=notebook&utm_medium=create_expectations#get-a-datacontext-object)
-        """
+This represents your **project** that you just created using `great_expectations init`. [Read more in the tutorial](https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html?utm_source=notebook&utm_medium=create_expectations#get-a-datacontext-object)"""
         )
         self.add_code_cell("context = ge.data_context.DataContext()")
 
@@ -75,8 +73,7 @@ This represents your **project** that you just created using `great_expectations
         self.add_markdown_cell(
             f"""## 4. Review and save your Expectations
 
-Expectations that are `True` on this data batch are added automatically. Let's view all the expectations you created in machine-readable JSON.
-        """
+Expectations that are `True` on this data batch are added automatically. Let's view all the expectations you created in machine-readable JSON."""
         )
         self.add_code_cell("batch.get_expectation_suite()")
         self.add_markdown_cell(
@@ -85,7 +82,11 @@ If you decide not to save some expectations that you created, use [remove_expect
 
 The following method will save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project:"""
         )
-        self.add_code_cell("batch.save_expectation_suite(discard_failed_expectations=False)")
+        # TODO this may become confusing for users depending on what they are trying
+        #  to accomplish in their dev loop
+        self.add_code_cell(
+            "batch.save_expectation_suite(discard_failed_expectations=False)"
+        )
         self.add_markdown_cell(
             """\
 ## 5. View the Expectations in Data Docs
@@ -112,23 +113,21 @@ context.open_data_docs()"""
         :param batch_kwargs:
         """
         self.add_markdown_cell(
-                """\
+            """\
 ## 2. Load a batch of data you want to use to create `Expectations`
 
 To learn more about batches and `get_batch`, see [this tutorial](https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html?utm_source=notebook&utm_medium=create_expectations#load-a-batch-of-data-to-create-expectations)"""
-            )
+        )
 
         # TODO such brittle hacks to fix paths for a demo
         if "path" in batch_kwargs.keys():
             batch_kwargs["path"] = "../../" + batch_kwargs["path"]
 
         self.add_code_cell(
-            "batch_kwargs = " + str(batch_kwargs) + """   
-batch = context.get_batch(\""""
-            + str(data_asset_name)
-            + '", "'
-            + str(suite_name)
-            + '", batch_kwargs)'
+            """\
+batch_kwargs = {}
+batch = context.get_batch("{}", "{}", batch_kwargs)\
+""".format(batch_kwargs, data_asset_name, suite_name)
         )
         self.add_markdown_cell("Let's glance at a bit of your data.")
         self.add_code_cell("batch.head()")
@@ -187,9 +186,7 @@ batch = context.get_batch(\""""
                 "render must be given a NamespaceAwareExpectationSuite."
             )
         if not isinstance(batch_kwargs, dict):
-            raise RuntimeWarning(
-                "render must be given a dictionary of batch_kwargs."
-            )
+            raise RuntimeWarning("render must be given a dictionary of batch_kwargs.")
 
         self.notebook = nbformat.v4.new_notebook()
 
