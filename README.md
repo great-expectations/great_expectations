@@ -133,14 +133,14 @@ Looking at production deployment? [Go here]()
 
 -------------------------------------------------------------
 
-What does Great Expectations NOT do?
+What does Great Expectations _not_ do?
 -------------------------------------------------------------
 
-**Great Expectations is NOT a pipeline execution framework.**
+**Great Expectations is _not_ a pipeline execution framework.**
 
 We aim to integrate seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), etc. We DON'T execute your pipelines for you.
 
-**Great Expectations is NOT a data versioning tool.**
+**Great Expectations is _not_ a data versioning tool.**
 	
 Great Expectations does not store data itself. Instead, it deals in metadata about data: Expectations, validation results, etc. If you want to bring your data itself under version control, check out tools like: [DVC](https://dvc.org/) and [Quilt](https://github.com/quiltdata/quilt).
 
