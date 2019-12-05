@@ -88,7 +88,7 @@ Wouldn't it be great if your tests could write themselves? Run your data through
 <<<esp. multi-batch profiling>>>
 -->
 
-Automated profiling doesn't replace domain expertise---you will almost certainly tune and augment your auto-generated Expectations over time---but it's a great way to jump start the process of capturing and sharing domain knowledge across your team.
+Automated profiling doesn't replace domain expertise&mdash;you will almost certainly tune and augment your auto-generated Expectations over time&mdash;but it's a great way to jump start the process of capturing and sharing domain knowledge across your team.
 
 <!--
 <<<Note: this feature is still in early beta. Expect changes.>>>
@@ -135,18 +135,24 @@ Great Expectations works with the tools and systems that you're already using wi
 	</tbody>
 </table>
 
-<!--
 Quick start
 -------------------------------------------------------------
 
-Still getting comfortable with the concept of Expectations? Try [our online browser]()
+To see Great Expectations in action on your own data:
 
-Ready to start working with Great Expectations?
+```
+    pip install great_expectations
+    great_expectations init
 
-`great expectations init`
+```
 
-Looking at production deployment? [Go here]()
+(We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](http://docs.greatexpectations.io/en/latest/reference/supporting_resources.html) will teach you how to get up and running in minutes before continuing.)
 
+For full documentation, visit [Great Expectations on readthedocs.io](http://great-expectations.readthedocs.io/en/latest/).
+
+If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there.
+
+<!--
 -------------------------------------------------------------
 <<<More social proof: pics and quotes of power users>>>
 
@@ -168,24 +174,6 @@ Great Expectations does not store data itself. Instead, it deals in metadata abo
 
 Following the philosophy of "take the compute to the data," Great Expectations currently supports [native execution of Expectations]() in three environments: pandas, SQL (through the SQLAlchemy core), and Spark. That said, all orchestration in Great Expectations is python-based. You can invoke it from the command line without using a python programming environment, but if you're working in another ecosystem, other tools might be a better choice. If you're running in a pure R environment, you might consider [assertR](https://github.com/ropensci/assertr) as an alternative. Within the Tensorflow ecosystem, [TFDV](https://www.tensorflow.org/tfx/guide/tfdv) fulfills a similar function as Great Expectations.
 
-
-How do I start?
---------------------------------------------------------------------------------
-
-To see Great Expectations in action on your own data:
-
-```
-    pip install great_expectations
-    great_expectations init
-
-```
-
-(We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](http://docs.greatexpectations.io/en/latest/reference/supporting_resources.html) will teach you how to get up and running in minutes before continuing.)
-
-
-For full documentation, visit [Great Expectations on readthedocs.io](http://great-expectations.readthedocs.io/en/latest/).
-
-If you need help, hop into our [Slack channel](https://greatexpectations.io/slack) - there are always contributors and other users there.
 
 How do I learn more?
 --------------------------------------------------------------------------------
