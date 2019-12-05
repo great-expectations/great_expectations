@@ -155,6 +155,7 @@ Looking at production deployment? [Go here]()
 <<<More social proof: pics and quotes of power users>>>
 
 -------------------------------------------------------------
+Liking what you see? Show some love and give us a star!
 -->
 
 What does Great Expectations _not_ do?
