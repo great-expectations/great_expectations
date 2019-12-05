@@ -118,6 +118,10 @@ context.open_data_docs()"""
 To learn more about batches and `get_batch`, see [this tutorial](https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html?utm_source=notebook&utm_medium=create_expectations#load-a-batch-of-data-to-create-expectations)"""
             )
 
+        # TODO such brittle hacks to fix paths for a demo
+        if "path" in batch_kwargs.keys():
+            batch_kwargs["path"] = "../../" + batch_kwargs["path"]
+
         self.add_code_cell(
             "batch_kwargs = " + str(batch_kwargs) + """   
 batch = context.get_batch(\""""
