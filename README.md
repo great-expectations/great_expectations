@@ -64,6 +64,7 @@ Check out [The Era of DIY Data Validation is Over]() for more details.
 <!--
 <<animated gif showing slack message, plus click through to validation results, a la: https://docs.google.com/presentation/d/1ZqFXsoOyW2KIkMBNij3c7KOM0RhajhAHKesdCL_BKHw/edit#slide=id.g6b0ff79464_0_183>>
 -->
+![ooooo ahhhh](./readme_assets/terminal.gif)
 
 **Tests are docs and docs are tests**
 
@@ -78,6 +79,8 @@ Since docs are rendered from tests, and tests are run against new data as it arr
 
 Check out [Down with Documentation Rot!]() for more details.
 -->
+![Your tests are your docs and your docs are your tests](./readme_assets/test-are-docs.jpg)
+
 
 **Automated data profiling**
 
@@ -87,6 +90,7 @@ Wouldn't it be great if your tests could write themselves? Run your data through
 <<<pretty pics of profiled data>>>
 <<<esp. multi-batch profiling>>>
 -->
+![ooooo ahhhh](./readme_assets/datadocs.gif)
 
 Automated profiling doesn't replace domain expertise&mdash;you will almost certainly tune and augment your auto-generated Expectations over time&mdash;but it's a great way to jump start the process of capturing and sharing domain knowledge across your team.
 
@@ -158,6 +162,26 @@ Great Expectations works with the tools and systems that you're already using wi
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://cdn.brandfolder.io/5H442O3W/as/pl546j-7le8zk-5guop3/Slack_RGB.png" />            </td><td style="width: 200px;">Slack                    </td><td> Get automatic data quality notifications!</td></tr>
 	</tbody>
 </table>
+
+
+<!--
+Quick start
+-------------------------------------------------------------
+
+Still getting comfortable with the concept of Expectations? Try [our online browser]()
+
+Ready to start working with Great Expectations?
+
+`great expectations init`
+
+Looking at production deployment? [Go here]()
+
+-------------------------------------------------------------
+<<<More social proof: pics and quotes of power users>>>
+
+-------------------------------------------------------------
+Liking what you see? Show some love and give us a star!
+-->
 
 
 What does Great Expectations _not_ do?
