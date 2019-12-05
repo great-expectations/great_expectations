@@ -20,7 +20,7 @@ Great Expectations helps data teams eliminate pipeline debt, through data testin
 
 Software developers have long known that testing and documentation are essential for managing complex codebases. Great Expectations brings the same confidence, integrity, and acceleration to data science and data engineering teams.
 
-See [Down with Pipeline Debt!]() for an introduction to the philosophy of pipeline testing.
+See [Down with Pipeline Debt!](https://medium.com/@expectgreatdata/down-with-pipeline-debt-introducing-great-expectations-862ddc46782a) for an introduction to the philosophy of pipeline testing.
 
 
 <!--
