@@ -64,6 +64,7 @@ Check out [The Era of DIY Data Validation is Over]() for more details.
 <!--
 <<animated gif showing slack message, plus click through to validation results, a la: https://docs.google.com/presentation/d/1ZqFXsoOyW2KIkMBNij3c7KOM0RhajhAHKesdCL_BKHw/edit#slide=id.g6b0ff79464_0_183>>
 -->
+![ooooo ahhhh](./readme_assets/terminal.gif)
 
 **Tests are docs and docs are tests**
 
@@ -78,6 +79,8 @@ Since docs are rendered from tests, and tests are run against new data as it arr
 
 Check out [Down with Documentation Rot!]() for more details.
 -->
+![Your tests are your docs and your docs are your tests](./readme_assets/test-are-docs.jpg)
+
 
 **Automated data profiling**
 
@@ -87,6 +90,7 @@ Wouldn't it be great if your tests could write themselves? Run your data through
 <<<pretty pics of profiled data>>>
 <<<esp. multi-batch profiling>>>
 -->
+![ooooo ahhhh](./readme_assets/datadocs.gif)
 
 Automated profiling doesn't replace domain expertise---you will almost certainly tune and augment your auto-generated Expectations over time---but it's a great way to jump start the process of capturing and sharing domain knowledge across your team.
 
