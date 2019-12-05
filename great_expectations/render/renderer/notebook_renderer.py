@@ -103,6 +103,7 @@ results = context.run_validation_operator(
     run_id=run_id,
     validation_operator_name="action_list_operator",
 )
+context.build_data_docs()
 context.open_data_docs()"""
         )
 
