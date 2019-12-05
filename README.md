@@ -48,6 +48,7 @@ Expectations are [declarative, flexible and extensible](). To test out Expectati
 <<animated gif showing typing an Expectation in a notebook cell, running it, and getting an informative result>>
 
 **Full-stack data validation**
+
 Expectations are a great start, but it takes more to get to production-ready data validation. Where are Expectations stored? How do they get updated? How do you securely connect to production data systems? How do you notify team members and triage when data validation fails?
 
 Great Expectations supports all of these use cases out of the box. Instead of building these components for yourself over weeks or months, you will be able to add production-ready validation to your pipeline in a day. This “Expectations on rails” framework plays nice with other data engineering tools, respects your existing name spaces, and is designed for extensibility.
@@ -57,6 +58,7 @@ Check out [The Era of DIY Data Validation is Over]() for more details.
 <<animated gif showing slack message, plus click through to validation results, a la: https://docs.google.com/presentation/d/1ZqFXsoOyW2KIkMBNij3c7KOM0RhajhAHKesdCL_BKHw/edit#slide=id.g6b0ff79464_0_183>>
 
 **Render tests to documentation**
+
 Many data teams struggle to maintain up-to-date data documentation. Great Expectations solves this problem by rendering Expectations directly into clean, human-readable documentation. 
 
 Since docs are rendered from tests, and tests are run against new data as it arrives, your documentation is guaranteed to never go stale. Additional renderers allow Great Expectations to generate other type of "documentataion", including [slack notifications](), [data dictionaries](), [customized notebooks](), etc.
