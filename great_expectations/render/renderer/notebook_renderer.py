@@ -130,6 +130,8 @@ batch = context.get_batch(\""""
             + str(suite_name)
             + '", batch_kwargs)'
         )
+        self.add_markdown_cell("Let's glance at a bit of your data.")
+        self.add_code_cell("batch.head()")
 
     def add_code_cell(self, code):
         """
