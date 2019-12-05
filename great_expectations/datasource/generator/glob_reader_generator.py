@@ -51,7 +51,8 @@ class GlobReaderGenerator(BatchGenerator):
                  datasource=None,
                  base_directory="/data",
                  reader_options=None,
-                 asset_globs=None):
+                 asset_globs=None,
+                 reader_method=None):
         logger.debug("Constructing GlobReaderGenerator {!r}".format(name))
         super(GlobReaderGenerator, self).__init__(name, datasource=datasource)
         if reader_options is None:
@@ -69,6 +70,7 @@ class GlobReaderGenerator(BatchGenerator):
         self._base_directory = base_directory
         self._reader_options = reader_options
         self._asset_globs = asset_globs
+        self._reader_method = reader_method
 
     @property
     def reader_options(self):
@@ -77,6 +79,10 @@ class GlobReaderGenerator(BatchGenerator):
     @property
     def asset_globs(self):
         return self._asset_globs
+
+    @property
+    def reader_method(self):
+        return self._reader_method
 
     @property
     def base_directory(self):
@@ -188,6 +194,9 @@ class GlobReaderGenerator(BatchGenerator):
 
         if limit is not None:
             batch_kwargs['limit'] = limit
+
+        if self.reader_method is not None:
+            batch_kwargs['reader_method'] = self.reader_method
 
         return batch_kwargs
 
