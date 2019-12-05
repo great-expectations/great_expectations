@@ -44,7 +44,8 @@ Expectations are assertions for data. They are the workhorse abstraction in Grea
 - `expect_column_median_to_be_between`
 - ...and [many more](https://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html)
 
-Expectations are [declarative, flexible and extensible](). To test out Expectations on your own data, check out the [<<step-1 tutorial>>]().
+Expectations are <!--[declarative, flexible and extensible]()--> declarative, flexible and extensible.
+<!--To test out Expectations on your own data, check out the [<<step-1 tutorial>>]().-->
 
 <!--
 <<animated gif showing typing an Expectation in a notebook cell, running it, and getting an informative result>>
@@ -68,7 +69,7 @@ Check out [The Era of DIY Data Validation is Over]() for more details.
 
 Many data teams struggle to maintain up-to-date data documentation. Great Expectations solves this problem by rendering Expectations directly into clean, human-readable documentation. 
 
-Since docs are rendered from tests, and tests are run against new data as it arrives, your documentation is guaranteed to never go stale. Additional renderers allow Great Expectations to generate other type of "documentataion", including [slack notifications](), [data dictionaries](), [customized notebooks](), etc.
+Since docs are rendered from tests, and tests are run against new data as it arrives, your documentation is guaranteed to never go stale. Additional renderers allow Great Expectations to generate other type of "documentation", including <!--[slack notifications](), [data dictionaries](), [customized notebooks]()--> slack notifications, data dictionaries, customized notebooks, etc.
 
 <!--
 <<Pic, similar to slide 32: https://docs.google.com/presentation/d/1ZqFXsoOyW2KIkMBNij3c7KOM0RhajhAHKesdCL_BKHw/edit#slide=id.g6af8c4cd70_0_38>>
