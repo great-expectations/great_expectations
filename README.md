@@ -51,7 +51,7 @@ Expectations are <!--[declarative, flexible and extensible]()--> declarative, fl
 <<animated gif showing typing an Expectation in a notebook cell, running it, and getting an informative result>>
 -->
 
-**Full-stack data validation**
+**Batteries-included data validation**
 
 Expectations are a great start, but it takes more to get to production-ready data validation. Where are Expectations stored? How do they get updated? How do you securely connect to production data systems? How do you notify team members and triage when data validation fails?
 
