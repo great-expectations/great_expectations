@@ -16,7 +16,7 @@ Great Expectations
 Introduction
 --------------------------------------------------------------------------------
 
-Great Expectations helps data teams eliminate technical debt, through data testing, documentation, and profiling.
+Great Expectations helps data teams eliminate pipeline debt, through data testing, documentation, and profiling.
 
 Software developers have long known that testing and documentation are essential for managing complex codebases. Great Expectations brings the same confidence, integrity, and acceleration to data science and data engineering teams.
 
