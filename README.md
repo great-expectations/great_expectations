@@ -132,7 +132,7 @@ If you need help, hop into our [Slack channel](https://greatexpectations.io/slac
 
 -------------------------------------------------------------
 -->
-s
+
 Integrations
 -------------------------------------------------------------------------------
 Great Expectations works with the tools and systems that you're already using with your data, including:
