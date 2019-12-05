@@ -65,7 +65,7 @@ Check out [The Era of DIY Data Validation is Over]() for more details.
 <<animated gif showing slack message, plus click through to validation results, a la: https://docs.google.com/presentation/d/1ZqFXsoOyW2KIkMBNij3c7KOM0RhajhAHKesdCL_BKHw/edit#slide=id.g6b0ff79464_0_183>>
 -->
 
-**Render tests to documentation**
+**Tests are docs and docs are tests**
 
 Many data teams struggle to maintain up-to-date data documentation. Great Expectations solves this problem by rendering Expectations directly into clean, human-readable documentation. 
 
