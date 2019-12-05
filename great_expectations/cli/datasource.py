@@ -463,7 +463,7 @@ def create_sample_expectation_suite(
     msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
     """
 
-    msg_prompt_enter_data_asset_name = "Which data would you like to use? (Choose one)\n"
+    msg_prompt_enter_data_asset_name = "\nWhich data would you like to use? (Choose one)\n"
 
     msg_data_doc_intro = """
 <cyan>========== Data Docs ==========</cyan>"""
