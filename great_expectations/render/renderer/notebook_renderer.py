@@ -47,7 +47,7 @@ class NotebookRenderer(Renderer):
     def add_header(self, data_asset_name=None, suite_name=None):
         # TODO better wording in the intro cells
         self.add_markdown_cell(
-            f"""# Create & Edit Expectation Suite
+            f"""# Edit the Scaffolded Expectation Suite
 Use this notebook to recreate and modify your expectation suite for:
 - **Data Asset**: `{data_asset_name}`
 - **Expectation Suite Name**: `{suite_name}`
@@ -69,18 +69,31 @@ This represents your **project** that you just created using `great_expectations
         )
         self.add_code_cell("context = ge.data_context.DataContext()")
 
-    def add_footer(self):
-        self.add_markdown_cell(
-            f"""## 4. Review and save your Expectations
-
-Expectations that are `True` on this data batch are added automatically. Let's view all the expectations you created in machine-readable JSON."""
-        )
-        self.add_code_cell("batch.get_expectation_suite()")
         self.add_markdown_cell(
             """\
-If you decide not to save some expectations that you created, use [remove_expectaton method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=create_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation). You can also choose to include expectations that were `False` on this batch using the .
+## 2. Optional: Rename your Expectation Suite
 
-The following method will save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project:"""
+We recommend naming your first expectation suite for a table `warning`. Later, \
+as you identify some of the expectations that you add to this suite as \
+critical, you can move these expectations into another suite and call it \
+`failure`.
+""")
+        self.add_code_cell(
+            """\
+expectation_suite_name = "{}" # TODO: replace with your value!
+context.create_expectation_suite(data_asset_name="{}", expectation_suite_name=expectation_suite_name, overwrite_existing=True);""".format(suite_name, data_asset_name)
+       )
+
+    def add_footer(self):
+        self.add_markdown_cell(
+            """\
+## 5. Save your Expectations
+
+Run the next cell to save the expectation suite as a JSON file in the \
+`great_expectations/expectations` directory of your project.
+If you decide not to save some expectations that you created, use \
+[remove_expectaton method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation). \
+"""
         )
         # TODO this may become confusing for users depending on what they are trying
         #  to accomplish in their dev loop
@@ -89,10 +102,9 @@ The following method will save the expectation suite as a JSON file in the `grea
         )
         self.add_markdown_cell(
             """\
-## 5. View the Expectations in Data Docs
+## 6. Review your changes in Data Docs
 
-Let's now build and look at your Data Docs. These will now include an **Expectation Suite Overview** built from the expectations you just created that helps you communicate about your data with both machines and humans.
-"""
+Let's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans."""
         )
         self.add_code_cell(
             """\
@@ -114,23 +126,23 @@ context.open_data_docs()"""
         """
         self.add_markdown_cell(
             """\
-## 2. Load a batch of data you want to use to create `Expectations`
+## 3. Load a batch of data you want to use to create `Expectations`
 
-To learn more about batches and `get_batch`, see [this tutorial](https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html?utm_source=notebook&utm_medium=create_expectations#load-a-batch-of-data-to-create-expectations)"""
+To learn more about batches and `get_batch`, see [this tutorial](https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html?utm_source=notebook&utm_medium=create_expectations#load-a-batch-of-data-to-create-expectations)
+Let's glance at a bit of your data."""
         )
 
         # TODO such brittle hacks to fix paths for a demo
         if "path" in batch_kwargs.keys():
             batch_kwargs["path"] = "../../" + batch_kwargs["path"]
 
+        # TODO caution about the .head() showing data that could be committed.
         self.add_code_cell(
             """\
 batch_kwargs = {}
-batch = context.get_batch("{}", "{}", batch_kwargs)\
-""".format(batch_kwargs, data_asset_name, suite_name)
+batch = context.get_batch("{}", expectation_suite_name, batch_kwargs)
+batch.head()""".format(batch_kwargs, data_asset_name)
         )
-        self.add_markdown_cell("Let's glance at a bit of your data.")
-        self.add_code_cell("batch.head()")
 
     def add_code_cell(self, code):
         """
