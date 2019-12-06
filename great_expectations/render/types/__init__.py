@@ -202,6 +202,7 @@ class TextContent(RenderedComponentContent):
 
     def to_json_dict(self):
         d = super(TextContent, self).to_json_dict()
+
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
                 d["header"] = self.header.to_json_dict()
@@ -212,7 +213,8 @@ class TextContent(RenderedComponentContent):
                 d["subheader"] = self.subheader.to_json_dict()
             else:
                 d["subheader"] = self.subheader
-        d["text"] = self.text
+        d["text"] = RenderedContent.rendered_content_list_to_json(self.text)
+
         return d
 
 
