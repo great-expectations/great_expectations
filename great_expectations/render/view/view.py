@@ -15,6 +15,7 @@ from jinja2 import (
     select_autoescape,
     contextfilter
 )
+import pypandoc
 
 from great_expectations import __version__ as ge_version
 from great_expectations.render.types import (
@@ -97,6 +98,7 @@ class DefaultJinjaView(object):
         env.filters['render_styling_from_string_template'] = self.render_styling_from_string_template
         env.filters['render_styling'] = self.render_styling
         env.filters['render_content_block'] = self.render_content_block
+        env.filters['render_markdown'] = self.render_markdown
         env.globals['ge_version'] = ge_version
 
         template = env.get_template(template)
@@ -127,6 +129,7 @@ class DefaultJinjaView(object):
         return template.render(context, content_block=content_block, index=index)
 
     def render_styling(self, styling):
+        
         """Adds styling information suitable for an html tag.
 
         Example styling block::
@@ -197,6 +200,12 @@ class DefaultJinjaView(object):
     
         else:
             return ""
+
+    def render_markdown(self, markdown):
+        try:
+            return pypandoc.convert_text(markdown, format="md", to="html")
+        except OSError:
+            return markdown
 
     def render_string_template(self, template):
         #NOTE: Using this line for debugging. This should probably be logged...? 
