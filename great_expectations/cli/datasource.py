@@ -397,13 +397,13 @@ def _collect_redshift_credentials(default_credentials={}):
                         default=default_credentials.get("port", "5439"),
                         show_default=True)
     credentials["username"] = click.prompt("What is the username for the Redshift connection?",
-                            default=default_credentials.get("username", "postgres"),
+                            default=default_credentials.get("username", ""),
                             show_default=True)
     credentials["password"] = click.prompt("What is the password for the Redshift connection?",
                             default="",
                             show_default=False, hide_input=True)
     credentials["database"] = click.prompt("What is the database name for the Redshift connection?",
-                            default=default_credentials.get("database", "postgres"),
+                            default=default_credentials.get("database", ""),
                             show_default=True)
 
     # optional
@@ -465,6 +465,13 @@ def create_sample_expectation_suite(
 
     msg_prompt_enter_data_asset_name = "\nWhich data would you like to use? (Choose one)\n"
 
+    msg_prompt_what_will_profiler_do = """
+The profiler will choose a couple of columns and generate expectations about them.
+This will show you some examples of assertions you can make about your data using Great Expectations. 
+    
+Press any key to continue...
+    """
+
     msg_data_doc_intro = """
 <cyan>========== Data Docs ==========</cyan>"""
 
@@ -512,6 +519,8 @@ def create_sample_expectation_suite(
 
         if len(data_assets) > 0:
             data_asset_name = data_assets[0]
+
+    click.prompt(msg_prompt_what_will_profiler_do, default="Enter", hide_input=True)
 
     cli_message("\nProfiling {0:s}...".format(data_assets[0]))
 
