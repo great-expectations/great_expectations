@@ -247,6 +247,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
   - Please check your environment and the configuration you provided.
   - Database Error: {0:s}"""
         try:
+            cli_message("<cyan>Attempting to connect to your database. This may take a moment...</cyan>")
             configuration = SqlAlchemyDatasource.build_configuration(credentials="${" + data_source_name + "}")
             context.add_datasource(name=data_source_name, class_name='SqlAlchemyDatasource', **configuration)
             break
@@ -273,10 +274,11 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                                            }
                                        }
                                        )
+                # TODO this message about continuing may not be accurate
                 cli_message(
                     """
 We saved datasource {0:s} in {1:s} and the credentials you entered in {2:s}.
-Since we could not connect to the database, you can complete troubleshooting in the configuration files. Read here:
+Since we could not connect to the database, you can complete troubleshooting in the configuration files documented here:
 <blue>https://docs.greatexpectations.io/en/latest/tutorials/add-sqlalchemy-datasource.html?utm_source=cli&utm_medium=init&utm_campaign={3:s}#{4:s}</blue> .
 
 After you connect to the datasource, run great_expectations profile to continue.
@@ -292,19 +294,19 @@ def _collect_postgres_credentials(default_credentials={}):
         "drivername": "postgres"
     }
 
-    credentials["host"] = click.prompt("What is the host for the sqlalchemy connection?",
+    credentials["host"] = click.prompt("What is the host for the postgres connection?",
                         default=default_credentials.get("host", "localhost"),
                         show_default=True)
-    credentials["port"] = click.prompt("What is the port for the sqlalchemy connection?",
+    credentials["port"] = click.prompt("What is the port for the postgres connection?",
                         default=default_credentials.get("port", "5432"),
                         show_default=True)
-    credentials["username"] = click.prompt("What is the username for the sqlalchemy connection?",
+    credentials["username"] = click.prompt("What is the username for the postgres connection?",
                             default=default_credentials.get("username", "postgres"),
                             show_default=True)
-    credentials["password"] = click.prompt("What is the password for the sqlalchemy connection?",
+    credentials["password"] = click.prompt("What is the password for the postgres connection?",
                             default="",
                             show_default=False, hide_input=True)
-    credentials["database"] = click.prompt("What is the database name for the sqlalchemy connection?",
+    credentials["database"] = click.prompt("What is the database name for the postgres connection?",
                             default=default_credentials.get("database", "postgres"),
                             show_default=True)
 
