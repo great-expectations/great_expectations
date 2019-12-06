@@ -397,13 +397,13 @@ def _collect_redshift_credentials(default_credentials={}):
                         default=default_credentials.get("port", "5439"),
                         show_default=True)
     credentials["username"] = click.prompt("What is the username for the Redshift connection?",
-                            default=default_credentials.get("username", "postgres"),
+                            default=default_credentials.get("username", ""),
                             show_default=True)
     credentials["password"] = click.prompt("What is the password for the Redshift connection?",
                             default="",
                             show_default=False, hide_input=True)
     credentials["database"] = click.prompt("What is the database name for the Redshift connection?",
-                            default=default_credentials.get("database", "postgres"),
+                            default=default_credentials.get("database", ""),
                             show_default=True)
 
     # optional
