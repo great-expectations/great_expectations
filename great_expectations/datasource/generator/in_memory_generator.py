@@ -22,7 +22,7 @@ class InMemoryGenerator(BatchGenerator):
         return {"names": []}
 
     def get_available_partition_ids(self, generator_asset):
-        logger.warning(
+        logger.debug(
             "InMemoryGenerator cannot identify partition_ids, but can accept partition_id together with a valid GE "
             "object."
         )
