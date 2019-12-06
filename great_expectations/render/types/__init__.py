@@ -103,6 +103,17 @@ class RenderedTableContent(RenderedComponentContent):
         return d
 
 
+class RenderedMarkdownContent(RenderedComponentContent):
+    def __init__(self, markdown, styling=None, content_block_type="markdown"):
+        super(RenderedMarkdownContent, self).__init__(content_block_type=content_block_type, styling=styling)
+        self.markdown = markdown
+
+    def to_json_dict(self):
+        d = super(RenderedMarkdownContent, self).to_json_dict()
+        d["markdown"] = self.markdown
+        return d
+
+
 class RenderedStringTemplateContent(RenderedComponentContent):
     def __init__(self, string_template, styling=None, content_block_type="string_template"):
         super(RenderedStringTemplateContent, self).__init__(content_block_type=content_block_type, styling=styling)
@@ -142,15 +153,19 @@ class ValueListContent(RenderedComponentContent):
 
 
 class TextContent(RenderedComponentContent):
-    def __init__(self, text, header=None, styling=None, content_block_type="text"):
+    def __init__(self, text, header=None, subheader=None, styling=None, content_block_type="text"):
         super(TextContent, self).__init__(content_block_type=content_block_type, styling=styling)
         self.text = text
         self.header = header
+        self.subheader = subheader
 
     def to_json_dict(self):
         d = super(TextContent, self).to_json_dict()
-        d["header"] = self.header
-        d["text"] = self.text
+        if self.header is not None:
+            d["header"] = self.header
+        if self.subheader is not None:
+            d["subheader"] = self.subheader
+        d["text"] = RenderedContent.rendered_content_list_to_json(self.text)
         return d
 
 
