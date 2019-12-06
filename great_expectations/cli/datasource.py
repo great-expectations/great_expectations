@@ -283,7 +283,7 @@ Since we could not connect to the database, you can complete troubleshooting in 
 
 After you connect to the datasource, run great_expectations profile to continue.
 
-""".format(data_source_name, DataContext.GE_YML, context.get_project_config().get("config_variables_file_path"), rtd_url_ge_version, selected_database.value.lower()))
+""".format(data_source_name, DataContext.GE_YML, context.get_project_config()["config_variables_file_path"], rtd_url_ge_version, selected_database.value.lower()))
                 return None
 
     return data_source_name
@@ -468,8 +468,8 @@ def create_sample_expectation_suite(
     msg_prompt_enter_data_asset_name = "\nWhich data would you like to use? (Choose one)\n"
 
     msg_prompt_what_will_profiler_do = """
-The profiler will choose a couple of columns and generate expectations about them.
-This will show you some examples of assertions you can make about your data using Great Expectations. 
+Great Expectations will choose a couple of columns and generate expectations about them
+to demonstrate some examples of assertions you can make about your data. 
     
 Press any key to continue...
     """
