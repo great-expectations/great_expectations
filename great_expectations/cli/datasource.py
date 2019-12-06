@@ -466,8 +466,8 @@ def create_sample_expectation_suite(
     msg_prompt_enter_data_asset_name = "\nWhich data would you like to use? (Choose one)\n"
 
     msg_prompt_what_will_profiler_do = """
-The profiler will choose a couple of columns and generate expectations about them.
-This will show you some examples of assertions you can make about your data using Great Expectations. 
+Great Expectations will choose a couple of columns and generate expectations about them
+to demonstrate some examples of assertions you can make about your data. 
     
 Press any key to continue...
     """
