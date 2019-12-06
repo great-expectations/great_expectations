@@ -13,7 +13,12 @@ from .renderer import Renderer
 from ..types import (
     RenderedDocumentContent,
     RenderedSectionContent,
-    RenderedHeaderContent, RenderedTableContent, TextContent, RenderedStringTemplateContent)
+    RenderedHeaderContent,
+    RenderedTableContent,
+    TextContent,
+    RenderedStringTemplateContent,
+    RenderedMarkdownContent
+)
 from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
@@ -488,24 +493,30 @@ class ExpectationSuitePageRenderer(Renderer):
                             logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
                     
                     elif notes["format"] == "markdown":
-                        # ???: Should converting to markdown be the renderer's job, or the view's job?
-                        # Renderer is easier, but will end up mixing HTML strings with content_block info.
                         if isinstance(notes["content"], string_types):
-                            try:
-                                note_content = [pypandoc.convert_text(notes["content"], format='md', to="html")]
-                            except OSError:
-                                note_content = [notes["content"]]
-                        
+                            note_content = [
+                                RenderedMarkdownContent(**{
+                                    "content_block_type": "markdown",
+                                    "markdown": notes["content"],
+                                    "styling": {
+                                        "parent": {
+                                        }
+                                    }
+                                })
+                            ]
                         elif isinstance(notes["content"], list):
-                            try:
-                                note_content = [pypandoc.convert_text(note, format='md', to="html") for note in
-                                            notes["content"]]
-                            except OSError:
-                                note_content = [note for note in notes["content"]]
-                        
+                            note_content = [
+                                RenderedMarkdownContent(**{
+                                    "content_block_type": "markdown",
+                                    "markdown": note,
+                                    "styling": {
+                                        "parent": {
+                                        }
+                                    }
+                                }) for note in notes["content"]
+                            ]
                         else:
                             logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
-                
                 else:
                     logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
             
