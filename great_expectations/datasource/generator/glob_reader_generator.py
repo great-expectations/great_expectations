@@ -40,6 +40,7 @@ class GlobReaderGenerator(BatchGenerator):
               reader_options:
                 sep: %
                 header: 0
+              reader_method: csv
               asset_globs:
                 wifi_logs:
                   glob: wifi*.log
