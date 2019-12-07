@@ -1,4 +1,5 @@
 from great_expectations.core import ExpectationSuiteValidationResultSchema
+from great_expectations.data_context.store import DatabaseStoreBackend
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.fixed_length_tuple_store_backend import FixedLengthTupleStoreBackend
 from great_expectations.data_context.types import ValidationResultIdentifier
@@ -20,7 +21,18 @@ class ValidationsStore(Store):
                 # Provide defaults for this common case
                 store_backend["key_length"] = store_backend.get("key_length", 5)
                 store_backend["filepath_template"] = store_backend.get("filepath_template", "{4}/{0}/{1}/{2}/{3}.json")
-
+            elif issubclass(store_backend_class, DatabaseStoreBackend):
+                # Provide defaults for this common case
+                store_backend["table_name"] = store_backend.get("table_name", "ge_expectations_store")
+                store_backend["key_columns"] = store_backend.get(
+                    "key_columns", [
+                        "run_id",
+                        "datasource",
+                        "generator",
+                        "generator_asset",
+                        "expectation_suite_name"
+                    ]
+                )
         super(ValidationsStore, self).__init__(store_backend=store_backend, runtime_environment=runtime_environment)
 
     def serialize(self, key, value):
