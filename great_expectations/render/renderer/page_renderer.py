@@ -28,7 +28,7 @@ class ValidationResultsPageRenderer(Renderer):
             }
         self._column_section_renderer = instantiate_class_from_config(
             config=column_section_renderer,
-            runtime_config={},
+            runtime_environment={},
             config_defaults={
                 "module_name": column_section_renderer.get(
                     "module_name", "great_expectations.render.renderer.column_section_renderer")
@@ -332,7 +332,7 @@ class ExpectationSuitePageRenderer(Renderer):
             }
         self._column_section_renderer = instantiate_class_from_config(
             config=column_section_renderer,
-            runtime_config={},
+            runtime_environment={},
             config_defaults={
                 "module_name": column_section_renderer.get(
                     "module_name", "great_expectations.render.renderer.column_section_renderer")
@@ -541,7 +541,7 @@ class ProfilingResultsPageRenderer(Renderer):
             }
         self._overview_section_renderer = instantiate_class_from_config(
             config=overview_section_renderer,
-            runtime_config={},
+            runtime_environment={},
             config_defaults={
                 "module_name": overview_section_renderer.get(
                     "module_name", "great_expectations.render.renderer.other_section_renderer")
@@ -549,7 +549,7 @@ class ProfilingResultsPageRenderer(Renderer):
         )
         self._column_section_renderer = instantiate_class_from_config(
             config=column_section_renderer,
-            runtime_config={},
+            runtime_environment={},
             config_defaults={
                 "module_name": column_section_renderer.get(
                     "module_name", "great_expectations.render.renderer.column_section_renderer")

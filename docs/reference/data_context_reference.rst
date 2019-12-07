@@ -147,7 +147,7 @@ would include the following:
           class_name: FixedLengthTupleFilesystemStoreBackend
           base_directory: uncommitted/validations/
       evaluation_parameter_store:
-        class_name: InMemoryEvaluationParameterStore
+        class_name: EvaluationParameterStore
 
 The `expectations_store` provides access to expectations_suite objects, using the DataContext's namespace; the
 `validations_store` does the same for validations. See :ref:`evaluation_parameters` for more information on the
@@ -179,7 +179,7 @@ providing the bucket/prefix combination:
           bucket: ge.my_org.com
           prefix: common_validations
       evaluation_parameter_store:
-        class_name: InMemoryEvaluationParameterStore
+        class_name: EvaluationParameterStore
 
 GE uses `boto3 <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_ to access AWS, so credentials
 simply need to be available in any standard place searched by that library.
@@ -352,7 +352,7 @@ new directory or use this template:
       evaluation_parameter_store:
         # Evaluation Parameters enable dynamic expectations. Read more here:
         # https://docs.greatexpectations.io/en/latest/reference/evaluation_parameters.html
-        class_name: InMemoryEvaluationParameterStore
+        class_name: EvaluationParameterStore
     expectations_store_name: expectations_store
     validations_store_name: validations_store
     evaluation_parameter_store_name: evaluation_parameter_store

@@ -8,7 +8,7 @@ from great_expectations.data_context.types import (
     ExpectationSuiteIdentifier,
 
 )
-from great_expectations.data_context.store.namespaced_read_write_store import (
+from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
 )
@@ -97,17 +97,17 @@ class SiteBuilder(object):
                  store_backend,
                  site_index_builder=None,
                  site_section_builders=None,
-                 datasource_whitelist=None
-    ):
+                 datasource_whitelist=None,
+                 runtime_environment=None
+                 ):
         self.data_context = data_context
 
         # The site builder is essentially a frontend store. We'll open up three types of backends using the base
         # type of the configuration defined in the store_backend section
 
         target_store = HtmlSiteStore(
-            root_directory=data_context.root_directory,
-            serialization_type=None,
-            store_backend=store_backend
+            store_backend=store_backend,
+            runtime_environment=runtime_environment
         )
 
         # the site config may specify the list of datasource names to document.
@@ -122,7 +122,7 @@ class SiteBuilder(object):
             }
         self.site_index_builder = instantiate_class_from_config(
             config=site_index_builder,
-            runtime_config={
+            runtime_environment={
                 "data_context": data_context,
                 "target_store": target_store,
             },
@@ -167,7 +167,7 @@ class SiteBuilder(object):
         for site_section_name, site_section_config in site_section_builders.items():
             self.site_section_builders[site_section_name] = instantiate_class_from_config(
                 config=site_section_config,
-                runtime_config={
+                runtime_environment={
                     "data_context": data_context,
                     "target_store": target_store
                 },
@@ -199,15 +199,15 @@ class SiteBuilder(object):
 
 class DefaultSiteSectionBuilder(object):
 
-    def __init__(self,
-                 name,
-                 data_context,
-                 target_store,
-                 source_store_name,
-                 # NOTE: Consider allowing specification of ANY element (or combination of elements) within an ID key?
-                 run_id_filter=None,
-                 renderer=None,
-                 view=None,
+    def __init__(
+            self,
+            name,
+            data_context,
+            target_store,
+            source_store_name,
+            run_id_filter=None,
+            renderer=None,
+            view=None,
     ):
         self.name = name
         self.source_store = data_context.stores[source_store_name]
@@ -220,7 +220,9 @@ class DefaultSiteSectionBuilder(object):
             )
         self.renderer_class = instantiate_class_from_config(
             config=renderer,
-            runtime_config={},
+            runtime_environment={
+                "data_context": data_context
+            },
             config_defaults={
                 "module_name": "great_expectations.render.renderer"
             }
@@ -233,7 +235,7 @@ class DefaultSiteSectionBuilder(object):
 
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_config={
+            runtime_environment={
                 "data_context": data_context
             },
             config_defaults={
@@ -335,7 +337,9 @@ class DefaultSiteIndexBuilder(object):
             }
         self.renderer_class = instantiate_class_from_config(
             config=renderer,
-            runtime_config={},
+            runtime_environment={
+                "data_context": data_context
+            },
             config_defaults={
                 "module_name": "great_expectations.render.renderer"
             }
@@ -348,7 +352,7 @@ class DefaultSiteIndexBuilder(object):
             }
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_config={
+            runtime_environment={
                 "data_context": data_context
             },
             config_defaults={
@@ -493,9 +497,8 @@ class DefaultSiteIndexBuilder(object):
         if self.show_cta_footer:
             index_links_dict["cta_object"] = self.get_calls_to_action()
 
-        for key in resource_keys:
-            key_resource_identifier = key.resource_identifier
-            
+        for key_resource_identifier in resource_keys:
+
             if type(key_resource_identifier) == ExpectationSuiteIdentifier:
                 self.add_resource_info_to_index_links_dict(
                     data_context=self.data_context,
@@ -505,7 +508,7 @@ class DefaultSiteIndexBuilder(object):
                     generator=key_resource_identifier.data_asset_name.generator,
                     generator_asset=key_resource_identifier.data_asset_name.generator_asset,
                     expectation_suite_name=key_resource_identifier.expectation_suite_name,
-                    section_name=key.site_section_name
+                    section_name="expectations"
                 )
             elif type(key_resource_identifier) == ValidationResultIdentifier:
                 # FIXME: review and correct this hardcoded logic

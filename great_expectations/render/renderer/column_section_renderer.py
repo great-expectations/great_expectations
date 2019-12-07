@@ -13,10 +13,6 @@ from .content_block import ExceptionListContentBlockRenderer
 from ..types import RenderedSectionContent, RenderedHeaderContent, RenderedGraphContent, RenderedBulletListContent, \
     RenderedTableContent, ValueListContent, TextContent
 
-from ..types import (
-    RenderedComponentContent,
-)
-
 
 def convert_to_string_and_escape(var):
     return re.sub(r"\$", r"$$", str(var))

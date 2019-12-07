@@ -32,8 +32,7 @@ def test_ValidationsStore_with_FixedLengthTupleS3StoreBackend():
             "class_name": "FixedLengthTupleS3StoreBackend",
             "bucket": bucket,
             "prefix": prefix
-        },
-        root_directory=None
+        }
     )
 
     with pytest.raises(TypeError):
@@ -84,19 +83,16 @@ def test_ValidationsStore_with_FixedLengthTupleS3StoreBackend():
 
 
 def test_ValidationsStore_with_InMemoryStoreBackend():
-
     my_store = ValidationsStore(
         store_backend={
             "module_name": "great_expectations.data_context.store",
             "class_name": "InMemoryStoreBackend",
-            "separator": ".",
-        },
-        root_directory=None,
+        }
     )
 
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
-    
+
     ns_1 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-100"))
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
     assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
@@ -111,20 +107,6 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
     }
 
 
-def test_ValidationsStore__convert_resource_identifier_to_list():
-
-    my_store = ValidationsStore(
-        store_backend={
-            "module_name": "great_expectations.data_context.store",
-            "class_name": "InMemoryStoreBackend",
-        },
-        root_directory=None,
-    )
-
-    ns_1 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-100"))
-    assert my_store._convert_resource_identifier_to_tuple(ns_1) == ('a', 'b', 'c', 'quarantine', 'prod-100')
-
-
 def test_ValidationsStore_with_FixedLengthTupleFileSystemStoreBackend(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_ValidationResultStore_with_FixedLengthTupleFileSystemStoreBackend__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
@@ -136,12 +118,14 @@ def test_ValidationsStore_with_FixedLengthTupleFileSystemStoreBackend(tmp_path_f
             "base_directory": "my_store/",
             "filepath_template": "{4}/{0}/{1}/{2}/{3}.txt",
         },
-        root_directory=path,
+        runtime_environment={
+            "root_directory": path
+        }
     )
 
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
-    
+
     ns_1 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-100"))
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
     assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])

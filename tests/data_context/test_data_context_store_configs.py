@@ -57,29 +57,13 @@ def test_add_store(totally_empty_data_context):
     assert len(totally_empty_data_context.stores.keys()) == 1
 
     totally_empty_data_context.add_store(
-        "my_inmemory_store",
+        "my_new_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "BasicInMemoryStore"
+            "class_name": "ValidationsStore"
         }
     )
-    assert "my_inmemory_store" in totally_empty_data_context.stores.keys()
-    assert len(totally_empty_data_context.stores.keys()) == 2
-
-
-def test_config_from_absolute_zero(totally_empty_data_context):
-
-    assert len(totally_empty_data_context.stores.keys()) == 1
-
-    totally_empty_data_context.add_store(
-        "my_inmemory_store",
-        {
-            "module_name": "great_expectations.data_context.store",
-            "class_name": "BasicInMemoryStore",
-            "serialization_type": "json"
-        }
-    )
-    assert "my_inmemory_store" in totally_empty_data_context.stores.keys()
+    assert "my_new_store" in totally_empty_data_context.stores.keys()
     assert len(totally_empty_data_context.stores.keys()) == 2
 
 
@@ -94,11 +78,10 @@ def test_default_config_yml_stores(tmp_path_factory):
         }
 
     context.add_store(
-        "my_new_in_memory_store",
+        "my_new_validations_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "BasicInMemoryStore",
-            "serialization_type": "json",
+            "class_name": "ValidationsStore",
         }
     )
 
@@ -106,5 +89,5 @@ def test_default_config_yml_stores(tmp_path_factory):
             "expectations_store",
             "validations_store",
             "evaluation_parameter_store",
-            "my_new_in_memory_store"
+            "my_new_validations_store"
         }
