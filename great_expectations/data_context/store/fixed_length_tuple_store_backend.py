@@ -126,23 +126,27 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
     """
 
     def __init__(self,
-                 root_directory,
                  base_directory,
                  filepath_template,
                  key_length,
                  forbidden_substrings=None,
-                 platform_specific_separator=True):
+                 platform_specific_separator=True,
+                 root_directory=None):
         super(FixedLengthTupleFilesystemStoreBackend, self).__init__(
             filepath_template=filepath_template,
             key_length=key_length,
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator
         )
-        if not os.path.isabs(root_directory):
-            raise ValueError("root_directory must be an absolute path. Got {0} instead.".format(root_directory))
-        self.root_directory = root_directory
-        self.base_directory = base_directory
-        self.full_base_directory = os.path.join(self.root_directory, self.base_directory)
+        if os.path.isabs(base_directory):
+            self.full_base_directory = base_directory
+        else:
+            if root_directory is None:
+                raise ValueError("base_directory must be an absolute path if root_directory is not provided")
+            elif not os.path.isabs(root_directory):
+                raise ValueError("root_directory must be an absolute path. Got {0} instead.".format(root_directory))
+            else:
+                self.full_base_directory = os.path.join(root_directory, base_directory)
         safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
     def _get(self, key):

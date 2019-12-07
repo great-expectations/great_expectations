@@ -1638,7 +1638,6 @@ class ConfigOnlyDataContext(object):
                 try:
                     start_time = datetime.datetime.now()
 
-                    # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
                     if additional_batch_kwargs is None:
                         additional_batch_kwargs = {}
 
