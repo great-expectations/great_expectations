@@ -57,7 +57,7 @@ class DefaultJinjaView(object):
     def __init__(self, data_context=None):
         self.data_context = data_context
         self.custom_styles_directory = None
-        if data_context:
+        if data_context and data_context.plugins_directory:
             plugins_directory = data_context.plugins_directory
             if os.path.isdir(os.path.join(plugins_directory, "custom_data_docs", "styles")):
                 self.custom_styles_directory = os.path.join(plugins_directory, "custom_data_docs/styles")

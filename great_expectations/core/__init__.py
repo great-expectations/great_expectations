@@ -553,7 +553,7 @@ class ExpectationSuite(object):
         return not self == other
 
     def __repr__(self):
-        return json.dumps(self.to_json_dict())
+        return json.dumps(self.to_json_dict(), indent=2)
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
@@ -711,7 +711,7 @@ class ExpectationValidationResult(object):
             return False
 
     def __repr__(self):
-        return json.dumps(self.to_json_dict())
+        return json.dumps(self.to_json_dict(), indent=2)
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
@@ -790,7 +790,7 @@ class ExpectationSuiteValidationResult(DictDot):
         ))
 
     def __repr__(self):
-        return json.dumps(self.to_json_dict())
+        return json.dumps(self.to_json_dict(), indent=2)
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)

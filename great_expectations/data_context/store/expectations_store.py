@@ -1,5 +1,5 @@
 from great_expectations.core import NamespaceAwareExpectationSuiteSchema
-from great_expectations.data_context.store import DatabaseStoreBackend
+from great_expectations.data_context.store.database_store_backend import DatabaseStoreBackend
 from great_expectations.data_context.store.fixed_length_tuple_store_backend import FixedLengthTupleStoreBackend
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types import ExpectationSuiteIdentifier
