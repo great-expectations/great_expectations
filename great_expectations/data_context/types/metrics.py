@@ -1,5 +1,7 @@
-from great_expectations.core import DataContextKey
-from great_expectations.profile.metrics_utils import kwargs_to_tuple
+from six import PY3
+
+from great_expectations.core import DataContextKey, DataAssetIdentifier
+from great_expectations.profile.metrics_utils import kwargs_to_tuple, tuple_to_hash
 
 try:
     from urllib.parse import urlencode
@@ -103,8 +105,24 @@ class ExpectationDefinedMetricIdentifier(DataContextKey):
         return self._metric_kwargs
 
     def to_tuple(self):
-        return (self.data_asset_name, self.expectation_suite_name, self.expectation_type,
-                self.metric_name, kwargs_to_tuple(self.metric_kwargs))
+        if PY3:
+            return (self.run_id, *self.data_asset_name.to_tuple(), self.expectation_suite_name, self.expectation_type,
+                    self.metric_name, kwargs_to_tuple(self.metric_kwargs))
+        else:
+            expectation_defined_metric_tuple_list = [self.run_id] + list(self.data_asset_name.to_tuple()) + [
+                self.expectation_suite_name, self.expectation_type, self.metric_name,
+                kwargs_to_tuple(self.metric_kwargs)]
+            return tuple(expectation_defined_metric_tuple_list)
+
+    def to_string_tuple(self):
+        if PY3:
+            return (self.run_id, *self.data_asset_name.to_tuple(), self.expectation_suite_name, self.expectation_type,
+                    self.metric_name, tuple_to_hash(kwargs_to_tuple(self.metric_kwargs)))
+        else:
+            expectation_defined_metric_tuple_list = [self.run_id] + list(self.data_asset_name.to_tuple()) + [
+                self.expectation_suite_name, self.expectation_type, self.metric_name,
+                tuple_to_hash(kwargs_to_tuple(self.metric_kwargs))]
+            return tuple(expectation_defined_metric_tuple_list)
 
     def to_urn(self):
         urn = "urn:great_expectations:validations:" + \

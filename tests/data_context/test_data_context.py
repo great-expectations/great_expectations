@@ -5,6 +5,7 @@ from freezegun import freeze_time
 
 from great_expectations.core import ExpectationConfiguration, dataAssetIdentifierSchema, expectationSuiteSchema, \
     namespaceAwareExpectationSuiteSchema
+from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import DataContextConfig
 
 try:
@@ -28,10 +29,6 @@ from great_expectations.data_context.util import safe_mmkdir
 from great_expectations.data_context.types import (
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
-)
-from great_expectations.data_context.store import (
-    BasicInMemoryStore,
-    InMemoryEvaluationParameterStore,
 )
 from great_expectations.util import (
     gen_directory_tree_str,
@@ -111,87 +108,6 @@ def test_save_expectation_suite(data_context):
     data_context.save_expectation_suite(expectation_suite)
     expectation_suite_saved = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
     assert expectation_suite.expectations == expectation_suite_saved.expectations
-
-
-
-    #TODO: Add a test that specifies a data_asset_name
-
-# FIXME : Temporarily deprecating this test, so we can develop DataSnapshotStore in a new branch.
-# def test_register_validation_results_saves_data_assset_snapshot(data_context):
-#     run_id = "460d61be-7266-11e9-8848-1681be663d3e"
-#     source_patient_data_results = {
-#         "meta": {
-#             "data_asset_name": "mydatasource/mygenerator/source_patient_data",
-#             "expectation_suite_name": "default"
-#         },
-#         "results": [
-#             {
-#                 "expectation_config": {
-#                     "expectation_type": "expect_table_row_count_to_equal",
-#                     "kwargs": {
-#                         "value": 1024,
-#                     }
-#                 },
-#                 "success": True,
-#                 "exception_info": {"exception_message": None,
-#                     "exception_traceback": None,
-#                     "raised_exception": False},
-#                 "result": {
-#                     "observed_value": 1024,
-#                     "element_count": 1024,
-#                     "missing_percent": 0.0,
-#                     "missing_count": 0
-#                 }
-#             }
-#         ],
-#         "success": False
-#     }
-#     data_asset = PandasDataset({"x": [1,2,3,4]})
-
-#     snapshot_dir = os.path.join(data_context.root_directory, "uncommitted/snapshots")
-#     print(snapshot_dir)
-
-#     #The snapshot directory shouldn't exist yet
-#     assert not os.path.isfile(snapshot_dir)
-
-#     data_context.add_store(
-#         "data_asset_snapshot_store",
-#         {
-#             "module_name": "great_expectations.data_context.store",
-#             "class_name": "NamespacedReadWriteStore",
-#             "serialization_type" : "pandas_csv",
-#             "resource_identifier_class_name": "ValidationResultIdentifier",
-#             "store_backend" : {
-#                 "module_name": "great_expectations.data_context.store",
-#                 "class_name": "FixedLengthTupleFilesystemStoreBackend",
-#                 "base_directory" : "uncommitted/snapshots",
-#                 "filepath_template": "{4}/{0}/{1}/{2}/validation-results-{2}-{3}-{4}.{file_extension}",
-#                 "file_extension" : "csv.gz",
-#                 # "compression" : "gzip",
-#             }
-#         }
-#     )
-#     # print(json.dumps(data_context._project_config, indent=2))
-
-#     #The snapshot directory shouldn't contain any files
-#     # assert len(glob(snapshot_dir+"/*/*/*/*/*.csv.gz")) == 0
-#     print(gen_directory_tree_str(snapshot_dir))
-#     assert gen_directory_tree_str(snapshot_dir) == ""
-
-#     res = data_context.register_validation_results(
-#         run_id,
-#         source_patient_data_results,
-#         data_asset=data_asset
-#     )
-
-#     #This snapshot directory should now exist
-#     assert os.path.isdir(snapshot_dir)
-
-#     #we should have one file created as a side effect
-#     print(gen_directory_tree_str(snapshot_dir))
-#     glob_results = glob(snapshot_dir+"/*/*/*/*/*.csv.gz")
-#     print(glob_results)
-#     assert len(glob_results) == 1
 
 
 def test_compile(data_context):
@@ -489,14 +405,14 @@ project_path/
     context = DataContext.create(project_dir)
     ge_directory = os.path.join(project_dir, "great_expectations")
     context.add_datasource("titanic",
-                            module_name="great_expectations.datasource",
-                            class_name="PandasDatasource",
-                            base_directory=os.path.join(project_dir, "data/titanic/"))
+                           module_name="great_expectations.datasource",
+                           class_name="PandasDatasource",
+                           base_directory=os.path.join(project_dir, "data/titanic/"))
 
     context.add_datasource("random",
-                            module_name="great_expectations.datasource",
-                            class_name="PandasDatasource",
-                            base_directory=os.path.join(project_dir, "data/random/"))
+                           module_name="great_expectations.datasource",
+                           class_name="PandasDatasource",
+                           base_directory=os.path.join(project_dir, "data/random/"))
 
     context.profile_datasource("titanic")
 
@@ -604,13 +520,13 @@ def test_add_store(empty_data_context):
         "my_new_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "BasicInMemoryStore",
+            "class_name": "ExpectationsStore",
         }
     )
     assert "my_new_store" in empty_data_context.stores.keys()
     assert "my_new_store" in empty_data_context.get_config()["stores"]
 
-    assert isinstance(new_store, BasicInMemoryStore)
+    assert isinstance(new_store, ExpectationsStore)
 
 
 @pytest.fixture
@@ -635,7 +551,7 @@ def basic_data_context_config():
             },
             "evaluation_parameter_store" : {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "InMemoryEvaluationParameterStore",
+                "class_name": "EvaluationParameterStore",
             }
         },
         "data_docs_sites": {},
@@ -652,22 +568,6 @@ def test_ExplorerDataContext(titanic_data_context):
     context_root_directory = titanic_data_context.root_directory
     explorer_data_context = ExplorerDataContext(context_root_directory)
     assert explorer_data_context._expectation_explorer_manager
-
-
-# @freeze_time("2012-01-14")
-# def test_ExplorerDataContext_expectation_widget(titanic_data_context):
-#     context_root_directory = titanic_data_context.root_directory
-#     explorer_data_context = ExplorerDataContext(context_root_directory)
-#     explorer_data_context.create_expectation_suite('Titanic', expectation_suite_name='my_suite')
-#     data_asset = explorer_data_context.get_batch('Titanic', expectation_suite_name='my_suite',
-#                                                  batch_kwargs=explorer_data_context.yield_batch_kwargs("Titanic"))
-#     widget_output = data_asset.expect_column_to_exist('test')
-#     print(widget_output)
-#     if sys.version[0:3] == '2.7':
-#         expected_widget_output = "Accordion(children=(VBox(children=(HBox(children=(VBox(children=(HTML(value=u'<div><strong>Data Asset Name: </strong>mydatasource/mygenerator/Titanic</div>'), HTML(value=u'<div><strong>Column: </strong>test</div>'), HTML(value=u'<span><strong>Expectation Type: </strong>expect_column_to_exist</span>'), HTML(value=u'<span><strong>Success: </strong>False</span>'), HTML(value=u'<div><strong>Date/Time Validated (UTC): </strong>2012-01-14 00:00</div>')), layout=Layout(margin=u'10px', width=u'40%')), VBox(children=(Text(value=u'', description=u'<strong>column_index: </strong>', description_tooltip=u'', layout=Layout(width=u'400px'), placeholder=u'press enter to confirm...', style=DescriptionStyle(description_width=u'150px')),), layout=Layout(margin=u'10px', width=u'60%')))), Accordion(children=(Output(),), _titles={u'0': 'Exceptions/Warnings'}), Accordion(children=(VBox(),), selected_index=None, _titles={u'0': 'Validation Result Details'}), Button(button_style=u'danger', description=u'Remove Expectation', icon=u'trash', layout=Layout(width=u'auto'), style=ButtonStyle(), tooltip=u'click to remove expectation'))),), layout=Layout(border=u'2px solid red', margin=u'5px'), _titles={u'0': 'test | expect_column_to_exist'})"
-#     else:
-#         expected_widget_output = "Accordion(children=(VBox(children=(HBox(children=(VBox(children=(HTML(value='<div><strong>Data Asset Name: </strong>mydatasource/mygenerator/Titanic</div>'), HTML(value='<div><strong>Column: </strong>test</div>'), HTML(value='<span><strong>Expectation Type: </strong>expect_column_to_exist</span>'), HTML(value='<span><strong>Success: </strong>False</span>'), HTML(value='<div><strong>Date/Time Validated (UTC): </strong>2012-01-14 00:00</div>')), layout=Layout(margin='10px', width='40%')), VBox(children=(Text(value='', description='<strong>column_index: </strong>', description_tooltip='', layout=Layout(width='400px'), placeholder='press enter to confirm...', style=DescriptionStyle(description_width='150px')),), layout=Layout(margin='10px', width='60%')))), Accordion(children=(Output(),), _titles={'0': 'Exceptions/Warnings'}), Accordion(children=(VBox(),), selected_index=None, _titles={'0': 'Validation Result Details'}), Button(button_style='danger', description='Remove Expectation', icon='trash', layout=Layout(width='auto'), style=ButtonStyle(), tooltip='click to remove expectation'))),), layout=Layout(border='2px solid red', margin='5px'), _titles={'0': 'test | expect_column_to_exist'})"
-#     assert str(widget_output) == expected_widget_output
 
 
 def test_ConfigOnlyDataContext__initialization(tmp_path_factory, basic_data_context_config):

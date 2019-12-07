@@ -327,7 +327,7 @@ class ConfigOnlyDataContext(object):
         self._project_config["stores"][store_name] = store_config
         new_store = instantiate_class_from_config(
             config=self._project_config_with_variables_substituted["stores"][store_name],
-            runtime_config={
+            runtime_environment={
                 "root_directory": self.root_directory,
             },
             config_defaults={
@@ -351,7 +351,7 @@ class ConfigOnlyDataContext(object):
         self._project_config["validation_operators"][validation_operator_name] = validation_operator_config
         new_validation_operator = instantiate_class_from_config(
             config=self._project_config_with_variables_substituted["validation_operators"][validation_operator_name],
-            runtime_config={
+            runtime_environment={
                 "data_context": self,
             },
             config_defaults={
@@ -753,7 +753,7 @@ class ConfigOnlyDataContext(object):
             })
         datasource = instantiate_class_from_config(
             config=kwargs,
-            runtime_config={
+            runtime_environment={
                 "data_context": self
             },
             config_defaults={
@@ -1514,13 +1514,13 @@ class ConfigOnlyDataContext(object):
             for site_name, site_config in sites.items():
                 logger.debug("Building Data Docs Site %s" % site_name,)
 
-                # NOTE: 20191007 - JPC: removed condition that zero-length site_names mean build all sites
                 if (site_names and site_name in site_names) or not site_names:
                     complete_site_config = site_config
                     site_builder = instantiate_class_from_config(
                         config=complete_site_config,
-                        runtime_config={
+                        runtime_environment={
                             "data_context": self,
+                            "root_directory": self.root_directory
                         },
                         config_defaults={
                             "module_name": "great_expectations.render.renderer.site_builder"

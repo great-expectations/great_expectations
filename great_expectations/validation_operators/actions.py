@@ -95,7 +95,7 @@ class SlackNotificationAction(NamespacedValidationAction):
         self.data_context = data_context
         self.renderer = instantiate_class_from_config(
             config=renderer,
-            runtime_config={},
+            runtime_environment={},
             config_defaults={},
         )
         self.slack_webhook = slack_webhook

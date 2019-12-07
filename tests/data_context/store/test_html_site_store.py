@@ -25,10 +25,12 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_HtmlSiteStore_with_FixedLengthTupleFileSystemStoreBackend__dir'))
 
     my_store = HtmlSiteStore(
-        root_directory=path,
         store_backend={
             "class_name": "FixedLengthTupleFilesystemStoreBackend",
             "base_directory": "my_store"
+        },
+        runtime_environment={
+            "root_directory": path
         }
     )
 
@@ -53,9 +55,10 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
     # assert my_store.get(ns_2) == {"B": "bbb"}
 
     print(my_store.list_keys())
+    # WARNING: OBSERVE THAT SITE_SECTION_NAME IS LOST IN THE CALL TO LIST_KEYS
     assert set(my_store.list_keys()) == {
-        ns_1,
-        ns_2,
+        ns_1.resource_identifier,
+        ns_2.resource_identifier,
     }
 
     print(gen_directory_tree_str(path))
@@ -86,7 +89,6 @@ def test_HtmlSiteStore_S3_backend():
     conn.create_bucket(Bucket=bucket)
 
     my_store = HtmlSiteStore(
-        root_directory='NOT_USED_WITH_S3',
         store_backend={
             "class_name": "FixedLengthTupleS3StoreBackend",
             "bucket": bucket,
@@ -127,8 +129,8 @@ def test_HtmlSiteStore_S3_backend():
     my_store.set(ns_2, "bbb")
 
     assert set(my_store.list_keys()) == {
-        ns_1,
-        ns_2,
+        ns_1.resource_identifier,
+        ns_2.resource_identifier,
     }
 
     # This is a special un-store-like method exposed by the HtmlSiteStore

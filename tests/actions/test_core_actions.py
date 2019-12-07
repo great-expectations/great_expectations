@@ -53,7 +53,6 @@ def test_subclass_of_BasicValidationAction():
 
 def test_StoreAction():
     fake_in_memory_store = ValidationsStore(
-        root_directory=None,
         store_backend={
             "class_name": "InMemoryStoreBackend",
         }
@@ -62,7 +61,6 @@ def test_StoreAction():
         "fake_in_memory_store": fake_in_memory_store
     }
 
-    # NOTE: This is a hack meant to last until we implement runtime_configs
     class Object(object):
         pass
 
@@ -160,7 +158,7 @@ def test_SlackNotificationAction(data_context):
 #         "fake_in_memory_store" : fake_in_memory_store
 #     }
 #
-#     # NOTE: This is a hack meant to last until we implement runtime_configs
+#     # NOTE: This is a hack meant to last until we implement runtime_environments
 #     class Object(object):
 #         pass
 #

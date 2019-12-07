@@ -34,9 +34,9 @@ stores:
       base_directory: expectations/
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
-    class_name: InMemoryEvaluationParameterStore
+    class_name: EvaluationParameterStore
   validation_store:
-    class_name: BasicInMemoryStore
+    class_name: ValidationsStore
 
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
