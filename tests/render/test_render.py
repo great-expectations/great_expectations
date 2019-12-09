@@ -200,7 +200,8 @@ def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expe
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
-def test_render_profiled_fixture_expectation_suite_with_distribution(titanic_dataset_profiler_expectations_with_distribution):
+def test_render_profiled_fixture_expectation_suite_with_distribution(
+        titanic_dataset_profiler_expectations_with_distribution):
     # Tests sparkline
     rendered_content = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations_with_distribution)
     rendered_page = DefaultJinjaPageView().render(rendered_content)

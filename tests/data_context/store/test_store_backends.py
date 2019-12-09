@@ -213,6 +213,15 @@ def test_FixedLengthTupleGCSStoreBackend():
         project=project
     )
 
+    my_store_with_no_filepath_template = FixedLengthTupleGCSStoreBackend(
+        root_directory=os.path.abspath(path), # NOTE: Eugene: 2019-09-06: root_directory should be removed from the base class
+        key_length=None,
+        filepath_template=None,
+        bucket=bucket,
+        prefix=prefix,
+        project=project
+    )
+
     with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
         
         mock_client = mock_gcs_client.return_value
@@ -224,7 +233,19 @@ def test_FixedLengthTupleGCSStoreBackend():
         mock_gcs_client.assert_called_once_with('dummy-project')
         mock_client.get_bucket.assert_called_once_with("leakybucket")
         mock_bucket.blob.assert_called_once_with("this_is_a_test_prefix/my_file_AAA")
-        mock_blob.upload_from_string.assert_called_once_with(b"aaa", content_type="text/html")
+        mock_blob.upload_from_string.assert_called_once_with(b"aaa", content_encoding="utf-8", content_type="text/html")
+
+    with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
+        mock_client = mock_gcs_client.return_value
+        mock_bucket = mock_client.get_bucket.return_value
+        mock_blob = mock_bucket.blob.return_value
+    
+        my_store_with_no_filepath_template.set(("AAA",), b"aaa", content_encoding=None, content_type="image/png")
+    
+        mock_gcs_client.assert_called_once_with('dummy-project')
+        mock_client.get_bucket.assert_called_once_with("leakybucket")
+        mock_bucket.blob.assert_called_once_with("this_is_a_test_prefix/AAA")
+        mock_blob.upload_from_string.assert_called_once_with(b"aaa", content_type="image/png")
 
     with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
 

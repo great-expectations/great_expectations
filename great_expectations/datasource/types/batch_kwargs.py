@@ -126,6 +126,10 @@ class PathBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs)
     def path(self):
         return self.get("path")
 
+    @property
+    def reader_method(self):
+        return self.get("reader_method")
+
 
 class S3BatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs):
@@ -137,6 +141,9 @@ class S3BatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
     def s3(self):
         return self.get("s3")
 
+    @property
+    def reader_method(self):
+        return self.get("reader_method")
 
 class InMemoryBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs):

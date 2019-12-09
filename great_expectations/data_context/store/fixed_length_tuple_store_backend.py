@@ -11,8 +11,8 @@ from great_expectations.data_context.util import safe_mmkdir
 
 class FixedLengthTupleStoreBackend(StoreBackend, ABC):
     """
-    The key to this StoreBackend abstract class must be a tuple with fixed length equal to key_length.
-    The filepath_template is a string template used to convert the key to a filepath.
+    If key_length is provided, the key to this StoreBackend abstract class must be a tuple with fixed length equal
+    to key_length. The filepath_template is a string template used to convert the key to a filepath.
     There's a bit of regex magic in _convert_filepath_to_key that reverses this process,
     so that we can write AND read using filenames as keys.
 
@@ -26,7 +26,7 @@ class FixedLengthTupleStoreBackend(StoreBackend, ABC):
         forbidden_substrings=None,
         platform_specific_separator=True
     ):
-        assert isinstance(key_length, int)
+        assert isinstance(key_length, int) or key_length is None
         self.key_length = key_length
         if forbidden_substrings is None:
             forbidden_substrings = ["/", "\\"]
@@ -34,13 +34,12 @@ class FixedLengthTupleStoreBackend(StoreBackend, ABC):
         self.platform_specific_separator = platform_specific_separator
 
         self.filepath_template = filepath_template
-        self.verify_that_key_to_filepath_operation_is_reversible()
+        if key_length:
+            self.verify_that_key_to_filepath_operation_is_reversible()
 
     def _validate_key(self, key):
         super(FixedLengthTupleStoreBackend, self)._validate_key(key)
 
-        # if isinstance(key, DataContextKey):
-        #     return
         for key_element in key:
             for substring in self.forbidden_substrings:
                 if substring in key_element:
@@ -51,16 +50,20 @@ class FixedLengthTupleStoreBackend(StoreBackend, ABC):
                     ))
 
     def _validate_value(self, value):
-        if not isinstance(value, string_types):
-            raise TypeError("Values in {0} must be instances of {1}, not {2}".format(
+        if not isinstance(value, string_types) and not isinstance(value, bytes):
+            raise TypeError("Values in {0} must be instances of {1} or {2}, not {3}".format(
                 self.__class__.__name__,
                 string_types,
+                bytes,
                 type(value),
             ))
 
     def _convert_key_to_filepath(self, key):
         self._validate_key(key)
-        converted_string = self.filepath_template.format(*list(key))
+        if self.filepath_template:
+            converted_string = self.filepath_template.format(*list(key))
+        else:
+            converted_string = '/'.join(key)
         if self.platform_specific_separator:
             converted_string = os.path.join(*converted_string.split('/'))
         return converted_string
@@ -68,6 +71,9 @@ class FixedLengthTupleStoreBackend(StoreBackend, ABC):
     def _convert_filepath_to_key(self, filepath):
         # filepath_template (for now) is always specified with forward slashes, but it is then
         # used to (1) dynamically construct and evaluate a regex, and (2) split the provided (observed) filepath
+        if not self.filepath_template:
+            return tuple(filepath.split(os.sep))
+
         if self.platform_specific_separator:
             filepath_template = os.path.join(*self.filepath_template.split('/'))
             filepath_template = filepath_template.replace('\\', '\\\\')
