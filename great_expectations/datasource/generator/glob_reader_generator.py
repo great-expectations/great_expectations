@@ -45,7 +45,7 @@ class GlobReaderGenerator(BatchGenerator):
                 wifi_logs:
                   glob: wifi*.log
                   partition_regex: wifi-((0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])-20\d\d).*\.log
-
+                  reader_method: csv
     """
 
     def __init__(self, name="default",
@@ -64,7 +64,8 @@ class GlobReaderGenerator(BatchGenerator):
                 "default": {
                     "glob": "*",
                     "partition_regex": r"^((19|20)\d\d[- /.]?(0[1-9]|1[012])[- /.]?(0[1-9]|[12][0-9]|3[01])_(.*))\.csv",
-                    "match_group_id": 1
+                    "match_group_id": 1,
+                    "reader_method": 'csv'
                 }
             }
 
@@ -126,7 +127,7 @@ class GlobReaderGenerator(BatchGenerator):
                                         partition_id: partition_id
                                     })
         batch_kwargs = self._build_batch_kwargs_from_path(path[0], glob_config, reader_options=reader_options,
-                                                          limit=limit, partition_id=partition_id)
+                                                          limit=limit, reader_method=reader_method, partition_id=partition_id)
         return batch_kwargs
 
     def _get_generator_asset_paths(self, generator_asset):
@@ -163,11 +164,11 @@ class GlobReaderGenerator(BatchGenerator):
         paths = glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
         return self._build_batch_kwargs_path_iter(paths, glob_config, reader_options=reader_options, limit=limit)
 
-    def _build_batch_kwargs_path_iter(self, path_list, glob_config, reader_options=None, limit=None):
+    def _build_batch_kwargs_path_iter(self, path_list, glob_config, reader_options=None, limit=None, reader_method=None):
         for path in path_list:
-            yield self._build_batch_kwargs_from_path(path, glob_config, reader_options=reader_options, limit=limit)
+            yield self._build_batch_kwargs_from_path(path, glob_config, reader_options=reader_options, limit=limit, reader_method=None)
 
-    def _build_batch_kwargs_from_path(self, path, glob_config, reader_options=None, limit=None, partition_id=None):
+    def _build_batch_kwargs_from_path(self, path, glob_config, reader_options=None, limit=None, reader_method=None, partition_id=None):
         # We could add MD5 (e.g. for smallish files)
         # but currently don't want to assume the extra read is worth it
         # unless it's configurable
@@ -198,6 +199,9 @@ class GlobReaderGenerator(BatchGenerator):
 
         if self.reader_method is not None:
             batch_kwargs['reader_method'] = self.reader_method
+        
+        if reader_method:
+            batch_kwargs['reader_method'].update(reader_method)
 
         return batch_kwargs
 
