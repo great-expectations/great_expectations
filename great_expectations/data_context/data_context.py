@@ -90,16 +90,18 @@ class ConfigOnlyDataContext(object):
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
     UNCOMMITTED_DIRECTORIES = ["data_docs", "samples", "validations"]
+    GE_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
         "datasources",
         "expectations",
         "notebooks",
         "plugins",
-        "uncommitted",
+        GE_UNCOMMITTED_DIR,
     ]
     NOTEBOOK_SUBDIRECTORIES = ["pandas", "spark", "sql"]
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
+    GE_EDIT_NOTEBOOK_DIR = os.path.join(GE_DIR, GE_UNCOMMITTED_DIR)
 
     # TODO: Consider moving this to DataContext, instead of ConfigOnlyDataContext, since it writes to disc.
     @classmethod

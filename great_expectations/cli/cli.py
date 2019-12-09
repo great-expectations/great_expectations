@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import shutil
+import subprocess
 import sys
 import warnings
 
@@ -469,6 +470,88 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, vi
             open_docs=view,
             additional_batch_kwargs=batch_kwargs
         )
+
+
+@cli.command()
+@click.argument("data_asset_name")
+@click.argument("suite_name")
+@click.option(
+    '--batch-kwargs',
+    default=None,
+    help='Additional keyword arguments to be provided to get_batch when loading \
+    the data asset. Must be a valid JSON dictionary'
+)
+@click.option(
+    "--directory",
+    "-d",
+    default=None,
+    help="The project's great_expectations directory.",
+)
+@click.option(
+    "--jupyter-notebook",
+    "-jn",
+    default=True,
+    is_flag=True,
+    help="By default open in browser unless you specify the --no-jupyter flag",
+)
+@click.option(
+    "--jupyter-lab", "-jl", is_flag=True, default=False, help="Edit in jupyter lab",
+)
+@click.option(
+    "--jupyter/--no-jupyter",
+    is_flag=True,
+    help="By default open in browser unless you specify the --no-jupyter flag",
+    default=True,
+)
+def edit_suite(
+    data_asset_name, suite_name, directory, jupyter_notebook, jupyter_lab, jupyter, batch_kwargs
+):
+    """Edit an existing suite."""
+    try:
+        context = DataContext(directory)
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, context.root_directory)
+        return
+
+    suite = _load_suite(context, data_asset_name, suite_name)
+
+    if not batch_kwargs:
+        # TODO rrrgh why aren't batch kwargs in a suite make this work...
+        cli_message("<red>This probably won't work.</red>")
+        batch_kwargs = context.yield_batch_kwargs(suite.data_asset_name)
+    else:
+        batch_kwargs = json.loads(batch_kwargs)
+
+    notebook_path = os.path.join(context.GE_EDIT_NOTEBOOK_DIR, "foo.ipynb")
+    NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path)
+
+    cli_message(
+        "To continue editing this suite, run <green>jupyter notebook {}</green>".format(
+            notebook_path
+        )
+    )
+
+    if jupyter:
+        command = "notebook"
+        if jupyter_notebook:
+            command = "notebook"
+        if jupyter_lab:
+            command = "lab"
+        subprocess.call(["jupyter", command, notebook_path])
+
+
+def _load_suite(context, data_asset_name, suite_name):
+    try:
+        suite = context.get_expectation_suite(data_asset_name, suite_name)
+    except ge_exceptions.DataContextError:
+        cli_message(
+            "<red>Could not locate a suite named {} for {}</red>".format(
+                suite_name, data_asset_name))
+        sys.exit(-1)
+    return suite
 
 
 @cli.command()
