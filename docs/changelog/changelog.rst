@@ -3,10 +3,18 @@
 * INTERNAL TYPES
 * Change data_asset get_data_asset_name and save_data_asset_name to be properties.
 
-0.8.6__develop
+0.8.7__develop
 -----------------
 
 
+0.8.6
+-----------------
+* Raise informative error if config variables are declared but unavailable
+* Update ExpectationsStore defaults to be consistent across all FixedLengthTupleStoreBackend objects
+* Add support for setting spark_options via SparkDFDatasource
+* Include tail_weights by default when using build_continuous_partition_object
+* Fix Redshift quantiles computation and type detection
+* Allow boto3 options to be configured (#887)
 
 0.8.5
 -----------------
@@ -37,7 +45,7 @@
 * Allow configuration of known extensions and return more informative message when SubdirReaderGenerator cannot find
   relevant files.
 * Add support for allow_relative_error on internal dataset quantile functions, and add support for
-  build_continuous_partition_objec in Redshift
+  build_continuous_partition_object in Redshift
 * Fix truncated scroll bars in value_counts graphs
 
 

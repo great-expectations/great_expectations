@@ -30,22 +30,8 @@ class HtmlSiteStore(object):
             logger.warning("Configuring a filepath_template or key_length is not supported in SiteBuilder: "
                            "filepaths will be selected based on the type of asset rendered.")
 
-        # # Each key type gets its own backend.
-        # # If backends were DB connections, this could be inefficient, but it doesn't much matter for filepaths.
-        # # One thing to watch for is reversibility of keys.
-        # # If several types are being written to overlapping directories, we could get collisions.
-        # expectations_backend_config = copy.deepcopy(store_backend)
-        # if "base_directory" in expectations_backend_config:
-        #     expectations_backend_config["base_directory"] = os.path.join(expectations_backend_config["base_directory"], "expectations")
-        # elif "prefix" in expectations_backend_config:
-        #     expectations_backend_config["prefix"] = os.path.join(expectations_backend_config["prefix"], "expectations")
-        #
-        # validations_backend_config = copy.deepcopy(store_backend)
-        # if "base_directory" in validations_backend_config:
-        #     validations_backend_config["base_directory"] = os.path.join(validations_backend_config["base_directory"], "validations")
-        # elif "prefix" in validations_backend_config:
-        #     validations_backend_config["prefix"] = os.path.join(validations_backend_config["prefix"], "validations")
-
+        # One thing to watch for is reversibility of keys.
+        # If several types are being written to overlapping directories, we could get collisions.
         self.store_backends = {
             ExpectationSuiteIdentifier: instantiate_class_from_config(
                 config=store_backend,
@@ -72,6 +58,15 @@ class HtmlSiteStore(object):
                     "module_name": "great_expectations.data_context.store",
                     "key_length": 0,
                     "filepath_template": 'index.html',
+                }
+            ),
+            "static_assets": instantiate_class_from_config(
+                config=store_backend,
+                runtime_environment=runtime_environment,
+                config_defaults={
+                    "module_name": "great_expectations.data_context.store",
+                    "key_length": None,
+                    "filepath_template": None,
                 }
             ),
         }
@@ -143,3 +138,39 @@ class HtmlSiteStore(object):
         """This third param_store has a special method, which uses a zero-length tuple as a key."""
         return self.store_backends["index_page"].set((), page, content_encoding='utf-8', content_type='text/html; '
                                                                                                       'charset=utf-8')
+    def copy_static_assets(self, static_assets_source_dir=None):
+        """
+        Copies static assets, using a special "static_assets" backend store that accepts variable-length tuples as
+        keys, with no filepath_template.
+        """
+        file_exclusions = [".DS_Store"]
+        dir_exclusions = []
+
+        if not static_assets_source_dir:
+            static_assets_source_dir = file_relative_path(__file__, "../../render/view/static")
+
+        for item in os.listdir(static_assets_source_dir):
+            # Directory
+            if os.path.isdir(os.path.join(static_assets_source_dir, item)):
+                if item in dir_exclusions:
+                    continue
+                # Recurse
+                new_source_dir = os.path.join(static_assets_source_dir, item)
+                self.copy_static_assets(new_source_dir)
+            # File
+            else:
+                # Copy file over using static assets store backend
+                if item in file_exclusions:
+                    continue
+                source_name = os.path.join(static_assets_source_dir, item)
+                with open(source_name, 'rb') as f:
+                    # Only use path elements starting from static/ for key
+                    store_key = tuple(os.path.normpath(source_name).split(os.sep))
+                    store_key = store_key[store_key.index('static'):]
+                    content_type, content_encoding = guess_type(item, strict=False)
+                    self.store_backends["static_assets"].set(
+                        store_key,
+                        f.read(),
+                        content_encoding=content_encoding,
+                        content_type=content_type
+                    )

@@ -182,7 +182,8 @@ providing the bucket/prefix combination:
         class_name: EvaluationParameterStore
 
 GE uses `boto3 <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_ to access AWS, so credentials
-simply need to be available in any standard place searched by that library.
+simply need to be available in any standard place searched by that library. You may also specify keyword arguments
+for boto3 to use in the `boto3_options key` of the store_backend configuration.
 
 
 Validation Operators

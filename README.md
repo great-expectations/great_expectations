@@ -2,6 +2,10 @@
 [![Coverage Status](https://coveralls.io/repos/github/great-expectations/great_expectations/badge.svg?branch=develop)](https://coveralls.io/github/great-expectations/great_expectations?branch=develop)
 [![Documentation Status](https://readthedocs.org/projects/great-expectations/badge/?version=latest)](http://great-expectations.readthedocs.io/en/latest/?badge=latest)
 
+<!-- <<<Super-quickstart links go here>>> -->
+
+
+
 <img align="right" src="./generic_dickens_protagonist.png">
 
 Great Expectations
@@ -9,111 +13,197 @@ Great Expectations
 
 *Always know what to expect from your data.*
 
-
-Quick Start
---------------------------------------------------------------------------------
-[Getting Started](http://docs.greatexpectations.io/en/latest/getting_started.html) will teach you how to get up and running in minutes.
-
-For full documentation, visit [Great Expectations on readthedocs.io](http://great-expectations.readthedocs.io/en/latest/).
-
-[Down with Pipeline Debt!](https://medium.com/@expectgreatdata/down-with-pipeline-debt-introducing-great-expectations-862ddc46782a) explains the core philosophy behind Great Expectations. Please give it a read, and clap, follow, and share while you're at it.
-
-To make this project more accessible to all data practitioners, we are looking for user testers to help make the onboarding experience better! **If you are new to Great Expectations, in return for your time we’d love to help you get up and running!**
-Feel free to schedule here:  https://calendly.com/great-expectations-1/great-expectations-integration-one-on-one
-
-What is great_expectations?
+Introduction
 --------------------------------------------------------------------------------
 
-Great Expectations helps teams save time and promote analytic integrity by offering a unique approach to automated testing: pipeline tests. Pipeline tests are applied to data (instead of code) and at batch time (instead of compile or deploy time). Pipeline tests are like unit tests for datasets: they help you guard against upstream data changes and monitor data quality.
+Great Expectations helps data teams eliminate pipeline debt, through data testing, documentation, and profiling.
 
-Software developers have long known that automated testing is essential for managing complex codebases. Great Expectations brings the same discipline, confidence, and acceleration to data science and engineering teams.
+Software developers have long known that testing and documentation are essential for managing complex codebases. Great Expectations brings the same confidence, integrity, and acceleration to data science and data engineering teams.
+
+See [Down with Pipeline Debt!](https://medium.com/@expectgreatdata/down-with-pipeline-debt-introducing-great-expectations-862ddc46782a) for an introduction to the philosophy of pipeline testing.
 
 
-Why would I use Great Expectations?
---------------------------------------------------------------------------------
+<!--
+--------------------------------------------------
+<<<A bunch of logos go here for social proof>>>
 
-To get more done with data, faster. Teams use great_expectations to
-
-*  Save time during data cleaning and munging.
-*  Accelerate ETL and data normalization.
-*  Streamline analyst-to-engineer handoffs.
-*  Streamline knowledge capture and requirements gathering from subject-matter experts.
-*  Monitor data quality in production data pipelines and data products.
-*  Automate verification of new data deliveries from vendors and other teams.
-*  Simplify debugging data pipelines if (when) they break.
-*  Codify assumptions used to build models when sharing with other
-   teams or analysts.
-*  Develop rich, shared data documention in the course of normal work.
-*  Make implicit knowledge explicit.
-*  etc., etc., etc.
+--------------------------------------------------
+-->
 
 Key features
 --------------------------------------------------
 
 **Expectations**
 
-Expectations are the workhorse abstraction in Great Expectations. Like assertions in traditional python unit tests, Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests, Great Expectations applies Expectations to data instead of code.
-
-Expectations include:
-- `expect_table_row_count_to_equal`
+Expectations are assertions for data. They are the workhorse abstraction in Great Expectations, covering all kinds of common data issues, including:
+- `expect_column_values_to_not_be_null`
+- `expect_column_values_to_match_regex`
 - `expect_column_values_to_be_unique`
-- `expect_column_values_to_be_in_set`
-- `expect_column_mean_to_be_between`
-- ...and many more
+- `expect_column_values_to_match_strftime_format`
+- `expect_table_row_count_to_be_between`
+- `expect_column_median_to_be_between`
+- ...and [many more](https://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html)
 
-Great Expectations currently supports native execution of Expectations in three environments: pandas, SQL (through the SQLAlchemy core), and Spark. This approach follows the philosophy of "take the compute to the data." Future releases of Great Expectations will extend this functionality to other frameworks, such as dask and BigQuery.
+Expectations are <!--[declarative, flexible and extensible]()--> declarative, flexible and extensible.
+<!--To test out Expectations on your own data, check out the [<<step-1 tutorial>>]().-->
+
+<!--
+<<animated gif showing typing an Expectation in a notebook cell, running it, and getting an informative result>>
+-->
+
+**Batteries-included data validation**
+
+Expectations are a great start, but it takes more to get to production-ready data validation. Where are Expectations stored? How do they get updated? How do you securely connect to production data systems? How do you notify team members and triage when data validation fails?
+
+Great Expectations supports all of these use cases out of the box. Instead of building these components for yourself over weeks or months, you will be able to add production-ready validation to your pipeline in a day. This “Expectations on rails” framework plays nice with other data engineering tools, respects your existing name spaces, and is designed for extensibility.
+
+<!--
+Check out [The Era of DIY Data Validation is Over]() for more details.
+-->
+
+<!--
+<<animated gif showing slack message, plus click through to validation results, a la: https://docs.google.com/presentation/d/1ZqFXsoOyW2KIkMBNij3c7KOM0RhajhAHKesdCL_BKHw/edit#slide=id.g6b0ff79464_0_183>>
+-->
+![ooooo ahhhh](./readme_assets/terminal.gif)
+
+**Tests are docs and docs are tests**
+
+Many data teams struggle to maintain up-to-date data documentation. Great Expectations solves this problem by rendering Expectations directly into clean, human-readable documentation. 
+
+Since docs are rendered from tests, and tests are run against new data as it arrives, your documentation is guaranteed to never go stale. Additional renderers allow Great Expectations to generate other type of "documentation", including <!--[slack notifications](), [data dictionaries](), [customized notebooks]()--> slack notifications, data dictionaries, customized notebooks, etc.
+
+<!--
+<<Pic, similar to slide 32: https://docs.google.com/presentation/d/1ZqFXsoOyW2KIkMBNij3c7KOM0RhajhAHKesdCL_BKHw/edit#slide=id.g6af8c4cd70_0_38>>
+
+<<Pic, showing an Expectation that renders a graph>>
+
+Check out [Down with Documentation Rot!]() for more details.
+-->
+![Your tests are your docs and your docs are your tests](./readme_assets/test-are-docs.jpg)
+
 
 **Automated data profiling**
 
-Writing pipeline tests from scratch can be tedious and counterintuitive. Great Expectations jump starts the process by providing powerful tools for automated data profiling. This provides the double benefit of helping you explore data faster, and capturing knowledge for future documentation and testing.
+Wouldn't it be great if your tests could write themselves? Run your data through one of Great Expectations' data profilers and it will automatically generate Expectations and data documentation. Profiling provides the double benefit of helping you explore data faster, and capturing knowledge for future documentation and testing.
 
-**DataContexts and DataSources**
+<!--
+<<<pretty pics of profiled data>>>
+<<<esp. multi-batch profiling>>>
+-->
+![ooooo ahhhh](./readme_assets/datadocs.gif)
 
-...allow you to configure connections your data stores, using names that point to concepts you’re already familiar with: “the `ml_training_results` bucket in S3,” “the `Users` table in Redshift.” Great Expectations provides convenience libraries to introspect most common data stores (Ex: SQL databases, data directories and S3 buckets.) We are also working to integrate with pipeline execution frameworks (Ex: airflow, dbt, dagster, prefect.io). The Great Expectations framework lets you fetch, validate, profile, and document your data in a way that’s meaningful within your existing infrastructure and work environment.
+Automated profiling doesn't replace domain expertise&mdash;you will almost certainly tune and augment your auto-generated Expectations over time&mdash;but it's a great way to jump start the process of capturing and sharing domain knowledge across your team.
 
-**Tooling for validation**
+<!--
+<<<Note: this feature is still in early beta. Expect changes.>>>
 
-Evaluating Expectations against data is just one step in a typical validation workflow. Great Expectations makes the followup steps simple, too: storing validation results to a shared bucket, summarizing results and posting notifications to slack, handling differences between warnings and errors, etc.
+Visit our gallery of expectations and documentation generated via automatic data profiling [here]().
 
-Great Expectations also provides robust concepts of Batches and Runs. Although we sometimes talk informally about validating "dataframes" or "tables," it’s much more common to validate batches of new data—subsets of tables, rather than whole tables. DataContexts provide simple, universal syntax to generate, fetch, and validate Batches of data from any of your DataSources.
+You can also test out profiling on your own data [here]().
+-->
 
-**Compile to Docs**
+**Pluggable and extensible**
 
-As of v0.7.0, Great Expectations includes new classes and methods to `render` Expectations to clean, human-readable documentation. Since docs are compiled from tests and you are running tests against new data as it arrives, your documentation is guaranteed to never go stale.
+Every component of the framework is designed to be extensible: Expectations, storage, profilers, renderers for documentation, actions taken after validation, etc.  This design choice gives a lot of creative freedom to developers working with Great Expectations.
 
+Recent extensions include:
+* [Renderers for data dictionaries](https://greatexpectations.io/blog/20191004_data_dictionary_plugin)
+* [BigQuery and GCS integration](https://github.com/great-expectations/great_expectations/pull/841)
+* [Notifications to MatterMost](https://github.com/great-expectations/great_expectations/issues/902)
 
-What does Great Expectations NOT do?
+We're very excited to see what other plugins the data community comes up with!
+
+Quick start
 -------------------------------------------------------------
 
-**Great Expectations is NOT a pipeline execution framework.**
+To see Great Expectations in action on your own data:
+
+```
+    pip install great_expectations
+    great_expectations init
+
+```
+
+(We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](http://docs.greatexpectations.io/en/latest/reference/supporting_resources.html) will teach you how to get up and running in minutes before continuing.)
+
+For full documentation, visit [Great Expectations on readthedocs.io](http://great-expectations.readthedocs.io/en/latest/).
+
+If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there.
+
+<!--
+-------------------------------------------------------------
+<<<More social proof: pics and quotes of power users>>>
+
+-------------------------------------------------------------
+-->
+
+Integrations
+-------------------------------------------------------------------------------
+Great Expectations works with the tools and systems that you're already using with your data, including:
+
+<table>
+	<thead>
+		<tr>
+			<th colspan="2">Integration</th>
+			<th>Notes</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://pandas.pydata.org/_static/pandas_logo.png" />                                    </td><td style="width: 200px;">Pandas                   </td><td>Great for in-memory machine learning pipelines!</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://spark.apache.org/images/spark-logo-trademark.png" />                             </td><td style="width: 200px;">Spark                    </td><td>Good for really big data.</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://wiki.postgresql.org/images/3/30/PostgreSQL_logo.3colors.120x120.png" />          </td><td style="width: 200px;">Postgres                 </td><td>Leading open source database</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.mysql.com/common/logos/powered-by-mysql-167x86.png" />                       </td><td style="width: 200px;">MySQL                    </td><td>Leading open source database</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.blazeclan.com/wp-content/uploads/2013/08/Amazon-Redshift-%E2%80%93-11-Key-Points-to-Remember.png" />                 </td><td style="width: 200px;">AWS Redshift             </td><td>Cloud-based data warehouse</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://braze-marketing-assets.s3.amazonaws.com/images/partner_logos/amazon-s3.png" />   </td><td style="width: 200px;">AWS S3                   </td><td>Cloud based blob storage</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.snowflake.com/wp-content/themes/snowflake/img/snowflake-logo-blue@2x.png" /> </td><td style="width: 200px;">Snowflake                </td><td>Cloud-based data warehouse</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://raw.githubusercontent.com/apache/airflow/master/docs/img/logos/wordmark_1.png" /></td><td style="width: 200px;">Apache Airflow           </td><td>An open source orchestration engine</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.sqlalchemy.org/img/sqla_logo.png" />                                         </td><td style="width: 200px;">Other SQL Relational DBs </td><td>Most RDBMS are supported via SQLalchemy</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://jupyter.org/assets/main-logo.svg" />                                             </td><td style="width: 200px;">Jupyter Notebooks        </td><td>The best way to build Expectations</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://cdn.brandfolder.io/5H442O3W/as/pl546j-7le8zk-5guop3/Slack_RGB.png" />            </td><td style="width: 200px;">Slack                    </td><td> Get automatic data quality notifications!</td></tr>
+	</tbody>
+</table>
+
+
+<!--
+Quick start
+-------------------------------------------------------------
+
+Still getting comfortable with the concept of Expectations? Try [our online browser]()
+
+Ready to start working with Great Expectations?
+
+`great expectations init`
+
+Looking at production deployment? [Go here]()
+
+-------------------------------------------------------------
+<<<More social proof: pics and quotes of power users>>>
+
+-------------------------------------------------------------
+Liking what you see? Show some love and give us a star!
+-->
+
+
+What does Great Expectations _not_ do?
+-------------------------------------------------------------
+
+**Great Expectations is _not_ a pipeline execution framework.**
 
 We aim to integrate seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), etc. We DON'T execute your pipelines for you.
 
-**Great Expectations is NOT a data versioning tool.**
+**Great Expectations is _not_ a data versioning tool.**
 	
 Great Expectations does not store data itself. Instead, it deals in metadata about data: Expectations, validation results, etc. If you want to bring your data itself under version control, check out tools like: [DVC](https://dvc.org/) and [Quilt](https://github.com/quiltdata/quilt).
 
 **Great Expectations currently works best in a python/bash environment.** 
 
-Great Expectations is python-based. You can invoke it from the command line without using a python programming environment, but if you're working in another ecosystem, other tools might be a better choice. If you're running in a pure R environment, you might consider [assertR](https://github.com/ropensci/assertr) as an alternative. Within the Tensorflow ecosystem, [TFDV](https://www.tensorflow.org/tfx/guide/tfdv) fulfills a similar function as Great Expectations.
+Following the philosophy of "take the compute to the data," Great Expectations currently supports native execution of Expectations in three environments: pandas, SQL (through the SQLAlchemy core), and Spark. That said, all orchestration in Great Expectations is python-based. You can invoke it from the command line without using a python programming environment, but if you're working in another ecosystem, other tools might be a better choice. If you're running in a pure R environment, you might consider [assertR](https://github.com/ropensci/assertr) as an alternative. Within the Tensorflow ecosystem, [TFDV](https://www.tensorflow.org/tfx/guide/tfdv) fulfills a similar function as Great Expectations.
 
-
-How do I learn more?
---------------------------------------------------------------------------------
-
-For full documentation, visit [Great Expectations on readthedocs.io](http://great-expectations.readthedocs.io/en/latest/).
-
-[Down with Pipeline Debt!](https://medium.com/@expectgreatdata/down-with-pipeline-debt-introducing-great-expectations-862ddc46782a) explains the core philosophy behind Great Expectations. Please give it a read, and clap, follow, and share while you're at it.
-
-For quick, hands-on introductions to Great Expectations' key features, check out our walkthrough videos:
-
-* [Introduction to Great Expectations](https://www.youtube.com/watch?v=-_0tG7ACNU4)
-* [Using Distributional Expectations](https://www.youtube.com/watch?v=l3DYPVZAUmw&t=20s)
 
 Who maintains Great Expectations?
 -------------------------------------------------------------
 
-Great Expectations is under active development by James Campbell, Abe Gong, Eugene Mandel, Rob Lim, Taylor Miller, and help from many others.
+Great Expectations is under active development by James Campbell, Abe Gong, Eugene Mandel, Rob Lim, Taylor Miller, with help from many others.
 
 What's the best way to get in touch with the Great Expectations team?
 --------------------------------------------------------------------------------

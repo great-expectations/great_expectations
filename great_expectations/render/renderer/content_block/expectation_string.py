@@ -1329,6 +1329,66 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         })]
     
     @classmethod
+    def expect_column_quantile_values_to_be_between(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "quantile_ranges"]
+        )
+        template_str = "Column quantiles must be within the following value ranges:\n\n"
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        expectation_string_obj = {
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params
+            }
+        }
+
+        quantiles = params["quantile_ranges"]["quantiles"]
+        value_ranges = params["quantile_ranges"]["value_ranges"]
+
+        table_header_row = ["Quantile", "Min Value", "Max Value"]
+        table_rows = []
+
+        quantile_strings = {
+            .25: "Q1",
+            .75: "Q3",
+            .50: "Median"
+        }
+
+        for idx, quantile in enumerate(quantiles):
+            quantile_string = quantile_strings.get(quantile)
+            table_rows.append([
+                quantile_string if quantile_string else "{:3.2f}".format(quantile),
+                str(value_ranges[idx][0]) if value_ranges[idx][0] else "Any",
+                str(value_ranges[idx][1]) if value_ranges[idx][1] else "Any",
+            ])
+
+        quantile_range_table = {
+            "content_block_type": "table",
+            "header_row": table_header_row,
+            "table": table_rows,
+            "styling": {
+                "body": {
+                    "classes": ["table", "table-sm", "table-unbordered", "col-4"],
+                },
+                "parent": {
+                    "styles": {
+                        "list-style-type": "none"
+                    }
+                }
+            }
+        }
+
+        return [
+            expectation_string_obj,
+            quantile_range_table
+        ]
+
+    @classmethod
     def expect_column_kl_divergence_to_be_less_than(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
