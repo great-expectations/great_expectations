@@ -467,7 +467,10 @@ def edit_suite(
     else:
         batch_kwargs = json.loads(batch_kwargs)
 
-    notebook_path = os.path.join(context.GE_EDIT_NOTEBOOK_DIR, "foo.ipynb")
+    human_data_asset_name = suite.data_asset_name.generator_asset
+    notebook_name = f"{human_data_asset_name}_{suite_name}.ipynb"
+
+    notebook_path = os.path.join(context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
     NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path)
 
     cli_message(
