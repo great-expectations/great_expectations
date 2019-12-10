@@ -736,7 +736,7 @@ class ConfigOnlyDataContext(object):
 
         if initialize:
             datasource = self._build_datasource_from_config(
-                **self._project_config_with_variables_substituted["datasources"][name])
+                name, self._project_config_with_variables_substituted["datasources"][name])
             self._datasources[name] = datasource
         else:
             datasource = None
@@ -746,16 +746,19 @@ class ConfigOnlyDataContext(object):
     def get_config(self):
         return self._project_config
 
-    def _build_datasource_from_config(self, **kwargs):
-        if "type" in kwargs:
+    def _build_datasource_from_config(self, name, config):
+        if "type" in config:
             warnings.warn("Using type configuration to build datasource. Please update to using class_name.")
-            type_ = kwargs.pop("type")
+            type_ = config.pop("type")
             datasource_class = self._get_datasource_class_from_type(type_)
-            kwargs.update({
+            config.update({
                 "class_name": datasource_class.__name__
             })
+        config.update({
+            "name": name
+        })
         datasource = instantiate_class_from_config(
-            config=kwargs,
+            config=config,
             runtime_environment={
                 "data_context": self
             },
@@ -803,7 +806,7 @@ class ConfigOnlyDataContext(object):
             raise ValueError(
                 "Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name
             )
-        datasource = self._build_datasource_from_config(**datasource_config)
+        datasource = self._build_datasource_from_config(datasource_name, datasource_config)
         self._datasources[datasource_name] = datasource
         return datasource
             
