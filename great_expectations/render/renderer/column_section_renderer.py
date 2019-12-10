@@ -375,10 +375,12 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         if any(len(value) > 80 for value in values):
             content_block_type = "bullet_list"
+            content_block_class = RenderedBulletListContent
         else:
             content_block_type = "value_list"
+            content_block_class = ValueListContent
 
-        new_block = ValueListContent(**{
+        new_block = content_block_class(**{
             "content_block_type": content_block_type,
             "header":
                 {
