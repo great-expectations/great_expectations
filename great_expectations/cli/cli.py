@@ -421,7 +421,7 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, vi
     '--batch-kwargs',
     default=None,
     help='Additional keyword arguments to be provided to get_batch when loading \
-    the data asset. Must be a valid JSON dictionary'
+the data asset. Must be a valid JSON dictionary'
 )
 @click.option(
     "--directory",
@@ -430,25 +430,15 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, vi
     help="The project's great_expectations directory.",
 )
 @click.option(
-    "--jupyter-notebook",
-    "-jn",
-    default=True,
-    is_flag=True,
-    help="By default open in browser unless you specify the --no-jupyter flag",
-)
-@click.option(
-    "--jupyter-lab", "-jl", is_flag=True, default=False, help="Edit in jupyter lab",
-)
-@click.option(
     "--jupyter/--no-jupyter",
     is_flag=True,
-    help="By default open in browser unless you specify the --no-jupyter flag",
+    help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
 def edit_suite(
-    data_asset_name, suite_name, directory, jupyter_notebook, jupyter_lab, jupyter, batch_kwargs
+    data_asset_name, suite_name, directory, jupyter, batch_kwargs
 ):
-    ""Create a new jupyter notebook prepopulated to make it easy to edit an existing suite."""
+    """Create a new jupyter notebook prepopulated to make it easy to edit an existing suite."""
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
@@ -460,12 +450,25 @@ def edit_suite(
 
     suite = _load_suite(context, data_asset_name, suite_name)
 
-    if not batch_kwargs:
-        # TODO rrrgh why aren't batch kwargs in a suite make this work...
-        cli_message("<red>Attempting to use a configured generator to build batch_kwargs. You may need to review the generator configuration to ensure you can get the desired batch.</red>")
-        batch_kwargs = context.yield_batch_kwargs(suite.data_asset_name)
-    else:
+    if batch_kwargs:
         batch_kwargs = json.loads(batch_kwargs)
+    # elif "batch_kwargs" in suite:
+        # do they exist in suite?
+        # TODO this functionality doesn't actually exist yet
+        # batch_kwargs = suite.get("batch_kwargs")
+    # elif
+        # manual generator batch kwargs are configured
+        # TODO this functionality doesn't actually exist yet
+    else:
+        # can they be yielded?
+        batch_kwargs = context.yield_batch_kwargs(suite.data_asset_name)
+
+    if not batch_kwargs:
+        cli_message(
+            "<red>Attempting to use a configured generator to build batch_"
+            "kwargs. You may need to review the generator configuration to "
+            "ensure you can get the desired batch.</red>"
+        )
 
     human_data_asset_name = suite.data_asset_name.generator_asset
     notebook_name = f"{human_data_asset_name}_{suite_name}.ipynb"
@@ -480,12 +483,7 @@ def edit_suite(
     )
 
     if jupyter:
-        command = "notebook"
-        if jupyter_notebook:
-            command = "notebook"
-        if jupyter_lab:
-            command = "lab"
-        subprocess.call(["jupyter", command, notebook_path])
+        subprocess.call(["jupyter", "notebook", notebook_path])
 
 
 def _load_suite(context, data_asset_name, suite_name):
