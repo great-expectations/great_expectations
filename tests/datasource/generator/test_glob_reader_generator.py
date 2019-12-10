@@ -80,7 +80,7 @@ def test_glob_reader_generator_partitioning():
             "asset3": {
                 "glob": "asset3/my_data.parquet",
                 "reader_method": "parquet"
-            }
+            },
             "no_partition_asset1": {
                 "glob": "no_partition_asset1/*.csv"
             },
