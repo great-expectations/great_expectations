@@ -462,7 +462,7 @@ def edit_suite(
 
     if not batch_kwargs:
         # TODO rrrgh why aren't batch kwargs in a suite make this work...
-        cli_message("<red>This probably won't work.</red>")
+        cli_message("<red>Attempting to use a configured generator to build batch_kwargs. You may need to review the generator configuration to ensure you can get the desired batch.</red>")
         batch_kwargs = context.yield_batch_kwargs(suite.data_asset_name)
     else:
         batch_kwargs = json.loads(batch_kwargs)
