@@ -356,6 +356,55 @@ def test_simple_suite(critical_suite):
     assert obs == expected
 
 
+def test_batch_kwarg_path_relative_is_modified_and_found_in_a_code_cell(critical_suite):
+    obs = NotebookRenderer().render(critical_suite, {"path": "foo/data"})
+    assert isinstance(obs, dict)
+    found_expected = False
+    for cell in obs["cells"]:
+        if cell["cell_type"] == "code":
+            source_code = cell["source"]
+            print(source_code)
+            if "batch_kwargs = {'path': '../../foo/data'}" in source_code:
+                found_expected = True
+                break
+
+    assert found_expected
+
+
+def test_batch_kwarg_path_relative_dot_slash_is_modified_and_found_in_a_code_cell(
+    critical_suite,
+):
+    obs = NotebookRenderer().render(critical_suite, {"path": "./foo/data"})
+    assert isinstance(obs, dict)
+    found_expected = False
+    for cell in obs["cells"]:
+        if cell["cell_type"] == "code":
+            source_code = cell["source"]
+            print(source_code)
+            if "batch_kwargs = {'path': '../.././foo/data'}" in source_code:
+                found_expected = True
+                break
+
+    assert found_expected
+
+
+def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
+    critical_suite,
+):
+    obs = NotebookRenderer().render(critical_suite, {"path": "/home/user/foo/data"})
+    assert isinstance(obs, dict)
+    found_expected = False
+    for cell in obs["cells"]:
+        if cell["cell_type"] == "code":
+            source_code = cell["source"]
+            print(source_code)
+            if "batch_kwargs = {'path': '/home/user/foo/data'}" in source_code:
+                found_expected = True
+                break
+
+    assert found_expected
+
+
 def test_complex_suite(warning_suite):
     obs = NotebookRenderer().render(warning_suite, {"path": "foo/data"})
     assert isinstance(obs, dict)

@@ -448,6 +448,7 @@ def edit_suite(
         _offer_to_install_new_template(err, context.root_directory)
         return
 
+    suite_name = suite_name.rstrip(".json")
     suite = _load_suite(context, data_asset_name, suite_name)
 
     if batch_kwargs:
