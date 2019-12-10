@@ -66,15 +66,20 @@ def test_glob_reader_generator_partitioning():
             "sep": "|",
             "quoting": 3
         },
+        reader_method="csv",
         asset_globs={
             "asset1": {
                 "glob": "asset1/*__my_data.csv",
                 "partition_regex": r"^.*(20\d\d\d\d\d\d)__my_data\.csv$",
-                "match_group_id": 1  # This is optional
+                "match_group_id": 1,  # This is optional
             },
             "asset2": {
                 "glob": "asset2/*__my_data.csv",
                 "partition_regex": r"^.*(20\d\d\d\d\d\d)__my_data\.csv$"
+            },
+            "asset3": {
+                "glob": "asset3/my_data.parquet",
+                "reader_method": "parquet"
             },
             "no_partition_asset1": {
                 "glob": "no_partition_asset1/*.csv"
@@ -105,7 +110,7 @@ def test_glob_reader_generator_partitioning():
         is_dir.return_value = True
         names = glob_generator.get_available_data_asset_names()
         # Use set in test to avoid order issues
-        assert set(names) == {"asset1", "asset2", "no_partition_asset1", "no_partition_asset2"}
+        assert set(names) == {"asset1", "asset2", "asset3", "no_partition_asset1", "no_partition_asset2"}
 
     with mock.patch("glob.glob") as mock_glob, mock.patch("os.path.isdir") as is_dir:
         mock_glob_match = [
@@ -132,7 +137,8 @@ def test_glob_reader_generator_partitioning():
         assert batch_kwargs["partition_id"] == "20190101"
         assert batch_kwargs["reader_options"]["sep"] == "|"
         assert batch_kwargs["reader_options"]["quoting"] == 3
-        assert len(batch_kwargs) == 3
+        assert batch_kwargs["reader_method"] == "csv"
+        assert len(batch_kwargs) == 4
 
     with mock.patch("glob.glob") as mock_glob, mock.patch("os.path.isdir") as is_dir:
         mock_glob_match = [
@@ -163,7 +169,7 @@ def test_glob_reader_generator_partitioning():
         assert batch_kwargs["partition_id"] == "no_partition_asset1/this_is_a_batch_of_data.csv"
         assert batch_kwargs["reader_options"]["sep"] == "|"
         assert batch_kwargs["reader_options"]["quoting"] == 3
-        assert len(batch_kwargs) == 3
+        assert len(batch_kwargs) == 4
 
         # When partition isn't really well defined, though, the preferred way is to use yield_batch_kwargs
         batch_kwargs = glob_generator.yield_batch_kwargs("no_partition_asset1")
@@ -174,7 +180,7 @@ def test_glob_reader_generator_partitioning():
         assert batch_kwargs["partition_id"] == "no_partition_asset1/this_is_a_batch_of_data.csv"
         assert batch_kwargs["reader_options"]["sep"] == "|"
         assert batch_kwargs["reader_options"]["quoting"] == 3
-        assert len(batch_kwargs) == 3
+        assert len(batch_kwargs) == 4
 
         # We should be able to pass limit as well
         batch_kwargs = glob_generator.yield_batch_kwargs("no_partition_asset1", limit=10)
@@ -185,7 +191,15 @@ def test_glob_reader_generator_partitioning():
         assert batch_kwargs["reader_options"]["sep"] == "|"
         assert batch_kwargs["reader_options"]["quoting"] == 3
         assert batch_kwargs["limit"] == 10
-        assert len(batch_kwargs) == 4
+        assert len(batch_kwargs) == 5
+
+    with mock.patch("glob.glob") as mock_glob, mock.patch("os.path.isdir") as is_dir:
+        mock_glob_match = ["/data/project/asset3/mydata.parquet"]    
+        mock_glob.return_value = mock_glob_match
+        is_dir.return_value = True
+        batch_kwargs = glob_generator.yield_batch_kwargs("asset3")
+        assert batch_kwargs["reader_method"] == "parquet"
+
 
 
 def test_glob_reader_generator_customize_partitioning():
