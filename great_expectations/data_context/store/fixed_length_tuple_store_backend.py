@@ -172,7 +172,10 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
 
         safe_mmkdir(str(path))
         with open(filepath, "wb") as outfile:
-            outfile.write(value.encode("utf-8"))
+            try:
+                outfile.write(value.encode("utf-8"))
+            except AttributeError:
+                outfile.write(value)
         return filepath
 
     def list_keys(self, prefix=()):
