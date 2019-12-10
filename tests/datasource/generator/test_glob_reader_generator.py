@@ -166,7 +166,7 @@ def test_glob_reader_generator_partitioning():
         assert batch_kwargs["partition_id"] == "no_partition_asset1/this_is_a_batch_of_data.csv"
         assert batch_kwargs["reader_options"]["sep"] == "|"
         assert batch_kwargs["reader_options"]["quoting"] == 3
-        assert len(batch_kwargs) == 3
+        assert len(batch_kwargs) == 4
 
         # When partition isn't really well defined, though, the preferred way is to use yield_batch_kwargs
         batch_kwargs = glob_generator.yield_batch_kwargs("no_partition_asset1")
@@ -177,7 +177,7 @@ def test_glob_reader_generator_partitioning():
         assert batch_kwargs["partition_id"] == "no_partition_asset1/this_is_a_batch_of_data.csv"
         assert batch_kwargs["reader_options"]["sep"] == "|"
         assert batch_kwargs["reader_options"]["quoting"] == 3
-        assert len(batch_kwargs) == 3
+        assert len(batch_kwargs) == 4
 
         # We should be able to pass limit as well
         batch_kwargs = glob_generator.yield_batch_kwargs("no_partition_asset1", limit=10)
