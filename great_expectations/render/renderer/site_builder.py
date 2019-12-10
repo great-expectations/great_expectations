@@ -14,11 +14,7 @@ from great_expectations.data_context.store.html_site_store import (
     SiteSectionIdentifier,
 )
 
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-    file_relative_path
-)
-
+from great_expectations.data_context.util import instantiate_class_from_config
 import great_expectations.exceptions as exceptions
 
 logger = logging.getLogger(__name__)

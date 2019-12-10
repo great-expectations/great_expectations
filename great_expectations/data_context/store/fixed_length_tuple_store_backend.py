@@ -172,9 +172,13 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
 
         safe_mmkdir(str(path))
         with open(filepath, "wb") as outfile:
-            try:
-                outfile.write(value.encode("utf-8"))
-            except AttributeError:
+            if isinstance(value, string_types):
+                # Following try/except is to support py2, since both str and bytes objects pass above condition
+                try:
+                    outfile.write(value.encode("utf-8"))
+                except TypeError:
+                    outfile.write(value)
+            else:
                 outfile.write(value)
         return filepath
 
@@ -252,7 +256,15 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         import boto3
         s3 = boto3.resource('s3')
         result_s3 = s3.Object(self.bucket, s3_object_key)
-        result_s3.put(Body=value.encode(content_encoding), ContentEncoding=content_encoding, ContentType=content_type)
+        if isinstance(value, string_types):
+            # Following try/except is to support py2, since both str and bytes objects pass above condition
+            try:
+                result_s3.put(Body=value.encode(content_encoding), ContentEncoding=content_encoding,
+                              ContentType=content_type)
+            except TypeError:
+                result_s3.put(Body=value, ContentType=content_type)
+        else:
+            result_s3.put(Body=value, ContentType=content_type)
         return s3_object_key
 
     def list_keys(self):
@@ -330,7 +342,15 @@ class FixedLengthTupleGCSStoreBackend(FixedLengthTupleStoreBackend):
         gcs = storage.Client(project=self.project)
         bucket = gcs.get_bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
-        blob.upload_from_string(value.encode(content_encoding), content_type=content_type)
+        if isinstance(value, string_types):
+            # Following try/except is to support py2, since both str and bytes objects pass above condition
+            try:
+                blob.upload_from_string(value.encode(content_encoding), content_encoding=content_encoding,
+                                        content_type=content_type)
+            except TypeError:
+                blob.upload_from_string(value, content_type=content_type)
+        else:
+            blob.upload_from_string(value, content_type=content_type)
         return gcs_object_key
 
     def list_keys(self):

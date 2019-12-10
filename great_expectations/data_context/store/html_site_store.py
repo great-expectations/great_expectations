@@ -13,8 +13,8 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
     file_relative_path
 )
-from great_expectations.exceptions import DataContextError, StoreConfigurationError
-from ...core import DataContextKey
+from great_expectations.exceptions import DataContextError
+from great_expectations.core import DataContextKey
 
 logger = logging.getLogger(__name__)
 
