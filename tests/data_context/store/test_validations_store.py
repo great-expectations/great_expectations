@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from moto import mock_s3
 import boto3
@@ -155,3 +157,55 @@ test_ValidationResultStore_with_FixedLengthTupleFileSystemStoreBackend__dir0/
                     c/
                         quarantine.txt
 """
+
+
+def test_ValidationsStore_with_DatabaseStoreBackend():
+    # Use sqlite so we don't require postgres for this test.
+    connection_kwargs = {
+        "drivername": "sqlite"
+    }
+
+    # First, demonstrate that we pick up default configuration
+    my_store = ValidationsStore(
+        store_backend={
+            "class_name": "DatabaseStoreBackend",
+            "credentials": connection_kwargs
+        }
+    )
+
+    with pytest.raises(TypeError):
+        my_store.get("not_a_ValidationResultIdentifier")
+
+    ns_1 = ValidationResultIdentifier(
+        expectation_suite_identifier=ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier(
+                datasource="a",
+                generator="b",
+                generator_asset="c"
+            ),
+            expectation_suite_name="quarantine",
+        ),
+        run_id="20191007T151224.1234Z_prod_100"
+    )
+    my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
+    assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
+
+    ns_2 = ValidationResultIdentifier(
+        expectation_suite_identifier=ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier(
+                datasource="a",
+                generator="b",
+                generator_asset="c"
+            ),
+            expectation_suite_name="quarantine",
+        ),
+        run_id="20191007T151224.1234Z_prod_200"
+    )
+
+    my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
+    assert my_store.get(ns_2) == ExpectationSuiteValidationResult(success=False, statistics={}, results=[])
+
+    assert set(my_store.list_keys()) == {
+        ns_1,
+        ns_2,
+    }

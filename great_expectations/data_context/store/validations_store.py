@@ -23,7 +23,7 @@ class ValidationsStore(Store):
                 store_backend["filepath_template"] = store_backend.get("filepath_template", "{4}/{0}/{1}/{2}/{3}.json")
             elif issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
-                store_backend["table_name"] = store_backend.get("table_name", "ge_expectations_store")
+                store_backend["table_name"] = store_backend.get("table_name", "ge_validations_store")
                 store_backend["key_columns"] = store_backend.get(
                     "key_columns", [
                         "run_id",
