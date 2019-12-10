@@ -1,7 +1,8 @@
 import logging
 import json
-from abc import ABC, abstractmethod
-from copy import deepcopy, copy
+# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
+from abc import ABCMeta, abstractmethod
+from copy import deepcopy
 
 from six import string_types
 
@@ -233,7 +234,8 @@ def ensure_json_serializable(data):
             str(data), type(data).__name__))
 
 
-class DataContextKey(ABC):
+class DataContextKey(object):
+    __metaclass__ = ABCMeta
     """DataContextKey objects are used to uniquely identify resources used by the DataContext.
 
     A DataContextKey is designed to support clear naming with multiple representations including a hashable

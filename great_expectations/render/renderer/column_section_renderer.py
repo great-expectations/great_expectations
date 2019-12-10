@@ -375,10 +375,12 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         if any(len(value) > 80 for value in values):
             content_block_type = "bullet_list"
+            content_block_class = RenderedBulletListContent
         else:
             content_block_type = "value_list"
+            content_block_class = ValueListContent
 
-        new_block = ValueListContent(**{
+        new_block = content_block_class(**{
             "content_block_type": content_block_type,
             "header":
                 {
@@ -510,8 +512,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         value_count_dicts = distinct_values_set_evr.result['details']['value_counts']
         if isinstance(value_count_dicts, pd.Series):
-            values = value_count_dicts.index.to_list()
-            counts = value_count_dicts.to_list()
+            values = value_count_dicts.index.tolist()
+            counts = value_count_dicts.tolist()
         else:
             values = [value_count_dict['value'] for value_count_dict in value_count_dicts]
             counts = [value_count_dict['count'] for value_count_dict in value_count_dicts]

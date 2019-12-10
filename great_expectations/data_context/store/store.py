@@ -1,5 +1,4 @@
 import logging
-from abc import ABC
 
 from great_expectations.core import DataContextKey
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -9,7 +8,7 @@ from great_expectations.exceptions import DataContextError
 logger = logging.getLogger(__name__)
 
 
-class Store(ABC):
+class Store(object):
     """A store is responsible for reading and writing Great Expectations objects
     to appropriate backends. It provides a generic API that the DataContext can
     use independently of any particular ORM and backend.
