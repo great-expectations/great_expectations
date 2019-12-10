@@ -53,6 +53,7 @@ Commands:
   add-datasource    Add a new datasource to the data context.
   build-docs        Build Data Docs for a project.
   check-config      Check a config for validity and help with migrations.
+  edit-suite        Edit an existing suite with a jupyter notebook.
   init              Create a new project and help with onboarding.
   list-datasources  List known datasources.
   profile           Profile datasources from the specified context.
