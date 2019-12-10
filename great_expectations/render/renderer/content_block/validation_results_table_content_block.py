@@ -2,7 +2,7 @@ from six import integer_types
 
 from great_expectations.render.renderer.content_block.expectation_string import ExpectationStringRenderer
 from great_expectations.render.types import RenderedComponentContent, RenderedStringTemplateContent, \
-    RenderedTableContent, RenderedGraphContent
+    RenderedTableContent, RenderedGraphContent, RenderedContentBlockContainer
 from great_expectations.render.util import num_to_str
 
 import pandas as pd
@@ -262,21 +262,21 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             }
         })
 
-        return {
+        return RenderedContentBlockContainer(**{
             "content_block_type": "content_block_container",
             "content_blocks": [
                 observed_value_content_block,
                 graph_content_block
             ]
-        }
+        })
 
     @classmethod
     def _get_quantile_values_observed_value(cls, evr):
-        if "result" not in evr:
+        if evr.result is None:
             return "--"
 
-        quantiles = evr["result"]["observed_value"]["quantiles"]
-        value_ranges = evr["result"]["observed_value"]["values"]
+        quantiles = evr.result["observed_value"]["quantiles"]
+        value_ranges = evr.result["observed_value"]["values"]
 
         table_header_row = ["Value"]
         table_rows = []
@@ -294,7 +294,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 str(value_ranges[idx])
             ])
 
-        return {
+        return RenderedTableContent(**{
             "content_block_type": "table",
             "header_row": table_header_row,
             "table": table_rows,
@@ -303,7 +303,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "classes": ["table", "table-sm", "table-unbordered", "col-4"],
                 }
             }
-        }
+        })
 
     @classmethod
     def _get_observed_value(cls, evr):

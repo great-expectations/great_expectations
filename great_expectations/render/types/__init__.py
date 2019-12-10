@@ -103,6 +103,17 @@ class RenderedTableContent(RenderedComponentContent):
         return d
 
 
+class RenderedContentBlockContainer(RenderedComponentContent):
+    def __init__(self, content_blocks, styling=None, content_block_type="content_block_container"):
+        super(RenderedContentBlockContainer, self).__init__(content_block_type=content_block_type, styling=styling)
+        self.content_blocks = content_blocks
+
+    def to_json_dict(self):
+        d = super(RenderedContentBlockContainer, self).to_json_dict()
+        d["content_blocks"] = RenderedContent.rendered_content_list_to_json(self.content_blocks)
+        return d
+
+
 class RenderedStringTemplateContent(RenderedComponentContent):
     def __init__(self, string_template, styling=None, content_block_type="string_template"):
         super(RenderedStringTemplateContent, self).__init__(content_block_type=content_block_type, styling=styling)

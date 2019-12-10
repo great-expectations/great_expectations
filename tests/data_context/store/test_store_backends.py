@@ -214,7 +214,6 @@ def test_FixedLengthTupleGCSStoreBackend():
     )
 
     my_store_with_no_filepath_template = FixedLengthTupleGCSStoreBackend(
-        root_directory=os.path.abspath(path), # NOTE: Eugene: 2019-09-06: root_directory should be removed from the base class
         key_length=None,
         filepath_template=None,
         bucket=bucket,
