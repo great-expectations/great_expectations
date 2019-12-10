@@ -26,11 +26,11 @@ from great_expectations.cli.init_messages import (
     SLACK_WEBHOOK_PROMPT,
 )
 from great_expectations.core import expectationSuiteValidationResultSchema, expectationSuiteSchema
+from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 from .datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
     build_docs as build_documentation_impl,
-    MSG_GO_TO_NOTEBOOK,
 )
 from great_expectations.cli.util import cli_message, is_sane_slack_webhook
 from great_expectations.data_context import DataContext
@@ -438,7 +438,7 @@ the data asset. Must be a valid JSON dictionary'
 def edit_suite(
     data_asset_name, suite_name, directory, jupyter, batch_kwargs
 ):
-    """Create a new jupyter notebook prepopulated to make it easy to edit an existing suite."""
+    """Edit an existing suite with a jupyter notebook."""
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
