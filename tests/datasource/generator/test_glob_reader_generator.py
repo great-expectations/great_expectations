@@ -66,11 +66,13 @@ def test_glob_reader_generator_partitioning():
             "sep": "|",
             "quoting": 3
         },
+        reader_method="csv",
         asset_globs={
             "asset1": {
                 "glob": "asset1/*__my_data.csv",
                 "partition_regex": r"^.*(20\d\d\d\d\d\d)__my_data\.csv$",
-                "match_group_id": 1  # This is optional
+                "match_group_id": 1,  # This is optional
+                "reader_method": "csv"
             },
             "asset2": {
                 "glob": "asset2/*__my_data.csv",
@@ -132,7 +134,8 @@ def test_glob_reader_generator_partitioning():
         assert batch_kwargs["partition_id"] == "20190101"
         assert batch_kwargs["reader_options"]["sep"] == "|"
         assert batch_kwargs["reader_options"]["quoting"] == 3
-        assert len(batch_kwargs) == 3
+        assert batch_kwargs["reader_method"] == "csv"
+        assert len(batch_kwargs) == 4
 
     with mock.patch("glob.glob") as mock_glob, mock.patch("os.path.isdir") as is_dir:
         mock_glob_match = [
