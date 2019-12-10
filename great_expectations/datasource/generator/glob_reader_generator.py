@@ -40,18 +40,20 @@ class GlobReaderGenerator(BatchGenerator):
               reader_options:
                 sep: %
                 header: 0
+              reader_method: csv
               asset_globs:
                 wifi_logs:
                   glob: wifi*.log
                   partition_regex: wifi-((0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])-20\d\d).*\.log
-
+                  reader_method: csv
     """
 
     def __init__(self, name="default",
                  datasource=None,
                  base_directory="/data",
                  reader_options=None,
-                 asset_globs=None):
+                 asset_globs=None,
+                 reader_method=None):
         logger.debug("Constructing GlobReaderGenerator {!r}".format(name))
         super(GlobReaderGenerator, self).__init__(name, datasource=datasource)
         if reader_options is None:
@@ -62,13 +64,15 @@ class GlobReaderGenerator(BatchGenerator):
                 "default": {
                     "glob": "*",
                     "partition_regex": r"^((19|20)\d\d[- /.]?(0[1-9]|1[012])[- /.]?(0[1-9]|[12][0-9]|3[01])_(.*))\.csv",
-                    "match_group_id": 1
+                    "match_group_id": 1,
+                    "reader_method": 'csv'
                 }
             }
 
         self._base_directory = base_directory
         self._reader_options = reader_options
         self._asset_globs = asset_globs
+        self._reader_method = reader_method
 
     @property
     def reader_options(self):
@@ -77,6 +81,10 @@ class GlobReaderGenerator(BatchGenerator):
     @property
     def asset_globs(self):
         return self._asset_globs
+
+    @property
+    def reader_method(self):
+        return self._reader_method
 
     @property
     def base_directory(self):
@@ -188,6 +196,12 @@ class GlobReaderGenerator(BatchGenerator):
 
         if limit is not None:
             batch_kwargs['limit'] = limit
+
+        if self.reader_method is not None:
+            batch_kwargs['reader_method'] = self.reader_method
+        
+        if glob_config.get("reader_method"):
+            batch_kwargs['reader_method'] = glob_config.get("reader_method")
 
         return batch_kwargs
 
