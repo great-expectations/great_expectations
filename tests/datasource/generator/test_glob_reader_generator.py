@@ -188,7 +188,7 @@ def test_glob_reader_generator_partitioning():
         assert batch_kwargs["reader_options"]["sep"] == "|"
         assert batch_kwargs["reader_options"]["quoting"] == 3
         assert batch_kwargs["limit"] == 10
-        assert len(batch_kwargs) == 4
+        assert len(batch_kwargs) == 5
 
 
 def test_glob_reader_generator_customize_partitioning():
