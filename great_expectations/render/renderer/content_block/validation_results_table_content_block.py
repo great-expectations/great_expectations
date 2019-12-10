@@ -198,45 +198,59 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return "--"
 
         weights = evr.result["details"]["observed_partition"]["weights"]
-        if len(weights) <= 10:
-            height = 200
-            width = 200
-            col_width = 4
+        if len(weights) > 60:
+            chart_block = super(ValidationResultsTableContentBlockRenderer, cls)._get_kl_divergence_partition_object_table(evr.result["details"]["observed_partition"])
         else:
-            height = 300
-            width = 300
-            col_width = 6
+            if len(weights) <= 10:
+                height = 200
+                width = 200
+                col_width = 4
+            else:
+                height = 300
+                width = 300
+                col_width = 6
+    
+            if evr.result["details"]["observed_partition"].get("bins"):
+                bins = evr.result["details"]["observed_partition"]["bins"]
+                bins_x1 = [round(value, 1) for value in bins[:-1]]
+                bins_x2 = [round(value, 1) for value in bins[1:]]
+    
+                df = pd.DataFrame({
+                    "bin_min": bins_x1,
+                    "bin_max": bins_x2,
+                    "fraction": weights,
+                })
+    
+                bars = alt.Chart(df).mark_bar().encode(
+                    x='bin_min:O',
+                    x2='bin_max:O',
+                    y="fraction:Q"
+                ).properties(width=width, height=height, autosize="fit")
+                chart = bars.to_json()
+            elif evr.result["details"]["observed_partition"].get("values"):
+                values = evr.result["details"]["observed_partition"]["values"]
+    
+                df = pd.DataFrame({
+                    "values": values,
+                    "fraction": weights
+                })
+    
+                bars = alt.Chart(df).mark_bar().encode(
+                    x='values:N',
+                    y="fraction:Q"
+                ).properties(width=width, height=height, autosize="fit")
+                chart = bars.to_json()
 
-        if evr.result["details"]["observed_partition"].get("bins"):
-            bins = evr.result["details"]["observed_partition"]["bins"]
-            bins_x1 = [round(value, 1) for value in bins[:-1]]
-            bins_x2 = [round(value, 1) for value in bins[1:]]
-
-            df = pd.DataFrame({
-                "bin_min": bins_x1,
-                "bin_max": bins_x2,
-                "fraction": weights,
+            chart_block = RenderedGraphContent(**{
+                "content_block_type": "graph",
+                "graph": chart,
+                "styling": {
+                    "classes": ["col-" + str(col_width)],
+                    "styles": {
+                        "margin-top": "20px",
+                    }
+                }
             })
-
-            bars = alt.Chart(df).mark_bar().encode(
-                x='bin_min:O',
-                x2='bin_max:O',
-                y="fraction:Q"
-            ).properties(width=width, height=height, autosize="fit")
-            chart = bars.to_json()
-        elif evr.result["details"]["observed_partition"].get("values"):
-            values = evr.result["details"]["observed_partition"]["values"]
-
-            df = pd.DataFrame({
-                "values": values,
-                "fraction": weights
-            })
-
-            bars = alt.Chart(df).mark_bar().encode(
-                x='values:N',
-                y="fraction:Q"
-            ).properties(width=width, height=height, autosize="fit")
-            chart = bars.to_json()
 
         observed_value = evr.result.get("observed_value")
 
@@ -251,22 +265,11 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             }
         })
 
-        graph_content_block = RenderedGraphContent(**{
-            "content_block_type": "graph",
-            "graph": chart,
-            "styling": {
-                "classes": ["col-" + str(col_width)],
-                "styles": {
-                    "margin-top": "20px",
-                }
-            }
-        })
-
         return RenderedContentBlockContainer(**{
             "content_block_type": "content_block_container",
             "content_blocks": [
                 observed_value_content_block,
-                graph_content_block
+                chart_block
             ]
         })
 
