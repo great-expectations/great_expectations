@@ -127,7 +127,7 @@ class GlobReaderGenerator(BatchGenerator):
                                         partition_id: partition_id
                                     })
         batch_kwargs = self._build_batch_kwargs_from_path(path[0], glob_config, reader_options=reader_options,
-                                                          limit=limit, reader_method=reader_method, partition_id=partition_id)
+                                                          limit=limit, partition_id=partition_id)
         return batch_kwargs
 
     def _get_generator_asset_paths(self, generator_asset):
@@ -164,11 +164,11 @@ class GlobReaderGenerator(BatchGenerator):
         paths = glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
         return self._build_batch_kwargs_path_iter(paths, glob_config, reader_options=reader_options, limit=limit)
 
-    def _build_batch_kwargs_path_iter(self, path_list, glob_config, reader_options=None, limit=None, reader_method=None):
+    def _build_batch_kwargs_path_iter(self, path_list, glob_config, reader_options=None, limit=None):
         for path in path_list:
-            yield self._build_batch_kwargs_from_path(path, glob_config, reader_options=reader_options, limit=limit, reader_method=None)
+            yield self._build_batch_kwargs_from_path(path, glob_config, reader_options=reader_options, limit=limit)
 
-    def _build_batch_kwargs_from_path(self, path, glob_config, reader_options=None, limit=None, reader_method=None, partition_id=None):
+    def _build_batch_kwargs_from_path(self, path, glob_config, reader_options=None, limit=None, partition_id=None):
         # We could add MD5 (e.g. for smallish files)
         # but currently don't want to assume the extra read is worth it
         # unless it's configurable
@@ -200,8 +200,8 @@ class GlobReaderGenerator(BatchGenerator):
         if self.reader_method is not None:
             batch_kwargs['reader_method'] = self.reader_method
         
-        if reader_method:
-            batch_kwargs['reader_method'].update(reader_method)
+        if glob_config.get("reader_method"):
+            batch_kwargs['reader_method'] = glob_config.get("reader_method")
 
         return batch_kwargs
 
