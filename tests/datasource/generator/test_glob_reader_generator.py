@@ -110,7 +110,7 @@ def test_glob_reader_generator_partitioning():
         is_dir.return_value = True
         names = glob_generator.get_available_data_asset_names()
         # Use set in test to avoid order issues
-        assert set(names) == {"asset1", "asset2", "no_partition_asset1", "no_partition_asset2"}
+        assert set(names) == {"asset1", "asset2", "asset3", "no_partition_asset1", "no_partition_asset2"}
 
     with mock.patch("glob.glob") as mock_glob, mock.patch("os.path.isdir") as is_dir:
         mock_glob_match = [
