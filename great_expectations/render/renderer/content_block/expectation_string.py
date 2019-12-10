@@ -1329,6 +1329,56 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         })]
     
     @classmethod
+    def _get_kl_divergence_partition_object_table(cls, partition_object):
+        table_rows = []
+        fractions = partition_object["weights"]
+        
+        if partition_object.get("bins"):
+            bins = partition_object["bins"]
+            
+            for idx, fraction in enumerate(fractions):
+                if idx == len(fractions) - 1:
+                    table_rows.append([
+                        "[{} - {}]".format(num_to_str(bins[idx]), num_to_str(bins[idx + 1])),
+                        num_to_str(fraction)
+                    ])
+                else:
+                    table_rows.append([
+                        "[{} - {})".format(num_to_str(bins[idx]), num_to_str(bins[idx + 1])),
+                        num_to_str(fraction)
+                    ])
+        else:
+            values = partition_object["values"]
+            table_rows = [[value, num_to_str(fractions[idx])] for idx, value in enumerate(values)]
+
+        return {
+            "content_block_type": "table",
+            "header_row": ["Interval", "Fraction"] if partition_object.get("bins") else ["Value", "Fraction"],
+            "table": table_rows,
+            "styling": {
+                "body": {
+                    "classes": [
+                        "table",
+                        "table-sm",
+                        "table-bordered",
+                        "col-6"
+                    ],
+                },
+                "parent": {
+                    "classes": [
+                        "show-scrollbars",
+                        "p-2"
+                    ],
+                    "styles": {
+                        "list-style-type": "none",
+                        "overflow": "auto",
+                        "max-height": "80vh"
+                    }
+                }
+            }
+        }
+    
+    @classmethod
     def expect_column_quantile_values_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
@@ -1403,62 +1453,66 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                            "lower than $threshold:\n\n"
 
             weights = params["partition_object"]["weights"]
-            if len(weights) <= 10:
-                height = 200
-                width = 200
-                col_width = 4
+            
+            if len(weights) > 60:
+                expected_distribution = cls._get_kl_divergence_partition_object_table(params.get("partition_object"))
             else:
-                height = 300
-                width = 300
-                col_width = 6
-                
-            if params["partition_object"].get("bins"):
-                bins = params["partition_object"]["bins"]
-                bins_x1 = [round(value, 1) for value in bins[:-1]]
-                bins_x2 = [round(value, 1) for value in bins[1:]]
+                if len(weights) <= 10:
+                    height = 200
+                    width = 200
+                    col_width = 4
+                else:
+                    height = 300
+                    width = 300
+                    col_width = 6
+                    
+                if params["partition_object"].get("bins"):
+                    bins = params["partition_object"]["bins"]
+                    bins_x1 = [round(value, 1) for value in bins[:-1]]
+                    bins_x2 = [round(value, 1) for value in bins[1:]]
+        
+                    df = pd.DataFrame({
+                        "bin_min": bins_x1,
+                        "bin_max": bins_x2,
+                        "fraction": weights,
+                    })
     
-                df = pd.DataFrame({
-                    "bin_min": bins_x1,
-                    "bin_max": bins_x2,
-                    "fraction": weights,
-                })
-
-                bars = alt.Chart(df).mark_bar().encode(
-                    x='bin_min:O',
-                    x2='bin_max:O',
-                    y="fraction:Q"
-                ).properties(width=width, height=height, autosize="fit")
+                    bars = alt.Chart(df).mark_bar().encode(
+                        x='bin_min:O',
+                        x2='bin_max:O',
+                        y="fraction:Q"
+                    ).properties(width=width, height=height, autosize="fit")
+        
+                    chart = bars.to_json()
+                elif params["partition_object"].get("values"):
+                    values = params["partition_object"]["values"]
+                    
+                    df = pd.DataFrame({
+                        "values": values,
+                        "fraction": weights
+                    })
     
-                chart = bars.to_json()
-            elif params["partition_object"].get("values"):
-                values = params["partition_object"]["values"]
-                
-                df = pd.DataFrame({
-                    "values": values,
-                    "fraction": weights
-                })
-
-                bars = alt.Chart(df).mark_bar().encode(
-                    x='values:N',
-                    y="fraction:Q"
-                ).properties(width=width, height=height, autosize="fit")
-                chart = bars.to_json()
-
-            expected_distribution = {
-                "content_block_type": "graph",
-                "graph": chart,
-                "styling": {
-                    "classes": ["col-" + str(col_width)],
-                    "styles": {
-                        "margin-top": "20px",
-                    },
-                    "parent": {
+                    bars = alt.Chart(df).mark_bar().encode(
+                        x='values:N',
+                        y="fraction:Q"
+                    ).properties(width=width, height=height, autosize="fit")
+                    chart = bars.to_json()
+    
+                expected_distribution = {
+                    "content_block_type": "graph",
+                    "graph": chart,
+                    "styling": {
+                        "classes": ["col-" + str(col_width)],
                         "styles": {
-                            "list-style-type": "none"
+                            "margin-top": "20px",
+                        },
+                        "parent": {
+                            "styles": {
+                                "list-style-type": "none"
+                            }
                         }
                     }
                 }
-            }
 
         if include_column_name:
             template_str = "$column " + template_str
