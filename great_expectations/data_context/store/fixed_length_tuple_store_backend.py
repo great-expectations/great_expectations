@@ -1,7 +1,8 @@
 import os
 import random
 import re
-from abc import ABC
+# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
+from abc import ABCMeta
 
 from six import string_types
 
@@ -9,7 +10,8 @@ from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.util import safe_mmkdir
 
 
-class FixedLengthTupleStoreBackend(StoreBackend, ABC):
+class FixedLengthTupleStoreBackend(StoreBackend):
+    __metaclass__ = ABCMeta
     """
     If key_length is provided, the key to this StoreBackend abstract class must be a tuple with fixed length equal
     to key_length. The filepath_template is a string template used to convert the key to a filepath.

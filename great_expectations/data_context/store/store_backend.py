@@ -1,9 +1,11 @@
-from abc import ABC, abstractmethod
+# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
+from abc import ABCMeta, abstractmethod
 
 from six import string_types
 
 
-class StoreBackend(ABC):
+class StoreBackend(object):
+    __metaclass__ = ABCMeta
     """A store backend acts as a key-value store that can accept tuples as keys, to abstract away
     reading and writing to a persistence layer.
 

@@ -1,6 +1,7 @@
 import logging
 
-from abc import ABC
+# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
+from abc import ABCMeta
 from hashlib import md5
 import datetime
 
@@ -93,21 +94,24 @@ class BatchId(BatchKwargs):
         return self.get("timestamp")
 
 
-class PandasDatasourceBatchKwargs(ABC, BatchKwargs):
+class PandasDatasourceBatchKwargs(BatchKwargs):
+    __metaclass__ = ABCMeta
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
     pass
 
 
-class SparkDFDatasourceBatchKwargs(ABC, BatchKwargs):
+class SparkDFDatasourceBatchKwargs(BatchKwargs):
+    __metaclass__ = ABCMeta
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
     pass
 
 
-class SqlAlchemyDatasourceBatchKwargs(ABC, BatchKwargs):
+class SqlAlchemyDatasourceBatchKwargs(BatchKwargs):
+    __metaclass__ = ABCMeta
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
