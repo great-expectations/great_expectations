@@ -448,7 +448,7 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, vi
 def edit_suite(
     data_asset_name, suite_name, directory, jupyter_notebook, jupyter_lab, jupyter, batch_kwargs
 ):
-    """Edit an existing suite."""
+    ""Create a new jupyter notebook prepopulated to make it easy to edit an existing suite."""
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
