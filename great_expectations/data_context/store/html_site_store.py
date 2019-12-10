@@ -1,4 +1,6 @@
+import os
 import logging
+from mimetypes import guess_type
 
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -8,7 +10,8 @@ from great_expectations.data_context.types.resource_identifiers import (
 from .fixed_length_tuple_store_backend import FixedLengthTupleStoreBackend
 from great_expectations.data_context.util import (
     load_class,
-    instantiate_class_from_config
+    instantiate_class_from_config,
+    file_relative_path
 )
 from great_expectations.exceptions import DataContextError, StoreConfigurationError
 from ...core import DataContextKey

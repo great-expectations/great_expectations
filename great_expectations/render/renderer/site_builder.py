@@ -8,15 +8,17 @@ from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLAS
 from great_expectations.data_context.types import (
     ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
-
 )
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
 )
 
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.util import file_relative_path
+from great_expectations.data_context.util import (
+    instantiate_class_from_config,
+    file_relative_path
+)
+
 import great_expectations.exceptions as exceptions
 
 logger = logging.getLogger(__name__)
