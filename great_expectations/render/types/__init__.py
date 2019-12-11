@@ -62,24 +62,40 @@ class RenderedHeaderContent(RenderedComponentContent):
 
     def to_json_dict(self):
         d = super(RenderedHeaderContent, self).to_json_dict()
-        d["header"] = self.header
-        if self.subheader:
-            d["subheader"] = self.subheader
+        if isinstance(self.header, RenderedContent):
+            d["header"] = self.header.to_json_dict()
+        else:
+            d["header"] = self.header
+        if self.subheader is not None:
+            if isinstance(self.subheader, RenderedContent):
+                d["subheader"] = self.subheader.to_json_dict()
+            else:
+                d["subheader"] = self.subheader
         if self.header_row:
             d["header_row"] = self.header_row
         return d
 
 
 class RenderedGraphContent(RenderedComponentContent):
-    def __init__(self, graph, header=None, styling=None, content_block_type="graph"):
+    def __init__(self, graph, header=None, subheader=None, styling=None, content_block_type="graph"):
         super(RenderedGraphContent, self).__init__(content_block_type=content_block_type, styling=styling)
         self.graph = graph
         self.header = header
+        self.subheader = subheader
 
     def to_json_dict(self):
         d = super(RenderedGraphContent, self).to_json_dict()
         d["graph"] = self.graph
-        d["header"] = self.header
+        if self.header is not None:
+            if isinstance(self.header, RenderedContent):
+                d["header"] = self.header.to_json_dict()
+            else:
+                d["header"] = self.header
+        if self.subheader is not None:
+            if isinstance(self.subheader, RenderedContent):
+                d["subheader"] = self.subheader.to_json_dict()
+            else:
+                d["subheader"] = self.subheader
         return d
 
 
@@ -94,12 +110,18 @@ class RenderedTableContent(RenderedComponentContent):
     def to_json_dict(self):
         d = super(RenderedTableContent, self).to_json_dict()
         if self.header is not None:
-            d["header"] = self.header
+            if isinstance(self.header, RenderedContent):
+                d["header"] = self.header.to_json_dict()
+            else:
+                d["header"] = self.header
         if self.subheader is not None:
-            d["subheader"] = self.subheader
+            if isinstance(self.subheader, RenderedContent):
+                d["subheader"] = self.subheader.to_json_dict()
+            else:
+                d["subheader"] = self.subheader
         d["table"] = RenderedContent.rendered_content_list_to_json(self.table)
         if self.header_row is not None:
-            d["header_row"] = self.header_row
+            d["header_row"] = RenderedContent.rendered_content_list_to_json(self.header_row)
         return d
 
 
