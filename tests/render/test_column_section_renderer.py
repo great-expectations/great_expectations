@@ -111,6 +111,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
     ).to_json_dict()
 
     assert content_block["content_block_type"] == "header"
+    print(content_block["header"])
     assert content_block["header"] == {
         'content_block_type': 'string_template',
         'string_template': {
@@ -120,6 +121,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
                 'placement': 'top'}
         }
     }
+    print(content_block["subheader"])
     assert content_block["subheader"] == {
         'content_block_type': 'string_template',
         'string_template': {
@@ -225,7 +227,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
 def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_profiled_evrs_1):
     print(titanic_profiled_evrs_1.results[0])
     distinct_values_evrs = [evr for evr in titanic_profiled_evrs_1.results if evr.expectation_config.expectation_type == "expect_column_distinct_values_to_be_in_set"]
-    
+
     assert len(distinct_values_evrs) == 4
 
     content_blocks = []
@@ -338,8 +340,8 @@ def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profil
     assert "may have any number of unique values" in stringified_dump
     assert "may have any fraction of unique values" in stringified_dump
     assert "values must not be null, at least $mostly_pct % of the time." in stringified_dump
-    
-    
+
+
 def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
     remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_header(
         validation_results=titanic_profiled_name_column_evrs,
@@ -420,7 +422,7 @@ def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_na
     assert "\\n\\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows." in content_block_stringified
     assert "values must not match this regular expression: $regex." in content_block_stringified
     assert "\\n\\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows." in content_block_stringified
-    
+
 
 # noinspection PyPep8Naming
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path():

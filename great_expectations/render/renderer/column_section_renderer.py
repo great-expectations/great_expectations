@@ -122,8 +122,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                         "string_template": {
                             "template": "Type: {column_type}".format(column_type=column_type),
                             "tooltip": {
-                              "content": "expect_column_values_to_be_of_type \
-                              <br>expect_column_values_to_be_in_type_list",
+                              "content":
+                              "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",
                             },
                         }
                     }),
