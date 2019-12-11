@@ -26,44 +26,26 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
     assert html_to_display == """\
 <div id="section-1" class="ge-section container-fluid">
     <div class="row" >
-    
-
 <div id="content-block-1" class="col-12" >
-
     <div id="content-block-1-header" class="alert alert-secondary" ><h4>
           <span>naturals</span>
       </h4>
     </div>
-
 </div>
-
-
 <div id="content-block-2" class="col-12" >
-
-
-
 <ul id="content-block-2-body" >
-    
-        
-        
         <li >
                 <span >
                     is a required field.
                 </span>
             </li>
-    
-            
-        
         <li >
                 <span >
                     values must be unique.
                 </span>
             </li>
-    
 </ul>
-
 </div>
-    
     </div>
 </div>
 """.replace(" ", "").replace("\t", "").replace("\n", "")
@@ -82,7 +64,6 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
     position:relative;
     text-align:left;
 }
-
 .cooltip .top {
     min-width:200px;
     top:-6px;
@@ -100,11 +81,9 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
     box-shadow:0 1px 8px rgba(0,0,0,0.5);
     display:none;
 }
-
 .cooltip:hover .top {
     display:block;
 }
-
 .cooltip .top i {
     position:absolute;
     top:100%;
@@ -114,7 +93,6 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
     height:12px;
     overflow:hidden;
 }
-
 .cooltip .top i::after {
     content:'';
     position:absolute;
@@ -128,47 +106,28 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 </style>
 <div id="section-1" class="ge-section container-fluid">
     <div class="row" >
-    
-
 <div id="content-block-1" class="col-12" >
-
     <div id="content-block-1-header" class="alert alert-secondary" ><h4>
           <span>naturals</span>
       </h4>
     </div>
-
 </div>
-
-
 <div id="content-block-2" class="col-12" >
-
-
-
 <ul id="content-block-2-body" >
-    
-        
-        
         <li >
                 <span >
                     is a required field.
                 </span>
             </li>
-    
-            
-        
         <li >
                 <span >
                     values must be unique.
                 </span>
             </li>
-    
 </ul>
-
 </div>
-    
     </div>
 </div>
-
 """.replace(" ", "").replace("\t", "").replace("\n", "")
 
 
