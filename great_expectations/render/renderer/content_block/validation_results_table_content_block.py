@@ -212,7 +212,10 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "observed_value": str(
                         observed_value) if observed_value else "None (-infinity, infinity, or NaN)",
                 },
-            }
+                "styling": {
+                    "classes": ["mb-2"]
+                }
+            },
         })
 
         return RenderedContentBlockContainer(**{
