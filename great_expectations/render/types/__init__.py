@@ -126,41 +126,70 @@ class RenderedStringTemplateContent(RenderedComponentContent):
 
 
 class RenderedBulletListContent(RenderedComponentContent):
-    def __init__(self, bullet_list, header=None, styling=None, content_block_type="bullet_list"):
+    def __init__(self, bullet_list, header=None, subheader=None, styling=None, content_block_type="bullet_list"):
         super(RenderedBulletListContent, self).__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
+        self.subheader = subheader
         self.bullet_list = bullet_list
 
     def to_json_dict(self):
         d = super(RenderedBulletListContent, self).to_json_dict()
         d["bullet_list"] = RenderedContent.rendered_content_list_to_json(self.bullet_list)
         if self.header is not None:
-            d["header"] = self.header
+            if isinstance(self.header, RenderedContent):
+                d["header"] = self.header.to_json_dict()
+            else:
+                d["header"] = self.header
+        if self.subheader is not None:
+            if isinstance(self.subheader, RenderedContent):
+                d["subheader"] = self.subheader.to_json_dict()
+            else:
+                d["subheader"] = self.subheader
         return d
 
 
 class ValueListContent(RenderedComponentContent):
-    def __init__(self, value_list, header=None, styling=None, content_block_type="value_list"):
+    def __init__(self, value_list, header=None, subheader=None, styling=None, content_block_type="value_list"):
         super(ValueListContent, self).__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
+        self.subheader = subheader
         self.value_list = value_list
 
     def to_json_dict(self):
         d = super(ValueListContent, self).to_json_dict()
-        d["header"] = self.header
+        if self.header is not None:
+            if isinstance(self.header, RenderedContent):
+                d["header"] = self.header.to_json_dict()
+            else:
+                d["header"] = self.header
+        if self.subheader is not None:
+            if isinstance(self.subheader, RenderedContent):
+                d["subheader"] = self.subheader.to_json_dict()
+            else:
+                d["subheader"] = self.subheader
         d["value_list"] = RenderedContent.rendered_content_list_to_json(self.value_list)
         return d
 
 
 class TextContent(RenderedComponentContent):
-    def __init__(self, text, header=None, styling=None, content_block_type="text"):
+    def __init__(self, text, header=None, subheader=None, styling=None, content_block_type="text"):
         super(TextContent, self).__init__(content_block_type=content_block_type, styling=styling)
         self.text = text
         self.header = header
+        self.subheader = subheader
 
     def to_json_dict(self):
         d = super(TextContent, self).to_json_dict()
-        d["header"] = self.header
+        if self.header is not None:
+            if isinstance(self.header, RenderedContent):
+                d["header"] = self.header.to_json_dict()
+            else:
+                d["header"] = self.header
+        if self.subheader is not None:
+            if isinstance(self.subheader, RenderedContent):
+                d["subheader"] = self.subheader.to_json_dict()
+            else:
+                d["subheader"] = self.subheader
         d["text"] = self.text
         return d
 

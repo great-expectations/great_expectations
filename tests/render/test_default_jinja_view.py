@@ -12,7 +12,13 @@ from great_expectations.render.renderer import (
 from great_expectations.render.view import DefaultJinjaPageView
 from great_expectations.render.types import (
     RenderedSectionContent,
-    RenderedHeaderContent, RenderedTableContent, ValueListContent, RenderedGraphContent, TextContent)
+    RenderedHeaderContent,
+    RenderedTableContent,
+    ValueListContent,
+    RenderedGraphContent,
+    TextContent,
+    RenderedStringTemplateContent
+)
 
 @pytest.fixture()
 def validation_results():
@@ -206,24 +212,27 @@ def test_rendering_components_with_styling():
     header_component_content = RenderedTableContent(**{
         # "component_type": "table",
         "content_block_type": "table",
-        "header": {
-            "template": "$var1 $var2 $var3",
-            "params": {
-                "var1": "AAA",
-                "var2": "BBB",
-                "var3": "CCC",
-            },
-            "styling": {
-                "default": {
-                    "classes": ["x"]
-                },
-                "params": {
-                    "var1": {
-                        "classes": ["y"]
-                    }
-                }
-            }
-        },
+        "header": RenderedStringTemplateContent(**{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "$var1 $var2 $var3",
+                            "params": {
+                                "var1": "AAA",
+                                "var2": "BBB",
+                                "var3": "CCC",
+                            },
+                            "styling": {
+                                "default": {
+                                    "classes": ["x"]
+                                },
+                                "params": {
+                                    "var1": {
+                                        "classes": ["y"]
+                                    }
+                                }
+                            }
+                        }
+                    }),
         "subheader": {
             "template": "$var1 $var2 $var3",
             "params": {

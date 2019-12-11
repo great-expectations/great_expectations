@@ -9,9 +9,10 @@ from great_expectations.core import ExpectationConfiguration, ExpectationValidat
 from .renderer import Renderer
 from great_expectations.util import load_class
 from .content_block import ExceptionListContentBlockRenderer
+from .content_block import ExpectationStringRenderer
 
 from ..types import RenderedSectionContent, RenderedHeaderContent, RenderedGraphContent, RenderedBulletListContent, \
-    RenderedTableContent, ValueListContent, TextContent
+    RenderedTableContent, ValueListContent, TextContent, RenderedStringTemplateContent
 
 
 def convert_to_string_and_escape(var):
@@ -96,19 +97,25 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         return RenderedHeaderContent(**{
             "content_block_type": "header",
-            "header": {
-                    "template": convert_to_string_and_escape(column_name),
-                    "tooltip": {
-                        "content": "expect_column_to_exist",
-                        "placement": "top"
-                    },
-                },
-            "subheader": {
-                    "template": "Type: {column_type}".format(column_type=column_type),
-                    "tooltip": {
-                      "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",
-                    },
-                },
+            "header": RenderedStringTemplateContent(**{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": convert_to_string_and_escape(column_name),
+                            "tooltip": {
+                                "content": "expect_column_to_exist",
+                                "placement": "top"
+                            },
+                        }
+                    }),
+            "subheader": RenderedStringTemplateContent(**{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "Type: {column_type}".format(column_type=column_type),
+                            "tooltip": {
+                              "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",
+                            },
+                        }
+                    }),
             # {
             #     "template": column_type,
             # },
@@ -382,13 +389,15 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         new_block = content_block_class(**{
             "content_block_type": content_block_type,
-            "header":
-                {
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
                     "template": "Example Values",
                     "tooltip": {
                         "content": "expect_column_values_to_be_in_set"
                     }
-                },
+                }
+            }),
             content_block_type: [{
                 "content_block_type": "string_template",
                 "string_template": {
