@@ -436,78 +436,22 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         if kl_divergence_evr is None or kl_divergence_evr.result is None or "details" not in kl_divergence_evr.result:
             return
 
-        weights = kl_divergence_evr.result["details"]["observed_partition"]["weights"]
-
+        observed_partition_object = kl_divergence_evr.result["details"]["observed_partition"]
+        weights = observed_partition_object["weights"]
         if len(weights) > 60:
             return None
-        else:
-            chart_pixel_width = (len(weights) / 60.0) * 1000
-            if chart_pixel_width < 200:
-                chart_pixel_width = 200
-            chart_container_col_width = round((len(weights) / 60.0) * 12)
-            if chart_container_col_width < 4:
-                chart_container_col_width = 4
-            elif chart_container_col_width > 8:
-                chart_container_col_width = 12
-            elif chart_container_col_width > 4:
-                chart_container_col_width = 8
-
-        mark_bar_args = {}
-        if len(weights) == 1:
-            mark_bar_args["size"] = 20
-
-        if kl_divergence_evr.result["details"]["observed_partition"].get("bins"):
-            bins = kl_divergence_evr.result["details"]["observed_partition"]["bins"]
-            bins_x1 = [round(value, 1) for value in bins[:-1]]
-            bins_x2 = [round(value, 1) for value in bins[1:]]
-
-            df = pd.DataFrame({
-                "bin_min": bins_x1,
-                "bin_max": bins_x2,
-                "fraction": weights,
-            })
-            df.fraction *= 100
-
-            bars = alt.Chart(df).mark_bar(**mark_bar_args).encode(
-                x='bin_min:O',
-                x2='bin_max:O',
-                y="fraction:Q",
-                tooltip=["bin_min", "bin_max", "fraction"]
-            ).properties(width=chart_pixel_width, height=400, autosize="fit")
-            chart = bars.to_json()
-        elif kl_divergence_evr.result["details"]["observed_partition"].get("values"):
-            values = kl_divergence_evr.result["details"]["observed_partition"]["values"]
-
-            df = pd.DataFrame({
-                "values": values,
-                "fraction": weights
-            })
-            df.fraction *= 100
-
-            bars = alt.Chart(df).mark_bar(**mark_bar_args).encode(
-                x='values:N',
-                y="fraction:Q",
-                tooltip=["values", "fraction"]
-            ).properties(width=chart_pixel_width, height=400, autosize="fit")
-            chart = bars.to_json()
-
-        return RenderedGraphContent(**{
-            "content_block_type": "graph",
-            "header":
-                {
-                    "template": "Histogram",
-                    "tooltip": {
-                        "content": "expect_column_kl_divergence_to_be_less_than"
-                    }
-                },
-            "graph": chart,
-            "styling": {
-                "classes": ["col-" + str(chart_container_col_width)],
-                "styles": {
-                    "margin-top": "20px",
+        
+        header = RenderedStringTemplateContent(**{
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "Histogram",
+                "tooltip": {
+                    "content": "expect_column_kl_divergence_to_be_less_than"
                 }
             }
         })
+
+        return ExpectationStringRenderer._get_kl_divergence_chart(observed_partition_object, header)
 
     @classmethod
     def _render_bar_chart_table(cls, evrs):
@@ -535,16 +479,16 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         if len(values) > 60:
             return None
         else:
-            chart_pixel_width = (len(values) / 60.0) * 1000
-            if chart_pixel_width < 200:
-                chart_pixel_width = 200
-            chart_container_col_width = round((len(values) / 60.0) * 12)
+            chart_pixel_width = (len(values) / 60.0) * 500
+            if chart_pixel_width < 250:
+                chart_pixel_width = 250
+            chart_container_col_width = round((len(values) / 60.0) * 6)
             if chart_container_col_width < 4:
                 chart_container_col_width = 4
-            elif chart_container_col_width > 8:
-                chart_container_col_width = 12
-            elif chart_container_col_width > 4:
-                chart_container_col_width = 8
+            elif chart_container_col_width >= 5:
+                chart_container_col_width = 6
+            elif chart_container_col_width >= 4:
+                chart_container_col_width = 5
 
         mark_bar_args = {}
         if len(values) == 1:
@@ -560,12 +504,15 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         new_block = RenderedGraphContent(**{
             "content_block_type": "graph",
-            "header": {
-                "template": "Value Counts",
-                "tooltip": {
-                    "content": "expect_column_distinct_values_to_be_in_set"
-                }
-            },
+            "header": RenderedStringTemplateContent(**{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "Value Counts",
+                            "tooltip": {
+                                "content": "expect_column_distinct_values_to_be_in_set"
+                            }
+                        }
+                    }),
             "graph": chart,
             "styling": {
                 "classes": ["col-" + str(chart_container_col_width)],

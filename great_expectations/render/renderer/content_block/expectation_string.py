@@ -3,7 +3,10 @@ import copy
 import json
 
 from great_expectations.render.renderer.content_block.content_block import ContentBlockRenderer
-from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.types import (
+    RenderedStringTemplateContent,
+    RenderedGraphContent
+)
 from great_expectations.render.util import ordinal, num_to_str
 
 import pandas as pd
@@ -1329,7 +1332,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         })]
     
     @classmethod
-    def _get_kl_divergence_partition_object_table(cls, partition_object):
+    def _get_kl_divergence_partition_object_table(cls, partition_object, header=None):
         table_rows = []
         fractions = partition_object["weights"]
         
@@ -1351,32 +1354,65 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             values = partition_object["values"]
             table_rows = [[value, num_to_str(fractions[idx])] for idx, value in enumerate(values)]
 
-        return {
-            "content_block_type": "table",
-            "header_row": ["Interval", "Fraction"] if partition_object.get("bins") else ["Value", "Fraction"],
-            "table": table_rows,
-            "styling": {
-                "body": {
-                    "classes": [
-                        "table",
-                        "table-sm",
-                        "table-bordered",
-                        "col-6"
-                    ],
-                },
-                "parent": {
-                    "classes": [
-                        "show-scrollbars",
-                        "p-2"
-                    ],
-                    "styles": {
-                        "list-style-type": "none",
-                        "overflow": "auto",
-                        "max-height": "80vh"
+        if header:
+            return {
+                "content_block_type": "table",
+                "header": header,
+                "header_row": ["Interval", "Fraction"] if partition_object.get("bins") else ["Value", "Fraction"],
+                "table": table_rows,
+                "styling": {
+                    "classes": ["table-responsive"],
+                    "body": {
+                        "classes": [
+                            "table",
+                            "table-sm",
+                            "table-bordered",
+                            "mt-2",
+                            "mb-2"
+                        ],
+                    },
+                    "parent": {
+                        "classes": [
+                            "show-scrollbars",
+                            "p-2"
+                        ],
+                        "styles": {
+                            "list-style-type": "none",
+                            "overflow": "auto",
+                            "max-height": "80vh"
+                        }
                     }
                 }
             }
-        }
+        else:
+            return {
+                "content_block_type": "table",
+                "header_row": ["Interval", "Fraction"] if partition_object.get("bins") else ["Value", "Fraction"],
+                "table": table_rows,
+                "styling": {
+                    "classes": ["table-responsive"],
+                    "body": {
+                        "classes": [
+                            "table",
+                            "table-sm",
+                            "table-bordered",
+                            "mt-2",
+                            "mb-2"
+                        ],
+                    },
+                    "parent": {
+                        "classes": [
+                            "show-scrollbars",
+                            "p-2"
+                        ],
+                        "styles": {
+                            "list-style-type": "none",
+                            "overflow": "auto",
+                            "max-height": "80vh"
+                        }
+                    }
+                }
+            }
     
     @classmethod
     def expect_column_quantile_values_to_be_between(cls, expectation, styling=None, include_column_name=True):
@@ -1439,6 +1475,97 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         ]
 
     @classmethod
+    def _get_kl_divergence_chart(cls, partition_object, header=None):
+        weights = partition_object["weights"]
+    
+        if len(weights) > 60:
+            expected_distribution = cls._get_kl_divergence_partition_object_table(partition_object, header=header)
+        else:
+            chart_pixel_width = (len(weights) / 60.0) * 500
+            if chart_pixel_width < 250:
+                chart_pixel_width = 250
+            chart_container_col_width = round((len(weights) / 60.0) * 6)
+            if chart_container_col_width < 4:
+                chart_container_col_width = 4
+            elif chart_container_col_width >= 5:
+                chart_container_col_width = 6
+            elif chart_container_col_width >= 4:
+                chart_container_col_width = 5
+
+            mark_bar_args = {}
+            if len(weights) == 1:
+                mark_bar_args["size"] = 20
+        
+            if partition_object.get("bins"):
+                bins = partition_object["bins"]
+                bins_x1 = [round(value, 1) for value in bins[:-1]]
+                bins_x2 = [round(value, 1) for value in bins[1:]]
+            
+                df = pd.DataFrame({
+                    "bin_min": bins_x1,
+                    "bin_max": bins_x2,
+                    "fraction": weights,
+                })
+            
+                bars = alt.Chart(df).mark_bar().encode(
+                    x='bin_min:O',
+                    x2='bin_max:O',
+                    y="fraction:Q",
+                    tooltip=["bin_min", "bin_max", "fraction"]
+                ).properties(width=chart_pixel_width, height=400, autosize="fit")
+            
+                chart = bars.to_json()
+            elif partition_object.get("values"):
+                values = partition_object["values"]
+            
+                df = pd.DataFrame({
+                    "values": values,
+                    "fraction": weights
+                })
+            
+                bars = alt.Chart(df).mark_bar().encode(
+                    x='values:N',
+                    y="fraction:Q",
+                    tooltip=["values", "fraction"]
+                ).properties(width=chart_pixel_width, height=400, autosize="fit")
+                chart = bars.to_json()
+        
+            if header:
+                expected_distribution = RenderedGraphContent(**{
+                    "content_block_type": "graph",
+                    "graph": chart,
+                    "header": header,
+                    "styling": {
+                        "classes": ["col-" + str(chart_container_col_width)],
+                        "styles": {
+                            "margin-top": "20px",
+                        },
+                        "parent": {
+                            "styles": {
+                                "list-style-type": "none"
+                            }
+                        }
+                    }
+                })
+            else:
+                expected_distribution = RenderedGraphContent(**{
+                    "content_block_type": "graph",
+                    "graph": chart,
+                    "styling": {
+                        "classes": ["col-" + str(chart_container_col_width)],
+                        "styles": {
+                            "margin-top": "20px",
+                        },
+                        "parent": {
+                            "styles": {
+                                "list-style-type": "none"
+                            }
+                        }
+                    }
+                })
+        return expected_distribution
+
+    @classmethod
     def expect_column_kl_divergence_to_be_less_than(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
@@ -1451,68 +1578,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         else:
             template_str = "Kullback-Leibler (KL) divergence with respect to the following distribution must be " \
                            "lower than $threshold:\n\n"
-
-            weights = params["partition_object"]["weights"]
-            
-            if len(weights) > 60:
-                expected_distribution = cls._get_kl_divergence_partition_object_table(params.get("partition_object"))
-            else:
-                if len(weights) <= 10:
-                    height = 200
-                    width = 200
-                    col_width = 4
-                else:
-                    height = 300
-                    width = 300
-                    col_width = 6
-                    
-                if params["partition_object"].get("bins"):
-                    bins = params["partition_object"]["bins"]
-                    bins_x1 = [round(value, 1) for value in bins[:-1]]
-                    bins_x2 = [round(value, 1) for value in bins[1:]]
-        
-                    df = pd.DataFrame({
-                        "bin_min": bins_x1,
-                        "bin_max": bins_x2,
-                        "fraction": weights,
-                    })
-    
-                    bars = alt.Chart(df).mark_bar().encode(
-                        x='bin_min:O',
-                        x2='bin_max:O',
-                        y="fraction:Q"
-                    ).properties(width=width, height=height, autosize="fit")
-        
-                    chart = bars.to_json()
-                elif params["partition_object"].get("values"):
-                    values = params["partition_object"]["values"]
-                    
-                    df = pd.DataFrame({
-                        "values": values,
-                        "fraction": weights
-                    })
-    
-                    bars = alt.Chart(df).mark_bar().encode(
-                        x='values:N',
-                        y="fraction:Q"
-                    ).properties(width=width, height=height, autosize="fit")
-                    chart = bars.to_json()
-    
-                expected_distribution = {
-                    "content_block_type": "graph",
-                    "graph": chart,
-                    "styling": {
-                        "classes": ["col-" + str(col_width)],
-                        "styles": {
-                            "margin-top": "20px",
-                        },
-                        "parent": {
-                            "styles": {
-                                "list-style-type": "none"
-                            }
-                        }
-                    }
-                }
+            expected_distribution = cls._get_kl_divergence_chart(params.get("partition_object"))
 
         if include_column_name:
             template_str = "$column " + template_str
