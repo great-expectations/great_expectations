@@ -60,14 +60,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 },
             }
         })]
-    
+
     @classmethod
     def expect_column_to_exist(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "column_index"],
         )
-        
+
         if params["column_index"] is None:
             if include_column_name:
                 template_str = "$column is a required field."
@@ -79,7 +79,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "$column must be the $column_indexth field"
             else:
                 template_str = "must be the $column_indexth field"
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -88,14 +88,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_unique_value_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "min_value", "max_value", "mostly"],
         )
-        
+
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
         else:
@@ -115,10 +115,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     template_str = "must have more than $min_value unique values."
                 else:
                     template_str = "must have between $min_value and $max_value unique values."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -127,7 +127,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     # NOTE: This method is a pretty good example of good usage of `params`.
     @classmethod
     def expect_column_values_to_be_between(cls, expectation, styling=None, include_column_name=True):
@@ -135,7 +135,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             expectation.kwargs,
             ["column", "min_value", "max_value", "mostly"]
         )
-        
+
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any numerical value."
         else:
@@ -144,25 +144,25 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must be between $min_value and $max_value, at least $mostly_pct % of the time."
-                
+
                 elif params["min_value"] is None:
                     template_str = "values must be less than $max_value, at least $mostly_pct % of the time."
-                
+
                 elif params["max_value"] is None:
                     template_str = "values must be less than $max_value, at least $mostly_pct % of the time."
             else:
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must always be between $min_value and $max_value."
-                
+
                 elif params["min_value"] is None:
                     template_str = "values must always be less than $max_value."
-                
+
                 elif params["max_value"] is None:
                     template_str = "values must always be more than $min_value."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -171,7 +171,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_pair_values_A_to_be_greater_than_B(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
@@ -179,10 +179,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             ["column_A", "column_B", "parse_strings_as_datetimes",
              "ignore_row_if", "mostly", "or_equal"]
         )
-        
+
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
-        
+
         if params["mostly"] is None:
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must always be greater than those in $column_B."
@@ -195,10 +195,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "Values in $column_A must be greater than those in $column_B, at least $mostly_pct % of the time."
             else:
                 template_str = "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time."
-        
+
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -207,7 +207,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_pair_values_to_be_equal(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
@@ -215,19 +215,19 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             ["column_A", "column_B",
              "ignore_row_if", "mostly", ]
         )
-        
+
         # NOTE: This renderer doesn't do anything with "ignore_row_if"
-        
+
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
-        
+
         if params["mostly"] is None:
             template_str = "Values in $column_A and $column_B must always be equal."
         else:
             params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -236,27 +236,27 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_table_columns_to_match_ordered_list(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column_list"]
         )
-        
+
         if params["column_list"] is None:
             template_str = "This table should have a list of columns in a specific order, but that order is not specified."
-        
+
         else:
             template_str = "This table should have these columns in this order: "
             for idx in range(len(params["column_list"]) - 1):
                 template_str += "$column_list_" + str(idx) + ", "
                 params["column_list_" + str(idx)] = params["column_list"][idx]
-            
+
             last_idx = len(params["column_list"]) - 1
             template_str += "$column_list_" + str(last_idx)
             params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -265,23 +265,23 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_multicolumn_values_to_be_unique(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column_list", "ignore_row_if"]
         )
-        
+
         template_str = "Values must always be unique across columns: "
         for idx in range(len(params["column_list"]) - 1):
             template_str += "$column_list_" + str(idx) + ", "
             params["column_list_" + str(idx)] = params["column_list"][idx]
-        
+
         last_idx = len(params["column_list"]) - 1
         template_str += "$column_list_" + str(last_idx)
         params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -330,14 +330,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_table_row_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["min_value", "max_value"]
         )
-        
+
         if params["min_value"] is None and params["max_value"] is None:
             template_str = "May have any number of rows."
         else:
@@ -347,7 +347,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "Must have less than than $max_value rows."
             elif params["max_value"] is None:
                 template_str = "Must have more than $min_value rows."
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -356,7 +356,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_table_row_count_to_equal(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
@@ -364,7 +364,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             ["value"]
         )
         template_str = "Must have exactly $value rows."
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -373,34 +373,34 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_distinct_values_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "value_set"],
         )
-        
+
         if params["value_set"] is None or len(params["value_set"]) == 0:
-            
+
             if include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
-        
+
         else:
-            
+
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
             values_string = " ".join(
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
-            
+
             if include_column_name:
                 template_str = "$column distinct values must belong to this set: " + values_string + "."
             else:
                 template_str = "distinct values must belong to this set: " + values_string + "."
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -409,7 +409,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_values_to_not_be_null(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
@@ -429,7 +429,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "$column values must never be null."
             else:
                 template_str = "values must never be null."
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -438,24 +438,24 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_values_to_be_null(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "mostly"]
         )
-        
+
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = "values must be null, at least $mostly_pct % of the time."
         else:
             template_str = "values must be null."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -464,24 +464,24 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_values_to_be_of_type(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "type_", "mostly"]
         )
-        
+
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = "values must be of type $type_, at least $mostly_pct % of the time."
         else:
             template_str = "values must be of type $type_."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -490,7 +490,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_values_to_be_in_type_list(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
@@ -538,32 +538,32 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             expectation.kwargs,
             ["column", "value_set", "mostly", "parse_strings_as_datetimes"]
         )
-        
+
         if params["value_set"] is None or len(params["value_set"]) == 0:
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
-            
+
             values_string = " ".join(
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
-            
+
         template_str = "values must belong to this set: " + values_string
-        
+
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-        
+
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -572,39 +572,39 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_values_to_not_be_in_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "value_set", "mostly", "parse_strings_as_datetimes"]
         )
-        
+
         if params["value_set"] is None or len(params["value_set"]) == 0:
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
-            
+
             values_string = " ".join(
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
-            
+
         template_str = "values must not belong to this set: " + values_string
-    
+
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-        
+
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-        
+
         if include_column_name:
             template_str = "$column"
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -613,7 +613,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_proportion_of_unique_values_to_be_between(cls, expectation, styling=None,
                                                                 include_column_name=True):
@@ -621,7 +621,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             expectation.kwargs,
             ["column", "min_value", "max_value"],
         )
-        
+
         if params["min_value"] is None and params["max_value"] is None:
             template_str = "may have any fraction of unique values."
         else:
@@ -631,10 +631,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "fraction of unique values must be at least $min_value."
             else:
                 template_str = "fraction of unique values must be between $min_value and $max_value."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -643,7 +643,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     # TODO: test parse_strings_as_datetimes
     @classmethod
     def expect_column_values_to_be_increasing(cls, expectation, styling=None, include_column_name=True):
@@ -651,25 +651,25 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             expectation.kwargs,
             ["column", "strictly", "mostly", "parse_strings_as_datetimes"]
         )
-        
+
         if params.get("strictly"):
             template_str = "values must be strictly greater than previous values"
         else:
             template_str = "values must be greater than or equal to previous values"
-            
+
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-        
+
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -678,7 +678,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     # TODO: test parse_strings_as_datetimes
     @classmethod
     def expect_column_values_to_be_decreasing(cls, expectation, styling=None, include_column_name=True):
@@ -686,25 +686,25 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             expectation.kwargs,
             ["column", "strictly", "mostly", "parse_strings_as_datetimes"]
         )
-        
+
         if params.get("strictly"):
             template_str = "values must be strictly less than previous values"
         else:
             template_str = "values must be less than or equal to previous values"
-    
+
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-        
+
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -713,14 +713,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_value_lengths_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "min_value", "max_value", "mostly"],
         )
-        
+
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "values may have any length."
         else:
@@ -729,25 +729,25 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must be between $min_value and $max_value characters long, at least $mostly_pct % of the time."
-                
+
                 elif params["min_value"] is None:
                     template_str = "values must be less than $max_value characters long, at least $mostly_pct % of the time."
-                
+
                 elif params["max_value"] is None:
                     template_str = "values must be more than $min_value characters long, at least $mostly_pct % of the time."
             else:
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must always be between $min_value and $max_value characters long."
-                
+
                 elif params["min_value"] is None:
                     template_str = "values must always be less than $max_value characters long."
-                
+
                 elif params["max_value"] is None:
                     template_str = "values must always be more than $min_value characters long."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -756,14 +756,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_value_lengths_to_equal(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "value", "mostly"]
         )
-        
+
         if params.get("value") is None:
             template_str = "values may have any length."
         else:
@@ -774,10 +774,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -786,14 +786,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_values_to_match_regex(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "regex", "mostly"]
         )
-        
+
         if not params.get("regex"):
             template_str = "values must match a regular expression but none was specified."
         else:
@@ -804,10 +804,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -816,14 +816,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_values_to_not_match_regex(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "regex", "mostly"],
         )
-        
+
         if not params.get("regex"):
             template_str = "values must not match a regular expression but none was specified."
         else:
@@ -839,7 +839,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     template_str = "$column values must not match this regular expression: $regex."
                 else:
                     template_str = "values must not match this regular expression: $regex."
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -848,14 +848,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_values_to_match_regex_list(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "regex_list", "mostly", "match_on"],
         )
-        
+
         if not params.get("regex_list") or len(params.get("regex_list")) == 0:
             values_string = "[ ]"
         else:
@@ -864,22 +864,22 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             values_string = " ".join(
                 ["$v__" + str(i) for i, v in enumerate(params["regex_list"])]
             )
-            
+
         if params.get("match_on") == "all":
             template_str = "values must match all of the following regular expressions: " + values_string
         else:
             template_str = "values must match any of the following regular expressions: " + values_string
-            
+
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -888,14 +888,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_values_to_not_match_regex_list(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "regex_list", "mostly"],
         )
-        
+
         if not params.get("regex_list") or len(params.get("regex_list")) == 0:
             values_string = "[ ]"
         else:
@@ -904,19 +904,19 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             values_string = " ".join(
                 ["$v__" + str(i) for i, v in enumerate(params["regex_list"])]
             )
-            
+
         template_str = "values must not match any of the following regular expressions: " + values_string
-        
+
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -925,14 +925,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_values_to_match_strftime_format(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "strftime_format", "mostly"],
         )
-        
+
         if not params.get("strftime_format"):
             template_str = "values must match a strftime format but none was specified."
         else:
@@ -943,10 +943,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -955,26 +955,26 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_values_to_be_dateutil_parseable(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "mostly"],
         )
-        
+
         template_str = "values must be parseable by dateutil"
-        
+
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -983,26 +983,26 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_values_to_be_json_parseable(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "mostly"],
         )
-        
+
         template_str = "values must be parseable as JSON"
-    
+
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1011,14 +1011,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_values_to_match_json_schema(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "mostly", "json_schema"],
         )
-        
+
         if not params.get("json_schema"):
             template_str = "values must match a JSON Schema but none was specified."
         else:
@@ -1029,10 +1029,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
             else:
                 template_str = "values must match the following JSON Schema: $formatted_json"
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1048,32 +1048,32 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 },
             }
         })]
-    
+
     @classmethod
     def expect_column_distinct_values_to_contain_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "value_set", "parse_strings_as_datetimes"]
         )
-        
+
         if params["value_set"] is None or len(params["value_set"]) == 0:
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
-            
+
             values_string = " ".join(
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
-            
+
         template_str = "distinct values must contain this set: " + values_string + "."
-        
+
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1082,32 +1082,32 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_distinct_values_to_equal_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "value_set", "parse_strings_as_datetimes"]
         )
-        
+
         if params["value_set"] is None or len(params["value_set"]) == 0:
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
-            
+
             values_string = " ".join(
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
-            
+
         template_str = "distinct values must match this set: " + values_string + "."
-        
+
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1116,14 +1116,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_mean_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "min_value", "max_value"]
         )
-        
+
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "mean may have any numerical value."
         else:
@@ -1133,10 +1133,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "mean must be less than $max_value."
             elif params["max_value"] is None:
                 template_str = "mean must be more than $min_value."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1152,7 +1152,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             expectation.kwargs,
             ["column", "min_value", "max_value"]
         )
-    
+
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "median may have any numerical value."
         else:
@@ -1162,10 +1162,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "median must be less than $max_value."
             elif params["max_value"] is None:
                 template_str = "median must be more than $min_value."
-    
+
         if include_column_name:
             template_str = "$column " + template_str
-    
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1174,14 +1174,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-        
+
     @classmethod
     def expect_column_stdev_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "min_value", "max_value"]
         )
-    
+
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "standard deviation may have any numerical value."
         else:
@@ -1191,10 +1191,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "standard deviation must be less than $max_value."
             elif params["max_value"] is None:
                 template_str = "standard deviation must be more than $min_value."
-    
+
         if include_column_name:
             template_str = "$column " + template_str
-    
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1203,14 +1203,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-        
+
     @classmethod
     def expect_column_max_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "min_value", "max_value", "parse_strings_as_datetimes"]
         )
-    
+
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "maximum value may have any numerical value."
         else:
@@ -1220,13 +1220,13 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "maximum value must be less than $max_value."
             elif params["max_value"] is None:
                 template_str = "maximum value must be more than $min_value."
-    
+
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-    
+
         if include_column_name:
             template_str = "$column " + template_str
-    
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1235,14 +1235,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_min_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "min_value", "max_value", "parse_strings_as_datetimes"]
         )
-        
+
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "minimum value may have any numerical value."
         else:
@@ -1252,13 +1252,13 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "minimum value must be less than $max_value."
             elif params["max_value"] is None:
                 template_str = "minimum value must be more than $min_value."
-        
+
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1267,14 +1267,14 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_sum_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "min_value", "max_value"]
         )
-        
+
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "sum may have any numerical value."
         else:
@@ -1284,10 +1284,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "sum must be less than $max_value."
             elif params["max_value"] is None:
                 template_str = "sum must be more than $min_value."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1296,32 +1296,32 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def expect_column_most_common_value_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation.kwargs,
             ["column", "value_set", "ties_okay"]
         )
-        
+
         if params["value_set"] is None or len(params["value_set"]) == 0:
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
-            
+
             values_string = " ".join(
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
-            
+
         template_str = "most common value must belong to this set: " + values_string + "."
-        
+
         if params.get("ties_okay"):
             template_str += " Values outside this set that are as common (but not more common) are allowed."
-        
+
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -1330,15 +1330,15 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "styling": styling,
             }
         })]
-    
+
     @classmethod
     def _get_kl_divergence_partition_object_table(cls, partition_object, header=None):
         table_rows = []
         fractions = partition_object["weights"]
-        
+
         if partition_object.get("bins"):
             bins = partition_object["bins"]
-            
+
             for idx, fraction in enumerate(fractions):
                 if idx == len(fractions) - 1:
                     table_rows.append([
@@ -1413,7 +1413,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     }
                 }
             }
-    
+
     @classmethod
     def expect_column_quantile_values_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
@@ -1477,7 +1477,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
     def _get_kl_divergence_chart(cls, partition_object, header=None):
         weights = partition_object["weights"]
-    
+
         if len(weights) > 60:
             expected_distribution = cls._get_kl_divergence_partition_object_table(partition_object, header=header)
         else:
@@ -1495,41 +1495,41 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             mark_bar_args = {}
             if len(weights) == 1:
                 mark_bar_args["size"] = 20
-        
+
             if partition_object.get("bins"):
                 bins = partition_object["bins"]
                 bins_x1 = [round(value, 1) for value in bins[:-1]]
                 bins_x2 = [round(value, 1) for value in bins[1:]]
-            
+
                 df = pd.DataFrame({
                     "bin_min": bins_x1,
                     "bin_max": bins_x2,
                     "fraction": weights,
                 })
-            
+
                 bars = alt.Chart(df).mark_bar().encode(
                     x='bin_min:O',
                     x2='bin_max:O',
                     y="fraction:Q",
                     tooltip=["bin_min", "bin_max", "fraction"]
                 ).properties(width=chart_pixel_width, height=400, autosize="fit")
-            
+
                 chart = bars.to_json()
             elif partition_object.get("values"):
                 values = partition_object["values"]
-            
+
                 df = pd.DataFrame({
                     "values": values,
                     "fraction": weights
                 })
-            
+
                 bars = alt.Chart(df).mark_bar().encode(
                     x='values:N',
                     y="fraction:Q",
                     tooltip=["values", "fraction"]
                 ).properties(width=chart_pixel_width, height=400, autosize="fit")
                 chart = bars.to_json()
-        
+
             if header:
                 expected_distribution = RenderedGraphContent(**{
                     "content_block_type": "graph",
@@ -1571,7 +1571,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             expectation.kwargs,
             ["column", "partition_object", "threshold"]
         )
-        
+
         expected_distribution = None
         if not params.get("partition_object"):
             template_str = "Column can match any distribution."
@@ -1582,7 +1582,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if include_column_name:
             template_str = "$column " + template_str
-        
+
         expectation_string_obj = {
             "content_block_type": "string_template",
             "string_template": {
@@ -1590,7 +1590,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 "params": params
             }
         }
-        
+
         if expected_distribution:
             return [
                 expectation_string_obj,
@@ -1598,7 +1598,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             ]
         else:
             return [expectation_string_obj]
-    
+
     @classmethod
     def expect_column_values_to_be_unique(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
@@ -1617,7 +1617,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-        
+
         return [RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {

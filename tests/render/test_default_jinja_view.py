@@ -104,7 +104,7 @@ def test_render_section_page():
     )#.replace(" ", "").replace("\t", "").replace("\n", "")
 
     print(rendered_doc)
-    
+
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """<div id="section-1" class="ge-section container-fluid">
     <div class="row" >
@@ -287,7 +287,7 @@ def test_rendering_components_with_styling():
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
-    
+
     assert rendered_doc == \
         """
 <div id="section-1-content-block-2" class="root_foo" root="baz" style="root:bar;" >

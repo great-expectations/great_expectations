@@ -112,7 +112,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                         "string_template": {
                             "template": "Type: {column_type}".format(column_type=column_type),
                             "tooltip": {
-                              "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",
+                              "content": "expect_column_values_to_be_of_type \
+                              <br>expect_column_values_to_be_in_type_list",
                             },
                         }
                     }),
@@ -240,7 +241,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             .75: "Q3",
             .50: "Median"
         }
-        
+
         for idx, quantile in enumerate(quantiles):
             quantile_string = quantile_strings.get(quantile)
             table_rows.append([
@@ -440,7 +441,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         weights = observed_partition_object["weights"]
         if len(weights) > 60:
             return None
-        
+
         header = RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
@@ -577,7 +578,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
     @classmethod
     def _render_header(cls, validation_results):
         column = cls._get_column_name(validation_results)
-        
+
         new_block = RenderedHeaderContent(**{
             "header": convert_to_string_and_escape(column),
             "styling": {
@@ -587,17 +588,17 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
                 }
             }
         })
-        
+
         return validation_results, new_block
-    
+
     def _render_table(self, validation_results):
         new_block = self._table_renderer.render(
             validation_results,
             include_column_name=False
         )
-        
+
         return [], new_block
-    
+
     def render(self, validation_results):
         column = self._get_column_name(validation_results)
         content_blocks = []
