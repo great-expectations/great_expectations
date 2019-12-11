@@ -41,14 +41,24 @@ class ColumnSectionRenderer(Renderer):
 
 class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
-    def __init__(self, overview_table_renderer=None):
+    def __init__(self, overview_table_renderer=None, expectation_string_renderer=None):
         if overview_table_renderer is None:
             overview_table_renderer = {
                 "class_name": "ProfilingOverviewTableContentBlockRenderer"
             }
+        if expectation_string_renderer is None:
+            expectation_string_renderer = {
+                "class_name": "ExpectationStringRenderer"
+            }
         self._overview_table_renderer = load_class(
             class_name=overview_table_renderer.get("class_name"),
             module_name=overview_table_renderer.get("module_name", "great_expectations.render.renderer.content_block")
+        )
+        self._expectation_string_renderer = load_class(
+            class_name=expectation_string_renderer.get("class_name"),
+            module_name=expectation_string_renderer.get(
+                "module_name", "great_expectations.render.renderer.content_block"
+            )
         )
 
     #Note: Seems awkward to pass section_name and column_type into this renderer.
@@ -426,10 +436,9 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         return new_block
 
-    @classmethod
-    def _render_histogram(cls, evrs):
+    def _render_histogram(self, evrs):
         # NOTE: This code is very brittle
-        kl_divergence_evr = cls._find_evr_by_type(
+        kl_divergence_evr = self._find_evr_by_type(
             evrs,
             "expect_column_kl_divergence_to_be_less_than"
         )
@@ -452,7 +461,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             }
         })
 
-        return ExpectationStringRenderer._get_kl_divergence_chart(observed_partition_object, header)
+        return self._expectation_string_renderer._get_kl_divergence_chart(observed_partition_object, header)
 
     @classmethod
     def _render_bar_chart_table(cls, evrs):
