@@ -108,12 +108,12 @@ def test_render_section_page():
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """<div id="section-1" class="ge-section container-fluid">
     <div class="row" >
-
+    
 
 <div id="content-block-1" >
 
     <div id="content-block-1-header" ><h4>
-          Overview
+          <span>Overview</span>
       </h4>
     </div>
 
@@ -125,7 +125,7 @@ def test_render_section_page():
     <div id="content-block-2-header" >
         
         <h4>
-            Dataset info
+            <span>Dataset info</span>
         </h4>
         </div>
 
@@ -162,7 +162,7 @@ def test_rendering_components_without_section_loop_index():
 <div id="content-block-2" >
 
     <div id="content-block-2-header" ><h4>
-          Overview
+          <span>Overview</span>
       </h4>
     </div>
 
@@ -180,7 +180,7 @@ def test_rendering_components_without_section_loop_index():
 <div id="content-block" >
 
     <div id="content-block-header" ><h4>
-          Overview
+          <span>Overview</span>
       </h4>
     </div>
 
@@ -199,7 +199,7 @@ def test_rendering_components_without_section_loop_index():
 <div id="content-block" >
 
     <div id="content-block-header" ><h4>
-          Overview
+          <span>Overview</span>
       </h4>
     </div>
 
@@ -210,47 +210,49 @@ def test_rendering_components_with_styling():
     # Medium-complicated example to verify that all the things are correctly piped to all the places
 
     header_component_content = RenderedTableContent(**{
-        # "component_type": "table",
         "content_block_type": "table",
         "header": RenderedStringTemplateContent(**{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "$var1 $var2 $var3",
-                            "params": {
-                                "var1": "AAA",
-                                "var2": "BBB",
-                                "var3": "CCC",
-                            },
-                            "styling": {
-                                "default": {
-                                    "classes": ["x"]
-                                },
-                                "params": {
-                                    "var1": {
-                                        "classes": ["y"]
-                                    }
-                                }
-                            }
-                        }
-                    }),
-        "subheader": {
-            "template": "$var1 $var2 $var3",
-            "params": {
-                "var1": "aaa",
-                "var2": "bbb",
-                "var3": "ccc",
-            },
-            "styling": {
-                "default": {
-                    "classes": ["xx"]
-                },
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "$var1 $var2 $var3",
                 "params": {
-                    "var1": {
-                        "classes": ["yy"]
+                    "var1": "AAA",
+                    "var2": "BBB",
+                    "var3": "CCC",
+                },
+                "styling": {
+                    "default": {
+                        "classes": ["x"]
+                    },
+                    "params": {
+                        "var1": {
+                            "classes": ["y"]
+                        }
                     }
                 }
             }
-        },
+        }),
+        "subheader": RenderedStringTemplateContent(**{
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "$var1 $var2 $var3",
+                "params": {
+                    "var1": "aaa",
+                    "var2": "bbb",
+                    "var3": "ccc",
+                },
+                "styling": {
+                    "default": {
+                        "classes": ["xx"]
+                    },
+                    "params": {
+                        "var1": {
+                            "classes": ["yy"]
+                        }
+                    }
+                }
+            },
+        }),
         "table": [
             ["Mean", "446"],
             ["Minimum", "1"],
@@ -342,7 +344,7 @@ def test_render_header_component():
 <div id="section-1-content-block-2" >
 
     <div id="section-1-content-block-2-header" ><h4>
-          Overview
+          <span>Overview</span>
       </h4>
     </div>
 
@@ -351,7 +353,6 @@ def test_render_header_component():
 
 def test_render_table_component():
     table_component_content = RenderedTableContent(**{
-        # "component_type": "header",
         "content_block_type": "table",
         "header": "Overview",
         "table": [
@@ -378,7 +379,7 @@ def test_render_table_component():
     <div id="section-1-content-block-2-header" >
         
         <h4>
-            Overview
+            <span>Overview</span>
         </h4>
         </div>
 
@@ -431,9 +432,11 @@ def test_render_value_list():
 <div id="section-1-content-block-2" class="col-4" style="margin-top:20px;" >
 
     <div id="section-1-content-block-2-header" >
+        
         <h4>
-            Example values
-        </h4></div>
+            <span>Example values</span>
+        </h4>
+        </div>
 
 
 <p id="section-1-content-block-2-body" >
@@ -477,7 +480,7 @@ def test_render_graph():
     <div id="section-1-content-block-2-header" >
         
         <h4>
-            Histogram
+            <span>Histogram</span>
         </h4>
         </div>
 <div class="show-scrollbars">
@@ -519,9 +522,11 @@ def test_render_text():
 <div id="section-1-content-block-2" class="col-4" >
 
     <div id="section-1-content-block-2-header" >
+        
         <h4>
-            Histogram
-        </h4></div>
+            <span>Histogram</span>
+        </h4>
+        </div>
 
 
 <div id="section-1-content-block-2-body" >
@@ -552,9 +557,11 @@ def test_render_text():
 <div id="section-1-content-block-2" class="col-4" >
 
     <div id="section-1-content-block-2-header" >
+        
         <h4>
-            Histogram
-        </h4></div>
+            <span>Histogram</span>
+        </h4>
+        </div>
 
 
 <div id="section-1-content-block-2-body" >

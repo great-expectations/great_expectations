@@ -112,16 +112,21 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
 
     assert content_block["content_block_type"] == "header"
     assert content_block["header"] == {
-        "template": "Name",
-        "tooltip": {
-            "content": "expect_column_to_exist",
-            "placement": "top"
+        'content_block_type': 'string_template',
+        'string_template': {
+            'template': 'Name',
+            'tooltip': {
+                'content': 'expect_column_to_exist',
+                'placement': 'top'}
         }
     }
     assert content_block["subheader"] == {
-        "template": "Type: None",
-        "tooltip": {
-            "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list"
+        'content_block_type': 'string_template',
+        'string_template': {
+            'template': 'Type: None',
+            'tooltip': {
+                  'content': 'expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list'
+            }
         }
     }
 
@@ -165,17 +170,34 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
         [evr_with_unescaped_dollar_sign],
         column_type=[],
     ).to_json_dict()
+    print(content_block)
     assert content_block == {
         'content_block_type': 'header',
+        'styling': {
+            'classes': ['col-12'],
+            'header': {
+                'classes': ['alert', 'alert-secondary']
+            }
+        },
         'header': {
-            'template': 'Car Insurance Premiums ($$)',
-            'tooltip': {'content': 'expect_column_to_exist', 'placement': 'top'}
+            'content_block_type': 'string_template',
+            'string_template': {
+                'template': 'Car Insurance Premiums ($$)',
+                'tooltip': {
+                    'content': 'expect_column_to_exist',
+                    'placement': 'top'
+                }
+            }
         },
         'subheader': {
-            'template': 'Type: []',
-            'tooltip': {'content': 'expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list'}
-        },
-        'styling': {'classes': ['col-12'], 'header': {'classes': ['alert', 'alert-secondary']}}
+            'content_block_type': 'string_template',
+            'string_template': {
+                'template': 'Type: []',
+                'tooltip': {
+                    'content': 'expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list'
+                }
+            }
+        }
     }
 
 

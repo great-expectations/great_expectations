@@ -31,7 +31,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 <div id="content-block-1" class="col-12" >
 
     <div id="content-block-1-header" class="alert alert-secondary" ><h4>
-          naturals
+          <span>naturals</span>
       </h4>
     </div>
 
@@ -43,7 +43,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 
 
 <ul id="content-block-2-body" >
-
+    
         
         
         <li >
@@ -52,14 +52,14 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
                 </span>
             </li>
     
-           
+            
         
         <li >
                 <span >
                     values must be unique.
                 </span>
             </li>
-
+    
 </ul>
 
 </div>
@@ -126,7 +126,6 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
     box-shadow:0 1px 8px rgba(0,0,0,0.5);
 }
 </style>
-
 <div id="section-1" class="ge-section container-fluid">
     <div class="row" >
     
@@ -134,7 +133,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 <div id="content-block-1" class="col-12" >
 
     <div id="content-block-1-header" class="alert alert-secondary" ><h4>
-          naturals
+          <span>naturals</span>
       </h4>
     </div>
 
@@ -146,9 +145,9 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 
 
 <ul id="content-block-2-body" >
-
-
-
+    
+        
+        
         <li >
                 <span >
                     is a required field.
@@ -169,6 +168,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
     
     </div>
 </div>
+
 """.replace(" ", "").replace("\t", "").replace("\n", "")
 
 
