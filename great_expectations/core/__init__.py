@@ -394,7 +394,7 @@ class ExpectationConfiguration(DictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
     def __init__(self, expectation_type, kwargs, meta=None, success_on_last_run=None):
-        if not isinstance(expectation_type, str):
+        if not isinstance(expectation_type, string_types):
             raise InvalidExpectationConfigurationError("expectation_type must be a string")
         self._expectation_type = expectation_type
         if not isinstance(kwargs, dict):

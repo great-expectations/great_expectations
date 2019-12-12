@@ -2,6 +2,12 @@ from great_expectations.core import ExpectationConfiguration, ExpectationValidat
 
 
 class Renderer(object):
+
+    def __init__(self):
+        # This is purely a convenience to provide an explicit mechanism to instantiate any Renderer, even ones that
+        # used to be composed exclusively of classmethods
+        pass
+
     @classmethod
     def render(cls, ge_object):
         return ge_object
