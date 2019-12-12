@@ -960,10 +960,9 @@ class ConfigOnlyDataContext(object):
                     "No datasource configured: a datasource is required to normalize an incomplete data_asset_name"
                 )
 
-            # TODO how is this code path different than the on on 938?
             raise ge_exceptions.DataContextError(
-                "Ambiguous data_asset_name: no existing data_asset has the "
-                "provided name, no generator provides it, and there are "
+                "Could not normalize data asset name. No existing data_asset has the "
+                "provided name, no generator provides it and there are "
                 "multiple datasources and/or generators configured."
             )
 
