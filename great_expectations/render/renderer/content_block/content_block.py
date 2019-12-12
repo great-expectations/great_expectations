@@ -49,7 +49,7 @@ class ContentBlockRenderer(Renderer):
                         )
                     except Exception as e:
                         logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
-                        
+
                         if type(obj_) == ExpectationValidationResult:
                             content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
                         else:
@@ -65,7 +65,7 @@ class ContentBlockRenderer(Renderer):
                         cls._get_element_styling(),
                         **kwargs
                     )
-                
+
                 if result is not None:
                     if type(obj_) == ExpectationConfiguration:
                         expectation_meta_notes = cls._render_expectation_meta_notes(obj_)
@@ -94,7 +94,7 @@ class ContentBlockRenderer(Renderer):
                                             **kwargs)
                 except Exception as e:
                     logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
-                    
+
                     if type(render_object) == ExpectationValidationResult:
                         content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
                     else:
@@ -140,7 +140,7 @@ class ContentBlockRenderer(Renderer):
                         note_content = notes["content"]
                     else:
                         logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
-        
+
                 elif notes["format"] == "markdown":
                     # ???: Should converting to markdown be the renderer's job, or the view's job?
                     # Renderer is easier, but will end up mixing HTML strings with content_block info.
@@ -173,7 +173,7 @@ class ContentBlockRenderer(Renderer):
                         logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
             else:
                 logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
-                
+
         return TextContent(**{
             "content_block_type": "text",
             "subheader": "Notes:",
@@ -182,7 +182,7 @@ class ContentBlockRenderer(Renderer):
                     "classes": ["col-12", "mt-2", "mb-2", "alert", "alert-warning"]
             },
         })
-    
+
     @classmethod
     def _process_content_block(cls, content_block):
         header = cls._get_header()
