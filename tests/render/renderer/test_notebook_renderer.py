@@ -257,7 +257,7 @@ def test_simple_suite(critical_suite):
         "cells": [
             {
                 "cell_type": "markdown",
-                "source": "# Edit the Scaffolded Expectation Suite\nUse this notebook to recreate and modify your expectation suite for:\n- **Data Asset**: `pre_prod_staging.staging_npi`\n- **Expectation Suite Name**: `critical`\n\nWe'd love it if you **reach out for help on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)",
+                "source": "# Edit the Scaffolded Expectation Suite\nUse this notebook to recreate and modify your expectation suite for:\n- **Data Asset**: `edw/default/pre_prod_staging.staging_npi`\n- **Expectation Suite Name**: `critical`\n\nWe'd love it if you **reach out for help on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)",
                 "metadata": {},
             },
             {
@@ -288,7 +288,7 @@ def test_simple_suite(critical_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'expectation_suite_name = "critical" # TODO: replace with your value!\ncontext.create_expectation_suite(data_asset_name="pre_prod_staging.staging_npi", expectation_suite_name=expectation_suite_name, overwrite_existing=True);',
+                "source": 'expectation_suite_name = "critical" # TODO: replace with your value!\ncontext.create_expectation_suite(data_asset_name="edw/default/pre_prod_staging.staging_npi", expectation_suite_name=expectation_suite_name, overwrite_existing=True);',
                 "outputs": [],
             },
             {
@@ -300,7 +300,7 @@ def test_simple_suite(critical_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch_kwargs = {'path': '../../foo/data'}\nbatch = context.get_batch(\"pre_prod_staging.staging_npi\", expectation_suite_name, batch_kwargs)\nbatch.head()",
+                "source": "batch_kwargs = {'path': '../../foo/data'}\nbatch = context.get_batch(\"edw/default/pre_prod_staging.staging_npi\", expectation_suite_name, batch_kwargs)\nbatch.head()",
                 "outputs": [],
             },
             {
@@ -415,7 +415,7 @@ def test_complex_suite(warning_suite):
         "cells": [
             {
                 "cell_type": "markdown",
-                "source": "# Edit the Scaffolded Expectation Suite\nUse this notebook to recreate and modify your expectation suite for:\n- **Data Asset**: `pre_prod_staging.staging_npi`\n- **Expectation Suite Name**: `warning`\n\nWe'd love it if you **reach out for help on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)",
+                "source": "# Edit the Scaffolded Expectation Suite\nUse this notebook to recreate and modify your expectation suite for:\n- **Data Asset**: `edw/default/pre_prod_staging.staging_npi`\n- **Expectation Suite Name**: `warning`\n\nWe'd love it if you **reach out for help on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)",
                 "metadata": {},
             },
             {
@@ -446,7 +446,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'expectation_suite_name = "warning" # TODO: replace with your value!\ncontext.create_expectation_suite(data_asset_name="pre_prod_staging.staging_npi", expectation_suite_name=expectation_suite_name, overwrite_existing=True);',
+                "source": 'expectation_suite_name = "warning" # TODO: replace with your value!\ncontext.create_expectation_suite(data_asset_name="edw/default/pre_prod_staging.staging_npi", expectation_suite_name=expectation_suite_name, overwrite_existing=True);',
                 "outputs": [],
             },
             {
@@ -458,7 +458,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch_kwargs = {'path': '../../foo/data'}\nbatch = context.get_batch(\"pre_prod_staging.staging_npi\", expectation_suite_name, batch_kwargs)\nbatch.head()",
+                "source": "batch_kwargs = {'path': '../../foo/data'}\nbatch = context.get_batch(\"edw/default/pre_prod_staging.staging_npi\", expectation_suite_name, batch_kwargs)\nbatch.head()",
                 "outputs": [],
             },
             {
