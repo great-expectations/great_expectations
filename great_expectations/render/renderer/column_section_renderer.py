@@ -7,6 +7,7 @@ import altair as alt
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration, ExpectationValidationResult
+from great_expectations.data_context.util import instantiate_class_from_config
 from .renderer import Renderer
 from great_expectations.util import load_class
 from .content_block import ExceptionListContentBlockRenderer
@@ -57,12 +58,15 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             class_name=overview_table_renderer.get("class_name"),
             module_name=overview_table_renderer.get("module_name", "great_expectations.render.renderer.content_block")
         )
-        self._expectation_string_renderer = load_class(
-            class_name=expectation_string_renderer.get("class_name"),
-            module_name=expectation_string_renderer.get(
-                "module_name", "great_expectations.render.renderer.content_block"
-            )
+        self._expectation_string_renderer = instantiate_class_from_config(
+            config=expectation_string_renderer,
+            runtime_environment={},
+            config_defaults={
+                "module_name": expectation_string_renderer.get(
+                    "module_name", "great_expectations.render.renderer.content_block")
+            }
         )
+
         self.content_block_function_names = [
             "_render_header",
             "_render_overview_table",
