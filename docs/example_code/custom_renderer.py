@@ -15,9 +15,12 @@ class CustomPageRenderer(Renderer):
     def _get_header_content_block(cls, header="", subheader="", highlight=True):
         return RenderedHeaderContent(**{
             "content_block_type": "header",
-            "header": {
-                "template": header
-            },
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": header,
+                }
+            }),
             "subheader": subheader,
             "styling": {
                 "classes": ["col-12"],

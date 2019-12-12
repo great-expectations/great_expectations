@@ -39,7 +39,7 @@ class SupportedDatabases(enum.Enum):
     POSTGRES = 'Postgres'
     REDSHIFT = 'Redshift'
     SNOWFLAKE = 'Snowflake'
-    OTHER = 'other (I have a working SQLAlchemy connection string)'
+    OTHER = 'other - Do you have a working SQLAlchemy connection string?'
     # TODO MSSQL
     # TODO BigQuery
 

@@ -45,7 +45,7 @@ class FakeConfigurableWrapperClass(object):
         # This code allows us to specify defaults for the child class
         self.fake_configurable_object = instantiate_class_from_config(
             config=fake_configurable,
-            runtime_config={
+            runtime_environment={
                 "x" : self.x,
                 "y" : self.y,
                 "z" : self.z,

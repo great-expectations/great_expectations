@@ -21,7 +21,7 @@ def basic_data_context_config_for_validation_operator():
             },
             "evaluation_parameter_store": {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "InMemoryEvaluationParameterStore",
+                "class_name": "EvaluationParameterStore",
             },
             "validation_result_store": {
                 "module_name": "great_expectations.data_context.store",

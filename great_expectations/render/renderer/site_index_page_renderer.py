@@ -342,20 +342,23 @@ class SiteIndexPageRenderer(Renderer):
             # datasource header
             source_header_block = RenderedHeaderContent(**{
                 "content_block_type": "header",
-                "header": {
-                    "template": "$title_prefix | $source",
-                    "params": {
-                        "source": source,
-                        "title_prefix": "Datasource"
-                    },
-                    "styling": {
+                "header": RenderedStringTemplateContent(**{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "$title_prefix | $source",
                         "params": {
-                            "title_prefix": {
-                                "tag": "strong"
+                            "source": source,
+                            "title_prefix": "Datasource"
+                        },
+                        "styling": {
+                            "params": {
+                                "title_prefix": {
+                                    "tag": "strong"
+                                }
                             }
-                        }
-                    },
-                },
+                        },
+                    }
+                }),
                 "styling": {
                     "classes": ["col-12", "ge-index-page-datasource-title"],
                     "header": {
@@ -370,20 +373,23 @@ class SiteIndexPageRenderer(Renderer):
                 generator_header_block = RenderedHeaderContent(**{
                     "content_block_type": "header",
                     "header": "",
-                    "subheader": {
-                        "template": "$title_prefix | $generator",
-                        "params": {
-                            "generator": generator,
-                            "title_prefix": "Data Asset Generator"
-                        },
-                        "styling": {
+                    "subheader": RenderedStringTemplateContent(**{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "$title_prefix | $generator",
                             "params": {
-                                "title_prefix": {
-                                    "tag": "strong"
+                                "generator": generator,
+                                "title_prefix": "Data Asset Generator"
+                            },
+                            "styling": {
+                                "params": {
+                                    "title_prefix": {
+                                        "tag": "strong"
+                                    }
                                 }
-                            }
-                        },
-                    },
+                            },
+                        }
+                    }),
                     "styling": {
                         "classes": ["col-12", "ml-4", "ge-index-page-generator-title"],
                     }

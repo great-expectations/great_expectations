@@ -13,8 +13,9 @@ from great_expectations.core import ExpectationSuiteValidationResult, Expectatio
 
 @pytest.fixture(params=[
     {
-        "class_name": "DatabaseEvaluationParameterStore",
+        "class_name": "EvaluationParameterStore",
         "store_backend": {
+            "class_name": "DatabaseStoreBackend",
             "credentials": {
                 "drivername": "postgresql",
                 "username": "postgres",
@@ -26,7 +27,7 @@ from great_expectations.core import ExpectationSuiteValidationResult, Expectatio
         }
     },
     {
-        "class_name": "InMemoryEvaluationParameterStore",
+        "class_name": "EvaluationParameterStore",
         "module_name": "great_expectations.data_context.store"
     }
 ])
@@ -36,7 +37,7 @@ def param_store(request):
         config_defaults={
             "module_name": "great_expectations.data_context.store",
         },
-        runtime_config={}
+        runtime_environment={}
     )
 
 

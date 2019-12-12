@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from moto import mock_s3
 import boto3
@@ -32,8 +34,7 @@ def test_ValidationsStore_with_FixedLengthTupleS3StoreBackend():
             "class_name": "FixedLengthTupleS3StoreBackend",
             "bucket": bucket,
             "prefix": prefix
-        },
-        root_directory=None
+        }
     )
 
     with pytest.raises(TypeError):
@@ -84,19 +85,16 @@ def test_ValidationsStore_with_FixedLengthTupleS3StoreBackend():
 
 
 def test_ValidationsStore_with_InMemoryStoreBackend():
-
     my_store = ValidationsStore(
         store_backend={
             "module_name": "great_expectations.data_context.store",
             "class_name": "InMemoryStoreBackend",
-            "separator": ".",
-        },
-        root_directory=None,
+        }
     )
 
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
-    
+
     ns_1 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-100"))
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
     assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
@@ -111,20 +109,6 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
     }
 
 
-def test_ValidationsStore__convert_resource_identifier_to_list():
-
-    my_store = ValidationsStore(
-        store_backend={
-            "module_name": "great_expectations.data_context.store",
-            "class_name": "InMemoryStoreBackend",
-        },
-        root_directory=None,
-    )
-
-    ns_1 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-100"))
-    assert my_store._convert_resource_identifier_to_tuple(ns_1) == ('a', 'b', 'c', 'quarantine', 'prod-100')
-
-
 def test_ValidationsStore_with_FixedLengthTupleFileSystemStoreBackend(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_ValidationResultStore_with_FixedLengthTupleFileSystemStoreBackend__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
@@ -136,12 +120,14 @@ def test_ValidationsStore_with_FixedLengthTupleFileSystemStoreBackend(tmp_path_f
             "base_directory": "my_store/",
             "filepath_template": "{4}/{0}/{1}/{2}/{3}.txt",
         },
-        root_directory=path,
+        runtime_environment={
+            "root_directory": path
+        }
     )
 
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
-    
+
     ns_1 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-100"))
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
     assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
@@ -171,3 +157,55 @@ test_ValidationResultStore_with_FixedLengthTupleFileSystemStoreBackend__dir0/
                     c/
                         quarantine.txt
 """
+
+
+def test_ValidationsStore_with_DatabaseStoreBackend():
+    # Use sqlite so we don't require postgres for this test.
+    connection_kwargs = {
+        "drivername": "sqlite"
+    }
+
+    # First, demonstrate that we pick up default configuration
+    my_store = ValidationsStore(
+        store_backend={
+            "class_name": "DatabaseStoreBackend",
+            "credentials": connection_kwargs
+        }
+    )
+
+    with pytest.raises(TypeError):
+        my_store.get("not_a_ValidationResultIdentifier")
+
+    ns_1 = ValidationResultIdentifier(
+        expectation_suite_identifier=ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier(
+                datasource="a",
+                generator="b",
+                generator_asset="c"
+            ),
+            expectation_suite_name="quarantine",
+        ),
+        run_id="20191007T151224.1234Z_prod_100"
+    )
+    my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
+    assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
+
+    ns_2 = ValidationResultIdentifier(
+        expectation_suite_identifier=ExpectationSuiteIdentifier(
+            data_asset_name=DataAssetIdentifier(
+                datasource="a",
+                generator="b",
+                generator_asset="c"
+            ),
+            expectation_suite_name="quarantine",
+        ),
+        run_id="20191007T151224.1234Z_prod_200"
+    )
+
+    my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
+    assert my_store.get(ns_2) == ExpectationSuiteValidationResult(success=False, statistics={}, results=[])
+
+    assert set(my_store.list_keys()) == {
+        ns_1,
+        ns_2,
+    }

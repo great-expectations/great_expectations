@@ -1,7 +1,8 @@
 import logging
 import json
-from abc import ABC, abstractmethod
-from copy import deepcopy, copy
+# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
+from abc import ABCMeta, abstractmethod
+from copy import deepcopy
 
 from six import string_types
 
@@ -233,7 +234,8 @@ def ensure_json_serializable(data):
             str(data), type(data).__name__))
 
 
-class DataContextKey(ABC):
+class DataContextKey(object):
+    __metaclass__ = ABCMeta
     """DataContextKey objects are used to uniquely identify resources used by the DataContext.
 
     A DataContextKey is designed to support clear naming with multiple representations including a hashable
@@ -392,7 +394,7 @@ class ExpectationConfiguration(DictDot):
     """ExpectationConfiguration defines the parameters and name of a specific expectation."""
 
     def __init__(self, expectation_type, kwargs, meta=None, success_on_last_run=None):
-        if not isinstance(expectation_type, str):
+        if not isinstance(expectation_type, string_types):
             raise InvalidExpectationConfigurationError("expectation_type must be a string")
         self._expectation_type = expectation_type
         if not isinstance(kwargs, dict):
@@ -790,7 +792,7 @@ class ExpectationSuiteValidationResult(DictDot):
         ))
 
     def __repr__(self):
-        return json.dumps(self.to_json_dict())
+        return json.dumps(self.to_json_dict(), indent=2)
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
