@@ -936,9 +936,13 @@ class ConfigOnlyDataContext(object):
                 return provider_names.pop()
 
             elif len(provider_names) > 1:
-                raise ge_exceptions.DataContextError(
-                    "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
-                    .format(data_asset_name=data_asset_name, provider_names=provider_names)
+                raise ge_exceptions.AmbiguousDataAssetNameError(
+                    "Ambiguous data_asset_name '{data_asset_name}'. Multiple "
+                    "candidates found: {provider_names}".format(
+                        data_asset_name=data_asset_name,
+                        provider_names=provider_names
+                    ),
+                    candidates=provider_names
                 )
 
             # If we are here, then the data_asset_name does not belong to any configured datasource or generator
@@ -958,8 +962,9 @@ class ConfigOnlyDataContext(object):
                 )
 
             raise ge_exceptions.DataContextError(
-                "Ambiguous data_asset_name: no existing data_asset has the provided name, no generator provides it, "
-                " and there are multiple datasources and/or generators configured."
+                "Could not normalize data asset name. No existing data_asset has the "
+                "provided name, no generator provides it and there are "
+                "multiple datasources and/or generators configured."
             )
 
         elif len(split_name) == 2:
@@ -1002,9 +1007,10 @@ class ConfigOnlyDataContext(object):
                 return provider_names.pop()
             
             elif len(provider_names) > 1:
-                raise ge_exceptions.DataContextError(
+                raise ge_exceptions.AmbiguousDataAssetNameError(
                     "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
-                    .format(data_asset_name=data_asset_name, provider_names=provider_names)
+                    .format(data_asset_name=data_asset_name, provider_names=provider_names),
+                    candidates=provider_names
                 )
 
             # If we are here, then the data_asset_name does not belong to any configured datasource or generator
@@ -2030,7 +2036,7 @@ class DataContext(ConfigOnlyDataContext):
         if result is None:
             raise ge_exceptions.ConfigNotFoundError()
 
-        logger.info("Using project config: {}".format(yml_path))
+        logger.debug("Using project config: {}".format(yml_path))
         return result
 
     @classmethod

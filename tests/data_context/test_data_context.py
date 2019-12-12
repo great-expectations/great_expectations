@@ -271,7 +271,8 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     # However, we cannot create new names using only a single component
     with pytest.raises(DataContextError) as exc:
         data_context.normalize_data_asset_name("f10")
-    assert "Ambiguous data_asset_name: no existing data_asset has the provided name" in exc.value.message
+    assert "Could not normalize data asset name. No existing data_asset has the provided name, no generator provides " \
+           "it and there are multiple datasources and/or generators configured" in exc.value.message
 
     ###
     # Add a second generator to one datasource
