@@ -1,19 +1,15 @@
 import pytest
 
 import decimal
-import warnings
 
 import pandas as pd
 import numpy as np
 import great_expectations as ge
 
-import unittest
-from six import PY2
 
-from great_expectations.core import ExpectationConfiguration, expectationConfigurationSchema, ExpectationSuite, \
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite, \
     expectationSuiteSchema, ExpectationValidationResult
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from tests.test_utils import convert_test_obj_to_json_dict
 
 
 def test_get_and_save_expectation_suite(tmp_path_factory):
@@ -679,10 +675,7 @@ def test_find_expectations():
             )
     ]
 
-    if PY2:
-        assert sorted(my_df.find_expectations("expect_column_to_exist")) == sorted(exp1)
-    else:
-        assert my_df.find_expectations("expect_column_to_exist") == exp1
+    assert my_df.find_expectations("expect_column_to_exist") == exp1
 
     with pytest.raises(ValueError) as exc:
         my_df.find_expectations("expect_column_to_exist", "x", {"column": "y"})
@@ -704,10 +697,7 @@ def test_find_expectations():
         )
     ]
 
-    if PY2:
-        assert sorted(my_df.find_expectations(column="x")) == sorted(exp1)
-    else:
-        assert my_df.find_expectations(column="x") == exp1
+    assert my_df.find_expectations(column="x") == exp1
 
 
 def test_remove_expectation():
@@ -768,13 +758,8 @@ def test_remove_expectation():
         )
     ]
 
-    if PY2:
-        assert sorted(
-            my_df.remove_expectation("expect_column_to_exist", remove_multiple_matches=True, dry_run=True)) == \
-        sorted(exp1)
-    else:
-        assert my_df.remove_expectation("expect_column_to_exist", remove_multiple_matches=True, dry_run=True) == \
-            exp1
+    assert my_df.remove_expectation("expect_column_to_exist", remove_multiple_matches=True, dry_run=True) == \
+        exp1
 
     with pytest.raises(ValueError) as exc:
         my_df.remove_expectation("expect_column_to_exist", "x", {
@@ -797,11 +782,7 @@ def test_remove_expectation():
         )
     ]
 
-    if PY2:
-        assert sorted(convert_test_obj_to_json_dict(my_df.remove_expectation(column="x", remove_multiple_matches=True,
-                                                            dry_run=True))) == sorted(exp1)
-    else:
-        assert my_df.remove_expectation(column="x", remove_multiple_matches=True, dry_run=True) == exp1
+    assert my_df.remove_expectation(column="x", remove_multiple_matches=True, dry_run=True) == exp1
 
     assert len(my_df._expectation_suite.expectations) == 8
 
@@ -886,32 +867,19 @@ def test_discard_failing_expectations():
     sub1 = df[:3]
 
     sub1.discard_failing_expectations()
-    # PY2 sorting is allowed and order not guaranteed
-    if PY2:
-        assert sorted(sub1.find_expectations()) == sorted(exp1)
-    else:
-        assert sub1.find_expectations() == exp1
+    assert sub1.find_expectations() == exp1
 
     sub1 = df[1:2]
     sub1.discard_failing_expectations()
-    if PY2:
-        assert sorted(sub1.find_expectations()) == sorted(exp1)
-    else:
-        assert sub1.find_expectations() == exp1
+    assert sub1.find_expectations() == exp1
 
     sub1 = df[:-1]
     sub1.discard_failing_expectations()
-    if PY2:
-        assert sorted(sub1.find_expectations()) == sorted(exp1)
-    else:
-        assert sub1.find_expectations() == exp1
+    assert sub1.find_expectations() == exp1
 
     sub1 = df[-1:]
     sub1.discard_failing_expectations()
-    if PY2:
-        assert sorted(sub1.find_expectations()) == sorted(exp1)
-    else:
-        assert sub1.find_expectations() == exp1
+    assert sub1.find_expectations() == exp1
 
     sub1 = df[['A', 'D']]
     exp1 = [
@@ -933,10 +901,7 @@ def test_discard_failing_expectations():
         )
     ]
     sub1.discard_failing_expectations()
-    if PY2:
-       assert sorted(sub1.find_expectations()) == sorted(exp1)
-    else:
-        assert sub1.find_expectations() == exp1
+    assert sub1.find_expectations() == exp1
 
     sub1 = df[['A']]
     exp1 = [
@@ -950,10 +915,7 @@ def test_discard_failing_expectations():
         ),
     ]
     sub1.discard_failing_expectations()
-    if PY2:
-        assert sorted(sub1.find_expectations()) == sorted(exp1)
-    else:
-        assert sub1.find_expectations() == exp1
+    assert sub1.find_expectations() == exp1
 
     sub1 = df.iloc[:3, 1:4]
     exp1 = [
@@ -983,10 +945,7 @@ def test_discard_failing_expectations():
         )
     ]
     sub1.discard_failing_expectations()
-    if PY2:
-        assert sorted(sub1.find_expectations()) == sorted(exp1)
-    else:
-        assert sub1.find_expectations() == exp1
+    assert sub1.find_expectations() == exp1
 
     sub1 = df.loc[0:, 'A':'B']
     exp1 = [
@@ -1008,10 +967,7 @@ def test_discard_failing_expectations():
         ),
     ]
     sub1.discard_failing_expectations()
-    if PY2:
-        assert sorted(sub1.find_expectations()) == sorted(exp1)
-    else:
-        assert sub1.find_expectations() == exp1
+    assert sub1.find_expectations() == exp1
 
 
 def test_test_expectation_function():

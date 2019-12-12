@@ -14,7 +14,7 @@ def test_instantiate_class_from_config():
             "class_name" : "FakeConfigurableClass",
             "a" : "hi"
         },
-        runtime_config = {
+        runtime_environment = {
             "x" : 1
         }
     )
@@ -33,7 +33,7 @@ def test_instantiate_class_from_config_with_overriden_defaults():
                 "class_name" : "FakeConfigurableClass",
             },
         },
-        runtime_config = {
+        runtime_environment = {
             "x" : 1
         }
     )
@@ -50,14 +50,14 @@ def test_instantiate_class_from_config_with_overriden_defaults():
                 "a" : "not_the_default_value",
             },
         },
-        runtime_config = {
+        runtime_environment = {
             "x" : 1
         }
     )
     assert fake_configurable_wrapper_object.fake_configurable_object.a == "not_the_default_value"
 
 def test_instantiate_class_from_config_with_config_defaults():
-    my_runtime_config = {
+    my_runtime_environment = {
         "x" : 1
     }
 
@@ -68,7 +68,7 @@ def test_instantiate_class_from_config_with_config_defaults():
             "module_name" : "tests.test_plugins.fake_configs",
             "a" : "value_from_the_config",
         },
-        runtime_config = my_runtime_config,
+        runtime_environment = my_runtime_environment,
         config_defaults = {}
     )
     assert fake_configurable_object.a == "value_from_the_config"
@@ -79,7 +79,7 @@ def test_instantiate_class_from_config_with_config_defaults():
             "class_name" : "FakeConfigurableClass",
             "module_name" : "tests.test_plugins.fake_configs",
         },
-        runtime_config = my_runtime_config,
+        runtime_environment = my_runtime_environment,
         config_defaults = {
             "a" : "value_from_the_defaults",
         }
@@ -93,7 +93,7 @@ def test_instantiate_class_from_config_with_config_defaults():
             "module_name" : "tests.test_plugins.fake_configs",
             "a" : "value_from_the_config",
         },
-        runtime_config = my_runtime_config,
+        runtime_environment = my_runtime_environment,
         config_defaults = {
             "a" : "value_from_the_defaults",
         }
@@ -107,7 +107,7 @@ def test_instantiate_class_from_config_with_config_defaults():
                 "class_name" : "FakeConfigurableClass",
                 "module_name" : "tests.test_plugins.fake_configs"
             },
-            runtime_config = my_runtime_config,
+            runtime_environment = my_runtime_environment,
             config_defaults = {}
         )
 
@@ -118,7 +118,7 @@ def test_instantiate_class_from_config_with_config_defaults():
             "class_name" : "FakeConfigurableClass",
             "a" : "value_from_the_config",
         },
-        runtime_config = my_runtime_config,
+        runtime_environment = my_runtime_environment,
         config_defaults = {
             "module_name" : "tests.test_plugins.fake_configs",
         }
@@ -131,7 +131,7 @@ def test_instantiate_class_from_config_with_config_defaults():
             "class_name" : "FakeConfigurableClass",
             "a" : "value_from_the_config",
         },
-        runtime_config = my_runtime_config,
+        runtime_environment = my_runtime_environment,
         config_defaults = {
             "module_name" : "tests.test_plugins.fake_configs",
         }
@@ -144,7 +144,7 @@ def test_instantiate_class_from_config_with_config_defaults():
                 "class_name" : "FakeConfigurableClass",
                 "a" : "value_from_the_config",
             },
-            runtime_config = my_runtime_config,
+            runtime_environment = my_runtime_environment,
             config_defaults = {}
         )
 
@@ -154,7 +154,7 @@ def test_instantiate_class_from_config_with_config_defaults():
         config = {
             "class_name" : "FakeConfigurableClass",
         },
-        runtime_config = my_runtime_config,
+        runtime_environment = my_runtime_environment,
         config_defaults = {
             "module_name" : "tests.test_plugins.fake_configs",
             "a" : "value_from_the_config",
@@ -166,7 +166,7 @@ def test_instantiate_class_from_config_with_config_defaults():
         config = {
             "a" : "value_from_the_config",
         },
-        runtime_config = my_runtime_config,
+        runtime_environment = my_runtime_environment,
         config_defaults = {
             "module_name" : "tests.test_plugins.fake_configs",
             "class_name" : "FakeConfigurableClass",
@@ -176,7 +176,7 @@ def test_instantiate_class_from_config_with_config_defaults():
     # Okay, this is just getting silly
     fake_configurable_object = instantiate_class_from_config(
         config = {},
-        runtime_config = my_runtime_config,
+        runtime_environment = my_runtime_environment,
         config_defaults = {
             "module_name" : "tests.test_plugins.fake_configs",
             "class_name" : "FakeConfigurableClass",

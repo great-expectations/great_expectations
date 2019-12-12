@@ -5,11 +5,10 @@ import json
 import datetime
 import pandas as pd
 import great_expectations as ge
-from great_expectations.core import ExpectationSuiteSchema, expectationSuiteSchema, ExpectationConfiguration
+from great_expectations.core import expectationSuiteSchema, ExpectationConfiguration
 from great_expectations.profile import ColumnsExistProfiler
 
-from tests.test_utils import assertDeepAlmostEqual, expectationValidationResultSchema, convert_test_obj_to_json_dict
-from six import PY2
+from tests.test_utils import expectationValidationResultSchema
 
 
 def test_expect_column_values_to_be_dateutil_parseable():
@@ -351,10 +350,7 @@ def test_ge_pandas_sampling():
 
     samp1 = df.sample(n=2)
     assert isinstance(samp1, ge.dataset.PandasDataset)
-    if PY2:
-        assert sorted(samp1.find_expectations()) == sorted(exp1)
-    else:
-        assert samp1.find_expectations() == exp1
+    assert samp1.find_expectations() == exp1
 
     samp1 = df.sample(frac=0.25, replace=True)
     assert isinstance(samp1, ge.dataset.PandasDataset)
@@ -383,10 +379,7 @@ def test_ge_pandas_sampling():
         {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'x']}}
     ]}).data
-    if PY2:
-        assert sorted(samp1.find_expectations()) == sorted(exp1.expectations)
-    else:
-        assert samp1.find_expectations() == exp1.expectations
+    assert samp1.find_expectations() == exp1.expectations
 
 
 def test_ge_pandas_subsetting():
@@ -480,18 +473,12 @@ def test_ge_pandas_automatic_failure_removal():
                                  kwargs={'column': 'D', 'value_set': ['e', 'f', 'g', 'h']})
     ]
     samp1 = df.sample(n=2)
-    if PY2:
-        assert sorted(samp1.find_expectations()) == sorted(exp1)
-    else:
-        assert samp1.find_expectations() == exp1
+    assert samp1.find_expectations() == exp1
 
     # Now check subsetting to verify that failing expectations are NOT
     # automatically dropped when subsetting.
     sub1 = df[['A', 'D']]
-    if PY2:
-        assert sorted(samp1.find_expectations()) == sorted(exp1)
-    else:
-        assert samp1.find_expectations() == exp1
+    assert samp1.find_expectations() == exp1
 
     # Set property/attribute so that failing expectations are
     # automatically removed when sampling or subsetting.
@@ -519,10 +506,7 @@ def test_ge_pandas_automatic_failure_removal():
     ]
 
     samp2 = df.sample(n=2)
-    if PY2:
-        assert sorted(samp2.find_expectations()) == sorted(exp_samp)
-    else:
-        assert samp2.find_expectations() == exp_samp
+    assert samp2.find_expectations() == exp_samp
 
     # Now check subsetting. In additional to the failure on column "C",
     # the expectations on column "B" now fail since column "B" doesn't
@@ -538,10 +522,7 @@ def test_ge_pandas_automatic_failure_removal():
         ExpectationConfiguration(expectation_type='expect_column_values_to_be_in_set',
                                  kwargs={'column': 'D', 'value_set': ['e', 'f', 'g', 'h']})
     ]
-    if PY2:
-        assert sorted(samp2.find_expectations()) == sorted(exp_samp)
-    else:
-        assert samp2.find_expectations() == exp_samp
+    assert samp2.find_expectations() == exp_samp
 
 
 def test_subclass_pandas_subset_retains_subclass():

@@ -49,7 +49,7 @@ class ContentBlockRenderer(Renderer):
                         )
                     except Exception as e:
                         logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
-                        
+
                         if type(obj_) == ExpectationValidationResult:
                             content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
                         else:
@@ -65,14 +65,14 @@ class ContentBlockRenderer(Renderer):
                         cls._get_element_styling(),
                         **kwargs
                     )
-                
+
                 if result is not None:
                     if type(obj_) == ExpectationConfiguration:
                         expectation_meta_notes = cls._render_expectation_meta_notes(obj_)
                         if expectation_meta_notes:
                             result.append(expectation_meta_notes)
-                    blocks.append(result)
-                
+                    blocks += result
+
             if len(blocks) > 0:
                 content_block = cls._rendered_component_type(**{
                     cls._content_block_type: blocks,
@@ -89,12 +89,14 @@ class ContentBlockRenderer(Renderer):
             content_block_fn = getattr(cls, expectation_type, None)
             if content_block_fn is not None:
                 try:
-                    result = content_block_fn(render_object,
-                                            styling=cls._get_element_styling(),
-                                            **kwargs)
+                    result = content_block_fn(
+                        render_object,
+                        styling=cls._get_element_styling(),
+                        **kwargs
+                    )
                 except Exception as e:
                     logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
-                    
+
                     if type(render_object) == ExpectationValidationResult:
                         content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
                     else:
@@ -117,7 +119,6 @@ class ContentBlockRenderer(Renderer):
                         result.append(expectation_meta_notes)
             return result
 
-    # TODO: Add tests
     @classmethod
     def _render_expectation_meta_notes(cls, expectation):
         if not expectation.meta.get("notes"):
@@ -140,7 +141,7 @@ class ContentBlockRenderer(Renderer):
                         note_content = notes["content"]
                     else:
                         logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
-        
+
                 elif notes["format"] == "markdown":
                     # ???: Should converting to markdown be the renderer's job, or the view's job?
                     # Renderer is easier, but will end up mixing HTML strings with content_block info.
@@ -173,7 +174,70 @@ class ContentBlockRenderer(Renderer):
                         logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
             else:
                 logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
-                
+
+        return TextContent(**{
+            "content_block_type": "text",
+            "subheader": "Notes:",
+            "text": note_content,
+            "styling": {
+                "classes": ["col-12", "mt-2", "mb-2", "alert", "alert-warning"],
+                "parent": {
+                    "styles": {
+                        "list-style-type": "none"
+                    }
+                }
+            },
+        })
+
+        if isinstance(notes, string_types):
+            note_content = [notes]
+
+        elif isinstance(notes, list):
+            note_content = notes
+
+        elif isinstance(notes, dict):
+            if "format" in notes:
+                if notes["format"] == "string":
+                    if isinstance(notes["content"], string_types):
+                        note_content = [notes["content"]]
+                    elif isinstance(notes["content"], list):
+                        note_content = notes["content"]
+                    else:
+                        logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
+
+                elif notes["format"] == "markdown":
+                    # ???: Should converting to markdown be the renderer's job, or the view's job?
+                    # Renderer is easier, but will end up mixing HTML strings with content_block info.
+                    if isinstance(notes["content"], string_types):
+                        note_content = [
+                            RenderedMarkdownContent(**{
+                                "content_block_type": "markdown",
+                                "markdown": notes["content"],
+                                "styling": {
+                                    "parent": {
+                                        "styles": {
+                                            "color": "red"
+                                        }
+                                    }
+                                }
+                            })
+                        ]
+                    elif isinstance(notes["content"], list):
+                        note_content = [
+                            RenderedMarkdownContent(**{
+                                "content_block_type": "markdown",
+                                "markdown": note,
+                                "styling": {
+                                    "parent": {
+                                    }
+                                }
+                            }) for note in notes["content"]
+                        ]
+                    else:
+                        logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
+            else:
+                logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
+
         return TextContent(**{
             "content_block_type": "text",
             "subheader": "Notes:",
@@ -182,7 +246,7 @@ class ContentBlockRenderer(Renderer):
                     "classes": ["col-12", "mt-2", "mb-2", "alert", "alert-warning"]
             },
         })
-    
+
     @classmethod
     def _process_content_block(cls, content_block):
         header = cls._get_header()

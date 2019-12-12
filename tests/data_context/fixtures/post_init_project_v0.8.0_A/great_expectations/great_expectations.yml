@@ -49,7 +49,7 @@ stores:
       base_directory: fixtures/validations
 
   evaluation_parameter_store:
-    class_name: InMemoryEvaluationParameterStore
+    class_name: EvaluationParameterStore
 
 data_docs_sites:
   local_site: # site name

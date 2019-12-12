@@ -154,7 +154,7 @@ class Datasource(object):
             })
         generator = instantiate_class_from_config(
             config=kwargs,
-            runtime_config={
+            runtime_environment={
                 "datasource": self
             },
             config_defaults={

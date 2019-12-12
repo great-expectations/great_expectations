@@ -100,7 +100,7 @@ stores:
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/en/latest/reference/evaluation_parameters.html
-    class_name: InMemoryEvaluationParameterStore
+    class_name: EvaluationParameterStore
 
 expectations_store_name: expectations_store
 validations_store_name: validations_store

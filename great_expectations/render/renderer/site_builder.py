@@ -8,9 +8,8 @@ from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLAS
 from great_expectations.data_context.types import (
     ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
-
 )
-from great_expectations.data_context.store.namespaced_read_write_store import (
+from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
 )
@@ -100,24 +99,24 @@ class SiteBuilder(object):
                  store_backend,
                  site_index_builder=None,
                  site_section_builders=None,
-                 datasource_whitelist=None
-    ):
+                 datasource_whitelist=None,
+                 runtime_environment=None
+                 ):
         self.data_context = data_context
         self.store_backend = store_backend
-        
+
         # set custom_styles_directory if present
         custom_styles_directory = None
         plugins_directory = data_context.plugins_directory
-        if os.path.isdir(os.path.join(plugins_directory, "custom_data_docs", "styles")):
+        if plugins_directory and os.path.isdir(os.path.join(plugins_directory, "custom_data_docs", "styles")):
             custom_styles_directory = os.path.join(plugins_directory, "custom_data_docs/styles")
 
         # The site builder is essentially a frontend store. We'll open up three types of backends using the base
         # type of the configuration defined in the store_backend section
 
-        target_store = HtmlSiteStore(
-            root_directory=data_context.root_directory,
-            serialization_type=None,
-            store_backend=store_backend
+        self.target_store = HtmlSiteStore(
+            store_backend=store_backend,
+            runtime_environment=runtime_environment
         )
 
         # the site config may specify the list of datasource names to document.
@@ -132,10 +131,10 @@ class SiteBuilder(object):
             }
         self.site_index_builder = instantiate_class_from_config(
             config=site_index_builder,
-            runtime_config={
+            runtime_environment={
                 "data_context": data_context,
                 "custom_styles_directory": custom_styles_directory,
-                "target_store": target_store,
+                "target_store": self.target_store,
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -178,9 +177,9 @@ class SiteBuilder(object):
         for site_section_name, site_section_config in site_section_builders.items():
             self.site_section_builders[site_section_name] = instantiate_class_from_config(
                 config=site_section_config,
-                runtime_config={
+                runtime_environment={
                     "data_context": data_context,
-                    "target_store": target_store,
+                    "target_store": self.target_store,
                     "custom_styles_directory": custom_styles_directory
                 },
                 config_defaults={
@@ -200,20 +199,10 @@ class SiteBuilder(object):
                             and avoids full rebuild.
         :return:
         """
-        
+
         # copy static assets
-        project_root_dir = self.data_context.root_directory
-        site_base_dir = self.store_backend["base_directory"]
-        site_dir = os.path.join(project_root_dir, site_base_dir)
-        static_assets_source_dir = file_relative_path(__file__, "../view/static")
-        static_assets_destination_path = os.path.join(site_dir, "static")
-        if os.path.isdir(static_assets_destination_path):
-            message = """Warning. An existing static assets directory was found here: {}.
-                    - Static assets were not copied.""".format(static_assets_destination_path)
-            logger.warning(message)
-        else:
-            shutil.copytree(static_assets_source_dir, static_assets_destination_path)
-        
+        self.target_store.copy_static_assets()
+
         for site_section, site_section_builder in self.site_section_builders.items():
             site_section_builder.build(datasource_whitelist=self.datasource_whitelist,
                                        resource_identifiers=resource_identifiers
@@ -224,16 +213,16 @@ class SiteBuilder(object):
 
 class DefaultSiteSectionBuilder(object):
 
-    def __init__(self,
-                 name,
-                 data_context,
-                 target_store,
-                 source_store_name,
-                 custom_styles_directory=None,
-                 # NOTE: Consider allowing specification of ANY element (or combination of elements) within an ID key?
-                 run_id_filter=None,
-                 renderer=None,
-                 view=None,
+    def __init__(
+            self,
+            name,
+            data_context,
+            target_store,
+            source_store_name,
+            custom_styles_directory=None,
+            run_id_filter=None,
+            renderer=None,
+            view=None,
     ):
         self.name = name
         self.source_store = data_context.stores[source_store_name]
@@ -246,7 +235,9 @@ class DefaultSiteSectionBuilder(object):
             )
         self.renderer_class = instantiate_class_from_config(
             config=renderer,
-            runtime_config={},
+            runtime_environment={
+                "data_context": data_context
+            },
             config_defaults={
                 "module_name": "great_expectations.render.renderer"
             }
@@ -259,7 +250,7 @@ class DefaultSiteSectionBuilder(object):
 
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_config={
+            runtime_environment={
                 "custom_styles_directory": custom_styles_directory
             },
             config_defaults={
@@ -362,7 +353,9 @@ class DefaultSiteIndexBuilder(object):
             }
         self.renderer_class = instantiate_class_from_config(
             config=renderer,
-            runtime_config={},
+            runtime_environment={
+                "data_context": data_context
+            },
             config_defaults={
                 "module_name": "great_expectations.render.renderer"
             }
@@ -375,7 +368,7 @@ class DefaultSiteIndexBuilder(object):
             }
         self.view_class = instantiate_class_from_config(
             config=view,
-            runtime_config={
+            runtime_environment={
                 "custom_styles_directory": custom_styles_directory
             },
             config_defaults={
@@ -525,9 +518,8 @@ class DefaultSiteIndexBuilder(object):
         if self.show_cta_footer:
             index_links_dict["cta_object"] = self.get_calls_to_action()
 
-        for key in resource_keys:
-            key_resource_identifier = key.resource_identifier
-            
+        for key_resource_identifier in resource_keys:
+
             if type(key_resource_identifier) == ExpectationSuiteIdentifier:
                 self.add_resource_info_to_index_links_dict(
                     data_context=self.data_context,
@@ -537,7 +529,7 @@ class DefaultSiteIndexBuilder(object):
                     generator=key_resource_identifier.data_asset_name.generator,
                     generator_asset=key_resource_identifier.data_asset_name.generator_asset,
                     expectation_suite_name=key_resource_identifier.expectation_suite_name,
-                    section_name=key.site_section_name
+                    section_name="expectations"
                 )
             elif type(key_resource_identifier) == ValidationResultIdentifier:
                 # FIXME: review and correct this hardcoded logic

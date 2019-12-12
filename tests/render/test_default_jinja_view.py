@@ -12,7 +12,13 @@ from great_expectations.render.renderer import (
 from great_expectations.render.view import DefaultJinjaPageView
 from great_expectations.render.types import (
     RenderedSectionContent,
-    RenderedHeaderContent, RenderedTableContent, ValueListContent, RenderedGraphContent, TextContent)
+    RenderedHeaderContent,
+    RenderedTableContent,
+    ValueListContent,
+    RenderedGraphContent,
+    TextContent,
+    RenderedStringTemplateContent
+)
 
 @pytest.fixture()
 def validation_results():
@@ -98,41 +104,27 @@ def test_render_section_page():
     )#.replace(" ", "").replace("\t", "").replace("\n", "")
 
     print(rendered_doc)
-    
+
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """<div id="section-1" class="ge-section container-fluid">
     <div class="row" >
-
-
 <div id="content-block-1" >
-
     <div id="content-block-1-header" ><h4>
-          Overview
+          <span>Overview</span>
       </h4>
     </div>
-
 </div>
-
-
 <div id="content-block-2" class="col-6 table-responsive" style="margin-top:20px;" >
-
     <div id="content-block-2-header" >
-        
         <h4>
-            Dataset info
+            <span>Dataset info</span>
         </h4>
         </div>
-
-
 <table id="content-block-2-body" class="table table-sm" >
-    
-
     <tr>
         <td id="content-block-2-cell-1-1" ><div class="show-scrollbars"><span>Number of variables</span></div></td><td id="content-block-2-cell-1-2" ><div class="show-scrollbars"><span>12</span></div></td></tr><tr>
         <td id="content-block-2-cell-2-1" ><div class="show-scrollbars"><span>Number of observations</span></div></td><td id="content-block-2-cell-2-2" ><div class="show-scrollbars"><span>891</span></div></td></tr></table>
-
 </div>
-        
     </div>
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
@@ -154,12 +146,10 @@ def test_rendering_components_without_section_loop_index():
     assert rendered_doc == \
         """
 <div id="content-block-2" >
-
     <div id="content-block-2-header" ><h4>
-          Overview
+          <span>Overview</span>
       </h4>
     </div>
-
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
@@ -172,12 +162,10 @@ def test_rendering_components_without_section_loop_index():
     assert rendered_doc == \
         """
 <div id="content-block" >
-
     <div id="content-block-header" ><h4>
-          Overview
+          <span>Overview</span>
       </h4>
     </div>
-
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView().render(
@@ -191,12 +179,10 @@ def test_rendering_components_without_section_loop_index():
     assert rendered_doc == \
         """
 <div id="content-block" >
-
     <div id="content-block-header" ><h4>
-          Overview
+          <span>Overview</span>
       </h4>
     </div>
-
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
@@ -204,44 +190,49 @@ def test_rendering_components_with_styling():
     # Medium-complicated example to verify that all the things are correctly piped to all the places
 
     header_component_content = RenderedTableContent(**{
-        # "component_type": "table",
         "content_block_type": "table",
-        "header": {
-            "template": "$var1 $var2 $var3",
-            "params": {
-                "var1": "AAA",
-                "var2": "BBB",
-                "var3": "CCC",
-            },
-            "styling": {
-                "default": {
-                    "classes": ["x"]
-                },
+        "header": RenderedStringTemplateContent(**{
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "$var1 $var2 $var3",
                 "params": {
-                    "var1": {
-                        "classes": ["y"]
+                    "var1": "AAA",
+                    "var2": "BBB",
+                    "var3": "CCC",
+                },
+                "styling": {
+                    "default": {
+                        "classes": ["x"]
+                    },
+                    "params": {
+                        "var1": {
+                            "classes": ["y"]
+                        }
                     }
                 }
             }
-        },
-        "subheader": {
-            "template": "$var1 $var2 $var3",
-            "params": {
-                "var1": "aaa",
-                "var2": "bbb",
-                "var3": "ccc",
-            },
-            "styling": {
-                "default": {
-                    "classes": ["xx"]
-                },
+        }),
+        "subheader": RenderedStringTemplateContent(**{
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "$var1 $var2 $var3",
                 "params": {
-                    "var1": {
-                        "classes": ["yy"]
+                    "var1": "aaa",
+                    "var2": "bbb",
+                    "var3": "ccc",
+                },
+                "styling": {
+                    "default": {
+                        "classes": ["xx"]
+                    },
+                    "params": {
+                        "var1": {
+                            "classes": ["yy"]
+                        }
                     }
                 }
-            }
-        },
+            },
+        }),
         "table": [
             ["Mean", "446"],
             ["Minimum", "1"],
@@ -276,43 +267,30 @@ def test_rendering_components_with_styling():
     )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
-    
+
     assert rendered_doc == \
         """
 <div id="section-1-content-block-2" class="root_foo" root="baz" style="root:bar;" >
-
     <div id="section-1-content-block-2-header" class="header_foo" header="baz" style="header:bar;" >
-        
         <h4>
-            
-                <span >
-                    <span class="y" >AAA</span> <span class="x" >BBB</span> <span class="x" >CCC</span>
-                </span>
-            
+            <span >
+                <span class="y" >AAA</span> <span class="x" >BBB</span> <span class="x" >CCC</span>
+            </span>
         </h4>
         <h5 id="section-1-content-block-2-subheader" class="subheader_foo" subheader="baz" style="subheader:bar;" >
-            
-                <span >
-                    <span class="yy" >aaa</span> <span class="xx" >bbb</span> <span class="xx" >ccc</span>
-                </span>
-            
+            <span >
+                <span class="yy" >aaa</span> <span class="xx" >bbb</span> <span class="xx" >ccc</span>
+            </span>
         </h5>
         </div>
-
-
 <table id="section-1-content-block-2-body" class="body_foo" body="baz" style="body:bar;" >
-    
-
     <tr>
         <td id="section-1-content-block-2-cell-1-1" ><div class="show-scrollbars"><span>Mean</span></div></td><td id="section-1-content-block-2-cell-1-2" ><div class="show-scrollbars"><span>446</span></div></td></tr><tr>
         <td id="section-1-content-block-2-cell-2-1" ><div class="show-scrollbars"><span>Minimum</span></div></td><td id="section-1-content-block-2-cell-2-2" ><div class="show-scrollbars"><span>1</span></div></td></tr></table>
-
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
-### Test all the component types ###
-
-
+# Test all the component types ###
 def test_render_header_component():
     header_component_content = RenderedHeaderContent(**{
         # "component_type": "header",
@@ -331,18 +309,15 @@ def test_render_header_component():
     assert rendered_doc == \
         """
 <div id="section-1-content-block-2" >
-
     <div id="section-1-content-block-2-header" ><h4>
-          Overview
+          <span>Overview</span>
       </h4>
     </div>
-
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
 def test_render_table_component():
     table_component_content = RenderedTableContent(**{
-        # "component_type": "header",
         "content_block_type": "table",
         "header": "Overview",
         "table": [
@@ -365,22 +340,15 @@ def test_render_table_component():
     assert rendered_doc == \
         """
 <div id="section-1-content-block-2" class="col-4" >
-
     <div id="section-1-content-block-2-header" >
-        
         <h4>
-            Overview
+            <span>Overview</span>
         </h4>
         </div>
-
-
 <table id="section-1-content-block-2-body" >
-    
-
     <tr>
         <td id="section-1-content-block-2-cell-1-1" ><div class="show-scrollbars"><span>Mean</span></div></td><td id="section-1-content-block-2-cell-1-2" ><div class="show-scrollbars"><span>446</span></div></td></tr><tr>
         <td id="section-1-content-block-2-cell-2-1" ><div class="show-scrollbars"><span>Minimum</span></div></td><td id="section-1-content-block-2-cell-2-2" ><div class="show-scrollbars"><span>1</span></div></td></tr></table>
-
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
@@ -420,26 +388,19 @@ def test_render_value_list():
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" style="margin-top:20px;" >
-
     <div id="section-1-content-block-2-header" >
         <h4>
-            Example values
-        </h4></div>
-
-
+            <span>Example values</span>
+        </h4>
+        </div>
 <p id="section-1-content-block-2-body" >
-    
-                <span >
-                    <span class="badge badge-info" >0</span>
-                </span>
-            
-    
-                <span >
-                    <span class="badge badge-info" >1</span>
-                </span>
-            
-    </p>
-
+    <span >
+        <span class="badge badge-info" >0</span>
+    </span>
+    <span >
+        <span class="badge badge-info" >1</span>
+    </span>
+</p>
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
@@ -464,11 +425,9 @@ def test_render_graph():
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" >
-
     <div id="section-1-content-block-2-header" >
-        
         <h4>
-            Histogram
+            <span>Histogram</span>
         </h4>
         </div>
 <div class="show-scrollbars">
@@ -482,7 +441,6 @@ def test_render_graph():
         actions: false
     }).then(result=>console.log(result)).catch(console.warn);
 </script>
-
 </div>
 """.replace(" ", "").replace("\t", "").replace("\n", "")
 
@@ -507,19 +465,17 @@ def test_render_text():
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """
-<div id="section-1-content-block-2" class="col-4" >
-
-    <div id="section-1-content-block-2-header" >
-        <h4>
-            Histogram
-        </h4></div>
-
-
-<div id="section-1-content-block-2-body" >
-    <p>hello</p>
-    </div>
-
-</div>""".replace(" ", "").replace("\t", "").replace("\n", "")
+        <div id="section-1-content-block-2" class="col-4" >
+        <div id="section-1-content-block-2-body" class="col-4" >
+          <div id="section-1-content-block-2-header" >
+                <h4>
+                    <span>Histogram</span>
+                </h4>
+                </div>
+                <p ><span>hello</span></p>
+            </div>
+        </div>
+    """.replace(" ", "").replace("\t", "").replace("\n", "")
 
     text_component_content = TextContent(**{
         "content_block_type": "text",
@@ -540,17 +496,15 @@ def test_render_text():
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """
-<div id="section-1-content-block-2" class="col-4" >
-
-    <div id="section-1-content-block-2-header" >
-        <h4>
-            Histogram
-        </h4></div>
-
-
-<div id="section-1-content-block-2-body" >
-    <p>hello</p>
-    <p>goodbye</p>
-    </div>
-
-</div>""".replace(" ", "").replace("\t", "").replace("\n", "")
+        <div id="section-1-content-block-2" class="col-4" >
+        <div id="section-1-content-block-2-body" class="col-4" >
+          <div id="section-1-content-block-2-header" >
+                <h4>
+                    <span>Histogram</span>
+                </h4>
+                </div>
+                <p ><span>hello</span></p>
+                <p ><span>goodbye</span></p>
+            </div>
+        </div>
+    """.replace(" ", "").replace("\t", "").replace("\n", "")
