@@ -450,7 +450,6 @@ class ExpectationSuitePageRenderer(Renderer):
             },
         })
 
-    # TODO: Update tests
     @classmethod
     def _render_asset_notes(cls, expectations):
 

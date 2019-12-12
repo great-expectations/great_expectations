@@ -200,7 +200,6 @@ class DefaultJinjaView(object):
         else:
             return ""
 
-    # TODO: Add test
     def render_markdown(self, markdown):
         try:
             return pypandoc.convert_text(markdown, format="md", to="html")
