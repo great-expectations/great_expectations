@@ -179,7 +179,12 @@ class ContentBlockRenderer(Renderer):
             "subheader": "Notes:",
             "text": note_content,
             "styling": {
-                    "classes": ["col-12", "mt-2", "mb-2", "alert", "alert-warning"]
+                "classes": ["col-12", "mt-2", "mb-2", "alert", "alert-warning"],
+                "parent": {
+                    "styles": {
+                        "list-style-type": "none"
+                    }
+                }
             },
         })
 
