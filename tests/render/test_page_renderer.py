@@ -10,7 +10,7 @@ from great_expectations.render.renderer import (
     ProfilingResultsPageRenderer,
     ValidationResultsPageRenderer
 )
-from great_expectations.render.types import RenderedHeaderContent, RenderedTableContent
+from great_expectations.render.types import RenderedHeaderContent, RenderedTableContent, RenderedContent
 
 
 def test_ExpectationSuitePageRenderer_render_asset_notes():
@@ -23,8 +23,9 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
             "notes": "*hi*"
         }
     ))
-    print(result)
-    assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.', "*hi*"]
+    print(RenderedContent.rendered_content_list_to_json(result.text))
+    assert RenderedContent.rendered_content_list_to_json(
+        result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.', "*hi*"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
         data_asset_name="test", expectation_suite_name="test",
@@ -32,8 +33,9 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
             "notes": ["*alpha*", "_bravo_", "charlie"]
         }
     ))
-    print(result)
-    assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
+    print(RenderedContent.rendered_content_list_to_json(result.text))
+    assert RenderedContent.rendered_content_list_to_json(
+        result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
                               "*alpha*", "_bravo_", "charlie"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
@@ -45,8 +47,9 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
             }
         }
     ))
-    print(result)
-    assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
+    print(RenderedContent.rendered_content_list_to_json(result.text))
+    assert RenderedContent.rendered_content_list_to_json(
+        result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
                            "*alpha*", "_bravo_", "charlie"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
@@ -58,14 +61,18 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
             }
         }
     ))
-    print(result)
-    
+    print(RenderedContent.rendered_content_list_to_json(result.text))
+
     try:
         pypandoc.convert_text("*test*", format='md', to="html")
-        assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
-                               "<p><em>alpha</em></p>\n"]
+        assert RenderedContent.rendered_content_list_to_json(
+            result.text) == [
+            'This Expectation suite currently contains 0 total Expectations across 0 columns.',
+            {'content_block_type': 'markdown', 'styling': {'parent': {}}, 'markdown': '*alpha*'}
+        ]
     except OSError:
-        assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
+        assert RenderedContent.rendered_content_list_to_json(
+            result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
                                "*alpha*"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
@@ -77,14 +84,20 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
             }
         }
     ))
-    print(result)
-    
+    print(RenderedContent.rendered_content_list_to_json(result.text))
+
     try:
         pypandoc.convert_text("*test*", format='md', to="html")
-        assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
-                               "<p><em>alpha</em></p>\n", "<p><em>bravo</em></p>\n", "<p>charlie</p>\n"]
+        assert RenderedContent.rendered_content_list_to_json(
+            result.text) == [
+            'This Expectation suite currently contains 0 total Expectations across 0 columns.',
+            {'content_block_type': 'markdown', 'styling': {'parent': {}}, 'markdown': '*alpha*'},
+            {'content_block_type': 'markdown', 'styling': {'parent': {}}, 'markdown': '_bravo_'},
+            {'content_block_type': 'markdown', 'styling': {'parent': {}}, 'markdown': 'charlie'}
+        ]
     except OSError:
-        assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
+        assert RenderedContent.rendered_content_list_to_json(
+            result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
                                "*alpha*", "_bravo_", "charlie"]
 
 
@@ -94,8 +107,9 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_asset_notes(
         meta={},
         expectations=None
     ))
-    print(result)
-    assert result.text == ['This Expectation suite currently contains 0 total Expectations across 0 columns.']
+    print(RenderedContent.rendered_content_list_to_json(result.text))
+    assert RenderedContent.rendered_content_list_to_json(
+        result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.']
 
     result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
         data_asset_name="test", expectation_suite_name="test",
@@ -106,16 +120,16 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_asset_notes(
             }
         }
     ))
-    print(result)
-    
+    print(RenderedContent.rendered_content_list_to_json(result.text))
+
     try:
         pypandoc.convert_text("*test*", format='md', to="html")
-        assert result.text == [
+        assert RenderedContent.rendered_content_list_to_json(result.text) == [
             'This Expectation suite currently contains 0 total Expectations across 0 columns.',
-            '<p>hi</p>\n',
+            {'content_block_type': 'markdown', 'styling': {'parent': {}}, 'markdown': 'hi'}
         ]
     except OSError:
-        assert result.text == [
+        assert RenderedContent.rendered_content_list_to_json(result.text) == [
             'This Expectation suite currently contains 0 total Expectations across 0 columns.',
             'hi',
         ]
@@ -138,8 +152,9 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_asset_notes(
             )
         ]
     ))
-    print(result)
-    assert result.text[0] == 'This Expectation suite currently contains 3 total Expectations across 2 columns.'
+    print(RenderedContent.rendered_content_list_to_json(result.text)[0])
+    assert RenderedContent.rendered_content_list_to_json(
+        result.text)[0] == 'This Expectation suite currently contains 3 total Expectations across 2 columns.'
 
 
 def test_ProfilingResultsPageRenderer(titanic_profiled_evrs_1):

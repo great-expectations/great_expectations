@@ -358,78 +358,106 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_no
     )
     expectations = [expectation_with_markdown_meta_notes]
     expected_result_json = {
-        'content_blocks': [
+      'content_blocks': [
+        {
+          'content_block_type': 'header',
+          'styling': {
+            'classes': [
+              'col-12'
+            ],
+            'header': {
+              'classes': [
+                'alert',
+                'alert-secondary'
+              ]
+            }
+          },
+          'header': 'Car Insurance Premiums ($$)'
+        },
+        {
+          'content_block_type': 'bullet_list',
+          'styling': {
+            'classes': [
+              'col-12'
+            ]
+          },
+          'bullet_list': [
             {
-                'content_block_type': 'header',
-                'styling': {
-                    'classes': ['col-12'],
-                    'header': {
-                        'classes': ['alert', 'alert-secondary']
-                    }
+              'content_block_type': 'string_template',
+              'string_template': {
+                'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
+                'params': {
+                  "column": "Car Insurance Premiums ($)",
+                  "type_list": [
+                    "DOUBLE_PRECISION",
+                    "DoubleType",
+                    "FLOAT",
+                    "FLOAT4",
+                    "FLOAT8",
+                    "FloatType",
+                    "NUMERIC",
+                    "float"
+                  ],
+                  "result_format": "SUMMARY",
+                  "mostly": None,
+                  "v__0": "DOUBLE_PRECISION",
+                  "v__1": "DoubleType",
+                  "v__2": "FLOAT",
+                  "v__3": "FLOAT4",
+                  "v__4": "FLOAT8",
+                  "v__5": "FloatType",
+                  "v__6": "NUMERIC",
+                  "v__7": "float"
                 },
-                'header': 'Car Insurance Premiums ($$)'
+                'styling': {
+                  'default': {
+                    'classes': [
+                      'badge',
+                      'badge-secondary'
+                    ]
+                  },
+                  'params': {
+                    'column': {
+                      'classes': [
+                        'badge',
+                        'badge-primary'
+                      ]
+                    }
+                  }
+                }
+              }
             },
             {
-               'content_block_type': 'bullet_list',
-               'styling': {
-                   'classes': ['col-12']
-               },
-                'bullet_list': [
-                    [
-                        {
-                            'content_block_type': 'string_template',
-                            'string_template': {
-                                'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
-                                'params': {
-                                    "column": "Car Insurance Premiums ($)",
-                                    "type_list": [
-                                        "DOUBLE_PRECISION",
-                                        "DoubleType",
-                                        "FLOAT",
-                                        "FLOAT4",
-                                        "FLOAT8",
-                                        "FloatType",
-                                        "NUMERIC",
-                                        "float"
-                                    ],
-                                    "result_format": "SUMMARY",
-                                    "mostly": None,
-                                    "v__0": "DOUBLE_PRECISION",
-                                    "v__1": "DoubleType", "v__2": "FLOAT",
-                                    "v__3": "FLOAT4", "v__4": "FLOAT8",
-                                    "v__5": "FloatType", "v__6": "NUMERIC",
-                                    "v__7": "float"
-                                },
-                                'styling': {
-                                    'default': {
-                                        'classes': ['badge', 'badge-secondary']
-                                    },
-                                    'params': {
-                                        'column': {
-                                            'classes': ['badge', 'badge-primary']
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            'content_block_type': 'text',
-                            'styling': {
-                                'classes': ['col-12', 'mt-2', 'mb-2', 'alert', 'alert-warning']
-                            },
-                            'subheader': 'Notes:',
-                            'text': [
-                                 {'content_block_type': 'markdown',
-                                  'styling': {'parent': {}},
-                                  'markdown': '#### These are expectation notes \n - you can use markdown \n - or just strings'
-                                  }
-                            ]
-                        }
-                    ]
-                ]
+              'content_block_type': 'text',
+              'styling': {
+                'classes': [
+                  'col-12',
+                  'mt-2',
+                  'mb-2',
+                  'alert',
+                  'alert-warning'
+                ],
+                'parent': {
+                  'styles': {
+                    'list-style-type': 'none'
+                  }
+                }
+              },
+              'subheader': 'Notes:',
+              'text': [
+                {
+                  'content_block_type': 'markdown',
+                  'styling': {
+                    'parent': {}
+                  },
+                  'markdown': '#### These are expectation notes \n - you can use markdown \n - or just strings'
+                }
+              ]
             }
-        ],
-        'section_name': 'Car Insurance Premiums ($)'
+          ]
+        }
+      ],
+      'section_name': 'Car Insurance Premiums ($)'
     }
 
     result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
@@ -496,78 +524,82 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
             ]
           },
           'bullet_list': [
-            [
-              {
-                'content_block_type': 'string_template',
-                'string_template': {
-                  'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
-                  'params': {
-                    "column": "Car Insurance Premiums ($)",
-                    "type_list": [
-                      "DOUBLE_PRECISION",
-                      "DoubleType",
-                      "FLOAT",
-                      "FLOAT4",
-                      "FLOAT8",
-                      "FloatType",
-                      "NUMERIC",
-                      "float"
-                    ],
-                    "result_format": "SUMMARY",
-                    "mostly": None,
-                    "v__0": "DOUBLE_PRECISION",
-                    "v__1": "DoubleType",
-                    "v__2": "FLOAT",
-                    "v__3": "FLOAT4",
-                    "v__4": "FLOAT8",
-                    "v__5": "FloatType",
-                    "v__6": "NUMERIC",
-                    "v__7": "float"
+            {
+              'content_block_type': 'string_template',
+              'string_template': {
+                'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
+                'params': {
+                  "column": "Car Insurance Premiums ($)",
+                  "type_list": [
+                    "DOUBLE_PRECISION",
+                    "DoubleType",
+                    "FLOAT",
+                    "FLOAT4",
+                    "FLOAT8",
+                    "FloatType",
+                    "NUMERIC",
+                    "float"
+                  ],
+                  "result_format": "SUMMARY",
+                  "mostly": None,
+                  "v__0": "DOUBLE_PRECISION",
+                  "v__1": "DoubleType",
+                  "v__2": "FLOAT",
+                  "v__3": "FLOAT4",
+                  "v__4": "FLOAT8",
+                  "v__5": "FloatType",
+                  "v__6": "NUMERIC",
+                  "v__7": "float"
+                },
+                'styling': {
+                  'default': {
+                    'classes': [
+                      'badge',
+                      'badge-secondary'
+                    ]
                   },
-                  'styling': {
-                    'default': {
+                  'params': {
+                    'column': {
                       'classes': [
                         'badge',
-                        'badge-secondary'
+                        'badge-primary'
                       ]
-                    },
-                    'params': {
-                      'column': {
-                        'classes': [
-                          'badge',
-                          'badge-primary'
-                        ]
-                      }
                     }
                   }
                 }
-              },
-              {
-                'content_block_type': 'text',
-                'styling': {
-                  'classes': [
-                    'col-12',
-                    'mt-2',
-                    'mb-2',
-                    'alert',
-                    'alert-warning'
-                  ]
-                },
-                'subheader': 'Notes:',
-                'text': [
-                  'This is a',
-                  'string list,',
-                  "assigned to the 'content' key of a notes dict.",
-                  'Cool',
-                  'huh?'
-                ]
               }
-            ]
+            },
+            {
+              'content_block_type': 'text',
+              'styling': {
+                'classes': [
+                  'col-12',
+                  'mt-2',
+                  'mb-2',
+                  'alert',
+                  'alert-warning'
+                ],
+                'parent': {
+                  'styles': {
+                    'list-style-type': 'none'
+                  }
+                }
+              },
+              'subheader': 'Notes:',
+              'text': [
+                'This is a',
+                'string list,',
+                "assigned to the 'content' key of a notes dict.",
+                'Cool',
+                'huh?'
+              ]
+            }
           ]
         }
       ],
       'section_name': 'Car Insurance Premiums ($)'
     }
+
     result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     print(result_json)
     assert result_json == expected_result_json
@@ -626,74 +658,79 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
             ]
           },
           'bullet_list': [
-            [
-              {
-                'content_block_type': 'string_template',
-                'string_template': {
-                  'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
-                  'params': {
-                    "column": "Car Insurance Premiums ($)",
-                    "type_list": [
-                      "DOUBLE_PRECISION",
-                      "DoubleType",
-                      "FLOAT",
-                      "FLOAT4",
-                      "FLOAT8",
-                      "FloatType",
-                      "NUMERIC",
-                      "float"
-                    ],
-                    "result_format": "SUMMARY",
-                    "mostly": None,
-                    "v__0": "DOUBLE_PRECISION",
-                    "v__1": "DoubleType",
-                    "v__2": "FLOAT",
-                    "v__3": "FLOAT4",
-                    "v__4": "FLOAT8",
-                    "v__5": "FloatType",
-                    "v__6": "NUMERIC",
-                    "v__7": "float"
+            {
+              'content_block_type': 'string_template',
+              'string_template': {
+                'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
+                'params': {
+                  "column": "Car Insurance Premiums ($)",
+                  "type_list": [
+                    "DOUBLE_PRECISION",
+                    "DoubleType",
+                    "FLOAT",
+                    "FLOAT4",
+                    "FLOAT8",
+                    "FloatType",
+                    "NUMERIC",
+                    "float"
+                  ],
+                  "result_format": "SUMMARY",
+                  "mostly": None,
+                  "v__0": "DOUBLE_PRECISION",
+                  "v__1": "DoubleType",
+                  "v__2": "FLOAT",
+                  "v__3": "FLOAT4",
+                  "v__4": "FLOAT8",
+                  "v__5": "FloatType",
+                  "v__6": "NUMERIC",
+                  "v__7": "float"
+                },
+                'styling': {
+                  'default': {
+                    'classes': [
+                      'badge',
+                      'badge-secondary'
+                    ]
                   },
-                  'styling': {
-                    'default': {
+                  'params': {
+                    'column': {
                       'classes': [
                         'badge',
-                        'badge-secondary'
+                        'badge-primary'
                       ]
-                    },
-                    'params': {
-                      'column': {
-                        'classes': [
-                          'badge',
-                          'badge-primary'
-                        ]
-                      }
                     }
                   }
                 }
-              },
-              {
-                'content_block_type': 'text',
-                'styling': {
-                  'classes': [
-                    'col-12',
-                    'mt-2',
-                    'mb-2',
-                    'alert',
-                    'alert-warning'
-                  ]
-                },
-                'subheader': 'Notes:',
-                'text': [
-                  "This is just a single string, assigned to the 'content' key of a notes dict."
-                ]
               }
-            ]
+            },
+            {
+              'content_block_type': 'text',
+              'styling': {
+                'classes': [
+                  'col-12',
+                  'mt-2',
+                  'mb-2',
+                  'alert',
+                  'alert-warning'
+                ],
+                'parent': {
+                  'styles': {
+                    'list-style-type': 'none'
+                  }
+                }
+              },
+              'subheader': 'Notes:',
+              'text': [
+                "This is just a single string, assigned to the 'content' key of a notes dict."
+              ]
+            }
           ]
         }
       ],
       'section_name': 'Car Insurance Premiums ($)'
     }
+
+
     result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     print(result_json)
     assert result_json == expected_result_json
@@ -749,77 +786,81 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
             ]
           },
           'bullet_list': [
-            [
-              {
-                'content_block_type': 'string_template',
-                'string_template': {
-                  'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
-                  'params': {
-                    "column": "Car Insurance Premiums ($)",
-                    "type_list": [
-                      "DOUBLE_PRECISION",
-                      "DoubleType",
-                      "FLOAT",
-                      "FLOAT4",
-                      "FLOAT8",
-                      "FloatType",
-                      "NUMERIC",
-                      "float"
-                    ],
-                    "result_format": "SUMMARY",
-                    "mostly": None,
-                    "v__0": "DOUBLE_PRECISION",
-                    "v__1": "DoubleType",
-                    "v__2": "FLOAT",
-                    "v__3": "FLOAT4",
-                    "v__4": "FLOAT8",
-                    "v__5": "FloatType",
-                    "v__6": "NUMERIC",
-                    "v__7": "float"
+            {
+              'content_block_type': 'string_template',
+              'string_template': {
+                'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
+                'params': {
+                  "column": "Car Insurance Premiums ($)",
+                  "type_list": [
+                    "DOUBLE_PRECISION",
+                    "DoubleType",
+                    "FLOAT",
+                    "FLOAT4",
+                    "FLOAT8",
+                    "FloatType",
+                    "NUMERIC",
+                    "float"
+                  ],
+                  "result_format": "SUMMARY",
+                  "mostly": None,
+                  "v__0": "DOUBLE_PRECISION",
+                  "v__1": "DoubleType",
+                  "v__2": "FLOAT",
+                  "v__3": "FLOAT4",
+                  "v__4": "FLOAT8",
+                  "v__5": "FloatType",
+                  "v__6": "NUMERIC",
+                  "v__7": "float"
+                },
+                'styling': {
+                  'default': {
+                    'classes': [
+                      'badge',
+                      'badge-secondary'
+                    ]
                   },
-                  'styling': {
-                    'default': {
+                  'params': {
+                    'column': {
                       'classes': [
                         'badge',
-                        'badge-secondary'
+                        'badge-primary'
                       ]
-                    },
-                    'params': {
-                      'column': {
-                        'classes': [
-                          'badge',
-                          'badge-primary'
-                        ]
-                      }
                     }
                   }
                 }
-              },
-              {
-                'content_block_type': 'text',
-                'styling': {
-                  'classes': [
-                    'col-12',
-                    'mt-2',
-                    'mb-2',
-                    'alert',
-                    'alert-warning'
-                  ]
-                },
-                'subheader': 'Notes:',
-                'text': [
-                  'This is a list',
-                  'of strings',
-                  'assigned to the notes',
-                  'key.'
-                ]
               }
-            ]
+            },
+            {
+              'content_block_type': 'text',
+              'styling': {
+                'classes': [
+                  'col-12',
+                  'mt-2',
+                  'mb-2',
+                  'alert',
+                  'alert-warning'
+                ],
+                'parent': {
+                  'styles': {
+                    'list-style-type': 'none'
+                  }
+                }
+              },
+              'subheader': 'Notes:',
+              'text': [
+                'This is a list',
+                'of strings',
+                'assigned to the notes',
+                'key.'
+              ]
+            }
           ]
         }
       ],
       'section_name': 'Car Insurance Premiums ($)'
     }
+
     result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     print(result_json)
     assert result_json == expected_result_json
@@ -875,74 +916,78 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
             ]
           },
           'bullet_list': [
-            [
-              {
-                'content_block_type': 'string_template',
-                'string_template': {
-                  'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
-                  'params': {
-                    "column": "Car Insurance Premiums ($)",
-                    "type_list": [
-                      "DOUBLE_PRECISION",
-                      "DoubleType",
-                      "FLOAT",
-                      "FLOAT4",
-                      "FLOAT8",
-                      "FloatType",
-                      "NUMERIC",
-                      "float"
-                    ],
-                    "result_format": "SUMMARY",
-                    "mostly": None,
-                    "v__0": "DOUBLE_PRECISION",
-                    "v__1": "DoubleType",
-                    "v__2": "FLOAT",
-                    "v__3": "FLOAT4",
-                    "v__4": "FLOAT8",
-                    "v__5": "FloatType",
-                    "v__6": "NUMERIC",
-                    "v__7": "float"
+            {
+              'content_block_type': 'string_template',
+              'string_template': {
+                'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
+                'params': {
+                  "column": "Car Insurance Premiums ($)",
+                  "type_list": [
+                    "DOUBLE_PRECISION",
+                    "DoubleType",
+                    "FLOAT",
+                    "FLOAT4",
+                    "FLOAT8",
+                    "FloatType",
+                    "NUMERIC",
+                    "float"
+                  ],
+                  "result_format": "SUMMARY",
+                  "mostly": None,
+                  "v__0": "DOUBLE_PRECISION",
+                  "v__1": "DoubleType",
+                  "v__2": "FLOAT",
+                  "v__3": "FLOAT4",
+                  "v__4": "FLOAT8",
+                  "v__5": "FloatType",
+                  "v__6": "NUMERIC",
+                  "v__7": "float"
+                },
+                'styling': {
+                  'default': {
+                    'classes': [
+                      'badge',
+                      'badge-secondary'
+                    ]
                   },
-                  'styling': {
-                    'default': {
+                  'params': {
+                    'column': {
                       'classes': [
                         'badge',
-                        'badge-secondary'
+                        'badge-primary'
                       ]
-                    },
-                    'params': {
-                      'column': {
-                        'classes': [
-                          'badge',
-                          'badge-primary'
-                        ]
-                      }
                     }
                   }
                 }
-              },
-              {
-                'content_block_type': 'text',
-                'styling': {
-                  'classes': [
-                    'col-12',
-                    'mt-2',
-                    'mb-2',
-                    'alert',
-                    'alert-warning'
-                  ]
-                },
-                'subheader': 'Notes:',
-                'text': [
-                  "This is a single string assigned to the 'notes' key."
-                ]
               }
-            ]
+            },
+            {
+              'content_block_type': 'text',
+              'styling': {
+                'classes': [
+                  'col-12',
+                  'mt-2',
+                  'mb-2',
+                  'alert',
+                  'alert-warning'
+                ],
+                'parent': {
+                  'styles': {
+                    'list-style-type': 'none'
+                  }
+                }
+              },
+              'subheader': 'Notes:',
+              'text': [
+                "This is a single string assigned to the 'notes' key."
+              ]
+            }
           ]
         }
       ],
       'section_name': 'Car Insurance Premiums ($)'
     }
+
     result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     print(result_json)
     assert result_json == expected_result_json

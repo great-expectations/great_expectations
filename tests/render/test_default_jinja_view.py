@@ -465,16 +465,17 @@ def test_render_text():
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """
-<div id="section-1-content-block-2" class="col-4" >
-    <div id="section-1-content-block-2-header" >
-        <h4>
-            <span>Histogram</span>
-        </h4>
+        <div id="section-1-content-block-2" class="col-4" >
+        <div id="section-1-content-block-2-body" class="col-4" >
+          <div id="section-1-content-block-2-header" >
+                <h4>
+                    <span>Histogram</span>
+                </h4>
+                </div>
+                <p ><span>hello</span></p>
+            </div>
         </div>
-<div id="section-1-content-block-2-body" >
-    <p>hello</p>
-    </div>
-</div>""".replace(" ", "").replace("\t", "").replace("\n", "")
+    """.replace(" ", "").replace("\t", "").replace("\n", "")
 
     text_component_content = TextContent(**{
         "content_block_type": "text",
@@ -495,14 +496,15 @@ def test_render_text():
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """
-<div id="section-1-content-block-2" class="col-4" >
-    <div id="section-1-content-block-2-header" >
-        <h4>
-            <span>Histogram</span>
-        </h4>
+        <div id="section-1-content-block-2" class="col-4" >
+        <div id="section-1-content-block-2-body" class="col-4" >
+          <div id="section-1-content-block-2-header" >
+                <h4>
+                    <span>Histogram</span>
+                </h4>
+                </div>
+                <p ><span>hello</span></p>
+                <p ><span>goodbye</span></p>
+            </div>
         </div>
-<div id="section-1-content-block-2-body" >
-    <p>hello</p>
-    <p>goodbye</p>
-    </div>
-</div>""".replace(" ", "").replace("\t", "").replace("\n", "")
+    """.replace(" ", "").replace("\t", "").replace("\n", "")
