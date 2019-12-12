@@ -89,9 +89,11 @@ class ContentBlockRenderer(Renderer):
             content_block_fn = getattr(cls, expectation_type, None)
             if content_block_fn is not None:
                 try:
-                    result = content_block_fn(render_object,
-                                            styling=cls._get_element_styling(),
-                                            **kwargs)
+                    result = content_block_fn(
+                        render_object,
+                        styling=cls._get_element_styling(),
+                        **kwargs
+                    )
                 except Exception as e:
                     logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
 

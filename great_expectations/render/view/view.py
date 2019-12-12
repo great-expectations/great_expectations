@@ -207,7 +207,7 @@ class DefaultJinjaView(object):
             return markdown
 
     def render_string_template(self, template):
-        #NOTE: Using this line for debugging. This should probably be logged...?
+        # NOTE: Using this line for debugging. This should probably be logged...?
         # print(template)
 
         # NOTE: We should add some kind of type-checking to template

@@ -730,7 +730,6 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
       'section_name': 'Car Insurance Premiums ($)'
     }
 
-
     result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     print(result_json)
     assert result_json == expected_result_json
