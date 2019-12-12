@@ -543,8 +543,6 @@ def get_batch_kwargs(context,
 
     data_source = select_datasource(context, data_source_name=data_source_name)
 
-    data_source_name = "pandas_datasource" # "my_mysql_db" #TODO: remove after the datasource name bug is fixed
-
     available_data_assets_dict = context.get_available_data_asset_names(datasource_names=data_source_name)
 
     if generator_name is None:
@@ -651,7 +649,6 @@ Press any key to continue...
         raise ge_exceptions.DataContextError("No datasources found in the context")
 
     data_source_name = data_source.name
-    data_source_name = "pandas_datasource"#""my_mysql_db" #TODO: hack - remove!!!
 
     if generator_name is None or data_asset_name is None or batch_kwargs is None:
         data_source_name, generator_name, data_asset_name, batch_kwargs = get_batch_kwargs(context,
