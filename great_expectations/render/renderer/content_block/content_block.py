@@ -71,8 +71,8 @@ class ContentBlockRenderer(Renderer):
                         expectation_meta_notes = cls._render_expectation_meta_notes(obj_)
                         if expectation_meta_notes:
                             result.append(expectation_meta_notes)
-                    blocks.append(result)
-                
+                    blocks += result
+
             if len(blocks) > 0:
                 content_block = cls._rendered_component_type(**{
                     cls._content_block_type: blocks,
