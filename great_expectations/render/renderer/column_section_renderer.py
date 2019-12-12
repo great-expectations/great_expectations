@@ -1,5 +1,6 @@
 import json
 from builtins import str  # PY2 compatibility
+import logging
 import re
 
 import altair as alt
@@ -9,9 +10,12 @@ from great_expectations.core import ExpectationConfiguration, ExpectationValidat
 from .renderer import Renderer
 from great_expectations.util import load_class
 from .content_block import ExceptionListContentBlockRenderer
+from .content_block import ExpectationStringRenderer
 
 from ..types import RenderedSectionContent, RenderedHeaderContent, RenderedGraphContent, RenderedBulletListContent, \
-    RenderedTableContent, ValueListContent, TextContent
+    RenderedTableContent, ValueListContent, TextContent, RenderedStringTemplateContent
+
+logger = logging.getLogger(__name__)
 
 
 def convert_to_string_and_escape(var):
@@ -40,15 +44,35 @@ class ColumnSectionRenderer(Renderer):
 
 class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
-    def __init__(self, overview_table_renderer=None):
+    def __init__(self, overview_table_renderer=None, expectation_string_renderer=None):
         if overview_table_renderer is None:
             overview_table_renderer = {
                 "class_name": "ProfilingOverviewTableContentBlockRenderer"
+            }
+        if expectation_string_renderer is None:
+            expectation_string_renderer = {
+                "class_name": "ExpectationStringRenderer"
             }
         self._overview_table_renderer = load_class(
             class_name=overview_table_renderer.get("class_name"),
             module_name=overview_table_renderer.get("module_name", "great_expectations.render.renderer.content_block")
         )
+        self._expectation_string_renderer = load_class(
+            class_name=expectation_string_renderer.get("class_name"),
+            module_name=expectation_string_renderer.get(
+                "module_name", "great_expectations.render.renderer.content_block"
+            )
+        )
+        self.content_block_function_names = [
+            "_render_header",
+            "_render_overview_table",
+            "_render_quantile_table",
+            "_render_stats_table",
+            "_render_histogram",
+            "_render_values_set",
+            "_render_bar_chart_table",
+            "_render_failed"
+        ]
 
     #Note: Seems awkward to pass section_name and column_type into this renderer.
     #Can't we figure that out internally?
@@ -60,14 +84,14 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks = []
 
-        content_blocks.append(self._render_header(evrs, column_type))
-        # content_blocks.append(cls._render_column_type(evrs))
-        content_blocks.append(self._render_overview_table(evrs))
-        content_blocks.append(self._render_quantile_table(evrs))
-        content_blocks.append(self._render_stats_table(evrs))
-        content_blocks.append(self._render_histogram(evrs))
-        content_blocks.append(self._render_values_set(evrs))
-        content_blocks.append(self._render_bar_chart_table(evrs))
+        for content_block_function_name in self.content_block_function_names:
+            try:
+                if content_block_function_name == "_render_header":
+                    content_blocks.append(getattr(self, content_block_function_name)(evrs, column_type))
+                else:
+                    content_blocks.append(getattr(self, content_block_function_name)(evrs))
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
 
         # content_blocks.append(cls._render_statistics(evrs))
         # content_blocks.append(cls._render_common_values(evrs))
@@ -77,7 +101,6 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         # content_blocks.append(cls._render_expectation_types(evrs))
         # content_blocks.append(cls._render_unrecognized(evrs))
 
-        content_blocks.append(self._render_failed(evrs))
         # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))
 
@@ -96,19 +119,26 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         return RenderedHeaderContent(**{
             "content_block_type": "header",
-            "header": {
-                    "template": convert_to_string_and_escape(column_name),
-                    "tooltip": {
-                        "content": "expect_column_to_exist",
-                        "placement": "top"
-                    },
-                },
-            "subheader": {
-                    "template": "Type: {column_type}".format(column_type=column_type),
-                    "tooltip": {
-                      "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",
-                    },
-                },
+            "header": RenderedStringTemplateContent(**{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": convert_to_string_and_escape(column_name),
+                            "tooltip": {
+                                "content": "expect_column_to_exist",
+                                "placement": "top"
+                            },
+                        }
+                    }),
+            "subheader": RenderedStringTemplateContent(**{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "Type: {column_type}".format(column_type=column_type),
+                            "tooltip": {
+                              "content":
+                              "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",
+                            },
+                        }
+                    }),
             # {
             #     "template": column_type,
             # },
@@ -233,7 +263,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             .75: "Q3",
             .50: "Median"
         }
-        
+
         for idx, quantile in enumerate(quantiles):
             quantile_string = quantile_strings.get(quantile)
             table_rows.append([
@@ -382,13 +412,15 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         new_block = content_block_class(**{
             "content_block_type": content_block_type,
-            "header":
-                {
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
                     "template": "Example Values",
                     "tooltip": {
                         "content": "expect_column_values_to_be_in_set"
                     }
-                },
+                }
+            }),
             content_block_type: [{
                 "content_block_type": "string_template",
                 "string_template": {
@@ -416,10 +448,9 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         return new_block
 
-    @classmethod
-    def _render_histogram(cls, evrs):
+    def _render_histogram(self, evrs):
         # NOTE: This code is very brittle
-        kl_divergence_evr = cls._find_evr_by_type(
+        kl_divergence_evr = self._find_evr_by_type(
             evrs,
             "expect_column_kl_divergence_to_be_less_than"
         )
@@ -427,78 +458,22 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         if kl_divergence_evr is None or kl_divergence_evr.result is None or "details" not in kl_divergence_evr.result:
             return
 
-        weights = kl_divergence_evr.result["details"]["observed_partition"]["weights"]
-
+        observed_partition_object = kl_divergence_evr.result["details"]["observed_partition"]
+        weights = observed_partition_object["weights"]
         if len(weights) > 60:
             return None
-        else:
-            chart_pixel_width = (len(weights) / 60.0) * 1000
-            if chart_pixel_width < 200:
-                chart_pixel_width = 200
-            chart_container_col_width = round((len(weights) / 60.0) * 12)
-            if chart_container_col_width < 4:
-                chart_container_col_width = 4
-            elif chart_container_col_width > 8:
-                chart_container_col_width = 12
-            elif chart_container_col_width > 4:
-                chart_container_col_width = 8
 
-        mark_bar_args = {}
-        if len(weights) == 1:
-            mark_bar_args["size"] = 20
-
-        if kl_divergence_evr.result["details"]["observed_partition"].get("bins"):
-            bins = kl_divergence_evr.result["details"]["observed_partition"]["bins"]
-            bins_x1 = [round(value, 1) for value in bins[:-1]]
-            bins_x2 = [round(value, 1) for value in bins[1:]]
-
-            df = pd.DataFrame({
-                "bin_min": bins_x1,
-                "bin_max": bins_x2,
-                "fraction": weights,
-            })
-            df.fraction *= 100
-
-            bars = alt.Chart(df).mark_bar(**mark_bar_args).encode(
-                x='bin_min:O',
-                x2='bin_max:O',
-                y="fraction:Q",
-                tooltip=["bin_min", "bin_max", "fraction"]
-            ).properties(width=chart_pixel_width, height=400, autosize="fit")
-            chart = bars.to_json()
-        elif kl_divergence_evr.result["details"]["observed_partition"].get("values"):
-            values = kl_divergence_evr.result["details"]["observed_partition"]["values"]
-
-            df = pd.DataFrame({
-                "values": values,
-                "fraction": weights
-            })
-            df.fraction *= 100
-
-            bars = alt.Chart(df).mark_bar(**mark_bar_args).encode(
-                x='values:N',
-                y="fraction:Q",
-                tooltip=["values", "fraction"]
-            ).properties(width=chart_pixel_width, height=400, autosize="fit")
-            chart = bars.to_json()
-
-        return RenderedGraphContent(**{
-            "content_block_type": "graph",
-            "header":
-                {
-                    "template": "Histogram",
-                    "tooltip": {
-                        "content": "expect_column_kl_divergence_to_be_less_than"
-                    }
-                },
-            "graph": chart,
-            "styling": {
-                "classes": ["col-" + str(chart_container_col_width)],
-                "styles": {
-                    "margin-top": "20px",
+        header = RenderedStringTemplateContent(**{
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "Histogram",
+                "tooltip": {
+                    "content": "expect_column_kl_divergence_to_be_less_than"
                 }
             }
         })
+
+        return self._expectation_string_renderer._get_kl_divergence_chart(observed_partition_object, header)
 
     @classmethod
     def _render_bar_chart_table(cls, evrs):
@@ -526,16 +501,16 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         if len(values) > 60:
             return None
         else:
-            chart_pixel_width = (len(values) / 60.0) * 1000
-            if chart_pixel_width < 200:
-                chart_pixel_width = 200
-            chart_container_col_width = round((len(values) / 60.0) * 12)
+            chart_pixel_width = (len(values) / 60.0) * 500
+            if chart_pixel_width < 250:
+                chart_pixel_width = 250
+            chart_container_col_width = round((len(values) / 60.0) * 6)
             if chart_container_col_width < 4:
                 chart_container_col_width = 4
-            elif chart_container_col_width > 8:
-                chart_container_col_width = 12
-            elif chart_container_col_width > 4:
-                chart_container_col_width = 8
+            elif chart_container_col_width >= 5:
+                chart_container_col_width = 6
+            elif chart_container_col_width >= 4:
+                chart_container_col_width = 5
 
         mark_bar_args = {}
         if len(values) == 1:
@@ -551,12 +526,15 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         new_block = RenderedGraphContent(**{
             "content_block_type": "graph",
-            "header": {
-                "template": "Value Counts",
-                "tooltip": {
-                    "content": "expect_column_distinct_values_to_be_in_set"
-                }
-            },
+            "header": RenderedStringTemplateContent(**{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "Value Counts",
+                            "tooltip": {
+                                "content": "expect_column_distinct_values_to_be_in_set"
+                            }
+                        }
+                    }),
             "graph": chart,
             "styling": {
                 "classes": ["col-" + str(chart_container_col_width)],
@@ -621,7 +599,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
     @classmethod
     def _render_header(cls, validation_results):
         column = cls._get_column_name(validation_results)
-        
+
         new_block = RenderedHeaderContent(**{
             "header": convert_to_string_and_escape(column),
             "styling": {
@@ -631,17 +609,17 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
                 }
             }
         })
-        
+
         return validation_results, new_block
-    
+
     def _render_table(self, validation_results):
         new_block = self._table_renderer.render(
             validation_results,
             include_column_name=False
         )
-        
+
         return [], new_block
-    
+
     def render(self, validation_results):
         column = self._get_column_name(validation_results)
         content_blocks = []

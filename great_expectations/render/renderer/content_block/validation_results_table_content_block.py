@@ -1,3 +1,4 @@
+import logging
 from six import integer_types
 
 from great_expectations.render.renderer.content_block.expectation_string import ExpectationStringRenderer
@@ -7,6 +8,8 @@ from great_expectations.render.util import num_to_str
 
 import pandas as pd
 import altair as alt
+
+logger = logging.getLogger(__name__)
 
 
 class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
@@ -23,7 +26,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             }
         }
     }
-    
+
     _default_content_block_styling = {
         "body": {
             "classes": ["table"],
@@ -100,9 +103,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
         if not result.get("partial_unexpected_list") and not result.get("partial_unexpected_counts"):
             return None
-        
+
         table_rows = []
-        
+
         if result.get("partial_unexpected_counts"):
             header_row = ["Unexpected Value", "Count"]
             for unexpected_count in result.get("partial_unexpected_counts"):
@@ -121,7 +124,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     table_rows.append(["EMPTY"])
                 else:
                     table_rows.append(["null"])
-                    
+
         unexpected_table_content_block = RenderedTableContent(**{
             "content_block_type": "table",
             "table": table_rows,
@@ -132,7 +135,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 }
             }
         })
-        
+
         return unexpected_table_content_block
 
     @classmethod
@@ -172,7 +175,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             unexpected_count = num_to_str(result["unexpected_count"], use_locale=True, precision=20)
             unexpected_percent = num_to_str(result["unexpected_percent"], precision=4) + "%"
             element_count = num_to_str(result["element_count"], use_locale=True, precision=20)
-            
+
             template_str = "\n\n$unexpected_count unexpected values found. " \
                            "$unexpected_percent of $element_count total rows."
 
@@ -197,48 +200,12 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         if not evr.result.get("details"):
             return "--"
 
-        weights = evr.result["details"]["observed_partition"]["weights"]
-        if len(weights) <= 10:
-            height = 200
-            width = 200
-            col_width = 4
-        else:
-            height = 300
-            width = 300
-            col_width = 6
+        observed_partition_object = evr.result["details"]["observed_partition"]
+        observed_distribution = super(
+            ValidationResultsTableContentBlockRenderer, cls)._get_kl_divergence_chart(observed_partition_object)
 
-        if evr.result["details"]["observed_partition"].get("bins"):
-            bins = evr.result["details"]["observed_partition"]["bins"]
-            bins_x1 = [round(value, 1) for value in bins[:-1]]
-            bins_x2 = [round(value, 1) for value in bins[1:]]
-
-            df = pd.DataFrame({
-                "bin_min": bins_x1,
-                "bin_max": bins_x2,
-                "fraction": weights,
-            })
-
-            bars = alt.Chart(df).mark_bar().encode(
-                x='bin_min:O',
-                x2='bin_max:O',
-                y="fraction:Q"
-            ).properties(width=width, height=height, autosize="fit")
-            chart = bars.to_json()
-        elif evr.result["details"]["observed_partition"].get("values"):
-            values = evr.result["details"]["observed_partition"]["values"]
-
-            df = pd.DataFrame({
-                "values": values,
-                "fraction": weights
-            })
-
-            bars = alt.Chart(df).mark_bar().encode(
-                x='values:N',
-                y="fraction:Q"
-            ).properties(width=width, height=height, autosize="fit")
-            chart = bars.to_json()
-
-        observed_value = evr.result.get("observed_value")
+        observed_value = num_to_str(evr.result.get("observed_value")) if evr.result.get("observed_value") \
+            else evr.result.get("observed_value")
 
         observed_value_content_block = RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
@@ -248,25 +215,17 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "observed_value": str(
                         observed_value) if observed_value else "None (-infinity, infinity, or NaN)",
                 },
-            }
-        })
-
-        graph_content_block = RenderedGraphContent(**{
-            "content_block_type": "graph",
-            "graph": chart,
-            "styling": {
-                "classes": ["col-" + str(col_width)],
-                "styles": {
-                    "margin-top": "20px",
+                "styling": {
+                    "classes": ["mb-2"]
                 }
-            }
+            },
         })
 
         return RenderedContentBlockContainer(**{
             "content_block_type": "content_block_container",
             "content_blocks": [
                 observed_value_content_block,
-                graph_content_block
+                observed_distribution
             ]
         })
 
@@ -278,7 +237,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         quantiles = evr.result["observed_value"]["quantiles"]
         value_ranges = evr.result["observed_value"]["values"]
 
-        table_header_row = ["Value"]
+        table_header_row = ["Quantile", "Value"]
         table_rows = []
 
         quantile_strings = {
@@ -357,15 +316,28 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             expectation_string_cell = expectation_string_fn(expectation, styling, include_column_name)
 
             status_cell = [cls._get_status_icon(evr)]
-            unexpected_statement = cls._get_unexpected_statement(evr)
-            unexpected_table = cls._get_unexpected_table(evr)
-            observed_value = [cls._get_observed_value(evr)]
+            unexpected_statement = None
+            unexpected_table = None
+            observed_value = ["--"]
 
-            #If the expectation has some unexpected values...:
+            try:
+                unexpected_statement = cls._get_unexpected_statement(evr)
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+            try:
+                unexpected_table = cls._get_unexpected_table(evr)
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+            try:
+                observed_value = [cls._get_observed_value(evr)]
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+
+            # If the expectation has some unexpected values...:
             if unexpected_statement or unexpected_table:
                 expectation_string_cell.append(unexpected_statement)
                 expectation_string_cell.append(unexpected_table)
-            
+
             if len(expectation_string_cell) > 1:
                 return [status_cell + [expectation_string_cell] + observed_value]
             else:

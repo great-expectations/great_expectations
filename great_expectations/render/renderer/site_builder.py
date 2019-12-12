@@ -8,7 +8,6 @@ from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLAS
 from great_expectations.data_context.types import (
     ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
-
 )
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
