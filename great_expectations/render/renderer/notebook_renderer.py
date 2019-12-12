@@ -197,7 +197,7 @@ batch.head()""".format(batch_kwargs, data_asset_name)
 
         self.notebook = nbformat.v4.new_notebook()
 
-        data_asset_name = suite.data_asset_name.generator_asset
+        data_asset_name = suite.data_asset_name
         suite_name = suite.expectation_suite_name
 
         # Compose the notebook sections from generic + backend-specific cells
