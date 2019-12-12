@@ -1651,6 +1651,7 @@ class ConfigOnlyDataContext(object):
 
                     normalized_data_asset_name = self.normalize_data_asset_name(name)
                     expectation_suite_name = profiler.__name__
+
                     self.create_expectation_suite(
                         data_asset_name=normalized_data_asset_name,
                         expectation_suite_name=expectation_suite_name,
@@ -1736,6 +1737,7 @@ class ConfigOnlyDataContext(object):
                            generator_name=None,
                            data_asset_name=None,
                            batch_kwargs=None,
+                           expectation_suite_name=None,
                            profiler=BasicDatasetProfiler,
                            run_id="profiling",
                            additional_batch_kwargs=None):
@@ -1810,8 +1812,13 @@ class ConfigOnlyDataContext(object):
             if additional_batch_kwargs is None:
                 additional_batch_kwargs = {}
 
-            normalized_data_asset_name = self.normalize_data_asset_name(name)
-            expectation_suite_name = profiler.__name__
+            if datasource_name is None or generator_name is None:
+                normalized_data_asset_name = self.normalize_data_asset_name(name)
+            else:
+                normalized_data_asset_name = DataAssetIdentifier(datasource_name, generator_name,
+                                                                 name)
+            if expectation_suite_name is None:
+                expectation_suite_name = profiler.__name__
             self.create_expectation_suite(
                 data_asset_name=normalized_data_asset_name,
                 expectation_suite_name=expectation_suite_name,
