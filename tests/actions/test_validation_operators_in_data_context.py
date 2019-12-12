@@ -142,7 +142,7 @@ project/
         context_root_dir=os.path.join(project_path, "great_expectations"),
     )
 
-    my_df = pd.DataFrame({"x": [1,2,3,4,5]})
+    my_df = pd.DataFrame({"x": [1, 2, 3, 4, 5]})
 
     data_asset_name = "data__dir/default/bob-ross"
     data_context.create_expectation_suite(data_asset_name=data_asset_name, expectation_suite_name="default")

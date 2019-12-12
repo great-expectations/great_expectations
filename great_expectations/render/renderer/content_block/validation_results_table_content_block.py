@@ -3,7 +3,7 @@ from six import integer_types
 
 from great_expectations.render.renderer.content_block.expectation_string import ExpectationStringRenderer
 from great_expectations.render.types import RenderedComponentContent, RenderedStringTemplateContent, \
-    RenderedTableContent, RenderedGraphContent
+    RenderedTableContent, RenderedGraphContent, RenderedContentBlockContainer
 from great_expectations.render.util import num_to_str
 
 import pandas as pd
@@ -26,7 +26,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             }
         }
     }
-    
+
     _default_content_block_styling = {
         "body": {
             "classes": ["table"],
@@ -103,9 +103,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
         if not result.get("partial_unexpected_list") and not result.get("partial_unexpected_counts"):
             return None
-        
+
         table_rows = []
-        
+
         if result.get("partial_unexpected_counts"):
             header_row = ["Unexpected Value", "Count"]
             for unexpected_count in result.get("partial_unexpected_counts"):
@@ -124,7 +124,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     table_rows.append(["EMPTY"])
                 else:
                     table_rows.append(["null"])
-                    
+
         unexpected_table_content_block = RenderedTableContent(**{
             "content_block_type": "table",
             "table": table_rows,
@@ -135,7 +135,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 }
             }
         })
-        
+
         return unexpected_table_content_block
 
     @classmethod
@@ -175,7 +175,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             unexpected_count = num_to_str(result["unexpected_count"], use_locale=True, precision=20)
             unexpected_percent = num_to_str(result["unexpected_percent"], precision=4) + "%"
             element_count = num_to_str(result["element_count"], use_locale=True, precision=20)
-            
+
             template_str = "\n\n$unexpected_count unexpected values found. " \
                            "$unexpected_percent of $element_count total rows."
 
@@ -200,82 +200,38 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         if not evr.result.get("details"):
             return "--"
 
-        weights = evr.result["details"]["observed_partition"]["weights"]
-        if len(weights) <= 10:
-            height = 200
-            width = 200
-            col_width = 4
-        else:
-            height = 300
-            width = 300
-            col_width = 6
+        observed_partition_object = evr.result["details"]["observed_partition"]
+        observed_distribution = super(
+            ValidationResultsTableContentBlockRenderer, cls)._get_kl_divergence_chart(observed_partition_object)
 
-        if evr.result["details"]["observed_partition"].get("bins"):
-            bins = evr.result["details"]["observed_partition"]["bins"]
-            bins_x1 = [round(value, 1) for value in bins[:-1]]
-            bins_x2 = [round(value, 1) for value in bins[1:]]
+        observed_value = num_to_str(evr.result.get("observed_value")) if evr.result.get("observed_value") \
+            else evr.result.get("observed_value")
 
-            df = pd.DataFrame({
-                "bin_min": bins_x1,
-                "bin_max": bins_x2,
-                "fraction": weights,
-            })
-
-            bars = alt.Chart(df).mark_bar().encode(
-                x='bin_min:O',
-                x2='bin_max:O',
-                y="fraction:Q"
-            ).properties(width=width, height=height, autosize="fit")
-            chart = bars.to_json()
-        elif evr.result["details"]["observed_partition"].get("values"):
-            values = evr.result["details"]["observed_partition"]["values"]
-
-            df = pd.DataFrame({
-                "values": values,
-                "fraction": weights
-            })
-
-            bars = alt.Chart(df).mark_bar().encode(
-                x='values:N',
-                y="fraction:Q"
-            ).properties(width=width, height=height, autosize="fit")
-            chart = bars.to_json()
-
-        observed_value = evr.result.get("observed_value")
-
-        observed_value_content_block = {
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "KL Divergence: $observed_value",
-                    "params": {
-                        "observed_value": str(
-                            observed_value) if observed_value else "None (-infinity, infinity, or NaN)",
-                    },
+        observed_value_content_block = RenderedStringTemplateContent(**{
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "KL Divergence: $observed_value",
+                "params": {
+                    "observed_value": str(
+                        observed_value) if observed_value else "None (-infinity, infinity, or NaN)",
+                },
+                "styling": {
+                    "classes": ["mb-2"]
                 }
-        }
+            },
+        })
 
-        graph_content_block = {
-            "content_block_type": "graph",
-            "graph": chart,
-            "styling": {
-                "classes": ["col-" + str(col_width)],
-                "styles": {
-                    "margin-top": "20px",
-                }
-            }
-        }
-
-        return {
+        return RenderedContentBlockContainer(**{
             "content_block_type": "content_block_container",
             "content_blocks": [
                 observed_value_content_block,
-                graph_content_block
+                observed_distribution
             ]
-        }
+        })
 
     @classmethod
     def _get_quantile_values_observed_value(cls, evr):
-        if not evr.result:
+        if evr.result is None:
             return "--"
 
         quantiles = evr.result["observed_value"]["quantiles"]
@@ -297,7 +253,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 str(value_ranges[idx])
             ])
 
-        return {
+        return RenderedTableContent(**{
             "content_block_type": "table",
             "header_row": table_header_row,
             "table": table_rows,
@@ -306,11 +262,13 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "classes": ["table", "table-sm", "table-unbordered", "col-4"],
                 }
             }
-        }
+        })
 
     @classmethod
     def _get_observed_value(cls, evr):
         result = evr.result
+        if result is None:
+            return "--"
 
         expectation_type = evr.expectation_config["expectation_type"]
 
@@ -361,7 +319,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             unexpected_statement = None
             unexpected_table = None
             observed_value = ["--"]
-            
+
             try:
                 unexpected_statement = cls._get_unexpected_statement(evr)
             except Exception as e:
@@ -379,7 +337,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             if unexpected_statement or unexpected_table:
                 expectation_string_cell.append(unexpected_statement)
                 expectation_string_cell.append(unexpected_table)
-            
+
             if len(expectation_string_cell) > 1:
                 return [status_cell + [expectation_string_cell] + observed_value]
             else:

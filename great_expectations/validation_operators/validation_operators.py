@@ -81,7 +81,7 @@ class ActionListValidationOperator(ValidationOperator):
 
             new_action = instantiate_class_from_config(
                 config=action_config["action"],
-                runtime_config={
+                runtime_environment={
                     "data_context": self.data_context,
                 },
                 config_defaults={

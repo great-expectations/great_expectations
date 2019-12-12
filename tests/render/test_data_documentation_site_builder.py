@@ -94,6 +94,9 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     site_builder = SiteBuilder(
             data_context=context,
+            runtime_environment={
+                "root_directory": context.root_directory
+            },
             **local_site_config
         )
     res = site_builder.build()

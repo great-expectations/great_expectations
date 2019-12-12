@@ -53,6 +53,7 @@ Commands:
   add-datasource    Add a new datasource to the data context.
   build-docs        Build Data Docs for a project.
   check-config      Check a config for validity and help with migrations.
+  edit-suite        Edit an existing suite with a jupyter notebook.
   init              Create a new project and help with onboarding.
   list-datasources  List known datasources.
   profile           Profile datasources from the specified context.
@@ -145,11 +146,6 @@ def test_validate_basic_operation():
     del json_result["meta"]["great_expectations.__version__"]
     with open('./tests/test_sets/expected_cli_results_default.json', 'r') as f:
         expected_cli_results = expectationSuiteValidationResultSchema.load(json.load(f)).data
-
-    # In PY2 sorting is possible and order is wonky. Order doesn't matter. So sort in that case
-    if PY2:
-        json_result["results"] = sorted(json_result["results"])
-        expected_cli_results["results"] = sorted(expected_cli_results["results"])
 
     assertDeepAlmostEqual(json_result, expected_cli_results)
 
