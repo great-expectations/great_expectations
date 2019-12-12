@@ -34,4 +34,4 @@ stores:
       class_name: FixedLengthTupleFilesystemStoreBackend
       base_directory: expectations/
   evaluation_parameter_store:
-    class_name: InMemoryEvaluationParameterStore
+    class_name: EvaluationParameterStore

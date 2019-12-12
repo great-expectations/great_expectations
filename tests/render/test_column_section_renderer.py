@@ -111,17 +111,24 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
     ).to_json_dict()
 
     assert content_block["content_block_type"] == "header"
+    print(content_block["header"])
     assert content_block["header"] == {
-        "template": "Name",
-        "tooltip": {
-            "content": "expect_column_to_exist",
-            "placement": "top"
+        'content_block_type': 'string_template',
+        'string_template': {
+            'template': 'Name',
+            'tooltip': {
+                'content': 'expect_column_to_exist',
+                'placement': 'top'}
         }
     }
+    print(content_block["subheader"])
     assert content_block["subheader"] == {
-        "template": "Type: None",
-        "tooltip": {
-            "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list"
+        'content_block_type': 'string_template',
+        'string_template': {
+            'template': 'Type: None',
+            'tooltip': {
+                  'content': 'expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list'
+            }
         }
     }
 
@@ -165,17 +172,34 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
         [evr_with_unescaped_dollar_sign],
         column_type=[],
     ).to_json_dict()
+    print(content_block)
     assert content_block == {
         'content_block_type': 'header',
+        'styling': {
+            'classes': ['col-12'],
+            'header': {
+                'classes': ['alert', 'alert-secondary']
+            }
+        },
         'header': {
-            'template': 'Car Insurance Premiums ($$)',
-            'tooltip': {'content': 'expect_column_to_exist', 'placement': 'top'}
+            'content_block_type': 'string_template',
+            'string_template': {
+                'template': 'Car Insurance Premiums ($$)',
+                'tooltip': {
+                    'content': 'expect_column_to_exist',
+                    'placement': 'top'
+                }
+            }
         },
         'subheader': {
-            'template': 'Type: []',
-            'tooltip': {'content': 'expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list'}
-        },
-        'styling': {'classes': ['col-12'], 'header': {'classes': ['alert', 'alert-secondary']}}
+            'content_block_type': 'string_template',
+            'string_template': {
+                'template': 'Type: []',
+                'tooltip': {
+                    'content': 'expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list'
+                }
+            }
+        }
     }
 
 
@@ -203,7 +227,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
 def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_profiled_evrs_1):
     print(titanic_profiled_evrs_1.results[0])
     distinct_values_evrs = [evr for evr in titanic_profiled_evrs_1.results if evr.expectation_config.expectation_type == "expect_column_distinct_values_to_be_in_set"]
-    
+
     assert len(distinct_values_evrs) == 4
 
     content_blocks = []
@@ -303,6 +327,671 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
     }
 
 
+def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_notes():
+    expectation_with_markdown_meta_notes = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_type_list",
+        kwargs={
+            "column": "Car Insurance Premiums ($)",
+            "type_list": [
+                "DOUBLE_PRECISION",
+                "DoubleType",
+                "FLOAT",
+                "FLOAT4",
+                "FLOAT8",
+                "FloatType",
+                "NUMERIC",
+                "float"
+            ],
+            "result_format": "SUMMARY"
+        },
+        meta={
+            "BasicDatasetProfiler": {
+                "confidence": "very low"
+            },
+            "notes": {
+                "format": "markdown",
+                "content": [
+                    "#### These are expectation notes \n - you can use markdown \n - or just strings"
+                ]
+            }
+        }
+    )
+    expectations = [expectation_with_markdown_meta_notes]
+    expected_result_json = {
+      'content_blocks': [
+        {
+          'content_block_type': 'header',
+          'styling': {
+            'classes': [
+              'col-12'
+            ],
+            'header': {
+              'classes': [
+                'alert',
+                'alert-secondary'
+              ]
+            }
+          },
+          'header': 'Car Insurance Premiums ($$)'
+        },
+        {
+          'content_block_type': 'bullet_list',
+          'styling': {
+            'classes': [
+              'col-12'
+            ]
+          },
+          'bullet_list': [
+            {
+              'content_block_type': 'string_template',
+              'string_template': {
+                'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
+                'params': {
+                  "column": "Car Insurance Premiums ($)",
+                  "type_list": [
+                    "DOUBLE_PRECISION",
+                    "DoubleType",
+                    "FLOAT",
+                    "FLOAT4",
+                    "FLOAT8",
+                    "FloatType",
+                    "NUMERIC",
+                    "float"
+                  ],
+                  "result_format": "SUMMARY",
+                  "mostly": None,
+                  "v__0": "DOUBLE_PRECISION",
+                  "v__1": "DoubleType",
+                  "v__2": "FLOAT",
+                  "v__3": "FLOAT4",
+                  "v__4": "FLOAT8",
+                  "v__5": "FloatType",
+                  "v__6": "NUMERIC",
+                  "v__7": "float"
+                },
+                'styling': {
+                  'default': {
+                    'classes': [
+                      'badge',
+                      'badge-secondary'
+                    ]
+                  },
+                  'params': {
+                    'column': {
+                      'classes': [
+                        'badge',
+                        'badge-primary'
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              'content_block_type': 'text',
+              'styling': {
+                'classes': [
+                  'col-12',
+                  'mt-2',
+                  'mb-2',
+                  'alert',
+                  'alert-warning'
+                ],
+                'parent': {
+                  'styles': {
+                    'list-style-type': 'none'
+                  }
+                }
+              },
+              'subheader': 'Notes:',
+              'text': [
+                {
+                  'content_block_type': 'markdown',
+                  'styling': {
+                    'parent': {}
+                  },
+                  'markdown': '#### These are expectation notes \n - you can use markdown \n - or just strings'
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      'section_name': 'Car Insurance Premiums ($)'
+    }
+
+    result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
+    print(result_json)
+    assert result_json == expected_result_json
+
+
+def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta_notes_in_dict():
+    expectation_with_string_notes_list_in_dict = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_type_list",
+        kwargs={
+            "column": "Car Insurance Premiums ($)",
+            "type_list": [
+                "DOUBLE_PRECISION",
+                "DoubleType",
+                "FLOAT",
+                "FLOAT4",
+                "FLOAT8",
+                "FloatType",
+                "NUMERIC",
+                "float"
+            ],
+            "result_format": "SUMMARY"
+        },
+        meta={
+            "BasicDatasetProfiler": {
+                "confidence": "very low"
+            },
+            "notes": {
+              "format": "string",
+              "content": [
+                "This is a",
+                "string list,",
+                "assigned to the 'content' key of a notes dict.",
+                "Cool",
+                "huh?"
+              ]
+            }
+        }
+    )
+    expectations = [expectation_with_string_notes_list_in_dict]
+    expected_result_json = {
+      'content_blocks': [
+        {
+          'content_block_type': 'header',
+          'styling': {
+            'classes': [
+              'col-12'
+            ],
+            'header': {
+              'classes': [
+                'alert',
+                'alert-secondary'
+              ]
+            }
+          },
+          'header': 'Car Insurance Premiums ($$)'
+        },
+        {
+          'content_block_type': 'bullet_list',
+          'styling': {
+            'classes': [
+              'col-12'
+            ]
+          },
+          'bullet_list': [
+            {
+              'content_block_type': 'string_template',
+              'string_template': {
+                'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
+                'params': {
+                  "column": "Car Insurance Premiums ($)",
+                  "type_list": [
+                    "DOUBLE_PRECISION",
+                    "DoubleType",
+                    "FLOAT",
+                    "FLOAT4",
+                    "FLOAT8",
+                    "FloatType",
+                    "NUMERIC",
+                    "float"
+                  ],
+                  "result_format": "SUMMARY",
+                  "mostly": None,
+                  "v__0": "DOUBLE_PRECISION",
+                  "v__1": "DoubleType",
+                  "v__2": "FLOAT",
+                  "v__3": "FLOAT4",
+                  "v__4": "FLOAT8",
+                  "v__5": "FloatType",
+                  "v__6": "NUMERIC",
+                  "v__7": "float"
+                },
+                'styling': {
+                  'default': {
+                    'classes': [
+                      'badge',
+                      'badge-secondary'
+                    ]
+                  },
+                  'params': {
+                    'column': {
+                      'classes': [
+                        'badge',
+                        'badge-primary'
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              'content_block_type': 'text',
+              'styling': {
+                'classes': [
+                  'col-12',
+                  'mt-2',
+                  'mb-2',
+                  'alert',
+                  'alert-warning'
+                ],
+                'parent': {
+                  'styles': {
+                    'list-style-type': 'none'
+                  }
+                }
+              },
+              'subheader': 'Notes:',
+              'text': [
+                'This is a',
+                'string list,',
+                "assigned to the 'content' key of a notes dict.",
+                'Cool',
+                'huh?'
+              ]
+            }
+          ]
+        }
+      ],
+      'section_name': 'Car Insurance Premiums ($)'
+    }
+
+    result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
+    print(result_json)
+    assert result_json == expected_result_json
+
+
+def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_meta_note_in_dict():
+    expectation_with_single_string_note_in_dict = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_type_list",
+        kwargs={
+            "column": "Car Insurance Premiums ($)",
+            "type_list": [
+                "DOUBLE_PRECISION",
+                "DoubleType",
+                "FLOAT",
+                "FLOAT4",
+                "FLOAT8",
+                "FloatType",
+                "NUMERIC",
+                "float"
+            ],
+            "result_format": "SUMMARY"
+        },
+        meta={
+            "BasicDatasetProfiler": {
+                "confidence": "very low"
+            },
+            "notes": {
+              "format": "string",
+              "content": "This is just a single string, assigned to the 'content' key of a notes dict."
+            }
+        }
+    )
+    expectations = [expectation_with_single_string_note_in_dict]
+    expected_result_json = {
+      'content_blocks': [
+        {
+          'content_block_type': 'header',
+          'styling': {
+            'classes': [
+              'col-12'
+            ],
+            'header': {
+              'classes': [
+                'alert',
+                'alert-secondary'
+              ]
+            }
+          },
+          'header': 'Car Insurance Premiums ($$)'
+        },
+        {
+          'content_block_type': 'bullet_list',
+          'styling': {
+            'classes': [
+              'col-12'
+            ]
+          },
+          'bullet_list': [
+            {
+              'content_block_type': 'string_template',
+              'string_template': {
+                'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
+                'params': {
+                  "column": "Car Insurance Premiums ($)",
+                  "type_list": [
+                    "DOUBLE_PRECISION",
+                    "DoubleType",
+                    "FLOAT",
+                    "FLOAT4",
+                    "FLOAT8",
+                    "FloatType",
+                    "NUMERIC",
+                    "float"
+                  ],
+                  "result_format": "SUMMARY",
+                  "mostly": None,
+                  "v__0": "DOUBLE_PRECISION",
+                  "v__1": "DoubleType",
+                  "v__2": "FLOAT",
+                  "v__3": "FLOAT4",
+                  "v__4": "FLOAT8",
+                  "v__5": "FloatType",
+                  "v__6": "NUMERIC",
+                  "v__7": "float"
+                },
+                'styling': {
+                  'default': {
+                    'classes': [
+                      'badge',
+                      'badge-secondary'
+                    ]
+                  },
+                  'params': {
+                    'column': {
+                      'classes': [
+                        'badge',
+                        'badge-primary'
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              'content_block_type': 'text',
+              'styling': {
+                'classes': [
+                  'col-12',
+                  'mt-2',
+                  'mb-2',
+                  'alert',
+                  'alert-warning'
+                ],
+                'parent': {
+                  'styles': {
+                    'list-style-type': 'none'
+                  }
+                }
+              },
+              'subheader': 'Notes:',
+              'text': [
+                "This is just a single string, assigned to the 'content' key of a notes dict."
+              ]
+            }
+          ]
+        }
+      ],
+      'section_name': 'Car Insurance Premiums ($)'
+    }
+
+    result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
+    print(result_json)
+    assert result_json == expected_result_json
+
+
+def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta_notes():
+    expectation_with_string_list_note = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_type_list",
+        kwargs={
+            "column": "Car Insurance Premiums ($)",
+            "type_list": [
+                "DOUBLE_PRECISION",
+                "DoubleType",
+                "FLOAT",
+                "FLOAT4",
+                "FLOAT8",
+                "FloatType",
+                "NUMERIC",
+                "float"
+            ],
+            "result_format": "SUMMARY"
+        },
+        meta={
+            "BasicDatasetProfiler": {
+                "confidence": "very low"
+            },
+            "notes": ["This is a list", "of strings", "assigned to the notes", "key."]
+        }
+    )
+    expectations = [expectation_with_string_list_note]
+    expected_result_json = {
+      'content_blocks': [
+        {
+          'content_block_type': 'header',
+          'styling': {
+            'classes': [
+              'col-12'
+            ],
+            'header': {
+              'classes': [
+                'alert',
+                'alert-secondary'
+              ]
+            }
+          },
+          'header': 'Car Insurance Premiums ($$)'
+        },
+        {
+          'content_block_type': 'bullet_list',
+          'styling': {
+            'classes': [
+              'col-12'
+            ]
+          },
+          'bullet_list': [
+            {
+              'content_block_type': 'string_template',
+              'string_template': {
+                'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
+                'params': {
+                  "column": "Car Insurance Premiums ($)",
+                  "type_list": [
+                    "DOUBLE_PRECISION",
+                    "DoubleType",
+                    "FLOAT",
+                    "FLOAT4",
+                    "FLOAT8",
+                    "FloatType",
+                    "NUMERIC",
+                    "float"
+                  ],
+                  "result_format": "SUMMARY",
+                  "mostly": None,
+                  "v__0": "DOUBLE_PRECISION",
+                  "v__1": "DoubleType",
+                  "v__2": "FLOAT",
+                  "v__3": "FLOAT4",
+                  "v__4": "FLOAT8",
+                  "v__5": "FloatType",
+                  "v__6": "NUMERIC",
+                  "v__7": "float"
+                },
+                'styling': {
+                  'default': {
+                    'classes': [
+                      'badge',
+                      'badge-secondary'
+                    ]
+                  },
+                  'params': {
+                    'column': {
+                      'classes': [
+                        'badge',
+                        'badge-primary'
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              'content_block_type': 'text',
+              'styling': {
+                'classes': [
+                  'col-12',
+                  'mt-2',
+                  'mb-2',
+                  'alert',
+                  'alert-warning'
+                ],
+                'parent': {
+                  'styles': {
+                    'list-style-type': 'none'
+                  }
+                }
+              },
+              'subheader': 'Notes:',
+              'text': [
+                'This is a list',
+                'of strings',
+                'assigned to the notes',
+                'key.'
+              ]
+            }
+          ]
+        }
+      ],
+      'section_name': 'Car Insurance Premiums ($)'
+    }
+
+    result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
+    print(result_json)
+    assert result_json == expected_result_json
+
+
+def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_meta_note():
+    expectation_with_single_string_note = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_type_list",
+        kwargs={
+            "column": "Car Insurance Premiums ($)",
+            "type_list": [
+                "DOUBLE_PRECISION",
+                "DoubleType",
+                "FLOAT",
+                "FLOAT4",
+                "FLOAT8",
+                "FloatType",
+                "NUMERIC",
+                "float"
+            ],
+            "result_format": "SUMMARY"
+        },
+        meta={
+            "BasicDatasetProfiler": {
+                "confidence": "very low"
+            },
+            "notes": "This is a single string assigned to the 'notes' key."
+        }
+    )
+    expectations = [expectation_with_single_string_note]
+    expected_result_json = {
+      'content_blocks': [
+        {
+          'content_block_type': 'header',
+          'styling': {
+            'classes': [
+              'col-12'
+            ],
+            'header': {
+              'classes': [
+                'alert',
+                'alert-secondary'
+              ]
+            }
+          },
+          'header': 'Car Insurance Premiums ($$)'
+        },
+        {
+          'content_block_type': 'bullet_list',
+          'styling': {
+            'classes': [
+              'col-12'
+            ]
+          },
+          'bullet_list': [
+            {
+              'content_block_type': 'string_template',
+              'string_template': {
+                'template': 'value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7.',
+                'params': {
+                  "column": "Car Insurance Premiums ($)",
+                  "type_list": [
+                    "DOUBLE_PRECISION",
+                    "DoubleType",
+                    "FLOAT",
+                    "FLOAT4",
+                    "FLOAT8",
+                    "FloatType",
+                    "NUMERIC",
+                    "float"
+                  ],
+                  "result_format": "SUMMARY",
+                  "mostly": None,
+                  "v__0": "DOUBLE_PRECISION",
+                  "v__1": "DoubleType",
+                  "v__2": "FLOAT",
+                  "v__3": "FLOAT4",
+                  "v__4": "FLOAT8",
+                  "v__5": "FloatType",
+                  "v__6": "NUMERIC",
+                  "v__7": "float"
+                },
+                'styling': {
+                  'default': {
+                    'classes': [
+                      'badge',
+                      'badge-secondary'
+                    ]
+                  },
+                  'params': {
+                    'column': {
+                      'classes': [
+                        'badge',
+                        'badge-primary'
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              'content_block_type': 'text',
+              'styling': {
+                'classes': [
+                  'col-12',
+                  'mt-2',
+                  'mb-2',
+                  'alert',
+                  'alert-warning'
+                ],
+                'parent': {
+                  'styles': {
+                    'list-style-type': 'none'
+                  }
+                }
+              },
+              'subheader': 'Notes:',
+              'text': [
+                "This is a single string assigned to the 'notes' key."
+              ]
+            }
+          ]
+        }
+      ],
+      'section_name': 'Car Insurance Premiums ($)'
+    }
+
+    result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
+    print(result_json)
+    assert result_json == expected_result_json
+
+
 def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profiled_name_column_expectations):
     remaining_expectations, content_block = ExpectationSuiteColumnSectionRenderer()._render_bullet_list(
         titanic_profiled_name_column_expectations,
@@ -316,8 +1005,8 @@ def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profil
     assert "may have any number of unique values" in stringified_dump
     assert "may have any fraction of unique values" in stringified_dump
     assert "values must not be null, at least $mostly_pct % of the time." in stringified_dump
-    
-    
+
+
 def test_ValidationResultsColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
     remaining_evrs, content_block = ValidationResultsColumnSectionRenderer._render_header(
         validation_results=titanic_profiled_name_column_evrs,
@@ -398,7 +1087,7 @@ def test_ValidationResultsColumnSectionRenderer_render_table(titanic_profiled_na
     assert "\\n\\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows." in content_block_stringified
     assert "values must not match this regular expression: $regex." in content_block_stringified
     assert "\\n\\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows." in content_block_stringified
-    
+
 
 # noinspection PyPep8Naming
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path():

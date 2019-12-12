@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import shutil
+import subprocess
 import sys
 import warnings
 
@@ -24,12 +25,7 @@ from great_expectations.cli.init_messages import (
     SLACK_SETUP_PROMPT,
     SLACK_WEBHOOK_PROMPT,
 )
-from great_expectations.core import (
-    expectationSuiteSchema,
-    ExpectationSuiteValidationResult,
-    expectationSuiteValidationResultSchema,
-    NamespaceAwareExpectationSuite,
-)
+from great_expectations.core import expectationSuiteValidationResultSchema, expectationSuiteSchema
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 from .datasource import (
     add_datasource as add_datasource_impl,
@@ -473,6 +469,90 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, vi
             open_docs=view,
             additional_batch_kwargs=batch_kwargs
         )
+
+
+@cli.command()
+@click.argument("data_asset_name")
+@click.argument("suite_name")
+@click.option(
+    '--batch-kwargs',
+    default=None,
+    help='Additional keyword arguments to be provided to get_batch when loading \
+the data asset. Must be a valid JSON dictionary'
+)
+@click.option(
+    "--directory",
+    "-d",
+    default=None,
+    help="The project's great_expectations directory.",
+)
+@click.option(
+    "--jupyter/--no-jupyter",
+    is_flag=True,
+    help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
+    default=True,
+)
+def edit_suite(
+    data_asset_name, suite_name, directory, jupyter, batch_kwargs
+):
+    """Edit an existing suite with a jupyter notebook."""
+    try:
+        context = DataContext(directory)
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, context.root_directory)
+        return
+
+    suite_name = suite_name.rstrip(".json")
+    suite = _load_suite(context, data_asset_name, suite_name)
+
+    if batch_kwargs:
+        batch_kwargs = json.loads(batch_kwargs)
+    # elif "batch_kwargs" in suite:
+        # do they exist in suite?
+        # TODO this functionality doesn't actually exist yet
+        # batch_kwargs = suite.get("batch_kwargs")
+    # elif
+        # manual generator batch kwargs are configured
+        # TODO this functionality doesn't actually exist yet
+    else:
+        # can they be yielded?
+        batch_kwargs = context.yield_batch_kwargs(suite.data_asset_name)
+
+    if not batch_kwargs:
+        cli_message(
+            "<red>Attempting to use a configured generator to build batch_"
+            "kwargs. You may need to review the generator configuration to "
+            "ensure you can get the desired batch.</red>"
+        )
+
+    human_data_asset_name = suite.data_asset_name.generator_asset
+    notebook_name = f"{human_data_asset_name}_{suite_name}.ipynb"
+
+    notebook_path = os.path.join(context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
+    NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path)
+
+    cli_message(
+        "To continue editing this suite, run <green>jupyter notebook {}</green>".format(
+            notebook_path
+        )
+    )
+
+    if jupyter:
+        subprocess.call(["jupyter", "notebook", notebook_path])
+
+
+def _load_suite(context, data_asset_name, suite_name):
+    try:
+        suite = context.get_expectation_suite(data_asset_name, suite_name)
+    except ge_exceptions.DataContextError:
+        cli_message(
+            "<red>Could not locate a suite named {} for {}</red>".format(
+                suite_name, data_asset_name))
+        sys.exit(-1)
+    return suite
 
 
 @cli.command()

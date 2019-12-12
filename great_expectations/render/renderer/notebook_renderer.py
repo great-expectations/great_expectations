@@ -1,3 +1,4 @@
+import os
 import nbformat
 
 from great_expectations.core import NamespaceAwareExpectationSuite
@@ -126,7 +127,9 @@ Let's glance at a bit of your data."""
 
         # TODO such brittle hacks to fix paths for a demo
         if "path" in batch_kwargs.keys():
-            batch_kwargs["path"] = "../../" + batch_kwargs["path"]
+            base_dir = batch_kwargs["path"]
+            if not base_dir.startswith("/"):
+                batch_kwargs["path"] = os.path.join("../../", base_dir)
 
         # TODO caution about the .head() showing data that could be committed.
         self.add_code_cell(

@@ -1,4 +1,3 @@
-import json
 import os
 import random
 import unittest
@@ -12,7 +11,6 @@ try:
 except ImportError:
     import mock
 
-from six import PY2
 import pandas as pd
 import re
 
@@ -190,11 +188,6 @@ def test_validate():
         expected_results = expectationSuiteValidationResultSchema.loads(f.read()).data
 
     del results.meta["great_expectations.__version__"]
-
-    # order is not guaranteed (or important in this case) but sorting is possible in PY2
-    if PY2:
-        results.results = sorted(results.results)
-        expected_results.results = sorted(expected_results.results)
 
     assert expected_results == results
 

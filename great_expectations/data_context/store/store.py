@@ -1,163 +1,73 @@
 import logging
 
-from marshmallow import ValidationError
-
-
-from six import string_types
-import json
-
-import pandas as pd
-
+from great_expectations.core import DataContextKey
+from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.exceptions import DataContextError
 
 logger = logging.getLogger(__name__)
 
 
-class WriteOnlyStore(object):
-    """This base class supports writing, but not reading.
+class Store(object):
+    """A store is responsible for reading and writing Great Expectations objects
+    to appropriate backends. It provides a generic API that the DataContext can
+    use independently of any particular ORM and backend.
 
-    It's suitable for things like HTML files that are information sinks.
+    An implementation of a store will generally need to define the following:
+      - serialize
+      - deserialize
+      - _key_class (class of expected key type)
+
+    All keys must have a to_tuple() method.
     """
+    _key_class = DataContextKey
 
-    def __init__(self, serialization_type=None, root_directory=None):
-        self.serialization_type = serialization_type
-        self.root_directory = root_directory
-
-    def set(self, key, value, serialization_type=None):
-        self._validate_key(key)
-        
-        if serialization_type:
-            serialization_method = self._get_serialization_method(
-                serialization_type)
-        else:
-            serialization_method = self._get_serialization_method(
-                self.serialization_type)
-
-        try:
-            serialized_value = serialization_method(value)
-        except ValidationError:
-            raise
-        return self._set(key, serialized_value)
-
-
-    # NOTE : Abe 2019/09/06 : It's unclear whether this serialization logic belongs here,
-    # or should be factored out to individual classes on a case-by-case basis.
-
-    def _get_serialization_method(self, serialization_type):
-        if serialization_type == None:
-            return lambda x: x
-
-        elif serialization_type == "json":
-            return json.dumps
-
-        elif serialization_type == "pandas_csv":
-
-            def convert_to_csv(df):
-                logger.debug("Starting convert_to_csv")
-
-                assert isinstance(df, pd.DataFrame)
-
-                return df.to_csv(index=None)
-
-            return convert_to_csv
-
-        # TODO: Add more serialization methods as needed
-
-    def _validate_key(self, key):
-        raise NotImplementedError
-
-    def _validate_value(self, value):
-        # NOTE : This is probably mainly a check of serializability using the chosen serialization_type.
-        # Might be redundant.
-        raise NotImplementedError
-
-    def _setup(self):
-        pass
-
-    def _set(self, key, value):
-        raise NotImplementedError
-
-
-class ReadWriteStore(WriteOnlyStore):
-    """This base class supports both reading and writing.
-
-    Most of the core objects in DataContext are handled by subclasses of ReadWriteStore.
-    """
-
-    def get(self, key, serialization_type=None):
-        self._validate_key(key)
-
-        value = self._get(key)
-
-        if serialization_type:
-            deserialization_method = self._get_deserialization_method(
-                serialization_type)
-        else:
-            deserialization_method = self._get_deserialization_method(
-                self.serialization_type)
-
-        deserialized_value = deserialization_method(value)
-        return deserialized_value
-
-    def _get(self, key):
-        raise NotImplementedError
-
-    def list_keys(self):
-        raise NotImplementedError
-
-    def has_key(self, key):
-        raise NotImplementedError
-
-    def _get_deserialization_method(self, serialization_type):
-        if serialization_type == None:
-            return lambda x: x
-
-        elif serialization_type == "json":
-            return json.loads
-
-        elif serialization_type == "pandas_csv":
-            # TODO:
-            raise NotImplementedError
-
-        # TODO: Add more serialization methods as needed
-
-
-class BasicInMemoryStore(ReadWriteStore):
-    """Like a dict, but much harder to write.
-    
-    This class uses an InMemoryStoreBackend, but I question whether it's worth it.
-    It would be easier just to wrap a dict.
-
-    This class is used for testing and not much else.
-    """
-
-    def __init__(self, serialization_type=None, root_directory=None):
-        self.serialization_type = serialization_type
-        self.root_directory = root_directory
-
-        self.store_backend = instantiate_class_from_config(
-            config={
-                "module_name" : "great_expectations.data_context.store",
-                "class_name" : "InMemoryStoreBackend",
-                "separator" : ".",
-            },
-            runtime_config={
-                "root_directory": root_directory,
-            },
-            config_defaults={},
+    def __init__(self, store_backend=None, runtime_environment=None):
+        """Runtime environment may be necessary to instantiate store backend elements."""
+        if store_backend is None:
+            store_backend = {
+                "class_name": "InMemoryStoreBackend"
+            }
+        logger.debug("Building store_backend.")
+        self._store_backend = instantiate_class_from_config(
+            config=store_backend,
+            runtime_environment=runtime_environment or {},
+            config_defaults={
+                "module_name": "great_expectations.data_context.store"
+            }
         )
+        if not isinstance(self._store_backend, StoreBackend):
+            raise DataContextError("Invalid StoreBackend configuration: expected a StoreBackend instance.")
 
     def _validate_key(self, key):
-        assert isinstance(key, string_types)
+        if not isinstance(key, self._key_class):
+            raise TypeError("key must be an instance of %s, not %s" % (self._key_class.__name__, type(key)))
 
-    def _get(self, key):
-        return self.store_backend.get((key,))
-    
-    def _set(self, key, value):
-        self.store_backend.set((key,), value)
+    # noinspection PyMethodMayBeStatic
+    def serialize(self, key, value):
+        return value
 
-    def has_key(self, key):
-        return self.store_backend.has_key((key,))
+    # noinspection PyMethodMayBeStatic
+    def key_to_tuple(self, key):
+        return key.to_tuple()
+
+    def tuple_to_key(self, tuple_):
+        return self._key_class.from_tuple(tuple_)
+
+    # noinspection PyMethodMayBeStatic
+    def deserialize(self, key, value):
+        return value
+
+    def get(self, key):
+        self._validate_key(key)
+        return self.deserialize(key, self._store_backend.get(self.key_to_tuple(key)))
+
+    def set(self, key, value):
+        self._validate_key(key)
+        return self._store_backend.set(self.key_to_tuple(key), self.serialize(key, value))
 
     def list_keys(self):
-        return [key for key, in self.store_backend.list_keys()]
+        return [self.tuple_to_key(key) for key in self._store_backend.list_keys()]
+
+    def has_key(self, key):
+        return self._store_backend.has_key(key.to_tuple())
