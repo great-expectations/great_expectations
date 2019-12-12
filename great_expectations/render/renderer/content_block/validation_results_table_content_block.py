@@ -26,7 +26,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             }
         }
     }
-    
+
     _default_content_block_styling = {
         "body": {
             "classes": ["table"],
@@ -103,9 +103,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
         if not result.get("partial_unexpected_list") and not result.get("partial_unexpected_counts"):
             return None
-        
+
         table_rows = []
-        
+
         if result.get("partial_unexpected_counts"):
             header_row = ["Unexpected Value", "Count"]
             for unexpected_count in result.get("partial_unexpected_counts"):
@@ -124,7 +124,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     table_rows.append(["EMPTY"])
                 else:
                     table_rows.append(["null"])
-                    
+
         unexpected_table_content_block = RenderedTableContent(**{
             "content_block_type": "table",
             "table": table_rows,
@@ -135,7 +135,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 }
             }
         })
-        
+
         return unexpected_table_content_block
 
     @classmethod
@@ -175,7 +175,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             unexpected_count = num_to_str(result["unexpected_count"], use_locale=True, precision=20)
             unexpected_percent = num_to_str(result["unexpected_percent"], precision=4) + "%"
             element_count = num_to_str(result["element_count"], use_locale=True, precision=20)
-            
+
             template_str = "\n\n$unexpected_count unexpected values found. " \
                            "$unexpected_percent of $element_count total rows."
 
@@ -319,7 +319,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             unexpected_statement = None
             unexpected_table = None
             observed_value = ["--"]
-            
+
             try:
                 unexpected_statement = cls._get_unexpected_statement(evr)
             except Exception as e:
@@ -337,7 +337,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             if unexpected_statement or unexpected_table:
                 expectation_string_cell.append(unexpected_statement)
                 expectation_string_cell.append(unexpected_table)
-            
+
             if len(expectation_string_cell) > 1:
                 return [status_cell + [expectation_string_cell] + observed_value]
             else:
