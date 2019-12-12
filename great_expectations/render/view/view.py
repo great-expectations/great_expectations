@@ -41,7 +41,7 @@ class PrettyPrintTemplate(object):
 class DefaultJinjaView(object):
     """
     Defines a method for converting a document to human-consumable form
-    
+
     Dependencies
     ~~~~~~~~~~~~
     * Font Awesome 5.10.1
@@ -128,7 +128,7 @@ class DefaultJinjaView(object):
         return template.render(context, content_block=content_block, index=index)
 
     def render_styling(self, styling):
-        
+
         """Adds styling information suitable for an html tag.
 
         Example styling block::
@@ -154,7 +154,7 @@ class DefaultJinjaView(object):
 
         Other dictionary keys are also allowed and ignored.
         """
-    
+
         class_list = styling.get("classes", None)
         if class_list is None:
             class_str = ""
@@ -162,7 +162,7 @@ class DefaultJinjaView(object):
             if type(class_list) == str:
                 raise TypeError("classes must be a list, not a string.")
             class_str = 'class="' + ' '.join(class_list) + '" '
-    
+
         attribute_dict = styling.get("attributes", None)
         if attribute_dict is None:
             attribute_str = ""
@@ -170,7 +170,7 @@ class DefaultJinjaView(object):
             attribute_str = ""
             for k, v in attribute_dict.items():
                 attribute_str += k + '="' + v + '" '
-    
+
         style_dict = styling.get("styles", None)
         if style_dict is None:
             style_str = ""
@@ -178,13 +178,13 @@ class DefaultJinjaView(object):
             style_str = 'style="'
             style_str += " ".join([k + ':' + v + ';' for k, v in style_dict.items()])
             style_str += '" '
-    
+
         styling_string = pTemplate('$classes$attributes$style').substitute({
             "classes": class_str,
             "attributes": attribute_str,
             "style": style_str,
         })
-    
+
         return styling_string
 
     def render_styling_from_string_template(self, template):
@@ -193,10 +193,10 @@ class DefaultJinjaView(object):
         """
         if not isinstance(template, (dict, OrderedDict)):
             return template
-    
+
         if "styling" in template:
             return self.render_styling(template["styling"])
-    
+
         else:
             return ""
 
@@ -208,16 +208,16 @@ class DefaultJinjaView(object):
             return markdown
 
     def render_string_template(self, template):
-        #NOTE: Using this line for debugging. This should probably be logged...? 
+        #NOTE: Using this line for debugging. This should probably be logged...?
         # print(template)
 
         # NOTE: We should add some kind of type-checking to template
         if not isinstance(template, (dict, OrderedDict)):
             return template
-    
+
         tag = template.get("tag", "span")
         template["template"] = template.get("template", "").replace("\n", "<br>")
-    
+
         if "tooltip" in template:
             if template.get("styling", {}).get("classes"):
                 classes = template.get("styling", {}).get("classes")
@@ -247,29 +247,29 @@ class DefaultJinjaView(object):
                     $template
                 </{tag}>
             """.format(tag=tag)
-    
+
         if "styling" in template:
             params = template.get("params", {})
-        
+
             # Apply default styling
             if "default" in template["styling"]:
                 default_parameter_styling = template["styling"]["default"]
                 default_param_tag = default_parameter_styling.get("tag", "span")
                 base_param_template_string = "<{param_tag} $styling>$content</{param_tag}>".format(
                     param_tag=default_param_tag)
-            
+
                 for parameter in template["params"].keys():
-                
+
                     # If this param has styling that over-rides the default, skip it here and get it in the next loop.
                     if "params" in template["styling"]:
                         if parameter in template["styling"]["params"]:
                             continue
-                
+
                     params[parameter] = pTemplate(base_param_template_string).substitute({
                         "styling": self.render_styling(default_parameter_styling),
                         "content": params[parameter],
                     })
-        
+
             # Apply param-specific styling
             if "params" in template["styling"]:
                 # params = template["params"]
@@ -282,7 +282,7 @@ class DefaultJinjaView(object):
                         "styling": self.render_styling(parameter_styling),
                         "content": params[parameter],
                     })
-        
+
             string = pTemplate(
                 pTemplate(base_template_string).substitute(
                     {"template": template["template"], "styling": self.render_styling(template.get("styling", {}))})

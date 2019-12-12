@@ -146,8 +146,8 @@ def test_ProfilingResultsPageRenderer(titanic_profiled_evrs_1):
     document = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     print(document)
     # assert document == 0
-    
-    
+
+
 def test_ValidationResultsPageRenderer_render_validation_header():
     validation_header = RenderedHeaderContent(**{
         "content_block_type": "header",
@@ -160,8 +160,8 @@ def test_ValidationResultsPageRenderer_render_validation_header():
         }
     })
     assert ValidationResultsPageRenderer._render_validation_header() == validation_header
-    
-    
+
+
 def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_evrs_1):
     validation_info = ValidationResultsPageRenderer._render_validation_info(titanic_profiled_evrs_1)
     validation_info.table[2][1] = "__fixture__"
