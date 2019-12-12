@@ -58,7 +58,7 @@ def test_file_kwargs_generator_error(data_context, filesystem_csv):
 
     with pytest.raises(DataContextError) as exc:
         data_context.yield_batch_kwargs("f4")
-    assert "Ambiguous data_asset_name" in exc.value.message
+    assert "Could not normalize data asset name. No existing data_asset has" in exc.value.message
 
 
 def test_glob_reader_generator(tmp_path_factory):
