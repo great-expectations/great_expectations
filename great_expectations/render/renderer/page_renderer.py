@@ -13,7 +13,12 @@ from .renderer import Renderer
 from ..types import (
     RenderedDocumentContent,
     RenderedSectionContent,
-    RenderedHeaderContent, RenderedTableContent, TextContent, RenderedStringTemplateContent)
+    RenderedHeaderContent,
+    RenderedTableContent,
+    TextContent,
+    RenderedStringTemplateContent,
+    RenderedMarkdownContent
+)
 from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
@@ -52,7 +57,7 @@ class ValidationResultsPageRenderer(Renderer):
         else:
             short_data_asset_name = full_data_asset_identifier.generator_asset
         expectation_suite_name = validation_results.meta['expectation_suite_name']
-    
+
         # Group EVRs by column
         columns = {}
         for evr in validation_results.results:
@@ -60,13 +65,13 @@ class ValidationResultsPageRenderer(Renderer):
                 column = evr.expectation_config.kwargs["column"]
             else:
                 column = "Table-Level Expectations"
-        
+
             if column not in columns:
                 columns[column] = []
             columns[column].append(evr)
-    
+
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
-    
+
         overview_content_blocks = [
             self._render_validation_header(),
             self._render_validation_info(validation_results=validation_results),
@@ -95,7 +100,7 @@ class ValidationResultsPageRenderer(Renderer):
             data_asset_name = short_data_asset_name
         else:
             data_asset_name = None
-    
+
         sections = [
             RenderedSectionContent(**{
                 "section_name": "Overview",
@@ -115,7 +120,7 @@ class ValidationResultsPageRenderer(Renderer):
                 validation_results=columns[column],
             ) for column in ordered_columns
         ]
-    
+
         return RenderedDocumentContent(**{
             "renderer_type": "ValidationResultsPageRenderer",
             "data_asset_name": data_asset_name,
@@ -124,7 +129,7 @@ class ValidationResultsPageRenderer(Renderer):
             "sections": sections,
             "utm_medium": "validation-results-page",
         })
-    
+
     @classmethod
     def _render_validation_header(cls):
         return RenderedHeaderContent(**{
@@ -137,7 +142,7 @@ class ValidationResultsPageRenderer(Renderer):
                 }
             }
         })
-    
+
     @classmethod
     def _render_validation_info(cls, validation_results):
         run_id = validation_results.meta['run_id']
@@ -179,7 +184,7 @@ class ValidationResultsPageRenderer(Renderer):
                 }
             },
         })
-    
+
     @classmethod
     def _render_nested_table_from_dict(cls, input_dict, header=None, sub_table=False):
         table_rows = []
@@ -306,7 +311,7 @@ class ValidationResultsPageRenderer(Renderer):
                     table_rows.append([value, num_to_str(statistics[key], precision=4) + "%"])
                 else:
                     table_rows.append([value, statistics[key]])
-        
+
         return RenderedTableContent(**{
             "content_block_type": "table",
             "header": "Statistics",
@@ -357,22 +362,22 @@ class ExpectationSuitePageRenderer(Renderer):
             self._render_asset_header(expectations),
             self._render_asset_info(expectations)
         ]
-        
+
         table_level_expectations_content_block = self._render_table_level_expectations(columns)
         if table_level_expectations_content_block is not None:
             overview_content_blocks.append(table_level_expectations_content_block)
-        
+
         asset_notes_content_block = self._render_asset_notes(expectations)
         if asset_notes_content_block is not None:
             overview_content_blocks.append(asset_notes_content_block)
-        
+
         sections = [
             RenderedSectionContent(**{
                 "section_name": "Overview",
                 "content_blocks": overview_content_blocks,
             })
         ]
-        
+
         sections += [
             self._column_section_renderer.render(expectations=columns[column]) for column in ordered_columns if column != "_nocolumn"
         ]
@@ -394,7 +399,7 @@ class ExpectationSuitePageRenderer(Renderer):
                 expectations=table_level_expectations).content_blocks[1]
             expectation_bullet_list.header = "Table-Level Expectations"
             return expectation_bullet_list
-        
+
     @classmethod
     def _render_asset_header(cls, expectations):
         return RenderedHeaderContent(**{
@@ -407,7 +412,7 @@ class ExpectationSuitePageRenderer(Renderer):
                 }
             }
         })
-      
+
     @classmethod
     def _render_asset_info(cls, expectations):
         full_data_asset_identifier = expectations.data_asset_name
@@ -447,7 +452,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
     @classmethod
     def _render_asset_notes(cls, expectations):
-        
+
         content = []
 
         total_expectations = len(expectations.expectations)
@@ -466,17 +471,17 @@ class ExpectationSuitePageRenderer(Renderer):
                 total_columns,
             ),
         ]
-        
+
         if "notes" in expectations.meta:
             notes = expectations.meta["notes"]
             note_content = None
-            
+
             if isinstance(notes, string_types):
                 note_content = [notes]
-            
+
             elif isinstance(notes, list):
                 note_content = notes
-            
+
             elif isinstance(notes, dict):
                 if "format" in notes:
                     if notes["format"] == "string":
@@ -486,29 +491,35 @@ class ExpectationSuitePageRenderer(Renderer):
                             note_content = notes["content"]
                         else:
                             logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
-                    
+
                     elif notes["format"] == "markdown":
-                        # ???: Should converting to markdown be the renderer's job, or the view's job?
-                        # Renderer is easier, but will end up mixing HTML strings with content_block info.
                         if isinstance(notes["content"], string_types):
-                            try:
-                                note_content = [pypandoc.convert_text(notes["content"], format='md', to="html")]
-                            except OSError:
-                                note_content = [notes["content"]]
-                        
+                            note_content = [
+                                RenderedMarkdownContent(**{
+                                    "content_block_type": "markdown",
+                                    "markdown": notes["content"],
+                                    "styling": {
+                                        "parent": {
+                                        }
+                                    }
+                                })
+                            ]
                         elif isinstance(notes["content"], list):
-                            try:
-                                note_content = [pypandoc.convert_text(note, format='md', to="html") for note in
-                                            notes["content"]]
-                            except OSError:
-                                note_content = [note for note in notes["content"]]
-                        
+                            note_content = [
+                                RenderedMarkdownContent(**{
+                                    "content_block_type": "markdown",
+                                    "markdown": note,
+                                    "styling": {
+                                        "parent": {
+                                        }
+                                    }
+                                }) for note in notes["content"]
+                            ]
                         else:
                             logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
-                
                 else:
                     logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
-            
+
             if note_content is not None:
                 content = content + note_content
 

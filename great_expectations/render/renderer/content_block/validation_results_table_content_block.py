@@ -1,3 +1,4 @@
+import logging
 from six import integer_types
 
 from great_expectations.render.renderer.content_block.expectation_string import ExpectationStringRenderer
@@ -7,6 +8,8 @@ from great_expectations.render.util import num_to_str
 
 import pandas as pd
 import altair as alt
+
+logger = logging.getLogger(__name__)
 
 
 class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
@@ -23,7 +26,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             }
         }
     }
-    
+
     _default_content_block_styling = {
         "body": {
             "classes": ["table"],
@@ -100,9 +103,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
         if not result.get("partial_unexpected_list") and not result.get("partial_unexpected_counts"):
             return None
-        
+
         table_rows = []
-        
+
         if result.get("partial_unexpected_counts"):
             header_row = ["Unexpected Value", "Count"]
             for unexpected_count in result.get("partial_unexpected_counts"):
@@ -121,7 +124,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     table_rows.append(["EMPTY"])
                 else:
                     table_rows.append(["null"])
-                    
+
         unexpected_table_content_block = RenderedTableContent(**{
             "content_block_type": "table",
             "table": table_rows,
@@ -132,7 +135,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 }
             }
         })
-        
+
         return unexpected_table_content_block
 
     @classmethod
@@ -172,7 +175,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             unexpected_count = num_to_str(result["unexpected_count"], use_locale=True, precision=20)
             unexpected_percent = num_to_str(result["unexpected_percent"], precision=4) + "%"
             element_count = num_to_str(result["element_count"], use_locale=True, precision=20)
-            
+
             template_str = "\n\n$unexpected_count unexpected values found. " \
                            "$unexpected_percent of $element_count total rows."
 
@@ -313,15 +316,28 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             expectation_string_cell = expectation_string_fn(expectation, styling, include_column_name)
 
             status_cell = [cls._get_status_icon(evr)]
-            unexpected_statement = cls._get_unexpected_statement(evr)
-            unexpected_table = cls._get_unexpected_table(evr)
-            observed_value = [cls._get_observed_value(evr)]
+            unexpected_statement = None
+            unexpected_table = None
+            observed_value = ["--"]
 
-            #If the expectation has some unexpected values...:
+            try:
+                unexpected_statement = cls._get_unexpected_statement(evr)
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+            try:
+                unexpected_table = cls._get_unexpected_table(evr)
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+            try:
+                observed_value = [cls._get_observed_value(evr)]
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+
+            # If the expectation has some unexpected values...:
             if unexpected_statement or unexpected_table:
                 expectation_string_cell.append(unexpected_statement)
                 expectation_string_cell.append(unexpected_table)
-            
+
             if len(expectation_string_cell) > 1:
                 return [status_cell + [expectation_string_cell] + observed_value]
             else:
