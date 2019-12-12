@@ -90,13 +90,6 @@ def modify_locale(func):
     return locale_wrapper
 
 
-def convert_test_obj_to_json_dict(test_obj):
-    if isinstance(test_obj, list):
-        return [x.to_json_dict() for x in test_obj]
-    else:
-        return test_obj.to_json_dict()
-
-
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
 def assertDeepAlmostEqual(expected, actual, *args, **kwargs):

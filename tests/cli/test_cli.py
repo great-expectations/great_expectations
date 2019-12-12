@@ -147,11 +147,6 @@ def test_validate_basic_operation():
     with open('./tests/test_sets/expected_cli_results_default.json', 'r') as f:
         expected_cli_results = expectationSuiteValidationResultSchema.load(json.load(f)).data
 
-    # In PY2 sorting is possible and order is wonky. Order doesn't matter. So sort in that case
-    if PY2:
-        json_result["results"] = sorted(json_result["results"])
-        expected_cli_results["results"] = sorted(expected_cli_results["results"])
-
     assertDeepAlmostEqual(json_result, expected_cli_results)
 
 
