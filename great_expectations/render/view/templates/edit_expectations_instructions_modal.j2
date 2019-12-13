@@ -19,6 +19,16 @@
   {% set expectation_suite_name = expectation_suite_name %}
 {% endif %}
 
+<script type="text/javascript">
+$(function() {
+    $('button.copy-edit-command').click(function() {
+        $('.edit-command').focus();
+        $('.edit-command').select();
+        document.execCommand('copy');
+    });
+});
+</script>
+
 <div class="modal fade ge-expectation-editing-instructions-modal" tabindex="-1" role="dialog" aria-labelledby="ge-expectation-editing-instructions-modal-title"
      aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -30,15 +40,16 @@
         </button>
       </div>
       <div class="modal-body">
-        <p>Expectations are best edited interactively w/ jupyter notebooks. There is a notebook already set up to do this!</p>
-        <p>
-          To do this, run one of the following commands, from the same directory you called
-          <code>great_expectations init</code>:
-        </p>
-        <ul>
-          <li>Jupyter Notebook: <code>jupyter notebook "great_expectations/notebooks/{{ generator_asset_name }}_{{ expectation_suite_name }}.ipynb"</code></li>
-          <li>Jupyter Lab: <code>jupyter lab "great_expectations/notebooks/{{ generator_asset_name }}_{{ expectation_suite_name }}.ipynb"</code></li>
-        </ul>
+        <p>Expectations are best <strong>edited interactively in Jupyter notebooks</strong>.</p>
+        <p>To automatically generate a notebook that does this run:</p>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control edit-command" readonly value="great_expectations edit-suite '{{ full_data_asset_identifier }}' {{ expectation_suite_name }}">
+            <div class="input-group-append">
+                <button class="btn btn-primary copy-edit-command" type="button"><i class="far fa-clipboard"></i> Copy</button>
+            </div>
+        </div>
+      <p>Once you have made your changes and <strong>run the entire notebook</strong> you can kill the notebook by pressing <strong>Ctr-C</strong> in your terminal.</p>
+      <p>Because these notebooks are generated from an Expectation Suite, these notebooks are <strong>entirely disposable</strong>.</p>
       </div>
     </div>
   </div>
