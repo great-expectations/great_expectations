@@ -1594,6 +1594,14 @@ class ConfigOnlyDataContext(object):
         # Get data_asset_name_list
         data_asset_names = self.get_available_data_asset_names(datasource_name)
         if generator_name is None:
+            available_data_asset_names_by_generator = {}
+            for key, value in data_asset_names[datasource_name].items():
+                if len(value["names"]) > 0:
+                    available_data_asset_names_by_generator[key] = value["names"]
+
+            if len(available_data_asset_names_by_generator.keys()) == 1:
+                generator_name = list(available_data_asset_names_by_generator.keys())[0]
+
             if len(data_asset_names[datasource_name].keys()) == 1:
                 generator_name = list(data_asset_names[datasource_name].keys())[0]
         if generator_name not in data_asset_names[datasource_name]:
