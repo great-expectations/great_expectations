@@ -35,21 +35,15 @@
 
     {% if renderer_type in ["ValidationResultsPageRenderer", "ExpectationSuitePageRenderer"] %}
       <div class="mb-2">
-        <p class="card-text col-12 p-0 mb-1">
-          Edit Expectation Suite:
-        </p>
         <div class="d-flex justify-content-center">
           <button type="button" class="btn btn-warning" data-toggle="modal" data-target=".ge-expectation-editing-instructions-modal">
-            How to Edit Suites
+            <i class="fas fa-edit"></i> How to Edit This Suite
           </button>
         </div>
       </div>
     {% endif %}
 
     <div class="mb-2">
-      <p class="card-text col-12 p-0 mb-1">
-        Walkthrough:
-      </p>
       <div class="d-flex justify-content-center">
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".ge-walkthrough-modal">
           Show Walkthrough
