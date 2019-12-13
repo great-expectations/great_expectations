@@ -25,7 +25,7 @@ def test_manual_generator():
     })
 
     # We should be able to provide generator_asset names
-    assert generator.get_available_data_asset_names() == ["asset1", "logs"]
+    assert generator.get_available_data_asset_names() == {"names": ["asset1", "logs"]}
 
     # We should not be able to provide partition ids
     assert generator.get_available_partition_ids("asset1") == [1, 2]
