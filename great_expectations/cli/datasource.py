@@ -100,7 +100,7 @@ What are you processing your files with?
 def _add_pandas_datasource_with_manual_generator(context):
     """
     Add a Pandas datasource to the context without configuring any "opinionated" generators.
-    Only a manul generator is added.
+    Only a manual generator is added.
 
     :param context:
     :return:
@@ -1005,4 +1005,3 @@ msg_unknown_data_source = """
 Do we not have the type of data source you want?
     - Please create a GitHub issue here so we can discuss it!
     - <blue>https://github.com/great-expectations/great_expectations/issues/new</blue>"""
-
