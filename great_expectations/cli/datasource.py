@@ -643,7 +643,8 @@ to demonstrate some examples of assertions you can make about your data.
 Press any key to continue...
     """
 
-    msg_prompt_expectation_suite_name = """Name the new expectation sute"""
+    msg_prompt_expectation_suite_name = """
+Name the new expectation sute"""
 
     msg_data_doc_intro = """
 <cyan>========== Data Docs ==========</cyan>"""
