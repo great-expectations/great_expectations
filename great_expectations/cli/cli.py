@@ -25,7 +25,9 @@ from great_expectations.cli.init_messages import (
     SLACK_SETUP_PROMPT,
     SLACK_WEBHOOK_PROMPT,
 )
-from great_expectations.core import expectationSuiteValidationResultSchema, expectationSuiteSchema
+from great_expectations.core import expectationSuiteValidationResultSchema, \
+    expectationSuiteSchema, NamespaceAwareExpectationSuite, \
+    ExpectationSuiteValidationResult
 from great_expectations.datasource.generator import ManualGenerator
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 from .datasource import (
