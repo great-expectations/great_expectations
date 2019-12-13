@@ -82,7 +82,7 @@ What are you processing your files with?
 
             data_source_type = DatasourceTypes.PANDAS
 
-            data_source_name = _add_pandas_datasource_with_in_memory_generator(context)
+            data_source_name = _add_pandas_datasource_with_manual_generator(context)
         elif data_source_compute_selection == "2":  # Spark
 
             data_source_type = DatasourceTypes.SPARK
@@ -97,10 +97,10 @@ What are you processing your files with?
     return data_source_name, data_source_type
 
 
-def _add_pandas_datasource_with_in_memory_generator(context):
+def _add_pandas_datasource_with_manual_generator(context):
     """
     Add a Pandas datasource to the context without configuring any "opinionated" generators.
-    Only an in-memory generator is added.
+    Only a manul generator is added.
 
     :param context:
     :return:
@@ -115,7 +115,7 @@ def _add_pandas_datasource_with_in_memory_generator(context):
 
     configuration = PandasDatasource.build_configuration(generators={
                                                              "default": {
-                                                                 "class_name": "InMemoryGenerator",
+                                                                 "class_name": "PassthroughGenerator",
                                                              }
                                                          }
                                                          )
@@ -467,7 +467,7 @@ def select_datasource(context, data_source_name=None):
         else:
             choices = "\n".join(["    {}. {}".format(i, data_source["name"]) for i, data_source in enumerate(data_sources, 1)])
             option_selection = click.prompt(
-                msg_prompt_select_data_source + "\n" + choices,
+                msg_prompt_select_data_source + "\n" + choices + "\n",
                 type=click.Choice([str(i) for i, data_source in enumerate(data_sources, 1)]),
                 show_choices=False
             )
@@ -542,7 +542,7 @@ def get_batch_kwargs(context,
 
     msg_prompt_enter_data_asset_name = "\nWhich data would you like to use? (Choose one)\n"
 
-    msg_prompt_enter_data_asset_name_suffix = "    Don't see the data asset in the list above?. Just type the name."
+    msg_prompt_enter_data_asset_name_suffix = "    Don't see the data asset in the list above?. Just type the name.\n"
 
     data_source = select_datasource(context, data_source_name=data_source_name)
 
