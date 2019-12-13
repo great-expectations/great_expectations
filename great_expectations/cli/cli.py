@@ -652,7 +652,12 @@ def check_config(directory):
 )
 @click.option('--batch_kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
-def create_expectation_suite(datasource_name, generator_name, data_asset_name, expectation_suite_name, directory, batch_kwargs):
+def new_suite(datasource_name, generator_name, data_asset_name, expectation_suite_name, directory, batch_kwargs):
+    """Create a new expectation suite.
+
+Great Expectations will choose a couple of columns and generate expectations about them
+to demonstrate some examples of assertions you can make about your data.  
+    """
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
