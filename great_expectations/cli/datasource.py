@@ -105,7 +105,7 @@ Skipping datasource configuration.
 def _add_pandas_datasource_with_manual_generator(context):
     """
     Add a Pandas datasource to the context without configuring any "opinionated" generators.
-    Only a manul generator is added.
+    Only a manual generator is added.
 
     :param context:
     :return:
@@ -1000,10 +1000,3 @@ msg_unknown_data_source = """
 Do we not have the type of data source you want?
     - Please create a GitHub issue here so we can discuss it!
     - <blue>https://github.com/great-expectations/great_expectations/issues/new</blue>"""
-
-# TODO also maybe add validation playground notebook or wait for the full onboarding flow
-MSG_GO_TO_NOTEBOOK = """
-To create expectations for your data, start Jupyter and open a tutorial notebook:
-    - To launch with jupyter notebooks:
-        <green>jupyter notebook great_expectations/notebooks/{}/create_expectations.ipynb</green>
-"""
