@@ -53,6 +53,9 @@ class SparkDFDatasource(Datasource):
                     "class_name": "SubdirReaderGenerator",
                     "base_directory": base_directory,
                     "reader_options": reader_options
+                },
+                "passthrough": {
+                    "class_name": "PassthroughGenerator",
                 }
             }
 

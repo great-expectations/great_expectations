@@ -61,10 +61,25 @@ def add_datasource(context):
     data_source_name = None
     data_source_type = None
 
-    if data_source_selection == "1":  # pandas
-        data_source_type = DatasourceTypes.PANDAS
-        data_source_name = _add_pandas_datasource(context)
-    elif data_source_selection == "2":  # sqlalchemy
+    if data_source_location_selection == "1":
+        data_source_compute_selection = click.prompt(
+            msg_prompt_files_compute_engine,
+            type=click.Choice(["1", "2"]),
+            show_choices=False
+        )
+
+        if data_source_compute_selection == "1":  # pandas
+
+            data_source_type = DatasourceTypes.PANDAS
+
+            data_source_name = _add_pandas_datasource_with_manual_generator(context)
+        elif data_source_compute_selection == "2":  # Spark
+
+            data_source_type = DatasourceTypes.SPARK
+
+            # TODO: create a Spark datasource with an in-memory generator
+            data_source_name = _add_spark_datasource(context, prompt_for_datasource_name=True)
+    else:
         data_source_type = DatasourceTypes.SQL
         data_source_name = _add_sqlalchemy_datasource(context)
     elif data_source_selection == "3":  # Spark
@@ -87,7 +102,34 @@ Skipping datasource configuration.
     return data_source_name, data_source_type
 
 
-def _add_pandas_datasource(context):
+def _add_pandas_datasource_with_manual_generator(context):
+    """
+    Add a Pandas datasource to the context without configuring any "opinionated" generators.
+    Only a manul generator is added.
+
+    :param context:
+    :return:
+    """
+
+    data_source_name = "files_datasource"
+    # data_source_name = click.prompt(
+    #     msg_prompt_datasource_name,
+    #     default=data_source_name,
+    #     show_default=True
+    # )
+
+    configuration = PandasDatasource.build_configuration(generators={
+                                                             "default": {
+                                                                 "class_name": "PassthroughGenerator",
+                                                             }
+                                                         }
+                                                         )
+    datasource = context.add_datasource(name=data_source_name,
+                                        class_name='PandasDatasource',
+                                        **configuration)
+    return data_source_name
+
+def _add_pandas_datasource(context, prompt_for_datasource_name=True):
     path = click.prompt(
         msg_prompt_filesys_enter_base_path,
         # default='/data/',
@@ -420,7 +462,7 @@ def select_datasource(context, data_source_name=None):
         else:
             choices = "\n".join(["    {}. {}".format(i, data_source["name"]) for i, data_source in enumerate(data_sources, 1)])
             option_selection = click.prompt(
-                msg_prompt_select_data_source + "\n" + choices,
+                msg_prompt_select_data_source + "\n" + choices + "\n",
                 type=click.Choice([str(i) for i, data_source in enumerate(data_sources, 1)]),
                 show_choices=False
             )
@@ -495,7 +537,7 @@ def get_batch_kwargs(context,
 
     msg_prompt_enter_data_asset_name = "\nWhich data would you like to use? (Choose one)\n"
 
-    msg_prompt_enter_data_asset_name_suffix = "    Don't see the data asset in the list above?. Just type the name."
+    msg_prompt_enter_data_asset_name_suffix = "    Don't see the data asset in the list above?. Just type the name.\n"
 
     data_source = select_datasource(context, data_source_name=data_source_name)
 
