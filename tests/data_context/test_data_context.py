@@ -200,10 +200,17 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     ###
     # Add a datasource
     ###
+    generators = {
+        "default": {
+            "class_name": "SubdirReaderGenerator",
+        },
+    }
+
     empty_data_context.add_datasource("my_datasource",
                                     module_name="great_expectations.datasource",
                                     class_name="PandasDatasource",
-                                    base_directory=str(filesystem_csv))
+                                    base_directory=str(filesystem_csv),
+                                    generators=generators)
     data_context = empty_data_context
 
     # We can now reference existing or available data asset namespaces using
