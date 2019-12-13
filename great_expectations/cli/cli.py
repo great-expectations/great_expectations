@@ -663,7 +663,7 @@ def new_suite(datasource_name, generator_name, data_asset_name, expectation_suit
     """Create a new expectation suite.
 
 Great Expectations will choose a couple of columns and generate expectations about them
-to demonstrate some examples of assertions you can make about your data.  
+to demonstrate some examples of assertions you can make about your data.
     """
     try:
         context = DataContext(directory)
