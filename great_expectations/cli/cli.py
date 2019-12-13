@@ -26,6 +26,7 @@ from great_expectations.cli.init_messages import (
     SLACK_WEBHOOK_PROMPT,
 )
 from great_expectations.core import expectationSuiteValidationResultSchema, expectationSuiteSchema
+from great_expectations.datasource.generator import ManualGenerator
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 from .datasource import (
     add_datasource as add_datasource_impl,
@@ -415,8 +416,8 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, vi
 
 
 @cli.command()
-@click.argument("data_asset_name")
-@click.argument("suite_name")
+@click.argument("data_asset")
+@click.argument("suite")
 @click.option(
     '--batch-kwargs',
     default=None,
@@ -436,7 +437,7 @@ the data asset. Must be a valid JSON dictionary'
     default=True,
 )
 def edit_suite(
-    data_asset_name, suite_name, directory, jupyter, batch_kwargs
+    data_asset, suite, directory, jupyter, batch_kwargs
 ):
     """Edit an existing suite with a jupyter notebook."""
     try:
@@ -448,20 +449,38 @@ def edit_suite(
         _offer_to_install_new_template(err, context.root_directory)
         return
 
-    suite_name = suite_name.rstrip(".json")
-    suite = _load_suite(context, data_asset_name, suite_name)
+    try:
+        normalized_data_asset_name = context.normalize_data_asset_name(data_asset)
+    except ge_exceptions.AmbiguousDataAssetNameError as e:
+        cli_message(
+            """<cyan>Your data_asset name of {} was not specific enough.
+Please re-run with one of these selected data assets:
+  - '{}""".format(data_asset,
+                "'\n  - '".join([str(ds) for ds in e.candidates]))
+            + "'</cyan>"
+        )
+        sys.exit(-1)
+    except ge_exceptions.DataContextError as e:
+        # TODO consider increasing precision of other DataContextErrors to improve usability
+        # TODO Add suggestion to user to run `ge list-data-assets`
+        cli_message("<red>{}</red>".format(e.message))
+        sys.exit(-1)
+
+    suite = suite.rstrip(".json")
+    suite = _load_suite(context, normalized_data_asset_name, suite)
+
+    data_source = context.get_datasource(normalized_data_asset_name.datasource)
+    generator = data_source.get_generator(normalized_data_asset_name.generator)
 
     if batch_kwargs:
         batch_kwargs = json.loads(batch_kwargs)
-    # elif "batch_kwargs" in suite:
-        # do they exist in suite?
+    # elif suite.get_original_batch_kwargs():
         # TODO this functionality doesn't actually exist yet
-        # batch_kwargs = suite.get("batch_kwargs")
-    # elif
-        # manual generator batch kwargs are configured
-        # TODO this functionality doesn't actually exist yet
+        # batch_kwargs = suite.get_original_batch_kwargs()
+    elif isinstance(generator, ManualGenerator):
+        generator_asset = suite.data_asset_name.generator_asset
+        batch_kwargs = generator.yield_batch_kwargs(generator_asset)
     else:
-        # can they be yielded?
         batch_kwargs = context.yield_batch_kwargs(suite.data_asset_name)
 
     if not batch_kwargs:
@@ -472,7 +491,7 @@ def edit_suite(
         )
 
     human_data_asset_name = suite.data_asset_name.generator_asset
-    notebook_name = f"{human_data_asset_name}_{suite_name}.ipynb"
+    notebook_name = f"{human_data_asset_name}_{suite.expectation_suite_name}.ipynb"
 
     notebook_path = os.path.join(context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
     NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path)
@@ -490,10 +509,12 @@ def edit_suite(
 def _load_suite(context, data_asset_name, suite_name):
     try:
         suite = context.get_expectation_suite(data_asset_name, suite_name)
-    except ge_exceptions.DataContextError:
+    except ge_exceptions.DataContextError as e:
         cli_message(
             "<red>Could not locate a suite named {} for {}</red>".format(
-                suite_name, data_asset_name))
+                suite_name, data_asset_name)
+        )
+        logger.info(e)
         sys.exit(-1)
     return suite
 

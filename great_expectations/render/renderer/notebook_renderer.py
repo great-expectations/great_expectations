@@ -45,52 +45,45 @@ class NotebookRenderer(Renderer):
 
         return ", ".join(kwargs)
 
-    def add_header(self, data_asset_name=None, suite_name=None):
-        # TODO better wording in the intro cells
+    def add_header(self, data_asset_name, suite_name, batch_kwargs):
         self.add_markdown_cell(
-            f"""# Edit the Scaffolded Expectation Suite
+            f"""# Edit Your Expectation Suite
 Use this notebook to recreate and modify your expectation suite for:
-- **Data Asset**: `{data_asset_name}`
-- **Expectation Suite Name**: `{suite_name}`
 
-We'd love it if you **reach out for help on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)"""
+**Data Asset**: `{data_asset_name}`<br>
+**Expectation Suite Name**: `{suite_name}`
+
+We'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)"""
         )
+
+        # TODO such brittle hacks to fix paths
+        if "path" in batch_kwargs.keys():
+            base_dir = batch_kwargs["path"]
+            if not base_dir.startswith("/"):
+                batch_kwargs["path"] = os.path.join("../../", base_dir)
+
         self.add_code_cell(
             """\
-import os
-import json
 from datetime import datetime
 import great_expectations as ge
-import great_expectations.jupyter_ux"""
-        )
-        self.add_markdown_cell(
-            """\
-## 1. Get a DataContext
-This represents your **project** that you just created using `great_expectations init`. [Read more in the tutorial](https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html?utm_source=notebook&utm_medium=create_expectations#get-a-datacontext-object)"""
-        )
-        self.add_code_cell("context = ge.data_context.DataContext()")
+import great_expectations.jupyter_ux
 
-        self.add_markdown_cell(
-            """\
-## 2. Optional: Rename your Expectation Suite
+context = ge.data_context.DataContext()
 
-We recommend naming your first expectation suite for a table `warning`. Later, \
-as you identify some of the expectations that you add to this suite as \
-critical, you can move these expectations into another suite and call it \
-`failure`.
-""")
-        self.add_code_cell(
-            """\
-expectation_suite_name = "{}" # TODO: replace with your value!
-context.create_expectation_suite(data_asset_name="{}", expectation_suite_name=expectation_suite_name, overwrite_existing=True);""".format(suite_name, data_asset_name)
-       )
+expectation_suite_name = "{}"  # Feel free to change the name of your suite here. Renaming this will not remove the other one.
+context.create_expectation_suite("{}", expectation_suite_name, overwrite_existing=True)
+
+batch_kwargs = {}
+batch = context.get_batch("{}", expectation_suite_name, batch_kwargs)
+batch.head()""".format(suite_name, data_asset_name, batch_kwargs, data_asset_name)
+        )
 
     def add_footer(self):
         self.add_markdown_cell(
             """\
 ## Save & Review Your Expectations
 
-Run the next cell to save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.
+Let's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.
 If you decide not to save some expectations that you created, use [remove_expectaton method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).
 
 Let's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans."""
@@ -104,39 +97,9 @@ batch.save_expectation_suite(discard_failed_expectations=False)
 # Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
 run_id = datetime.utcnow().isoformat().replace(":", "") + "Z"
 
-results = context.run_validation_operator(
-    assets_to_validate=[batch],
-    run_id=run_id,
-    validation_operator_name="action_list_operator",
-)
+results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
 context.build_data_docs()
 context.open_data_docs()"""
-        )
-
-    def add_batch_cells(self, data_asset_name, batch_kwargs, suite_name=None):
-        """Add backend-specific batch cells.
-        :param batch_kwargs:
-        """
-        self.add_markdown_cell(
-            """\
-## 3. Load a batch of data you want to use to create `Expectations`
-
-To learn more about batches and `get_batch`, see [this tutorial](https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html?utm_source=notebook&utm_medium=create_expectations#load-a-batch-of-data-to-create-expectations)
-Let's glance at a bit of your data."""
-        )
-
-        # TODO such brittle hacks to fix paths for a demo
-        if "path" in batch_kwargs.keys():
-            base_dir = batch_kwargs["path"]
-            if not base_dir.startswith("/"):
-                batch_kwargs["path"] = os.path.join("../../", base_dir)
-
-        # TODO caution about the .head() showing data that could be committed.
-        self.add_code_cell(
-            """\
-batch_kwargs = {}
-batch = context.get_batch("{}", expectation_suite_name, batch_kwargs)
-batch.head()""".format(batch_kwargs, data_asset_name)
         )
 
     def add_code_cell(self, code):
@@ -164,7 +127,8 @@ batch.head()""".format(batch_kwargs, data_asset_name)
                 self.add_code_cell(f"batch.{exp['expectation_type']}({kwargs_string})")
         else:
             self.add_markdown_cell(
-                "No table level expectations are in this suite. Feel free to add some."
+                "No table level expectations are in this suite. Feel free to "
+                "add some here. The all begin with `batch.expect_table_...`."
             )
 
         # Remove the table expectations since they are dealt with
@@ -197,12 +161,10 @@ batch.head()""".format(batch_kwargs, data_asset_name)
 
         self.notebook = nbformat.v4.new_notebook()
 
-        data_asset_name = suite.data_asset_name.generator_asset
+        data_asset_name = suite.data_asset_name
         suite_name = suite.expectation_suite_name
 
-        # Compose the notebook sections from generic + backend-specific cells
-        self.add_header(data_asset_name, suite_name)
-        self.add_batch_cells(data_asset_name, batch_kwargs, suite_name)
+        self.add_header(data_asset_name, suite_name, batch_kwargs)
         self.add_authoring_intro()
         self.add_expectation_cells_from_suite(suite.expectations)
         self.add_footer()
@@ -223,32 +185,9 @@ batch.head()""".format(batch_kwargs, data_asset_name)
     def add_authoring_intro(self):
         self.add_markdown_cell(
             """\
-## 3. Create & Edit Expectations
+## Create & Edit Expectations
 
-With a batch, you can add expectations by calling specific expectation methods. They all begin with `.expect_` which makes autocompleting easy.
+Add expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.
 
-See available expectations in the [expectation glossary](https://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations).
-You can also see available expectations by hovering over data elements in DataDocs generated by profiling your dataset. [Read more in the tutorial](https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html?utm_source=notebook&utm_medium=create_expectations#author-expectations)"""
+You can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**."""
         )
-
-
-# class SQLNotebookRenderer(NotebookRenderer):
-#     def add_batch_cells(self, context, data_asset_name, suite_name=None):
-#         self.add_markdown_cell(
-#             """\
-# ## 2. Load a batch of data you want to use to create `Expectations`
-#
-# To learn more about batches and `get_batch`, see [this tutorial](https://docs.greatexpectations.io/en/latest/tutorials/create_expectations.html?utm_source=notebook&utm_medium=create_expectations#load-a-batch-of-data-to-create-expectations)"""
-#         )
-#         table_name = data_asset_name.split("/")[-1]
-#         self.add_code_cell(
-#             """\
-# batch_kwargs = {"query": "SELECT * FROM """
-#             + table_name
-#             + """\"}
-# batch = context.get_batch(\""""
-#             + str(data_asset_name)
-#             + '", "'
-#             + str(suite_name)
-#             + '", batch_kwargs)'
-#         )

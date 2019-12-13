@@ -65,6 +65,12 @@ class InvalidConfigError(DataContextError):
         self.message = message
 
 
+class AmbiguousDataAssetNameError(DataContextError):
+    def __init__(self, message, candidates=None):
+        self.message = message
+        self.candidates = candidates
+
+
 class StoreConfigurationError(DataContextError):
     pass
 
