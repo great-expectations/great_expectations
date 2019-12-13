@@ -8,7 +8,7 @@ from .util import cli_message
 from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.data_context import DataContext
 from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
-from great_expectations.datasource.generator import InMemoryGenerator
+from great_expectations.datasource.generator import InMemoryGenerator, ManualGenerator, PassthroughGenerator
 
 from great_expectations import rtd_url_ge_version
 from great_expectations.datasource.types import ReaderMethods
@@ -31,6 +31,8 @@ DATASOURCE_TYPE_BY_DATASOURCE_CLASS = {
     "SparkDFDatasource": DatasourceTypes.SPARK,
     "SqlAlchemyDatasource": DatasourceTypes.SQL,
 }
+
+MANUAL_GENERATOR_CLASSES = (InMemoryGenerator, ManualGenerator, PassthroughGenerator)
 
 
 class SupportedDatabases(enum.Enum):
@@ -487,7 +489,8 @@ def get_batch_kwargs(context,
     :param additional_batch_kwargs:
     :return: a tuple: (data_source_name, generator_name, data_asset_name, batch_kwargs). The components
                 of the tuple were passed into the methods as optional arguments, but their values might
-                have changed after this method's execution
+                have changed after this method's execution. If the returned batch_kwargs is None, it means
+                that the generator will know to yield batch_kwargs when called.
     """
 
     msg_prompt_enter_data_asset_name = "\nWhich data would you like to use? (Choose one)\n"
@@ -495,6 +498,8 @@ def get_batch_kwargs(context,
     msg_prompt_enter_data_asset_name_suffix = "    Don't see the data asset in the list above?. Just type the name."
 
     data_source = select_datasource(context, data_source_name=data_source_name)
+
+    batch_kwargs = None
 
     available_data_assets_dict = context.get_available_data_asset_names(datasource_names=data_source_name)
 
@@ -531,11 +536,11 @@ def get_batch_kwargs(context,
         generator_name = None
         for generator_info in data_source.list_generators():
             generator = data_source.get_generator(generator_info["name"])
-            if isinstance(generator, InMemoryGenerator):
+            if isinstance(generator, MANUAL_GENERATOR_CLASSES):
                 generator_name = generator_info["name"]
                 break
         if generator_name is None:
-            raise ge_exceptions.DataContextError("No InMemoryGenerator generators found in datasource {0:s}".format(data_source_name))
+            raise ge_exceptions.DataContextError("No manual generators found in datasource {0:s}".format(data_source_name))
 
 
         if isinstance(context.get_datasource(data_source_name), (PandasDatasource, SparkDFDatasource)):
@@ -591,6 +596,8 @@ to demonstrate some examples of assertions you can make about your data.
 Press any key to continue...
     """
 
+    msg_prompt_expectation_suite_name = """Name the new expectation sute"""
+
     msg_data_doc_intro = """
 <cyan>========== Data Docs ==========</cyan>"""
 
@@ -609,6 +616,8 @@ Press any key to continue...
                                                                                 data_asset_name=data_asset_name,
                                                                                 generator_name=generator_name,
                                                                                 additional_batch_kwargs=additional_batch_kwargs)
+    if expectation_suite_name is None:
+        expectation_suite_name = click.prompt(msg_prompt_expectation_suite_name, default="warning", show_default=True)
 
     profiler = SampleExpectationsDatasetProfiler
 
