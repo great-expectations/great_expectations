@@ -523,7 +523,7 @@ def get_batch_kwargs(context,
     from that list (note: if there are multiple generators, user has to choose one first). If a name known to
     the chosen generator is selected, the generator will be able to yield batch_kwargs. The method also gives user
     an alternative to selecting the data asset name from the generator's list - user can type in a name for their
-    data asset. In this case the in-memory generator will be used to construct a fully qualified data asset
+    data asset. In this case a manual batch kwargs generator will be used to construct a fully qualified data asset
     identifier (note: if the datasource has no in-memory generator configured, the method will exist with a failure).
     Since no generator can yield batch_kwargs for this data asset name, the method prompts user to specify batch_kwargs
     by choosing a file (if the datasource is pandas or spark) or by writing a SQL query (if the datasource points
