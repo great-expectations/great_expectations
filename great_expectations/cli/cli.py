@@ -226,15 +226,15 @@ def init(target_directory, view):
             cli_message(RUN_INIT_AGAIN)
             exit(0)
         try:
-            context, data_source_name, data_source_type = _create_new_project(target_directory)
-            if not data_source_name:  # no datasource was created
+            context, datasource_name, data_source_type = _create_new_project(target_directory)
+            if not datasource_name:  # no datasource was created
                 return
 
             # we need only one of the values returned here - profiling_results
-            data_source_name, generator_name, data_asset_name, batch_kwargs, profiling_results = \
+            datasource_name, generator_name, data_asset_name, batch_kwargs, profiling_results = \
                 create_expectation_suite_impl(
                         context,
-                        data_source_name=data_source_name,
+                        datasource_name=datasource_name,
                         show_intro_message=False,
                         additional_batch_kwargs={"limit": 1000},
                         open_docs=view)
@@ -255,7 +255,7 @@ def init(target_directory, view):
 
                 logger.debug(f"\nRendering a notebook for {human_data_asset_name} and suite {suite_name}")
                 logger.debug(f"batch_kwargs: {batch_kwargs}")
-                logger.debug(f"data_source_name: {data_source_name}")
+                logger.debug(f"datasource_name: {datasource_name}")
 
                 notebook_name = f"{human_data_asset_name}_{suite_name}.ipynb"
                 notebook_path = os.path.join(context.root_directory, "notebooks", notebook_name)
@@ -284,7 +284,7 @@ def init(target_directory, view):
             #     batch_kwargs = context.yield_batch_kwargs(data_asset)
             #     batch_kwargs_by_data_asset[data_asset] = batch_kwargs
             #     print(f"batch_kwargs: {batch_kwargs}")
-            #     print(f"data_source_name: {data_source_name}")
+            #     print(f"datasource_name: {datasource_name}")
             #
             #     notebook_name = f"{data_asset}_{suite_name}.ipynb"
             #     notebook_renderer.render_to_disk(suite, batch_kwargs, os.path.join(context.root_directory, notebook_name))
@@ -323,8 +323,8 @@ def _get_full_path_to_ge_dir(target_directory):
 def _create_new_project(target_directory):
     try:
         context = DataContext.create(target_directory)
-        data_source_name, data_source_type = add_datasource_impl(context)
-        return context, data_source_name, data_source_type
+        datasource_name, data_source_type = add_datasource_impl(context)
+        return context, datasource_name, data_source_type
     except ge_exceptions.DataContextError as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(-1)
@@ -361,13 +361,13 @@ def add_datasource(directory, view):
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         _offer_to_install_new_template(err, context.root_directory)
 
-    data_source_name, data_source_type = add_datasource_impl(context)
+    datasource_name, data_source_type = add_datasource_impl(context)
 
-    if not data_source_name:  # no datasource was created
+    if not datasource_name:  # no datasource was created
         return
 
     # TODO do we really want to "profile" every new datasource?
-    profile_datasource(context, data_source_name, open_docs=view)
+    profile_datasource(context, datasource_name, open_docs=view)
 
 
 @cli.command()
@@ -637,12 +637,9 @@ def check_config(directory):
         _offer_to_install_new_template(err, directory)
 
 @cli.command()
-@click.option('--datasource_name', '-ds', default=None)
-@click.option('--generator_name', '-g', default=None,
-              help='Generator name. Requires datasource_name specified.')
-@click.option('--data_asset_name', '-da', default=None,
-              help='Data asset name. Requires datasource_name specified.')
-@click.option('--expectation_suite_name', '-es', default=None,
+@click.option('--data_asset', '-da', default=None,
+              help='Fully qualified data asset name (datasource/generator/generator_asset)')
+@click.option('--suite', '-es', default=None,
               help='Expectation suite name.')
 @click.option(
     "--directory",
@@ -652,7 +649,7 @@ def check_config(directory):
 )
 @click.option('--batch_kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
-def new_suite(datasource_name, generator_name, data_asset_name, expectation_suite_name, directory, batch_kwargs):
+def new_suite(data_asset, suite, directory, batch_kwargs):
     """Create a new expectation suite.
 
 Great Expectations will choose a couple of columns and generate expectations about them
@@ -670,13 +667,30 @@ to demonstrate some examples of assertions you can make about your data.
     if batch_kwargs is not None:
         batch_kwargs = json.loads(batch_kwargs)
 
+    datasource_name = None
+    generator_name = None
+    generator_asset = None
+    if data_asset is not None:
+        try:
+            data_asset_id = context.normalize_data_asset_name(data_asset)
+            datasource_name = data_asset_id.datasource
+            generator_name = data_asset_id.generator
+            generator_asset = data_asset_id.generator_asset
+        except ge_exceptions.AmbiguousDataAssetNameError as e:
+            cli_message(
+                """<cyan>Your data_asset name of {} was not specific enough.
+    No worries - we will help you to specify the data asset name
+      - '{}""".format(data_asset)
+                + "'</cyan>"
+            )
+
     create_expectation_suite_impl(
         context,
-        data_source_name=datasource_name,
+        datasource_name=datasource_name,
         generator_name=generator_name,
-        data_asset_name=data_asset_name,
+        generator_asset=generator_asset,
         batch_kwargs=batch_kwargs,
-        expectation_suite_name=expectation_suite_name,
+        expectation_suite_name=suite,
         additional_batch_kwargs=None,
         show_intro_message=False,
         open_docs=True)
