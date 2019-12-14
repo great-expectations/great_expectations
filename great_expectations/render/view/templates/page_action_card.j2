@@ -2,11 +2,21 @@
     function showAllValidations() {
     $(".hide-succeeded-validation-target-child").parent().fadeIn();
     $(".hide-succeeded-validation-target").fadeIn();
+    $(".hide-succeeded-validations-column-section-target-child").parent().parent().each((idx, el) => {
+      $(el).fadeIn();
+      const elId = el.id;
+      $(`a[href$=${elId}]`).fadeIn();
+    })
   }
 
     function hideSucceededValidations() {
     $(".hide-succeeded-validation-target-child").parent().fadeOut();
     $(".hide-succeeded-validation-target").fadeOut();
+    $(".hide-succeeded-validations-column-section-target-child").parent().parent().each((idx, el) => {
+      $(el).fadeOut();
+      const elId = el.id;
+      $(`a[href$=${elId}]`).fadeOut();
+    })
   }
 </script>
 

@@ -1112,87 +1112,33 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
     # print(json.dumps(result, indent=2))
 
     #Note: A better approach to testing would separate out styling into a separate test.
-    assert result == {
-        "content_block_type": "table",
-        "table": [
-            [
-                {
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$icon",
-                        "params": {
-                            "icon": ""
-                        },
-                        "styling": {
-                            "params": {
-                                "icon": {
-                                    "classes": [
-                                        "fas",
-                                        "fa-check-circle",
-                                        "text-success"
-                                    ],
-                                    "tag": "i"
-                                }
-                            }
-                        }
-                    },
-                    "styling": {
-                        "parent": {
-                            "classes": [
-                                "hide-succeeded-validation-target-child"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$column minimum value may have any numerical value.",
-                        "params": {
-                            "column": "live",
-                            "min_value": None,
-                            "max_value": None,
-                            "result_format": "SUMMARY",
-                            "parse_strings_as_datetimes": None
-                        },
-                        "styling": {
-                            "default": {
-                                "classes": [
-                                    "badge",
-                                    "badge-secondary"
-                                ]
-                            },
-                            "params": {
-                                "column": {
-                                    "classes": [
-                                        "badge",
-                                        "badge-primary"
-                                    ]
-                                }
-                            }
-                        }
-                    }
-                },
-                "True"
-            ]
-        ],
-        "styling": {
-            "body": {
-                "classes": [
-                    "table"
-                ]
-            },
-            "classes": [
-                "m-3",
-                "table-responsive"
-            ]
-        },
-        "header_row": [
-            "Status",
-            "Expectation",
-            "Observed Value"
-        ]
-    }
+    assert result == {'content_block_type': 'table',
+                      'header_row': ['Status', 'Expectation', 'Observed Value'],
+                      'styling': {'body': {'classes': ['table']},
+                                  'classes': ['m-3',
+                                              'table-responsive',
+                                              'hide-succeeded-validations-column-section-target-child']},
+                      'table': [[{'content_block_type': 'string_template',
+                                  'string_template': {'params': {'icon': ''},
+                                                      'styling': {'params': {'icon': {'classes': ['fas',
+                                                                                                  'fa-check-circle',
+                                                                                                  'text-success'],
+                                                                                      'tag': 'i'}}},
+                                                      'template': '$icon'},
+                                  'styling': {'parent': {'classes': ['hide-succeeded-validation-target-child']}}},
+                                 {'content_block_type': 'string_template',
+                                  'string_template': {'params': {'column': 'live',
+                                                                 'max_value': None,
+                                                                 'min_value': None,
+                                                                 'parse_strings_as_datetimes': None,
+                                                                 'result_format': 'SUMMARY'},
+                                                      'styling': {'default': {'classes': ['badge',
+                                                                                          'badge-secondary']},
+                                                                  'params': {'column': {'classes': ['badge',
+                                                                                                    'badge-primary']}}},
+                                                      'template': '$column minimum value may have '
+                                                                  'any numerical value.'}},
+                                 'True']]}
 
 
 # noinspection PyPep8Naming
