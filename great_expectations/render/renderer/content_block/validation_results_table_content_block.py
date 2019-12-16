@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from six import integer_types
 
 from great_expectations.render.renderer.content_block.expectation_string import ExpectationStringRenderer
@@ -300,9 +301,18 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return "--"
 
     @classmethod
-    def _process_content_block(cls, content_block):
-        super(ValidationResultsTableContentBlockRenderer, cls)._process_content_block(content_block)
+    def _process_content_block(cls, content_block, has_failed_evr):
+        super(ValidationResultsTableContentBlockRenderer, cls)._process_content_block(content_block, has_failed_evr)
         content_block.header_row = ["Status", "Expectation", "Observed Value"]
+
+        if has_failed_evr is False:
+            styling = deepcopy(content_block.styling) if content_block.styling else {}
+            if styling.get("classes"):
+                styling["classes"].append("hide-succeeded-validations-column-section-target-child")
+            else:
+                styling["classes"] = ["hide-succeeded-validations-column-section-target-child"]
+
+            content_block.styling = styling
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
@@ -342,5 +352,5 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 return [status_cell + [expectation_string_cell] + observed_value]
             else:
                 return [status_cell + expectation_string_cell + observed_value]
-        
+
         return row_generator_fn

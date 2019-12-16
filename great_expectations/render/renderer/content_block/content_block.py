@@ -35,10 +35,14 @@ class ContentBlockRenderer(Renderer):
 
         if isinstance(render_object, list):
             blocks = []
+            has_failed_evr = False if isinstance(render_object[0], ExpectationValidationResult) else None
             for obj_ in render_object:
                 expectation_type = cls._get_expectation_type(obj_)
 
                 content_block_fn = cls._get_content_block_fn(expectation_type)
+
+                if isinstance(obj_, ExpectationValidationResult) and not obj_.success:
+                    has_failed_evr = True
 
                 if content_block_fn is not None:
                     try:
@@ -50,7 +54,7 @@ class ContentBlockRenderer(Renderer):
                     except Exception as e:
                         logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
 
-                        if type(obj_) == ExpectationValidationResult:
+                        if isinstance(obj_, ExpectationValidationResult):
                             content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
                         else:
                             content_block_fn = cls._missing_content_block_fn
@@ -67,7 +71,7 @@ class ContentBlockRenderer(Renderer):
                     )
 
                 if result is not None:
-                    if type(obj_) == ExpectationConfiguration:
+                    if isinstance(obj_, ExpectationConfiguration):
                         expectation_meta_notes = cls._render_expectation_meta_notes(obj_)
                         if expectation_meta_notes:
                             result.append(expectation_meta_notes)
@@ -78,7 +82,7 @@ class ContentBlockRenderer(Renderer):
                     cls._content_block_type: blocks,
                     "styling": cls._get_content_block_styling(),
                 })
-                cls._process_content_block(content_block)
+                cls._process_content_block(content_block, has_failed_evr=has_failed_evr)
 
                 return content_block
             else:
@@ -97,7 +101,7 @@ class ContentBlockRenderer(Renderer):
                 except Exception as e:
                     logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
 
-                    if type(render_object) == ExpectationValidationResult:
+                    if isinstance(render_object, ExpectationValidationResult):
                         content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
                     else:
                         content_block_fn = cls._missing_content_block_fn
@@ -113,7 +117,7 @@ class ContentBlockRenderer(Renderer):
                             **kwargs
                         )
             if result is not None:
-                if type(render_object) == ExpectationConfiguration:
+                if isinstance(render_object, ExpectationConfiguration):
                     expectation_meta_notes = cls._render_expectation_meta_notes(render_object)
                     if expectation_meta_notes:
                         result.append(expectation_meta_notes)
@@ -248,7 +252,7 @@ class ContentBlockRenderer(Renderer):
         })
 
     @classmethod
-    def _process_content_block(cls, content_block):
+    def _process_content_block(cls, content_block, has_failed_evr):
         header = cls._get_header()
         if header != "":
             content_block.header = header
