@@ -56,7 +56,7 @@ class ManualGenerator(BatchGenerator):
         return self._assets
 
     def get_available_data_asset_names(self):
-        return list(self.assets.keys())
+        return {"names": list(self.assets.keys())}
 
     def _get_generator_asset_config(self, generator_asset):
         for asset_name, asset_definition in self.assets.items():
