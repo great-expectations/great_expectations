@@ -166,7 +166,7 @@ class SiteIndexPageRenderer(Renderer):
                         },
                         "styling": {
                             "parent": {
-                                "classes": ["hide-succeeded-validation-target"] if not link_dict[
+                                "classes": ["hide-succeeded-validation-target"] if link_dict[
                                             "validation_success"] else []
                             }
                         }
@@ -219,7 +219,7 @@ class SiteIndexPageRenderer(Renderer):
                     },
                     "styling": {
                         "parent": {
-                            "classes": ["hide-succeeded-validation-target"] if not link_dict[
+                            "classes": ["hide-succeeded-validation-target"] if link_dict[
                                 "validation_success"] else []
                         }
                     }
