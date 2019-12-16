@@ -1,7 +1,13 @@
 import json
+import great_expectations.exceptions as ge_exceptions
 
-from sqlalchemy import create_engine, Column, String, MetaData, Table, select, and_, column
-from sqlalchemy.engine.url import URL
+try:
+    import sqlalchemy
+    from sqlalchemy import create_engine, Column, String, MetaData, Table, select, and_, column
+    from sqlalchemy.engine.url import URL
+except ImportError:
+    sqlalchemy = None
+    create_engine = None
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 
@@ -9,6 +15,8 @@ from great_expectations.data_context.store.store_backend import StoreBackend
 class DatabaseStoreBackend(StoreBackend):
 
     def __init__(self, credentials, table_name, key_columns):
+        if not sqlalchemy:
+            raise ge_exceptions.DataContextError("ModuleNotFoundError: No module named 'sqlalchemy'")
         meta = MetaData()
         self.key_columns = key_columns
         # Dynamically construct a SQLAlchemy table with the name and column names we'll use
