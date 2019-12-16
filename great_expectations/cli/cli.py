@@ -31,7 +31,9 @@ from great_expectations.render.renderer.notebook_renderer import NotebookRendere
 from .datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
+    create_expectation_suite as create_expectation_suite_impl,
     build_docs as build_documentation_impl,
+    get_batch_kwargs
 )
 from great_expectations.cli.util import cli_message, is_sane_slack_webhook
 from great_expectations.data_context import DataContext
@@ -229,13 +231,73 @@ def init(target_directory, view):
         if not click.confirm(LETS_BEGIN_PROMPT, default=True):
             cli_message(RUN_INIT_AGAIN)
             exit(0)
+        try:
+            context, datasource_name, data_source_type = _create_new_project(target_directory)
+            if not datasource_name:  # no datasource was created
+                return
 
-        context, data_source_name, data_source_type = _create_new_project(target_directory)
-        if not data_source_name:  # no datasource was created
-            return
+            # we need only one of the values returned here - profiling_results
+            datasource_name, generator_name, data_asset_name, batch_kwargs, profiling_results = \
+                create_expectation_suite_impl(
+                        context,
+                        datasource_name=datasource_name,
+                        show_intro_message=False,
+                        additional_batch_kwargs={"limit": 1000},
+                        open_docs=view)
 
-        profile_datasource(context, data_source_name, open_docs=view, additional_batch_kwargs={"limit": 1000})
-        cli_message("""\n<cyan>Great Expectations is now set up in your project!</cyan>""")
+            notebook_renderer = NotebookRenderer()
+
+            for result in profiling_results["results"]:
+                # TODO brittle
+                suite = result[0]
+                assert isinstance(suite, NamespaceAwareExpectationSuite)
+                suite_name = suite.expectation_suite_name
+
+                validation_result = result[1]
+                assert isinstance(validation_result, ExpectationSuiteValidationResult)
+                batch_kwargs = validation_result.meta.get("batch_kwargs")
+                data_asset_identifier = validation_result.meta.get("data_asset_name")
+                human_data_asset_name = data_asset_identifier.generator_asset
+
+                logger.debug(f"\nRendering a notebook for {human_data_asset_name} and suite {suite_name}")
+                logger.debug(f"batch_kwargs: {batch_kwargs}")
+                logger.debug(f"datasource_name: {datasource_name}")
+
+                notebook_name = f"{human_data_asset_name}_{suite_name}.ipynb"
+                notebook_path = os.path.join(context.root_directory, "notebooks", notebook_name)
+                notebook_renderer.render_to_disk(suite, batch_kwargs, notebook_path)
+
+
+            # TODO maybe loop over profiling results since they contain suites and validation results
+            # for data_asset in data_assets:
+            #     # TODO brittle
+            #     # print("\n\n\n")
+            #     # print(profiling_results)
+            #     # print("\n\n\n")
+            #     # sys.exit(1)
+            #     # batch_kwargs = profiling_results["results"][0][1]["meta"]["batch_kwargs"]
+            #
+            #     print(f"data_asset: {data_asset}")
+            #     suite = context.get_expectation_suite(
+            #         data_asset_name=data_asset,
+            #         expectation_suite_name=str(profiler.__name__)
+            #     )
+            #     suite_name = suite.expectation_suite_name
+            #
+            #     print(f"\nRendering a notebook for {data_asset} and suite {suite_name}")
+            #
+            #     # batch_kwargs = context.build_batch_kwargs(data_asset, partition_id="profiler")
+            #     batch_kwargs = context.yield_batch_kwargs(data_asset)
+            #     batch_kwargs_by_data_asset[data_asset] = batch_kwargs
+            #     print(f"batch_kwargs: {batch_kwargs}")
+            #     print(f"datasource_name: {datasource_name}")
+            #
+            #     notebook_name = f"{data_asset}_{suite_name}.ipynb"
+            #     notebook_renderer.render_to_disk(suite, batch_kwargs, os.path.join(context.root_directory, notebook_name))
+                cli_message("""\n<cyan>Great Expectations is now set up.</cyan>""")
+        except ge_exceptions.DataContextError as e:
+            cli_message("<red>{}</red>".format(e))
+
 
 
 def _slack_setup(context):
@@ -267,8 +329,8 @@ def _get_full_path_to_ge_dir(target_directory):
 def _create_new_project(target_directory):
     try:
         context = DataContext.create(target_directory)
-        data_source_name, data_source_type = add_datasource_impl(context)
-        return context, data_source_name, data_source_type
+        datasource_name, data_source_type = add_datasource_impl(context)
+        return context, datasource_name, data_source_type
     except ge_exceptions.DataContextError as err:
         logger.critical(err.message)
         sys.exit(-1)
@@ -305,12 +367,13 @@ def add_datasource(directory, view):
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         _offer_to_install_new_template(err, context.root_directory)
 
-    data_source_name, data_source_type = add_datasource_impl(context)
+    datasource_name, data_source_type = add_datasource_impl(context)
 
-    if not data_source_name:  # no datasource was created
+    if not datasource_name:  # no datasource was created
         return
 
-    profile_datasource(context, data_source_name, open_docs=view)
+    # TODO do we really want to "profile" every new datasource?
+    profile_datasource(context, datasource_name, open_docs=view)
 
 
 @cli.command()
@@ -580,6 +643,65 @@ def check_config(directory):
             sys.exit(1)
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         _offer_to_install_new_template(err, directory)
+
+@cli.command()
+@click.option('--data_asset', '-da', default=None,
+              help='Fully qualified data asset name (datasource/generator/generator_asset)')
+@click.option('--suite', '-es', default=None,
+              help='Expectation suite name.')
+@click.option(
+    "--directory",
+    "-d",
+    default=None,
+    help="The project's great_expectations directory."
+)
+@click.option('--batch_kwargs', default=None,
+              help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
+def new_suite(data_asset, suite, directory, batch_kwargs):
+    """Create a new expectation suite.
+
+Great Expectations will choose a couple of columns and generate expectations about them
+to demonstrate some examples of assertions you can make about your data.
+    """
+    try:
+        context = DataContext(directory)
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, context.root_directory)
+        return
+
+    if batch_kwargs is not None:
+        batch_kwargs = json.loads(batch_kwargs)
+
+    datasource_name = None
+    generator_name = None
+    generator_asset = None
+    if data_asset is not None:
+        try:
+            data_asset_id = context.normalize_data_asset_name(data_asset)
+            datasource_name = data_asset_id.datasource
+            generator_name = data_asset_id.generator
+            generator_asset = data_asset_id.generator_asset
+        except ge_exceptions.AmbiguousDataAssetNameError as e:
+            cli_message(
+                """<cyan>Your data_asset name of {} was not specific enough.
+    No worries - we will help you to specify the data asset name
+      - '{}""".format(data_asset)
+                + "'</cyan>"
+            )
+
+    create_expectation_suite_impl(
+        context,
+        datasource_name=datasource_name,
+        generator_name=generator_name,
+        generator_asset=generator_asset,
+        batch_kwargs=batch_kwargs,
+        expectation_suite_name=suite,
+        additional_batch_kwargs=None,
+        show_intro_message=False,
+        open_docs=True)
 
 
 def _offer_to_install_new_template(err, ge_dir):
