@@ -17,10 +17,10 @@ class PassthroughGenerator(BatchGenerator):
         return iter([kwargs])
 
     def get_available_data_asset_names(self):
-        logger.warning(
+        logger.debug(
             "PassthroughGenerator cannot identify data_asset_names, but can accept any object as a valid data_asset."
         )
-        return []
+        return {"names": []}
 
     def get_available_partition_ids(self, generator_asset):
         logger.warning(

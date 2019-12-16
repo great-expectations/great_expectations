@@ -1594,6 +1594,14 @@ class ConfigOnlyDataContext(object):
         # Get data_asset_name_list
         data_asset_names = self.get_available_data_asset_names(datasource_name)
         if generator_name is None:
+            available_data_asset_names_by_generator = {}
+            for key, value in data_asset_names[datasource_name].items():
+                if len(value["names"]) > 0:
+                    available_data_asset_names_by_generator[key] = value["names"]
+
+            if len(available_data_asset_names_by_generator.keys()) == 1:
+                generator_name = list(available_data_asset_names_by_generator.keys())[0]
+
             if len(data_asset_names[datasource_name].keys()) == 1:
                 generator_name = list(data_asset_names[datasource_name].keys())[0]
         if generator_name not in data_asset_names[datasource_name]:
@@ -1658,6 +1666,7 @@ class ConfigOnlyDataContext(object):
 
                     normalized_data_asset_name = self.normalize_data_asset_name(name)
                     expectation_suite_name = profiler.__name__
+
                     self.create_expectation_suite(
                         data_asset_name=normalized_data_asset_name,
                         expectation_suite_name=expectation_suite_name,
@@ -1743,6 +1752,7 @@ class ConfigOnlyDataContext(object):
                            generator_name=None,
                            data_asset_name=None,
                            batch_kwargs=None,
+                           expectation_suite_name=None,
                            profiler=BasicDatasetProfiler,
                            run_id="profiling",
                            additional_batch_kwargs=None):
@@ -1817,8 +1827,13 @@ class ConfigOnlyDataContext(object):
             if additional_batch_kwargs is None:
                 additional_batch_kwargs = {}
 
-            normalized_data_asset_name = self.normalize_data_asset_name(name)
-            expectation_suite_name = profiler.__name__
+            if datasource_name is None or generator_name is None:
+                normalized_data_asset_name = self.normalize_data_asset_name(name)
+            else:
+                normalized_data_asset_name = DataAssetIdentifier(datasource_name, generator_name,
+                                                                 name)
+            if expectation_suite_name is None:
+                expectation_suite_name = profiler.__name__
             self.create_expectation_suite(
                 data_asset_name=normalized_data_asset_name,
                 expectation_suite_name=expectation_suite_name,

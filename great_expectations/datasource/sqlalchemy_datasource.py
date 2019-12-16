@@ -52,6 +52,9 @@ class SqlAlchemyDatasource(Datasource):
             generators = {
                 "default": {
                     "class_name": "TableGenerator"
+                },
+                "passthrough": {
+                    "class_name": "PassthroughGenerator",
                 }
             }
 
