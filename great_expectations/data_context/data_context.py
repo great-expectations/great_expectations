@@ -1540,7 +1540,9 @@ class ConfigOnlyDataContext(object):
                             "module_name": "great_expectations.render.renderer.site_builder"
                         }
                     )
-                    index_page_locator_info = site_builder.build(resource_identifiers)[0]
+                    index_page_resource_identifier_tuple = site_builder.build(resource_identifiers)
+                    index_page_locator_info = site_builder.build(
+                        resource_identifiers)[0] if index_page_resource_identifier_tuple else None
 
                     if index_page_locator_info:
                         index_page_locator_infos[site_name] = index_page_locator_info
