@@ -381,7 +381,7 @@ class ConfigOnlyDataContext(object):
                 resource_store["base_directory"] = os.path.join(self.root_directory, resource_store["base_directory"])
         return resource_store
 
-    def get_existing_local_data_docs_sites_urls(self, resource_identifier=None):
+    def get_docs_sites_urls(self, resource_identifier=None):
         """
         Get URLs for a resource for all data docs sites.
 
@@ -429,7 +429,7 @@ class ConfigOnlyDataContext(object):
                 or any other type's identifier. The argument is optional - when
                 not supplied, the method returns the URL of the index page.
         """
-        data_docs_urls = self.get_existing_local_data_docs_sites_urls(resource_identifier=resource_identifier)
+        data_docs_urls = self.get_docs_sites_urls(resource_identifier=resource_identifier)
         for url in data_docs_urls:
             logger.debug("Opening Data Docs found here: {}".format(url))
             webbrowser.open(url)
