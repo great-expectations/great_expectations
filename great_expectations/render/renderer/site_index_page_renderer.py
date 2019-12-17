@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import logging
 
 from .renderer import Renderer
 from great_expectations.render.types import (
@@ -8,6 +9,8 @@ from great_expectations.render.types import (
 )
 
 from .call_to_action_renderer import CallToActionRenderer
+
+logger = logging.getLogger(__name__)
 
 # FIXME : This class needs to be rebuilt to accept SiteSectionIdentifiers as input.
 # FIXME : This class needs tests.
