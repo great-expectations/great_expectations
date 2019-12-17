@@ -270,10 +270,10 @@ class DefaultSiteSectionBuilder(object):
             if self.run_id_filter:
                 if not self._resource_key_passes_run_id_filter(resource_key):
                     continue
-                    
+
             if not self._resource_key_passes_datasource_whitelist(resource_key, datasource_whitelist):
                 continue
-                
+
             resource = self.source_store.get(resource_key)
 
             if isinstance(resource_key, ExpectationSuiteIdentifier):
@@ -291,7 +291,7 @@ class DefaultSiteSectionBuilder(object):
                 if run_id == "profiling":
                     logger.debug("        Rendering profiling for data asset {}".format(data_asset_name))
                 else:
-                    
+
                     logger.debug("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id,
                                                                                                               expectation_suite_name,
                                                                                                               data_asset_name))
@@ -313,7 +313,7 @@ class DefaultSiteSectionBuilder(object):
         elif type(resource_key) is ValidationResultIdentifier:
             datasource = resource_key.expectation_suite_identifier.data_asset_name.datasource
         return datasource in datasource_whitelist
-    
+
     def _resource_key_passes_run_id_filter(self, resource_key):
         if type(resource_key) == ValidationResultIdentifier:
             run_id = resource_key.run_id
@@ -391,22 +391,22 @@ class DefaultSiteIndexBuilder(object):
 
         if datasource not in index_links_dict:
             index_links_dict[datasource] = OrderedDict()
-    
+
         if generator not in index_links_dict[datasource]:
             index_links_dict[datasource][generator] = OrderedDict()
-    
+
         if generator_asset not in index_links_dict[datasource][generator]:
             index_links_dict[datasource][generator][generator_asset] = {
                 'profiling_links': [],
                 'validations_links': [],
                 'expectations_links': []
             }
-    
+
         if run_id:
             base_path = "validations/" + run_id
         else:
             base_path = "expectations"
-    
+
         index_links_dict[datasource][generator][generator_asset][section_name + "_links"].append(
             {
                 "full_data_asset_name": str(data_asset_name),
@@ -419,7 +419,7 @@ class DefaultSiteIndexBuilder(object):
                 "validation_success": validation_success
             }
         )
-    
+
         return index_links_dict
 
     def get_calls_to_action(self):

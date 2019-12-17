@@ -447,7 +447,7 @@ class ConfigOnlyDataContext(object):
         """Configurable delimiter character used to parse data asset name strings into \
         ``DataAssetIdentifier`` objects."""
         return self._data_asset_name_delimiter
-    
+
     @data_asset_name_delimiter.setter
     def data_asset_name_delimiter(self, new_delimiter):
         """data_asset_name_delimiter property setter method"""
@@ -553,7 +553,7 @@ class ConfigOnlyDataContext(object):
             raise ValueError(
                 "Datasource names must be a datasource name, list of datasource names or None (to list all datasources)"
             )
-        
+
         if generator_names is not None:
             if isinstance(generator_names, string_types):
                 generator_names = [generator_names]
@@ -789,7 +789,7 @@ class ConfigOnlyDataContext(object):
                 return PandasDatasource
             except ImportError:
                 raise
- 
+
     def get_datasource(self, datasource_name="default"):
         """Get the named datasource
 
@@ -811,7 +811,7 @@ class ConfigOnlyDataContext(object):
         datasource = self._build_datasource_from_config(datasource_name, datasource_config)
         self._datasources[datasource_name] = datasource
         return datasource
-            
+
     def list_expectation_suite_keys(self):
         """Return a list of available expectation suite keys."""
         try:
@@ -845,7 +845,7 @@ class ConfigOnlyDataContext(object):
 
     def normalize_data_asset_name(self, data_asset_name):
         """Normalizes data_asset_names for a data context.
-        
+
         A data_asset_name is defined per-project and consists of three components that together define a "namespace"
         for data assets, encompassing both expectation suites and batches.
 
@@ -893,7 +893,7 @@ class ConfigOnlyDataContext(object):
                         delimiter=self.data_asset_name_delimiter
                 )
             )
-        
+
         elif len(split_name) == 1:
             # In this case, the name *must* refer to a unique data_asset_name
             provider_names = set()
@@ -921,7 +921,7 @@ class ConfigOnlyDataContext(object):
             #         "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
             #         .format(data_asset_name=data_asset_name, provider_names=provider_names)
             #     )
-                    
+
             available_names = self.get_available_data_asset_names()
             for datasource in available_names.keys():
                 for generator in available_names[datasource].keys():
@@ -930,7 +930,7 @@ class ConfigOnlyDataContext(object):
                         provider_names.add(
                             DataAssetIdentifier(datasource, generator, generator_asset)
                         )
-            
+
             if len(provider_names) == 1:
                 return provider_names.pop()
 
@@ -1003,7 +1003,7 @@ class ConfigOnlyDataContext(object):
 
             if len(provider_names) == 1:
                 return provider_names.pop()
-            
+
             elif len(provider_names) > 1:
                 raise ge_exceptions.AmbiguousDataAssetNameError(
                     "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
@@ -1222,7 +1222,7 @@ class ConfigOnlyDataContext(object):
                                 #     run_id, desired_param, result.result["details"])
                             else:
                                 logger.warning("Unrecognized key for parameter %s" % desired_param)
-                
+
                 # Next, bind parameters that do not have column parameter
                 for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type].items():
                     if type_key == "columns":
@@ -1312,14 +1312,14 @@ class ConfigOnlyDataContext(object):
     # A more descriptive name would have helped me grok this faster when I first encountered it
     def _compile(self):
         """Compiles all current expectation configurations in this context to be ready for result registration.
-        
+
         Compilation only respects parameters with a URN structure beginning with urn:great_expectations:validations
         It splits parameters by the : (colon) character; valid URNs must have one of the following structures to be
         automatically recognized.
 
         "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "columns" : column_name : "result": result_key
          [0]            [1]                 [2]              [3]                   [4]                  [5]             [6]              [7]         [8]        [9]        [10]
-        
+
         "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "columns" : column_name : "details": details_key
          [0]            [1]                 [2]              [3]                   [4]                  [5]             [6]              [7]         [8]        [9]         [10]
 
@@ -1408,12 +1408,12 @@ class ConfigOnlyDataContext(object):
                                 if param_key not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name]:
                                     self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name][param_key] = set()
                                 self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name][param_key].add(parameter)
-                            
+
                             elif param_key in ["result", "details"]:
                                 if param_key not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]:
                                     self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key] = set()
                                 self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key].add(parameter)
-                            
+
                             else:
                                 logger.warning("Invalid parameter urn (unrecognized structure): %s" % parameter)
 
