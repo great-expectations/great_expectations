@@ -99,6 +99,39 @@ class HtmlSiteStore(object):
         ].set(key.resource_identifier.to_tuple(), serialized_value,
               content_encoding='utf-8', content_type='text/html; charset=utf-8')
 
+    def get_url_for_resource(self, resource_identifier=None):
+        """
+        Return the URL of the HTML document that renders a resource
+        (e.g., an expectation suite or a validation result).
+
+        :param resource_identifier: ExpectationSuiteIdentifier, ValidationResultIdentifier
+                or any other type's identifier. The argument is optional - when
+                not supplied, the method returns the URL of the index page.
+        :return: URL (string)
+        """
+        from great_expectations.data_context.store import FixedLengthTupleFilesystemStoreBackend
+
+        if resource_identifier is None:
+            store_backend = self.store_backends["index_page"]
+            key = ()
+        elif isinstance(resource_identifier, ExpectationSuiteIdentifier):
+            store_backend = self.store_backends[ExpectationSuiteIdentifier]
+            key = resource_identifier.to_tuple()
+        elif isinstance(resource_identifier, ValidationResultIdentifier):
+            store_backend = self.store_backends[ValidationResultIdentifier]
+            key = resource_identifier.to_tuple()
+        else:
+            raise ValueError("Cannot get URL for resource {0:s}".format(str(resource_identifier)))
+
+        if isinstance(store_backend, FixedLengthTupleFilesystemStoreBackend):
+            path = store_backend.convert_key_to_filepath(key)
+            full_path = os.path.join(store_backend.full_base_directory, path)
+            url = "file://" + full_path
+
+            return url
+        else:
+            raise NotImplementedError("Store backend of type {0:s} does not have an implementation of get_url_for_resource".format(type(store_backend).__name__))
+
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
             raise TypeError("key: {!r} must a SiteSectionIdentifier, not {!r}".format(

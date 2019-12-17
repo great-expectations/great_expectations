@@ -672,6 +672,7 @@ Name the new expectation sute"""
     click.prompt(msg_prompt_what_will_profiler_do, default="Enter", hide_input=True)
 
     cli_message("\nProfiling {0:s}...".format(generator_asset))
+    run_id = datetime.datetime.now().isoformat().replace(":", "") + "Z"
 
     profiling_results = context.profile_data_asset(
         datasource_name,
@@ -680,14 +681,29 @@ Name the new expectation sute"""
         batch_kwargs=batch_kwargs,
         profiler=profiler,
         expectation_suite_name=expectation_suite_name,
-        run_id=datetime.datetime.now().isoformat().replace(":", "") + "Z",
+        run_id=run_id,
         additional_batch_kwargs=additional_batch_kwargs
     )
 
     if profiling_results['success']:
         build_docs(context)
         if open_docs:  # This is mostly to keep tests from spawning windows
-            context.open_data_docs()
+            from great_expectations.data_context.types import DataAssetIdentifier, ExpectationSuiteIdentifier, \
+                ValidationResultIdentifier
+
+            data_asset_id = DataAssetIdentifier(datasource=datasource_name, generator=generator_name,
+                                                generator_asset=generator_asset)
+
+            expectation_suite_identifier = ExpectationSuiteIdentifier(
+                data_asset_name=data_asset_id,
+                expectation_suite_name=expectation_suite_name
+            )
+
+            validation_result_identifier = ValidationResultIdentifier(
+                expectation_suite_identifier=expectation_suite_identifier,
+                run_id=run_id,
+            )
+            context.open_data_docs(resource_identifier=validation_result_identifier)
 
         return (datasource_name, generator_name, generator_asset, batch_kwargs, profiling_results)
 

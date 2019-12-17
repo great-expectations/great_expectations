@@ -60,6 +60,9 @@ class FixedLengthTupleStoreBackend(StoreBackend):
                 type(value),
             ))
 
+    def convert_key_to_filepath(self, key):
+        return self._convert_key_to_filepath(key)
+
     def _convert_key_to_filepath(self, key):
         self._validate_key(key)
         if self.filepath_template:

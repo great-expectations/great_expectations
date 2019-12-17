@@ -208,5 +208,18 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     assert ts_last_mod_0 == ts_last_mod_1
 
+    # verify that the new method of the site builder that returns the URL of the HTML file that renders
+    # a resource
+
+    html_url = site_builder.get_resource_url(resource_identifier=validation_result_id)
+    assert "file://" + os.path.join(site_builder.site_index_builder.target_store.store_backends[\
+                                        ValidationResultIdentifier].full_base_directory,
+                                        "validations/test_run_id_12346/titanic/default/Titanic/BasicDatasetProfiler.html") == html_url
+
+    html_url = site_builder.get_resource_url()
+    assert "file://" + os.path.join(site_builder.site_index_builder.target_store.store_backends[\
+                                        ValidationResultIdentifier].full_base_directory,
+                                        "index.html") == html_url
+
     print("mmm")
 
