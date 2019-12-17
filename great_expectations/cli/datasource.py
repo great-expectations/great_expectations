@@ -672,7 +672,7 @@ Name the new expectation sute"""
     click.prompt(msg_prompt_what_will_profiler_do, default="Enter", hide_input=True)
 
     cli_message("\nProfiling {0:s}...".format(generator_asset))
-    run_id = datetime.datetime.now().isoformat().replace(":", "") + "Z"
+    run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
 
     profiling_results = context.profile_data_asset(
         datasource_name,
