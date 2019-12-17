@@ -337,49 +337,18 @@ class SiteIndexPageRenderer(Renderer):
         cta_object = index_links_dict.pop("cta_object", None)
 
         for source, generators in index_links_dict.items():
-            content_blocks = []
-
-            # datasource header
-            source_header_block = RenderedHeaderContent(**{
-                "content_block_type": "header",
-                "header": RenderedStringTemplateContent(**{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$title_prefix | $source",
-                        "params": {
-                            "source": source,
-                            "title_prefix": "Datasource"
-                        },
-                        "styling": {
-                            "params": {
-                                "title_prefix": {
-                                    "tag": "strong"
-                                }
-                            }
-                        },
-                    }
-                }),
-                "styling": {
-                    "classes": ["col-12", "ge-index-page-datasource-title"],
-                    "header": {
-                        "classes": ["alert", "alert-secondary"]
-                    }
-                }
-            })
-            content_blocks.append(source_header_block)
-
-            # generator header
-            for generator, data_assets in generators.items():
-                generator_header_block = RenderedHeaderContent(**{
+            try:
+                content_blocks = []
+                # datasource header
+                source_header_block = RenderedHeaderContent(**{
                     "content_block_type": "header",
-                    "header": "",
-                    "subheader": RenderedStringTemplateContent(**{
+                    "header": RenderedStringTemplateContent(**{
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": "$title_prefix | $generator",
+                            "template": "$title_prefix | $source",
                             "params": {
-                                "generator": generator,
-                                "title_prefix": "Data Asset Generator"
+                                "source": source,
+                                "title_prefix": "Datasource"
                             },
                             "styling": {
                                 "params": {
@@ -391,75 +360,113 @@ class SiteIndexPageRenderer(Renderer):
                         }
                     }),
                     "styling": {
-                        "classes": ["col-12", "ml-4", "ge-index-page-generator-title"],
-                    }
-                })
-                content_blocks.append(generator_header_block)
-
-                generator_table_rows = []
-                generator_table_header_row = [RenderedStringTemplateContent(**{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "Data Asset",
-                        "params": {},
-                        "styling": {
-                            "classes": ["ge-index-page-generator-table-data-asset-header"],
+                        "classes": ["col-12", "ge-index-page-datasource-title"],
+                        "header": {
+                            "classes": ["alert", "alert-secondary"]
                         }
                     }
-                })]
-                link_list_keys_to_render = []
-                
-                header_dict = OrderedDict([
-                    ["profiling_links", "Profiling Results"],
-                    ["expectations_links", "Expectation Suite"],
-                    ["validations_links", "Validation Results"]
-                ])
-                
-                for link_lists_key, header in header_dict.items():
-                    for data_asset, link_lists in data_assets.items():
-                        if header in generator_table_header_row:
-                            continue
-                        if link_lists.get(link_lists_key):
-                            class_header_str = link_lists_key.replace("_", "-")
-                            class_str = "ge-index-page-generator-table-{}-header".format(class_header_str)
-                            header = RenderedStringTemplateContent(**{
-                                "content_block_type": "string_template",
-                                "string_template": {
-                                    "template": header,
-                                    "params": {},
-                                    "styling": {
-                                        "classes": [class_str],
+                })
+                content_blocks.append(source_header_block)
+
+                # generator header
+                for generator, data_assets in generators.items():
+                    generator_header_block = RenderedHeaderContent(**{
+                        "content_block_type": "header",
+                        "header": "",
+                        "subheader": RenderedStringTemplateContent(**{
+                            "content_block_type": "string_template",
+                            "string_template": {
+                                "template": "$title_prefix | $generator",
+                                "params": {
+                                    "generator": generator,
+                                    "title_prefix": "Data Asset Generator"
+                                },
+                                "styling": {
+                                    "params": {
+                                        "title_prefix": {
+                                            "tag": "strong"
+                                        }
                                     }
-                                }
-                            })
-                            generator_table_header_row.append(header)
-                            link_list_keys_to_render.append(link_lists_key)
-                
-                generator_table = RenderedTableContent(**{
-                    "content_block_type": "table",
-                    "header_row": generator_table_header_row,
-                    "table": generator_table_rows,
-                    "styling": {
-                        "classes": ["col-12", "ge-index-page-generator-table-container", "pl-5", "pr-4"],
-                        "styles": {
-                            "margin-top": "10px"
-                        },
-                        "body": {
-                            "classes": ["table", "table-sm", "ge-index-page-generator-table"]
+                                },
+                            }
+                        }),
+                        "styling": {
+                            "classes": ["col-12", "ml-4", "ge-index-page-generator-title"],
                         }
-                    }
-                })
-                # data_assets
-                for data_asset, link_lists in data_assets.items():
-                    generator_table_rows += cls._generate_data_asset_table_section(data_asset, link_lists, link_list_keys_to_render=link_list_keys_to_render)
-                    
-                content_blocks.append(generator_table)
+                    })
+                    content_blocks.append(generator_header_block)
 
-            section = RenderedSectionContent(**{
-                "section_name": source,
-                "content_blocks": content_blocks
-            })
-            sections.append(section)
+                    generator_table_rows = []
+                    generator_table_header_row = [RenderedStringTemplateContent(**{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "Data Asset",
+                            "params": {},
+                            "styling": {
+                                "classes": ["ge-index-page-generator-table-data-asset-header"],
+                            }
+                        }
+                    })]
+                    link_list_keys_to_render = []
+
+                    header_dict = OrderedDict([
+                        ["profiling_links", "Profiling Results"],
+                        ["expectations_links", "Expectation Suite"],
+                        ["validations_links", "Validation Results"]
+                    ])
+
+                    for link_lists_key, header in header_dict.items():
+                        for data_asset, link_lists in data_assets.items():
+                            if header in generator_table_header_row:
+                                continue
+                            if link_lists.get(link_lists_key):
+                                class_header_str = link_lists_key.replace("_", "-")
+                                class_str = "ge-index-page-generator-table-{}-header".format(class_header_str)
+                                header = RenderedStringTemplateContent(**{
+                                    "content_block_type": "string_template",
+                                    "string_template": {
+                                        "template": header,
+                                        "params": {},
+                                        "styling": {
+                                            "classes": [class_str],
+                                        }
+                                    }
+                                })
+                                generator_table_header_row.append(header)
+                                link_list_keys_to_render.append(link_lists_key)
+
+                    generator_table = RenderedTableContent(**{
+                        "content_block_type": "table",
+                        "header_row": generator_table_header_row,
+                        "table": generator_table_rows,
+                        "styling": {
+                            "classes": ["col-12", "ge-index-page-generator-table-container", "pl-5", "pr-4"],
+                            "styles": {
+                                "margin-top": "10px"
+                            },
+                            "body": {
+                                "classes": ["table", "table-sm", "ge-index-page-generator-table"]
+                            }
+                        }
+                    })
+                    # data_assets
+                    for data_asset, link_lists in data_assets.items():
+                        try:
+                            generator_table_rows += cls._generate_data_asset_table_section(data_asset, link_lists, link_list_keys_to_render=link_list_keys_to_render)
+                        except Exception as e:
+                            logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+                            continue
+
+                    content_blocks.append(generator_table)
+
+                section = RenderedSectionContent(**{
+                    "section_name": source,
+                    "content_blocks": content_blocks
+                })
+                sections.append(section)
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+                continue
 
         index_page_document = RenderedDocumentContent(**{
             "renderer_type": "SiteIndexPageRenderer",
