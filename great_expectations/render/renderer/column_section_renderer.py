@@ -127,6 +127,10 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                                 "content": "expect_column_to_exist",
                                 "placement": "top"
                             },
+                            "tag": "h5",
+                            "styling": {
+                                "classes": ["m-0"]
+                            }
                         }
                     }),
             "subheader": RenderedStringTemplateContent(**{
@@ -137,6 +141,10 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                               "content":
                               "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",
                             },
+                            "tag": "h6",
+                            "styling": {
+                                "classes": ["mt-1", "mb-0"]
+                            }
                         }
                     }),
             # {
@@ -183,15 +191,17 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks.append(RenderedBulletListContent(**{
             "content_block_type": "bullet_list",
-            "header": 'Expectation types <span class="mr-3 triangle"></span>',
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Expectation types <span class="mr-3 triangle"></span>',
+                    "tag": "h6"
+                }
+            }),
             "bullet_list": bullet_list,
             "styling": {
-                "classes": ["col-12"],
-                "styles": {
-                    "margin-top": "20px"
-                },
+                "classes": ["col-12", "mt-1"],
                 "header": {
-                    # "classes": ["alert", "alert-secondary"],
                     "classes": ["collapsed"],
                     "attributes": {
                         "data-toggle": "collapse",
@@ -227,12 +237,15 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         if len(evrs) > 0:
             new_content_block = self._overview_table_renderer.render(evrs)
-            new_content_block.header = "Properties"
+            new_content_block.header = RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Properties',
+                    "tag": "h6"
+                }
+            })
             new_content_block.styling = {
-                "classes": ["col-4", ],
-                "styles": {
-                    "margin-top": "20px"
-                },
+                "classes": ["col-4", "mt-1"],
                 "body": {
                     "classes": ["table", "table-sm", "table-unbordered"],
                     "styles": {
@@ -281,13 +294,16 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         return RenderedTableContent(**{
             "content_block_type": "table",
-            "header": "Quantiles",
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Quantiles',
+                    "tag": "h6"
+                }
+            }),
             "table": table_rows,
             "styling": {
-                "classes": ["col-4"],
-                "styles": {
-                    "margin-top": "20px"
-                },
+                "classes": ["col-4", "mt-1"],
                 "body": {
                     "classes": ["table", "table-sm", "table-unbordered"],
                 }
@@ -365,13 +381,16 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         if len(table_rows) > 0:
             return RenderedTableContent(**{
                 "content_block_type": "table",
-                "header": "Statistics",
+                "header": RenderedStringTemplateContent(**{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": 'Statistics',
+                        "tag": "h6"
+                    }
+                }),
                 "table": table_rows,
                 "styling": {
-                    "classes": ["col-4"],
-                    "styles": {
-                        "margin-top": "20px"
-                    },
+                    "classes": ["col-4", "mt-1"],
                     "body": {
                         "classes": ["table", "table-sm", "table-unbordered"],
                     }
@@ -398,10 +417,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         else:
             return
 
-        if len(" ".join(values)) > 100:
-            classes = ["col-12"]
-        else:
-            classes = ["col-4"]
+        classes = ["col-4", "mt-1"]
 
         if any(len(value) > 80 for value in values):
             content_block_type = "bullet_list"
@@ -418,7 +434,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                     "template": "Example Values",
                     "tooltip": {
                         "content": "expect_column_values_to_be_in_set"
-                    }
+                    },
+                    "tag": "h6"
                 }
             }),
             content_block_type: [{
@@ -440,9 +457,6 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             } for value in values],
             "styling": {
                 "classes": classes,
-                "styles": {
-                    "margin-top": "20px",
-                }
             }
         })
 
@@ -469,7 +483,8 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 "template": "Histogram",
                 "tooltip": {
                     "content": "expect_column_kl_divergence_to_be_less_than"
-                }
+                },
+                "tag": "h6"
             }
         })
 
@@ -532,15 +547,13 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                             "template": "Value Counts",
                             "tooltip": {
                                 "content": "expect_column_distinct_values_to_be_in_set"
-                            }
+                            },
+                            "tag": "h6"
                         }
                     }),
             "graph": chart,
             "styling": {
-                "classes": ["col-" + str(chart_container_col_width)],
-                "styles": {
-                    "margin-top": "20px",
-                }
+                "classes": ["col-" + str(chart_container_col_width), "mt-1"],
             }
         })
 
@@ -601,7 +614,16 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         column = cls._get_column_name(validation_results)
 
         new_block = RenderedHeaderContent(**{
-            "header": convert_to_string_and_escape(column),
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": convert_to_string_and_escape(column),
+                    "tag": "h5",
+                    "styling": {
+                        "classes": ["m-0"]
+                    }
+                }
+            }),
             "styling": {
                 "classes": ["col-12"],
                 "header": {
@@ -651,7 +673,16 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
         column = cls._get_column_name(expectations)
 
         new_block = RenderedHeaderContent(**{
-            "header": convert_to_string_and_escape(column),
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": convert_to_string_and_escape(column),
+                    "tag": "h5",
+                    "styling": {
+                        "classes": ["m-0"]
+                    }
+                }
+            }),
             "styling": {
                 "classes": ["col-12"],
                 "header": {
