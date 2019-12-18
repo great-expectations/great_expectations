@@ -32,7 +32,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         "body": {
             "classes": ["table"],
         },
-        "classes": ["m-3", "table-responsive"],
+        "classes": ["ml-3", "mr-3", "mt-0", "mb-0", "table-responsive"],
     }
 
     @classmethod
