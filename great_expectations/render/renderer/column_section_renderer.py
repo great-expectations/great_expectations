@@ -101,14 +101,6 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             except Exception as e:
                 logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
 
-        # content_blocks.append(cls._render_statistics(evrs))
-        # content_blocks.append(cls._render_common_values(evrs))
-        # content_blocks.append(cls._render_extreme_values(evrs))
-        # content_blocks.append(cls._render_frequency(evrs))
-        # content_blocks.append(cls._render_composition(evrs))
-        # content_blocks.append(cls._render_expectation_types(evrs))
-        # content_blocks.append(cls._render_unrecognized(evrs))
-
         # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))
 
