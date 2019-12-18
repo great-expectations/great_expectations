@@ -211,6 +211,20 @@ class SiteBuilder(object):
         return self.site_index_builder.build()
 
 
+    def get_resource_url(self, resource_identifier=None):
+        """
+        Return the URL of the HTML document that renders a resource
+        (e.g., an expectation suite or a validation result).
+
+        :param resource_identifier: ExpectationSuiteIdentifier, ValidationResultIdentifier
+                or any other type's identifier. The argument is optional - when
+                not supplied, the method returns the URL of the index page.
+        :return: URL (string)
+        """
+
+        return self.target_store.get_url_for_resource(resource_identifier=resource_identifier)
+
+
 class DefaultSiteSectionBuilder(object):
 
     def __init__(
