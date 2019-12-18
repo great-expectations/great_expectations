@@ -60,8 +60,10 @@ class FixedLengthTupleStoreBackend(StoreBackend):
                 type(value),
             ))
 
-    def convert_key_to_filepath(self, key):
-        return self._convert_key_to_filepath(key)
+    def get_url_for_key(self, key, protocol=None):
+        raise NotImplementedError(
+            "Store backend of type {0:s} does not have an implementation of get_url_for_key".format(
+                type(self).__name__))
 
     def _convert_key_to_filepath(self, key):
         self._validate_key(key)
@@ -210,6 +212,15 @@ class FixedLengthTupleFilesystemStoreBackend(FixedLengthTupleStoreBackend):
 
         return key_list
 
+    def get_url_for_key(self, key, protocol=None):
+        path = self._convert_key_to_filepath(key)
+        full_path = os.path.join(self.full_base_directory, path)
+        if protocol is None:
+            protocol = "file:"
+        url = protocol + "//" + full_path
+
+        return url
+
     def _has_key(self, key):
         return os.path.isfile(os.path.join(self.full_base_directory, self._convert_key_to_filepath(key)))
 
@@ -290,6 +301,16 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
                 key_list.append(key)
 
         return key_list
+
+    def get_url_for_key(self, key, protocol=None):
+        path = self._convert_key_to_filepath(key)
+        full_path = os.path.join(self.full_base_directory, path)
+        #TODO: return an HTTP URL that can be opened in the browser
+        if protocol is None:
+            protocol = "s3:"
+        url = protocol + "//" + full_path
+
+        return url
 
     def _has_key(self, key):
         all_keys = self.list_keys()

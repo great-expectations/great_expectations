@@ -123,14 +123,7 @@ class HtmlSiteStore(object):
         else:
             raise ValueError("Cannot get URL for resource {0:s}".format(str(resource_identifier)))
 
-        if isinstance(store_backend, FixedLengthTupleFilesystemStoreBackend):
-            path = store_backend.convert_key_to_filepath(key)
-            full_path = os.path.join(store_backend.full_base_directory, path)
-            url = "file://" + full_path
-
-            return url
-        else:
-            raise NotImplementedError("Store backend of type {0:s} does not have an implementation of get_url_for_resource".format(type(store_backend).__name__))
+        return store_backend.get_url_for_key(key)
 
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):

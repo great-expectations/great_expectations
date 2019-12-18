@@ -10,6 +10,11 @@ from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.data_context import DataContext
 from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
 from great_expectations.datasource.generator import InMemoryGenerator, ManualGenerator, PassthroughGenerator
+from great_expectations.data_context.types import (
+    DataAssetIdentifier,
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier
+)
 
 from great_expectations import rtd_url_ge_version
 from great_expectations.datasource.types import ReaderMethods
@@ -688,9 +693,6 @@ Name the new expectation sute"""
     if profiling_results['success']:
         build_docs(context)
         if open_docs:  # This is mostly to keep tests from spawning windows
-            from great_expectations.data_context.types import DataAssetIdentifier, ExpectationSuiteIdentifier, \
-                ValidationResultIdentifier
-
             data_asset_id = DataAssetIdentifier(datasource=datasource_name, generator=generator_name,
                                                 generator_asset=generator_asset)
 
