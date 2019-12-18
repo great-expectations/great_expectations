@@ -221,5 +221,4 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
                                         ValidationResultIdentifier].full_base_directory,
                                         "index.html") == html_url
 
-    print("mmm")
 

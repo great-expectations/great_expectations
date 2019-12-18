@@ -60,11 +60,6 @@ class FixedLengthTupleStoreBackend(StoreBackend):
                 type(value),
             ))
 
-    def get_url_for_key(self, key, protocol=None):
-        raise NotImplementedError(
-            "Store backend of type {0:s} does not have an implementation of get_url_for_key".format(
-                type(self).__name__))
-
     def _convert_key_to_filepath(self, key):
         self._validate_key(key)
         if self.filepath_template:
