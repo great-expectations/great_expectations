@@ -645,8 +645,8 @@ def create_expectation_suite(
 Great Expectations will choose a couple of columns and generate expectations about them
 to demonstrate some examples of assertions you can make about your data. 
     
-Press any key to continue...
-    """
+Press Enter to continue...
+"""
 
     msg_prompt_expectation_suite_name = """
 Name the new expectation sute"""

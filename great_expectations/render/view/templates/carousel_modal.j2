@@ -16,18 +16,19 @@ div.walkthrough-card img {
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="ge-walkthrough-modal-title">Welcome to Data Docs!</h5>
+        <h5 class="modal-title" id="ge-walkthrough-modal-title">Great Expectations Walkthrough</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
         <div class="card walkthrough-card bg-dark text-white walkthrough-1">
-        <div class="card-header">Data Docs Walkthrough</div>
+        <div class="card-header">How to work with Great Expectations</div>
+        <img src="{{ static_images_dir + "iterative-dev-loop.png" }}" class="card-img-top" alt="...">
+
             <div class="card-body">
-                  <h5 class="card-title">Welcome to Great Expectations Data Docs!</h5>
-                  <p>This quick walkthrough will show you around.</p>
-                  <p>
+{#                  <h5 class="card-title">How to work with Great Expectations</h5>#}
+                  <p>Welcome! The best way to work with Great Expectations is in this iterative dev loop.</p>
             </div>
             <div class="card-footer walkthrough-links">
               <div class="container">
@@ -51,14 +52,14 @@ div.walkthrough-card img {
 
 
                 <div class="card walkthrough-card bg-dark text-white walkthrough-2">
-                <div class="card-header">Data Docs Walkthrough</div>
+                <div class="card-header">What are Expectations?</div>
                 <img src="{{ static_images_dir + "values_not_null_html_en.jpg" }}" class="card-img-top" alt="...">
                 <!--<img src="../static/images/values_not_null_html_en.jpg" }}" class="card-img-top" alt="...">-->
                 <div class="card-body">
-                  <h5 class="card-title">What are Expectations?</h5>
+{#                  <h5 class="card-title">What are Expectations?</h5>#}
                   <p>An expectation is a falsifiable, verifiable statement about data.</p>
-                  <p>Expectations provide a language to talk about data characteristics and data quality - humans-humans, humans-machines and machines-machines.</p>
-                  <p>Expectations are both data tests and documentation.</p>
+                  <p>Expectations provide a language to talk about data characteristics and data quality - humans to humans, humans to machines and machines to machines.</p>
+                  <p>Expectations are both data tests and docs!</p>
                 </div>
                 <div class="card-footer walkthrough-links">
                   <div class="container">
@@ -82,11 +83,11 @@ div.walkthrough-card img {
 
 
                 <div class="card walkthrough-card bg-dark text-white walkthrough-3">
-                <div class="card-header">Data Docs Walkthrough</div>
+                <div class="card-header">An expectation can be presented in a machine-friendly JSON</div>
                 <img src="{{ static_images_dir + "values_not_null_json.jpg" }}" class="card-img-top" alt="...">
                 <!--<img src="../static/images/values_not_null_json.jpg" }}" class="card-img-top" alt="...">-->
                 <div class="card-body">
-                  <h5 class="card-title">An expectation can be presented in a machine-friendly JSON</h5>
+{#                  <h5 class="card-title">An expectation can be presented in a machine-friendly JSON</h5>#}
                   <p>A machine can test if a dataset conforms to the expectation.</p>
                 </div>
                 <div class="card-footer walkthrough-links">
@@ -110,12 +111,12 @@ div.walkthrough-card img {
                 </div>
 
                 <div class="card walkthrough-card bg-dark text-white walkthrough-4">
-                <div class="card-header">Data Docs Walkthrough</div>
+                <div class="card-header">Validation produces a validation result object</div>
                 <img src="{{ static_images_dir + "values_not_null_validation_result_json.jpg" }}" class="card-img-top" alt="...">
                 <!--<img src="../static/images/values_not_null_validation_result_json.jpg" }}" class="card-img-top" alt="...">-->
                 <div class="card-body">
-                  <h5 class="card-title">Validation produces a validation result object</h5>
-                  <p>Here's an example (not from your data). This object has rich context about the test failure.</p>
+{#                  <h5 class="card-title">Validation produces a validation result object</h5>#}
+                  <p>Here's an example JSON (not from your data). This object has rich context about the test failure.</p>
                 </div>
                 <div class="card-footer walkthrough-links">
                   <div class="container">
@@ -138,12 +139,12 @@ div.walkthrough-card img {
                 </div>
 
                 <div class="card walkthrough-card bg-dark text-white walkthrough-5">
-                <div class="card-header">Data Docs Walkthrough</div>
+                <div class="card-header">Validation results save you time.</div>
                 <img src="{{ static_images_dir + "validation_failed_unexpected_values.gif" }}" class="card-img-top" alt="...">
                 <!--<img src="../static/images/validation_failed_unexpected_values.gif" }}" class="card-img-top" alt="...">-->
                 <div class="card-body">
-                  <h5 class="card-title">Validation results save you time.</h5>
-                  <p>This is a single failed Expectation. Note the failure includes unexpected values from your data. This helps you debug pipeines faster.</p>
+{#                  <h5 class="card-title">Validation results save you time.</h5>#}
+                  <p>This is an example of what a single failed Expectation looks like in Data Docs. Note the failure includes unexpected values from your data. This helps you debug pipeines faster.</p>
                 </div>
                 <div class="card-footer walkthrough-links">
                   <div class="container">
@@ -166,10 +167,10 @@ div.walkthrough-card img {
                 </div>
 
                 <div class="card walkthrough-card bg-dark text-white walkthrough-6">
-                <div class="card-header">Data Docs Walkthrough</div>
+                <div class="card-header">Great Expectations provides a large library of expectations.</div>
                 <img src="{{ static_images_dir + "glossary_scroller.gif" }}" class="card-img-top" alt="...">
                 <div class="card-body">
-                  <h5 class="card-title">Great Expectations provides a large library of expectations.</h5>
+{#                  <h5 class="card-title">Great Expectations provides a large library of expectations.</h5>#}
                   <p>Prebuilt expectations allow you to express how you understand your data, and you can add custom
                   expectations if you need a new one.
                   </p>
@@ -195,11 +196,12 @@ div.walkthrough-card img {
                 </div>
 
                 <div class="card walkthrough-card bg-dark text-white walkthrough-7">
-                <div class="card-header">Data Docs Walkthrough</div>
+                <div class="card-header">Now explore and edit the sample suite!</div>
                 <div class="card-body">
-                  <h5 class="card-title">Now explore the sample suite!</h5>
+{#                  <h5 class="card-title">Now explore the sample suite!</h5>#}
                   <p>This sample suite shows you a few examples of expectations.</p>
                   <p>Note this is not a production suite and was autogenerated using only a small snippet of your data.</p>
+                  <p>When you are ready, press the <strong>How to Edit</strong> button to kick off the iterative dev loop.</p>
                 </div>
                 <div class="card-footer walkthrough-links">
                   <div class="container">
