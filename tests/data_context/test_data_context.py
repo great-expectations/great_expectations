@@ -1000,7 +1000,7 @@ def test_existing_local_data_docs_urls_returns_nothing_on_empty_project(tmp_path
     DataContext.create(empty_directory)
     context = DataContext(os.path.join(empty_directory, DataContext.GE_DIR))
 
-    obs = context.get_existing_local_data_docs_sites_urls()
+    obs = context.get_docs_sites_urls()
     assert obs == []
 
 
@@ -1029,7 +1029,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     expected_path = os.path.join(ge_dir, "uncommitted/data_docs/some/local/path/index.html")
     assert os.path.isfile(expected_path)
 
-    obs = context.get_existing_local_data_docs_sites_urls()
+    obs = context.get_docs_sites_urls()
     assert obs == ["file://{}".format(expected_path)]
 
 
@@ -1068,7 +1068,7 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
     for expected_path in [path_1, path_2]:
         assert os.path.isfile(expected_path)
 
-    obs = context.get_existing_local_data_docs_sites_urls()
+    obs = context.get_docs_sites_urls()
     assert set(obs) == set([
         "file://{}".format(path_1),
         "file://{}".format(path_2),
@@ -1116,7 +1116,7 @@ def test_existing_local_data_docs_urls_returns_only_existing_urls_from_customize
     path_2 = os.path.join(data_docs_dir, "another/path/index.html")
     assert os.path.isfile(path_2)
 
-    obs = context.get_existing_local_data_docs_sites_urls()
+    obs = context.get_docs_sites_urls()
     assert obs == [
         "file://{}".format(path_2),
     ]
