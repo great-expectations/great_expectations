@@ -26,8 +26,14 @@
     {% include 'carousel_modal.j2' %}
 
     <script>
-      if (localStorage.getItem('ge-walkthrough-modal-dismissed') !== 'true') {
+      try {
+        if (localStorage.getItem('ge-walkthrough-modal-dismissed') !== 'true') {
+          $(".ge-walkthrough-modal").modal();
+        }
+      }
+      catch(error) {
         $(".ge-walkthrough-modal").modal();
+        console.log(error);
       }
     </script>
 

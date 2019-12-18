@@ -229,20 +229,25 @@ div.walkthrough-card img {
 
 <script type="text/JavaScript">
   $(".ge-walkthrough-modal").on('hide.bs.modal', function (e) {
-    localStorage.setItem('ge-walkthrough-modal-dismissed', 'true')
-    go_to_slide(1)
+    try {
+      localStorage.setItem('ge-walkthrough-modal-dismissed', 'true');
+    }
+    catch (e) {
+      console.log(e);
+    }
+    go_to_slide(1);
   })
 </script>
 
 
 <script type="text/JavaScript">
-function go_to_slide(slide_number) {
+  function go_to_slide(slide_number) {
+    hide_cards();
+    $('.walkthrough-' + slide_number).show();
+  }
+  function hide_cards() {
+    $('.walkthrough-card').hide();
+  }
   hide_cards();
-  $('.walkthrough-' + slide_number).show();
-};
-function hide_cards(){
-  $('.walkthrough-card').hide();
-}
-hide_cards()
-go_to_slide(1)
+  go_to_slide(1);
 </script>
