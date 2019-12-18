@@ -33,9 +33,18 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
     def _render_header(cls, evrs, content_blocks):
         content_blocks.append(RenderedHeaderContent(**{
             "content_block_type": "header",
-            "header": "Overview",
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Overview',
+                    "tag": "h5",
+                    "styling": {
+                        "classes": ["m-0"]
+                    }
+                }
+            }),
             "styling": {
-                "classes": ["col-12", ],
+                "classes": ["col-12"],
                 "header": {
                     "classes": ["alert", "alert-secondary"]
                 }
@@ -60,7 +69,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                     },
                     "params": {
                         "tooltip_text": "Number of observations"
-                    }
+                    },
                 }
             }),
             "--" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr.result["observed_value"]
@@ -73,13 +82,16 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         content_blocks.append(RenderedTableContent(**{
             "content_block_type": "table",
-            "header": "Dataset info",
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Dataset info',
+                    "tag": "h6"
+                }
+            }),
             "table": table_rows,
             "styling": {
-                "classes": ["col-6"],
-                "styles": {
-                    "margin-top": "20px"
-                },
+                "classes": ["col-6", "mt-1"],
                 "body": {
                     "classes": ["table", "table-sm"]
                 }
@@ -96,13 +108,16 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         content_blocks.append(RenderedTableContent(**{
             "content_block_type": "table",
-            "header": "Variable types",
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Variable types',
+                    "tag": "h6"
+                }
+            }),
             "table": table_rows,
             "styling": {
-                "classes": ["col-6", "table-responsive", ],
-                "styles": {
-                    "margin-top": "20px"
-                },
+                "classes": ["col-6", "table-responsive", "mt-1"],
                 "body": {
                     "classes": ["table", "table-sm"]
                 }
@@ -142,13 +157,16 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         content_blocks.append(RenderedBulletListContent(**{
             "content_block_type": "bullet_list",
-            "header": 'Expectation types <span class="mr-3 triangle"></span>',
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Expectation types <span class="mr-3 triangle"></span>',
+                    "tag": "h6"
+                }
+            }),
             "bullet_list": bullet_list,
             "styling": {
-                "classes": ["col-12"],
-                "styles": {
-                    "margin-top": "20px"
-                },
+                "classes": ["col-12", "mt-1"],
                 "header": {
                     "classes": ["collapsed"],
                     "attributes": {

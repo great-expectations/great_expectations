@@ -73,28 +73,28 @@ class ValidationResultsPageRenderer(Renderer):
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
 
         overview_content_blocks = [
-            self._render_validation_header(),
-            self._render_validation_info(validation_results=validation_results),
+            self._render_validation_header(validation_results),
+            # self._render_validation_info(validation_results=validation_results),
             self._render_validation_statistics(validation_results=validation_results),
         ]
 
-        if validation_results["meta"].get("batch_id"):
-            overview_content_blocks.insert(
-                2,
-                self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_id"),
-                    header="Batch ID"
-                )
-            )
-
-        if validation_results["meta"].get("batch_kwargs"):
-            overview_content_blocks.insert(
-                3,
-                self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_kwargs"),
-                    header="Batch Kwargs"
-                )
-            )
+        # if validation_results["meta"].get("batch_id"):
+        #     overview_content_blocks.insert(
+        #         2,
+        #         self._render_nested_table_from_dict(
+        #             input_dict=validation_results["meta"].get("batch_id"),
+        #             header="Batch ID"
+        #         )
+        #     )
+        #
+        # if validation_results["meta"].get("batch_kwargs"):
+        #     overview_content_blocks.insert(
+        #         3,
+        #         self._render_nested_table_from_dict(
+        #             input_dict=validation_results["meta"].get("batch_kwargs"),
+        #             header="Batch Kwargs"
+        #         )
+        #     )
 
         if "data_asset_name" in validation_results.meta and validation_results.meta["data_asset_name"]:
             data_asset_name = short_data_asset_name
@@ -132,10 +132,48 @@ class ValidationResultsPageRenderer(Renderer):
         })
 
     @classmethod
-    def _render_validation_header(cls):
+    def _render_validation_header(cls, validation_results):
+        success = validation_results.success
+        expectation_suite_name = validation_results.meta['expectation_suite_name']
+        if success:
+            success = '<i class="fas fa-check-circle text-success" aria-hidden="true"></i> Succeeded'
+        else:
+            success = '<i class="fas fa-times text-danger" aria-hidden="true"></i> Failed'
         return RenderedHeaderContent(**{
             "content_block_type": "header",
-            "header": "Validation Overview",
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Overview',
+                    "tag": "h5",
+                    "styling": {
+                        "classes": ["m-0"]
+                    }
+                }
+            }),
+            "subheader": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "${suite_title} ${expectation_suite_name}\n${status_title} ${success}",
+                    "params": {
+                        "suite_title": "Expectation Suite:",
+                        "status_title": "Status:",
+                        "expectation_suite_name": expectation_suite_name,
+                        "success": success
+                    },
+                    "styling": {
+                        "params": {
+                            "suite_title": {
+                                "classes": ["h6"]
+                            },
+                            "status_title": {
+                                "classes": ["h6"]
+                            }
+                        },
+                        "classes": ["mb-0", "mt-1"]
+                    }
+                }
+            }),
             "styling": {
                 "classes": ["col-12"],
                 "header": {
@@ -159,27 +197,27 @@ class ValidationResultsPageRenderer(Renderer):
                     raise
         expectation_suite_name = validation_results.meta['expectation_suite_name']
         ge_version = validation_results.meta["great_expectations.__version__"]
-        success = validation_results.success
-        if success:
-            success = '<i class="fas fa-check-circle text-success" aria-hidden="true"></i> Succeeded'
-        else:
-            success = '<i class="fas fa-times text-danger" aria-hidden="true"></i> Failed'
 
         return RenderedTableContent(**{
             "content_block_type": "table",
-            "header": "Info",
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Info',
+                    "tag": "h6",
+                    "styling": {
+                        "classes": ["m-0"]
+                    }
+                }
+            }),
             "table": [
                 ["Full Data Asset Identifier", full_data_asset_identifier.to_path()],
                 ["Expectation Suite Name", expectation_suite_name],
                 ["Great Expectations Version", ge_version],
-                ["Run ID", run_id],
-                ["Validation Status", success]
+                ["Run ID", run_id]
             ],
             "styling": {
-                "classes": ["col-12", "table-responsive"],
-                "styles": {
-                    "margin-top": "20px"
-                },
+                "classes": ["col-12", "table-responsive", "mt-1"],
                 "body": {
                     "classes": ["table", "table-sm"]
                 }
@@ -282,13 +320,19 @@ class ValidationResultsPageRenderer(Renderer):
         else:
             return RenderedTableContent(**{
                 "content_block_type": "table",
-                "header": header,
+                "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": header,
+                    "tag": "h6",
+                    "styling": {
+                        "classes": ["m-0"]
+                    }
+                }
+            }),
                 "table": table_rows,
                 "styling": {
-                    "classes": ["col-12", "table-responsive"],
-                    "styles": {
-                        "margin-top": "20px"
-                    },
+                    "classes": ["col-12", "table-responsive", "mt-1"],
                     "body": {
                         "classes": ["table", "table-sm"]
                     }
@@ -315,13 +359,19 @@ class ValidationResultsPageRenderer(Renderer):
 
         return RenderedTableContent(**{
             "content_block_type": "table",
-            "header": "Statistics",
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Statistics',
+                    "tag": "h6",
+                    "styling": {
+                        "classes": ["m-0"]
+                    }
+                }
+            }),
             "table": table_rows,
             "styling": {
-                "classes": ["col-6", "table-responsive"],
-                "styles": {
-                    "margin-top": "20px"
-                },
+                "classes": ["col-6", "table-responsive", "mt-1"],
                 "body": {
                     "classes": ["table", "table-sm"]
                 }
@@ -398,14 +448,32 @@ class ExpectationSuitePageRenderer(Renderer):
         else:
             expectation_bullet_list = self._column_section_renderer.render(
                 expectations=table_level_expectations).content_blocks[1]
-            expectation_bullet_list.header = "Table-Level Expectations"
+            expectation_bullet_list.header = RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Table-Level Expectations',
+                    "tag": "h6",
+                    "styling": {
+                        "classes": ["m-0"]
+                    }
+                }
+            })
             return expectation_bullet_list
 
     @classmethod
     def _render_asset_header(cls, expectations):
         return RenderedHeaderContent(**{
             "content_block_type": "header",
-            "header": "Expectation Suite Overview",
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Overview',
+                    "tag": "h5",
+                    "styling": {
+                        "classes": ["m-0"]
+                    }
+                }
+            }),
             "styling": {
                 "classes": ["col-12"],
                 "header": {
@@ -432,7 +500,16 @@ class ExpectationSuitePageRenderer(Renderer):
 
         return RenderedTableContent(**{
             "content_block_type": "table",
-            "header": "Info",
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Info',
+                    "tag": "h6",
+                    "styling": {
+                        "classes": ["m-0"]
+                    }
+                }
+            }),
             "table": [
                 ["Full Data Asset Identifier", full_data_asset_identifier.to_path()],
                 ["Data Asset Type", data_asset_type],
@@ -440,11 +517,7 @@ class ExpectationSuitePageRenderer(Renderer):
                 ["Great Expectations Version", ge_version]
             ],
             "styling": {
-                "classes": ["col-12", "table-responsive"],
-                "styles": {
-                    "margin-top": "20px",
-                    "margin-bottom": "20px"
-                },
+                "classes": ["col-12", "table-responsive", "mt-1"],
                 "body": {
                     "classes": ["table", "table-sm"]
                 }
@@ -527,13 +600,19 @@ class ExpectationSuitePageRenderer(Renderer):
 
         return TextContent(**{
             "content_block_type": "text",
-            "header": "Notes",
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": 'Notes',
+                    "tag": "h6",
+                    "styling": {
+                        "classes": ["m-0"]
+                    }
+                }
+            }),
             "text": content,
             "styling": {
-                "classes": ["col-12", "table-responsive"],
-                "styles": {
-                    "margin-top": "20px"
-                },
+                "classes": ["col-12", "table-responsive", "mt-1"],
                 "body": {
                     "classes": ["table", "table-sm"]
                 }
