@@ -77,9 +77,9 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "_render_quantile_table",
             "_render_stats_table",
             "_render_histogram",
-            "_render_values_set",
             "_render_bar_chart_table",
-            "_render_failed"
+            "_render_failed",
+            "_render_values_set",
         ]
 
     #Note: Seems awkward to pass section_name and column_type into this renderer.
