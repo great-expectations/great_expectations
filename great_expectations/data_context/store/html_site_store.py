@@ -121,6 +121,7 @@ class HtmlSiteStore(object):
             store_backend = self.store_backends[ValidationResultIdentifier]
             key = resource_identifier.to_tuple()
         else:
+            # this method does not support getting the URL of static assets
             raise ValueError("Cannot get URL for resource {0:s}".format(str(resource_identifier)))
 
         return store_backend.get_url_for_key(key)
