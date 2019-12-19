@@ -5,7 +5,12 @@ from .renderer import Renderer
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.types import (
     RenderedSectionContent,
-    RenderedHeaderContent, RenderedStringTemplateContent, RenderedTableContent, RenderedBulletListContent)
+    RenderedHeaderContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+    RenderedBulletListContent,
+    CollapseContent
+)
 
 
 class ProfilingResultsOverviewSectionRenderer(Renderer):
@@ -44,7 +49,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 }
             }),
             "styling": {
-                "classes": ["col-12"],
+                "classes": ["col-12", "p-0"],
                 "header": {
                     "classes": ["alert", "alert-secondary"]
                 }
@@ -91,7 +96,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             }),
             "table": table_rows,
             "styling": {
-                "classes": ["col-6", "mt-1"],
+                "classes": ["col-6", "mt-1", "p-1"],
                 "body": {
                     "classes": ["table", "table-sm"]
                 }
@@ -117,7 +122,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             }),
             "table": table_rows,
             "styling": {
-                "classes": ["col-6", "table-responsive", "mt-1"],
+                "classes": ["col-6", "table-responsive", "mt-1", "p-1"],
                 "body": {
                     "classes": ["table", "table-sm"]
                 }
@@ -132,10 +137,9 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         for evr in evrs.results:
             type_counts[evr.expectation_config.expectation_type] += 1
 
-        # table_rows = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
-        bullet_list = sorted(type_counts.items(), key=lambda kv: -1 * kv[1])
+        bullet_list_items = sorted(type_counts.items(), key=lambda kv: -1 * kv[1])
 
-        bullet_list = [
+        bullet_list_items = [
             RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
@@ -152,38 +156,36 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                             }
                         }
                     }
+                },
+                "styling": {
+                    'parent': {
+                        'styles': {
+                            'list-style-type': 'none'
+                        }
+                    }
                 }
-            }) for tr in bullet_list]
+            }) for tr in bullet_list_items]
 
-        content_blocks.append(RenderedBulletListContent(**{
+        bullet_list = RenderedBulletListContent(**{
             "content_block_type": "bullet_list",
-            "header": RenderedStringTemplateContent(**{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": 'Expectation types <span class="mr-3 triangle"></span>',
-                    "tag": "h6"
-                }
-            }),
-            "bullet_list": bullet_list,
+            "bullet_list": bullet_list_items,
             "styling": {
                 "classes": ["col-12", "mt-1"],
-                "header": {
-                    "classes": ["collapsed"],
-                    "attributes": {
-                        "data-toggle": "collapse",
-                        "href": "#{{content_block_id}}-body",
-                        "aria-expanded": "true",
-                        "aria-controls": "collapseExample",
-                    },
-                    "styles": {
-                        "cursor": "pointer"
-                    }
-                },
                 "body": {
-                    "classes": ["list-group", "collapse"],
+                    "classes": ["list-group"],
                 },
             },
-        }))
+        })
+
+        bullet_list_collapse = CollapseContent(**{
+            "collapse_toggle_link_text": "Show Expectation Types...",
+            "collapse": [bullet_list],
+            "styling": {
+                "classes": ["col-12", "p-1"]
+            }
+        })
+
+        content_blocks.append(bullet_list_collapse)
 
     @classmethod
     def _render_warnings(cls, evrs, content_blocks):
