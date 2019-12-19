@@ -227,6 +227,34 @@ class TextContent(RenderedComponentContent):
         return d
 
 
+class CollapseContent(RenderedComponentContent):
+    def __init__(self, collapse, collapse_toggle_link_text=None, header=None, subheader=None, styling=None,
+                 content_block_type="collapse"):
+        super(CollapseContent, self).__init__(content_block_type=content_block_type, styling=styling)
+        self.collapse_toggle_link_text = collapse_toggle_link_text
+        self.header = header
+        self.subheader = subheader
+        self.collapse = collapse
+
+    def to_json_dict(self):
+        d = super(CollapseContent, self).to_json_dict()
+        if self.header is not None:
+            if isinstance(self.header, RenderedContent):
+                d["header"] = self.header.to_json_dict()
+            else:
+                d["header"] = self.header
+        if self.subheader is not None:
+            if isinstance(self.subheader, RenderedContent):
+                d["subheader"] = self.subheader.to_json_dict()
+            else:
+                d["subheader"] = self.subheader
+        if self.collapse_toggle_link_text is not None:
+            d["collapse_toggle_link_text"] = self.collapse_toggle_link_text
+        d["collapse"] = RenderedContent.rendered_content_list_to_json(self.collapse)
+
+        return d
+
+
 class RenderedDocumentContent(RenderedContent):
     # NOTE: JPC 20191028 - review these keys to consolidate and group
     def __init__(self, sections, data_asset_name=None, full_data_asset_identifier=None, renderer_type=None,
