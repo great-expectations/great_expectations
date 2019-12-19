@@ -91,7 +91,8 @@ class DefaultJinjaView(object):
 
         env = Environment(
             loader=ChoiceLoader(loaders),
-            autoescape=select_autoescape(['html', 'xml'])
+            autoescape=select_autoescape(['html', 'xml']),
+            extensions=["jinja2.ext.do"]
         )
         env.filters['render_string_template'] = self.render_string_template
         env.filters['render_styling_from_string_template'] = self.render_styling_from_string_template
