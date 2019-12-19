@@ -17,7 +17,8 @@ from ..types import (
     RenderedTableContent,
     TextContent,
     RenderedStringTemplateContent,
-    RenderedMarkdownContent
+    RenderedMarkdownContent,
+    CollapseContent
 )
 from collections import OrderedDict
 
@@ -74,27 +75,39 @@ class ValidationResultsPageRenderer(Renderer):
 
         overview_content_blocks = [
             self._render_validation_header(validation_results),
-            # self._render_validation_info(validation_results=validation_results),
             self._render_validation_statistics(validation_results=validation_results),
         ]
 
-        # if validation_results["meta"].get("batch_id"):
-        #     overview_content_blocks.insert(
-        #         2,
-        #         self._render_nested_table_from_dict(
-        #             input_dict=validation_results["meta"].get("batch_id"),
-        #             header="Batch ID"
-        #         )
-        #     )
-        #
-        # if validation_results["meta"].get("batch_kwargs"):
-        #     overview_content_blocks.insert(
-        #         3,
-        #         self._render_nested_table_from_dict(
-        #             input_dict=validation_results["meta"].get("batch_kwargs"),
-        #             header="Batch Kwargs"
-        #         )
-        #     )
+        collapse_content_blocks = [self._render_validation_info(validation_results=validation_results)]
+
+        if validation_results["meta"].get("batch_id"):
+            collapse_content_blocks.append(
+                self._render_nested_table_from_dict(
+                    input_dict=validation_results["meta"].get("batch_id"),
+                    header="Batch ID"
+                )
+            )
+
+        if validation_results["meta"].get("batch_kwargs"):
+            collapse_content_blocks.append(
+                self._render_nested_table_from_dict(
+                    input_dict=validation_results["meta"].get("batch_kwargs"),
+                    header="Batch Kwargs"
+                )
+            )
+
+        collapse_content_block = CollapseContent(**{
+            "collapse_toggle_link_text": "Show more info...",
+            "collapse": collapse_content_blocks,
+            "styling": {
+                "body": {
+                    "classes": ["card", "card-body"]
+                },
+                "classes": ["col-12", "p-1"]
+            }
+        })
+
+        overview_content_blocks.append(collapse_content_block)
 
         if "data_asset_name" in validation_results.meta and validation_results.meta["data_asset_name"]:
             data_asset_name = short_data_asset_name
@@ -195,7 +208,6 @@ class ValidationResultsPageRenderer(Renderer):
                     logger.warning("Rendering validation results using incomplete data_asset_identifier.")
                 else:
                     raise
-        expectation_suite_name = validation_results.meta['expectation_suite_name']
         ge_version = validation_results.meta["great_expectations.__version__"]
 
         return RenderedTableContent(**{
@@ -212,7 +224,6 @@ class ValidationResultsPageRenderer(Renderer):
             }),
             "table": [
                 ["Full Data Asset Identifier", full_data_asset_identifier.to_path()],
-                ["Expectation Suite Name", expectation_suite_name],
                 ["Great Expectations Version", ge_version],
                 ["Run ID", run_id]
             ],
