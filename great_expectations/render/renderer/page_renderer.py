@@ -188,7 +188,7 @@ class ValidationResultsPageRenderer(Renderer):
                 }
             }),
             "styling": {
-                "classes": ["col-12"],
+                "classes": ["col-12", "p-0"],
                 "header": {
                     "classes": ["alert", "alert-secondary"]
                 }
@@ -319,7 +319,7 @@ class ValidationResultsPageRenderer(Renderer):
                 "content_block_type": "table",
                 "table": table_rows,
                 "styling": {
-                    "classes": ["col-12", "table-responsive"],
+                    "classes": ["col-6", "table-responsive"],
                     "body": {
                         "classes": ["table", "table-sm", "m-0"]
                     },
@@ -343,7 +343,7 @@ class ValidationResultsPageRenderer(Renderer):
             }),
                 "table": table_rows,
                 "styling": {
-                    "classes": ["col-12", "table-responsive", "mt-1"],
+                    "classes": ["col-6", "table-responsive", "mt-1"],
                     "body": {
                         "classes": ["table", "table-sm"]
                     }
@@ -382,7 +382,7 @@ class ValidationResultsPageRenderer(Renderer):
             }),
             "table": table_rows,
             "styling": {
-                "classes": ["col-6", "table-responsive", "mt-1"],
+                "classes": ["col-6", "table-responsive", "mt-1", "p-1"],
                 "body": {
                     "classes": ["table", "table-sm"]
                 }
