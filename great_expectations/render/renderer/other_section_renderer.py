@@ -44,7 +44,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 }
             }),
             "styling": {
-                "classes": ["col-12"],
+                "classes": ["col-12", "p-0"],
                 "header": {
                     "classes": ["alert", "alert-secondary"]
                 }
@@ -91,7 +91,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             }),
             "table": table_rows,
             "styling": {
-                "classes": ["col-6", "mt-1"],
+                "classes": ["col-6", "mt-1", "p-1"],
                 "body": {
                     "classes": ["table", "table-sm"]
                 }

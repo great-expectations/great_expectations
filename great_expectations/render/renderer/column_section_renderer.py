@@ -76,10 +76,10 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "_render_overview_table",
             "_render_quantile_table",
             "_render_stats_table",
+            "_render_values_set",
             "_render_histogram",
             "_render_bar_chart_table",
             "_render_failed",
-            "_render_values_set",
         ]
 
     #Note: Seems awkward to pass section_name and column_type into this renderer.
@@ -129,7 +129,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                             },
                             "tag": "h5",
                             "styling": {
-                                "classes": ["m-0"]
+                                "classes": ["m-0", "p-0"]
                             }
                         }
                     }),
@@ -151,7 +151,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             #     "template": column_type,
             # },
             "styling": {
-                "classes": ["col-12"],
+                "classes": ["col-12", "p-0"],
                 "header": {
                     "classes": ["alert", "alert-secondary"]
                 }
@@ -245,7 +245,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 }
             })
             new_content_block.styling = {
-                "classes": ["col-4", "mt-1"],
+                "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
                 "body": {
                     "classes": ["table", "table-sm", "table-unbordered"],
                     "styles": {
@@ -303,7 +303,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             }),
             "table": table_rows,
             "styling": {
-                "classes": ["col-4", "mt-1"],
+                "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
                 "body": {
                     "classes": ["table", "table-sm", "table-unbordered"],
                 }
@@ -390,7 +390,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 }),
                 "table": table_rows,
                 "styling": {
-                    "classes": ["col-4", "mt-1"],
+                    "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
                     "body": {
                         "classes": ["table", "table-sm", "table-unbordered"],
                     }
@@ -417,7 +417,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         else:
             return
 
-        classes = ["col-4", "mt-1"]
+        classes = ["col-3", "mt-1", "pl-1", "pr-1"]
 
         if any(len(value) > 80 for value in values):
             content_block_type = "bullet_list"
@@ -625,7 +625,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
                 }
             }),
             "styling": {
-                "classes": ["col-12"],
+                "classes": ["col-12", "p-0"],
                 "header": {
                     "classes": ["alert", "alert-secondary"]
                 }
