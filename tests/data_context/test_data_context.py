@@ -519,6 +519,7 @@ data_docs/
                 9_suite_overview.png
                 favicon.ico
                 glossary_scroller.gif
+                iterative-dev-loop.png
                 logo-long-vector.svg
                 logo-long.png
                 short-logo-vector.svg
