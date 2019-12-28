@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from great_expectations import rtd_url_ge_version, DataContext
+from great_expectations import DataContext
 
 # !!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
 
@@ -10,7 +10,7 @@ GREETING = """<cyan>\
  \___|_| \___\__,_|\__| |___/_\_\ .__/\___\__|\__\__,_|\__|_\___/_||_/__/
                                 |_|                                      
              ~ Always know what to expect from your data ~             
-</cyan>""".format(rtd_url_ge_version)
+</cyan>"""
 
 LETS_BEGIN_PROMPT = """In just a couple of minutes you will see Great Expectations in action on your data.
 
@@ -41,7 +41,7 @@ COMPLETE_ONBOARDING_PROMPT = """To run locally, we need some files that are not 
 
 SLACK_SETUP_INTRO = """
 <cyan>========== Slack Notifications ==========</cyan>
-""".format(rtd_url_ge_version)
+"""
 
 SLACK_SETUP_PROMPT = "Would you like to set up Slack data quality notifications?"
 

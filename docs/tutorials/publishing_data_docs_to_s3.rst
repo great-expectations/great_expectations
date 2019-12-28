@@ -84,7 +84,7 @@ Modify the policy above and save it to a file called `ip-policy.json` in your lo
 
 .. code-block:: bash
 
-    > great_expectations build-docs
+    > great_expectations docs build
     Building...
 
 You're now ready to visit the site! Your site will be available at the following URL:

@@ -52,7 +52,7 @@ Finally, the command-line tool also allows you to provide a JSON file that conta
     {
         "upstream_row_count": 10
     }
-    >> great_expectations validate --evaluation_parameters=my_parameters_file.json dataset_file.csv expectation_suite.json
+    >> great_expectations validation csv --evaluation_parameters=my_parameters_file.json dataset_file.csv expectation_suite.json
 
 
 .. _data_context_evaluation_parameter_store:

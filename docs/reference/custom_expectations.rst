@@ -355,7 +355,7 @@ A similar approach works for the command-line tool.
 
 .. code-block:: bash
 
-    >> great_expectations validate \
+    >> great_expectations validation csv \
         my_data_file.csv \
         my_expectations.json \
         dataset_class=custom_dataset.CustomPandasDataset
