@@ -25,17 +25,19 @@ from great_expectations.cli.init_messages import (
     SLACK_SETUP_PROMPT,
     SLACK_WEBHOOK_PROMPT,
 )
-from great_expectations.core import expectationSuiteValidationResultSchema, \
-    expectationSuiteSchema, NamespaceAwareExpectationSuite, \
-    ExpectationSuiteValidationResult
+from great_expectations.core import (
+    expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
+    ExpectationSuiteValidationResult,
+    NamespaceAwareExpectationSuite,
+)
 from great_expectations.datasource.generator import ManualGenerator
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
-from .datasource import (
+from great_expectations.cli.datasource import (
     add_datasource as add_datasource_impl,
     profile_datasource,
     create_expectation_suite as create_expectation_suite_impl,
     build_docs as build_documentation_impl,
-    get_batch_kwargs
 )
 from great_expectations.cli.util import cli_message, is_sane_slack_webhook
 from great_expectations.data_context import DataContext
@@ -44,6 +46,7 @@ from great_expectations.dataset import Dataset, PandasDataset
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations import read_csv
+
 #FIXME: This prevents us from seeing a huge stack of these messages in python 2. We'll need to fix that later.
 # tests/test_cli.py::test_cli_profile_with_datasource_arg
 #   /Users/abe/Documents/superconductive/tools/great_expectations/tests/test_cli.py:294: Warning: Click detected the use of the unicode_literals __future__ import.  This is heavily discouraged because it can introduce subtle bugs in your code.  You should instead use explicit u"" literals for your unicode strings.  For more information see https://click.palletsprojects.com/python3/
@@ -79,7 +82,36 @@ def cli(verbose):
         logger.setLevel(logging.DEBUG)
 
 
-@cli.command()
+@cli.group()
+def project():
+    """project operations"""
+    pass
+
+
+@cli.group()
+def datasource():
+    """datasource operations"""
+    pass
+
+@cli.group()
+def suite():
+    """expectation suite operations"""
+    pass
+
+
+@cli.group()
+def docs():
+    """data docs operations"""
+    pass
+
+
+@cli.group()
+def validation():
+    """validation operations"""
+    pass
+
+
+@validation.command(name="csv")
 @click.argument('dataset')
 @click.argument('expectation_suite_file')
 @click.option('--evaluation_parameters', '-p', default=None,
@@ -95,7 +127,7 @@ def cli(verbose):
               help='Path to a python module containing a custom dataset class.')
 @click.option('--custom_dataset_class', '-c', default=None,
               help='Name of the custom dataset class to use during evaluation.')
-def validate(
+def validation_csv(
         dataset,
         expectation_suite_file,
         evaluation_parameters,
@@ -186,7 +218,7 @@ validate the data.
 )
 def init(target_directory, view):
     """
-    Create a new project and help with onboarding.
+    Initialize a new Great Expectations project.
 
     This guided input walks the user through setting up a new project and also
     onboards a new developer in an existing project.
@@ -340,8 +372,7 @@ def _complete_onboarding(target_dir):
         cli_message(RUN_INIT_AGAIN)
 
 
-
-@cli.command()
+@datasource.command(name="new")
 @click.option(
     '--directory',
     '-d',
@@ -353,7 +384,7 @@ def _complete_onboarding(target_dir):
     help="By default open in browser unless you specify the --no-view flag",
     default=True
 )
-def add_datasource(directory, view):
+def datasource_new(directory, view):
     """Add a new datasource to the data context."""
     try:
         context = DataContext(directory)
@@ -372,14 +403,14 @@ def add_datasource(directory, view):
     profile_datasource(context, datasource_name, open_docs=view)
 
 
-@cli.command()
+@datasource.command(name="list")
 @click.option(
     '--directory',
     '-d',
     default=None,
     help="The project's great_expectations directory."
 )
-def list_datasources(directory):
+def datasource_list(directory):
     """List known datasources."""
     try:
         context = DataContext(directory)
@@ -393,7 +424,7 @@ def list_datasources(directory):
         _offer_to_install_new_template(err, context.root_directory)
 
 
-@cli.command()
+@datasource.command(name="profile")
 @click.argument('datasource_name', default=None, required=False)
 @click.option('--data_assets', '-l', default=None,
               help='Comma-separated list of the names of data assets that should be profiled. Requires datasource_name specified.')
@@ -413,9 +444,9 @@ def list_datasources(directory):
     help="By default open in browser unless you specify the --no-view flag",
     default=True
 )
-def profile(datasource_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
+def datasource_profile(datasource_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
     """
-    Profile datasources from the specified context.
+    Profile a datasource
 
     If the optional data_assets and profile_all_data_assets arguments are not specified, the profiler will check
     if the number of data assets in the datasource exceeds the internally defined limit. If it does, it will
@@ -474,7 +505,7 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory, vi
         )
 
 
-@cli.command()
+@suite.command(name="edit")
 @click.argument("data_asset")
 @click.argument("suite")
 @click.option(
@@ -495,7 +526,7 @@ the data asset. Must be a valid JSON dictionary'
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-def edit_suite(
+def suite_edit(
     data_asset, suite, directory, jupyter, batch_kwargs
 ):
     """Edit an existing suite with a jupyter notebook."""
@@ -578,7 +609,7 @@ def _load_suite(context, data_asset_name, suite_name):
     return suite
 
 
-@cli.command()
+@docs.command(name="build")
 @click.option(
     '--directory',
     '-d',
@@ -592,7 +623,7 @@ def _load_suite(context, data_asset_name, suite_name):
     help="By default open in browser unless you specify the --no-view flag",
     default=True
 )
-def build_docs(directory, site_name, view=True):
+def docs_build(directory, site_name, view=True):
     """Build Data Docs for a project."""
     try:
         context = DataContext(directory)
@@ -616,14 +647,14 @@ def build_docs(directory, site_name, view=True):
         sys.exit(1)
 
 
-@cli.command()
+@project.command(name="check-config")
 @click.option(
     '--directory',
     '-d',
     default="./great_expectations",
     help="The project's great_expectations directory."
 )
-def check_config(directory):
+def project_check_config(directory):
     """Check a config for validity and help with migrations."""
     cli_message("Checking your config files for validity...\n")
 
@@ -638,7 +669,8 @@ def check_config(directory):
     except ge_exceptions.ZeroDotSevenConfigVersionError as err:
         _offer_to_install_new_template(err, directory)
 
-@cli.command()
+
+@suite.command(name="new")
 @click.option('--data_asset', '-da', default=None,
               help='Fully qualified data asset name (datasource/generator/generator_asset)')
 @click.option('--suite', '-es', default=None,
@@ -651,11 +683,12 @@ def check_config(directory):
 )
 @click.option('--batch_kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
-def new_suite(data_asset, suite, directory, batch_kwargs):
-    """Create a new expectation suite.
+def suite_new(data_asset, suite, directory, batch_kwargs):
+    """
+    Create a new expectation suite.
 
-Great Expectations will choose a couple of columns and generate expectations about them
-to demonstrate some examples of assertions you can make about your data.
+    Great Expectations will choose a couple of columns and generate expectations about them
+    to demonstrate some examples of assertions you can make about your data.
     """
     try:
         context = DataContext(directory)

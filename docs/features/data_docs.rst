@@ -13,6 +13,13 @@ are the three core services offered by GE.
 Data Docs is implemented in the :py:mod:`great_expectations.render` module.
 
 *******************
+Building Data Docs
+*******************
+
+Run ``great_expectations docs build`` from your project root directory. This
+will build Data Docs and open them in your default browser.
+
+*******************
 HTML documentation
 *******************
 

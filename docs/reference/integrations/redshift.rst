@@ -6,7 +6,7 @@ Redshift
 
 To add a Redshift datasource do this:
 
-1. Run ``great_expectations add-datasource``
+1. Run ``great_expectations datasource new``
 2. Choose the *SQL* option from the menu.
 3. When asked which sqlalchemy driver to use enter ``redshift``.
 4. Consult the `SQLAlchemy docs <https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls>`_

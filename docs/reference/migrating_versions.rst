@@ -17,14 +17,14 @@ little change required when upgrading great expectations, with some exceptions
 noted here.
 
 *********************************
-Using the check-config Command
+Using the project check-config Command
 *********************************
 
 To facilitate this substantial config format change, starting with version 0.8.0
-we introduced `check-config` to sanity check your config files. From your
+we introduced ``project check-config`` to sanity check your config files. From your
 project directory, run:
 
->>> great_expectations check-config
+>>> great_expectations project check-config
 
 This can be used at any time and will grow more robust and helpful as our
 internal config typing system improves.
@@ -64,7 +64,7 @@ BREAKING:
  - InMemoryBatchKwargs use the key dataset instead of df to be more explicit
 
 
-Pre-0.8.x configuration files ``great_expectations.yml`` are not compatible with 0.8.x. Run ``great_expectations check-config`` - it will offer to create a new config file. The new config file will not have any customizations you made, so you will have to copy these from the old file.
+Pre-0.8.x configuration files ``great_expectations.yml`` are not compatible with 0.8.x. Run ``great_expectations project check-config`` - it will offer to create a new config file. The new config file will not have any customizations you made, so you will have to copy these from the old file.
 
 If you run into any issues, please ask for help on `Slack <https://greatexpectations.io/slack>`__.
 
