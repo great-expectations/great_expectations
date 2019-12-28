@@ -1,28 +1,45 @@
 import importlib
+import json
 import os
+import logging
 import enum
+import sys
+
 import click
 import datetime
 
-from great_expectations.datasource import PandasDatasource, SparkDFDatasource, SqlAlchemyDatasource
-from .util import cli_message
+from great_expectations.cli.docs import _build_docs
+from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
+from great_expectations.cli.util import cli_message, _offer_to_install_new_template
+from great_expectations.datasource import (
+    PandasDatasource,
+    SparkDFDatasource,
+    SqlAlchemyDatasource,
+)
 from great_expectations.exceptions import DatasourceInitializationError
-from great_expectations.data_context import DataContext
 from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
-from great_expectations.datasource.generator import InMemoryGenerator, ManualGenerator, PassthroughGenerator
+from great_expectations.datasource.generator import (
+    InMemoryGenerator,
+    ManualGenerator,
+    PassthroughGenerator,
+)
 from great_expectations.data_context.types import (
     DataAssetIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier
 )
 
-from great_expectations import rtd_url_ge_version
-from great_expectations.datasource.types import ReaderMethods
+from great_expectations import rtd_url_ge_version, DataContext
 import great_expectations.exceptions as ge_exceptions
 
 
-import logging
 logger = logging.getLogger(__name__)
+
+# FIXME: This prevents us from seeing a huge stack of these messages in python 2. We'll need to fix that later.
+# tests/test_cli.py::test_cli_profile_with_datasource_arg
+#   /Users/abe/Documents/superconductive/tools/great_expectations/tests/test_cli.py:294: Warning: Click detected the use of the unicode_literals __future__ import.  This is heavily discouraged because it can introduce subtle bugs in your code.  You should instead use explicit u"" literals for your unicode strings.  For more information see https://click.palletsprojects.com/python3/
+#     cli, ["profile", "my_datasource", "-d", project_root_dir])
+click.disable_unicode_literals_warning = True
 
 
 class DatasourceTypes(enum.Enum):
@@ -49,6 +66,145 @@ class SupportedDatabases(enum.Enum):
     OTHER = 'other - Do you have a working SQLAlchemy connection string?'
     # TODO MSSQL
     # TODO BigQuery
+
+
+@click.group()
+def datasource():
+    """datasource operations"""
+    pass
+
+
+@datasource.command(name="new")
+@click.option(
+    '--directory',
+    '-d',
+    default=None,
+    help="The project's great_expectations directory."
+)
+@click.option(
+    "--view/--no-view",
+    help="By default open in browser unless you specify the --no-view flag",
+    default=True
+)
+def datasource_new(directory, view):
+    """Add a new datasource to the data context."""
+    try:
+        context = DataContext(directory)
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, context.root_directory)
+
+    datasource_name, data_source_type = add_datasource(context)
+
+    if not datasource_name:  # no datasource was created
+        return
+
+    # TODO do we really want to "profile" every new datasource?
+    profile_datasource(context, datasource_name, open_docs=view)
+
+
+@datasource.command(name="list")
+@click.option(
+    '--directory',
+    '-d',
+    default=None,
+    help="The project's great_expectations directory."
+)
+def datasource_list(directory):
+    """List known datasources."""
+    try:
+        context = DataContext(directory)
+        datasources = context.list_datasources()
+        # TODO Pretty up this console output
+        cli_message(str([d for d in datasources]))
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, context.root_directory)
+
+
+@datasource.command(name="profile")
+@click.argument('datasource_name', default=None, required=False)
+@click.option('--data_assets', '-l', default=None,
+              help='Comma-separated list of the names of data assets that should be profiled. Requires datasource_name specified.')
+@click.option('--profile_all_data_assets', '-A', is_flag=True, default=False,
+              help='Profile ALL data assets within the target data source. '
+                   'If True, this will override --max_data_assets.')
+@click.option(
+    "--directory",
+    "-d",
+    default=None,
+    help="The project's great_expectations directory."
+)
+@click.option('--batch_kwargs', default=None,
+              help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
+@click.option(
+    "--view/--no-view",
+    help="By default open in browser unless you specify the --no-view flag",
+    default=True
+)
+def datasource_profile(datasource_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
+    """
+    Profile a datasource
+
+    If the optional data_assets and profile_all_data_assets arguments are not specified, the profiler will check
+    if the number of data assets in the datasource exceeds the internally defined limit. If it does, it will
+    prompt the user to either specify the list of data assets to profile or to profile all.
+    If the limit is not exceeded, the profiler will profile all data assets in the datasource.
+
+    :param datasource_name: name of the datasource to profile
+    :param data_assets: if this comma-separated list of data asset names is provided, only the specified data assets will be profiled
+    :param profile_all_data_assets: if provided, all data assets will be profiled
+    :param directory:
+    :param view: Open the docs in a browser
+    :param batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
+    :return:
+    """
+
+    try:
+        context = DataContext(directory)
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, context.root_directory)
+        return
+
+    if batch_kwargs is not None:
+        batch_kwargs = json.loads(batch_kwargs)
+
+    if datasource_name is None:
+        datasources = [datasource["name"] for datasource in context.list_datasources()]
+        if not datasources:
+            cli_message(NO_DATASOURCES_FOUND)
+            sys.exit(-1)
+        elif len(datasources) > 1:
+            cli_message(
+                "<red>Error: please specify the datasource to profile. "\
+                "Available datasources: " + ", ".join(datasources) + "</red>"
+            )
+            sys.exit(-1)
+        else:
+            profile_datasource(
+                context,
+                datasources[0],
+                data_assets=data_assets,
+                profile_all_data_assets=profile_all_data_assets,
+                open_docs=view,
+                additional_batch_kwargs=batch_kwargs
+            )
+    else:
+        profile_datasource(
+            context,
+            datasource_name,
+            data_assets=data_assets,
+            profile_all_data_assets=profile_all_data_assets,
+            open_docs=view,
+            additional_batch_kwargs=batch_kwargs
+        )
 
 
 def add_datasource(context):
@@ -691,7 +847,7 @@ Name the new expectation sute"""
     )
 
     if profiling_results['success']:
-        build_docs(context)
+        _build_docs(context)
         if open_docs:  # This is mostly to keep tests from spawning windows
             data_asset_id = DataAssetIdentifier(datasource=datasource_name, generator=generator_name,
                                                 generator_asset=generator_asset)
@@ -952,34 +1108,9 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 break
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
-    build_docs(context)
+    _build_docs(context)
     if open_docs:  # This is mostly to keep tests from spawning windows
         context.open_data_docs()
-
-
-def build_docs(context, site_name=None):
-    """Build documentation in a context"""
-    logger.debug("Starting cli.datasource.build_docs")
-
-    cli_message("Building <green>Data Docs</green>...")
-
-    if site_name is not None:
-        site_names = [site_name]
-    else:
-        site_names = None
-
-    index_page_locator_infos = context.build_data_docs(site_names=site_names)
-
-    msg = "The following Data Docs sites were built:\n"
-    for site_name, index_page_locator_info in index_page_locator_infos.items():
-        if os.path.isfile(index_page_locator_info):
-            msg += "- " + site_name + ":\n"
-            msg += "   <green>file://" + index_page_locator_info + "</green>\n"
-        else:
-            msg += site_name + "\n"
-
-    msg = msg.rstrip("\n")
-    cli_message(msg)
 
 
 msg_prompt_choose_datasource = """Configure a datasource:

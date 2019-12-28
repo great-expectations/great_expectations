@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from great_expectations import DataContext
 
-# !!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
 
 GREETING = """<cyan>\
   ___              _     ___                  _        _   _             
