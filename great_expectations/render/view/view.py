@@ -15,7 +15,7 @@ from jinja2 import (
     select_autoescape,
     contextfilter
 )
-import pypandoc
+import mistune
 
 from great_expectations import __version__ as ge_version
 from great_expectations.render.types import (
@@ -203,7 +203,7 @@ class DefaultJinjaView(object):
 
     def render_markdown(self, markdown):
         try:
-            return pypandoc.convert_text(markdown, format="md", to="html")
+            return mistune.markdown(markdown)
         except OSError:
             return markdown
 

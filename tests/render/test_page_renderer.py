@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 import json
-import pypandoc
+import mistune
 
 from great_expectations.core import ExpectationSuite, ExpectationConfiguration
 from great_expectations.render.renderer import (
@@ -14,9 +14,6 @@ from great_expectations.render.types import RenderedHeaderContent, RenderedTable
 
 
 def test_ExpectationSuitePageRenderer_render_asset_notes():
-    # import pypandoc
-    # print(pypandoc.convert_text("*hi*", to='html', format="md"))
-
     result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
         data_asset_name="test", expectation_suite_name="test",
         meta={
@@ -64,7 +61,7 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
     print(RenderedContent.rendered_content_list_to_json(result.text))
 
     try:
-        pypandoc.convert_text("*test*", format='md', to="html")
+        mistune.markdown("*test*")
         assert RenderedContent.rendered_content_list_to_json(
             result.text) == [
             'This Expectation suite currently contains 0 total Expectations across 0 columns.',
@@ -87,7 +84,7 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
     print(RenderedContent.rendered_content_list_to_json(result.text))
 
     try:
-        pypandoc.convert_text("*test*", format='md', to="html")
+        mistune.markdown("*test*")
         assert RenderedContent.rendered_content_list_to_json(
             result.text) == [
             'This Expectation suite currently contains 0 total Expectations across 0 columns.',
@@ -123,7 +120,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_asset_notes(
     print(RenderedContent.rendered_content_list_to_json(result.text))
 
     try:
-        pypandoc.convert_text("*test*", format='md', to="html")
+        mistune.markdown("*test*")
         assert RenderedContent.rendered_content_list_to_json(result.text) == [
             'This Expectation suite currently contains 0 total Expectations across 0 columns.',
             {'content_block_type': 'markdown', 'styling': {'parent': {}}, 'markdown': 'hi'}
