@@ -257,6 +257,7 @@ great_expectations/
     finally:
         os.chdir(curdir)
 
+
 @pytest.mark.skip()
 def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_yml(tmp_path_factory):
     """
@@ -297,6 +298,7 @@ def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_ym
         raise
     finally:
         os.chdir(curdir)
+
 
 @pytest.mark.skip()
 def test_cli_add_datasource(empty_data_context, filesystem_csv_2, capsys):
@@ -587,6 +589,7 @@ def test_cli_init_on_existing_ge_yml_with_some_missing_uncommitted_dirs(tmp_path
     finally:
         os.chdir(curdir)
 
+
 @pytest.mark.skip()
 def test_cli_init_on_existing_ge_yml_with_missing_uncommitted_dirs_and_missing_config_variables_yml(tmp_path_factory):
     """
@@ -659,6 +662,7 @@ great_expectations/
         raise
     finally:
         os.chdir(curdir)
+
 
 @pytest.mark.skip()
 def test_cli_init_does_not_prompt_to_fix_if_all_uncommitted_dirs_exist(tmp_path_factory):
