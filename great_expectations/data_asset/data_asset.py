@@ -844,9 +844,12 @@ class DataAsset(object):
                                      result_format,
                                      runtime_evaluation_parameters,
                                      catch_exceptions):
-        """This method is factored out of the inner loop of validate to simplify certain kinds of error trapping and mocking.
+        """This method is factored out of the inner loop of validate
+        to simplify certain kinds of error trapping and mocking.
 
-        Note that we have to return BOTH the expectation and result, since the expectation is often modified as a side effect of other operations, and this config is used later in the validate method.
+        Note that we have to return BOTH the expectation and result,
+        since the expectation is often modified as a side effect of other operations,
+        and this config is used later in the validate method.
         """
         # copy the config so we can modify it below if needed
         expectation = copy.deepcopy(expectation)
