@@ -8,7 +8,6 @@ from great_expectations.cli.docs import docs
 from great_expectations.cli.init import init
 from great_expectations.cli.project import project
 from great_expectations.cli.suite import suite
-from great_expectations.cli.validation import validation
 
 from great_expectations import __version__ as ge_version
 
@@ -23,7 +22,23 @@ from great_expectations import __version__ as ge_version
     help="Set great_expectations to use verbose output.",
 )
 def cli(verbose):
-    """great_expectations command-line interface"""
+    """
+Welcome to the great_expectations CLI!
+
+Most commands follow this format: great_expectations <NOUN> <VERB>
+
+The nouns are: datasource, docs, project, suite
+
+Most nouns accept the following verbs: new, list, edit
+
+In addition, the CLI supports the following special commands:
+
+- great_expectations init : same as `project new`
+
+- great_expectations datasource profile : profile a  datasource
+
+- great_expectations docs build : compile documentation from expectations
+"""
     if verbose:
         # Note we are explicitly not using a logger in all CLI output to have
         # more control over console UI.
@@ -36,7 +51,6 @@ cli.add_command(docs)
 cli.add_command(init)
 cli.add_command(project)
 cli.add_command(suite)
-cli.add_command(validation)
 
 
 def main():
