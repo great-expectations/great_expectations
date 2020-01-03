@@ -42,7 +42,21 @@ def test_cli_command_entrance():
     assert result.exit_code == 0
     assert result.output == """Usage: cli [OPTIONS] COMMAND [ARGS]...
 
-  great_expectations command-line interface
+  Welcome to the great_expectations CLI!
+
+  Most commands follow this format: great_expectations <NOUN> <VERB>
+
+  The nouns are: datasource, docs, project, suite
+
+  Most nouns accept the following verbs: new, list, edit
+
+  In addition, the CLI supports the following special commands:
+
+  - great_expectations init : same as `project new`
+
+  - great_expectations datasource profile : profile a  datasource
+
+  - great_expectations docs build : compile documentation from expectations
 
 Options:
   --version      Show the version and exit.
@@ -55,7 +69,6 @@ Commands:
   init        Initialize a new Great Expectations project.
   project     project operations
   suite       expectation suite operations
-  validation  validation operations
 """
 
 
@@ -71,119 +84,11 @@ Error: No such command "blarg".
 """
 
 
-def test_cli_validate_help():
-    runner = CliRunner()
-
-    result = runner.invoke(cli, ["validation", "csv", "--help"])
-
-    assert result.exit_code == 0
-    expected_help_message = """Usage: cli validation csv [OPTIONS] DATASET EXPECTATION_SUITE_FILE
-
-  Validate a CSV file against an expectation suite.
-
-  DATASET: Path to a file containing a CSV file to validate using the provided
-  expectation_suite_file.
-
-  EXPECTATION_SUITE_FILE: Path to a file containing a valid great_expectations
-  expectations suite to use to validate the data.
-
-Options:
-  -p, --evaluation_parameters TEXT
-                                  Path to a file containing JSON object used to
-                                  evaluate parameters in expectations config.
-  -o, --result_format TEXT        Result format to use when building evaluation
-                                  responses.
-  -e, --catch_exceptions BOOLEAN  Specify whether to catch exceptions raised
-                                  during evaluation of expectations (defaults to
-                                  True).
-  -f, --only_return_failures BOOLEAN
-                                  Specify whether to only return expectations
-                                  that are not met during evaluation (defaults
-                                  to False).
-  -m, --custom_dataset_module TEXT
-                                  Path to a python module containing a custom
-                                  dataset class.
-  -c, --custom_dataset_class TEXT
-                                  Name of the custom dataset class to use during
-                                  evaluation.
-  --help                          Show this message and exit.
-""".replace(" ", "").replace("\t", "").replace("\n", "")
-    output = str(result.output).replace(
-        " ", "").replace("\t", "").replace("\n", "")
-    assert output == expected_help_message
-
-
-def test_cli_validate_missing_positional_arguments():
-    runner = CliRunner()
-    result = runner.invoke(cli, ["validation", "csv"])
-    assert "Error: Missing argument \"DATASET\"." in str(result.output)
-
-
 def test_cli_version():
     runner = CliRunner()
 
     result = runner.invoke(cli, ["--version"])
     assert ge_version in str(result.output)
-
-
-def test_validate_basic_operation():
-    with mock.patch("datetime.datetime") as mock_datetime:
-        mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
-        runner = CliRunner()
-        with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
-            result = runner.invoke(cli, ["validation", "csv", "./tests/test_sets/Titanic.csv",
-                                         "./tests/test_sets/titanic_expectations.json"])
-
-            assert result.exit_code == 1
-            json_result = expectationSuiteValidationResultSchema.load(json.loads(str(result.output))).data
-
-    del json_result["meta"]["great_expectations.__version__"]
-    with open('./tests/test_sets/expected_cli_results_default.json', 'r') as f:
-        expected_cli_results = expectationSuiteValidationResultSchema.load(json.load(f)).data
-
-    assertDeepAlmostEqual(json_result, expected_cli_results)
-
-
-def test_validate_custom_dataset():
-    with mock.patch("datetime.datetime") as mock_datetime:
-        mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
-        runner = CliRunner()
-        with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
-            result = runner.invoke(cli, ["validation",
-                                         "csv",
-                                         "./tests/test_sets/Titanic.csv",
-                                         "./tests/test_sets/titanic_custom_expectations.json",
-                                         "-f", "True",
-                                         "-m", "./tests/test_fixtures/custom_pandas_dataset.py",
-                                         "-c", "CustomPandasDataset"])
-
-            json_result = json.loads(result.output)
-
-    del json_result["meta"]["great_expectations.__version__"]
-    del json_result["results"][0]["result"]['partial_unexpected_counts']
-    with open('./tests/test_sets/expected_cli_results_custom.json', 'r') as f:
-        expected_cli_results = json.load(f)
-
-    assert expectationSuiteValidationResultSchema.load(json_result).data == \
-        expectationSuiteValidationResultSchema.load(expected_cli_results).data
-
-
-def test_cli_evaluation_parameters():
-    with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
-        runner = CliRunner()
-        result = runner.invoke(cli, ["validation",
-                                     "csv",
-                                     "./tests/test_sets/Titanic.csv",
-                                     "./tests/test_sets/titanic_parameterized_expectations.json",
-                                     "--evaluation_parameters",
-                                     "./tests/test_sets/titanic_evaluation_parameters.json",
-                                     "-f", "True"])
-        json_result = json.loads(result.output)
-
-    with open('./tests/test_sets/titanic_evaluation_parameters.json', 'r') as f:
-        expected_evaluation_parameters = json.load(f)
-
-    assert json_result['evaluation_parameters'] == expected_evaluation_parameters
 
 
 @pytest.mark.skip()
