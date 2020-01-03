@@ -7,7 +7,7 @@ Once your changes and tests are ready to submit for review:
 
 1. Test your changes
 
-    Run the test suite to make sure that nothing is broken. See the the section on testing below for help running tests. (Hint: `pytest` from the great_expectations root.)
+    Run the test suite to make sure that nothing is broken. See the the section on testing below for help running tests. (Hint: `pytest` from the great_expectations root. Also: `pytest --no-spark --no-sqlalchemy`, if you don't want to configure these backends for local testing.)
     To test for both Python 2 and 3, use `tox` .
 
 2. Update the documentation
