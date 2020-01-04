@@ -141,7 +141,8 @@ context.open_data_docs()"""
 
             for exp in expectations:
                 kwargs_string = self._build_kwargs_string(exp)
-                self.add_code_cell(f"batch.{exp['expectation_type']}({kwargs_string})")
+                meta_args = f", meta={exp.meta}" if exp.meta else ""
+                self.add_code_cell(f"batch.{exp['expectation_type']}({kwargs_string}{meta_args})")
 
     @classmethod
     def _write_notebook_to_disk(cls, notebook, notebook_file_path):

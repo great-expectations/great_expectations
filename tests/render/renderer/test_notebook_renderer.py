@@ -16,6 +16,10 @@ def critical_suite():
             {
                 "expectation_type": "expect_column_values_to_not_be_null",
                 "kwargs": {"column": "npi"},
+                "meta": {
+                    "question": True,
+                    "Notes": "There are empty strings that should probably be nulls"
+                }
             },
             {
                 "expectation_type": "expect_column_values_to_not_be_null",
@@ -292,7 +296,7 @@ def test_simple_suite(critical_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_not_be_null('npi')",
+                "source": "batch.expect_column_values_to_not_be_null('npi', meta={'question': True, 'Notes': 'There are empty strings that should probably be nulls'})",
                 "outputs": [],
             },
             {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
