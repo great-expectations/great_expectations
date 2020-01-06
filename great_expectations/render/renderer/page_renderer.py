@@ -3,8 +3,6 @@ import logging
 from marshmallow import ValidationError
 from six import string_types
 
-import pypandoc
-
 from great_expectations.core import DataAssetIdentifier, dataAssetIdentifierSchema
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import num_to_str
