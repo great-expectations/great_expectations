@@ -198,14 +198,14 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     generators = {
         "default": {
             "class_name": "SubdirReaderGenerator",
+            "base_directory": str(filesystem_csv)
         },
     }
 
     empty_data_context.add_datasource("my_datasource",
-                                    module_name="great_expectations.datasource",
-                                    class_name="PandasDatasource",
-                                    base_directory=str(filesystem_csv),
-                                    generators=generators)
+                                      module_name="great_expectations.datasource",
+                                      class_name="PandasDatasource",
+                                      generators=generators)
     data_context = empty_data_context
 
     # We can now reference existing or available data asset namespaces using
@@ -251,9 +251,9 @@ def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_cs
     with open(os.path.join(second_datasource_basedir, "f4.tsv"), "w") as outfile:
         outfile.write("\n\n\n")
     data_context.add_datasource("my_second_datasource",
-                                    module_name="great_expectations.datasource",
-                                    class_name="PandasDatasource",
-                                    base_directory=second_datasource_basedir)
+                                module_name="great_expectations.datasource",
+                                class_name="PandasDatasource",
+                                base_directory=second_datasource_basedir)
 
     # We can still reference *unambiguous* data_asset_names:
     assert data_context.normalize_data_asset_name("f1") == \
