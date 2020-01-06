@@ -13,96 +13,59 @@ from great_expectations.render.types import RenderedComponentContent, RenderedSt
 
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(evr_failed_with_exception):
     result = ValidationResultsTableContentBlockRenderer.render([evr_failed_with_exception]).to_json_dict()
-    assert result == {
-      "content_block_type": "table",
-      "table": [
-        [
-          {
-            "content_block_type": "string_template",
-            "string_template": {
-              "template": "$icon",
-              "params": {
-                "icon": ""
-              },
-              "styling": {
-                "params": {
-                  "icon": {
-                    "classes": [
-                      "fas",
-                      "fa-exclamation-triangle",
-                      "text-warning"
-                    ],
-                    "tag": "i"
-                  }
-                }
-              }
-            }
-          },
-          [
-            {
-              "content_block_type": "string_template",
-              "string_template": {
-                "template": "$column Column can match any distribution.",
-                "params": {
-                  "column": "live",
-                  "partition_object": None,
-                  "threshold": None,
-                  "result_format": "SUMMARY"
-                }
-              }
-            },
-            {
-              "content_block_type": "string_template",
-              "string_template": {
-                "template": "\n\n$expectation_type raised an exception:\n$exception_message",
-                "params": {
-                  "expectation_type": "expect_column_kl_divergence_to_be_less_than",
-                  "exception_message": "Invalid partition object."
-                },
-                "tag": "strong",
-                "styling": {
-                  "classes": [
-                    "text-danger"
-                  ],
-                  "params": {
-                    "exception_message": {
-                      "tag": "code"
-                    },
-                    "expectation_type": {
-                      "classes": [
-                        "badge",
-                        "badge-danger",
-                        "mb-2"
-                      ]
-                    }
-                  }
-                }
-              }
-            },
-            None
-          ],
-          "--"
-        ]
-      ],
-      "styling": {
-        "body": {
-          "classes": [
-            "table"
-          ]
-        },
-        "classes": [
-          "m-3",
-          "table-responsive"
-        ]
-      },
-      "header_row": [
-        "Status",
-        "Expectation",
-        "Observed Value"
-      ]
-    }
-    
-    
+    print(result)
+    expected_result = {
+        'content_block_type': 'table',
+        'styling': {'body': {'classes': ['table']},
+                    'classes': ['ml-2', 'mr-2', 'mt-0', 'mb-0',
+                                'table-responsive']}, 'table': [[{
+            'content_block_type': 'string_template',
+            'string_template': {
+                'template': '$icon',
+                'params': {
+                    'icon': ''},
+                'styling': {
+                    'params': {
+                        'icon': {
+                            'classes': [
+                                'fas',
+                                'fa-exclamation-triangle',
+                                'text-warning'],
+                            'tag': 'i'}}}}},
+            [{
+                'content_block_type': 'string_template',
+                'string_template': {
+                    'template': '$column Column can match any distribution.',
+                    'params': {
+                        "column": "live",
+                        "partition_object": None,
+                        "threshold": None,
+                        "result_format": "SUMMARY"}}},
+                {
+                    'content_block_type': 'string_template',
+                    'string_template': {
+                        'template': '\n\n$expectation_type raised an exception:\n$exception_message',
+                        'params': {
+                            'expectation_type': 'expect_column_kl_divergence_to_be_less_than',
+                            'exception_message': 'Invalid partition object.'},
+                        'tag': 'strong',
+                        'styling': {
+                            'classes': [
+                                'text-danger'],
+                            'params': {
+                                'exception_message': {
+                                    'tag': 'code'},
+                                'expectation_type': {
+                                    'classes': [
+                                        'badge',
+                                        'badge-danger',
+                                        'mb-2']}}}}},
+                None],
+            '--']],
+        'header_row': ['Status', 'Expectation', 'Observed Value']}
+    assert result == expected_result
+
+
 def test_ValidationResultsTableContentBlockRenderer_render(titanic_profiled_name_column_evrs):
     validation_results_table = ValidationResultsTableContentBlockRenderer.render(titanic_profiled_name_column_evrs)
 
@@ -111,19 +74,12 @@ def test_ValidationResultsTableContentBlockRenderer_render(titanic_profiled_name
     assert len(validation_results_table.table) == 6
     assert validation_results_table.header_row == ["Status", "Expectation", "Observed Value"]
     assert validation_results_table.styling == {
-        "body": {
-          "classes": [
-            "table"
-          ]
-        },
-        "classes": [
-          "m-3",
-          "table-responsive"
-        ]
+        'body': {'classes': ['table']},
+        'classes': ['ml-2', 'mr-2', 'mt-0', 'mb-0', 'table-responsive']
     }
     assert json.dumps(validation_results_table.to_json_dict()).count("$icon") == 6
-    
-    
+
+
 def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_success):
     content_block_fn = ValidationResultsTableContentBlockRenderer._get_content_block_fn("expect_table_row_count_to_be_between")
     content_block_fn_output = content_block_fn(evr_success)
@@ -174,7 +130,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
       ]
     ]
     assert content_block_fn_output == content_block_fn_expected_output
-    
+
 
 def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_success):
     evr_no_result_key = ExpectationValidationResult(
@@ -193,7 +149,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
         }
       )
     )
-    
+
     evr_expect_column_values_to_not_be_null = ExpectationValidationResult(
       success=True,
       result={
@@ -239,7 +195,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
             }
         )
     )
-    
+
     # test _get_observed_value when evr.result["observed_value"] exists
     output_1 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_success)
     assert output_1 == "1,313"
@@ -253,7 +209,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     output_4 = ValidationResultsTableContentBlockRenderer._get_observed_value(evr_expect_column_values_to_be_null)
     assert output_4 == "100% null"
 
-    
+
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr_success, evr_failed):
     evr_no_result = ExpectationValidationResult(
       success=True,
@@ -318,11 +274,11 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
             }
     )
     )
-    
+
     # test for succeeded evr
     output_1 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_success)
     assert output_1 is None
-    
+
     # test for failed evr
     output_2 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed)
     assert output_2 == RenderedStringTemplateContent(**{
@@ -342,12 +298,12 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
         }
       }
     })
-    
+
     # test for evr with no "result" key
     output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_no_result)
     print(json.dumps(output_3, indent=2))
     assert output_3 is None
-    
+
     # test for evr with no unexpected count
     output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed_no_unexpected_count)
     print(output_4)
@@ -633,19 +589,19 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             }
 )
 )
-    
+
     # test for succeeded evr
     output_1 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_success)
     assert output_1 is None
-    
+
     # test for failed evr with no "result" key
     output_2 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_no_result)
     assert output_2 is None
-    
+
     # test for failed evr with no unexpected list or unexpected counts
     output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_no_unexpected_list_or_counts)
     assert output_3 is None
-    
+
     # test for failed evr with partial unexpected list
     output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_partial_unexpected_list)
     assert output_4.to_json_dict() == {
@@ -725,7 +681,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
         }
       }
     }
-    
+
     # test for failed evr with partial unexpected counts
     output_5 = ValidationResultsTableContentBlockRenderer._get_unexpected_table(evr_failed_partial_unexpected_counts)
     assert output_5.to_json_dict() == {
@@ -883,7 +839,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(evr_failed_w
         }
       }
     }
-    
+
     # test for failed evr
     output_3 = ValidationResultsTableContentBlockRenderer._get_status_icon(evr_failed)
     assert output_3.to_json_dict() == {
