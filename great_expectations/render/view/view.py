@@ -128,7 +128,10 @@ class DefaultJinjaView(object):
             return content_block
         content_block_type = content_block.get("content_block_type")
         template = self._get_template(template="{content_block_type}.j2".format(content_block_type=content_block_type))
-        return template.render(context, content_block=content_block, index=index)
+        if content_block_id:
+            return template.render(context, content_block=content_block, index=index, content_block_id=content_block_id)
+        else:
+            return template.render(context, content_block=content_block, index=index)
 
     def render_styling(self, styling):
 
