@@ -10,10 +10,11 @@
   {% set content_block_body_styling_dict = content_block["styling"]["body"] %}
   {% if content_block_body_styling_dict.get("classes") %}
     {% do content_block_body_styling_dict["classes"].append("collapse") %}
+    {% do content_block_body_styling_dict["classes"].append("m-2") %}
   {% endif %}
     {% set content_block_body_styling = content_block_body_styling_dict | render_styling -%}
 {% else -%}
-  {% set content_block_body_styling_dict = {"classes": ["collapse"]} %}
+  {% set content_block_body_styling_dict = {"classes": ["collapse", "m-2"]} %}
   {% set content_block_body_styling = content_block_body_styling_dict | render_styling -%}
 {% endif -%}
 
