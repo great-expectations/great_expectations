@@ -171,7 +171,7 @@ class SparkDFDatasource(Datasource):
             path = batch_kwargs.get("s3", path)
             reader_method = batch_kwargs.get("reader_method")
             if reader_method is None:
-                reader_method = self._guess_reader_method_from_path(path)
+                reader_method = self.guess_reader_method_from_path(path)
                 if reader_method is None:
                     raise BatchKwargsError("Unable to determine reader for path: %s" % path, batch_kwargs)
             else:

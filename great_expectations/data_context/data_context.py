@@ -40,6 +40,7 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
+from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
 
 from .types import (
     DataAssetIdentifier,
@@ -380,32 +381,55 @@ class ConfigOnlyDataContext(object):
                 resource_store["base_directory"] = os.path.join(self.root_directory, resource_store["base_directory"])
         return resource_store
 
-    def get_existing_local_data_docs_sites_urls(self):
-        """Get file urls for all built local data docs."""
-        from great_expectations.data_context.store import FixedLengthTupleFilesystemStoreBackend
-        ge_dir = os.path.abspath(self.root_directory)
-        sites = self._project_config_with_variables_substituted["data_docs_sites"]
+    def get_docs_sites_urls(self, resource_identifier=None):
+        """
+        Get URLs for a resource for all data docs sites.
 
-        existing_sites = []
+        :param resource_identifier: optional. It can be an identifier of ExpectationSuite's,
+                ValidationResults and other resources that have typed identifiers.
+                If not provided, the method will return the URLs of the index page.
+        :return: a list of URLs. Each item is the URL for the resource for a data docs site
+        """
 
-        for site_name, site in sites.items():
-            store_backend = site.get("store_backend")
-            store_class = load_class(
-                store_backend.get("class_name"),
-                "great_expectations.data_context.store"
-            )
-            # Only do this for local files
-            if issubclass(store_class, FixedLengthTupleFilesystemStoreBackend):
-                base_dir = store_backend.get("base_directory")
-                data_docs_index = os.path.join(ge_dir, base_dir, "index.html")
+        site_urls = []
 
-                if os.path.isfile(data_docs_index):
-                    existing_sites.append("file://" + data_docs_index)
-        return existing_sites
+        site_names=None
+        sites = self._project_config_with_variables_substituted.get('data_docs_sites', [])
+        if sites:
+            logger.debug("Found data_docs_sites. Building sites...")
 
-    def open_data_docs(self):
-        """A stdlib cross-platform way to open a file in a browser."""
-        data_docs_urls = self.get_existing_local_data_docs_sites_urls()
+            for site_name, site_config in sites.items():
+                logger.debug("Building Data Docs Site %s" % site_name,)
+
+                if (site_names and site_name in site_names) or not site_names:
+                    complete_site_config = site_config
+                    site_builder = instantiate_class_from_config(
+                        config=complete_site_config,
+                        runtime_environment={
+                            "data_context": self,
+                            "root_directory": self.root_directory
+                        },
+                        config_defaults={
+                            "module_name": "great_expectations.render.renderer.site_builder"
+                        }
+                    )
+
+                    url = site_builder.get_resource_url(resource_identifier=resource_identifier)
+
+                    site_urls.append(url)
+
+        return site_urls
+
+    def open_data_docs(self, resource_identifier=None):
+
+        """
+        A stdlib cross-platform way to open a file in a browser.
+
+        :param resource_identifier: ExpectationSuiteIdentifier, ValidationResultIdentifier
+                or any other type's identifier. The argument is optional - when
+                not supplied, the method returns the URL of the index page.
+        """
+        data_docs_urls = self.get_docs_sites_urls(resource_identifier=resource_identifier)
         for url in data_docs_urls:
             logger.debug("Opening Data Docs found here: {}".format(url))
             webbrowser.open(url)
@@ -925,7 +949,7 @@ class ConfigOnlyDataContext(object):
             available_names = self.get_available_data_asset_names()
             for datasource in available_names.keys():
                 for generator in available_names[datasource].keys():
-                    names_set = available_names[datasource][generator]
+                    names_set = set([n[0] for n in available_names[datasource][generator]["names"]])
                     if generator_asset in names_set:
                         provider_names.add(
                             DataAssetIdentifier(datasource, generator, generator_asset)
@@ -997,7 +1021,8 @@ class ConfigOnlyDataContext(object):
             available_names = self.get_available_data_asset_names()
             for datasource_name in available_names.keys():
                 for generator in available_names[datasource_name].keys():
-                    generator_assets = available_names[datasource_name][generator]
+                    generator_assets = set([n[0] for n in available_names[datasource_name][generator]["names"]])
+
                     if split_name[0] == datasource_name and split_name[1] in generator_assets:
                         provider_names.add(DataAssetIdentifier(datasource_name, generator, split_name[1]))
 
@@ -1561,6 +1586,7 @@ class ConfigOnlyDataContext(object):
                            profile_all_data_assets=True,
                            profiler=BasicDatasetProfiler,
                            dry_run=False,
+                           run_id="profiling",
                            additional_batch_kwargs=None):
         """Profile the named datasource using the named profiler.
 
@@ -1606,7 +1632,7 @@ class ConfigOnlyDataContext(object):
         if generator_name not in data_asset_names[datasource_name]:
             raise ge_exceptions.ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
 
-        data_asset_name_list = list(data_asset_names[datasource_name][generator_name])
+        data_asset_name_list = [name[0] for name in data_asset_names[datasource_name][generator_name]["names"]]
         total_data_assets = len(data_asset_name_list)
 
         if data_assets and len(data_assets) > 0:
@@ -1646,7 +1672,7 @@ class ConfigOnlyDataContext(object):
         if not dry_run:
             logger.info("Profiling all %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
         else:
-            logger.debug("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
+            logger.info("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
 
         profiling_results['success'] = True
 
@@ -1654,8 +1680,6 @@ class ConfigOnlyDataContext(object):
             profiling_results['results'] = []
             total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
             total_start_time = datetime.datetime.now()
-            # run_id = total_start_time.isoformat().replace(":", "") + "Z"
-            run_id = "profiling"
 
             for name in data_asset_name_list:
                 logger.info("\tProfiling '%s'..." % name)

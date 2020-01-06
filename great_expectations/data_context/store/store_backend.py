@@ -31,6 +31,11 @@ class StoreBackend(object):
         self._validate_key(key)
         return self._has_key(key)
 
+    def get_url_for_key(self, key, protocol=None):
+        raise NotImplementedError(
+            "Store backend of type {0:s} does not have an implementation of get_url_for_key".format(
+                type(self).__name__))
+
     def _validate_key(self, key):
         if isinstance(key, tuple):
             for key_element in key:

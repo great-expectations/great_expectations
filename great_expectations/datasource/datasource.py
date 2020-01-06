@@ -412,7 +412,7 @@ class Datasource(object):
         return self._data_context
 
     @staticmethod
-    def _guess_reader_method_from_path(path):
+    def guess_reader_method_from_path(path):
         """Static helper for parsing reader types from file path extensions.
 
         Args:
