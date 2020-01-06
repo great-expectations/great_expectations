@@ -4,6 +4,7 @@ import json
 from string import Template as pTemplate
 import datetime
 from collections import OrderedDict
+from uuid import uuid4
 import os
 
 
@@ -99,6 +100,7 @@ class DefaultJinjaView(object):
         env.filters['render_styling'] = self.render_styling
         env.filters['render_content_block'] = self.render_content_block
         env.filters['render_markdown'] = self.render_markdown
+        env.filters['generate_html_element_uuid'] = self.generate_html_element_uuid
         env.globals['ge_version'] = ge_version
 
         template = env.get_template(template)
@@ -107,7 +109,7 @@ class DefaultJinjaView(object):
         return template
 
     @contextfilter
-    def render_content_block(self, context, content_block, index=None):
+    def render_content_block(self, context, content_block, index=None, content_block_id=None):
         if type(content_block) is str:
             return "<span>{content_block}</span>".format(content_block=content_block)
         elif content_block is None:
@@ -126,7 +128,10 @@ class DefaultJinjaView(object):
             return content_block
         content_block_type = content_block.get("content_block_type")
         template = self._get_template(template="{content_block_type}.j2".format(content_block_type=content_block_type))
-        return template.render(context, content_block=content_block, index=index)
+        if content_block_id:
+            return template.render(context, content_block=content_block, index=index, content_block_id=content_block_id)
+        else:
+            return template.render(context, content_block=content_block, index=index)
 
     def render_styling(self, styling):
 
@@ -200,6 +205,12 @@ class DefaultJinjaView(object):
 
         else:
             return ""
+
+    def generate_html_element_uuid(self, prefix=None):
+        if prefix:
+            return prefix + str(uuid4())
+        else:
+            return str(uuid4())
 
     def render_markdown(self, markdown):
         try:
