@@ -162,7 +162,7 @@ class PandasDatasource(Datasource):
         if "path" in batch_kwargs:
             path = batch_kwargs['path']
             reader_method = batch_kwargs.get("reader_method")
-            reader_fn, reader_fn_options = self._get_reader_fn(reader_method, path, reader_options)
+            reader_fn, reader_fn_options = self.get_reader_fn(reader_method, path, reader_options)
             try:
                 df = getattr(pd, reader_fn)(path, **reader_fn_options)
             except AttributeError:
@@ -179,7 +179,7 @@ class PandasDatasource(Datasource):
             url = S3Url(raw_url)
             logger.debug("Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key))
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
-            reader_fn, reader_fn_options = self._get_reader_fn(reader_method, url.key, reader_options)
+            reader_fn, reader_fn_options = self.get_reader_fn(reader_method, url.key, reader_options)
 
             try:
                 df = getattr(pd, reader_fn)(
@@ -211,9 +211,9 @@ class PandasDatasource(Datasource):
                                batch_kwargs=batch_kwargs,
                                batch_id=batch_id)
 
-    def _get_reader_fn(self, reader_method, path, reader_options):
+    def get_reader_fn(self, reader_method, path, reader_options):
         if reader_method is None:
-            reader_method = self._guess_reader_method_from_path(path)
+            reader_method = self.guess_reader_method_from_path(path)
             if reader_method is None:
                 raise BatchKwargsError("Unable to determine reader for path: %s" % path, reader_options)
         else:

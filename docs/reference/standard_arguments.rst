@@ -165,5 +165,5 @@ In validation mode, they can be overridden using flags:
 
 .. code-block:: bash
 
-    great_expectations my_dataset.csv my_expectations.json --result_format=BOOLEAN_ONLY --catch_exceptions=False --include_config=True
+    great_expectations validation csv my_dataset.csv my_expectations.json --result_format=BOOLEAN_ONLY --catch_exceptions=False --include_config=True
 

@@ -57,6 +57,10 @@ def test_InMemoryStoreBackend():
     assert my_store.has_key(("C",)) is False
     assert my_store.list_keys() == [("A",), ("B",)]
 
+    with pytest.raises(NotImplementedError):
+        my_store.get_url_for_key(my_key)
+
+
 
 def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_FilesystemStoreBackend_two_way_string_conversion__dir'))

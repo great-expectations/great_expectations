@@ -42,15 +42,16 @@ class DatasetProfiler(DataAssetProfiler):
             exp) for exp in expectation_suite.expectations]
         expectation_suite.expectations = new_expectations
 
-        expectation_suite.meta["notes"] = {
-            "format": "markdown",
-            "content": [
-                "_To add additional notes, edit the <code>meta.notes.content</code> field in the appropriate Expectation json file._"
-                #TODO: be more helpful to the user by piping in the filename.
-                #This will require a minor refactor to make more DataContext information accessible from this method.
-                # "_To add additional notes, edit the <code>meta.notes.content</code> field in <code>expectations/mydb/default/movies/BasicDatasetProfiler.json</code>_"
-            ]
-        }
+        if not "notes" in expectation_suite.meta:
+            expectation_suite.meta["notes"] = {
+                "format": "markdown",
+                "content": [
+                    "_To add additional notes, edit the <code>meta.notes.content</code> field in the appropriate Expectation json file._"
+                    #TODO: be more helpful to the user by piping in the filename.
+                    #This will require a minor refactor to make more DataContext information accessible from this method.
+                    # "_To add additional notes, edit the <code>meta.notes.content</code> field in <code>expectations/mydb/default/movies/BasicDatasetProfiler.json</code>_"
+                ]
+            }
         return expectation_suite
 
     @classmethod

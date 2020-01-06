@@ -60,13 +60,8 @@ def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
                                       class_name="PandasDatasource",
                                       base_directory=str(filesystem_csv))
     available_asset_names = empty_data_context.get_available_data_asset_names()
-    available_asset_names["my_datasource"]["default"] = set(available_asset_names["my_datasource"]["default"])
 
-    assert available_asset_names == {
-        "my_datasource": {
-            "default": {"f1", "f2", "f3"}
-        }
-    }
+    assert set(available_asset_names["my_datasource"]["default"]["names"]) == {('f3', 'directory'), ('f2', 'file'), ('f1', 'file')}
 
 
 def test_list_expectation_suite_keys(data_context):
@@ -426,8 +421,7 @@ project_path/
 
     tree_str = gen_directory_tree_str(project_dir)
     print(tree_str)
-    assert tree_str == """\
-project_path/
+    assert tree_str == """project_path/
     data/
         random/
             f1.csv
@@ -506,12 +500,35 @@ data_docs/
                     HKGrotesk-SemiBold.otf
                     HKGrotesk-SemiBoldItalic.otf
             images/
+                0_values_not_null_html_en.jpg
+                10_suite_toc.jpeg
+                11_home_validation_results_failed.jpeg
+                12_validation_overview.png
+                13_validation_passed.jpeg
+                14_validation_failed.jpeg
+                15_validation_failed_unexpected_values.jpeg
+                16_validation_failed_unexpected_values (1).gif
+                1_values_not_null_html_de.jpg
+                2_values_not_null_json.jpg
+                3_values_not_null_validation_result_json.jpg
+                4_values_not_null_validation_result_html_en.jpg
+                5_home.png
+                6_home_tables.jpeg
+                7_home_suites.jpeg
+                8_home_validation_results_succeeded.jpeg
+                9_suite_overview.png
                 favicon.ico
+                glossary_scroller.gif
+                iterative-dev-loop.png
                 logo-long-vector.svg
                 logo-long.png
                 short-logo-vector.svg
                 short-logo.png
                 validation_failed_unexpected_values.gif
+                values_not_null_html_en.jpg
+                values_not_null_json.jpg
+                values_not_null_validation_result_html_en.jpg
+                values_not_null_validation_result_json.jpg
             styles/
                 data_docs_custom_styles_template.css
                 data_docs_default_styles.css
@@ -984,7 +1001,7 @@ def test_existing_local_data_docs_urls_returns_nothing_on_empty_project(tmp_path
     DataContext.create(empty_directory)
     context = DataContext(os.path.join(empty_directory, DataContext.GE_DIR))
 
-    obs = context.get_existing_local_data_docs_sites_urls()
+    obs = context.get_docs_sites_urls()
     assert obs == []
 
 
@@ -1013,7 +1030,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     expected_path = os.path.join(ge_dir, "uncommitted/data_docs/some/local/path/index.html")
     assert os.path.isfile(expected_path)
 
-    obs = context.get_existing_local_data_docs_sites_urls()
+    obs = context.get_docs_sites_urls()
     assert obs == ["file://{}".format(expected_path)]
 
 
@@ -1052,7 +1069,7 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
     for expected_path in [path_1, path_2]:
         assert os.path.isfile(expected_path)
 
-    obs = context.get_existing_local_data_docs_sites_urls()
+    obs = context.get_docs_sites_urls()
     assert set(obs) == set([
         "file://{}".format(path_1),
         "file://{}".format(path_2),
@@ -1100,7 +1117,7 @@ def test_existing_local_data_docs_urls_returns_only_existing_urls_from_customize
     path_2 = os.path.join(data_docs_dir, "another/path/index.html")
     assert os.path.isfile(path_2)
 
-    obs = context.get_existing_local_data_docs_sites_urls()
+    obs = context.get_docs_sites_urls()
     assert obs == [
         "file://{}".format(path_2),
     ]

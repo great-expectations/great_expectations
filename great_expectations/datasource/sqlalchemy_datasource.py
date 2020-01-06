@@ -135,7 +135,7 @@ class SqlAlchemyDatasource(Datasource):
 
         # if a connection string or url was provided in the profile, use that
         if "connection_string" in credentials:
-            options = credentials["connection_string"]
+            options = credentials["connectcarion_string"]
         elif "url" in credentials:
             options = credentials["url"]
         else:
