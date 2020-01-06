@@ -162,7 +162,7 @@ suites available to the configured context and validations available in the
 
 .. code-block:: bash
 
-    great_expectations build-docs
+    great_expectations docs build
 
 
 When called without additional arguments, this command will render all the Data
@@ -175,7 +175,7 @@ To disable the web browser opening behavior use `--no-view` option.
 
 To render just one site, use `--site_name SITE_NAME` option.
 
-Here is when the `build-docs` command should be called:
+Here is when the ``docs build`` command should be called:
 
 * when you want to fully rebuild a Data Docs site
 * after a new expectation suite is added or an existing one is edited
@@ -385,7 +385,7 @@ Note that if your ``data_docs_sites`` configuration contains a ``site_section_bu
 defaults for anything you would like rendered. By omitting the ``profiling`` key within ``site_section_builders``, your third goal
 is achieved and Data Docs will no longer render Profiling Results pages.
 
-Lastly, to compile your newly-customized Data Docs local site, you run ``great_expectations build-docs`` from the command line.
+Lastly, to compile your newly-customized Data Docs local site, you run ``great_expectations docs build`` from the command line.
 
 ``site_section_builders`` defaults:
 
