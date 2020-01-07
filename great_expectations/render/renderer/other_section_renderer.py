@@ -178,7 +178,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         })
 
         bullet_list_collapse = CollapseContent(**{
-            "collapse_toggle_link_text": "Show Expectation Types...",
+            "collapse_toggle_link": "Show Expectation Types...",
             "collapse": [bullet_list],
             "styling": {
                 "classes": ["col-12", "p-1"]
