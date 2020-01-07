@@ -42,10 +42,20 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
                     is a required field.
                 </span>
             </li>
+        <li style="list-style-type:none;" >
+                <hr class="mt-1 mb-1" >
+                    
+                </hr>
+            </li>
         <li >
                 <span >
                     values must be unique.
                 </span>
+            </li>
+        <li style="list-style-type:none;" >
+                <hr class="mt-1 mb-1" >
+                    
+                </hr>
             </li>
 </ul>
 </div>
@@ -125,10 +135,18 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
                     is a required field.
                 </span>
             </li>
+        <li style="list-style-type:none;" >
+                <hr class="mt-1 mb-1" >
+                </hr>
+            </li>
         <li >
                 <span >
                     values must be unique.
                 </span>
+            </li>
+        <li style="list-style-type:none;" >
+                <hr class="mt-1 mb-1" >
+                </hr>
             </li>
 </ul>
 </div>

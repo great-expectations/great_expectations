@@ -95,7 +95,7 @@ class ValidationResultsPageRenderer(Renderer):
             )
 
         collapse_content_block = CollapseContent(**{
-            "collapse_toggle_link_text": "Show more info...",
+            "collapse_toggle_link": "Show more info...",
             "collapse": collapse_content_blocks,
             "styling": {
                 "body": {

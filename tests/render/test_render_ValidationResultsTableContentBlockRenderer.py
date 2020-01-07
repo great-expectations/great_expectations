@@ -16,53 +16,23 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
     print(result)
     expected_result = {
         'content_block_type': 'table',
-        'styling': {'body': {'classes': ['table']},
-                    'classes': ['ml-2', 'mr-2', 'mt-0', 'mb-0',
-                                'table-responsive']}, 'table': [[{
-            'content_block_type': 'string_template',
-            'string_template': {
-                'template': '$icon',
-                'params': {
-                    'icon': ''},
-                'styling': {
-                    'params': {
-                        'icon': {
-                            'classes': [
-                                'fas',
-                                'fa-exclamation-triangle',
-                                'text-warning'],
-                            'tag': 'i'}}}}},
-            [{
-                'content_block_type': 'string_template',
-                'string_template': {
-                    'template': '$column Column can match any distribution.',
-                    'params': {
-                        "column": "live",
-                        "partition_object": None,
-                        "threshold": None,
-                        "result_format": "SUMMARY"}}},
-                {
-                    'content_block_type': 'string_template',
-                    'string_template': {
-                        'template': '\n\n$expectation_type raised an exception:\n$exception_message',
-                        'params': {
-                            'expectation_type': 'expect_column_kl_divergence_to_be_less_than',
-                            'exception_message': 'Invalid partition object.'},
-                        'tag': 'strong',
-                        'styling': {
-                            'classes': [
-                                'text-danger'],
-                            'params': {
-                                'exception_message': {
-                                    'tag': 'code'},
-                                'expectation_type': {
-                                    'classes': [
-                                        'badge',
-                                        'badge-danger',
-                                        'mb-2']}}}}},
-                None],
-            '--']],
-        'header_row': ['Status', 'Expectation', 'Observed Value']}
+        'styling': {'body': {'classes': ['table']}, 'classes': ['ml-2', 'mr-2', 'mt-0', 'mb-0', 'table-responsive']},
+        'table': [[{'content_block_type': 'string_template',
+                    'string_template': {'template': '$icon', 'params': {'icon': ''}, 'styling': {'params': {
+                        'icon': {'classes': ['fas', 'fa-exclamation-triangle', 'text-warning'], 'tag': 'i'}}}}}, [
+                       {'content_block_type': 'string_template',
+                        'string_template': {'template': '$column can match any distribution.',
+                                            'params': {"column": "live", "partition_object": None, "threshold": None,
+                                                       "result_format": "SUMMARY"}}},
+                       {'content_block_type': 'string_template', 'string_template': {
+                           'template': '\n\n$expectation_type raised an exception:\n$exception_message',
+                           'params': {'expectation_type': 'expect_column_kl_divergence_to_be_less_than',
+                                      'exception_message': 'Invalid partition object.'}, 'tag': 'strong',
+                           'styling': {'classes': ['text-danger'], 'params': {'exception_message': {'tag': 'code'},
+                                                                              'expectation_type': {
+                                                                                  'classes': ['badge', 'badge-danger',
+                                                                                              'mb-2']}}}}}, None],
+                   '--']], 'header_row': ['Status', 'Expectation', 'Observed Value']}
     assert result == expected_result
 
 
