@@ -35,25 +35,25 @@ class NotebookRenderer(Renderer):
         for k, v in expectation["kwargs"].items():
             if k == "column":
                 # make the column a positional argument
-                kwargs.append(f"'{v}'")
+                kwargs.append("'{}'".format(v))
             elif isinstance(v, str):
                 # Put strings in quotes
-                kwargs.append(f"{k}='{v}'")
+                kwargs.append("{}='{}'".format(k, v))
             else:
                 # Pass other types as is
-                kwargs.append(f"{k}={v}")
+                kwargs.append("{}={}".format(k, v))
 
         return ", ".join(kwargs)
 
     def add_header(self, data_asset_name, suite_name, batch_kwargs):
         self.add_markdown_cell(
-            f"""# Edit Your Expectation Suite
+            """# Edit Your Expectation Suite
 Use this notebook to recreate and modify your expectation suite for:
 
-**Data Asset**: `{data_asset_name}`<br>
-**Expectation Suite Name**: `{suite_name}`
+**Data Asset**: `{}`<br>
+**Expectation Suite Name**: `{}`
 
-We'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)"""
+We'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)""".format(data_asset_name, suite_name)
         )
 
         # TODO such brittle hacks to fix paths
@@ -120,11 +120,11 @@ context.open_data_docs()"""
 
     def add_expectation_cells_from_suite(self, expectations):
         expectations_by_column = self._get_expectations_by_column(expectations)
-        self.add_markdown_cell(f"### Table Expectation(s)")
+        self.add_markdown_cell("### Table Expectation(s)")
         if expectations_by_column["table_expectations"]:
             for exp in expectations_by_column["table_expectations"]:
                 kwargs_string = self._build_kwargs_string(exp)
-                self.add_code_cell(f"batch.{exp['expectation_type']}({kwargs_string})")
+                self.add_code_cell("batch.{}({})".format(exp['expectation_type'], kwargs_string))
         else:
             self.add_markdown_cell(
                 "No table level expectations are in this suite. Feel free to "
@@ -137,12 +137,12 @@ context.open_data_docs()"""
         self.add_markdown_cell("### Column Expectation(s)")
 
         for column, expectations in expectations_by_column.items():
-            self.add_markdown_cell(f"#### `{column}`")
+            self.add_markdown_cell("#### `{}`".format(column))
 
             for exp in expectations:
                 kwargs_string = self._build_kwargs_string(exp)
-                meta_args = f", meta={exp.meta}" if exp.meta else ""
-                self.add_code_cell(f"batch.{exp['expectation_type']}({kwargs_string}{meta_args})")
+                meta_args = ", meta={}".format(exp.meta) if exp.meta else ""
+                self.add_code_cell("batch.{}({}{})".format(exp['expectation_type'], kwargs_string, meta_args))
 
     @classmethod
     def _write_notebook_to_disk(cls, notebook, notebook_file_path):
