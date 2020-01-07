@@ -4,14 +4,13 @@
 
 {% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
   {% set home_url = "../../../../../index.html" -%}
-  {% set static_images_dir = "../../../../../static/images/" -%}
 {% elif utm_medium == "expectation-suite-page" %}
   {% set home_url = "../../../../index.html" -%}
-  {% set static_images_dir = "../../../../static/images/" -%}
 {% elif utm_medium == "index-page" %}
   {% set home_url = "#" -%}
-  {% set static_images_dir = "./static/images/" -%}
 {% endif %}
+
+{% set static_images_dir = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/" -%}
 
 <nav class="navbar bg-light navbar-expand-md sticky-top border-bottom" style="height: 70px">
   <div class="mr-auto">
@@ -19,6 +18,7 @@
       <div class="float-left navbar-brand m-0 h-100">
         <a href="{{ home_url }}">
           <img
+            class="NO-CACHE"
             src="{{ static_images_dir + "logo-long.png" }}"
             alt="Great Expectations"
             style="width: auto; height: 50px"
@@ -37,3 +37,12 @@
     </nav>
   </div>
 </nav>
+
+<script>
+  var d = new Date()
+  var els = document.getElementsByClassName('NO-CACHE');
+  for (var i = 0; i < els.length; i++)
+  {
+      els[i].attributes['src'].value += "?d=" + d.toISOString();
+  }
+</script>
