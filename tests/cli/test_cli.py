@@ -243,27 +243,23 @@ def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, c
     not_so_empty_data_context = empty_data_context
     project_root_dir = not_so_empty_data_context.root_directory
 
-    logger = logging.getLogger("great_expectations")
-    handler = logging.StreamHandler(stream=sys.stdout)
-    formatter = logging.Formatter("%(levelname)s %(message)s")
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        [
-            "datasource",
-            "profile",
-            "my_datasource",
-            "-d",
-            project_root_dir,
-            "--no-view",
-        ],
-    )
+    with capsys.disabled():
+        runner = CliRunner()
+        result = runner.invoke(
+            cli,
+            [
+                "datasource",
+                "profile",
+                "my_datasource",
+                "-d",
+                project_root_dir,
+                "--no-view",
+            ],
+        )
 
-    assert "Profiling 'my_datasource'" in result.stdout
-    logger.removeHandler(handler)
+        assert "Profiling 'my_datasource'" in result.stdout
+        # TODO make this test actually verify that profiling happened
+        assert False
 
 
 def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
@@ -274,26 +270,22 @@ def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
-    # print(project_root_dir)
 
-    # For some reason, even with this logging change (which is required and done in main of the cli)
-    # the click cli runner does not pick up output; capsys appears to intercept it first
-    logger = logging.getLogger("great_expectations")
-    handler = logging.StreamHandler(stream=sys.stdout)
-    formatter = logging.Formatter(
-        '%(levelname)s %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
-    runner = CliRunner()
-    result = runner.invoke(
-        cli, ["profile", "-d", project_root_dir, "--no-view"])
+    with capsys.disabled():
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["datasource", "profile", "-d", project_root_dir, "--no-view"])
 
-    captured = capsys.readouterr()
+        # TODO remove all this after profiling works
+        print(result.stdout)
+        print(result.output)
+        print(result)
+        print(result.exception)
 
-    assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
-    assert "Please review results using data-docs." in captured.out
-    logger.removeHandler(handler)
+        assert "Profiling 'my_datasource'" in result.stdout
+        assert "Please review results using data-docs." in result.stdout
+        # TODO make this test actually verify that profiling happened
+        assert False
 
 
 def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem_csv_2, capsys):
