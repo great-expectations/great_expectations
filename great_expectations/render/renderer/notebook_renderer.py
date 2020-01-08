@@ -1,5 +1,6 @@
 import os
 import nbformat
+import black
 
 from great_expectations.core import NamespaceAwareExpectationSuite
 from great_expectations.render.renderer.renderer import Renderer
@@ -13,6 +14,8 @@ class NotebookRenderer(Renderer):
     - Make an easy path to edit a suite that a Profiler created.
     - Make it easy to edit a suite where only JSON exists.
     """
+
+    black_file_mode = black.FileMode()
 
     @classmethod
     def _get_expectations_by_column(cls, expectations):
@@ -102,11 +105,14 @@ context.build_data_docs()
 context.open_data_docs()"""
         )
 
-    def add_code_cell(self, code):
+    def add_code_cell(self, code, lint=False):
         """
         Add the given code as a new code cell.
         :param code:
         """
+        if lint:
+            code = black.format_file_contents(code, fast=True, mode=self.black_file_mode).rstrip("\n")
+
         cell = nbformat.v4.new_code_cell(code)
         self.notebook["cells"].append(cell)
 
@@ -124,7 +130,8 @@ context.open_data_docs()"""
         if expectations_by_column["table_expectations"]:
             for exp in expectations_by_column["table_expectations"]:
                 kwargs_string = self._build_kwargs_string(exp)
-                self.add_code_cell("batch.{}({})".format(exp['expectation_type'], kwargs_string))
+                code = "batch.{}({})".format(exp['expectation_type'], kwargs_string)
+                self.add_code_cell(code, lint=True)
         else:
             self.add_markdown_cell(
                 "No table level expectations are in this suite. Feel free to "
@@ -142,7 +149,8 @@ context.open_data_docs()"""
             for exp in expectations:
                 kwargs_string = self._build_kwargs_string(exp)
                 meta_args = ", meta={}".format(exp.meta) if exp.meta else ""
-                self.add_code_cell("batch.{}({}{})".format(exp['expectation_type'], kwargs_string, meta_args))
+                code = "batch.{}({}{})".format(exp['expectation_type'], kwargs_string, meta_args)
+                self.add_code_cell(code, lint=True)
 
     @classmethod
     def _write_notebook_to_disk(cls, notebook, notebook_file_path):
