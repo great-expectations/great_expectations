@@ -205,6 +205,26 @@ def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_ym
         os.chdir(curdir)
 
 
+def test_cli_datasorce_list(empty_data_context, filesystem_csv_2, capsys):
+    project_root_dir = empty_data_context.root_directory
+    empty_data_context.add_datasource(
+        "wow_a_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        base_directory=str(filesystem_csv_2),
+    )
+
+    with capsys.disabled():
+        runner = CliRunner()
+        result = runner.invoke(
+            cli,
+            ["datasource", "list", "-d", project_root_dir],
+        )
+
+        obs = result.output.strip()
+        assert "[{'name': 'wow_a_datasource', 'class_name': 'PandasDatasource'}]" in obs
+
+
 def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
     project_root_dir = empty_data_context.root_directory
 
@@ -213,7 +233,7 @@ def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
         result = runner.invoke(
             cli,
             ["datasource", "new", "-d", project_root_dir, "--no-view"],
-            input="1\n1\n%s\nmynewsource\nn\n" % str(filesystem_csv_2)
+            input="1\n1\n%s\nmynewsource\nn\n" % str(filesystem_csv_2),
         )
 
         assert "mynewsource" in result.stdout
@@ -221,7 +241,9 @@ def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
         assert False
 
         # TODO what on earth is this?
-        ccc = [datasource['name'] for datasource in empty_data_context.list_datasources()]
+        ccc = [
+            datasource["name"] for datasource in empty_data_context.list_datasources()
+        ]
 
 
 def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, capsys):
