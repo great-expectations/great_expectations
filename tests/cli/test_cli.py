@@ -205,32 +205,23 @@ def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_ym
         os.chdir(curdir)
 
 
-@pytest.mark.skip()
-def test_cli_add_datasource(empty_data_context, filesystem_csv_2, capsys):
-    runner = CliRunner()
+def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
     project_root_dir = empty_data_context.root_directory
-    # For some reason, even with this logging change (which is required and done in main of the cli)
-    # the click cli runner does not pick up output; capsys appears to intercept it first
-    logger = logging.getLogger("great_expectations")
-    handler = logging.StreamHandler(stream=sys.stdout)
-    formatter = logging.Formatter(
-        '%(levelname)s %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        ["datasource", "new", "-d", project_root_dir, "--no-view"],
-        input="1\n%s\nmynewsource\nn\n" % str(filesystem_csv_2)
-    )
 
-    captured = capsys.readouterr()
+    with capsys.disabled():
+        runner = CliRunner()
+        result = runner.invoke(
+            cli,
+            ["datasource", "new", "-d", project_root_dir, "--no-view"],
+            input="1\n1\n%s\nmynewsource\nn\n" % str(filesystem_csv_2)
+        )
 
-    ccc = [datasource['name'] for datasource in empty_data_context.list_datasources()]
+        assert "mynewsource" in result.stdout
+        # TODO this test needs to test actual functionality like
+        assert False
 
-    assert "Would you like to profile 'mynewsource'?" in result.stdout
-    logger.removeHandler(handler)
+        # TODO what on earth is this?
+        ccc = [datasource['name'] for datasource in empty_data_context.list_datasources()]
 
 
 def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, capsys):
