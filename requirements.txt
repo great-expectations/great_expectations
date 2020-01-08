@@ -17,3 +17,4 @@ mistune>=0.8.4
 future>=0.16
 jinja2>=2.10
 marshmallow>=2.0,<3.0
+black>=18.9b0

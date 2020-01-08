@@ -18,8 +18,8 @@ def critical_suite():
                 "kwargs": {"column": "npi"},
                 "meta": {
                     "question": True,
-                    "Notes": "There are empty strings that should probably be nulls"
-                }
+                    "Notes": "There are empty strings that should probably be nulls",
+                },
             },
             {
                 "expectation_type": "expect_column_values_to_not_be_null",
@@ -296,7 +296,7 @@ def test_simple_suite(critical_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_not_be_null('npi', meta={'question': True, 'Notes': 'There are empty strings that should probably be nulls'})",
+                "source": 'batch.expect_column_values_to_not_be_null(\n    "npi",\n    meta={\n        "question": True,\n        "Notes": "There are empty strings that should probably be nulls",\n    },\n)',
                 "outputs": [],
             },
             {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
@@ -304,7 +304,7 @@ def test_simple_suite(critical_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_not_be_null('provider_type')",
+                "source": 'batch.expect_column_values_to_not_be_null("provider_type")',
                 "outputs": [],
             },
             {
@@ -427,7 +427,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_not_be_null('npi')",
+                "source": 'batch.expect_column_values_to_not_be_null("npi")',
                 "outputs": [],
             },
             {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
@@ -435,7 +435,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_not_be_null('provider_type')",
+                "source": 'batch.expect_column_values_to_not_be_null("provider_type")',
                 "outputs": [],
             },
             {
@@ -447,7 +447,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_not_be_null('nppes_provider_last_org_name')",
+                "source": 'batch.expect_column_values_to_not_be_null("nppes_provider_last_org_name")',
                 "outputs": [],
             },
             {
@@ -459,7 +459,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_be_in_set('nppes_provider_gender', value_set=['M', 'F', ''])",
+                "source": 'batch.expect_column_values_to_be_in_set(\n    "nppes_provider_gender", value_set=["M", "F", ""]\n)',
                 "outputs": [],
             },
             {
@@ -471,21 +471,21 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_not_be_null('nppes_entity_code')",
+                "source": 'batch.expect_column_values_to_not_be_null("nppes_entity_code")',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_be_in_set('nppes_entity_code', value_set=['I', 'O'])",
+                "source": 'batch.expect_column_values_to_be_in_set("nppes_entity_code", value_set=["I", "O"])',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_kl_divergence_to_be_less_than('nppes_entity_code', partition_object={'values': ['I', 'O'], 'weights': [0.9431769750233306, 0.056823024976669335]}, threshold=0.1)",
+                "source": 'batch.expect_column_kl_divergence_to_be_less_than(\n    "nppes_entity_code",\n    partition_object={\n        "values": ["I", "O"],\n        "weights": [0.9431769750233306, 0.056823024976669335],\n    },\n    threshold=0.1,\n)',
                 "outputs": [],
             },
             {
@@ -497,7 +497,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_be_in_set('nppes_provider_state', value_set=['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC', 'PR', 'AE', 'VI'], mostly=0.999)",
+                "source": 'batch.expect_column_values_to_be_in_set(\n    "nppes_provider_state",\n    value_set=[\n        "AL",\n        "AK",\n        "AZ",\n        "AR",\n        "CA",\n        "CO",\n        "CT",\n        "DE",\n        "FL",\n        "GA",\n        "HI",\n        "ID",\n        "IL",\n        "IN",\n        "IA",\n        "KS",\n        "KY",\n        "LA",\n        "ME",\n        "MD",\n        "MA",\n        "MI",\n        "MN",\n        "MS",\n        "MO",\n        "MT",\n        "NE",\n        "NV",\n        "NH",\n        "NJ",\n        "NM",\n        "NY",\n        "NC",\n        "ND",\n        "OH",\n        "OK",\n        "OR",\n        "PA",\n        "RI",\n        "SC",\n        "SD",\n        "TN",\n        "TX",\n        "UT",\n        "VT",\n        "VA",\n        "WA",\n        "WV",\n        "WI",\n        "WY",\n        "DC",\n        "PR",\n        "AE",\n        "VI",\n    ],\n    mostly=0.999,\n)',
                 "outputs": [],
             },
             {
@@ -509,14 +509,14 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_not_be_null('medicare_participation_indicator')",
+                "source": 'batch.expect_column_values_to_not_be_null("medicare_participation_indicator")',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_be_in_set('medicare_participation_indicator', value_set=['Y', 'N'])",
+                "source": 'batch.expect_column_values_to_be_in_set(\n    "medicare_participation_indicator", value_set=["Y", "N"]\n)',
                 "outputs": [],
             },
             {
@@ -528,14 +528,14 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_not_be_null('number_of_hcpcs')",
+                "source": 'batch.expect_column_values_to_not_be_null("number_of_hcpcs")',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_be_between('number_of_hcpcs', min_value=0, max_value=500, mostly=0.999)",
+                "source": 'batch.expect_column_values_to_be_between(\n    "number_of_hcpcs", min_value=0, max_value=500, mostly=0.999\n)',
                 "outputs": [],
             },
             {
@@ -547,14 +547,14 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_not_be_null('total_unique_benes')",
+                "source": 'batch.expect_column_values_to_not_be_null("total_unique_benes")',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_be_between('total_unique_benes', min_value=0, max_value=2000, mostly=0.95)",
+                "source": 'batch.expect_column_values_to_be_between(\n    "total_unique_benes", min_value=0, max_value=2000, mostly=0.95\n)',
                 "outputs": [],
             },
             {
@@ -566,14 +566,14 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_be_null('med_suppress_indicator', mostly=0.85)",
+                "source": 'batch.expect_column_values_to_be_null("med_suppress_indicator", mostly=0.85)',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_be_in_set('med_suppress_indicator', value_set=['#', '*'])",
+                "source": 'batch.expect_column_values_to_be_in_set("med_suppress_indicator", value_set=["#", "*"])',
                 "outputs": [],
             },
             {
@@ -585,14 +585,14 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_be_between('beneficiary_average_age', min_value=40, max_value=90, mostly=0.995)",
+                "source": 'batch.expect_column_values_to_be_between(\n    "beneficiary_average_age", min_value=40, max_value=90, mostly=0.995\n)',
                 "outputs": [],
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_kl_divergence_to_be_less_than('beneficiary_average_age', partition_object={'bins': [8, 16.5, 25, 33.5, 42, 50.5, 59, 67.5, 76, 84.5, 93], 'weights': [0.00025259576594384474, 0.00013318685840675451, 0.0009653750909344757, 0.0012363414580378728, 0.01081660996274442, 0.030813927854975127, 0.13495227317818748, 0.6919590041664524, 0.1244213260634741, 0.004449359600843578]}, threshold=0.9)",
+                "source": 'batch.expect_column_kl_divergence_to_be_less_than(\n    "beneficiary_average_age",\n    partition_object={\n        "bins": [8, 16.5, 25, 33.5, 42, 50.5, 59, 67.5, 76, 84.5, 93],\n        "weights": [\n            0.00025259576594384474,\n            0.00013318685840675451,\n            0.0009653750909344757,\n            0.0012363414580378728,\n            0.01081660996274442,\n            0.030813927854975127,\n            0.13495227317818748,\n            0.6919590041664524,\n            0.1244213260634741,\n            0.004449359600843578,\n        ],\n    },\n    threshold=0.9,\n)',
                 "outputs": [],
             },
             {
@@ -604,7 +604,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_be_between('total_submitted_chrg_amt', min_value=2000, max_value=5000000, mostly=0.98)",
+                "source": 'batch.expect_column_values_to_be_between(\n    "total_submitted_chrg_amt", min_value=2000, max_value=5000000, mostly=0.98\n)',
                 "outputs": [],
             },
             {
@@ -616,7 +616,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_not_be_null('nppes_provider_first_name', mostly=0.9)",
+                "source": 'batch.expect_column_values_to_not_be_null("nppes_provider_first_name", mostly=0.9)',
                 "outputs": [],
             },
             {
@@ -628,7 +628,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "batch.expect_column_values_to_match_regex('nppes_provider_zip', regex='^\\d*$', mostly=0.999)",
+                "source": 'batch.expect_column_values_to_match_regex(\n    "nppes_provider_zip", regex="^\\d*$", mostly=0.999\n)',
                 "outputs": [],
             },
             {

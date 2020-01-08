@@ -111,7 +111,10 @@ context.open_data_docs()"""
         :param code:
         """
         if lint:
-            code = black.format_file_contents(code, fast=True, mode=self.black_file_mode).rstrip("\n")
+            try:
+                code = black.format_file_contents(code, fast=True, mode=self.black_file_mode).rstrip("\n")
+            except (black.NothingChanged, RuntimeError):
+                pass
 
         cell = nbformat.v4.new_code_cell(code)
         self.notebook["cells"].append(cell)
