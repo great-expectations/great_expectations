@@ -371,45 +371,6 @@ def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_
     logger.removeHandler(handler)
 
 
-def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
-    # TODO it is unclear what this test tests.
-    empty_data_context.add_datasource("my_datasource",
-                                    module_name="great_expectations.datasource",
-                                    class_name="PandasDatasource",
-                                    base_directory=str(filesystem_csv_2))
-    not_so_empty_data_context = empty_data_context
-
-    project_root_dir = not_so_empty_data_context.root_directory
-
-    # For some reason, even with this logging change (which is required and done in main of the cli)
-    # the click cli runner does not pick up output; capsys appears to intercept it first
-    logger = logging.getLogger("great_expectations")
-    handler = logging.StreamHandler(stream=sys.stdout)
-    formatter = logging.Formatter(
-        '%(levelname)s %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
-
-    runner = CliRunner()
-    _ = runner.invoke(cli, ["datasource", "profile", "my_datasource", "-d", project_root_dir, "--no-view"])
-
-    captured = capsys.readouterr()
-
-    assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
-    assert "Please review results using data-docs." in captured.out
-
-    _ = runner.invoke(cli, ["build-docs", "-d", project_root_dir, "--no-view"])
-
-    assert "index.html" in os.listdir(os.path.join(
-        project_root_dir,
-        "uncommitted/data_docs/local_site"
-        )
-    )
-
-    logger.removeHandler(handler)
-
-
 def test_cli_config_not_found(tmp_path_factory):
     tmp_dir = str(tmp_path_factory.mktemp("test_cli_config_not_found"))
     curdir = os.path.abspath(os.getcwd())
