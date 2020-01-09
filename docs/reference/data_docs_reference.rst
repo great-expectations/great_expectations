@@ -193,6 +193,9 @@ for how to profile a single batch of data and build documentation from the valid
 
 .. code-block:: python
 
+  import os
+  import great_expectations as ge
+
   from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
   from great_expectations.render.renderer import ProfilingResultsPageRenderer, ExpectationSuitePageRenderer
   from great_expectations.data_context.util import safe_mmkdir
@@ -205,11 +208,12 @@ for how to profile a single batch of data and build documentation from the valid
 
   # load a batch from the data asset
   data_asset_name = context.normalize_data_asset_name('ratings')
-  context.creat_expectation_suite(data_asset_name, 'default'),
+  context.create_expectation_suite(data_asset_name, 'default'),
   batch = context.get_batch(
     data_asset_name=data_asset_name,
     expectation_suite_name='default',
-    context.yield_batch_kwargs(data_asset_name))
+    batch_kwargs=context.yield_batch_kwargs(data_asset_name)
+  )
 
   # run the profiler on the batch - this returns an expectation suite and validation results for this suite
   expectation_suite, validation_result = BasicDatasetProfiler().profile(batch)
@@ -220,7 +224,7 @@ for how to profile a single batch of data and build documentation from the valid
   # use a view to render the document model (produced by the renderer) into a HTML document
   safe_mmkdir(os.path.dirname(profiling_html_filepath))
   with open(profiling_html_filepath, 'w') as writer:
-      writer.write(DefaultJinjaPageView.render(document_model))
+      writer.write(DefaultJinjaPageView().render(document_model))
 
 .. _customizing_data_docs:
 
