@@ -996,13 +996,18 @@ def test_build_batch_kwargs(titanic_multibatch_data_context):
     assert batch_kwargs["partition_id"] == "Titanic_1911"
 
 
-def test_existing_local_data_docs_urls_returns_nothing_on_empty_project(tmp_path_factory):
-    empty_directory = str(tmp_path_factory.mktemp("hey_there"))
+def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasources_and_a_site_configured(tmp_path_factory):
+    """
+    This test ensures that a url will be returned for a default site even if a
+    datasource is not configured, and docs are not built.
+    """
+    empty_directory = str(tmp_path_factory.mktemp("another_empty_project"))
     DataContext.create(empty_directory)
     context = DataContext(os.path.join(empty_directory, DataContext.GE_DIR))
 
     obs = context.get_docs_sites_urls()
-    assert obs == []
+    assert len(obs) == 1
+    assert obs[0].endswith("great_expectations/uncommitted/data_docs/local_site/index.html")
 
 
 def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_site(tmp_path_factory):
@@ -1074,53 +1079,6 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
         "file://{}".format(path_1),
         "file://{}".format(path_2),
     ])
-
-
-def test_existing_local_data_docs_urls_returns_only_existing_urls_from_customized_local_site(tmp_path_factory):
-    """
-    This test ensures that the method only returns known-good urls where the
-    index.html file actually exists.
-    """
-    empty_directory = str(tmp_path_factory.mktemp("yo_yo_ma"))
-    DataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
-    context = DataContext(ge_dir)
-
-    context._project_config["data_docs_sites"] = {
-        "my_rad_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "FixedLengthTupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/some/path/"
-            }
-        },
-        "another_just_amazing_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "FixedLengthTupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/another/path/"
-            }
-        }
-    }
-
-    # TODO Workaround project config programmatic config manipulation
-    #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config()
-    context = DataContext(ge_dir)
-    context.build_data_docs()
-    data_docs_dir = os.path.join(ge_dir, "uncommitted/data_docs/")
-
-    # Mangle one of the local sites
-    shutil.rmtree(os.path.join(data_docs_dir, "some/"))
-    path_1 = os.path.join(data_docs_dir, "some/path/index.html")
-    assert not os.path.isfile(path_1)
-    path_2 = os.path.join(data_docs_dir, "another/path/index.html")
-    assert os.path.isfile(path_2)
-
-    obs = context.get_docs_sites_urls()
-    assert obs == [
-        "file://{}".format(path_2),
-    ]
 
 
 def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
