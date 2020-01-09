@@ -193,6 +193,9 @@ for how to profile a single batch of data and build documentation from the valid
 
 .. code-block:: python
 
+  import os
+  import great_expectations as ge
+
   from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
   from great_expectations.render.renderer import ProfilingResultsPageRenderer, ExpectationSuitePageRenderer
   from great_expectations.data_context.util import safe_mmkdir
