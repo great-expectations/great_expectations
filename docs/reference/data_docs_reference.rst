@@ -224,7 +224,7 @@ for how to profile a single batch of data and build documentation from the valid
   # use a view to render the document model (produced by the renderer) into a HTML document
   safe_mmkdir(os.path.dirname(profiling_html_filepath))
   with open(profiling_html_filepath, 'w') as writer:
-      writer.write(DefaultJinjaPageView.render(document_model))
+      writer.write(DefaultJinjaPageView().render(document_model))
 
 .. _customizing_data_docs:
 
