@@ -28,7 +28,7 @@ from six import PY2
 
 from great_expectations.cli import cli
 from great_expectations.util import gen_directory_tree_str
-from great_expectations import __version__ as ge_version
+from great_expectations import __version__ as ge_version, DataContext
 from tests.test_utils import assertDeepAlmostEqual, expectationSuiteValidationResultSchema
 
 yaml = YAML()
@@ -231,20 +231,31 @@ def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_ym
 
 
 def test_cli_datasorce_list(empty_data_context, filesystem_csv_2, capsys):
+    """Test an empty project and a project with a single datasource."""
     project_root_dir = empty_data_context.root_directory
-    empty_data_context.add_datasource(
+    context = DataContext(project_root_dir)
+
+    with capsys.disabled():
+        runner = CliRunner()
+        result = runner.invoke(cli, ["datasource", "list", "-d", project_root_dir])
+
+        obs = result.output.strip()
+        assert "[]" in obs
+    assert context.list_datasources() == []
+
+    context.add_datasource(
         "wow_a_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
         base_directory=str(filesystem_csv_2),
     )
+    assert context.list_datasources() == [
+        {"name": "wow_a_datasource", "class_name": "PandasDatasource"}
+    ]
 
     with capsys.disabled():
         runner = CliRunner()
-        result = runner.invoke(
-            cli,
-            ["datasource", "list", "-d", project_root_dir],
-        )
+        result = runner.invoke(cli, ["datasource", "list", "-d", project_root_dir])
 
         obs = result.output.strip()
         assert "[{'name': 'wow_a_datasource', 'class_name': 'PandasDatasource'}]" in obs
@@ -252,6 +263,8 @@ def test_cli_datasorce_list(empty_data_context, filesystem_csv_2, capsys):
 
 def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
     project_root_dir = empty_data_context.root_directory
+    context = DataContext(project_root_dir)
+    assert context.list_datasources() == []
 
     with capsys.disabled():
         runner = CliRunner()
@@ -260,15 +273,15 @@ def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
             ["datasource", "new", "-d", project_root_dir, "--no-view"],
             input="1\n1\n%s\nmynewsource\nn\n" % str(filesystem_csv_2),
         )
+        stdout = result.stdout
 
-        assert "mynewsource" in result.stdout
-        # TODO this test needs to test actual functionality like
-        assert False
-
-        # TODO what on earth is this?
-        ccc = [
-            datasource["name"] for datasource in empty_data_context.list_datasources()
-        ]
+        assert "What data would you like Great Expectations to connect to?" in stdout
+        assert "What are you processing your files with?" in stdout
+        assert "Give your new data source a short name." in stdout
+        assert "Profiling 'mynewsource'" in stdout
+        assert "Would you like to profile 'mynewsource'?" in stdout
+        assert "Skipping profiling for now." in stdout
+        assert result.exit_code == 0
 
 
 def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, capsys):
