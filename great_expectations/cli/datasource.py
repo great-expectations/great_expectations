@@ -217,7 +217,7 @@ def add_datasource(context, choose_one_data_asset=False):
             to configure a generator that comprehensively scans the datasource for data assets
     :return: a tuple: datasource_name, data_source_type
     """
-    
+
     msg_prompt_where_is_your_data = """
 What data would you like Great Expectations to connect to?    
     1. Files on a filesystem (for processing with Pandas or Spark)
@@ -1129,7 +1129,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 additional_batch_kwargs=additional_batch_kwargs
             )
 
-            if profiling_results.success:  # data context is ready to profile
+            if profiling_results["success"]:  # data context is ready to profile
                 break
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
