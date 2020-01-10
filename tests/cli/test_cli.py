@@ -84,6 +84,31 @@ Error: No such command "blarg".
 """
 
 
+def test_project_check_on_missing_ge_dir():
+    runner = CliRunner()
+    result = runner.invoke(cli, ["project", "check-config"])
+    assert "Checking your config files for validity" in result.output
+    assert "Unfortunately, your config appears to be invalid" in result.output
+    assert "Error: No great_expectations directory was found here!" in result.output
+    assert result.exit_code == 1
+
+
+@pytest.mark.skip()
+def test_project_check_on_valid_project(empty_data_context):
+    # TODO this needs a better fixture. Titanic seems busted for this use case.
+    assert False
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["project", "check-config"],
+    )
+    print(result.output)
+    assert "Checking your config files for validity" in result.output
+    assert "Your config file appears valid" in result.output
+    assert result.exit_code == 0
+
+
 def test_cli_version():
     runner = CliRunner()
 
