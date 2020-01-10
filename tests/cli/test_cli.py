@@ -271,17 +271,46 @@ def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
         result = runner.invoke(
             cli,
             ["datasource", "new", "-d", project_root_dir, "--no-view"],
-            input="1\n1\n%s\nmynewsource\nn\n" % str(filesystem_csv_2),
+            input="1\n1\n%s\nmynewsource\n" % str(filesystem_csv_2),
         )
         stdout = result.stdout
 
         assert "What data would you like Great Expectations to connect to?" in stdout
         assert "What are you processing your files with?" in stdout
         assert "Give your new data source a short name." in stdout
-        assert "Profiling 'mynewsource'" in stdout
-        assert "Would you like to profile 'mynewsource'?" in stdout
-        assert "Skipping profiling for now." in stdout
+        assert "A new datasource 'mynewsource' was added to your project." in stdout
+
         assert result.exit_code == 0
+
+
+def test_cli_profile_answering_no(empty_data_context, filesystem_csv_2, capsys):
+    empty_data_context.add_datasource(
+        "my_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        base_directory=str(filesystem_csv_2),
+    )
+    not_so_empty_data_context = empty_data_context
+    project_root_dir = not_so_empty_data_context.root_directory
+
+    with capsys.disabled():
+        runner = CliRunner()
+        result = runner.invoke(
+            cli,
+            [
+                "datasource",
+                "profile",
+                "my_datasource",
+                "-d",
+                project_root_dir,
+                "--no-view",
+            ],
+            input="n\n"
+        )
+
+        stdout = result.stdout
+        assert "Profiling 'my_datasource'" in stdout
+        assert "Skipping profiling for now." in stdout
 
 
 def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, capsys):
@@ -306,11 +335,19 @@ def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, c
                 project_root_dir,
                 "--no-view",
             ],
+            input="Y\n"
         )
 
-        assert "Profiling 'my_datasource'" in result.stdout
-        # TODO make this test actually verify that profiling happened
-        assert False
+        stdout = result.stdout
+        assert "Profiling 'my_datasource'" in stdout
+        assert result.exit_code == 0
+
+    context = DataContext(project_root_dir)
+    assert len(context.list_datasources()) == 1
+    expectations_store = context.stores["expectations_store"]
+    suites = expectations_store.list_keys()
+    assert len(suites) == 1
+    assert suites[0].expectation_suite_name == "BasicDatasetProfiler"
 
 
 def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
