@@ -1043,7 +1043,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
     # Call the data context's profiling method to check if the arguments are valid
     profiling_results = context.profile_datasource(
         datasource_name,
-        data_asset_names=data_assets,
+        data_assets=data_assets,
         profile_all_data_assets=profile_all_data_assets,
         max_data_assets=max_data_assets,
         dry_run=True,
@@ -1054,7 +1054,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         if data_assets or profile_all_data_assets or click.confirm(msg_confirm_ok_to_proceed.format(datasource_name), default=True):
             profiling_results = context.profile_datasource(
                 datasource_name,
-                data_asset_names=data_assets,
+                data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 max_data_assets=max_data_assets,
                 dry_run=False,
@@ -1099,7 +1099,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
             # (no dry run this time)
             profiling_results = context.profile_datasource(
                 datasource_name,
-                data_asset_names=data_assets,
+                data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 max_data_assets=max_data_assets,
                 dry_run=False,
