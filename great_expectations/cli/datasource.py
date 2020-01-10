@@ -207,7 +207,17 @@ def datasource_profile(datasource_name, data_assets, profile_all_data_assets, di
         )
 
 
-def add_datasource(context):
+def add_datasource(context, choose_one_data_asset=False):
+    """
+    Interactive flow for adding a datasource to an existing context.
+
+    :param context:
+    :param choose_one_data_asset: optional - if True, this signals the method that the intent
+            is to let user choose just one data asset (e.g., a file) and there is no need
+            to configure a generator that comprehensively scans the datasource for data assets
+    :return: a tuple: datasource_name, data_source_type
+    """
+    
     msg_prompt_where_is_your_data = """
 What data would you like Great Expectations to connect to?    
     1. Files on a filesystem (for processing with Pandas or Spark)
@@ -241,7 +251,8 @@ What are you processing your files with?
 
             data_source_type = DatasourceTypes.PANDAS
 
-            datasource_name = _add_pandas_datasource_with_manual_generator(context)
+            datasource_name = _add_pandas_datasource(context, passthrough_generator_only=choose_one_data_asset)
+
         elif data_source_compute_selection == "2":  # Spark
 
             data_source_type = DatasourceTypes.SPARK
@@ -282,35 +293,47 @@ def _add_pandas_datasource_with_manual_generator(context):
                                         **configuration)
     return datasource_name
 
-def _add_pandas_datasource(context, prompt_for_datasource_name=True):
-    path = click.prompt(
-        msg_prompt_filesys_enter_base_path,
-        # default='/data/',
-        type=click.Path(
-            exists=True,
-            file_okay=False,
-            dir_okay=True,
-            readable=True
-        ),
-        show_default=True
-    )
-    if path.startswith("./"):
-        path = path[2:]
+def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_datasource_name=True):
+    if passthrough_generator_only:
+        datasource_name = "files_datasource"
 
-    if path.endswith("/"):
-        basenamepath = path[:-1]
-    else:
-        basenamepath = path
-
-    datasource_name = os.path.basename(basenamepath) + "__dir"
-    if prompt_for_datasource_name:
-        datasource_name = click.prompt(
-            msg_prompt_datasource_name,
-            default=datasource_name,
-            show_default=True
+        configuration = PandasDatasource.build_configuration(generators={
+            "default": {
+                "class_name": "PassthroughGenerator",
+            }
+        }
         )
 
-    configuration = PandasDatasource.build_configuration(base_directory=os.path.join("..", path))
+    else:
+        path = click.prompt(
+            msg_prompt_filesys_enter_base_path,
+            # default='/data/',
+            type=click.Path(
+                exists=True,
+                file_okay=False,
+                dir_okay=True,
+                readable=True
+            ),
+            show_default=True
+        )
+        if path.startswith("./"):
+            path = path[2:]
+
+        if path.endswith("/"):
+            basenamepath = path[:-1]
+        else:
+            basenamepath = path
+
+        datasource_name = os.path.basename(basenamepath) + "__dir"
+        if prompt_for_datasource_name:
+            datasource_name = click.prompt(
+                msg_prompt_datasource_name,
+                default=datasource_name,
+                show_default=True
+            )
+
+        configuration = PandasDatasource.build_configuration(base_directory=os.path.join("..", path))
+
     context.add_datasource(name=datasource_name, class_name='PandasDatasource', **configuration)
     return datasource_name
 

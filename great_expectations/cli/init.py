@@ -100,7 +100,7 @@ def init(target_directory, view):
         else:
             datasources = context.list_datasources()
             if len(datasources) == 0:
-                datasource_name, data_source_type = add_datasource_impl(context)
+                datasource_name, data_source_type = add_datasource_impl(context, choose_one_data_asset=True)
                 if not datasource_name:  # no datasource was created
                     return # TODO: an error message?
 
