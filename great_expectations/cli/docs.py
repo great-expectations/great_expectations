@@ -35,9 +35,7 @@ def docs_build(directory, site_name, view=True):
     """Build Data Docs for a project."""
     try:
         context = DataContext(directory)
-        _build_docs(context, site_name=site_name)
-        if view:
-            context.open_data_docs()
+        build_docs(context, site_name=site_name, view=view)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         sys.exit(1)
@@ -52,7 +50,7 @@ def docs_build(directory, site_name, view=True):
         sys.exit(1)
 
 
-def _build_docs(context, site_name=None):
+def build_docs(context, site_name=None, view=True):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 
@@ -75,3 +73,6 @@ def _build_docs(context, site_name=None):
 
     msg = msg.rstrip("\n")
     cli_message(msg)
+
+    if view:
+        context.open_data_docs()

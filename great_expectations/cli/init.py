@@ -4,10 +4,13 @@ import sys
 import click
 
 from great_expectations import DataContext, exceptions as ge_exceptions
+from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.cli.datasource import (
     create_expectation_suite as create_expectation_suite_impl,
     add_datasource as add_datasource_impl,
 )
+from great_expectations.cli.docs import build_docs
+
 from great_expectations.cli.init_messages import (
     GREETING,
     PROJECT_IS_COMPLETE,
@@ -67,104 +70,115 @@ def init(target_directory, view):
         ) and DataContext.config_variables_yml_exist(ge_dir):
             # Ensure the context can be instantiated
             try:
-                _ = DataContext(ge_dir)
+                context = DataContext(ge_dir)
                 cli_message(PROJECT_IS_COMPLETE)
-            except ge_exceptions.DataContextError as e:
+            except (ge_exceptions.DataContextError, DatasourceInitializationError) as e:
                 cli_message("<red>{}</red>".format(e))
                 exit(5)
         else:
-            _complete_onboarding(target_directory)
-
-        try:
-            # if expectations exist, offer to build docs
-            context = DataContext(ge_dir)
-            if context.list_expectation_suite_keys():
-                if click.confirm(BUILD_DOCS_PROMPT, default=True):
-                    context.build_data_docs()
-                    context.open_data_docs()
-        except ge_exceptions.DataContextError as e:
-            cli_message("<red>{}</red>".format(e))
+            try:
+                _complete_onboarding(target_directory)
+            except ge_exceptions.DataContextError as e:
+                cli_message("<red>{}</red>".format(e))
+                exit(5)
     else:
         if not click.confirm(LETS_BEGIN_PROMPT, default=True):
             cli_message(RUN_INIT_AGAIN)
             exit(0)
         try:
-            context, datasource_name, data_source_type = _create_new_project(
-                target_directory
-            )
-            if not datasource_name:  # no datasource was created
-                return
-
-            # we need only one of the values returned here - profiling_results
-            (
-                datasource_name,
-                generator_name,
-                data_asset_name,
-                batch_kwargs,
-                profiling_results,
-            ) = create_expectation_suite_impl(
-                context,
-                datasource_name=datasource_name,
-                show_intro_message=False,
-                additional_batch_kwargs={"limit": 1000},
-                open_docs=view,
-            )
-
-            notebook_renderer = NotebookRenderer()
-
-            for result in profiling_results["results"]:
-                # TODO brittle
-                suite = result[0]
-                assert isinstance(suite, NamespaceAwareExpectationSuite)
-                suite_name = suite.expectation_suite_name
-
-                validation_result = result[1]
-                assert isinstance(validation_result, ExpectationSuiteValidationResult)
-                batch_kwargs = validation_result.meta.get("batch_kwargs")
-                data_asset_identifier = validation_result.meta.get("data_asset_name")
-                human_data_asset_name = data_asset_identifier.generator_asset
-
-                logger.debug(
-                    f"\nRendering a notebook for {human_data_asset_name} and suite {suite_name}"
-                )
-                logger.debug(f"batch_kwargs: {batch_kwargs}")
-                logger.debug(f"datasource_name: {datasource_name}")
-
-                notebook_name = f"{human_data_asset_name}_{suite_name}.ipynb"
-                notebook_path = os.path.join(
-                    context.root_directory, "notebooks", notebook_name
-                )
-                notebook_renderer.render_to_disk(suite, batch_kwargs, notebook_path)
-
-                # TODO maybe loop over profiling results since they contain suites and validation results
-                # for data_asset in data_assets:
-                #     # TODO brittle
-                #     # print("\n\n\n")
-                #     # print(profiling_results)
-                #     # print("\n\n\n")
-                #     # sys.exit(1)
-                #     # batch_kwargs = profiling_results["results"][0][1]["meta"]["batch_kwargs"]
-                #
-                #     print(f"data_asset: {data_asset}")
-                #     suite = context.get_expectation_suite(
-                #         data_asset_name=data_asset,
-                #         expectation_suite_name=str(profiler.__name__)
-                #     )
-                #     suite_name = suite.expectation_suite_name
-                #
-                #     print(f"\nRendering a notebook for {data_asset} and suite {suite_name}")
-                #
-                #     # batch_kwargs = context.build_batch_kwargs(data_asset, partition_id="profiler")
-                #     batch_kwargs = context.yield_batch_kwargs(data_asset)
-                #     batch_kwargs_by_data_asset[data_asset] = batch_kwargs
-                #     print(f"batch_kwargs: {batch_kwargs}")
-                #     print(f"datasource_name: {datasource_name}")
-                #
-                #     notebook_name = f"{data_asset}_{suite_name}.ipynb"
-                #     notebook_renderer.render_to_disk(suite, batch_kwargs, os.path.join(context.root_directory, notebook_name))
-                cli_message("""\n<cyan>Great Expectations is now set up.</cyan>""")
+            context = DataContext.create(target_directory)
         except ge_exceptions.DataContextError as e:
             cli_message("<red>{}</red>".format(e))
+
+    try:
+        # if expectations exist, offer to build docs
+        context = DataContext(ge_dir)
+        if context.list_expectation_suite_keys():
+            if click.confirm(BUILD_DOCS_PROMPT, default=True):
+                build_docs(context)
+
+        else:
+            datasources = context.list_datasources()
+            if len(datasources) == 0:
+                datasource_name, data_source_type = add_datasource_impl(context, choose_one_data_asset=True)
+                if not datasource_name:  # no datasource was created
+                    return # TODO: an error message?
+
+            datasources = context.list_datasources()
+            if len(datasources) == 1:
+                datasource_name = datasources[0]["name"]
+
+
+                # we need only one of the values returned here - profiling_results
+                (
+                    datasource_name,
+                    generator_name,
+                    data_asset_name,
+                    batch_kwargs,
+                    profiling_results,
+                ) = create_expectation_suite_impl(
+                    context,
+                    datasource_name=datasource_name,
+                    show_intro_message=False,
+                    additional_batch_kwargs={"limit": 1000},
+                    open_docs=view,
+                )
+
+                notebook_renderer = NotebookRenderer()
+
+                for result in profiling_results["results"]:
+                    # TODO brittle
+                    suite = result[0]
+                    assert isinstance(suite, NamespaceAwareExpectationSuite)
+                    suite_name = suite.expectation_suite_name
+
+                    validation_result = result[1]
+                    assert isinstance(validation_result, ExpectationSuiteValidationResult)
+                    batch_kwargs = validation_result.meta.get("batch_kwargs")
+                    data_asset_identifier = validation_result.meta.get("data_asset_name")
+                    human_data_asset_name = data_asset_identifier.generator_asset
+
+                    logger.debug(
+                        f"\nRendering a notebook for {human_data_asset_name} and suite {suite_name}"
+                    )
+                    logger.debug(f"batch_kwargs: {batch_kwargs}")
+                    logger.debug(f"datasource_name: {datasource_name}")
+
+                    notebook_name = f"{human_data_asset_name}_{suite_name}.ipynb"
+                    notebook_path = os.path.join(
+                        context.root_directory, "notebooks", notebook_name
+                    )
+                    notebook_renderer.render_to_disk(suite, batch_kwargs, notebook_path)
+
+                    # TODO maybe loop over profiling results since they contain suites and validation results
+                    # for data_asset in data_assets:
+                    #     # TODO brittle
+                    #     # print("\n\n\n")
+                    #     # print(profiling_results)
+                    #     # print("\n\n\n")
+                    #     # sys.exit(1)
+                    #     # batch_kwargs = profiling_results["results"][0][1]["meta"]["batch_kwargs"]
+                    #
+                    #     print(f"data_asset: {data_asset}")
+                    #     suite = context.get_expectation_suite(
+                    #         data_asset_name=data_asset,
+                    #         expectation_suite_name=str(profiler.__name__)
+                    #     )
+                    #     suite_name = suite.expectation_suite_name
+                    #
+                    #     print(f"\nRendering a notebook for {data_asset} and suite {suite_name}")
+                    #
+                    #     # batch_kwargs = context.build_batch_kwargs(data_asset, partition_id="profiler")
+                    #     batch_kwargs = context.yield_batch_kwargs(data_asset)
+                    #     batch_kwargs_by_data_asset[data_asset] = batch_kwargs
+                    #     print(f"batch_kwargs: {batch_kwargs}")
+                    #     print(f"datasource_name: {datasource_name}")
+                    #
+                    #     notebook_name = f"{data_asset}_{suite_name}.ipynb"
+                    #     notebook_renderer.render_to_disk(suite, batch_kwargs, os.path.join(context.root_directory, notebook_name))
+                    cli_message("""\n<cyan>Great Expectations is now set up.</cyan>""")
+    except ge_exceptions.DataContextError as e:
+        cli_message("<red>{}</red>".format(e))
 
 
 def _slack_setup(context):
@@ -191,16 +205,6 @@ def _slack_setup(context):
 
 def _get_full_path_to_ge_dir(target_directory):
     return os.path.abspath(os.path.join(target_directory, DataContext.GE_DIR))
-
-
-def _create_new_project(target_directory):
-    try:
-        context = DataContext.create(target_directory)
-        datasource_name, data_source_type = add_datasource_impl(context)
-        return context, datasource_name, data_source_type
-    except ge_exceptions.DataContextError as err:
-        cli_message("<red>{}</red>".format(err.message))
-        sys.exit(-1)
 
 
 def _complete_onboarding(target_dir):
