@@ -8,7 +8,7 @@ import sys
 import click
 import datetime
 
-from great_expectations.cli.docs import _build_docs
+from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.util import cli_message, _offer_to_install_new_template
 from great_expectations.datasource import (
@@ -220,8 +220,6 @@ What are you processing your files with?
     2. PySpark
 """
 
-    msg_success_database = "\n<green>Great Expectations connected to your database!</green>"
-
     # cli_message("\n<cyan>========== Where is your data? ===========</cyan>")
     data_source_location_selection = click.prompt(
         msg_prompt_where_is_your_data,
@@ -253,7 +251,6 @@ What are you processing your files with?
     else:
         data_source_type = DatasourceTypes.SQL
         datasource_name = _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True)
-        cli_message(msg_success_database)
 
     return datasource_name, data_source_type
 
@@ -348,6 +345,8 @@ def load_library(library_name, install_instructions_string=None):
 
 
 def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
+    msg_success_database = "\n<green>Great Expectations connected to your database!</green>"
+
     if not load_library("sqlalchemy"):
         return None
 
@@ -387,6 +386,8 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                 return None
             credentials = _collect_mysql_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.POSTGRES:
+            if not load_library("psycopg2"):
+                return None
             credentials = _collect_postgres_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.REDSHIFT:
             if not load_library("psycopg2"):
@@ -416,6 +417,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             cli_message("<cyan>Attempting to connect to your database. This may take a moment...</cyan>")
             configuration = SqlAlchemyDatasource.build_configuration(credentials="${" + datasource_name + "}")
             context.add_datasource(name=datasource_name, class_name='SqlAlchemyDatasource', **configuration)
+            cli_message(msg_success_database)
             break
         except ModuleNotFoundError as de:
             cli_message(message.format(str(de)))
@@ -703,7 +705,7 @@ def get_batch_kwargs(context,
 
     msg_prompt_enter_data_asset_name = "\nWhich data would you like to use? (Choose one)\n"
 
-    msg_prompt_enter_data_asset_name_suffix = "    Don't see the data asset in the list above?. Just type the name.\n"
+    msg_prompt_enter_data_asset_name_suffix = "    Don't see the data asset in the list above? Just type the name.\n"
 
     data_source = select_datasource(context, datasource_name=datasource_name)
 
@@ -847,7 +849,7 @@ Name the new expectation sute"""
     )
 
     if profiling_results['success']:
-        _build_docs(context)
+        build_docs(context)
         if open_docs:  # This is mostly to keep tests from spawning windows
             data_asset_id = DataAssetIdentifier(datasource=datasource_name, generator=generator_name,
                                                 generator_asset=generator_asset)
@@ -1108,7 +1110,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 break
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
-    _build_docs(context)
+    build_docs(context)
     if open_docs:  # This is mostly to keep tests from spawning windows
         context.open_data_docs()
 
