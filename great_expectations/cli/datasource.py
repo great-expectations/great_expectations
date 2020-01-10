@@ -98,11 +98,8 @@ def datasource_new(directory, view):
 
     datasource_name, data_source_type = add_datasource(context)
 
-    if not datasource_name:  # no datasource was created
-        return
-
-    # TODO do we really want to "profile" every new datasource?
-    profile_datasource(context, datasource_name, open_docs=view)
+    if datasource_name is not None:
+        cli_message("""\n<cyan>Datasource added.</cyan>""")
 
 
 @datasource.command(name="list")
