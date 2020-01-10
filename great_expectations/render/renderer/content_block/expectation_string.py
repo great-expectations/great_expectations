@@ -1420,7 +1420,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "quantile_ranges"]
         )
-        template_str = "Column quantiles must be within the following value ranges:\n\n"
+        template_str = "quantiles must be within the following value ranges."
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -1459,7 +1459,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             "table": table_rows,
             "styling": {
                 "body": {
-                    "classes": ["table", "table-sm", "table-unbordered", "col-4"],
+                    "classes": ["table", "table-sm", "table-unbordered", "col-4", "mt-2"],
                 },
                 "parent": {
                     "styles": {
@@ -1536,7 +1536,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     "graph": chart,
                     "header": header,
                     "styling": {
-                        "classes": ["col-" + str(chart_container_col_width), "mt-1", "pl-1", "pr-1"],
+                        "classes": ["col-" + str(chart_container_col_width), "mt-2", "pl-1", "pr-1"],
                         "parent": {
                             "styles": {
                                 "list-style-type": "none"
@@ -1549,7 +1549,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     "content_block_type": "graph",
                     "graph": chart,
                     "styling": {
-                        "classes": ["col-" + str(chart_container_col_width), "mt-1", "pl-1", "pr-1"],
+                        "classes": ["col-" + str(chart_container_col_width), "mt-2", "pl-1", "pr-1"],
                         "parent": {
                             "styles": {
                                 "list-style-type": "none"
@@ -1568,10 +1568,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         expected_distribution = None
         if not params.get("partition_object"):
-            template_str = "Column can match any distribution."
+            template_str = "can match any distribution."
         else:
             template_str = "Kullback-Leibler (KL) divergence with respect to the following distribution must be " \
-                           "lower than $threshold:\n\n"
+                           "lower than $threshold."
             expected_distribution = cls._get_kl_divergence_chart(params.get("partition_object"))
 
         if include_column_name:
