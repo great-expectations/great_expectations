@@ -133,6 +133,7 @@ class RenderedContentBlockContainer(RenderedComponentContent):
     def to_json_dict(self):
         d = super(RenderedContentBlockContainer, self).to_json_dict()
         d["content_blocks"] = RenderedContent.rendered_content_list_to_json(self.content_blocks)
+        return d
 
 
 class RenderedMarkdownContent(RenderedComponentContent):
