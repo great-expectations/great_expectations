@@ -830,7 +830,7 @@ Press Enter to continue...
 """
 
     msg_prompt_expectation_suite_name = """
-Name the new expectation sute"""
+Name the new expectation suite"""
 
     msg_data_doc_intro = """
 <cyan>========== Data Docs ==========</cyan>"""
