@@ -8,7 +8,7 @@ import sys
 import click
 import datetime
 
-from great_expectations.cli.docs import _build_docs
+from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.util import cli_message, _offer_to_install_new_template
 from great_expectations.datasource import (
@@ -207,7 +207,17 @@ def datasource_profile(datasource_name, data_assets, profile_all_data_assets, di
         )
 
 
-def add_datasource(context):
+def add_datasource(context, choose_one_data_asset=False):
+    """
+    Interactive flow for adding a datasource to an existing context.
+
+    :param context:
+    :param choose_one_data_asset: optional - if True, this signals the method that the intent
+            is to let user choose just one data asset (e.g., a file) and there is no need
+            to configure a generator that comprehensively scans the datasource for data assets
+    :return: a tuple: datasource_name, data_source_type
+    """
+
     msg_prompt_where_is_your_data = """
 What data would you like Great Expectations to connect to?    
     1. Files on a filesystem (for processing with Pandas or Spark)
@@ -219,8 +229,6 @@ What are you processing your files with?
     1. Pandas
     2. PySpark
 """
-
-    msg_success_database = "\n<green>Great Expectations connected to your database!</green>"
 
     # cli_message("\n<cyan>========== Where is your data? ===========</cyan>")
     data_source_location_selection = click.prompt(
@@ -243,7 +251,8 @@ What are you processing your files with?
 
             data_source_type = DatasourceTypes.PANDAS
 
-            datasource_name = _add_pandas_datasource_with_manual_generator(context)
+            datasource_name = _add_pandas_datasource(context, passthrough_generator_only=choose_one_data_asset)
+
         elif data_source_compute_selection == "2":  # Spark
 
             data_source_type = DatasourceTypes.SPARK
@@ -253,7 +262,6 @@ What are you processing your files with?
     else:
         data_source_type = DatasourceTypes.SQL
         datasource_name = _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True)
-        cli_message(msg_success_database)
 
     return datasource_name, data_source_type
 
@@ -285,35 +293,47 @@ def _add_pandas_datasource_with_manual_generator(context):
                                         **configuration)
     return datasource_name
 
-def _add_pandas_datasource(context, prompt_for_datasource_name=True):
-    path = click.prompt(
-        msg_prompt_filesys_enter_base_path,
-        # default='/data/',
-        type=click.Path(
-            exists=True,
-            file_okay=False,
-            dir_okay=True,
-            readable=True
-        ),
-        show_default=True
-    )
-    if path.startswith("./"):
-        path = path[2:]
+def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_datasource_name=True):
+    if passthrough_generator_only:
+        datasource_name = "files_datasource"
 
-    if path.endswith("/"):
-        basenamepath = path[:-1]
-    else:
-        basenamepath = path
-
-    datasource_name = os.path.basename(basenamepath) + "__dir"
-    if prompt_for_datasource_name:
-        datasource_name = click.prompt(
-            msg_prompt_datasource_name,
-            default=datasource_name,
-            show_default=True
+        configuration = PandasDatasource.build_configuration(generators={
+            "default": {
+                "class_name": "PassthroughGenerator",
+            }
+        }
         )
 
-    configuration = PandasDatasource.build_configuration(base_directory=os.path.join("..", path))
+    else:
+        path = click.prompt(
+            msg_prompt_filesys_enter_base_path,
+            # default='/data/',
+            type=click.Path(
+                exists=True,
+                file_okay=False,
+                dir_okay=True,
+                readable=True
+            ),
+            show_default=True
+        )
+        if path.startswith("./"):
+            path = path[2:]
+
+        if path.endswith("/"):
+            basenamepath = path[:-1]
+        else:
+            basenamepath = path
+
+        datasource_name = os.path.basename(basenamepath) + "__dir"
+        if prompt_for_datasource_name:
+            datasource_name = click.prompt(
+                msg_prompt_datasource_name,
+                default=datasource_name,
+                show_default=True
+            )
+
+        configuration = PandasDatasource.build_configuration(base_directory=os.path.join("..", path))
+
     context.add_datasource(name=datasource_name, class_name='PandasDatasource', **configuration)
     return datasource_name
 
@@ -348,6 +368,8 @@ def load_library(library_name, install_instructions_string=None):
 
 
 def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
+    msg_success_database = "\n<green>Great Expectations connected to your database!</green>"
+
     if not load_library("sqlalchemy"):
         return None
 
@@ -387,6 +409,8 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                 return None
             credentials = _collect_mysql_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.POSTGRES:
+            if not load_library("psycopg2"):
+                return None
             credentials = _collect_postgres_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.REDSHIFT:
             if not load_library("psycopg2"):
@@ -416,6 +440,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             cli_message("<cyan>Attempting to connect to your database. This may take a moment...</cyan>")
             configuration = SqlAlchemyDatasource.build_configuration(credentials="${" + datasource_name + "}")
             context.add_datasource(name=datasource_name, class_name='SqlAlchemyDatasource', **configuration)
+            cli_message(msg_success_database)
             break
         except ModuleNotFoundError as de:
             cli_message(message.format(str(de)))
@@ -703,7 +728,7 @@ def get_batch_kwargs(context,
 
     msg_prompt_enter_data_asset_name = "\nWhich data would you like to use? (Choose one)\n"
 
-    msg_prompt_enter_data_asset_name_suffix = "    Don't see the data asset in the list above?. Just type the name.\n"
+    msg_prompt_enter_data_asset_name_suffix = "    Don't see the data asset in the list above? Just type the name.\n"
 
     data_source = select_datasource(context, datasource_name=datasource_name)
 
@@ -847,7 +872,7 @@ Name the new expectation sute"""
     )
 
     if profiling_results['success']:
-        _build_docs(context)
+        build_docs(context)
         if open_docs:  # This is mostly to keep tests from spawning windows
             data_asset_id = DataAssetIdentifier(datasource=datasource_name, generator=generator_name,
                                                 generator_asset=generator_asset)
@@ -1041,7 +1066,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
     # Call the data context's profiling method to check if the arguments are valid
     profiling_results = context.profile_datasource(
         datasource_name,
-        data_asset_names=data_assets,
+        data_assets=data_assets,
         profile_all_data_assets=profile_all_data_assets,
         max_data_assets=max_data_assets,
         dry_run=True,
@@ -1052,7 +1077,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         if data_assets or profile_all_data_assets or click.confirm(msg_confirm_ok_to_proceed.format(datasource_name), default=True):
             profiling_results = context.profile_datasource(
                 datasource_name,
-                data_asset_names=data_assets,
+                data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 max_data_assets=max_data_assets,
                 dry_run=False,
@@ -1097,18 +1122,18 @@ Great Expectations is building Data Docs from the data you just profiled!"""
             # (no dry run this time)
             profiling_results = context.profile_datasource(
                 datasource_name,
-                data_asset_names=data_assets,
+                data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 max_data_assets=max_data_assets,
                 dry_run=False,
                 additional_batch_kwargs=additional_batch_kwargs
             )
 
-            if profiling_results.success:  # data context is ready to profile
+            if profiling_results["success"]:  # data context is ready to profile
                 break
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
-    _build_docs(context)
+    build_docs(context)
     if open_docs:  # This is mostly to keep tests from spawning windows
         context.open_data_docs()
 
