@@ -384,6 +384,9 @@ class ConfigOnlyDataContext(object):
     def get_docs_sites_urls(self, resource_identifier=None):
         """
         Get URLs for a resource for all data docs sites.
+        
+        This function will return URLs for any configured site even if the sites have not
+        been built yet.
 
         :param resource_identifier: optional. It can be an identifier of ExpectationSuite's,
                 ValidationResults and other resources that have typed identifiers.
