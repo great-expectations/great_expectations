@@ -228,13 +228,14 @@ class TextContent(RenderedComponentContent):
 
 
 class CollapseContent(RenderedComponentContent):
-    def __init__(self, collapse, collapse_toggle_link_text=None, header=None, subheader=None, styling=None,
-                 content_block_type="collapse"):
+    def __init__(self, collapse, collapse_toggle_link=None, header=None, subheader=None, styling=None,
+                 content_block_type="collapse", inline_link=False):
         super(CollapseContent, self).__init__(content_block_type=content_block_type, styling=styling)
-        self.collapse_toggle_link_text = collapse_toggle_link_text
+        self.collapse_toggle_link = collapse_toggle_link
         self.header = header
         self.subheader = subheader
         self.collapse = collapse
+        self.inline_link = inline_link
 
     def to_json_dict(self):
         d = super(CollapseContent, self).to_json_dict()
@@ -248,9 +249,13 @@ class CollapseContent(RenderedComponentContent):
                 d["subheader"] = self.subheader.to_json_dict()
             else:
                 d["subheader"] = self.subheader
-        if self.collapse_toggle_link_text is not None:
-            d["collapse_toggle_link_text"] = self.collapse_toggle_link_text
+        if self.collapse_toggle_link is not None:
+            if isinstance(self.collapse_toggle_link, RenderedContent):
+                d["collapse_toggle_link"] = self.collapse_toggle_link.to_json_dict()
+            else:
+                d["collapse_toggle_link"] = self.collapse_toggle_link
         d["collapse"] = RenderedContent.rendered_content_list_to_json(self.collapse)
+        d["inline_link"] = self.inline_link
 
         return d
 
