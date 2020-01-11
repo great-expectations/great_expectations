@@ -283,7 +283,7 @@ def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
         assert result.exit_code == 0
 
 
-def test_cli_profile_answering_no(empty_data_context, filesystem_csv_2, capsys):
+def test_cli_datasource_profile_answering_no(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource(
         "my_datasource",
         module_name="great_expectations.datasource",
@@ -313,7 +313,7 @@ def test_cli_profile_answering_no(empty_data_context, filesystem_csv_2, capsys):
         assert "Skipping profiling for now." in stdout
 
 
-def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, capsys):
+def test_cli_datasource_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource(
         "my_datasource",
         module_name="great_expectations.datasource",
@@ -335,22 +335,126 @@ def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, c
                 project_root_dir,
                 "--no-view",
             ],
-            input="Y\n"
+            input="Y\n",
         )
-
+        assert result.exit_code == 0
         stdout = result.stdout
         assert "Profiling 'my_datasource'" in stdout
         assert result.exit_code == 0
 
     context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
+
     expectations_store = context.stores["expectations_store"]
     suites = expectations_store.list_keys()
     assert len(suites) == 1
     assert suites[0].expectation_suite_name == "BasicDatasetProfiler"
 
+    validations_store = context.stores["validations_store"]
+    validation_keys = validations_store.list_keys()
+    assert len(validation_keys) == 1
 
-def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
+    validation = validations_store.get(validation_keys[0])
+    assert validation.meta["expectation_suite_name"] == "BasicDatasetProfiler"
+    assert validation.success is False
+    assert len(validation.results) == 13
+
+
+def test_cli_datasource_profile_with_no_datasource_args(
+    empty_data_context, filesystem_csv_2, capsys
+):
+    empty_data_context.add_datasource(
+        "my_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        base_directory=str(filesystem_csv_2),
+    )
+    not_so_empty_data_context = empty_data_context
+
+    project_root_dir = not_so_empty_data_context.root_directory
+
+    with capsys.disabled():
+        runner = CliRunner()
+        result = runner.invoke(
+            cli,
+            ["datasource", "profile", "-d", project_root_dir, "--no-view"],
+            input="Y\n",
+        )
+        assert result.exit_code == 0
+        stdout = result.stdout
+        assert "Profiling 'my_datasource'" in stdout
+        assert "The following Data Docs sites were built:\n- local_site:" in stdout
+
+    context = DataContext(project_root_dir)
+    assert len(context.list_datasources()) == 1
+
+    expectations_store = context.stores["expectations_store"]
+    suites = expectations_store.list_keys()
+    assert len(suites) == 1
+    assert suites[0].expectation_suite_name == "BasicDatasetProfiler"
+
+    validations_store = context.stores["validations_store"]
+    validation_keys = validations_store.list_keys()
+    assert len(validation_keys) == 1
+
+    validation = validations_store.get(validation_keys[0])
+    assert validation.meta["expectation_suite_name"] == "BasicDatasetProfiler"
+    assert validation.success is False
+    assert len(validation.results) == 13
+
+
+def test_cli_datasource_profile_with_additional_batch_kwargs(empty_data_context, filesystem_csv_2):
+    empty_data_context.add_datasource(
+        "my_datasource",
+        class_name="PandasDatasource",
+        base_directory=str(filesystem_csv_2),
+    )
+    not_so_empty_data_context = empty_data_context
+
+    project_root_dir = not_so_empty_data_context.root_directory
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "datasource",
+            "profile",
+            "-d",
+            project_root_dir,
+            "--batch_kwargs",
+            '{"reader_options": {"sep": ",", "parse_dates": [0]}}',
+            "--no-view",
+        ],
+        input="Y\n",
+    )
+    assert result.exit_code == 0
+
+    context = DataContext(project_root_dir)
+    assert len(context.list_datasources()) == 1
+
+    expectations_store = context.stores["expectations_store"]
+    suites = expectations_store.list_keys()
+    assert len(suites) == 1
+    assert suites[0].expectation_suite_name == "BasicDatasetProfiler"
+
+    validations_store = context.stores["validations_store"]
+    validation_keys = validations_store.list_keys()
+    assert len(validation_keys) == 1
+
+    validation = validations_store.get(validation_keys[0])
+    assert validation.meta["expectation_suite_name"] == "BasicDatasetProfiler"
+    assert validation.success is False
+    assert len(validation.results) == 8
+
+    evr = context.get_validation_result(
+        "f1", expectation_suite_name="BasicDatasetProfiler"
+    )
+    reader_options = evr.meta["batch_kwargs"]["reader_options"]
+    assert reader_options["parse_dates"] == [0]
+    assert reader_options["sep"] == ","
+
+
+def test_cli_datasource_profile_with_valid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource("my_datasource",
                                     module_name="great_expectations.datasource",
                                     class_name="PandasDatasource",
@@ -362,95 +466,68 @@ def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
     with capsys.disabled():
         runner = CliRunner()
         result = runner.invoke(
-            cli, ["datasource", "profile", "-d", project_root_dir, "--no-view"])
+            cli, ["datasource", "profile", "my_datasource", "--data_assets", "f1", "-d", project_root_dir, "--no-view"])
 
-        # TODO remove all this after profiling works
-        print(result.stdout)
-        print(result.output)
-        print(result)
-        print(result.exception)
+        assert result.exit_code == 0
+        stdout = result.stdout
+        assert "Profiling 'my_datasource'" in stdout
+        assert "The following Data Docs sites were built:\n- local_site:" in stdout
 
-        assert "Profiling 'my_datasource'" in result.stdout
-        assert "Please review results using data-docs." in result.stdout
-        # TODO make this test actually verify that profiling happened
-        assert False
+    context = DataContext(project_root_dir)
+    assert len(context.list_datasources()) == 1
+
+    expectations_store = context.stores["expectations_store"]
+    suites = expectations_store.list_keys()
+    assert len(suites) == 1
+    assert suites[0].expectation_suite_name == "BasicDatasetProfiler"
+
+    validations_store = context.stores["validations_store"]
+    validation_keys = validations_store.list_keys()
+    assert len(validation_keys) == 1
+
+    validation = validations_store.get(validation_keys[0])
+    assert validation.meta["expectation_suite_name"] == "BasicDatasetProfiler"
+    assert validation.success is False
+    assert len(validation.results) == 13
 
 
-def test_cli_profile_with_additional_batch_kwargs(empty_data_context, filesystem_csv_2, capsys):
+def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(empty_data_context, filesystem_csv_2):
     empty_data_context.add_datasource(
         "my_datasource",
+        module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2))
+        base_directory=str(filesystem_csv_2),
+    )
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
 
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["profile", "-d", project_root_dir, "--batch_kwargs", '{"reader_options": {"sep": ",", "parse_dates": ['
-                                                                   '0]}}',
-              "--no-view"])
-    evr = not_so_empty_data_context.get_validation_result("f1", expectation_suite_name="BasicDatasetProfiler")
+        cli,
+        [
+            "datasource",
+            "profile",
+            "my_datasource",
+            "--data_assets",
+            "bad-bad-asset",
+            "-d",
+            project_root_dir,
+            "--no-view",
+        ],
+        input="2\n",
+    )
 
-    assert evr.meta["batch_kwargs"]["reader_options"]["parse_dates"] == [0]
-    assert evr.meta["batch_kwargs"]["reader_options"]["sep"] == ","
+    stdout = result.stdout
+    assert "Some of the data assets you specified were not found: bad-bad-asset" in stdout
+    assert "Skipping profiling for now." in stdout
 
-def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource("my_datasource",
-                                    module_name="great_expectations.datasource",
-                                    class_name="PandasDatasource",
-                                    base_directory=str(filesystem_csv_2))
-    not_so_empty_data_context = empty_data_context
+    context = DataContext(project_root_dir)
+    assert len(context.list_datasources()) == 1
 
-    project_root_dir = not_so_empty_data_context.root_directory
-    # print(project_root_dir)
-
-    # For some reason, even with this logging change (which is required and done in main of the cli)
-    # the click cli runner does not pick up output; capsys appears to intercept it first
-    logger = logging.getLogger("great_expectations")
-    handler = logging.StreamHandler(stream=sys.stdout)
-    formatter = logging.Formatter(
-        '%(levelname)s %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
-    runner = CliRunner()
-    result = runner.invoke(
-        cli, ["profile", "my_datasource", "--data_assets", "f1", "-d", project_root_dir, "--no-view"])
-
-    captured = capsys.readouterr()
-
-    assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
-    assert "Please review results using data-docs." in captured.out
-    logger.removeHandler(handler)
-
-def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
-    empty_data_context.add_datasource("my_datasource",
-                                    module_name="great_expectations.datasource",
-                                    class_name="PandasDatasource",
-                                    base_directory=str(filesystem_csv_2))
-    not_so_empty_data_context = empty_data_context
-
-    project_root_dir = not_so_empty_data_context.root_directory
-    # print(project_root_dir)
-
-    # For some reason, even with this logging change (which is required and done in main of the cli)
-    # the click cli runner does not pick up output; capsys appears to intercept it first
-    logger = logging.getLogger("great_expectations")
-    handler = logging.StreamHandler(stream=sys.stdout)
-    formatter = logging.Formatter(
-        '%(levelname)s %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
-    runner = CliRunner()
-    result = runner.invoke(
-        cli, ["profile", "my_datasource", "--data_assets", "bad-bad-asset", "-d", project_root_dir, "--no-view"],
-    input="2\n")
-
-    assert "Some of the data assets you specified were not found: bad-bad-asset" in result.output
-    
-    logger.removeHandler(handler)
+    expectations_store = context.stores["expectations_store"]
+    suites = expectations_store.list_keys()
+    assert len(suites) == 0
 
 
 def test_cli_config_not_found(tmp_path_factory):
