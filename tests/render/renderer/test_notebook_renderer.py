@@ -269,7 +269,7 @@ def test_simple_suite(critical_suite):
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
@@ -391,7 +391,7 @@ def test_complex_suite(warning_suite):
             },
             {
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {

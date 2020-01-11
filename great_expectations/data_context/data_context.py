@@ -396,7 +396,7 @@ class ConfigOnlyDataContext(object):
 
         site_urls = []
 
-        site_names=None
+        site_names = None
         sites = self._project_config_with_variables_substituted.get('data_docs_sites', [])
         if sites:
             logger.debug("Found data_docs_sites. Building sites...")
