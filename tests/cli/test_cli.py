@@ -270,7 +270,7 @@ def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
         runner = CliRunner()
         result = runner.invoke(
             cli,
-            ["datasource", "new", "-d", project_root_dir, "--no-view"],
+            ["datasource", "new", "-d", project_root_dir],
             input="1\n1\n%s\nmynewsource\n" % str(filesystem_csv_2),
         )
         stdout = result.stdout
@@ -545,9 +545,9 @@ def test_cli_config_not_found(tmp_path_factory):
         assert error_message in result.output
 
         # datasource new
-        result = runner.invoke(cli, ["datasource", "new", "-d", "./", "--no-view"])
+        result = runner.invoke(cli, ["datasource", "new", "-d", "./"])
         assert error_message in result.output
-        result = runner.invoke(cli, ["datasource", "new", "--no-view"])
+        result = runner.invoke(cli, ["datasource", "new"])
         assert error_message in result.output
 
         # datasource profile
