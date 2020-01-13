@@ -257,41 +257,13 @@ What are you processing your files with?
 
             data_source_type = DatasourceTypes.SPARK
 
-            # TODO: create a Spark datasource with a passthrough generator
-            datasource_name = _add_spark_datasource(context, prompt_for_datasource_name=True)
+            datasource_name = _add_spark_datasource(context, passthrough_generator_only=choose_one_data_asset)
     else:
         data_source_type = DatasourceTypes.SQL
         datasource_name = _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True)
 
     return datasource_name, data_source_type
 
-
-def _add_pandas_datasource_with_manual_generator(context):
-    """
-    Add a Pandas datasource to the context without configuring any "opinionated" generators.
-    Only a manual generator is added.
-
-    :param context:
-    :return:
-    """
-
-    datasource_name = "files_datasource"
-    # datasource_name = click.prompt(
-    #     msg_prompt_datasource_name,
-    #     default=datasource_name,
-    #     show_default=True
-    # )
-
-    configuration = PandasDatasource.build_configuration(generators={
-                                                             "default": {
-                                                                 "class_name": "PassthroughGenerator",
-                                                             }
-                                                         }
-                                                         )
-    datasource = context.add_datasource(name=datasource_name,
-                                        class_name='PandasDatasource',
-                                        **configuration)
-    return datasource_name
 
 def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_datasource_name=True):
     if passthrough_generator_only:
@@ -358,10 +330,10 @@ def load_library(library_name, install_instructions_string=None):
         return True
     except ModuleNotFoundError as e:
         if install_instructions_string:
-            cli_message("""<red>ERROR: Great Expectations relies on the library `{}` to connect to your database.</red>
+            cli_message("""<red>ERROR: Great Expectations relies on the library `{}` to connect to your data.</red>
             - Please `{}` before trying again.""".format(library_name, install_instructions_string))
         else:
-            cli_message("""<red>ERROR: Great Expectations relies on the library `{}` to connect to your database.</red>
+            cli_message("""<red>ERROR: Great Expectations relies on the library `{}` to connect to your data.</red>
       - Please `pip install {}` before trying again.""".format(library_name, library_name))
 
         return False
@@ -608,35 +580,53 @@ def _collect_redshift_credentials(default_credentials={}):
 
     return credentials
 
-def _add_spark_datasource(context, prompt_for_datasource_name=True):
-    path = click.prompt(
-        msg_prompt_filesys_enter_base_path,
-        # default='/data/',
-        type=click.Path(
-            exists=True,
-            file_okay=False,
-            dir_okay=True,
-            readable=True
-        ),
-        show_default=True
-    )
-    if path.startswith("./"):
-        path = path[2:]
+def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_datasource_name=True):
+    if not load_library("pyspark"):
+        return None
 
-    if path.endswith("/"):
-        path = path[:-1]
+    if passthrough_generator_only:
+        datasource_name = "files_spark_datasource"
 
-    datasource_name = os.path.basename(path) + "__dir"
-    if prompt_for_datasource_name:
-        datasource_name = click.prompt(
-            msg_prompt_datasource_name,
-            default=datasource_name,
-            show_default=True
+        configuration = SparkDFDatasource.build_configuration(generators={
+            "default": {
+                "class_name": "PassthroughGenerator",
+            }
+        }
         )
 
-    configuration = SparkDFDatasource.build_configuration(base_directory=os.path.join("..", path))
+    else:
+        path = click.prompt(
+            msg_prompt_filesys_enter_base_path,
+            # default='/data/',
+            type=click.Path(
+                exists=True,
+                file_okay=False,
+                dir_okay=True,
+                readable=True
+            ),
+            show_default=True
+        )
+        if path.startswith("./"):
+            path = path[2:]
+
+        if path.endswith("/"):
+            basenamepath = path[:-1]
+        else:
+            basenamepath = path
+
+        datasource_name = os.path.basename(basenamepath) + "__dir"
+        if prompt_for_datasource_name:
+            datasource_name = click.prompt(
+                msg_prompt_datasource_name,
+                default=datasource_name,
+                show_default=True
+            )
+
+        configuration = SparkDFDatasource.build_configuration(base_directory=os.path.join("..", path))
+
     context.add_datasource(name=datasource_name, class_name='SparkDFDatasource', **configuration)
     return datasource_name
+
 
 def select_datasource(context, datasource_name=None):
     msg_prompt_select_data_source = "Select data source"
@@ -777,9 +767,9 @@ def get_batch_kwargs(context,
 
 
         if isinstance(context.get_datasource(datasource_name), (PandasDatasource, SparkDFDatasource)):
-            generator_asset, batch_kwargs = _load_file_as_data_asset_from_pandas_datasource(context, datasource_name,
-                                                                                            generator_name=generator_name,
-                                                                                            generator_asset=generator_asset)
+            generator_asset, batch_kwargs = _load_file_from_filesystem_as_data_asset(context, datasource_name,
+                                                                                     generator_name=generator_name,
+                                                                                     generator_asset=generator_asset)
         elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
             generator_asset, batch_kwargs = _load_query_as_data_asset_from_sqlalchemy_datasource(context,
                                                                                                  datasource_name,
@@ -898,9 +888,9 @@ Name the new expectation suite"""
 
 
 
-def _load_file_as_data_asset_from_pandas_datasource(context, datasource_name,
-                                                    generator_name=None,
-                                                    generator_asset=None):
+def _load_file_from_filesystem_as_data_asset(context, datasource_name,
+                                             generator_name=None,
+                                             generator_asset=None):
     msg_prompt_file_path = """
 Enter the path (relative or absolute) of a data file
 """
@@ -924,12 +914,17 @@ We could not determine the format of the file. What is it?
         "4": "json", # ReaderMethods.json
     }
 
+    datasource = context.get_datasource(datasource_name)
+
+    # We should allow a directory for Spark, but not for Pandas
+    dir_okay = isinstance(datasource, SparkDFDatasource)
+
     path = click.prompt(
         msg_prompt_file_path,
         type=click.Path(
             exists=True,
             file_okay=True,
-            dir_okay=False,
+            dir_okay=dir_okay,
             readable=True
         ),
         show_default=True
@@ -951,11 +946,8 @@ We could not determine the format of the file. What is it?
             show_default=True
         )
 
-    datasource = context.get_datasource(datasource_name)
-
     batch_kwargs = {"path": path}
 
-    reader_method = None
     reader_method = datasource.guess_reader_method_from_path(path)
 
     if reader_method is None:
