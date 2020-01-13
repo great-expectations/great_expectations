@@ -93,20 +93,25 @@ def test_project_check_on_missing_ge_dir():
     assert result.exit_code == 1
 
 
-@pytest.mark.skip()
-def test_project_check_on_valid_project(empty_data_context):
-    # TODO this needs a better fixture. Titanic seems busted for this use case.
-    assert False
-
+def test_project_check_on_valid_project(titanic_data_context):
+    project_dir = titanic_data_context.root_directory
     runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        ["project", "check-config"],
-    )
-    print(result.output)
+    result = runner.invoke(cli, ["project", "check-config", "-d", project_dir])
     assert "Checking your config files for validity" in result.output
     assert "Your config file appears valid" in result.output
     assert result.exit_code == 0
+
+
+def test_project_check_on_invalid_project(titanic_data_context):
+    project_dir = titanic_data_context.root_directory
+    # Remove the config file.
+    os.remove(os.path.join(project_dir, "great_expectations.yml"))
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["project", "check-config", "-d", project_dir])
+    assert result.exit_code == 1
+    assert "Checking your config files for validity" in result.output
+    assert "Unfortunately, your config appears to be invalid" in result.output
 
 
 def test_cli_version():
