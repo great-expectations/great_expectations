@@ -72,6 +72,6 @@ OK. You now have a new config file: `{}`.
 """
 
 NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please add one by:
-  - running `<green>great_expectations add-datasource</green>` or
+  - running `<green>great_expectations datasource new</green>` or
   - by editing the {} file
 """.format(DataContext.GE_YML)

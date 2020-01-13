@@ -81,12 +81,7 @@ def datasource():
     default=None,
     help="The project's great_expectations directory."
 )
-@click.option(
-    "--view/--no-view",
-    help="By default open in browser unless you specify the --no-view flag",
-    default=True
-)
-def datasource_new(directory, view):
+def datasource_new(directory):
     """Add a new datasource to the data context."""
     try:
         context = DataContext(directory)
@@ -98,11 +93,10 @@ def datasource_new(directory, view):
 
     datasource_name, data_source_type = add_datasource(context)
 
+    cli_message("A new datasource '{}' was added to your project.".format(datasource_name))
+
     if not datasource_name:  # no datasource was created
         return
-
-    # TODO do we really want to "profile" every new datasource?
-    profile_datasource(context, datasource_name, open_docs=view)
 
 
 @datasource.command(name="list")
@@ -139,13 +133,13 @@ def datasource_list(directory):
     default=None,
     help="The project's great_expectations directory."
 )
-@click.option('--batch_kwargs', default=None,
-              help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
 @click.option(
     "--view/--no-view",
     help="By default open in browser unless you specify the --no-view flag",
     default=True
 )
+@click.option('--batch_kwargs', default=None,
+              help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
 def datasource_profile(datasource_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
     """
     Profile a datasource
@@ -1133,7 +1127,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 break
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
-    build_docs(context)
+    build_docs(context, view=open_docs)
     if open_docs:  # This is mostly to keep tests from spawning windows
         context.open_data_docs()
 
