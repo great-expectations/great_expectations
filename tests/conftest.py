@@ -12,7 +12,7 @@ import great_expectations as ge
 from great_expectations.core import ExpectationConfiguration, ExpectationValidationResult, expectationSuiteSchema, \
     ExpectationSuite
 from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.data_context.util import safe_mmkdir
+from great_expectations.data_context.util import safe_mmkdir, file_relative_path
 
 from .test_utils import get_dataset, expectationSuiteValidationResultSchema
 
@@ -516,10 +516,10 @@ def titanic_data_context(tmp_path_factory):
     safe_mmkdir(os.path.join(context_path, "expectations"), exist_ok=True)
     data_path = os.path.join(context_path, "../data")
     safe_mmkdir(os.path.join(data_path), exist_ok=True)
-    shutil.copy("./tests/test_fixtures/great_expectations_titanic.yml",
-                str(os.path.join(context_path, "great_expectations.yml")))
-    shutil.copy("./tests/test_sets/Titanic.csv",
-                str(os.path.join(context_path, "../data/Titanic.csv")))
+    titanic_yml_path = file_relative_path(__file__, "./test_fixtures/great_expectations_titanic.yml")
+    shutil.copy(titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml")))
+    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
+    shutil.copy(titanic_csv_path, str(os.path.join(context_path, "../data/Titanic.csv")))
     return ge.data_context.DataContext(context_path)
 
 
