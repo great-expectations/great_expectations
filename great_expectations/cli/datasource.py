@@ -930,16 +930,10 @@ We could not determine the format of the file. What is it?
         show_default=True
     )
 
-    if path.startswith("./"):
-        path = path[2:]
-
-    if path.endswith("/"):
-        basenamepath = path[:-1]
-    else:
-        basenamepath = path
+    path = os.path.abspath(path)
 
     if generator_asset is None:
-        generator_asset = os.path.splitext(os.path.basename(basenamepath))[0]
+        generator_asset = os.path.splitext(os.path.basename(path))[0]
         generator_asset = click.prompt(
             msg_prompt_data_asset_name,
             default=generator_asset,
