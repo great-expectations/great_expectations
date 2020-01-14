@@ -8,7 +8,6 @@ from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.util import gen_directory_tree_str
 
 
 @pytest.mark.skip(reason="TBD if this behavior is desired")
@@ -118,9 +117,11 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     assert "to fix the missing files!" not in stdout
     assert "Would you like to build & view this project's Data Docs!?" in stdout
 
-    # DataContext should not write to disk unless you explicitly tell it to
     assert os.path.isdir(uncommitted_dir)
-    assert os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml"))
+    config_var_path = os.path.join(uncommitted_dir, "config_variables.yml")
+    assert os.path.isfile(config_var_path)
+    with open(config_var_path, "r") as f:
+        assert f.read() == CONFIG_VARIABLES_TEMPLATE
 
 
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_fixing_them(
