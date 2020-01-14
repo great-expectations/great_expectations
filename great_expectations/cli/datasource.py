@@ -971,10 +971,6 @@ def _load_query_as_data_asset_from_sqlalchemy_datasource(context, datasource_nam
 Enter an SQL query
 """
 
-    msg_prompt_data_asset_name = """
-Give your new data asset a short name
-"""
-
     datasource = context.get_datasource(datasource_name)
 
     while True:
