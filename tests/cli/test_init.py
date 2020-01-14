@@ -175,117 +175,40 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_f
     assert not os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml"))
 
 
-@pytest.mark.skip()
-def test_cli_init_on_existing_ge_yml_with_missing_uncommitted_dirs_and_missing_config_variables_yml(
+def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     tmp_path_factory,
 ):
     """
-    This test walks through an onboarding experience.
+    This test walks through the onboarding experience.
 
-    The user just is missing some uncommitted dirs and is missing
-    config_variables.yml
+    The user just checked an existing project out of source control and does
+    not yet have an uncommitted directory.
     """
-    tmp_dir = str(tmp_path_factory.mktemp("more_stuff"))
-    ge_dir = os.path.join(tmp_dir, "great_expectations")
-    curdir = os.path.abspath(os.getcwd())
-    os.chdir(tmp_dir)
+    root_dir = tmp_path_factory.mktemp("hiya")
+    root_dir = str(root_dir)
+    os.makedirs(os.path.join(root_dir, "data"))
+    data_path = os.path.join(root_dir, "data/Titanic.csv")
+    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    shutil.copy(fixture_path, data_path)
+
     runner = CliRunner()
-    runner.invoke(cli, ["init", "--no-view"], input="Y\n4\n")
-    # mangle setup
-    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
-    shutil.rmtree(os.path.join(uncommitted_dir, "data_docs"))
-    config_var_path = os.path.join(uncommitted_dir, "config_variables.yml")
-    os.remove(config_var_path)
-    # sanity check
-    assert not os.path.isfile(config_var_path)
+    result = runner.invoke(
+        cli,
+        ["init", "--no-view", "-d", root_dir],
+        input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
+    )
+    stdout = result.output
+    assert result.exit_code == 0
+    print(stdout)
 
-    try:
-        result = runner.invoke(cli, ["init", "--no-view"], input="Y\n")
-
-        # check dir structure
-        dir_structure = gen_directory_tree_str(ge_dir)
-        print(dir_structure)
-        assert (
-            dir_structure
-            == """\
-great_expectations/
-    .gitignore
-    great_expectations.yml
-    datasources/
-    expectations/
-    notebooks/
-        pandas/
-            create_expectations.ipynb
-            validation_playground.ipynb
-        spark/
-            create_expectations.ipynb
-            validation_playground.ipynb
-        sql/
-            create_expectations.ipynb
-            validation_playground.ipynb
-    plugins/
-        custom_data_docs/
-            renderers/
-            styles/
-                data_docs_custom_styles.css
-            views/
-    uncommitted/
-        config_variables.yml
-        data_docs/
-        samples/
-        validations/
-"""
-        )
-        # check config_variables.yml
-        with open(config_var_path, "r") as f:
-            obs_yml = f.read()
-        assert obs_yml == CONFIG_VARIABLES_TEMPLATE
-
-        # Check CLI output
-        obs = result.output
-        assert (
-            "To run locally, we need some files that are not in source control." in obs
-        )
-        assert "You may see new files in" in obs
-        assert "Let's add Great Expectations to your project, by scaffolding" not in obs
-
-        assert "open a tutorial notebook" not in obs
-    except:
-        raise
-    finally:
-        os.chdir(curdir)
-
-
-@pytest.mark.skip()
-def test_cli_init_does_not_prompt_to_fix_if_all_uncommitted_dirs_exist(
-    tmp_path_factory,
-):
-    """This test walks through an already onboarded project."""
-    tmp_dir = str(tmp_path_factory.mktemp("test_cli_init_on_existing_ge_yml"))
-    curdir = os.path.abspath(os.getcwd())
-    os.chdir(tmp_dir)
+    # Test the second invocation of init
     runner = CliRunner()
-    runner.invoke(cli, ["init", "--no-view"], input="Y\n4\n")
+    result = runner.invoke(cli, ["init", "--no-view", "-d", root_dir], input="n\n")
+    stdout = result.stdout
+    print(stdout)
 
-    try:
-        result = runner.invoke(cli, ["init", "--no-view"])
-        assert result.exit_code == 0
-        obs = result.output
-
-        # Users should see:
-        assert "This looks like an existing project" in obs
-        assert "appears complete" in obs
-        assert "ready to roll." in obs
-
-        # Users should NOT see:
-        assert (
-            "Great Expectations needs some directories that are not in source control."
-            not in obs
-        )
-        assert "You may see new directories in" not in obs
-        assert "Let's add Great Expectations to your project, by scaffolding" not in obs
-        assert "open a tutorial notebook" not in obs
-    except:
-        raise
-    finally:
-        os.chdir(curdir)
+    assert result.exit_code == 0
+    assert "This looks like an existing project that" in stdout
+    assert "appears complete" in stdout
+    assert "ready to roll" in stdout
+    assert "Would you like to build & view this project's Data Docs" in stdout
