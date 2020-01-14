@@ -16,6 +16,7 @@ import re
 from ruamel.yaml import YAML
 
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import ConfigNotFoundError
 
 
@@ -93,20 +94,25 @@ def test_project_check_on_missing_ge_dir():
     assert result.exit_code == 1
 
 
-@pytest.mark.skip()
-def test_project_check_on_valid_project(empty_data_context):
-    # TODO this needs a better fixture. Titanic seems busted for this use case.
-    assert False
-
+def test_project_check_on_valid_project(titanic_data_context):
+    project_dir = titanic_data_context.root_directory
     runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        ["project", "check-config"],
-    )
-    print(result.output)
+    result = runner.invoke(cli, ["project", "check-config", "-d", project_dir])
     assert "Checking your config files for validity" in result.output
     assert "Your config file appears valid" in result.output
     assert result.exit_code == 0
+
+
+def test_project_check_on_invalid_project(titanic_data_context):
+    project_dir = titanic_data_context.root_directory
+    # Remove the config file.
+    os.remove(os.path.join(project_dir, "great_expectations.yml"))
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["project", "check-config", "-d", project_dir])
+    assert result.exit_code == 1
+    assert "Checking your config files for validity" in result.output
+    assert "Unfortunately, your config appears to be invalid" in result.output
 
 
 def test_cli_version():
@@ -116,49 +122,69 @@ def test_cli_version():
     assert ge_version in str(result.output)
 
 
-@pytest.mark.skip()
 def test_cli_init_on_new_project(tmp_path_factory):
+    curdir = os.path.abspath(os.getcwd())
+
     try:
         basedir = tmp_path_factory.mktemp("test_cli_init_diff")
         basedir = str(basedir)
         os.makedirs(os.path.join(basedir, "data"))
-        curdir = os.path.abspath(os.getcwd())
-        shutil.copy(
-            "./tests/test_sets/Titanic.csv",
-            str(os.path.join(basedir, "data/Titanic.csv"))
-        )
+        data_path = os.path.join(basedir, "data/Titanic.csv")
+        fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
+        shutil.copy(fixture_path, data_path)
 
         os.chdir(basedir)
 
         runner = CliRunner()
-        result = runner.invoke(cli, ["init", "--no-view"], input="Y\n1\n%s\n\nn\n\n" % str(
-            os.path.join(basedir, "data")))
+        result = runner.invoke(
+            cli,
+            ["init", "--no-view"],
+            input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
+        )
+        stdout = result.output
 
-        print(result.output)
-        print("result.output length:", len(result.output))
+        assert len(stdout) < 2000, "CLI output is unreasonably long."
 
-        assert len(result.output) < 10000, "CLI output is unreasonably long."
-        assert len(re.findall(
-            "{", result.output)) < 100, "CLI contains way more '{' than we would reasonably expect."
-
-        assert """Always know what to expect from your data""" in result.output
-        assert """Let's add Great Expectations to your project""" in result.output
+        assert "Always know what to expect from your data" in stdout
+        assert "What data would you like Great Expectations to connect to" in stdout
+        assert "What are you processing your files with" in stdout
+        assert "Enter the path (relative or absolute) of a data file" in stdout
+        assert "Give your new data asset a short name" in stdout
+        assert "Name the new expectation suite [warning]" in stdout
+        assert (
+            "Great Expectations will choose a couple of columns and generate expectations about them"
+            in stdout
+        )
+        assert "Profiling Titanic" in stdout
+        assert "Building" in stdout
+        assert "Data Docs" in stdout
+        assert "Great Expectations is now set up" in stdout
 
         assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-        assert os.path.isfile(os.path.join(
-            basedir, "great_expectations/great_expectations.yml"))
-        config = yaml.load(
-            open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
-        assert config["datasources"]["data__dir"]["class_name"] == "PandasDatasource"
+        config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
+        assert os.path.isfile(config_path)
 
+        config = yaml.load(open(config_path, "r"))
+        data_source_class = config["datasources"]["files_datasource"]["data_asset_type"]["class_name"]
+        assert data_source_class == "PandasDataset"
 
-        print(gen_directory_tree_str(os.path.join(basedir, "great_expectations")))
-        assert gen_directory_tree_str(os.path.join(basedir, "great_expectations")) == """\
+        obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+
+        # Instead of monkey patching datetime, just regex out the time directories
+        date_safe_obs_tree = re.sub(r"\d*T\d*\.\d*Z", "9999.9999", obs_tree)
+
+        assert (
+            date_safe_obs_tree
+            == """\
 great_expectations/
     .gitignore
     great_expectations.yml
     datasources/
     expectations/
+        files_datasource/
+            default/
+                Titanic/
+                    warning.json
     notebooks/
         pandas/
             create_expectations.ipynb
@@ -178,12 +204,76 @@ great_expectations/
     uncommitted/
         config_variables.yml
         data_docs/
+            local_site/
+                index.html
+                expectations/
+                    files_datasource/
+                        default/
+                            Titanic/
+                                warning.html
+                static/
+                    fonts/
+                        HKGrotesk/
+                            HKGrotesk-Bold.otf
+                            HKGrotesk-BoldItalic.otf
+                            HKGrotesk-Italic.otf
+                            HKGrotesk-Light.otf
+                            HKGrotesk-LightItalic.otf
+                            HKGrotesk-Medium.otf
+                            HKGrotesk-MediumItalic.otf
+                            HKGrotesk-Regular.otf
+                            HKGrotesk-SemiBold.otf
+                            HKGrotesk-SemiBoldItalic.otf
+                    images/
+                        0_values_not_null_html_en.jpg
+                        10_suite_toc.jpeg
+                        11_home_validation_results_failed.jpeg
+                        12_validation_overview.png
+                        13_validation_passed.jpeg
+                        14_validation_failed.jpeg
+                        15_validation_failed_unexpected_values.jpeg
+                        16_validation_failed_unexpected_values (1).gif
+                        1_values_not_null_html_de.jpg
+                        2_values_not_null_json.jpg
+                        3_values_not_null_validation_result_json.jpg
+                        4_values_not_null_validation_result_html_en.jpg
+                        5_home.png
+                        6_home_tables.jpeg
+                        7_home_suites.jpeg
+                        8_home_validation_results_succeeded.jpeg
+                        9_suite_overview.png
+                        favicon.ico
+                        glossary_scroller.gif
+                        iterative-dev-loop.png
+                        logo-long-vector.svg
+                        logo-long.png
+                        short-logo-vector.svg
+                        short-logo.png
+                        validation_failed_unexpected_values.gif
+                        values_not_null_html_en.jpg
+                        values_not_null_json.jpg
+                        values_not_null_validation_result_html_en.jpg
+                        values_not_null_validation_result_json.jpg
+                    styles/
+                        data_docs_custom_styles_template.css
+                        data_docs_default_styles.css
+                validations/
+                    9999.9999/
+                        files_datasource/
+                            default/
+                                Titanic/
+                                    warning.html
         samples/
         validations/
+            9999.9999/
+                files_datasource/
+                    default/
+                        Titanic/
+                            warning.json
 """
-
-    except:
-        raise
+        )
+    except Exception as e:
+        raise e
     finally:
         os.chdir(curdir)
 

@@ -866,7 +866,7 @@ Name the new expectation suite"""
     )
 
     if profiling_results['success']:
-        build_docs(context)
+        build_docs(context, view=open_docs)
         if open_docs:  # This is mostly to keep tests from spawning windows
             data_asset_id = DataAssetIdentifier(datasource=datasource_name, generator=generator_name,
                                                 generator_asset=generator_asset)
