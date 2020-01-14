@@ -971,10 +971,6 @@ def _load_query_as_data_asset_from_sqlalchemy_datasource(context, datasource_nam
 Enter an SQL query
 """
 
-    msg_prompt_data_asset_name = """
-Give your new data asset a short name
-"""
-
     datasource = context.get_datasource(datasource_name)
 
     while True:
@@ -1151,7 +1147,7 @@ Give your new data source a short name.
 """
 
 msg_db_config = """
-Next, we will configure database credentials and store them in the "{0:s}" section
+Next, we will configure database credentials and store them in the `{0:s}` section
 of this config file: great_expectations/uncommitted/config_variables.yml:
 """
 
