@@ -452,6 +452,79 @@ great_expectations/
     )
 
 
+@pytest.mark.skipif(
+    is_library_installed("pymssql"), reason="requires pymssql to NOT be installed"
+)
+def test_cli_init_connection_string_invalid_mssql_connection_instructs_user(tmp_path_factory):
+    basedir = tmp_path_factory.mktemp("test_cli_init_diff")
+    basedir = str(basedir)
+    os.chdir(basedir)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["init", "--no-view"],
+        input="Y\n2\n5\nmy_db\nmssql+pymssql://scott:tiger@not_a_real_host:1234/dbname\n"
+    )
+    stdout = result.output
+
+    assert "Always know what to expect from your data" in stdout
+    assert "What data would you like Great Expectations to connect to" in stdout
+    assert "Which database backend are you using" in stdout
+    assert "What is the url/connection string for the sqlalchemy connection" in stdout
+    assert "Give your new data source a short name" in stdout
+    assert "Attempting to connect to your database. This may take a moment" in stdout
+    assert "Cannot connect to the database" in stdout
+    assert "Database Error: No module named 'pymssql'" in stdout
+
+    assert "Profiling" not in stdout
+    assert "Building" not in stdout
+    assert "Data Docs" not in stdout
+    assert "Great Expectations is now set up" not in stdout
+
+    assert result.exit_code == 1
+
+    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
+    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
+    assert os.path.isfile(config_path)
+
+    config = yaml.load(open(config_path, "r"))
+    assert config["datasources"] == dict()
+
+    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+    assert (
+        obs_tree
+        == """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    datasources/
+    expectations/
+    notebooks/
+        pandas/
+            create_expectations.ipynb
+            validation_playground.ipynb
+        spark/
+            create_expectations.ipynb
+            validation_playground.ipynb
+        sql/
+            create_expectations.ipynb
+            validation_playground.ipynb
+    plugins/
+        custom_data_docs/
+            renderers/
+            styles/
+                data_docs_custom_styles.css
+            views/
+    uncommitted/
+        config_variables.yml
+        data_docs/
+        samples/
+        validations/
+"""
+    )
+
+
 @pytest.mark.skip()
 def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_yml(tmp_path_factory):
     """
