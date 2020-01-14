@@ -9,7 +9,7 @@ from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.util import gen_directory_tree_str
 
 
-@pytest.mark.skip()
+@pytest.mark.skip(reason="TBD if this behavior is desired")
 def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_yml(
     tmp_path_factory,
 ):
