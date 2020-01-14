@@ -26,7 +26,9 @@ def test_suite_new(site_builder_data_context_with_html_store_titanic_random):
     context = DataContext(root_dir)
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["suite", "new", "-d", root_dir, "--no-view"], input="2\n1\nmy_new_suite\n\n"
+        cli,
+        ["suite", "new", "-d", root_dir, "--no-view"],
+        input="2\n1\nmy_new_suite\n\n",
     )
     stdout = result.stdout
 

@@ -297,5 +297,3 @@ def test_cli_config_not_found(tmp_path_factory):
         raise
     finally:
         os.chdir(curdir)
-
-

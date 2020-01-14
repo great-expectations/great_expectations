@@ -4,8 +4,10 @@ import shutil
 import pytest
 from click.testing import CliRunner
 
+from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 
 
@@ -70,8 +72,7 @@ def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_ym
         os.chdir(curdir)
 
 
-@pytest.mark.skip()
-def test_cli_init_on_existing_ge_yml_with_some_missing_uncommitted_dirs(
+def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_fixing_them(
     tmp_path_factory,
 ):
     """
@@ -80,28 +81,45 @@ def test_cli_init_on_existing_ge_yml_with_some_missing_uncommitted_dirs(
     The user just checked an existing project out of source control and does
     not yet have an uncommitted directory.
     """
-    tmp_dir = str(tmp_path_factory.mktemp("test_cli_init_on_existing_ge_yml"))
-    curdir = os.path.abspath(os.getcwd())
-    os.chdir(tmp_dir)
-    runner = CliRunner()
-    runner.invoke(cli, ["init", "--no-view"], input="Y\n4\n")
-    shutil.rmtree(os.path.join(tmp_dir, "great_expectations/uncommitted"))
+    root_dir = tmp_path_factory.mktemp("hiya")
+    root_dir = str(root_dir)
+    os.makedirs(os.path.join(root_dir, "data"))
+    data_path = os.path.join(root_dir, "data/Titanic.csv")
+    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    shutil.copy(fixture_path, data_path)
 
-    try:
-        result = runner.invoke(cli, ["init", "--no-view"], input="Y\n4\n")
-        obs = result.output
-        # Users should see
-        assert (
-            "To run locally, we need some files that are not in source control." in obs
-        )
-        assert "You may see new files in" in obs
-        assert "Let's add Great Expectations to your project, by scaffolding" not in obs
-        # Users should not see
-        assert "open a tutorial notebook" not in obs
-    except:
-        raise
-    finally:
-        os.chdir(curdir)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["init", "--no-view", "-d", root_dir],
+        input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
+    )
+    stdout = result.output
+    assert result.exit_code == 0
+    assert "Great Expectations is now set up." in stdout
+    print(stdout)
+
+    context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
+    uncommitted_dir = os.path.join(context.root_directory, "uncommitted")
+    shutil.rmtree(uncommitted_dir)
+    assert not os.path.isdir(uncommitted_dir)
+
+    # Test the second invocation of init
+    runner = CliRunner()
+    result = runner.invoke(cli, ["init", "-d", root_dir], input="n\nn\n")
+    stdout = result.stdout
+    print(stdout)
+
+    assert result.exit_code == 0
+    assert "To run locally, we need some files that are not in source control" in stdout
+    assert "OK. You must run" in stdout
+    assert "great_expectations init" in stdout
+    assert "to fix the missing files!" in stdout
+    assert "Would you like to build & view this project's Data Docs!?" in stdout
+
+    # DataContext should not write to disk unless you explicitly tell it to
+    assert not os.path.isdir(uncommitted_dir)
+    assert not os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml"))
 
 
 @pytest.mark.skip()
