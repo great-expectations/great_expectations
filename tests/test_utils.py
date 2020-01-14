@@ -1,24 +1,27 @@
 from __future__ import division
 
-import pytest
+import copy
+import importlib
 import locale
-from functools import wraps
 import random
 import string
-import copy
-from collections import (
-    OrderedDict,
-    Mapping
-)
+from functools import wraps
 
+import numpy as np
+import pandas as pd
+import pytest
 from dateutil.parser import parse
 
-import pandas as pd
-import numpy as np
-
-from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
+from great_expectations.core import (
+    ExpectationSuiteValidationResultSchema,
+    ExpectationValidationResultSchema,
+)
+from great_expectations.dataset import (
+    PandasDataset,
+    SparkDFDataset,
+    SqlAlchemyDataset,
+)
 from great_expectations.profile import ColumnsExistProfiler
-from great_expectations.core import ExpectationValidationResultSchema, ExpectationSuiteValidationResultSchema
 
 expectationValidationResultSchema = ExpectationValidationResultSchema(strict=True)
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema(strict=True)
@@ -574,11 +577,17 @@ def evaluate_json_test(data_asset, expectation_type, test):
                     "Invalid test specification: unknown key " + key + " in 'out'")
 
 
-# def dict_to_ordered_dict(plain_dict):
-#     ordered_dict = OrderedDict()
-#     for key, val in plain_dict.items():
-#         if isinstance(val, Mapping):
-#             ordered_dict[key] = dict_to_ordered_dict(val)
-#         else:
-#             ordered_dict[key] = val
-#     return ordered_dict
+def is_library_installed(library_name: str) -> bool:
+    """
+    Tests if a library is installed.
+
+    :rtype: bool
+    :type library_name: str
+    :param library_name:
+    :return:
+    """
+    try:
+        importlib.import_module(library_name)
+        return True
+    except ModuleNotFoundError as e:
+        return False

@@ -74,7 +74,7 @@ def init(target_directory, view):
                 cli_message(PROJECT_IS_COMPLETE)
             except (ge_exceptions.DataContextError, DatasourceInitializationError) as e:
                 cli_message("<red>{}</red>".format(e))
-                exit(5)
+                sys.exit(1)
         else:
             try:
                 _complete_onboarding(target_directory)
@@ -102,7 +102,7 @@ def init(target_directory, view):
             if len(datasources) == 0:
                 datasource_name, data_source_type = add_datasource_impl(context, choose_one_data_asset=True)
                 if not datasource_name:  # no datasource was created
-                    return # TODO: an error message?
+                    sys.exit(1)
 
             datasources = context.list_datasources()
             if len(datasources) == 1:
@@ -128,6 +128,7 @@ def init(target_directory, view):
 
     except ge_exceptions.DataContextError as e:
         cli_message("<red>{}</red>".format(e))
+        sys.exit(1)
 
 
 def _slack_setup(context):

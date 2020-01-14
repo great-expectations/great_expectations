@@ -1151,7 +1151,7 @@ Give your new data source a short name.
 """
 
 msg_db_config = """
-Next, we will configure database credentials and store them in the "{0:s}" section
+Next, we will configure database credentials and store them in the `{0:s}` section
 of this config file: great_expectations/uncommitted/config_variables.yml:
 """
 
