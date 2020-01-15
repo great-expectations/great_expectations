@@ -77,7 +77,8 @@ def init(target_directory, view):
                 sys.exit(1)
         else:
             try:
-                _complete_onboarding(target_directory)
+                if not _complete_onboarding(target_directory):
+                    exit(0)
             except ge_exceptions.DataContextError as e:
                 cli_message("<red>{}</red>".format(e))
                 exit(5)
@@ -161,5 +162,7 @@ def _complete_onboarding(target_dir):
     if click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True):
         DataContext.create(target_dir)
         cli_message(ONBOARDING_COMPLETE)
+        return True
     else:
         cli_message(RUN_INIT_AGAIN)
+        return False
