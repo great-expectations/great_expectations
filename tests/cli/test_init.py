@@ -169,7 +169,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_f
     assert "OK. You must run" in stdout
     assert "great_expectations init" in stdout
     assert "to fix the missing files!" in stdout
-    assert "Would you like to build & view this project's Data Docs!?" in stdout
 
     # DataContext should not write to disk unless you explicitly tell it to
     assert not os.path.isdir(uncommitted_dir)
