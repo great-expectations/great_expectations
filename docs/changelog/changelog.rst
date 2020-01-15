@@ -3,7 +3,7 @@
 
 0.8.7__develop
 -----------------
-
+* Add support for expect_column_values_to_be_of_type for BigQuery backend
 
 0.8.6
 -----------------
