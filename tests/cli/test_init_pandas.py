@@ -2,8 +2,10 @@ import os
 import re
 import shutil
 
+import pytest
 from click.testing import CliRunner
 
+from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
@@ -158,8 +160,72 @@ great_expectations/
     )
 
 
-def test_init_on_existing_project_with_no_datasources_should_add_one():
-    assert False
+def test_init_on_existing_project_with_no_datasources_should_add_one(
+    initialized_project,
+):
+    project_dir = initialized_project
+    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+
+    _remove_all_datasources(ge_dir)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["init", "--no-view", "-d", project_dir], input="1\n1\ndata\nmy_data_dir\n"
+    )
+    stdout = result.stdout
+    print(stdout)
+
+    assert result.exit_code == 0
+
+    assert "Error: invalid input" not in stdout
+
+    assert "Always know what to expect from your data" in stdout
+    assert "What data would you like Great Expectations to connect to" in stdout
+    assert "A new datasource 'my_data_dir' was added to your project" in stdout
+    assert "Would you like to build & view this project's Data Docs" in stdout
+
+    config = _load_config_file(os.path.join(ge_dir, DataContext.GE_YML))
+    assert "my_data_dir" in config["datasources"].keys()
+
+
+def _remove_all_datasources(ge_dir):
+    config_path = os.path.join(ge_dir, DataContext.GE_YML)
+
+    config = _load_config_file(config_path)
+    config["datasources"] = {}
+
+    with open(config_path, "w") as f:
+        yaml.dump(config, f)
+
+    context = DataContext(ge_dir)
+    assert context.list_datasources() == []
+
+
+def _load_config_file(config_path):
+    with open(config_path, "r") as f:
+        read = f.read()
+        config = yaml.load(read)
+    return config
+
+
+@pytest.fixture
+def initialized_project(tmp_path_factory):
+    """This is an initialized project through the CLI."""
+    basedir = str(tmp_path_factory.mktemp("my_rad_project"))
+    os.makedirs(os.path.join(basedir, "data"))
+    data_path = os.path.join(basedir, "data/Titanic.csv")
+    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    shutil.copy(fixture_path, data_path)
+    runner = CliRunner()
+    _ = runner.invoke(
+        cli,
+        ["init", "--no-view", "-d", basedir],
+        input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
+    )
+
+    context = DataContext(os.path.join(basedir, DataContext.GE_DIR))
+    assert isinstance(context, DataContext)
+    return basedir
 
 
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing():
