@@ -11,59 +11,55 @@ from tests.cli.test_cli import yaml
 
 
 def test_cli_init_on_new_project(tmp_path_factory):
-    curdir = os.path.abspath(os.getcwd())
+    basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
+    os.makedirs(os.path.join(basedir, "data"))
+    data_path = os.path.join(basedir, "data/Titanic.csv")
+    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    shutil.copy(fixture_path, data_path)
 
-    try:
-        basedir = tmp_path_factory.mktemp("test_cli_init_diff")
-        basedir = str(basedir)
-        os.makedirs(os.path.join(basedir, "data"))
-        data_path = os.path.join(basedir, "data/Titanic.csv")
-        fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
-        shutil.copy(fixture_path, data_path)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["init", "--no-view", "-d", basedir],
+        input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
+    )
+    stdout = result.output
 
-        os.chdir(basedir)
+    assert len(stdout) < 2000, "CLI output is unreasonably long."
 
-        runner = CliRunner()
-        result = runner.invoke(
-            cli, ["init", "--no-view"], input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
-        )
-        stdout = result.output
+    assert "Always know what to expect from your data" in stdout
+    assert "What data would you like Great Expectations to connect to" in stdout
+    assert "What are you processing your files with" in stdout
+    assert "Enter the path (relative or absolute) of a data file" in stdout
+    assert "Give your new data asset a short name" in stdout
+    assert "Name the new expectation suite [warning]" in stdout
+    assert (
+        "Great Expectations will choose a couple of columns and generate expectations about them"
+        in stdout
+    )
+    assert "Profiling Titanic" in stdout
+    assert "Building" in stdout
+    assert "Data Docs" in stdout
+    assert "Great Expectations is now set up" in stdout
 
-        assert len(stdout) < 2000, "CLI output is unreasonably long."
+    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
+    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
+    assert os.path.isfile(config_path)
 
-        assert "Always know what to expect from your data" in stdout
-        assert "What data would you like Great Expectations to connect to" in stdout
-        assert "What are you processing your files with" in stdout
-        assert "Enter the path (relative or absolute) of a data file" in stdout
-        assert "Give your new data asset a short name" in stdout
-        assert "Name the new expectation suite [warning]" in stdout
-        assert (
-            "Great Expectations will choose a couple of columns and generate expectations about them"
-            in stdout
-        )
-        assert "Profiling Titanic" in stdout
-        assert "Building" in stdout
-        assert "Data Docs" in stdout
-        assert "Great Expectations is now set up" in stdout
+    config = yaml.load(open(config_path, "r"))
+    data_source_class = config["datasources"]["files_datasource"]["data_asset_type"][
+        "class_name"
+    ]
+    assert data_source_class == "PandasDataset"
 
-        assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-        config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
-        assert os.path.isfile(config_path)
+    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
 
-        config = yaml.load(open(config_path, "r"))
-        data_source_class = config["datasources"]["files_datasource"][
-            "data_asset_type"
-        ]["class_name"]
-        assert data_source_class == "PandasDataset"
+    # Instead of monkey patching datetime, just regex out the time directories
+    date_safe_obs_tree = re.sub(r"\d*T\d*\.\d*Z", "9999.9999", obs_tree)
 
-        obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
-
-        # Instead of monkey patching datetime, just regex out the time directories
-        date_safe_obs_tree = re.sub(r"\d*T\d*\.\d*Z", "9999.9999", obs_tree)
-
-        assert (
-            date_safe_obs_tree
-            == """\
+    assert (
+        date_safe_obs_tree
+        == """\
 great_expectations/
     .gitignore
     great_expectations.yml
@@ -159,8 +155,20 @@ great_expectations/
                         Titanic/
                             warning.json
 """
-        )
-    except Exception as e:
-        raise e
-    finally:
-        os.chdir(curdir)
+    )
+
+
+def test_init_on_existing_project_with_no_datasources_should_add_one():
+    assert False
+
+
+def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing():
+    assert False
+
+
+def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs():
+    assert False
+
+
+def test_init_on_existing_project_with_datasource_with_no_suite_create_one():
+    assert False
