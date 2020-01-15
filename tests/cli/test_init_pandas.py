@@ -2,15 +2,14 @@ import os
 import re
 import shutil
 
-import pytest
 from click.testing import CliRunner
 
+from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import ConfigNotFoundError
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
-from tests.test_utils import is_library_installed
 
 
 def test_cli_init_on_new_project(tmp_path_factory):
@@ -169,13 +168,10 @@ great_expectations/
         os.chdir(curdir)
 
 
-@pytest.mark.skipif(
-    is_library_installed("pymssql"), reason="requires pymssql to NOT be installed"
-)
-def test_cli_init_connection_string_invalid_mssql_connection_instructs_user(
+def test_cli_init_connection_string_non_working_mssql_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
     tmp_path_factory,
 ):
-    basedir = tmp_path_factory.mktemp("test_cli_init_diff")
+    basedir = tmp_path_factory.mktemp("mssql_test")
     basedir = str(basedir)
     os.chdir(basedir)
 
@@ -203,12 +199,36 @@ def test_cli_init_connection_string_invalid_mssql_connection_instructs_user(
 
     assert result.exit_code == 1
 
-    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
+    ge_dir = os.path.join(basedir, DataContext.GE_DIR)
+    assert os.path.isdir(ge_dir)
+    config_path = os.path.join(ge_dir, DataContext.GE_YML)
     assert os.path.isfile(config_path)
 
+    # TODO this entry might not be totally right, but one needs to be here.
     config = yaml.load(open(config_path, "r"))
-    assert config["datasources"] == dict()
+    assert config["datasources"] == {
+        "my_db": {
+            "data_asset_type": {
+                "module_name": None,
+                "class_name": "SqlAlchemyDataset",
+            },
+            "credentials": "${my_db}",
+            "class_name": "SqlAlchemyDatasource",
+            "generators": {
+                "default": {"class_name": "TableGenerator"},
+                "passthrough": {"class_name": "PassthroughGenerator"},
+            },
+        }
+    }
+
+    # TODO add entry in config_vars this entry might not be totally right, but one needs to be here.
+    config_path = os.path.join(
+        ge_dir, DataContext.GE_UNCOMMITTED_DIR, "config_variables.yml"
+    )
+    config = yaml.load(open(config_path, "r"))
+    assert config["my_db"] == {
+        "connection_string": "mssql+pymssql://scott:tiger@not_a_real_host:1234/dbname"
+    }
 
     obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
     assert (

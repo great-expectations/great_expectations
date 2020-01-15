@@ -1,74 +1,12 @@
 import os
 import shutil
 
-import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.util import file_relative_path
-
-
-@pytest.mark.skip(reason="TBD if this behavior is desired")
-def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_yml(
-    tmp_path_factory,
-):
-    """
-    This is a low-key snapshot test used to sanity check some of the config yml
-    inline comments, and some CLI output.
-    """
-    curdir = os.path.abspath(os.getcwd())
-
-    try:
-        basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
-        os.chdir(basedir)
-        runner = CliRunner()
-        result = runner.invoke(cli, ["init", "--no-view"], input="Y\n4\n")
-
-        assert "Skipping datasource configuration." in result.output
-        print(result.output)
-
-        assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-        config_file_path = os.path.join(
-            basedir, "great_expectations/great_expectations.yml"
-        )
-        assert os.path.isfile(config_file_path)
-        with open(config_file_path, "r") as f:
-            observed_config = f.read()
-
-        assert (
-            """# Welcome to Great Expectations! Always know what to expect from your data."""
-            in observed_config
-        )
-        assert (
-            """# Datasources tell Great Expectations where your data lives and how to get it.
-# You can use the CLI command `great_expectations add-datasource` to help you"""
-            in observed_config
-        )
-        assert (
-            """# The plugins_directory will be added to your python path for custom modules
-# used to override and extend Great Expectations."""
-            in observed_config
-        )
-        assert (
-            """# Stores are configurable places to store things like Expectations, Validations
-# Data Docs, and more. These are for advanced users only - most users can simply
-# leave this section alone.
-# 
-# Three stores are required: expectations, validations, and
-# evaluation_parameters, and must exist with a valid store entry. Additional
-# stores can be configured for uses such as data_docs, validation_operators, etc."""
-            in observed_config
-        )
-        assert (
-            """# Data Docs make it simple to visualize data quality in your project. These"""
-            in observed_config
-        )
-    except:
-        raise
-    finally:
-        os.chdir(curdir)
 
 
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them(
