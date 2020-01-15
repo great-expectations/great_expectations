@@ -533,7 +533,7 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
     os.makedirs(os.path.join(project_dir, "data/titanic"))
     curdir = os.path.abspath(os.getcwd())
     shutil.copy(
-        "./tests/test_sets/Titanic.csv",
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
         str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
     )
 
@@ -548,8 +548,7 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
         str(os.path.join(project_dir, "data/random/f2.csv"))
     )
 
-    ge_directory = os.path.join(project_dir, "great_expectations")
-    shutil.copy("./tests/test_fixtures/great_expectations_site_builder.yml",
+    shutil.copy(file_relative_path(__file__, "./test_fixtures/great_expectations_site_builder.yml"),
                 str(os.path.join(project_dir, "great_expectations.yml")))
     context = ge.data_context.DataContext.create(project_dir)
 
@@ -565,11 +564,7 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
     )
 
     context.profile_datasource("titanic")
-    # print(gen_directory_tree_str(project_dir))
-
     context.profile_datasource("random")
-    # print(gen_directory_tree_str(project_dir))
-
     context.profile_datasource(context.list_datasources()[0]["name"])
 
     return context

@@ -773,6 +773,7 @@ def get_batch_kwargs(context,
 
     return (datasource_name, generator_name, generator_asset, batch_kwargs)
 
+
 def create_expectation_suite(
     context,
     datasource_name=None,
@@ -786,6 +787,7 @@ def create_expectation_suite(
 ):
 
     """
+    Create a new expectation suite.
 
     :param context:
     :param datasource_name:
