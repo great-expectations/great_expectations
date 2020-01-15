@@ -2,7 +2,8 @@
 
 0.8.8__develop
 -----------------
-
+* Add support for allow_relative_error to expect_column_quantile_values_to_be_between, allowing Redshift users access
+  to this expectation
 
 0.8.7
 -----------------
