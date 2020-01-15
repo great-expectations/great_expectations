@@ -202,9 +202,13 @@ def _remove_all_datasources(ge_dir):
 
 
 def _load_config_file(config_path):
+    assert os.path.isfile(config_path), "Config file is missing. Check path"
+
     with open(config_path, "r") as f:
         read = f.read()
         config = yaml.load(read)
+
+    assert isinstance(config, dict)
     return config
 
 
@@ -228,8 +232,33 @@ def initialized_project(tmp_path_factory):
     return basedir
 
 
-def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing():
-    assert False
+def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
+    initialized_project, filesystem_csv_2
+):
+    project_dir = initialized_project
+    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+
+    context = DataContext(ge_dir)
+    context.add_datasource(
+        "another_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        base_directory=str(filesystem_csv_2),
+    )
+    assert len(context.list_datasources()) == 2
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n")
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+
+    assert "Error: invalid input" not in stdout
+
+    assert "Always know what to expect from your data" in stdout
+    assert "This looks like an existing project that" in stdout
+    assert "appears complete" in stdout
+    assert "Would you like to build & view this project's Data Docs" in stdout
 
 
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs():
