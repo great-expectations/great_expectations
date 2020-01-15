@@ -1,9 +1,11 @@
 .. _changelog:
 
 
-0.8.7__develop
+0.8.7
 -----------------
-* Add support for expect_column_values_to_be_of_type for BigQuery backend
+* Add support for expect_column_values_to_be_of_type for BigQuery backend (#940)
+* Add image CDN for community usage stats
+* Documentation improvements and fixes
 
 0.8.6
 -----------------
