@@ -195,7 +195,7 @@ def suite_new(data_asset, suite, directory, view, batch_kwargs):
             )
 
     try:
-        create_expectation_suite_impl(
+        success, suite_name = create_expectation_suite_impl(
             context,
             datasource_name=datasource_name,
             generator_name=generator_name,
@@ -206,9 +206,14 @@ def suite_new(data_asset, suite, directory, view, batch_kwargs):
             show_intro_message=False,
             open_docs=view,
         )
-    except (ge_exceptions.DataContextError,
-            ge_exceptions.ProfilerError,
-            IOError,
-            SQLAlchemyError)  as e:
+        if success:
+            cli_message("A new Expectation suite '{}' was added to your project".format(suite_name))
+    except (
+        ge_exceptions.DataContextError,
+        ge_exceptions.ProfilerError,
+        IOError,
+        SQLAlchemyError
+    ) as e:
         cli_message("<red>{}</red>".format(e))
         sys.exit(1)
+

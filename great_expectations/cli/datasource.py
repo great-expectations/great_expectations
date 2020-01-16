@@ -93,10 +93,10 @@ def datasource_new(directory):
 
     datasource_name, data_source_type = add_datasource(context)
 
-    cli_message("A new datasource '{}' was added to your project.".format(datasource_name))
-
-    if not datasource_name:  # no datasource was created
-        return
+    if datasource_name:
+        cli_message("A new datasource '{}' was added to your project.".format(datasource_name))
+    else:  # no datasource was created
+        sys.exit(1)
 
 
 @datasource.command(name="list")
@@ -224,7 +224,6 @@ What are you processing your files with?
     2. PySpark
 """
 
-    # cli_message("\n<cyan>========== Where is your data? ===========</cyan>")
     data_source_location_selection = click.prompt(
         msg_prompt_where_is_your_data,
         type=click.Choice(["1", "2"]),
@@ -796,7 +795,7 @@ def create_expectation_suite(
     :param batch_kwargs:
     :param expectation_suite_name:
     :param additional_batch_kwargs:
-    :return: a tuple: (datasource_name, generator_name, data_asset_name, batch_kwargs, profiling_results)
+    :return: a tuple: (success, suite name)
     """
 
     msg_intro = """
@@ -874,7 +873,7 @@ Name the new expectation suite"""
             )
             context.open_data_docs(resource_identifier=validation_result_identifier)
 
-        return (datasource_name, generator_name, generator_asset, batch_kwargs, profiling_results)
+        return True, expectation_suite_name
 
     if profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND:
         raise ge_exceptions.DataContextError(msg_some_data_assets_not_found.format(",".join(profiling_results['error']['not_found_data_assets'])))
