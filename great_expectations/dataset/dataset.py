@@ -3224,7 +3224,14 @@ class Dataset(MetaDataset):
         if column_min is None:
             success = False
         else:
+
             if min_value is not None:
+                if isinstance(column_min, datetime):
+                    try:
+                        min_value = parse(min_value)
+                    except ValueError as e:
+                        pass
+
                 if strict_min:
                     above_min = column_min > min_value
                 else:
@@ -3233,6 +3240,12 @@ class Dataset(MetaDataset):
                 above_min = True
 
             if max_value is not None:
+                if isinstance(column_min, datetime):
+                    try:
+                        max_value = parse(max_value)
+                    except ValueError as e:
+                        pass
+
                 if strict_max:
                     below_max = column_min < max_value
                 else:
@@ -3347,6 +3360,12 @@ class Dataset(MetaDataset):
             success = False
         else:
             if min_value is not None:
+                if isinstance(column_max, datetime):
+                    try:
+                        min_value = parse(min_value)
+                    except ValueError as e:
+                        pass
+
                 if strict_min:
                     above_min = column_max > min_value
                 else:
@@ -3355,6 +3374,12 @@ class Dataset(MetaDataset):
                 above_min = True
 
             if max_value is not None:
+                if isinstance(column_max, datetime):
+                    try:
+                        max_value = parse(max_value)
+                    except ValueError as e:
+                        pass
+
                 if strict_max:
                     below_max = column_max < max_value
                 else:
