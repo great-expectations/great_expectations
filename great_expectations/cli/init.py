@@ -33,6 +33,13 @@ from great_expectations.core import (
 )
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
+    # just fall through
+    SQLAlchemyError = ge_exceptions.ProfilerError
+
 
 @click.command()
 @click.option(
@@ -127,7 +134,10 @@ def init(target_directory, view):
 
                 cli_message("""\n<cyan>Great Expectations is now set up.</cyan>""")
 
-    except ge_exceptions.DataContextError as e:
+    except (ge_exceptions.DataContextError,
+            ge_exceptions.ProfilerError,
+            IOError,
+            SQLAlchemyError)  as e:
         cli_message("<red>{}</red>".format(e))
         sys.exit(1)
 
