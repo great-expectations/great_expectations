@@ -116,23 +116,19 @@ def init(target_directory, view):
             if len(datasources) == 1:
                 datasource_name = datasources[0]["name"]
 
-
-                # we need only one of the values returned here - profiling_results
-                (
-                    datasource_name,
-                    generator_name,
-                    data_asset_name,
-                    batch_kwargs,
-                    profiling_results,
-                ) = create_expectation_suite_impl(
+                success, suite_name = create_expectation_suite_impl(
                     context,
                     datasource_name=datasource_name,
                     show_intro_message=False,
                     additional_batch_kwargs={"limit": 1000},
                     open_docs=view,
                 )
+                if success:
+                    cli_message(
+                        "A new Expectation suite '{}' was added to your project".format(suite_name)
+                    )
 
-                cli_message("""\n<cyan>Great Expectations is now set up.</cyan>""")
+                cli_message("\n<cyan>Great Expectations is now set up.</cyan>")
 
     except (ge_exceptions.DataContextError,
             ge_exceptions.ProfilerError,
