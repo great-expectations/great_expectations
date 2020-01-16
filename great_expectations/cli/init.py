@@ -33,6 +33,13 @@ from great_expectations.core import (
 )
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
+    # just fall through
+    SQLAlchemyError = ge_exceptions.ProfilerError
+
 
 @click.command()
 @click.option(
@@ -74,10 +81,11 @@ def init(target_directory, view):
                 cli_message(PROJECT_IS_COMPLETE)
             except (ge_exceptions.DataContextError, DatasourceInitializationError) as e:
                 cli_message("<red>{}</red>".format(e))
-                exit(5)
+                sys.exit(1)
         else:
             try:
-                _complete_onboarding(target_directory)
+                if not _complete_onboarding(target_directory):
+                    exit(0)
             except ge_exceptions.DataContextError as e:
                 cli_message("<red>{}</red>".format(e))
                 exit(5)
@@ -102,7 +110,7 @@ def init(target_directory, view):
             if len(datasources) == 0:
                 datasource_name, data_source_type = add_datasource_impl(context, choose_one_data_asset=True)
                 if not datasource_name:  # no datasource was created
-                    return # TODO: an error message?
+                    sys.exit(1)
 
             datasources = context.list_datasources()
             if len(datasources) == 1:
@@ -126,8 +134,12 @@ def init(target_directory, view):
 
                 cli_message("""\n<cyan>Great Expectations is now set up.</cyan>""")
 
-    except ge_exceptions.DataContextError as e:
+    except (ge_exceptions.DataContextError,
+            ge_exceptions.ProfilerError,
+            IOError,
+            SQLAlchemyError)  as e:
         cli_message("<red>{}</red>".format(e))
+        sys.exit(1)
 
 
 def _slack_setup(context):
@@ -160,5 +172,7 @@ def _complete_onboarding(target_dir):
     if click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True):
         DataContext.create(target_dir)
         cli_message(ONBOARDING_COMPLETE)
+        return True
     else:
         cli_message(RUN_INIT_AGAIN)
+        return False
