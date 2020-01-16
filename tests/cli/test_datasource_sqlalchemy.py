@@ -257,40 +257,37 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
     assert reader_options["sep"] == ","
 
 
-@pytest.mark.skip(reason="not yet converted to sqlalchemy")
 def test_cli_datasource_profile_with_valid_data_asset_arg(
-    empty_data_context, filesystem_csv_2, capsys
+        empty_data_context, titanic_sqlite_db
 ):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
+    project_root_dir = empty_data_context.root_directory
+    context = DataContext(project_root_dir)
+    datasource_name = "wow_a_datasource"
+    context = _add_datasource_and_credentials_to_context(
+        context, datasource_name, titanic_sqlite_db
     )
-    not_so_empty_data_context = empty_data_context
 
-    project_root_dir = not_so_empty_data_context.root_directory
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "datasource",
+            "profile",
+            datasource_name,
+            "--data_assets",
+            "titanic",
+            "-d",
+            project_root_dir,
+            "--no-view",
+        ],
+    )
 
-    with capsys.disabled():
-        runner = CliRunner()
-        result = runner.invoke(
-            cli,
-            [
-                "datasource",
-                "profile",
-                "my_datasource",
-                "--data_assets",
-                "f1",
-                "-d",
-                project_root_dir,
-                "--no-view",
-            ],
-        )
-
-        assert result.exit_code == 0
-        stdout = result.stdout
-        assert "Profiling 'my_datasource'" in stdout
-        assert "The following Data Docs sites were built:\n- local_site:" in stdout
+    stdout = result.stdout
+    print(stdout)
+    assert result.exit_code == 0
+    assert "Traceback" not in stdout
+    assert "Profiling '{}'".format(datasource_name) in stdout
+    assert "The following Data Docs sites were built:\n- local_site:" in stdout
 
     context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
