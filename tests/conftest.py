@@ -524,6 +524,15 @@ def titanic_data_context(tmp_path_factory):
 
 
 @pytest.fixture
+def titanic_sqlite_db():
+    from sqlalchemy import create_engine
+    titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
+    engine = create_engine('sqlite:///{}'.format(titanic_db_path))
+    assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+    return engine
+
+
+@pytest.fixture
 def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, filesystem_csv_3):
     base_dir = str(tmp_path_factory.mktemp("project_dir"))
     project_dir = os.path.join(base_dir, "project_path")

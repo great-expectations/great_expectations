@@ -66,7 +66,7 @@ def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
 
 
 def test_cli_datasource_profile_answering_no(
-    empty_data_context, filesystem_csv_2, capsys
+    empty_data_context, filesystem_csv_2
 ):
     empty_data_context.add_datasource(
         "my_datasource",
@@ -77,24 +77,24 @@ def test_cli_datasource_profile_answering_no(
     not_so_empty_data_context = empty_data_context
     project_root_dir = not_so_empty_data_context.root_directory
 
-    with capsys.disabled():
-        runner = CliRunner()
-        result = runner.invoke(
-            cli,
-            [
-                "datasource",
-                "profile",
-                "my_datasource",
-                "-d",
-                project_root_dir,
-                "--no-view",
-            ],
-            input="n\n",
-        )
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "datasource",
+            "profile",
+            "my_datasource",
+            "-d",
+            project_root_dir,
+            "--no-view",
+        ],
+        input="n\n",
+    )
 
-        stdout = result.stdout
-        assert "Profiling 'my_datasource'" in stdout
-        assert "Skipping profiling for now." in stdout
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "Profiling 'my_datasource'" in stdout
+    assert "Skipping profiling for now." in stdout
 
 
 def test_cli_datasource_profile_with_datasource_arg(

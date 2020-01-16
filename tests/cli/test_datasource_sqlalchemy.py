@@ -27,7 +27,17 @@ def test_cli_datasorce_list(empty_data_context, sql_engine):
     assert context.list_datasources() == []
 
     datasource_name = "wow_a_datasource"
+    _add_datasource_and_credentials_to_context(context, datasource_name, sql_engine)
 
+    runner = CliRunner()
+    result = runner.invoke(cli, ["datasource", "list", "-d", project_root_dir])
+    stdout = result.output.strip()
+    assert (
+        "[{'name': 'wow_a_datasource', 'class_name': 'SqlAlchemyDatasource'}]" in stdout
+    )
+
+
+def _add_datasource_and_credentials_to_context(context, datasource_name, sql_engine):
     credentials = {"url": str(sql_engine.url)}
     context.save_config_variable(datasource_name, credentials)
     context.add_datasource(
@@ -42,13 +52,7 @@ def test_cli_datasorce_list(empty_data_context, sql_engine):
     assert context.list_datasources() == [
         {"name": datasource_name, "class_name": "SqlAlchemyDatasource"}
     ]
-
-    runner = CliRunner()
-    result = runner.invoke(cli, ["datasource", "list", "-d", project_root_dir])
-    stdout = result.output.strip()
-    assert (
-        "[{'name': 'wow_a_datasource', 'class_name': 'SqlAlchemyDatasource'}]" in stdout
-    )
+    return context
 
 
 def test_cli_datasorce_new_connection_string(empty_data_context, sql_engine):
@@ -85,70 +89,57 @@ def test_cli_datasorce_new_connection_string(empty_data_context, sql_engine):
     assert data_source_class == "SqlAlchemyDataset"
 
 
-@pytest.mark.skip(reason="not yet converted to sqlalchemy")
-def test_cli_datasource_profile_answering_no(
-    empty_data_context, filesystem_csv_2, capsys
-):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
+def test_cli_datasource_profile_answering_no(empty_data_context, sql_engine):
+    project_root_dir = empty_data_context.root_directory
+    context = DataContext(project_root_dir)
+    datasource_name = "wow_a_datasource"
+    context = _add_datasource_and_credentials_to_context(
+        context, datasource_name, sql_engine
     )
-    not_so_empty_data_context = empty_data_context
-    project_root_dir = not_so_empty_data_context.root_directory
 
-    with capsys.disabled():
-        runner = CliRunner()
-        result = runner.invoke(
-            cli,
-            [
-                "datasource",
-                "profile",
-                "my_datasource",
-                "-d",
-                project_root_dir,
-                "--no-view",
-            ],
-            input="n\n",
-        )
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["datasource", "profile", datasource_name, "-d", project_root_dir, "--no-view"],
+        input="n\n",
+    )
 
-        stdout = result.stdout
-        assert "Profiling 'my_datasource'" in stdout
-        assert "Skipping profiling for now." in stdout
+    stdout = result.stdout
+    assert result.exit_code == 0
+
+    assert "Profiling 'wow_a_datasource'" in stdout
+    assert "Skipping profiling for now." in stdout
 
 
-@pytest.mark.skip(reason="not yet converted to sqlalchemy")
 def test_cli_datasource_profile_with_datasource_arg(
-    empty_data_context, filesystem_csv_2, capsys
+    empty_data_context, titanic_sqlite_db
 ):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
+    project_root_dir = empty_data_context.root_directory
+    context = DataContext(project_root_dir)
+    datasource_name = "wow_a_datasource"
+    context = _add_datasource_and_credentials_to_context(
+        context, datasource_name, titanic_sqlite_db
     )
-    not_so_empty_data_context = empty_data_context
-    project_root_dir = not_so_empty_data_context.root_directory
 
-    with capsys.disabled():
-        runner = CliRunner()
-        result = runner.invoke(
-            cli,
-            [
-                "datasource",
-                "profile",
-                "my_datasource",
-                "-d",
-                project_root_dir,
-                "--no-view",
-            ],
-            input="Y\n",
-        )
-        assert result.exit_code == 0
-        stdout = result.stdout
-        assert "Profiling 'my_datasource'" in stdout
-        assert result.exit_code == 0
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "datasource",
+            "profile",
+            datasource_name,
+            "-d",
+            project_root_dir,
+            "--no-view",
+        ],
+        input="Y\n",
+    )
+    stdout = result.stdout
+    print(stdout)
+
+    assert result.exit_code == 0
+    assert "Traceback" not in stdout
+    assert "Profiling '{}'".format(datasource_name) in stdout
 
     context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
@@ -165,7 +156,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     validation = validations_store.get(validation_keys[0])
     assert validation.meta["expectation_suite_name"] == "BasicDatasetProfiler"
     assert validation.success is False
-    assert len(validation.results) == 13
+    assert len(validation.results) == 51
 
 
 @pytest.mark.skip(reason="not yet converted to sqlalchemy")
