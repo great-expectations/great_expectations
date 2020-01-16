@@ -36,7 +36,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     stdout = result.output
     assert result.exit_code == 0
     assert "Great Expectations is now set up." in stdout
-    print(stdout)
 
     context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
     uncommitted_dir = os.path.join(context.root_directory, "uncommitted")
@@ -47,7 +46,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     runner = CliRunner()
     result = runner.invoke(cli, ["init", "-d", root_dir], input="Y\nn\n")
     stdout = result.stdout
-    print(stdout)
 
     assert result.exit_code == 0
     assert "To run locally, we need some files that are not in source control" in stdout
@@ -91,7 +89,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_f
     stdout = result.output
     assert result.exit_code == 0
     assert "Great Expectations is now set up." in stdout
-    print(stdout)
 
     context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
     uncommitted_dir = os.path.join(context.root_directory, "uncommitted")
@@ -102,7 +99,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_f
     runner = CliRunner()
     result = runner.invoke(cli, ["init", "-d", root_dir], input="n\nn\n")
     stdout = result.stdout
-    print(stdout)
 
     assert result.exit_code == 0
     assert "To run locally, we need some files that are not in source control" in stdout
@@ -139,13 +135,11 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     )
     stdout = result.output
     assert result.exit_code == 0
-    print(stdout)
 
     # Test the second invocation of init
     runner = CliRunner()
     result = runner.invoke(cli, ["init", "--no-view", "-d", root_dir], input="n\n")
     stdout = result.stdout
-    print(stdout)
 
     assert result.exit_code == 0
     assert "This looks like an existing project that" in stdout

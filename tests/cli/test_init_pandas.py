@@ -27,7 +27,7 @@ def test_cli_init_on_new_project(tmp_path_factory):
     )
     stdout = result.output
 
-    assert len(stdout) < 2000, "CLI output is unreasonably long."
+    assert len(stdout) < 3000, "CLI output is unreasonably long."
 
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
@@ -42,6 +42,7 @@ def test_cli_init_on_new_project(tmp_path_factory):
     assert "Profiling Titanic" in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
+    assert "A new Expectation suite 'warning' was added to your project" in stdout
     assert "Great Expectations is now set up" in stdout
 
     assert os.path.isdir(os.path.join(basedir, "great_expectations"))
@@ -160,6 +161,7 @@ great_expectations/
     )
 
 
+# TODO this test is failing because the behavior is broken
 def test_init_on_existing_project_with_no_datasources_should_add_one(
     initialized_project,
 ):
@@ -229,6 +231,7 @@ def initialized_project(tmp_path_factory):
 
     context = DataContext(os.path.join(basedir, DataContext.GE_DIR))
     assert isinstance(context, DataContext)
+    assert len(context.list_datasources()) == 1
     return basedir
 
 
@@ -261,9 +264,65 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert "Would you like to build & view this project's Data Docs" in stdout
 
 
-def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs():
-    assert False
+def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs(
+    initialized_project,
+):
+    project_dir = initialized_project
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n")
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+
+    assert "Error: invalid input" not in stdout
+
+    assert "Always know what to expect from your data" in stdout
+    assert "This looks like an existing project that" in stdout
+    assert "appears complete" in stdout
+    assert "Would you like to build & view this project's Data Docs" in stdout
 
 
-def test_init_on_existing_project_with_datasource_with_no_suite_create_one():
-    assert False
+def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
+    initialized_project,
+):
+    project_dir = initialized_project
+    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+
+    # mangle the setup to remove all traces of any suite
+    expectations_dir = os.path.join(ge_dir, "expectations")
+    data_docs_dir = os.path.join(uncommitted_dir, "data_docs")
+    validations_dir = os.path.join(uncommitted_dir, "validations")
+
+    _delete_and_recreate_dir(expectations_dir)
+    _delete_and_recreate_dir(data_docs_dir)
+    _delete_and_recreate_dir(validations_dir)
+
+    context = DataContext(ge_dir)
+    assert context.list_expectation_suite_keys() == []
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["init", "--no-view", "-d", project_dir],
+        input="{}\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+
+    assert "Error: invalid input" not in stdout
+    assert "Always know what to expect from your data" in stdout
+    assert "Enter the path (relative or absolute) of a data file" in stdout
+    assert "Profiling sink_me" in stdout
+    assert "The following Data Docs sites were built" in stdout
+    assert "Great Expectations is now set up" in stdout
+    assert "A new Expectation suite 'warning' was added to your project" in stdout
+
+
+def _delete_and_recreate_dir(directory):
+    shutil.rmtree(directory)
+    assert not os.path.isdir(directory)
+    os.mkdir(directory)
+    assert os.path.isdir(directory)
