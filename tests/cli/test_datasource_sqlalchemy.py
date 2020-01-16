@@ -1,5 +1,6 @@
 import os
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -7,7 +8,13 @@ from great_expectations.cli import cli
 from tests.cli.test_cli import yaml
 
 
-def test_cli_datasorce_list(empty_data_context, filesystem_csv_2):
+@pytest.fixture()
+def sql_engine(sqlitedb_engine):
+    """Silly shim to allow pluggable sql engines"""
+    return sqlitedb_engine
+
+
+def test_cli_datasorce_list(empty_data_context, sql_engine):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
@@ -19,23 +26,30 @@ def test_cli_datasorce_list(empty_data_context, filesystem_csv_2):
     assert "[]" in stdout
     assert context.list_datasources() == []
 
+    datasource_name = "wow_a_datasource"
+
+    credentials = {"url": str(sql_engine.url)}
+    context.save_config_variable(datasource_name, credentials)
     context.add_datasource(
-        "wow_a_datasource",
+        datasource_name,
+        initialize=False,
         module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
+        class_name="SqlAlchemyDatasource",
+        data_asset_type={"class_name": "SqlAlchemyDataset"},
+        credentials="${" + datasource_name + "}",
+        generators={"default": {"class_name": "TableGenerator"}},
     )
     assert context.list_datasources() == [
-        {"name": "wow_a_datasource", "class_name": "PandasDatasource"}
+        {"name": datasource_name, "class_name": "SqlAlchemyDatasource"}
     ]
 
     runner = CliRunner()
     result = runner.invoke(cli, ["datasource", "list", "-d", project_root_dir])
-
     stdout = result.output.strip()
-    assert "[{'name': 'wow_a_datasource', 'class_name': 'PandasDatasource'}]" in stdout
+    assert "[{'name': 'wow_a_datasource', 'class_name': 'SqlAlchemyDatasource'}]" in stdout
 
 
+@pytest.mark.skip(reason="not yet converted to sqlalchemy")
 def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
@@ -65,6 +79,7 @@ def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
     assert data_source_class == "PandasDataset"
 
 
+@pytest.mark.skip(reason="not yet converted to sqlalchemy")
 def test_cli_datasource_profile_answering_no(
     empty_data_context, filesystem_csv_2, capsys
 ):
@@ -97,6 +112,7 @@ def test_cli_datasource_profile_answering_no(
         assert "Skipping profiling for now." in stdout
 
 
+@pytest.mark.skip(reason="not yet converted to sqlalchemy")
 def test_cli_datasource_profile_with_datasource_arg(
     empty_data_context, filesystem_csv_2, capsys
 ):
@@ -146,6 +162,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert len(validation.results) == 13
 
 
+@pytest.mark.skip(reason="not yet converted to sqlalchemy")
 def test_cli_datasource_profile_with_no_datasource_args(
     empty_data_context, filesystem_csv_2, capsys
 ):
@@ -189,6 +206,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert len(validation.results) == 13
 
 
+@pytest.mark.skip(reason="not yet converted to sqlalchemy")
 def test_cli_datasource_profile_with_additional_batch_kwargs(
     empty_data_context, filesystem_csv_2
 ):
@@ -242,6 +260,7 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
     assert reader_options["sep"] == ","
 
 
+@pytest.mark.skip(reason="not yet converted to sqlalchemy")
 def test_cli_datasource_profile_with_valid_data_asset_arg(
     empty_data_context, filesystem_csv_2, capsys
 ):
@@ -294,6 +313,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert len(validation.results) == 13
 
 
+@pytest.mark.skip(reason="not yet converted to sqlalchemy")
 def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
     empty_data_context, filesystem_csv_2
 ):

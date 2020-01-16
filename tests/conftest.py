@@ -714,11 +714,7 @@ def titanic_profiled_name_column_expectations():
         titanic_profiled_expectations = expectationSuiteSchema.load(json.load(infile)).data
 
     columns, ordered_columns = Renderer()._group_and_order_expectations_by_column(titanic_profiled_expectations)
-    # print(columns)
-    # print(ordered_columns)
-
     name_column_expectations = columns["Name"]
-    # print(json.dumps(name_column_expectations, indent=2))
 
     return name_column_expectations
 
