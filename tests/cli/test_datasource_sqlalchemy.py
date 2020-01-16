@@ -46,37 +46,43 @@ def test_cli_datasorce_list(empty_data_context, sql_engine):
     runner = CliRunner()
     result = runner.invoke(cli, ["datasource", "list", "-d", project_root_dir])
     stdout = result.output.strip()
-    assert "[{'name': 'wow_a_datasource', 'class_name': 'SqlAlchemyDatasource'}]" in stdout
+    assert (
+        "[{'name': 'wow_a_datasource', 'class_name': 'SqlAlchemyDatasource'}]" in stdout
+    )
 
 
-@pytest.mark.skip(reason="not yet converted to sqlalchemy")
-def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
+def test_cli_datasorce_new_connection_string(empty_data_context, sql_engine):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     assert context.list_datasources() == []
 
-    with capsys.disabled():
-        runner = CliRunner()
-        result = runner.invoke(
-            cli,
-            ["datasource", "new", "-d", project_root_dir],
-            input="1\n1\n%s\nmynewsource\n" % str(filesystem_csv_2),
-        )
-        stdout = result.stdout
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["datasource", "new", "-d", project_root_dir],
+        input="2\n5\nmynewsource\n{}\n".format(str(sql_engine.url)),
+    )
+    stdout = result.stdout
 
-        assert "What data would you like Great Expectations to connect to?" in stdout
-        assert "What are you processing your files with?" in stdout
-        assert "Give your new data source a short name." in stdout
-        assert "A new datasource 'mynewsource' was added to your project." in stdout
+    assert "What data would you like Great Expectations to connect to?" in stdout
+    assert "Give your new data source a short name." in stdout
+    assert (
+        "Next, we will configure database credentials and store them in the `mynewsource` section"
+        in stdout
+    )
+    assert "What is the url/connection string for the sqlalchemy connection?" in stdout
+    assert "Attempting to connect to your database. This may take a moment" in stdout
+    assert "Great Expectations connected to your database" in stdout
+    assert "A new datasource 'mynewsource' was added to your project." in stdout
 
-        assert result.exit_code == 0
+    assert result.exit_code == 0
 
     config_path = os.path.join(project_root_dir, DataContext.GE_YML)
     config = yaml.load(open(config_path, "r"))
     datasources = config["datasources"]
     assert "mynewsource" in datasources.keys()
     data_source_class = datasources["mynewsource"]["data_asset_type"]["class_name"]
-    assert data_source_class == "PandasDataset"
+    assert data_source_class == "SqlAlchemyDataset"
 
 
 @pytest.mark.skip(reason="not yet converted to sqlalchemy")
