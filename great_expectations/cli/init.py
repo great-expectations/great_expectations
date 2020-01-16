@@ -116,15 +116,8 @@ def init(target_directory, view):
             if len(datasources) == 1:
                 datasource_name = datasources[0]["name"]
 
-
-                # we need only one of the values returned here - profiling_results
-                (
-                    datasource_name,
-                    generator_name,
-                    data_asset_name,
-                    batch_kwargs,
-                    profiling_results,
-                ) = create_expectation_suite_impl(
+                # we don't need any of the values returned here
+                success, suite_name = create_expectation_suite_impl(
                     context,
                     datasource_name=datasource_name,
                     show_intro_message=False,
