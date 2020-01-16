@@ -1127,7 +1127,7 @@ class ConfigOnlyDataContext(object):
                 data_asset_name will be normalized if it is a string
             expectation_suite_name: The name of the expectation_suite to create
             overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
-                already exists
+                already exists. If a user passes a string value of 'True' or 'False', this will resolve as boolean = True
 
         Returns:
             A new (empty) expectation suite.
@@ -1146,11 +1146,12 @@ class ConfigOnlyDataContext(object):
             expectation_suite_name=expectation_suite_name,
         )
 
-        if self._stores[self.expectations_store_name].has_key(key) and not overwrite_existing:
+        # Issue 970 - boolean check added around overwrite_existing to prevent accidental overwrite of expectation_suite
+        if self._stores[self.expectations_store_name].has_key(key) and not bool(overwrite_existing):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} already exists for data_asset "\
                 "{}. If you would like to overwrite this expectation_suite, "\
-                "set overwrite_existing=True.".format(
+                "set overwrite_existing=True. Note: overwrite_existing accepts BOOLEAN values only".format(
                     expectation_suite_name,
                     data_asset_name
                 )
