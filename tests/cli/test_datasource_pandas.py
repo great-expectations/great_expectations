@@ -327,6 +327,7 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
     assert (
         "Some of the data assets you specified were not found: bad-bad-asset" in stdout
     )
+    assert "Choose how to proceed" in stdou
     assert "Skipping profiling for now." in stdout
 
     context = DataContext(project_root_dir)

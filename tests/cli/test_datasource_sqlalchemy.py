@@ -310,19 +310,15 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert len(validation.results) == 13
 
 
-@pytest.mark.skip(reason="not yet converted to sqlalchemy")
 def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
-    empty_data_context, filesystem_csv_2
+    empty_data_context, titanic_sqlite_db
 ):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
+    project_root_dir = empty_data_context.root_directory
+    context = DataContext(project_root_dir)
+    datasource_name = "wow_a_datasource"
+    context = _add_datasource_and_credentials_to_context(
+        context, datasource_name, titanic_sqlite_db
     )
-    not_so_empty_data_context = empty_data_context
-
-    project_root_dir = not_so_empty_data_context.root_directory
 
     runner = CliRunner()
     result = runner.invoke(
@@ -330,7 +326,7 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
         [
             "datasource",
             "profile",
-            "my_datasource",
+            datasource_name,
             "--data_assets",
             "bad-bad-asset",
             "-d",
@@ -344,6 +340,7 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
     assert (
         "Some of the data assets you specified were not found: bad-bad-asset" in stdout
     )
+    assert "Choose how to proceed" in stdout
     assert "Skipping profiling for now." in stdout
 
     context = DataContext(project_root_dir)
