@@ -14,6 +14,13 @@ from great_expectations.cli.util import cli_message, _offer_to_install_new_templ
 from great_expectations.datasource.generator import ManualGenerator
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
+    # just fall through
+    SQLAlchemyError = ge_exceptions.ProfilerError
+
 
 @click.group()
 def suite():
@@ -187,14 +194,21 @@ def suite_new(data_asset, suite, directory, view, batch_kwargs):
                 + "'</cyan>"
             )
 
-    create_expectation_suite_impl(
-        context,
-        datasource_name=datasource_name,
-        generator_name=generator_name,
-        generator_asset=generator_asset,
-        batch_kwargs=batch_kwargs,
-        expectation_suite_name=suite,
-        additional_batch_kwargs=None,
-        show_intro_message=False,
-        open_docs=view,
-    )
+    try:
+        create_expectation_suite_impl(
+            context,
+            datasource_name=datasource_name,
+            generator_name=generator_name,
+            generator_asset=generator_asset,
+            batch_kwargs=batch_kwargs,
+            expectation_suite_name=suite,
+            additional_batch_kwargs=None,
+            show_intro_message=False,
+            open_docs=view,
+        )
+    except (ge_exceptions.DataContextError,
+            ge_exceptions.ProfilerError,
+            IOError,
+            SQLAlchemyError)  as e:
+        cli_message("<red>{}</red>".format(e))
+        sys.exit(1)

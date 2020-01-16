@@ -1848,101 +1848,87 @@ class ConfigOnlyDataContext(object):
 
         name = data_asset_name
         # logger.info("\tProfiling '%s'..." % name)
-        try:
-            start_time = datetime.datetime.now()
 
-            # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
-            if additional_batch_kwargs is None:
-                additional_batch_kwargs = {}
+        start_time = datetime.datetime.now()
 
-            if datasource_name is None or generator_name is None:
-                normalized_data_asset_name = self.normalize_data_asset_name(name)
-            else:
-                normalized_data_asset_name = DataAssetIdentifier(datasource_name, generator_name,
-                                                                 name)
-            if expectation_suite_name is None:
-                expectation_suite_name = profiler.__name__
-            self.create_expectation_suite(
+        # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
+        if additional_batch_kwargs is None:
+            additional_batch_kwargs = {}
+
+        if datasource_name is None or generator_name is None:
+            normalized_data_asset_name = self.normalize_data_asset_name(name)
+        else:
+            normalized_data_asset_name = DataAssetIdentifier(datasource_name, generator_name,
+                                                             name)
+        if expectation_suite_name is None:
+            expectation_suite_name = profiler.__name__
+        self.create_expectation_suite(
+            data_asset_name=normalized_data_asset_name,
+            expectation_suite_name=expectation_suite_name,
+            overwrite_existing=True
+        )
+
+        if batch_kwargs is None:
+
+            batch_kwargs = self.yield_batch_kwargs(
                 data_asset_name=normalized_data_asset_name,
-                expectation_suite_name=expectation_suite_name,
-                overwrite_existing=True
+                **additional_batch_kwargs
+            )
+        else:
+            batch_kwargs.update(additional_batch_kwargs)
+
+        batch = self.get_batch(
+            data_asset_name=normalized_data_asset_name,
+            expectation_suite_name=expectation_suite_name,
+            batch_kwargs=batch_kwargs
+        )
+
+        if not profiler.validate(batch):
+            raise ge_exceptions.ProfilerError(
+                "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
             )
 
-            if batch_kwargs is None:
+        # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
+        # will have more to unpack.
+        expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
+        profiling_results['results'].append((expectation_suite, validation_results))
 
-                batch_kwargs = self.yield_batch_kwargs(
+        self.validations_store.set(
+            key=ValidationResultIdentifier(
+                expectation_suite_identifier=ExpectationSuiteIdentifier(
                     data_asset_name=normalized_data_asset_name,
-                    **additional_batch_kwargs
-                )
-            else:
-                batch_kwargs.update(additional_batch_kwargs)
-
-            batch = self.get_batch(
-                data_asset_name=normalized_data_asset_name,
-                expectation_suite_name=expectation_suite_name,
-                batch_kwargs=batch_kwargs
-            )
-
-            if not profiler.validate(batch):
-                raise ge_exceptions.ProfilerError(
-                    "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
-                )
-
-            # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
-            # will have more to unpack.
-            expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
-            profiling_results['results'].append((expectation_suite, validation_results))
-
-            self.validations_store.set(
-                key=ValidationResultIdentifier(
-                    expectation_suite_identifier=ExpectationSuiteIdentifier(
-                        data_asset_name=normalized_data_asset_name,
-                        expectation_suite_name=expectation_suite_name
-                    ),
-                    run_id=run_id
+                    expectation_suite_name=expectation_suite_name
                 ),
-                value=validation_results
-            )
+                run_id=run_id
+            ),
+            value=validation_results
+        )
 
-            if isinstance(batch, Dataset):
-                # For datasets, we can produce some more detailed statistics
-                row_count = batch.get_row_count()
-                total_rows += row_count
-                new_column_count = len(set([exp.kwargs["column"] for exp in expectation_suite.expectations if "column" in exp.kwargs]))
-                total_columns += new_column_count
+        if isinstance(batch, Dataset):
+            # For datasets, we can produce some more detailed statistics
+            row_count = batch.get_row_count()
+            total_rows += row_count
+            new_column_count = len(set([exp.kwargs["column"] for exp in expectation_suite.expectations if "column" in exp.kwargs]))
+            total_columns += new_column_count
 
-            new_expectation_count = len(expectation_suite.expectations)
-            total_expectations += new_expectation_count
+        new_expectation_count = len(expectation_suite.expectations)
+        total_expectations += new_expectation_count
 
-            self.save_expectation_suite(expectation_suite)
-            duration = (datetime.datetime.now() - start_time).total_seconds()
-            logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
-                        (new_column_count, row_count, name, duration))
+        self.save_expectation_suite(expectation_suite)
+        duration = (datetime.datetime.now() - start_time).total_seconds()
+        logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
+                    (new_column_count, row_count, name, duration))
 
-        except ge_exceptions.ProfilerError as err:
-            logger.warning(err.message)
-        except IOError as err:
-            logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % name)
-            logger.debug(str(err))
-            skipped_data_assets += 1
-        except SQLAlchemyError as e:
-            logger.warning("SqlAlchemyError while profiling %s. Skipping." % name)
-            logger.debug(str(e))
-            skipped_data_assets += 1
 
-            total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
-            logger.info("""
-    Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
-    Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs.""" % (
-                len(data_asset_name_list),
-                total_data_assets,
-                total_rows,
-                total_columns,
-                total_duration,
-                total_expectations,
-            ))
-            if skipped_data_assets > 0:
-                logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
+        total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+        logger.info("""
+Profiled the data asset, with %d total rows and %d columns in %.2f seconds.
+Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs.""" % (
+            total_rows,
+            total_columns,
+            total_duration,
+            total_expectations,
+        ))
 
         profiling_results['success'] = True
         return profiling_results
