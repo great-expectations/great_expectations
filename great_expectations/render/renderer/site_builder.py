@@ -299,21 +299,19 @@ class DefaultSiteSectionBuilder(object):
                 expectation_suite_name = resource_key.expectation_suite_name
                 data_asset_name = resource_key.data_asset_name.generator_asset
                 logger.debug(
-                    "        Rendering expectation suite {} for data asset {}".format(
+                    "        Rendering expectation suite {}".format(
                         expectation_suite_name,
-                        data_asset_name
                     ))
             elif isinstance(resource_key, ValidationResultIdentifier):
-                data_asset_name = resource_key.expectation_suite_identifier.data_asset_name.generator_asset
                 run_id = resource_key.run_id
                 expectation_suite_name = resource_key.expectation_suite_identifier.expectation_suite_name
                 if run_id == "profiling":
-                    logger.debug("        Rendering profiling for data asset {}".format(data_asset_name))
+                    logger.debug("        Rendering profiling for batch {}".format(resource_key.batch_identifier))
                 else:
 
-                    logger.debug("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id,
+                    logger.debug("        Rendering validation: run id: {}, suite {} for batch {}".format(run_id,
                                                                                                               expectation_suite_name,
-                                                                                                              data_asset_name))
+                                                                                                              resource_key.batch_identifier))
 
             try:
                 rendered_content = self.renderer_class.render(resource)
@@ -331,11 +329,13 @@ class DefaultSiteSectionBuilder(object):
             )
 
     def _resource_key_passes_datasource_whitelist(self, resource_key, datasource_whitelist):
-        if type(resource_key) is ExpectationSuiteIdentifier:
-            datasource = resource_key.data_asset_name.datasource
-        elif type(resource_key) is ValidationResultIdentifier:
-            datasource = resource_key.expectation_suite_identifier.data_asset_name.datasource
-        return datasource in datasource_whitelist
+        logger.warning("_resource_key_passes_datasource_whitelist is not yet reimplemented")
+        return True
+        # if type(resource_key) is ExpectationSuiteIdentifier:
+        #     datasource = resource_key.data_asset_name.datasource
+        # elif type(resource_key) is ValidationResultIdentifier:
+        #     datasource = resource_key.expectation_suite_identifier.data_asset_name.datasource
+        # return datasource in datasource_whitelist
 
     def _resource_key_passes_run_id_filter(self, resource_key):
         if type(resource_key) == ValidationResultIdentifier:
