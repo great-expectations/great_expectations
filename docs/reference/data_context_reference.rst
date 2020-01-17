@@ -139,12 +139,12 @@ would include the following:
       expectations_store:
         class_name: ExpectationsStore
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: expectations/
       validations_store:
         class_name: ValidationsStore
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/validations/
       evaluation_parameter_store:
         class_name: EvaluationParameterStore
@@ -168,14 +168,14 @@ providing the bucket/prefix combination:
       expectations_store:
         class_name: ExpectationsStore
         store_backend:
-          class_name: FixedLengthTupleS3StoreBackend
+          class_name: TupleS3StoreBackend
           base_directory: expectations/
           bucket: ge.my_org.com
           prefix:
       validations_store:
         class_name: ValidationsStore
         store_backend:
-          class_name: FixedLengthTupleS3StoreBackend
+          class_name: TupleS3StoreBackend
           bucket: ge.my_org.com
           prefix: common_validations
       evaluation_parameter_store:
@@ -343,12 +343,12 @@ new directory or use this template:
       expectations_store:
         class_name: ExpectationsStore
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: expectations/
       validations_store:
         class_name: ValidationsStore
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/validations/
       evaluation_parameter_store:
         # Evaluation Parameters enable dynamic expectations. Read more here:
@@ -366,7 +366,7 @@ new directory or use this template:
       local_site:
         class_name: SiteBuilder
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
 
 

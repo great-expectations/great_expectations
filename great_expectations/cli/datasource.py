@@ -11,6 +11,8 @@ import datetime
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.util import cli_message, _offer_to_install_new_template
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
+    ExpectationSuiteIdentifier
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
@@ -22,11 +24,6 @@ from great_expectations.datasource.generator import (
     InMemoryGenerator,
     ManualGenerator,
     PassthroughGenerator,
-)
-from great_expectations.data_context.types import (
-    DataAssetIdentifier,
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier
 )
 
 from great_expectations import rtd_url_ge_version, DataContext
@@ -860,15 +857,12 @@ Name the new expectation suite"""
     if profiling_results['success']:
         build_docs(context, view=open_docs)
         if open_docs:  # This is mostly to keep tests from spawning windows
-            data_asset_id = DataAssetIdentifier(datasource=datasource_name, generator=generator_name,
-                                                generator_asset=generator_asset)
-
             expectation_suite_identifier = ExpectationSuiteIdentifier(
-                data_asset_name=data_asset_id,
                 expectation_suite_name=expectation_suite_name
             )
 
             validation_result_identifier = ValidationResultIdentifier(
+                batch_identifier=None,
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
             )

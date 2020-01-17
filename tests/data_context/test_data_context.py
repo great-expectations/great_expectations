@@ -3,8 +3,7 @@ import pytest
 import sys
 from freezegun import freeze_time
 
-from great_expectations.core import ExpectationConfiguration, dataAssetIdentifierSchema, expectationSuiteSchema, \
-    namespaceAwareExpectationSuiteSchema
+from great_expectations.core import ExpectationConfiguration, dataAssetIdentifierSchema, expectationSuiteSchema
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import DataContextConfig
 
@@ -765,7 +764,7 @@ def test_data_context_updates_expectation_suite_names(data_context):
                 "a_new_new_data_asset",
                 "a_new_new_suite_name.json"
                 ), 'r') as suite_file:
-        loaded_suite = namespaceAwareExpectationSuiteSchema.load(json.load(suite_file)).data
+        loaded_suite = expectationSuiteSchema.load(json.load(suite_file)).data
         assert loaded_suite.data_asset_name == DataAssetIdentifier(
                 data_asset_name.datasource,
                 data_asset_name.generator,

@@ -7,8 +7,6 @@ import logging
 
 from ruamel.yaml import YAML
 
-from great_expectations.core import ExpectationSuite
-from great_expectations.data_context.types import DataAssetIdentifier
 from great_expectations.data_context.util import (
     load_class,
     instantiate_class_from_config
@@ -133,6 +131,10 @@ class Datasource(object):
         for generator in self._datasource_config["generators"].keys():
             self.get_generator(generator)
 
+    @property
+    def config(self):
+        return self._datasource_config
+
     def get_config(self):
         """
         Get the current configuration.
@@ -230,186 +232,203 @@ class Datasource(object):
                 })
         return generators
 
-    def get_batch(self, data_asset_name, expectation_suite_name, batch_kwargs, **kwargs):
-        """
-        Get a batch of data from the datasource.
-
-        If a DataContext is attached, then expectation_suite_name can be used to define an expectation suite to
-        attach to the data_asset being fetched. Otherwise, the expectation suite will be empty.
-
-        If no batch_kwargs are specified, the next kwargs for the named data_asset will be fetched from the generator
-        first.
-
-        Specific datasource types implement the internal _get_data_asset method to use appropriate batch_kwargs to
-        construct and return GE data_asset objects.
+    def get_batch(self, batch_kwargs, batch_parameters=None):
+        """Get a batch of data from the datasource.
 
         Args:
-            data_asset_name: the name of the data asset for which to fetch data.
-            expectation_suite_name: the name of the expectation suite to attach to the batch
-            batch_kwargs: dictionary of key-value pairs describing the batch to get, or a single identifier if \
-            that can be unambiguously translated to batch_kwargs
-            **kwargs: Additional key-value pairs to pass to the datasource, such as reader parameters
+            batch_kwargs: the BatchKwargs to use to construct the batch
+            batch_parameters: optional parameters to store as the reference description of the batch. They should
+                reflect parameters that would provide the passed BatchKwargs.
+
 
         Returns:
-            A data_asset consisting of the specified batch of data with the named expectation suite connected.
-
-        """
-        if isinstance(data_asset_name, DataAssetIdentifier):  # this richer type can include more metadata
-            if self._data_context is not None:
-                expectation_suite = self._data_context.get_expectation_suite(
-                    data_asset_name,
-                    expectation_suite_name
-                )
-            else:
-                expectation_suite = None
-                # If data_context is not set, we cannot definitely use a fully normalized data_asset reference.
-                # This would mean someone got a normalized name without a data context which is unusual
-                logger.warning(
-                    "Using DataAssetIdentifier type without a data_context could result in unexpected behavior: "
-                    "using '/' as a default delimiter."
-                )
-        else:
-            expectation_suite = ExpectationSuite(data_asset_name=data_asset_name,
-                                                 expectation_suite_name=expectation_suite_name)
-
-        # Support partition_id or other mechanisms of building batch_kwargs
-        if not isinstance(batch_kwargs, dict):
-            batch_kwargs = self.build_batch_kwargs(data_asset_name, batch_kwargs)
-
-        return self._get_data_asset(batch_kwargs, expectation_suite, **kwargs)
-
-    def get_data_asset(self,
-                       generator_asset,
-                       generator_name=None,
-                       expectation_suite=None,
-                       batch_kwargs=None,
-                       **kwargs):
-        """
-        Get a DataAsset using a datasource. generator_asset and generator_name are required.
-
-        Args:
-            generator_asset: The name of the asset as identified by the generator to return.
-            generator_name: The name of the configured generator to use.
-            expectation_suite: The expectation suite to attach to the data_asset
-            batch_kwargs: Additional batch_kwargs that can
-            **kwargs: Additional kwargs that can be used to supplement batch_kwargs
-
-        Returns:
-            DataAsset
-        """
-        if batch_kwargs is None:
-            # noinspection PyUnboundLocalVariable
-            generator = self.get_generator(generator_name)
-            if generator is not None:
-                batch_kwargs = generator.yield_batch_kwargs(generator_asset, **kwargs)
-
-        return self._get_data_asset(batch_kwargs, expectation_suite, **kwargs)
-
-    def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
-        """
-        Internal implementation of batch fetch logic. Note that this must be overridden by datasource implementations.
-
-        Args:
-            batch_kwargs: the identifying information to use to fetch the batch.
-            expectation_suite: the expectation suite to attach to the batch.
-            **kwargs: additional key-value pairs to use when fetching the batch of data
-
-        Returns:
-            A data_asset consisting of the specified batch of data with the named expectation suite connected.
+            Batch
 
         """
         raise NotImplementedError
 
-    def get_available_data_asset_names(self, generator_names=None):
-        """Returns a dictionary of data_asset_names that the specified generator can provide. Note that some generators,
-        such as the "no-op" in-memory generator may not be capable of describing specific named data assets, and some
-        generators (such as filesystem glob generators) require the user to configure data asset names.
+    # def get_batch(self, data_asset_name, expectation_suite_name, batch_kwargs, **kwargs):
+    #     """
+    #     Get a batch of data from the datasource.
+    #
+    #     If a DataContext is attached, then expectation_suite_name can be used to define an expectation suite to
+    #     attach to the data_asset being fetched. Otherwise, the expectation suite will be empty.
+    #
+    #     If no batch_kwargs are specified, the next kwargs for the named data_asset will be fetched from the generator
+    #     first.
+    #
+    #     Specific datasource types implement the internal _get_data_asset method to use appropriate batch_kwargs to
+    #     construct and return GE data_asset objects.
+    #
+    #     Args:
+    #         data_asset_name: the name of the data asset for which to fetch data.
+    #         expectation_suite_name: the name of the expectation suite to attach to the batch
+    #         batch_kwargs: dictionary of key-value pairs describing the batch to get, or a single identifier if \
+    #         that can be unambiguously translated to batch_kwargs
+    #         **kwargs: Additional key-value pairs to pass to the datasource, such as reader parameters
+    #
+    #     Returns:
+    #         A data_asset consisting of the specified batch of data with the named expectation suite connected.
+    #
+    #     """
+    #     if isinstance(data_asset_name, DataAssetIdentifier):  # this richer type can include more metadata
+    #         if self._data_context is not None:
+    #             expectation_suite = self._data_context.get_expectation_suite(
+    #                 data_asset_name,
+    #                 expectation_suite_name
+    #             )
+    #         else:
+    #             expectation_suite = None
+    #             # If data_context is not set, we cannot definitely use a fully normalized data_asset reference.
+    #             # This would mean someone got a normalized name without a data context which is unusual
+    #             logger.warning(
+    #                 "Using DataAssetIdentifier type without a data_context could result in unexpected behavior: "
+    #                 "using '/' as a default delimiter."
+    #             )
+    #     else:
+    #         expectation_suite = ExpectationSuite(data_asset_name=data_asset_name,
+    #                                              expectation_suite_name=expectation_suite_name)
+    #
+    #     # Support partition_id or other mechanisms of building batch_kwargs
+    #     if not isinstance(batch_kwargs, dict):
+    #         batch_kwargs = self.build_batch_kwargs(data_asset_name, batch_kwargs)
+    #
+    #     return self._get_data_asset(batch_kwargs, expectation_suite, **kwargs)
 
-        Args:
-            generator_names: the generators for which to fetch available data asset names.
+    # def get_data_asset(self,
+    #                    generator_asset,
+    #                    generator_name=None,
+    #                    expectation_suite=None,
+    #                    batch_kwargs=None,
+    #                    **kwargs):
+    #     """
+    #     Get a DataAsset using a datasource. generator_asset and generator_name are required.
+    #
+    #     Args:
+    #         generator_asset: The name of the asset as identified by the generator to return.
+    #         generator_name: The name of the configured generator to use.
+    #         expectation_suite: The expectation suite to attach to the data_asset
+    #         batch_kwargs: Additional batch_kwargs that can
+    #         **kwargs: Additional kwargs that can be used to supplement batch_kwargs
+    #
+    #     Returns:
+    #         DataAsset
+    #     """
+    #     if batch_kwargs is None:
+    #         # noinspection PyUnboundLocalVariable
+    #         generator = self.get_generator(generator_name)
+    #         if generator is not None:
+    #             batch_kwargs = generator.yield_batch_kwargs(generator_asset, **kwargs)
+    #
+    #     return self._get_data_asset(batch_kwargs, expectation_suite, **kwargs)
 
-        Returns:
-            dictionary consisting of sets of generator assets available for the specified generators:
-            ::
+    # def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
+    #     """
+    #     Internal implementation of batch fetch logic. Note that this must be overridden by datasource implementations.
+    #
+    #     Args:
+    #         batch_kwargs: the identifying information to use to fetch the batch.
+    #         expectation_suite: the expectation suite to attach to the batch.
+    #         **kwargs: additional key-value pairs to use when fetching the batch of data
+    #
+    #     Returns:
+    #         A data_asset consisting of the specified batch of data with the named expectation suite connected.
+    #
+    #     """
+    #     raise NotImplementedError
 
-                {
-                  generator_name: [ data_asset_1, data_asset_2, ... ]
-                  ...
-                }
+    # def get_available_data_asset_names(self, generator_names=None):
+    #     """Returns a dictionary of data_asset_names that the specified generator can provide. Note that some generators,
+    #     such as the "no-op" in-memory generator may not be capable of describing specific named data assets, and some
+    #     generators (such as filesystem glob generators) require the user to configure data asset names.
+    #
+    #     Args:
+    #         generator_names: the generators for which to fetch available data asset names.
+    #
+    #     Returns:
+    #         dictionary consisting of sets of generator assets available for the specified generators:
+    #         ::
+    #
+    #             {
+    #               generator_name: [ data_asset_1, data_asset_2, ... ]
+    #               ...
+    #             }
+    #
+    #     """
+    #     available_data_asset_names = {}
+    #     if generator_names is None:
+    #         generator_names = [generator["name"] for generator in self.list_generators()]
+    #     elif isinstance(generator_names, string_types):
+    #         generator_names = [generator_names]
+    #
+    #     for generator_name in generator_names:
+    #         generator = self.get_generator(generator_name)
+    #         available_data_asset_names[generator_name] = generator.get_available_data_asset_names()
+    #     return available_data_asset_names
 
-        """
-        available_data_asset_names = {}
-        if generator_names is None:
-            generator_names = [generator["name"] for generator in self.list_generators()]
-        elif isinstance(generator_names, string_types):
-            generator_names = [generator_names]
+    def build_batch_kwargs(self, generator, batch_parameters=None, **kwargs):
+        generator_obj = self.get_generator(generator)
+        batch_params, batch_kwargs = generator_obj.build_batch_kwargs(batch_parameters, **kwargs)
+        batch_params["datasource"] = self.name
+        return batch_params, batch_kwargs
 
-        for generator_name in generator_names:
-            generator = self.get_generator(generator_name)
-            available_data_asset_names[generator_name] = generator.get_available_data_asset_names()
-        return available_data_asset_names
+    # def build_batch_kwargs(self, data_asset_name, *args, **kwargs):
+    #     """
+    #     Build batch kwargs for a requested data_asset. Try to use a generator where possible to support partitioning,
+    #     but fall back to datasource-default behavior if the generator cannot be identified.
+    #
+    #     Args:
+    #         data_asset_name: the data asset for which to build batch_kwargs; if a normalized name is provided,
+    #             use the named generator.
+    #         *args: at most exactly one positional argument can be provided from which to build kwargs
+    #         **kwargs: additional keyword arguments to be used to build the batch_kwargs
+    #
+    #     Returns:
+    #         A PandasDatasourceBatchKwargs object suitable for building a batch of data from this datasource
+    #
+    #     """
+    #     if isinstance(data_asset_name, DataAssetIdentifier):
+    #         generator_name = data_asset_name.generator
+    #         generator_asset = data_asset_name.generator_asset
+    #     elif len(self._datasource_config["generators"]) == 1:
+    #         logger.warning("Falling back to only configured generator to build batch_kwargs; consider explicitly "
+    #                        "declaring the generator using named_generator_build_batch_kwargs or a DataAssetIdentifier.")
+    #         generator_name = list(self._datasource_config["generators"].keys())[0]
+    #         generator_asset = data_asset_name
+    #     else:
+    #         raise BatchKwargsError(
+    #             "Unable to determine generator. Consider using named_generator_build_batch_kwargs or a "
+    #             "DataAssetIdentifier.",
+    #             {"args": args,
+    #              "kwargs": kwargs}
+    #         )
+    #
+    #     return self.named_generator_build_batch_kwargs(
+    #         generator_name,
+    #         generator_asset,
+    #         *args,
+    #         **kwargs
+    #     )
 
-    def build_batch_kwargs(self, data_asset_name, *args, **kwargs):
-        """
-        Build batch kwargs for a requested data_asset. Try to use a generator where possible to support partitioning,
-        but fall back to datasource-default behavior if the generator cannot be identified.
-
-        Args:
-            data_asset_name: the data asset for which to build batch_kwargs; if a normalized name is provided,
-                use the named generator.
-            *args: at most exactly one positional argument can be provided from which to build kwargs
-            **kwargs: additional keyword arguments to be used to build the batch_kwargs
-
-        Returns:
-            A PandasDatasourceBatchKwargs object suitable for building a batch of data from this datasource
-
-        """
-        if isinstance(data_asset_name, DataAssetIdentifier):
-            generator_name = data_asset_name.generator
-            generator_asset = data_asset_name.generator_asset
-        elif len(self._datasource_config["generators"]) == 1:
-            logger.warning("Falling back to only configured generator to build batch_kwargs; consider explicitly "
-                           "declaring the generator using named_generator_build_batch_kwargs or a DataAssetIdentifier.")
-            generator_name = list(self._datasource_config["generators"].keys())[0]
-            generator_asset = data_asset_name
-        else:
-            raise BatchKwargsError(
-                "Unable to determine generator. Consider using named_generator_build_batch_kwargs or a "
-                "DataAssetIdentifier.",
-                {"args": args,
-                 "kwargs": kwargs}
-            )
-
-        return self.named_generator_build_batch_kwargs(
-            generator_name,
-            generator_asset,
-            *args,
-            **kwargs
-        )
-
-    def named_generator_build_batch_kwargs(self, generator_name, generator_asset, partition_id=None, **kwargs):
-        """Use the named generator to build batch_kwargs"""
-        generator = self.get_generator(generator_name=generator_name)
-        if partition_id:
-            batch_kwargs = generator.build_batch_kwargs_from_partition_id(
-                generator_asset=generator_asset,
-                partition_id=partition_id,
-                **kwargs
-            )
-        else:
-            if len(kwargs) > 0:
-                batch_kwargs = generator.yield_batch_kwargs(generator_asset, **kwargs)
-            else:
-                raise BatchKwargsError(
-                    "Unable to build batch_kwargs: no partition_id or base kwargs found to pass to generator.",
-                    batch_kwargs=kwargs
-                )
-
-        return batch_kwargs
-
-    def get_data_context(self):
-        """Getter for the currently-configured data context."""
-        return self._data_context
+    # def named_generator_build_batch_kwargs(self, generator_name, generator_asset, partition_id=None, **kwargs):
+    #     """Use the named generator to build batch_kwargs"""
+    #     generator = self.get_generator(generator_name=generator_name)
+    #     if partition_id:
+    #         batch_kwargs = generator.build_batch_kwargs_from_partition_id(
+    #             generator_asset=generator_asset,
+    #             partition_id=partition_id,
+    #             **kwargs
+    #         )
+    #     else:
+    #         if len(kwargs) > 0:
+    #             batch_kwargs = generator.yield_batch_kwargs(generator_asset, **kwargs)
+    #         else:
+    #             raise BatchKwargsError(
+    #                 "Unable to build batch_kwargs: no partition_id or base kwargs found to pass to generator.",
+    #                 batch_kwargs=kwargs
+    #             )
+    #
+    #     return batch_kwargs
 
     @staticmethod
     def guess_reader_method_from_path(path):
@@ -435,60 +454,60 @@ class Datasource(object):
         else:
             return None
 
-    def _get_generator_class_from_type(self, type_):
-        """DEPRECATED.
+    # def _get_generator_class_from_type(self, type_):
+    #     """DEPRECATED.
+    #
+    #     This method can be used to support legacy-style type-only declaration of generators."""
+    #     raise NotImplementedError
 
-        This method can be used to support legacy-style type-only declaration of generators."""
-        raise NotImplementedError
-
-    def _get_data_asset_class(self, data_asset_type):
-        """Returns the class to be used to generate a data_asset from this datasource"""
-        if isinstance(data_asset_type, string_types):
-            # We have a custom type, but it is defined with only a string
-            try:
-                logger.warning("Use of custom_data_assets module is deprecated. Please define data_asset_type"
-                               "using a module_name and class_name.")
-                # FOR LEGACY REASONS support the fixed "custom_data_assets" name
-                # FIXME: this option should be removed in a future release
-                custom_data_assets_module = __import__("custom_data_assets", fromlist=["custom_data_assets"])
-                data_asset_type_class = getattr(custom_data_assets_module, data_asset_type)
-                return data_asset_type_class
-            except ImportError:
-                logger.error(
-                    "Unable to import custom_data_asset module. "
-                    "Check the plugins directory for 'custom_data_assets'."
-                )
-                raise InvalidConfigError(
-                    "Unable to import custom_data_asset module. "
-                    "Check the plugins directory for 'custom_data_assets'."
-                )
-            except AttributeError:
-                logger.error(
-                    "Unable to find data_asset_type: '%s'." % data_asset_type
-                )
-                raise InvalidConfigError("Unable to find data_asset_type: '%s'." % data_asset_type)
-        elif isinstance(data_asset_type, ClassConfig):
-            try:
-                module_name = data_asset_type.module_name
-                if module_name is None:
-                    module_name = "great_expectations.dataset"
-
-                loaded_module = import_module(module_name)
-                data_asset_type_class = getattr(loaded_module, data_asset_type.class_name)
-                return data_asset_type_class
-            except ImportError:
-                logger.error(
-                    "Unable to find module '%s'." % data_asset_type.module_name
-                )
-                raise InvalidConfigError("Unable to find module '%s'." % data_asset_type.module_name)
-            except AttributeError:
-                logger.error(
-                    "Unable to find data_asset_type: '%s' in module '%s'."
-                    % (data_asset_type.class_name, data_asset_type.module_name)
-                )
-                raise InvalidConfigError(
-                    "Unable to find data_asset_type: '%s' in module '%s'."
-                    % (data_asset_type.class_name, data_asset_type.module_name)
-                )
-        else:
-            raise InvalidConfigError("Invalid configuration for data_asset_type")
+    # def _get_data_asset_class(self, data_asset_type):
+    #     """Returns the class to be used to generate a data_asset from this datasource"""
+    #     if isinstance(data_asset_type, string_types):
+    #         # We have a custom type, but it is defined with only a string
+    #         try:
+    #             logger.warning("Use of custom_data_assets module is deprecated. Please define data_asset_type"
+    #                            "using a module_name and class_name.")
+    #             # FOR LEGACY REASONS support the fixed "custom_data_assets" name
+    #             # FIXME: this option should be removed in a future release
+    #             custom_data_assets_module = __import__("custom_data_assets", fromlist=["custom_data_assets"])
+    #             data_asset_type_class = getattr(custom_data_assets_module, data_asset_type)
+    #             return data_asset_type_class
+    #         except ImportError:
+    #             logger.error(
+    #                 "Unable to import custom_data_asset module. "
+    #                 "Check the plugins directory for 'custom_data_assets'."
+    #             )
+    #             raise InvalidConfigError(
+    #                 "Unable to import custom_data_asset module. "
+    #                 "Check the plugins directory for 'custom_data_assets'."
+    #             )
+    #         except AttributeError:
+    #             logger.error(
+    #                 "Unable to find data_asset_type: '%s'." % data_asset_type
+    #             )
+    #             raise InvalidConfigError("Unable to find data_asset_type: '%s'." % data_asset_type)
+    #     elif isinstance(data_asset_type, ClassConfig):
+    #         try:
+    #             module_name = data_asset_type.module_name
+    #             if module_name is None:
+    #                 module_name = "great_expectations.dataset"
+    #
+    #             loaded_module = import_module(module_name)
+    #             data_asset_type_class = getattr(loaded_module, data_asset_type.class_name)
+    #             return data_asset_type_class
+    #         except ImportError:
+    #             logger.error(
+    #                 "Unable to find module '%s'." % data_asset_type.module_name
+    #             )
+    #             raise InvalidConfigError("Unable to find module '%s'." % data_asset_type.module_name)
+    #         except AttributeError:
+    #             logger.error(
+    #                 "Unable to find data_asset_type: '%s' in module '%s'."
+    #                 % (data_asset_type.class_name, data_asset_type.module_name)
+    #             )
+    #             raise InvalidConfigError(
+    #                 "Unable to find data_asset_type: '%s' in module '%s'."
+    #                 % (data_asset_type.class_name, data_asset_type.module_name)
+    #             )
+    #     else:
+    #         raise InvalidConfigError("Invalid configuration for data_asset_type")

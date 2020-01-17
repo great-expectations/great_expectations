@@ -25,6 +25,7 @@ class SubdirReaderGenerator(BatchGenerator):
     """
 
     _default_reader_options = {}
+    recognized_batch_parameters = {'name', 'partition_id'}
 
     def __init__(self, name="default",
                  datasource=None,
@@ -86,7 +87,35 @@ class SubdirReaderGenerator(BatchGenerator):
         # Otherwise, subdir files are partition ids
         return self._get_valid_file_options(base_directory=os.path.join(self.base_directory, generator_asset))
 
-    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, reader_options=None, limit=None):
+    # TODO YIELD_BATCH_KWARGS
+
+    def _build_batch_kwargs(self, batch_parameters):
+        """
+
+        Args:
+            batch_parameters:
+
+        Returns:
+
+        """
+        param_keys = set(batch_parameters.keys())
+        recognized_params = (self.recognized_batch_parameters | self._datasource.recognized_batch_parameters)
+        if not param_keys <= recognized_params:
+            logger.warning("Unrecognized batch_parameter(s): %s" % str(param_keys - recognized_params))
+
+        try:
+            generator_asset = batch_parameters.pop("name")
+        except KeyError:
+            raise BatchKwargsError("Unable to build BatchKwargs: no name provided in batch_parameters.",
+                                   batch_kwargs=batch_parameters)
+
+        try:
+            partition_id = batch_parameters.pop("partition_id")
+        except KeyError:
+            raise BatchKwargsError("Unable to build BatchKwargs: no partition_id provided in batch_parameters.",
+                                   batch_kwargs=batch_parameters)
+
+        # Find the path
         path = None
         for extension in self.known_extensions:
             if os.path.isfile(os.path.join(self.base_directory, generator_asset, partition_id + extension)):
@@ -107,8 +136,10 @@ class SubdirReaderGenerator(BatchGenerator):
                 "partition_id": partition_id
             })
 
-        return self._build_batch_kwargs_from_path(path, reader_options=reader_options, limit=limit,
-                                                  partition_id=partition_id)
+        batch_parameters, batch_kwargs = self._build_batch_kwargs_from_path(path, **batch_parameters)
+        batch_parameters["partition_id"] = partition_id
+        batch_parameters["name"] = generator_asset
+        return batch_parameters, batch_kwargs
 
     # def _get_valid_file_options(self, base_directory=None):
     #     valid_options = []
@@ -127,7 +158,6 @@ class SubdirReaderGenerator(BatchGenerator):
     #                 if len(subdir_options) > 0 and file_option not in valid_options:
     #                     valid_options.append(file_option)
     #     return valid_options
-
 
     def _get_valid_file_options(self, base_directory=None):
         valid_options = []
@@ -179,39 +209,24 @@ class SubdirReaderGenerator(BatchGenerator):
         for path in path_list:
             yield self._build_batch_kwargs_from_path(path, reader_options=reader_options, limit=limit)
 
-    def _build_batch_kwargs_from_path(self, path, reader_options=None, limit=None, partition_id=None):
-        # We could add MD5 (e.g. for smallish files)
-        # but currently don't want to assume the extra read is worth it
-        # unless it's configurable
-        # with open(path,'rb') as f:
-        #     md5 = hashlib.md5(f.read()).hexdigest()
-        batch_kwargs = PathBatchKwargs({
-            "path": path
-        })
+    def _build_batch_kwargs_from_path(self, path, reader_options=None, limit=None, reader_method=None):
         computed_partition_id = self._partitioner(path)
-        if partition_id and computed_partition_id:
-            if partition_id != computed_partition_id:
-                logger.warning("Provided partition_id does not match computed partition_id; consider explicitly "
-                               "defining the asset or updating your partitioner.")
-            batch_kwargs["partition_id"] = partition_id
-        elif partition_id:
-            batch_kwargs["partition_id"] = partition_id
-        elif computed_partition_id:
-            batch_kwargs["partition_id"] = computed_partition_id
+        # if partition_id and computed_partition_id:
+        #     if partition_id != computed_partition_id:
+        #         logger.warning("Provided partition_id does not match computed partition_id; consider explicitly "
+        #                        "defining the asset or updating your partitioner.")
+        #     batch_kwargs["partition_id"] = partition_id
+        # elif partition_id:
+        #     batch_kwargs["partition_id"] = partition_id
+        # elif computed_partition_id:
+        #     batch_kwargs["partition_id"] = computed_partition_id
 
-        # Apply globally-configured reader options first
-        batch_kwargs['reader_options'] = self.reader_options
-        if reader_options:
-            # Then update with any locally-specified reader options
-            batch_kwargs['reader_options'].update(reader_options)
-
-        if limit is not None:
-            batch_kwargs['limit'] = limit
-
-        if self.reader_method is not None:
-            batch_kwargs['reader_method'] = self.reader_method
-
-        return batch_kwargs
+        batch_parameters, batch_kwargs = self._datasource.process_batch_parameters(
+            reader_method=reader_method or self.reader_method,
+            reader_options=reader_options or self.reader_options,
+            limit=limit)
+        batch_kwargs["path"] = path
+        return batch_parameters, PathBatchKwargs(batch_kwargs)
 
     # noinspection PyMethodMayBeStatic
     def _partitioner(self, path):

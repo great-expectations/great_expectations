@@ -2,17 +2,14 @@ import logging
 
 from collections import OrderedDict
 import os
-import shutil
 
 from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLASS
-from great_expectations.data_context.types import (
-    ValidationResultIdentifier,
-    ExpectationSuiteIdentifier,
-)
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
 )
+from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier, \
+    ValidationResultIdentifier
 
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.data_context.util import file_relative_path
@@ -42,7 +39,7 @@ class SiteBuilder(object):
         local_site:
             class_name: SiteBuilder
             store_backend:
-                class_name: FixedLengthTupleS3StoreBackend
+                class_name: TupleS3StoreBackend
                 bucket: data_docs.my_company.com
                 prefix: /data_docs/
 
@@ -52,7 +49,7 @@ class SiteBuilder(object):
         local_site:
             class_name: SiteBuilder
             store_backend:
-                class_name: FixedLengthTupleS3StoreBackend
+                class_name: TupleS3StoreBackend
                 bucket: data_docs.my_company.com
                 prefix: /data_docs/
             datasource_whitelist:
