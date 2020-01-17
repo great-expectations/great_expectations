@@ -24,7 +24,7 @@ Identifier Standard <https://www.cms.gov/Regulations-and-Guidance/Administrative
 .. code-block:: bash
 
     git clone https://github.com/superconductive/ge_example_project.git
-    cd example-dickens-ge_example_project-project
+    cd ge_example_project
 
 By default, everything in the Great Expectations deployment framework will be expressed in a directory structure
 within a ``great_expectations/`` folder within your version control system. To create this folder, navigate to the
@@ -50,15 +50,9 @@ If you inspect the ``great_expectations/`` directory after the init command has 
     ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── pandas
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   ├── spark
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   └── sql
-    │       ├── create_expectations.ipynb
-    │       └── validations_playground.ipynb
+    │   ├── pandas
+    │   ├── spark
+    │   └── sql
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -264,15 +258,9 @@ Still, it's useful to see how they're stored, to get a sense for how namespaces 
     ├── fixtures
     ├── great_expectations.yml
     ├── notebooks
-    │   ├── pandas
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   ├── spark
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
-    │   └── sql
-    │       ├── create_expectations.ipynb
-    │       └── validations_playground.ipynb
+    │   ├── pandas
+    │   ├── spark
+    │   └── sql
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -432,14 +420,8 @@ After the init command completes, you should see the following directory structu
     ├── great_expectations.yml
     ├── notebooks
     │   ├── pandas
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
     │   ├── spark
-    │   │   ├── create_expectations.ipynb
-    │   │   └── validations_playground.ipynb
     │   └── sql
-    │       ├── create_expectations.ipynb
-    │       └── validations_playground.ipynb
     ├── plugins
     └── uncommitted
         ├── config_variables.yml
@@ -449,7 +431,7 @@ After the init command completes, you should see the following directory structu
         │       │   └── data__dir
         │       │       └── default
         │       │           ├── npidata
-        │       │           │   └── BasicDatasetProfiler.html
+        │       │               └── BasicDatasetProfiler.html
         │       ├── index.html
         │       └── validations
         │           └── profiling

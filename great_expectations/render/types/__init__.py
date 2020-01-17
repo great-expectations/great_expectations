@@ -37,6 +37,7 @@ class RenderedSectionContent(RenderedContent):
     _allowed_keys = set([
         "section_name",
         "content_blocks",
+        "styling"
     ])
     _required_keys = set({
         "content_blocks",

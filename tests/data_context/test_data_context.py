@@ -527,6 +527,7 @@ def test_data_context_result_store(titanic_data_context):
     assert len(failed_validation_result["results"]) == 8
 
 
+@pytest.mark.rendered_output
 def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
 
     # TODO : Use a standard test fixture
@@ -645,6 +646,29 @@ data_docs/
                 default/
                     Titanic/
                         BasicDatasetProfiler.html
+        static/
+            fonts/
+                HKGrotesk/
+                    HKGrotesk-Bold.otf
+                    HKGrotesk-BoldItalic.otf
+                    HKGrotesk-Italic.otf
+                    HKGrotesk-Light.otf
+                    HKGrotesk-LightItalic.otf
+                    HKGrotesk-Medium.otf
+                    HKGrotesk-MediumItalic.otf
+                    HKGrotesk-Regular.otf
+                    HKGrotesk-SemiBold.otf
+                    HKGrotesk-SemiBoldItalic.otf
+            images/
+                favicon.ico
+                logo-long-vector.svg
+                logo-long.png
+                short-logo-vector.svg
+                short-logo.png
+                validation_failed_unexpected_values.gif
+            styles/
+                data_docs_custom_styles_template.css
+                data_docs_default_styles.css
         validations/
             profiling/
                 random/
@@ -1101,6 +1125,7 @@ uncommitted/
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
     DataContext.create(project_path)
     fixture = gen_directory_tree_str(uncommitted_dir)
+    print(fixture)
     assert fixture == expected
 
     # Test that all exist
@@ -1164,7 +1189,7 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
 def test_build_batch_kwargs(titanic_multibatch_data_context):
     data_asset_name = titanic_multibatch_data_context.normalize_data_asset_name("titanic")
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(data_asset_name, "Titanic_1911")
-    assert "./data/titanic/Titanic_1911.csv" in batch_kwargs["path"]
+    assert os.path.relpath("./data/titanic/Titanic_1911.csv") in batch_kwargs["path"]
     assert "partition_id" in batch_kwargs
     assert batch_kwargs["partition_id"] == "Titanic_1911"
 
@@ -1295,6 +1320,7 @@ def test_existing_local_data_docs_urls_returns_only_existing_urls_from_customize
         "file://{}".format(path_2),
     ]
 
+
 def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
     # Setup:
     base_path = str(tmp_path_factory.mktemp('test_load_config_variables_file'))
@@ -1304,16 +1330,17 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
     with open(os.path.join(base_path, "uncommitted", "prod_variables.yml"), "w") as outfile:
         yaml.dump({'env': 'prod'}, outfile)
     basic_data_context_config["config_variables_file_path"] = "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
-    context = ConfigOnlyDataContext(basic_data_context_config, context_root_dir=base_path)
 
     try:
         # We should be able to load different files based on an environment variable
         os.environ["TEST_CONFIG_FILE_ENV"] = "dev"
-        vars = context._load_config_variables_file()
-        assert vars['env'] == 'dev'
+        context = ConfigOnlyDataContext(basic_data_context_config, context_root_dir=base_path)
+        config_vars = context._load_config_variables_file()
+        assert config_vars['env'] == 'dev'
         os.environ["TEST_CONFIG_FILE_ENV"] = "prod"
-        vars = context._load_config_variables_file()
-        assert vars['env'] == 'prod'
+        context = ConfigOnlyDataContext(basic_data_context_config, context_root_dir=base_path)
+        config_vars = context._load_config_variables_file()
+        assert config_vars['env'] == 'prod'
     except Exception:
         raise
     finally:

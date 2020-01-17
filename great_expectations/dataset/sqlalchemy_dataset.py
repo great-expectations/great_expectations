@@ -41,6 +41,12 @@ except ImportError:
 
 try:
     import pybigquery.sqlalchemy_bigquery
+    from collections import namedtuple
+    # NOTE: pybigquery does not export its type map, so we are accessing a protected member.
+    # This is potentially error-prone, and should be fixed pending response from pybigquery maintainers
+    # https://github.com/mxmzdlv/pybigquery/issues/46
+    BigQueryTypes = namedtuple('BigQueryTypes', sorted(pybigquery.sqlalchemy_bigquery._type_map))
+    bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
 except ImportError:
     pybigquery = None
 
@@ -419,12 +425,22 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    def get_column_quantiles(self, column, quantiles):
-        selects = []
-        for quantile in quantiles:
-            selects.append(
-                sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
-            )
+    def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
+        selects = [sa.func.percentile_disc(quantile).within_group(
+            sa.column(column).asc()) for quantile in quantiles]
+        try:
+            if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+                # Redshift does not have a percentile_disc method, but does support an approximate version
+                if allow_relative_error is True:
+                    selects = [sa.text(
+                        ", ".join(["approximate " + str(stmt.compile(dialect=self.engine.dialect, compile_kwargs={
+                            'literal_binds': True})) for stmt in selects])
+                    )]
+                else:
+                    raise ValueError("Redshift does not support computing quantiles without approximation error; "
+                                     "set allow_relative_error to True to allow approximate quantiles.")
+        except (AttributeError, TypeError):
+            pass
         quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
         return list(quantiles)
 
@@ -603,6 +619,28 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return sa.column(column) != None
 
+    def _get_dialect_type_module(self):
+        if self.dialect is None:
+            logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+            return sa
+        try:
+            # Redshift does not (yet) export types to top level; only recognize base SA types
+            if isinstance(self.engine.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+                return self.dialect.sa
+        except (TypeError, AttributeError):
+            pass
+
+        try:
+            # Bigquery
+            if isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+                # NOTE: pybigquery does not export its type map, so we are accessing a protected member.
+                # This is potentially error-prone, and should be fixed pending response from pybigquery maintainers
+                # https://github.com/mxmzdlv/pybigquery/issues/46
+                return bigquery_types_tuple
+        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+            pass
+        return self.dialect
+
     @DocInherit
     @DataAsset.expectation(['column', 'type_', 'mostly'])
     def expect_column_values_to_be_of_type(
@@ -637,11 +675,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # vacuously true
                 success = True
             else:
-                if self.dialect is None:
-                    logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
-                    success = issubclass(col_type, getattr(sa, type_))
-                else:
-                    success = issubclass(col_type, getattr(self.dialect, type_))
+                type_module = self._get_dialect_type_module()
+                success = issubclass(col_type, getattr(type_module, type_))
 
             return {
                     "success": success,
@@ -685,30 +720,18 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if type_list is None:
             success = True
         else:
-            if self.dialect is None:
-                logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
-                types = []
-                for type_ in type_list:
-                    try:
-                        type_class = getattr(sa, type_)
-                        types.append(type_class)
-                    except AttributeError:
-                        logger.debug("Unrecognized type: %s" % type_)
-                if len(types) == 0:
-                    logger.warning("No recognized sqlalchemy types in type_list")
-                types = tuple(types)
-            else:
-                types = []
-                for type_ in type_list:
-                    try:
-                        type_class = getattr(self.dialect, type_)
-                        types.append(type_class)
-                    except AttributeError:
-                        logger.debug("Unrecognized type: %s" % type_)
-                if len(types) == 0:
-                    logger.warning("No recognized sqlalchemy types in type_list for dialect %s" %
-                                   self.dialect.__name__)
-                types = tuple(types)
+            types = []
+            type_module = self._get_dialect_type_module()
+            for type_ in type_list:
+                try:
+                    type_class = getattr(type_module, type_)
+                    types.append(type_class)
+                except AttributeError:
+                    logger.debug("Unrecognized type: %s" % type_)
+            if len(types) == 0:
+                logger.warning("No recognized sqlalchemy types in type_list for dialect %s" %
+                               type_module.__name__)
+            types = tuple(types)
             success = issubclass(col_type, types)
 
         return {

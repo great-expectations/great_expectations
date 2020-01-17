@@ -54,13 +54,8 @@ class DefaultJinjaView(object):
     """
     _template = NoOpTemplate
 
-    def __init__(self, data_context=None):
-        self.data_context = data_context
-        self.custom_styles_directory = None
-        if data_context:
-            plugins_directory = data_context.plugins_directory
-            if os.path.isdir(os.path.join(plugins_directory, "custom_data_docs", "styles")):
-                self.custom_styles_directory = os.path.join(plugins_directory, "custom_data_docs/styles")
+    def __init__(self, custom_styles_directory=None):
+        self.custom_styles_directory = custom_styles_directory
 
     def render(self, document, template=None, **kwargs):
         self._validate_document(document)
@@ -81,7 +76,7 @@ class DefaultJinjaView(object):
         )
         styles_loader = PackageLoader(
             'great_expectations',
-            'render/view/styles'
+            'render/view/static/styles'
         )
 
         loaders = [

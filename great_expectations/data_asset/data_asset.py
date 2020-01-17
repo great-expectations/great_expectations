@@ -839,7 +839,40 @@ class DataAsset(object):
         else:
             raise ValueError("Unable to save config: filepath or data_context must be available.")
 
-    #TODO: when validate is called and expectation editor is in data_context, need to bypass widget creation
+    def _validate_single_expectation(self,
+                                     expectation,
+                                     result_format,
+                                     runtime_evaluation_parameters,
+                                     catch_exceptions):
+        """This method is factored out of the inner loop of validate
+        to simplify certain kinds of error trapping and mocking.
+
+        Note that we have to return BOTH the expectation and result,
+        since the expectation is often modified as a side effect of other operations,
+        and this config is used later in the validate method.
+        """
+        # copy the config so we can modify it below if needed
+        expectation = copy.deepcopy(expectation)
+
+        expectation_method = getattr(
+            self, expectation['expectation_type'])
+
+        if result_format is not None:
+            expectation['kwargs'].update({'result_format': result_format})
+
+        # A missing parameter should raise a KeyError
+        evaluation_args = self._build_evaluation_parameters(
+            expectation['kwargs'], runtime_evaluation_parameters)
+
+        result = expectation_method(
+            catch_exceptions=catch_exceptions,
+            include_config=True,
+            **evaluation_args
+        )
+
+        return expectation, result
+
+    # TODO: when validate is called and expectation editor is in data_context, need to bypass widget creation
     # NOTE : Abe 2019/09/21 : This method contains a lot of logic that will need to be split between
     # the DataContextAwareDataAsset and BasicDataAsset classes, when we created those typed classes.
     # Some of the ContextAware logic may go to live in the DataContext itself.
@@ -995,23 +1028,11 @@ class DataAsset(object):
             for expectation in expectations_to_evaluate:
 
                 try:
-                    # copy the config so we can modify it below if needed
-                    expectation = copy.deepcopy(expectation)
-
-                    expectation_method = getattr(
-                        self, expectation['expectation_type'])
-
-                    if result_format is not None:
-                        expectation['kwargs'].update({'result_format': result_format})
-
-                    # A missing parameter should raise a KeyError
-                    evaluation_args = self._build_evaluation_parameters(
-                        expectation['kwargs'], runtime_evaluation_parameters)
-
-                    result = expectation_method(
-                        catch_exceptions=catch_exceptions,
-                        include_config=True,
-                        **evaluation_args
+                    expectation, result = self._validate_single_expectation(
+                        expectation,
+                        result_format,
+                        runtime_evaluation_parameters,
+                        catch_exceptions,
                     )
 
                 except Exception as err:

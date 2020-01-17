@@ -249,7 +249,7 @@ class Dataset(MetaDataset):
         """Returns: any"""
         raise NotImplementedError
 
-    def get_column_quantiles(self, column, quantiles):
+    def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
         """Get the values in column closest to the requested quantiles
         Args:
             column (string): name of column
@@ -265,13 +265,17 @@ class Dataset(MetaDataset):
         """Returns: float"""
         raise NotImplementedError
 
-    def get_column_partition(self, column, bins='uniform', n_bins=10):
+    def get_column_partition(self, column, bins='uniform', n_bins=10, allow_relative_error=False):
         """Get a partition of the range of values in the specified column.
 
         Args:
             column: the name of the column
             bins: 'uniform' for evenly spaced bins or 'quantile' for bins spaced according to quantiles
             n_bins: the number of bins to produce
+            allow_relative_error: passed to get_column_quantiles, set to False for only precise
+                values, True to allow approximate values on systems with only binary choice (e.g. Redshift), and to a
+                value between zero and one for systems that allow specification of relative error (e.g.
+                SparkDFDataset).
 
         Returns:
             A list of bins
@@ -282,7 +286,7 @@ class Dataset(MetaDataset):
             #  quantiles for clarity
             # min_ = self.get_column_min(column)
             # max_ = self.get_column_max(column)
-            min_, max_ = self.get_column_quantiles(column, (0.0, 1.0))
+            min_, max_ = self.get_column_quantiles(column, (0.0, 1.0), allow_relative_error=allow_relative_error)
             # PRECISION NOTE: some implementations of quantiles could produce
             # varying levels of precision (e.g. a NUMERIC column producing
             # Decimal from a SQLAlchemy source, so we cast to float for numpy)
@@ -290,13 +294,15 @@ class Dataset(MetaDataset):
         elif bins in ['ntile', 'quantile', 'percentile']:
             bins = self.get_column_quantiles(
                 column,
-                tuple(np.linspace(start=0, stop=1, num=n_bins+1))
+                tuple(np.linspace(start=0, stop=1, num=n_bins+1)),
+                allow_relative_error=allow_relative_error
             )
         elif bins == 'auto':
             # Use the method from numpy histogram_bin_edges
             nonnull_count = self.get_column_nonnull_count(column)
             sturges = np.log2(nonnull_count + 1)
-            min_, _25, _75, max_ = self.get_column_quantiles(column, (0.0, 0.25, 0.75, 1.0))
+            min_, _25, _75, max_ = self.get_column_quantiles(column, (0.0, 0.25, 0.75, 1.0),
+                                                             allow_relative_error=allow_relative_error)
             iqr = _75 - _25
             if (iqr < 1e-10):  # Consider IQR 0 and do not use variance-based estimator
                 n_bins = sturges
@@ -2514,6 +2520,7 @@ class Dataset(MetaDataset):
         self,
         column,
         quantile_ranges,
+        allow_relative_error=False,
         result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
@@ -2574,6 +2581,8 @@ class Dataset(MetaDataset):
                 The column name.
             quantile_ranges (dictionary): \
                 Quantiles and associated value ranges for the column. See above for details.
+            allow_relative_error (boolean): \
+                Whether to allow relative error in quantile communications on backends that support or require it.
 
         Other Parameters:
             result_format (str or None): \
@@ -2616,7 +2625,7 @@ class Dataset(MetaDataset):
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError("quntile_values and quantiles must have the same number of elements")
 
-        quantile_vals = self.get_column_quantiles(column, tuple(quantiles))
+        quantile_vals = self.get_column_quantiles(column, tuple(quantiles), allow_relative_error=allow_relative_error)
         # We explicitly allow "None" to be interpreted as +/- infinity
         comparison_quantile_ranges = [
             [lower_bound or -np.inf, upper_bound or np.inf]

@@ -15,7 +15,6 @@ Basic Functionality
    :maxdepth: 2
 
    /reference/creating_expectations
-   /reference/expectation_glossary
    /reference/distributional_expectations
    /reference/custom_expectations
    /reference/implemented_expectations
@@ -52,6 +51,7 @@ Integrations
    :maxdepth: 2
 
    /reference/integrations/redshift
+   /reference/integrations/bigquery
 
 ******************
 Advanced Features
@@ -65,6 +65,7 @@ Advanced Features
    /reference/stores_reference
    /reference/batch_identification
    /reference/validation_operators
+   /reference/usage_statistics
 
 *****************************
 Extending Great Expectations

@@ -1,6 +1,8 @@
 import logging
 
 from collections import OrderedDict
+import os
+import shutil
 
 from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLASS
 from great_expectations.data_context.types import (
@@ -14,6 +16,7 @@ from great_expectations.data_context.store.namespaced_read_write_store import (
 )
 
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.util import file_relative_path
 import great_expectations.exceptions as exceptions
 
 logger = logging.getLogger(__name__)
@@ -100,11 +103,18 @@ class SiteBuilder(object):
                  datasource_whitelist=None
     ):
         self.data_context = data_context
+        self.store_backend = store_backend
+        
+        # set custom_styles_directory if present
+        custom_styles_directory = None
+        plugins_directory = data_context.plugins_directory
+        if os.path.isdir(os.path.join(plugins_directory, "custom_data_docs", "styles")):
+            custom_styles_directory = os.path.join(plugins_directory, "custom_data_docs/styles")
 
         # The site builder is essentially a frontend store. We'll open up three types of backends using the base
         # type of the configuration defined in the store_backend section
 
-        target_store = HtmlSiteStore(
+        self.target_store = HtmlSiteStore(
             root_directory=data_context.root_directory,
             serialization_type=None,
             store_backend=store_backend
@@ -124,7 +134,8 @@ class SiteBuilder(object):
             config=site_index_builder,
             runtime_config={
                 "data_context": data_context,
-                "target_store": target_store,
+                "custom_styles_directory": custom_styles_directory,
+                "target_store": self.target_store,
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -169,7 +180,8 @@ class SiteBuilder(object):
                 config=site_section_config,
                 runtime_config={
                     "data_context": data_context,
-                    "target_store": target_store
+                    "target_store": self.target_store,
+                    "custom_styles_directory": custom_styles_directory
                 },
                 config_defaults={
                     "name": site_section_name,
@@ -188,7 +200,10 @@ class SiteBuilder(object):
                             and avoids full rebuild.
         :return:
         """
-
+        
+        # copy static assets
+        self.target_store.copy_static_assets()
+        
         for site_section, site_section_builder in self.site_section_builders.items():
             site_section_builder.build(datasource_whitelist=self.datasource_whitelist,
                                        resource_identifiers=resource_identifiers
@@ -204,6 +219,7 @@ class DefaultSiteSectionBuilder(object):
                  data_context,
                  target_store,
                  source_store_name,
+                 custom_styles_directory=None,
                  # NOTE: Consider allowing specification of ANY element (or combination of elements) within an ID key?
                  run_id_filter=None,
                  renderer=None,
@@ -234,7 +250,7 @@ class DefaultSiteSectionBuilder(object):
         self.view_class = instantiate_class_from_config(
             config=view,
             runtime_config={
-                "data_context": data_context
+                "custom_styles_directory": custom_styles_directory
             },
             config_defaults={
                 "module_name": "great_expectations.render.view"
@@ -318,6 +334,7 @@ class DefaultSiteIndexBuilder(object):
             name,
             data_context,
             target_store,
+            custom_styles_directory=None,
             show_cta_footer=True,
             renderer=None,
             view=None,
@@ -349,7 +366,7 @@ class DefaultSiteIndexBuilder(object):
         self.view_class = instantiate_class_from_config(
             config=view,
             runtime_config={
-                "data_context": data_context
+                "custom_styles_directory": custom_styles_directory
             },
             config_defaults={
                 "module_name": "great_expectations.render.view"

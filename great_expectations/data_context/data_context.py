@@ -207,8 +207,9 @@ class ConfigOnlyDataContext(object):
         uncommitted_dir = os.path.join(base_dir, "uncommitted")
 
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
+            new_directory_path = os.path.join(uncommitted_dir, new_directory)
             safe_mmkdir(
-                os.path.join(uncommitted_dir, new_directory),
+                new_directory_path,
                 exist_ok=True
             )
 
@@ -219,8 +220,10 @@ class ConfigOnlyDataContext(object):
     @classmethod
     def scaffold_custom_data_docs(cls, plugins_dir):
         """Copy custom data docs templates"""
-        styles_template = file_relative_path(__file__, "../render/view/styles/data_docs_custom_styles_template.css")
-        styles_destination_path = os.path.join(plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
+        styles_template = file_relative_path(
+            __file__, "../render/view/static/styles/data_docs_custom_styles_template.css")
+        styles_destination_path = os.path.join(
+            plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
         shutil.copyfile(styles_template, styles_destination_path)
 
     @classmethod
@@ -326,7 +329,6 @@ class ConfigOnlyDataContext(object):
         if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
             raise ge_exceptions.DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
-
 
     def _init_stores(self, store_configs):
         """Initialize all Stores for this DataContext.
@@ -574,8 +576,8 @@ class ConfigOnlyDataContext(object):
         """Save config variable value
 
         Args:
-            property_name: name of the property
-            **value: the value to save
+            config_variable_name: name of the property
+            value: the value to save for the property
 
         Returns:
             None

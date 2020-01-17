@@ -27,6 +27,7 @@ def titanic_expectations():
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_profiling_results_column_section_renderer(titanic_validation_results):
     # Group EVRs by column
     evrs = {}
@@ -46,6 +47,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
 
 
 @pytest.mark.smoketest
+@pytest.mark.rendered_output
 def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     # Group expectations by column
     exp_groups = {}
@@ -70,6 +72,7 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     #         assert json.dumps(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]), indent=2) == infile
 
 
+@pytest.mark.smoketest
 def test_ProfilingResultsColumnSectionRenderer_render(titanic_profiled_evrs_1, titanic_profiled_name_column_evrs):
     #Smoke test for titanic names
     document = ProfilingResultsColumnSectionRenderer().render(titanic_profiled_name_column_evrs)
@@ -413,7 +416,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         }
     }
     result = ValidationResultsTableContentBlockRenderer.render([evr])
-    # print(json.dumps(result, indent=2))
+    print(json.dumps(result, indent=2))
 
     #Note: A better approach to testing would separate out styling into a separate test.
     assert result == {
@@ -429,15 +432,22 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                         },
                         "styling": {
                             "params": {
-                            "icon": {
-                                "classes": [
-                                    "fas",
-                                    "fa-check-circle",
-                                    "text-success"
-                                ],
-                                "tag": "i"
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success"
+                                    ],
+                                    "tag": "i"
+                                }
                             }
-                            }
+                        }
+                    },
+                    "styling": {
+                        "parent": {
+                            "classes": [
+                                "hide-succeeded-validation-target-child"
+                            ]
                         }
                     }
                 },
@@ -462,8 +472,8 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             "params": {
                                 "column": {
                                     "classes": [
-                                    "badge",
-                                    "badge-primary"
+                                        "badge",
+                                        "badge-primary"
                                     ]
                                 }
                             }

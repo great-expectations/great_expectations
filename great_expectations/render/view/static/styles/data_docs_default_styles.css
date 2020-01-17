@@ -1,6 +1,25 @@
+{% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
+  {% set static_fonts_dir = "../../../../../static/fonts/" -%}
+{% elif utm_medium == "expectation-suite-page" %}
+  {% set static_fonts_dir = "../../../../static/fonts/" -%}
+{% elif utm_medium == "index-page" %}
+  {% set static_fonts_dir = "./static/fonts/" -%}
+{% endif %}
+
+@font-face {
+  font-family: HKGroteskPro;
+  src: url("{{ static_fonts_dir +  'HKGrotesk/HKGrotesk-Regular.otf'}}");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: HKGrotesk-Light;
+  src: url("{{ static_fonts_dir +  'HKGrotesk/HKGrotesk-Light.otf'}}");
+  font-weight: 300;
+}
+
 body {
   position: relative;
-  padding-bottom: 100px;
 }
 
 .container {
@@ -10,9 +29,8 @@ body {
 .sticky {
   position: -webkit-sticky;
   position: sticky;
-  max-height: 90vh;
-  overflow-y: auto;
-  top: 60px;
+  top: 90px;
+  z-index: 1;
 }
 
 .ge-section {
@@ -106,12 +124,12 @@ ul {
 }
 
 td .show-scrollbars {
-  max-height: 335px;
+  max-height: 80vh;
 }
 
-.show-scrollbars ul {
-  padding-bottom: 20px
-}
+/*.show-scrollbars ul {*/
+/*  padding-bottom: 20px*/
+/*}*/
 
 .show-scrollbars::-webkit-scrollbar {
   -webkit-appearance: none;
