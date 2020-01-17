@@ -298,14 +298,11 @@ class FixedLengthTupleS3StoreBackend(FixedLengthTupleStoreBackend):
         return key_list
 
     def get_url_for_key(self, key, protocol=None):
-        path = self._convert_key_to_filepath(key)
-        full_path = os.path.join(self.full_base_directory, path)
-        #TODO: return an HTTP URL that can be opened in the browser
-        if protocol is None:
-            protocol = "s3:"
-        url = protocol + "//" + full_path
+        import boto3
 
-        return url
+        location = boto3.client('s3').get_bucket_location(Bucket=self.bucket)['LocationConstraint']
+        s3_key = self._convert_key_to_filepath(key)
+        return "https://s3-%s.amazonaws.com/%s/%s" % (location, self.bucket, s3_key)
 
     def _has_key(self, key):
         all_keys = self.list_keys()
