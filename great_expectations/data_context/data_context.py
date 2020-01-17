@@ -15,17 +15,17 @@ from six import string_types
 import datetime
 import warnings
 
-from great_expectations.core import ExpectationSuite, NamespaceAwareExpectationSuite
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.base import DataContextConfig, dataContextConfigSchema
-from great_expectations.data_context.types.metrics import ExpectationDefinedMetricIdentifier
 from great_expectations.data_context.util import file_relative_path, substitute_config_variable
+from .types.resource_identifiers import ExpectationSuiteIdentifier, ValidationResultIdentifier
 from .util import safe_mmkdir, substitute_all_config_variables
 from ..types.base import DotDict
 
 import great_expectations.exceptions as ge_exceptions
 
 # FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers.
-
+from ..validator.validator import Validator
 
 try:
     from urllib.parse import urlparse
@@ -42,11 +42,6 @@ from great_expectations.datasource import (
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
 
-from .types import (
-    DataAssetIdentifier,
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
-)
 
 from .templates import (
     PROJECT_TEMPLATE,
@@ -606,96 +601,91 @@ class ConfigOnlyDataContext(object):
 
         return data_asset_names
 
-    def yield_batch_kwargs(self, data_asset_name, **kwargs):
-        """Yields a the next batch_kwargs for the provided data_asset_name, supplemented by any kwargs provided inline.
+    def build_batch_kwargs(self, datasource, generator, batch_parameters=None, **kwargs):
+        """Builds batch kwargs using the provided datasource, generator, and batch_parameters.
 
         Args:
-            data_asset_name (str or DataAssetIdentifier): the name from which to provide batch_kwargs
-            **kwargs: additional kwargs to supplement the returned batch_kwargs
+            datasource (str): the name of the datasource for which to build batch_kwargs
+            generator (str): the name of the generator to use to build batch_kwargs
+            batch_parameters (str): a dictionary of batch_parameters to use for building the batch_kwargs
+            **kwargs: additional batch_parameters
 
         Returns:
             BatchKwargs
 
         """
-        if not isinstance(data_asset_name, DataAssetIdentifier):
-            data_asset_name = self.normalize_data_asset_name(data_asset_name)
+        datasource_obj = self.get_datasource(datasource)
+        batch_params, batch_kwargs = datasource_obj.build_batch_kwargs(generator, batch_parameters, **kwargs)
+        # Track the datasource *in batch_kwargs* when building from a context so that the context can easily reuse them.
+        batch_kwargs["datasource"] = datasource
+        return batch_params, batch_kwargs
 
-        datasource = self.get_datasource(data_asset_name.datasource)
-        generator = datasource.get_generator(data_asset_name.generator)
-        batch_kwargs = generator.yield_batch_kwargs(data_asset_name.generator_asset, **kwargs)
-
-        return batch_kwargs
-
-    def build_batch_kwargs(self, data_asset_name, partition_id=None, **kwargs):
-        """Builds batch kwargs for the provided data_asset_name, using an optional partition_id or building from
-        provided kwargs.
-
-        build_batch_kwargs relies on the generator's implementation
+    def get_validator(self, batch_kwargs, expectation_suite_name, data_asset_type=None, batch_parameters=None):
+        """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If
+        batch_parameters are included, they will be available as attributes of the batch.
 
         Args:
-            data_asset_name (str or DataAssetIdentifier): the name from which to provide batch_kwargs
-            partition_id (str): partition_id to use when building batch_kwargs
-            **kwargs: additional kwargs to supplement the returned batch_kwargs
+            batch_kwargs: the batch_kwargs to use
+            expectation_suite_name: the name of the expectation_suite to get
+            data_asset_type: the type of data_asset to build, with associated expectation implementations. This can
+                generally be inferred from the datasource.
+            batch_parameters: optional parameters to store as the reference description of the batch. They should
+                reflect parameters that would provide the passed BatchKwargs.
 
         Returns:
-            BatchKwargs
+            Validator (DataAsset)
 
         """
-        if not isinstance(data_asset_name, DataAssetIdentifier):
-            data_asset_name = self.normalize_data_asset_name(data_asset_name)
+        datasource = self.get_datasource(batch_kwargs.get("datasource"))
+        expectation_suite = self.get_expectation_suite(expectation_suite_name)
+        batch = datasource.get_batch(batch_kwargs=batch_kwargs, batch_parameters=batch_parameters)
+        if data_asset_type is None:
+            data_asset_type = datasource.config.get("data_asset_type")
+        validator = Validator(batch=batch, expectation_suite=expectation_suite, expectation_engine=data_asset_type)
+        return validator.get_dataset()
 
-        datasource = self.get_datasource(data_asset_name.datasource)
-        batch_kwargs = datasource.named_generator_build_batch_kwargs(
-            generator_name=data_asset_name.generator,
-            generator_asset=data_asset_name.generator_asset,
-            partition_id=partition_id,
-            **kwargs
-        )
-
-        return batch_kwargs
-
-    def get_batch(self, data_asset_name, expectation_suite_name, batch_kwargs=None, **kwargs):
-        """
-        Get a batch of data, using the namespace of the provided data_asset_name.
-
-        get_batch constructs its batch by first normalizing the data_asset_name (if not already normalized) and then:
-          (1) getting data using the provided batch_kwargs; and
-          (2) attaching the named expectation suite
-
-        A single partition_id may be used in place of batch_kwargs when using a data_asset_name whose generator
-        supports that partition type, and additional kwargs will be used to supplement the provided batch_kwargs.
-
-        Args:
-            data_asset_name: name of the data asset. The name will be normalized. \
-                (See :py:meth:`normalize_data_asset_name` )
-            expectation_suite_name: name of the expectation suite to attach to the data_asset returned
-            batch_kwargs: key-value pairs describing the batch of data the datasource should fetch. \
-                (See :class:`BatchGenerator` ) If no batch_kwargs are specified, then the context will get the next
-                available batch_kwargs for the data_asset.
-            **kwargs: additional key-value pairs to pass to the datasource when fetching the batch.
-
-        Returns:
-            Great Expectations data_asset with attached expectation_suite and DataContext
-        """
-        normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
-
-        datasource = self.get_datasource(normalized_data_asset_name.datasource)
-        if not datasource:
-            raise ge_exceptions.DataContextError(
-                "Can't find datasource {} in the config - please check your {}".format(
-                    normalized_data_asset_name,
-                    self.GE_YML
-                )
-            )
-
-        if batch_kwargs is None:
-            batch_kwargs = self.build_batch_kwargs(data_asset_name, **kwargs)
-
-        data_asset = datasource.get_batch(normalized_data_asset_name,
-                                          expectation_suite_name,
-                                          batch_kwargs,
-                                          **kwargs)
-        return data_asset
+    # def get_batch(self, data_asset_name, expectation_suite_name, batch_kwargs=None, **kwargs):
+    #     """
+    #     Get a batch of data, using the namespace of the provided data_asset_name.
+    #
+    #     get_batch constructs its batch by first normalizing the data_asset_name (if not already normalized) and then:
+    #       (1) getting data using the provided batch_kwargs; and
+    #       (2) attaching the named expectation suite
+    #
+    #     A single partition_id may be used in place of batch_kwargs when using a data_asset_name whose generator
+    #     supports that partition type, and additional kwargs will be used to supplement the provided batch_kwargs.
+    #
+    #     Args:
+    #         data_asset_name: name of the data asset. The name will be normalized. \
+    #             (See :py:meth:`normalize_data_asset_name` )
+    #         expectation_suite_name: name of the expectation suite to attach to the data_asset returned
+    #         batch_kwargs: key-value pairs describing the batch of data the datasource should fetch. \
+    #             (See :class:`BatchGenerator` ) If no batch_kwargs are specified, then the context will get the next
+    #             available batch_kwargs for the data_asset.
+    #         **kwargs: additional key-value pairs to pass to the datasource when fetching the batch.
+    #
+    #     Returns:
+    #         Great Expectations data_asset with attached expectation_suite and DataContext
+    #     """
+    #     normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
+    #
+    #     datasource = self.get_datasource(normalized_data_asset_name.datasource)
+    #     if not datasource:
+    #         raise ge_exceptions.DataContextError(
+    #             "Can't find datasource {} in the config - please check your {}".format(
+    #                 normalized_data_asset_name,
+    #                 self.GE_YML
+    #             )
+    #         )
+    #
+    #     if batch_kwargs is None:
+    #         batch_kwargs = self.build_batch_kwargs(data_asset_name, **kwargs)
+    #
+    #     data_asset = datasource.get_batch(normalized_data_asset_name,
+    #                                       expectation_suite_name,
+    #                                       batch_kwargs,
+    #                                       **kwargs)
+    #     return data_asset
 
     def run_validation_operator(
             self,
@@ -870,220 +860,218 @@ class ConfigOnlyDataContext(object):
                 })
         return datasources
 
-    def normalize_data_asset_name(self, data_asset_name):
-        """Normalizes data_asset_names for a data context.
+    # def normalize_data_asset_name(self, data_asset_name):
+    #     """Normalizes data_asset_names for a data context.
+    #
+    #     A data_asset_name is defined per-project and consists of three components that together define a "namespace"
+    #     for data assets, encompassing both expectation suites and batches.
+    #
+    #     Within a namespace, an expectation suite effectively defines candidate "types" for batches of data, and
+    #     validating a batch of data determines whether that instance is of the candidate type.
+    #
+    #     The data_asset_name namespace consists of three components:
+    #
+    #       - a datasource name
+    #       - a generator_name
+    #       - a generator_asset
+    #
+    #     It has a string representation consisting of each of those components delimited by a character defined in the
+    #     data_context ('/' by default).
+    #
+    #     Args:
+    #         data_asset_name (str): The (unnormalized) data asset name to normalize. The name will be split \
+    #             according to the currently-configured data_asset_name_delimiter
+    #
+    #     Returns:
+    #         DataAssetIdentifier
+    #     """
+    #
+    #     if isinstance(data_asset_name, DataAssetIdentifier):
+    #         return data_asset_name
+    #
+    #     split_name = data_asset_name.split(self.data_asset_name_delimiter)
+    #
+    #     existing_expectation_suite_keys = self.list_expectation_suite_keys()
+    #     existing_namespaces = []
+    #     for key in existing_expectation_suite_keys:
+    #         existing_namespaces.append(
+    #             DataAssetIdentifier(
+    #                 key.data_asset_name.datasource,
+    #                 key.data_asset_name.generator,
+    #                 key.data_asset_name.generator_asset,
+    #             )
+    #         )
+    #
+    #     if len(split_name) > 3:
+    #         raise ge_exceptions.DataContextError(
+    #             "Invalid data_asset_name '{data_asset_name}': found too many components using delimiter '{delimiter}'"
+    #             .format(
+    #                     data_asset_name=data_asset_name,
+    #                     delimiter=self.data_asset_name_delimiter
+    #             )
+    #         )
+    #
+    #     elif len(split_name) == 1:
+    #         # In this case, the name *must* refer to a unique data_asset_name
+    #         provider_names = set()
+    #         generator_asset = split_name[0]
+    #         for normalized_identifier in existing_namespaces:
+    #             curr_generator_asset = normalized_identifier.generator_asset
+    #             if generator_asset == curr_generator_asset:
+    #                 provider_names.add(
+    #                     normalized_identifier
+    #                 )
+    #
+    #         # NOTE: Current behavior choice is to continue searching to see whether the namespace is ambiguous
+    #         # based on configured generators *even* if there is *only one* namespace with expectation suites
+    #         # in it.
+    #
+    #         # If generators' namespaces are enormous or if they are slow to provide all their available names,
+    #         # that behavior could become unwieldy, and perhaps should be revisited by using the escape hatch
+    #         # commented out below.
+    #
+    #         # if len(provider_names) == 1:
+    #         #     return provider_names[0]
+    #         #
+    #         # elif len(provider_names) > 1:
+    #         #     raise ge_exceptions.DataContextError(
+    #         #         "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
+    #         #         .format(data_asset_name=data_asset_name, provider_names=provider_names)
+    #         #     )
+    #
+    #         available_names = self.get_available_data_asset_names()
+    #         for datasource in available_names.keys():
+    #             for generator in available_names[datasource].keys():
+    #                 names_set = set([n[0] for n in available_names[datasource][generator]["names"]])
+    #                 if generator_asset in names_set:
+    #                     provider_names.add(
+    #                         DataAssetIdentifier(datasource, generator, generator_asset)
+    #                     )
+    #
+    #         if len(provider_names) == 1:
+    #             return provider_names.pop()
+    #
+    #         elif len(provider_names) > 1:
+    #             raise ge_exceptions.AmbiguousDataAssetNameError(
+    #                 "Ambiguous data_asset_name '{data_asset_name}'. Multiple "
+    #                 "candidates found: {provider_names}".format(
+    #                     data_asset_name=data_asset_name,
+    #                     provider_names=provider_names
+    #                 ),
+    #                 candidates=provider_names
+    #             )
+    #
+    #         # If we are here, then the data_asset_name does not belong to any configured datasource or generator
+    #         # If there is only a single datasource and generator, we assume the user wants to create a new
+    #         # namespace.
+    #         if (len(available_names.keys()) == 1 and  # in this case, we know that the datasource name is valid
+    #                 len(available_names[datasource].keys()) == 1):
+    #             return DataAssetIdentifier(
+    #                 datasource,
+    #                 generator,
+    #                 generator_asset
+    #             )
+    #
+    #         if len(available_names.keys()) == 0:
+    #             raise ge_exceptions.DataContextError(
+    #                 "No datasource configured: a datasource is required to normalize an incomplete data_asset_name"
+    #             )
+    #
+    #         raise ge_exceptions.DataContextError(
+    #             "Could not normalize data asset name. No existing data_asset has the "
+    #             "provided name, no generator provides it and there are "
+    #             "multiple datasources and/or generators configured."
+    #         )
+    #
+    #     elif len(split_name) == 2:
+    #         # In this case, the name must be a datasource_name/generator_asset
+    #
+    #         # If the data_asset_name is already defined by a config in that datasource, return that normalized name.
+    #         provider_names = set()
+    #         for normalized_identifier in existing_namespaces:
+    #             curr_datasource_name = normalized_identifier.datasource
+    #             curr_generator_asset = normalized_identifier.generator_asset
+    #             if curr_datasource_name == split_name[0] and curr_generator_asset == split_name[1]:
+    #                 provider_names.add(normalized_identifier)
+    #
+    #         # NOTE: Current behavior choice is to continue searching to see whether the namespace is ambiguous
+    #         # based on configured generators *even* if there is *only one* namespace with expectation suites
+    #         # in it.
+    #
+    #         # If generators' namespaces are enormous or if they are slow to provide all their available names,
+    #         # that behavior could become unwieldy, and perhaps should be revisited by using the escape hatch
+    #         # commented out below.
+    #
+    #         # if len(provider_names) == 1:
+    #         #     return provider_names[0]
+    #         #
+    #         # elif len(provider_names) > 1:
+    #         #     raise ge_exceptions.DataContextError(
+    #         #         "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
+    #         #         .format(data_asset_name=data_asset_name, provider_names=provider_names)
+    #         #     )
+    #
+    #         available_names = self.get_available_data_asset_names()
+    #         for datasource_name in available_names.keys():
+    #             for generator in available_names[datasource_name].keys():
+    #                 generator_assets = set([n[0] for n in available_names[datasource_name][generator]["names"]])
+    #
+    #                 if split_name[0] == datasource_name and split_name[1] in generator_assets:
+    #                     provider_names.add(DataAssetIdentifier(datasource_name, generator, split_name[1]))
+    #
+    #         if len(provider_names) == 1:
+    #             return provider_names.pop()
+    #
+    #         elif len(provider_names) > 1:
+    #             raise ge_exceptions.AmbiguousDataAssetNameError(
+    #                 "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
+    #                 .format(data_asset_name=data_asset_name, provider_names=provider_names),
+    #                 candidates=provider_names
+    #             )
+    #
+    #         # If we are here, then the data_asset_name does not belong to any configured datasource or generator
+    #         # If there is only a single generator for their provided datasource, we allow the user to create a new
+    #         # namespace.
+    #         if split_name[0] in available_names and len(available_names[split_name[0]]) == 1:
+    #             logger.info("Normalizing to a new generator name.")
+    #             return DataAssetIdentifier(
+    #                 split_name[0],
+    #                 list(available_names[split_name[0]].keys())[0],
+    #                 split_name[1]
+    #             )
+    #
+    #         if len(available_names.keys()) == 0:
+    #             raise ge_exceptions.DataContextError(
+    #                 "No datasource configured: a datasource is required to normalize an incomplete data_asset_name"
+    #             )
+    #
+    #         raise ge_exceptions.DataContextError(
+    #             "No generator available to produce data_asset_name '{data_asset_name}' "
+    #             "with datasource '{datasource_name}'"
+    #             .format(data_asset_name=data_asset_name, datasource_name=datasource_name)
+    #         )
+    #
+    #     elif len(split_name) == 3:
+    #         # In this case, we *do* check that the datasource and generator names are valid, but
+    #         # allow the user to define a new generator asset
+    #         datasources = [datasource["name"] for datasource in self.list_datasources()]
+    #         if split_name[0] in datasources:
+    #             datasource = self.get_datasource(split_name[0])
+    #
+    #             generators = [generator["name"] for generator in datasource.list_generators()]
+    #             if split_name[1] in generators:
+    #                 return DataAssetIdentifier(*split_name)
+    #
+    #         raise ge_exceptions.DataContextError(
+    #             "Invalid data_asset_name: no configured datasource '{datasource_name}' "
+    #             "with generator '{generator_name}'"
+    #             .format(datasource_name=split_name[0], generator_name=split_name[1])
+    #         )
 
-        A data_asset_name is defined per-project and consists of three components that together define a "namespace"
-        for data assets, encompassing both expectation suites and batches.
-
-        Within a namespace, an expectation suite effectively defines candidate "types" for batches of data, and
-        validating a batch of data determines whether that instance is of the candidate type.
-
-        The data_asset_name namespace consists of three components:
-
-          - a datasource name
-          - a generator_name
-          - a generator_asset
-
-        It has a string representation consisting of each of those components delimited by a character defined in the
-        data_context ('/' by default).
-
-        Args:
-            data_asset_name (str): The (unnormalized) data asset name to normalize. The name will be split \
-                according to the currently-configured data_asset_name_delimiter
-
-        Returns:
-            DataAssetIdentifier
-        """
-
-        if isinstance(data_asset_name, DataAssetIdentifier):
-            return data_asset_name
-
-        split_name = data_asset_name.split(self.data_asset_name_delimiter)
-
-        existing_expectation_suite_keys = self.list_expectation_suite_keys()
-        existing_namespaces = []
-        for key in existing_expectation_suite_keys:
-            existing_namespaces.append(
-                DataAssetIdentifier(
-                    key.data_asset_name.datasource,
-                    key.data_asset_name.generator,
-                    key.data_asset_name.generator_asset,
-                )
-            )
-
-        if len(split_name) > 3:
-            raise ge_exceptions.DataContextError(
-                "Invalid data_asset_name '{data_asset_name}': found too many components using delimiter '{delimiter}'"
-                .format(
-                        data_asset_name=data_asset_name,
-                        delimiter=self.data_asset_name_delimiter
-                )
-            )
-
-        elif len(split_name) == 1:
-            # In this case, the name *must* refer to a unique data_asset_name
-            provider_names = set()
-            generator_asset = split_name[0]
-            for normalized_identifier in existing_namespaces:
-                curr_generator_asset = normalized_identifier.generator_asset
-                if generator_asset == curr_generator_asset:
-                    provider_names.add(
-                        normalized_identifier
-                    )
-
-            # NOTE: Current behavior choice is to continue searching to see whether the namespace is ambiguous
-            # based on configured generators *even* if there is *only one* namespace with expectation suites
-            # in it.
-
-            # If generators' namespaces are enormous or if they are slow to provide all their available names,
-            # that behavior could become unwieldy, and perhaps should be revisited by using the escape hatch
-            # commented out below.
-
-            # if len(provider_names) == 1:
-            #     return provider_names[0]
-            #
-            # elif len(provider_names) > 1:
-            #     raise ge_exceptions.DataContextError(
-            #         "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
-            #         .format(data_asset_name=data_asset_name, provider_names=provider_names)
-            #     )
-
-            available_names = self.get_available_data_asset_names()
-            for datasource in available_names.keys():
-                for generator in available_names[datasource].keys():
-                    names_set = set([n[0] for n in available_names[datasource][generator]["names"]])
-                    if generator_asset in names_set:
-                        provider_names.add(
-                            DataAssetIdentifier(datasource, generator, generator_asset)
-                        )
-
-            if len(provider_names) == 1:
-                return provider_names.pop()
-
-            elif len(provider_names) > 1:
-                raise ge_exceptions.AmbiguousDataAssetNameError(
-                    "Ambiguous data_asset_name '{data_asset_name}'. Multiple "
-                    "candidates found: {provider_names}".format(
-                        data_asset_name=data_asset_name,
-                        provider_names=provider_names
-                    ),
-                    candidates=provider_names
-                )
-
-            # If we are here, then the data_asset_name does not belong to any configured datasource or generator
-            # If there is only a single datasource and generator, we assume the user wants to create a new
-            # namespace.
-            if (len(available_names.keys()) == 1 and  # in this case, we know that the datasource name is valid
-                    len(available_names[datasource].keys()) == 1):
-                return DataAssetIdentifier(
-                    datasource,
-                    generator,
-                    generator_asset
-                )
-
-            if len(available_names.keys()) == 0:
-                raise ge_exceptions.DataContextError(
-                    "No datasource configured: a datasource is required to normalize an incomplete data_asset_name"
-                )
-
-            raise ge_exceptions.DataContextError(
-                "Could not normalize data asset name. No existing data_asset has the "
-                "provided name, no generator provides it and there are "
-                "multiple datasources and/or generators configured."
-            )
-
-        elif len(split_name) == 2:
-            # In this case, the name must be a datasource_name/generator_asset
-
-            # If the data_asset_name is already defined by a config in that datasource, return that normalized name.
-            provider_names = set()
-            for normalized_identifier in existing_namespaces:
-                curr_datasource_name = normalized_identifier.datasource
-                curr_generator_asset = normalized_identifier.generator_asset
-                if curr_datasource_name == split_name[0] and curr_generator_asset == split_name[1]:
-                    provider_names.add(normalized_identifier)
-
-            # NOTE: Current behavior choice is to continue searching to see whether the namespace is ambiguous
-            # based on configured generators *even* if there is *only one* namespace with expectation suites
-            # in it.
-
-            # If generators' namespaces are enormous or if they are slow to provide all their available names,
-            # that behavior could become unwieldy, and perhaps should be revisited by using the escape hatch
-            # commented out below.
-
-            # if len(provider_names) == 1:
-            #     return provider_names[0]
-            #
-            # elif len(provider_names) > 1:
-            #     raise ge_exceptions.DataContextError(
-            #         "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
-            #         .format(data_asset_name=data_asset_name, provider_names=provider_names)
-            #     )
-
-            available_names = self.get_available_data_asset_names()
-            for datasource_name in available_names.keys():
-                for generator in available_names[datasource_name].keys():
-                    generator_assets = set([n[0] for n in available_names[datasource_name][generator]["names"]])
-
-                    if split_name[0] == datasource_name and split_name[1] in generator_assets:
-                        provider_names.add(DataAssetIdentifier(datasource_name, generator, split_name[1]))
-
-            if len(provider_names) == 1:
-                return provider_names.pop()
-
-            elif len(provider_names) > 1:
-                raise ge_exceptions.AmbiguousDataAssetNameError(
-                    "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
-                    .format(data_asset_name=data_asset_name, provider_names=provider_names),
-                    candidates=provider_names
-                )
-
-            # If we are here, then the data_asset_name does not belong to any configured datasource or generator
-            # If there is only a single generator for their provided datasource, we allow the user to create a new
-            # namespace.
-            if split_name[0] in available_names and len(available_names[split_name[0]]) == 1:
-                logger.info("Normalizing to a new generator name.")
-                return DataAssetIdentifier(
-                    split_name[0],
-                    list(available_names[split_name[0]].keys())[0],
-                    split_name[1]
-                )
-
-            if len(available_names.keys()) == 0:
-                raise ge_exceptions.DataContextError(
-                    "No datasource configured: a datasource is required to normalize an incomplete data_asset_name"
-                )
-
-            raise ge_exceptions.DataContextError(
-                "No generator available to produce data_asset_name '{data_asset_name}' "
-                "with datasource '{datasource_name}'"
-                .format(data_asset_name=data_asset_name, datasource_name=datasource_name)
-            )
-
-        elif len(split_name) == 3:
-            # In this case, we *do* check that the datasource and generator names are valid, but
-            # allow the user to define a new generator asset
-            datasources = [datasource["name"] for datasource in self.list_datasources()]
-            if split_name[0] in datasources:
-                datasource = self.get_datasource(split_name[0])
-
-                generators = [generator["name"] for generator in datasource.list_generators()]
-                if split_name[1] in generators:
-                    return DataAssetIdentifier(*split_name)
-
-            raise ge_exceptions.DataContextError(
-                "Invalid data_asset_name: no configured datasource '{datasource_name}' "
-                "with generator '{generator_name}'"
-                .format(datasource_name=split_name[0], generator_name=split_name[1])
-            )
-
-    def create_expectation_suite(self, data_asset_name, expectation_suite_name, overwrite_existing=False):
+    def create_expectation_suite(self, expectation_suite_name, overwrite_existing=False):
         """Build a new expectation suite and save it into the data_context expectation store.
 
         Args:
-            data_asset_name: The name of the data_asset for which this suite will be stored.
-                data_asset_name will be normalized if it is a string
             expectation_suite_name: The name of the expectation_suite to create
             overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
                 already exists
@@ -1091,203 +1079,163 @@ class ConfigOnlyDataContext(object):
         Returns:
             A new (empty) expectation suite.
         """
-        if not isinstance(data_asset_name, DataAssetIdentifier):
-            data_asset_name = self.normalize_data_asset_name(data_asset_name)
-
-        expectation_suite = NamespaceAwareExpectationSuite(
-            data_asset_name=data_asset_name,
-            expectation_suite_name=expectation_suite_name
-        )
-
-        key = ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_name,
-            expectation_suite_name=expectation_suite_name,
-        )
+        expectation_suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
+        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
         if self._stores[self.expectations_store_name].has_key(key) and not overwrite_existing:
             raise ge_exceptions.DataContextError(
-                "expectation_suite with name {} already exists for data_asset "
-                "{}. If you would like to overwrite this expectation_suite, "
-                "set overwrite_existing=True.".format(
-                    expectation_suite_name,
-                    data_asset_name
-                )
+                "expectation_suite with name {} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True.".format(expectation_suite_name)
             )
         else:
             self._stores[self.expectations_store_name].set(key, expectation_suite)
 
         return expectation_suite
 
-    def get_expectation_suite(self, data_asset_name, expectation_suite_name="default"):
+    def get_expectation_suite(self, expectation_suite_name):
         """Get a named expectation suite for the provided data_asset_name.
 
         Args:
-            data_asset_name (str or DataAssetIdentifier): the data asset name to which the expectation suite belongs
             expectation_suite_name (str): the name for the expectation suite
 
         Returns:
             expectation_suite
         """
-        if not isinstance(data_asset_name, DataAssetIdentifier):
-            data_asset_name = self.normalize_data_asset_name(data_asset_name)
-
-        key = ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_name,
-            expectation_suite_name=expectation_suite_name,
-        )
+        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
         if self.stores[self.expectations_store_name].has_key(key):
             return self.stores[self.expectations_store_name].get(key)
         else:
             raise ge_exceptions.DataContextError(
-                "No expectation_suite found for data_asset_name %s and expectation_suite_name %s" %
-                (data_asset_name, expectation_suite_name)
+                "expectation_suite %s not found" % expectation_suite_name
             )
 
-    def save_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
+    def save_expectation_suite(self, expectation_suite, expectation_suite_name=None):
         """Save the provided expectation suite into the DataContext.
 
         Args:
             expectation_suite: the suite to save
-            data_asset_name: the data_asset_name for this expectation suite. If no name is provided, the name will\
-                be read from the suite
             expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
                 be read from the suite
 
         Returns:
             None
         """
-        if data_asset_name is None:
-            try:
-                data_asset_name = expectation_suite.data_asset_name
-            except KeyError:
-                raise ge_exceptions.DataContextError(
-                    "data_asset_name must either be specified or present in the provided expectation suite")
-        else:
-            expectation_suite.data_asset_name = data_asset_name
-
         if expectation_suite_name is None:
-            try:
-                expectation_suite_name = expectation_suite.expectation_suite_name
-            except KeyError:
-                raise ge_exceptions.DataContextError(
-                    "expectation_suite_name must either be specified or present in the provided expectation suite")
+            key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite.expectation_suite_name)
         else:
-            expectation_suite.expectation_suite_name = expectation_suite_name
+            key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
-        if not isinstance(data_asset_name, DataAssetIdentifier):
-            data_asset_name = self.normalize_data_asset_name(data_asset_name)
-
-        self.stores[self.expectations_store_name].set(ExpectationSuiteIdentifier(
-            data_asset_name=data_asset_name,
-            expectation_suite_name=expectation_suite_name,
-        ), expectation_suite)
-
+        self.stores[self.expectations_store_name].set(key, expectation_suite)
         self._compiled = False
 
-    def _extract_and_store_parameters_from_validation_results(self, validation_results, data_asset_name, expectation_suite_name, run_id):
-
-        if not self._compiled:
-            self._compile()
-
-        if "data_asset_name" not in validation_results.meta or "expectation_suite_name" not in validation_results.meta:
-            logger.warning(
-                "Both data_asset_name and expectation_suite_name must be in validation results to "
-                "register evaluation parameters."
-            )
-            return
-
-        elif (data_asset_name not in self._compiled_parameters["data_assets"] or
-              expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]):
-            # This is fine; short-circuit since we do not need to register any results from this dataset.
-            return
-
-        for result in validation_results.results:
-            # Unoptimized: loop over all results and check if each is needed
-            expectation_type = result.expectation_config.expectation_type
-            if expectation_type in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name]:
-                # First, bind column-style parameters
-                if (("column" in result.expectation_config.kwargs) and
-                    ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]) and
-                    (result.expectation_config.kwargs["column"] in
-                        self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
-
-                    column = result.expectation_config.kwargs["column"]
-                    # Now that we have a small search space, invert logic, and look for the parameters in our result
-                    for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"][column].items():
-                        # value here is the set of desired parameters under the type_key
-                        for desired_param in desired_parameters:
-                            desired_key = desired_param.split(":")[-1]
-                            metric_id = ExpectationDefinedMetricIdentifier(
-                                run_id=run_id,
-                                data_asset_name=data_asset_name,
-                                expectation_suite_name=expectation_suite_name,
-                                expectation_type=expectation_type,
-                                metric_name=desired_key,
-                                metric_kwargs={
-                                    "column": column
-                                }
-                            )
-                            if desired_key in ["observed_value", "unexpected_count", "unexpected_percent"]:
-                                # if type_key == "result" and desired_key in result.result:
-                                try:
-                                    metric_value = result.result[desired_key]
-                                    self.evaluation_parameter_store.set(metric_id, metric_value)
-                                except KeyError:
-                                    logger.warning("Unable to locate metric %s: not found in expected validation "
-                                                   "result." % desired_key)
-                                # self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
-                                #     run_id, desired_param, result.result[desired_key])
-                            # elif type_key == "details" and desired_key in result.result["details"]:
-                            elif desired_key in ["expected_partition", "observed_partition"]:
-                                try:
-                                    metric_value = result.result["details"][desired_key]
-                                    self.evaluation_parameter_store.set(metric_id, metric_value)
-                                except KeyError:
-                                    logger.warning("Unable to locate metric %s: not found in expected validation "
-                                                   "result." % desired_key)
-                                # self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
-                                #     run_id, desired_param, result.result["details"])
-                            else:
-                                logger.warning("Unrecognized key for parameter %s" % desired_param)
-
-                # Next, bind parameters that do not have column parameter
-                for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type].items():
-                    if type_key == "columns":
-                        continue
-                    for desired_param in desired_parameters:
-                        desired_key = desired_param.split(":")[-1]
-                        metric_id = ExpectationDefinedMetricIdentifier(
-                            run_id=run_id,
-                            data_asset_name=data_asset_name,
-                            expectation_suite_name=expectation_suite_name,
-                            expectation_type=expectation_type,
-                            metric_name=desired_key,
-                            metric_kwargs={}
-                        )
-                        if desired_key in ["observed_value", "unexpected_count", "unexpected_percent"]:
-                            if desired_key in ["observed_value", "unexpected_count", "unexpected_percent"]:
-                                # if type_key == "result" and desired_key in result.result:
-                                try:
-                                    metric_value = result.result[desired_key]
-                                    self.evaluation_parameter_store.set(metric_id, metric_value)
-                                except KeyError:
-                                    logger.warning("Unable to locate metric %s: not found in expected validation "
-                                                   "result." % desired_key)
-                                # self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
-                                #     run_id, desired_param, result.result[desired_key])
-                            # elif type_key == "details" and desired_key in result.result["details"]:
-                            elif desired_key in ["expected_partition", "observed_partition"]:
-                                try:
-                                    metric_value = result.result["details"][desired_key]
-                                    self.evaluation_parameter_store.set(metric_id, metric_value)
-                                except KeyError:
-                                    logger.warning("Unable to locate metric %s: not found in expected validation "
-                                                   "result." % desired_key)
-                                # self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
-                                #     run_id, desired_param, result.result["details"])
-                            else:
-                                logger.warning("Unrecognized key for parameter %s" % desired_param)
+    def get_required_metric_keys(self):
+        logger.error("get_required_metric_keys IS NOT YET REIMPLEMENTED")
+        return []
+    #
+    # def _extract_and_store_parameters_from_validation_results(self, validation_results, data_asset_name, expectation_suite_name, run_id):
+    #
+    #     if not self._compiled:
+    #         self._compile()
+    #
+    #     if "data_asset_name" not in validation_results.meta or "expectation_suite_name" not in validation_results.meta:
+    #         logger.warning(
+    #             "Both data_asset_name and expectation_suite_name must be in validation results to "
+    #             "register evaluation parameters."
+    #         )
+    #         return
+    #
+    #     elif (data_asset_name not in self._compiled_parameters["data_assets"] or
+    #           expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]):
+    #         # This is fine; short-circuit since we do not need to register any results from this dataset.
+    #         return
+    #
+    #     for result in validation_results.results:
+    #         # Unoptimized: loop over all results and check if each is needed
+    #         expectation_type = result.expectation_config.expectation_type
+    #         if expectation_type in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name]:
+    #             # First, bind column-style parameters
+    #             if (("column" in result.expectation_config.kwargs) and
+    #                 ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]) and
+    #                 (result.expectation_config.kwargs["column"] in
+    #                     self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
+    #
+    #                 column = result.expectation_config.kwargs["column"]
+    #                 # Now that we have a small search space, invert logic, and look for the parameters in our result
+    #                 for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"][column].items():
+    #                     # value here is the set of desired parameters under the type_key
+    #                     for desired_param in desired_parameters:
+    #                         desired_key = desired_param.split(":")[-1]
+    #                         metric_id = ExpectationDefinedMetricIdentifier(
+    #                             run_id=run_id,
+    #                             data_asset_name=data_asset_name,
+    #                             expectation_suite_name=expectation_suite_name,
+    #                             expectation_type=expectation_type,
+    #                             metric_name=desired_key,
+    #                             metric_kwargs={
+    #                                 "column": column
+    #                             }
+    #                         )
+    #                         if desired_key in ["observed_value", "unexpected_count", "unexpected_percent"]:
+    #                             # if type_key == "result" and desired_key in result.result:
+    #                             try:
+    #                                 metric_value = result.result[desired_key]
+    #                                 self.evaluation_parameter_store.set(metric_id, metric_value)
+    #                             except KeyError:
+    #                                 logger.warning("Unable to locate metric %s: not found in expected validation "
+    #                                                "result." % desired_key)
+    #                             # self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+    #                             #     run_id, desired_param, result.result[desired_key])
+    #                         # elif type_key == "details" and desired_key in result.result["details"]:
+    #                         elif desired_key in ["expected_partition", "observed_partition"]:
+    #                             try:
+    #                                 metric_value = result.result["details"][desired_key]
+    #                                 self.evaluation_parameter_store.set(metric_id, metric_value)
+    #                             except KeyError:
+    #                                 logger.warning("Unable to locate metric %s: not found in expected validation "
+    #                                                "result." % desired_key)
+    #                             # self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+    #                             #     run_id, desired_param, result.result["details"])
+    #                         else:
+    #                             logger.warning("Unrecognized key for parameter %s" % desired_param)
+    #
+    #             # Next, bind parameters that do not have column parameter
+    #             for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type].items():
+    #                 if type_key == "columns":
+    #                     continue
+    #                 for desired_param in desired_parameters:
+    #                     desired_key = desired_param.split(":")[-1]
+    #                     metric_id = ExpectationDefinedMetricIdentifier(
+    #                         run_id=run_id,
+    #                         data_asset_name=data_asset_name,
+    #                         expectation_suite_name=expectation_suite_name,
+    #                         expectation_type=expectation_type,
+    #                         metric_name=desired_key,
+    #                         metric_kwargs={}
+    #                     )
+    #                     if desired_key in ["observed_value", "unexpected_count", "unexpected_percent"]:
+    #                         if desired_key in ["observed_value", "unexpected_count", "unexpected_percent"]:
+    #                             # if type_key == "result" and desired_key in result.result:
+    #                             try:
+    #                                 metric_value = result.result[desired_key]
+    #                                 self.evaluation_parameter_store.set(metric_id, metric_value)
+    #                             except KeyError:
+    #                                 logger.warning("Unable to locate metric %s: not found in expected validation "
+    #                                                "result." % desired_key)
+    #                             # self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+    #                             #     run_id, desired_param, result.result[desired_key])
+    #                         # elif type_key == "details" and desired_key in result.result["details"]:
+    #                         elif desired_key in ["expected_partition", "observed_partition"]:
+    #                             try:
+    #                                 metric_value = result.result["details"][desired_key]
+    #                                 self.evaluation_parameter_store.set(metric_id, metric_value)
+    #                             except KeyError:
+    #                                 logger.warning("Unable to locate metric %s: not found in expected validation "
+    #                                                "result." % desired_key)
+    #                             # self.set_parameters_in_evaluation_parameter_store_by_run_id_and_key(
+    #                             #     run_id, desired_param, result.result["details"])
+    #                         else:
+    #                             logger.warning("Unrecognized key for parameter %s" % desired_param)
 
     @property
     def evaluation_parameter_store(self):
@@ -1335,121 +1283,121 @@ class ConfigOnlyDataContext(object):
     #         )
     #     else:
     #         return {}
-
-    #NOTE: Abe 2019/08/22 : Can we rename this to _compile_all_evaluation_parameters_from_expectation_suites, or something similar?
-    # A more descriptive name would have helped me grok this faster when I first encountered it
-    def _compile(self):
-        """Compiles all current expectation configurations in this context to be ready for result registration.
-
-        Compilation only respects parameters with a URN structure beginning with urn:great_expectations:validations
-        It splits parameters by the : (colon) character; valid URNs must have one of the following structures to be
-        automatically recognized.
-
-        "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "columns" : column_name : "result": result_key
-         [0]            [1]                 [2]              [3]                   [4]                  [5]             [6]              [7]         [8]        [9]        [10]
-
-        "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "columns" : column_name : "details": details_key
-         [0]            [1]                 [2]              [3]                   [4]                  [5]             [6]              [7]         [8]        [9]         [10]
-
-        "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "result": result_key
-         [0]            [1]                 [2]              [3]                  [4]                  [5]              [6]              [7]         [8]
-
-        "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "details": details_key
-         [0]            [1]                 [2]              [3]                  [4]                   [5]             [6]              [7]        [8]
-
-         Parameters are compiled to the following structure:
-
-         :: json
-
-         {
-             "raw": <set of all parameters requested>
-             "data_assets": {
-                 data_asset_name: {
-                    expectation_suite_name: {
-                        expectation_name: {
-                            "details": <set of details parameter values requested>
-                            "result": <set of result parameter values requested>
-                            column_name: {
-                                "details": <set of details parameter values requested>
-                                "result": <set of result parameter values requested>
-                            }
-                        }
-                    }
-                 }
-             }
-         }
-
-
-        """
-
-        # Full recompilation every time
-        self._compiled_parameters = {
-            "raw": set(),
-            "data_assets": {}
-        }
-
-        for key in self.stores[self.expectations_store_name].list_keys():
-            config = self.stores[self.expectations_store_name].get(key)
-            for expectation in config.expectations:
-                for _, value in expectation.kwargs.items():
-                    if isinstance(value, dict) and '$PARAMETER' in value:
-                        # Compile *only* respects parameters in urn structure
-                        # beginning with urn:great_expectations:validations
-                        if value["$PARAMETER"].startswith("urn:great_expectations:validations:"):
-                            column_expectation = False
-                            parameter = value["$PARAMETER"]
-                            self._compiled_parameters["raw"].add(parameter)
-                            param_parts = parameter.split(":")
-                            try:
-                                data_asset_name = param_parts[3]
-                                expectation_suite_name = param_parts[4]
-                                expectation_name = param_parts[6]
-                                if param_parts[7] == "columns":
-                                    column_expectation = True
-                                    column_name = param_parts[8]
-                                    param_key = param_parts[9]
-                                else:
-                                    param_key = param_parts[7]
-                            except IndexError:
-                                logger.warning("Invalid parameter urn (not enough parts): %s" % parameter)
-                                continue
-
-                            normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
-
-                            data_asset_name = DataAssetIdentifier(normalized_data_asset_name.datasource,
-                                                                  normalized_data_asset_name.generator,
-                                                                  normalized_data_asset_name.generator_asset)
-                            if data_asset_name not in self._compiled_parameters["data_assets"]:
-                                self._compiled_parameters["data_assets"][data_asset_name] = {}
-
-                            if expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]:
-                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name] = {}
-
-                            if expectation_name not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name]:
-                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name] = {}
-
-                            if column_expectation:
-                                if "columns" not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]:
-                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"] = {}
-                                if column_name not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"]:
-                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name] = {}
-                                if param_key not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name]:
-                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name][param_key] = set()
-                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name][param_key].add(parameter)
-
-                            elif param_key in ["result", "details"]:
-                                if param_key not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]:
-                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key] = set()
-                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key].add(parameter)
-
-                            else:
-                                logger.warning("Invalid parameter urn (unrecognized structure): %s" % parameter)
-
-        self._compiled = True
+    #
+    # #NOTE: Abe 2019/08/22 : Can we rename this to _compile_all_evaluation_parameters_from_expectation_suites, or something similar?
+    # # A more descriptive name would have helped me grok this faster when I first encountered it
+    # def _compile(self):
+    #     """Compiles all current expectation configurations in this context to be ready for result registration.
+    #
+    #     Compilation only respects parameters with a URN structure beginning with urn:great_expectations:validations
+    #     It splits parameters by the : (colon) character; valid URNs must have one of the following structures to be
+    #     automatically recognized.
+    #
+    #     "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "columns" : column_name : "result": result_key
+    #      [0]            [1]                 [2]              [3]                   [4]                  [5]             [6]              [7]         [8]        [9]        [10]
+    #
+    #     "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "columns" : column_name : "details": details_key
+    #      [0]            [1]                 [2]              [3]                   [4]                  [5]             [6]              [7]         [8]        [9]         [10]
+    #
+    #     "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "result": result_key
+    #      [0]            [1]                 [2]              [3]                  [4]                  [5]              [6]              [7]         [8]
+    #
+    #     "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "details": details_key
+    #      [0]            [1]                 [2]              [3]                  [4]                   [5]             [6]              [7]        [8]
+    #
+    #      Parameters are compiled to the following structure:
+    #
+    #      :: json
+    #
+    #      {
+    #          "raw": <set of all parameters requested>
+    #          "data_assets": {
+    #              data_asset_name: {
+    #                 expectation_suite_name: {
+    #                     expectation_name: {
+    #                         "details": <set of details parameter values requested>
+    #                         "result": <set of result parameter values requested>
+    #                         column_name: {
+    #                             "details": <set of details parameter values requested>
+    #                             "result": <set of result parameter values requested>
+    #                         }
+    #                     }
+    #                 }
+    #              }
+    #          }
+    #      }
+    #
+    #
+    #     """
+    #
+    #     # Full recompilation every time
+    #     self._compiled_parameters = {
+    #         "raw": set(),
+    #         "data_assets": {}
+    #     }
+    #
+    #     for key in self.stores[self.expectations_store_name].list_keys():
+    #         config = self.stores[self.expectations_store_name].get(key)
+    #         for expectation in config.expectations:
+    #             for _, value in expectation.kwargs.items():
+    #                 if isinstance(value, dict) and '$PARAMETER' in value:
+    #                     # Compile *only* respects parameters in urn structure
+    #                     # beginning with urn:great_expectations:validations
+    #                     if value["$PARAMETER"].startswith("urn:great_expectations:validations:"):
+    #                         column_expectation = False
+    #                         parameter = value["$PARAMETER"]
+    #                         self._compiled_parameters["raw"].add(parameter)
+    #                         param_parts = parameter.split(":")
+    #                         try:
+    #                             data_asset_name = param_parts[3]
+    #                             expectation_suite_name = param_parts[4]
+    #                             expectation_name = param_parts[6]
+    #                             if param_parts[7] == "columns":
+    #                                 column_expectation = True
+    #                                 column_name = param_parts[8]
+    #                                 param_key = param_parts[9]
+    #                             else:
+    #                                 param_key = param_parts[7]
+    #                         except IndexError:
+    #                             logger.warning("Invalid parameter urn (not enough parts): %s" % parameter)
+    #                             continue
+    #
+    #                         normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
+    #
+    #                         data_asset_name = DataAssetIdentifier(normalized_data_asset_name.datasource,
+    #                                                               normalized_data_asset_name.generator,
+    #                                                               normalized_data_asset_name.generator_asset)
+    #                         if data_asset_name not in self._compiled_parameters["data_assets"]:
+    #                             self._compiled_parameters["data_assets"][data_asset_name] = {}
+    #
+    #                         if expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]:
+    #                             self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name] = {}
+    #
+    #                         if expectation_name not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name]:
+    #                             self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name] = {}
+    #
+    #                         if column_expectation:
+    #                             if "columns" not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]:
+    #                                 self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"] = {}
+    #                             if column_name not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"]:
+    #                                 self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name] = {}
+    #                             if param_key not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name]:
+    #                                 self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name][param_key] = set()
+    #                             self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name][param_key].add(parameter)
+    #
+    #                         elif param_key in ["result", "details"]:
+    #                             if param_key not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]:
+    #                                 self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key] = set()
+    #                             self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key].add(parameter)
+    #
+    #                         else:
+    #                             logger.warning("Invalid parameter urn (unrecognized structure): %s" % parameter)
+    #
+    #     self._compiled = True
 
     def get_validation_result(
         self,
-        data_asset_name,
+        batch_identifier,
         expectation_suite_name="default",
         run_id=None,
         validations_store_name=None,
@@ -1471,15 +1419,6 @@ class ConfigOnlyDataContext(object):
         if validations_store_name is None:
             validations_store_name = self.validations_store_name
         selected_store = self.stores[validations_store_name]
-        if not isinstance(data_asset_name, DataAssetIdentifier):
-            data_asset_name = self.normalize_data_asset_name(data_asset_name)
-
-        if not isinstance(data_asset_name, DataAssetIdentifier):
-            data_asset_name = DataAssetIdentifier(
-                datasource=data_asset_name.datasource,
-                generator=data_asset_name.generator,
-                generator_asset=data_asset_name.generator_asset
-            )
 
         if run_id is None:
             #Get most recent run id
@@ -1495,8 +1434,8 @@ class ConfigOnlyDataContext(object):
             run_id = max(run_id_set)
 
         key = ValidationResultIdentifier(
+                batch_identifier=batch_identifier,
                 expectation_suite_identifier=ExpectationSuiteIdentifier(
-                    data_asset_name=data_asset_name,
                     expectation_suite_name=expectation_suite_name
                 ),
                 run_id=run_id
@@ -1775,177 +1714,177 @@ class ConfigOnlyDataContext(object):
         profiling_results['success'] = True
         return profiling_results
 
-    def profile_data_asset(self,
-                           datasource_name,
-                           generator_name=None,
-                           data_asset_name=None,
-                           batch_kwargs=None,
-                           expectation_suite_name=None,
-                           profiler=BasicDatasetProfiler,
-                           run_id="profiling",
-                           additional_batch_kwargs=None):
-        """
-        Profile a data asset
-
-        :param datasource_name: the name of the datasource to which the profiled data asset belongs
-        :param generator_name: the name of the generator to use to get batches (only if batch_kwargs are not provided)
-        :param data_asset_name: the name of the profiled data asset
-        :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the generator (generator_name arg) will choose a batch
-        :param profiler: the profiler class to use
-        :param run_id: optional - if set, the validation result created by the profiler will be under the provided run_id
-        :param additional_batch_kwargs:
-        :returns
-            A dictionary::
-
-                {
-                    "success": True/False,
-                    "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
-                }
-
-            When success = False, the error details are under "error" key
-        """
-
-        logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
-
-        profiling_results = {}
-
-        if batch_kwargs is None:
-            # Get data_asset_name_list
-            data_asset_names = self.get_available_data_asset_names(datasource_name)
-            if generator_name is None:
-                if len(data_asset_names[datasource_name].keys()) == 1:
-                    generator_name = list(data_asset_names[datasource_name].keys())[0]
-            if generator_name not in data_asset_names[datasource_name]:
-                raise ge_exceptions.ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
-
-            data_asset_name_list = [name[0] for name in data_asset_names[datasource_name][generator_name]["names"]]
-            total_data_assets = len(data_asset_name_list)
-
-            if data_asset_name not in data_asset_name_list:
-                not_found_data_assets = [data_asset_name]
-                if len(not_found_data_assets) > 0:
-                    profiling_results = {
-                        'success': False,
-                        'error': {
-                            'code': DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
-                            'not_found_data_assets': not_found_data_assets,
-                            'data_assets': data_asset_name_list
-                        }
-                    }
-                    return profiling_results
-
-
-                data_asset_name_list = [data_asset_name]
-                data_asset_name_list.sort()
-                total_data_assets = len(data_asset_name_list)
-
-
-        profiling_results['success'] = True
-
-        profiling_results['results'] = []
-        total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
-        total_start_time = datetime.datetime.now()
-
-        name = data_asset_name
-        # logger.info("\tProfiling '%s'..." % name)
-        try:
-            start_time = datetime.datetime.now()
-
-            # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
-            if additional_batch_kwargs is None:
-                additional_batch_kwargs = {}
-
-            if datasource_name is None or generator_name is None:
-                normalized_data_asset_name = self.normalize_data_asset_name(name)
-            else:
-                normalized_data_asset_name = DataAssetIdentifier(datasource_name, generator_name,
-                                                                 name)
-            if expectation_suite_name is None:
-                expectation_suite_name = profiler.__name__
-            self.create_expectation_suite(
-                data_asset_name=normalized_data_asset_name,
-                expectation_suite_name=expectation_suite_name,
-                overwrite_existing=True
-            )
-
-            if batch_kwargs is None:
-
-                batch_kwargs = self.yield_batch_kwargs(
-                    data_asset_name=normalized_data_asset_name,
-                    **additional_batch_kwargs
-                )
-            else:
-                batch_kwargs.update(additional_batch_kwargs)
-
-            batch = self.get_batch(
-                data_asset_name=normalized_data_asset_name,
-                expectation_suite_name=expectation_suite_name,
-                batch_kwargs=batch_kwargs
-            )
-
-            if not profiler.validate(batch):
-                raise ge_exceptions.ProfilerError(
-                    "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
-                )
-
-            # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
-            # will have more to unpack.
-            expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
-            profiling_results['results'].append((expectation_suite, validation_results))
-
-            self.validations_store.set(
-                key=ValidationResultIdentifier(
-                    expectation_suite_identifier=ExpectationSuiteIdentifier(
-                        data_asset_name=normalized_data_asset_name,
-                        expectation_suite_name=expectation_suite_name
-                    ),
-                    run_id=run_id
-                ),
-                value=validation_results
-            )
-
-            if isinstance(batch, Dataset):
-                # For datasets, we can produce some more detailed statistics
-                row_count = batch.get_row_count()
-                total_rows += row_count
-                new_column_count = len(set([exp.kwargs["column"] for exp in expectation_suite.expectations if "column" in exp.kwargs]))
-                total_columns += new_column_count
-
-            new_expectation_count = len(expectation_suite.expectations)
-            total_expectations += new_expectation_count
-
-            self.save_expectation_suite(expectation_suite)
-            duration = (datetime.datetime.now() - start_time).total_seconds()
-            logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
-                        (new_column_count, row_count, name, duration))
-
-        except ge_exceptions.ProfilerError as err:
-            logger.warning(err.message)
-        except IOError as err:
-            logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % name)
-            logger.debug(str(err))
-            skipped_data_assets += 1
-        except SQLAlchemyError as e:
-            logger.warning("SqlAlchemyError while profiling %s. Skipping." % name)
-            logger.debug(str(e))
-            skipped_data_assets += 1
-
-            total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
-            logger.info("""
-    Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
-    Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs.""" % (
-                len(data_asset_name_list),
-                total_data_assets,
-                total_rows,
-                total_columns,
-                total_duration,
-                total_expectations,
-            ))
-            if skipped_data_assets > 0:
-                logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
-
-        profiling_results['success'] = True
-        return profiling_results
+    # def profile_data_asset(self,
+    #                        datasource_name,
+    #                        generator_name=None,
+    #                        data_asset_name=None,
+    #                        batch_kwargs=None,
+    #                        expectation_suite_name=None,
+    #                        profiler=BasicDatasetProfiler,
+    #                        run_id="profiling",
+    #                        additional_batch_kwargs=None):
+    #     """
+    #     Profile a data asset
+    #
+    #     :param datasource_name: the name of the datasource to which the profiled data asset belongs
+    #     :param generator_name: the name of the generator to use to get batches (only if batch_kwargs are not provided)
+    #     :param data_asset_name: the name of the profiled data asset
+    #     :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the generator (generator_name arg) will choose a batch
+    #     :param profiler: the profiler class to use
+    #     :param run_id: optional - if set, the validation result created by the profiler will be under the provided run_id
+    #     :param additional_batch_kwargs:
+    #     :returns
+    #         A dictionary::
+    #
+    #             {
+    #                 "success": True/False,
+    #                 "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
+    #             }
+    #
+    #         When success = False, the error details are under "error" key
+    #     """
+    #
+    #     logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
+    #
+    #     profiling_results = {}
+    #
+    #     if batch_kwargs is None:
+    #         # Get data_asset_name_list
+    #         data_asset_names = self.get_available_data_asset_names(datasource_name)
+    #         if generator_name is None:
+    #             if len(data_asset_names[datasource_name].keys()) == 1:
+    #                 generator_name = list(data_asset_names[datasource_name].keys())[0]
+    #         if generator_name not in data_asset_names[datasource_name]:
+    #             raise ge_exceptions.ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
+    #
+    #         data_asset_name_list = [name[0] for name in data_asset_names[datasource_name][generator_name]["names"]]
+    #         total_data_assets = len(data_asset_name_list)
+    #
+    #         if data_asset_name not in data_asset_name_list:
+    #             not_found_data_assets = [data_asset_name]
+    #             if len(not_found_data_assets) > 0:
+    #                 profiling_results = {
+    #                     'success': False,
+    #                     'error': {
+    #                         'code': DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
+    #                         'not_found_data_assets': not_found_data_assets,
+    #                         'data_assets': data_asset_name_list
+    #                     }
+    #                 }
+    #                 return profiling_results
+    #
+    #
+    #             data_asset_name_list = [data_asset_name]
+    #             data_asset_name_list.sort()
+    #             total_data_assets = len(data_asset_name_list)
+    #
+    #
+    #     profiling_results['success'] = True
+    #
+    #     profiling_results['results'] = []
+    #     total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
+    #     total_start_time = datetime.datetime.now()
+    #
+    #     name = data_asset_name
+    #     # logger.info("\tProfiling '%s'..." % name)
+    #     try:
+    #         start_time = datetime.datetime.now()
+    #
+    #         # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
+    #         if additional_batch_kwargs is None:
+    #             additional_batch_kwargs = {}
+    #
+    #         if datasource_name is None or generator_name is None:
+    #             normalized_data_asset_name = self.normalize_data_asset_name(name)
+    #         else:
+    #             normalized_data_asset_name = DataAssetIdentifier(datasource_name, generator_name,
+    #                                                              name)
+    #         if expectation_suite_name is None:
+    #             expectation_suite_name = profiler.__name__
+    #         self.create_expectation_suite(
+    #             data_asset_name=normalized_data_asset_name,
+    #             expectation_suite_name=expectation_suite_name,
+    #             overwrite_existing=True
+    #         )
+    #
+    #         if batch_kwargs is None:
+    #
+    #             batch_kwargs = self.yield_batch_kwargs(
+    #                 data_asset_name=normalized_data_asset_name,
+    #                 **additional_batch_kwargs
+    #             )
+    #         else:
+    #             batch_kwargs.update(additional_batch_kwargs)
+    #
+    #         batch = self.get_batch(
+    #             data_asset_name=normalized_data_asset_name,
+    #             expectation_suite_name=expectation_suite_name,
+    #             batch_kwargs=batch_kwargs
+    #         )
+    #
+    #         if not profiler.validate(batch):
+    #             raise ge_exceptions.ProfilerError(
+    #                 "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
+    #             )
+    #
+    #         # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
+    #         # will have more to unpack.
+    #         expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
+    #         profiling_results['results'].append((expectation_suite, validation_results))
+    #
+    #         self.validations_store.set(
+    #             key=ValidationResultIdentifier(
+    #                 expectation_suite_identifier=ExpectationSuiteIdentifier(
+    #                     data_asset_name=normalized_data_asset_name,
+    #                     expectation_suite_name=expectation_suite_name
+    #                 ),
+    #                 run_id=run_id
+    #             ),
+    #             value=validation_results
+    #         )
+    #
+    #         if isinstance(batch, Dataset):
+    #             # For datasets, we can produce some more detailed statistics
+    #             row_count = batch.get_row_count()
+    #             total_rows += row_count
+    #             new_column_count = len(set([exp.kwargs["column"] for exp in expectation_suite.expectations if "column" in exp.kwargs]))
+    #             total_columns += new_column_count
+    #
+    #         new_expectation_count = len(expectation_suite.expectations)
+    #         total_expectations += new_expectation_count
+    #
+    #         self.save_expectation_suite(expectation_suite)
+    #         duration = (datetime.datetime.now() - start_time).total_seconds()
+    #         logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
+    #                     (new_column_count, row_count, name, duration))
+    #
+    #     except ge_exceptions.ProfilerError as err:
+    #         logger.warning(err.message)
+    #     except IOError as err:
+    #         logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % name)
+    #         logger.debug(str(err))
+    #         skipped_data_assets += 1
+    #     except SQLAlchemyError as e:
+    #         logger.warning("SqlAlchemyError while profiling %s. Skipping." % name)
+    #         logger.debug(str(e))
+    #         skipped_data_assets += 1
+    #
+    #         total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+    #         logger.info("""
+    # Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
+    # Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs.""" % (
+    #             len(data_asset_name_list),
+    #             total_data_assets,
+    #             total_rows,
+    #             total_columns,
+    #             total_duration,
+    #             total_expectations,
+    #         ))
+    #         if skipped_data_assets > 0:
+    #             logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
+    #
+    #     profiling_results['success'] = True
+    #     return profiling_results
 
 class DataContext(ConfigOnlyDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for

@@ -1,13 +1,13 @@
 import json
 import pytest
 
-from great_expectations.core import NamespaceAwareExpectationSuiteSchema
+from great_expectations.core import ExpectationSuiteSchema
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 
 
 @pytest.fixture
 def critical_suite():
-    schema = NamespaceAwareExpectationSuiteSchema(strict=True)
+    schema = ExpectationSuiteSchema(strict=True)
     critical_suite = {
         "data_asset_name": "edw/default/pre_prod_staging.staging_npi",
         "expectation_suite_name": "critical",
@@ -29,7 +29,7 @@ def critical_suite():
 
 @pytest.fixture
 def warning_suite():
-    schema = NamespaceAwareExpectationSuiteSchema(strict=True)
+    schema = ExpectationSuiteSchema(strict=True)
     warning_suite = {
         "data_asset_name": "edw/default/pre_prod_staging.staging_npi",
         "expectation_suite_name": "warning",

@@ -1,7 +1,7 @@
 import logging
 import time
 
-from great_expectations.datasource.types import BatchId
+from great_expectations.datasource.types import BatchMarkers
 from ..exceptions import BatchKwargsError
 
 from .datasource import Datasource, ReaderMethods
@@ -145,7 +145,7 @@ class SparkDFDatasource(Datasource):
         reader_options = batch_kwargs.get("reader_options", {})
 
         # We need to build a batch_id to be used in the dataframe
-        batch_id = BatchId({
+        batch_id = BatchMarkers({
             "timestamp": time.time()
         })
 

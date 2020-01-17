@@ -28,7 +28,7 @@ from great_expectations.cli.init_messages import (
 from great_expectations.cli.logging import logger
 from great_expectations.cli.util import cli_message, is_sane_slack_webhook
 from great_expectations.core import (
-    NamespaceAwareExpectationSuite,
+    ExpectationSuite,
     ExpectationSuiteValidationResult,
 )
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer

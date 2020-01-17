@@ -6,7 +6,7 @@ from great_expectations.datasource import Datasource
 from great_expectations.datasource.types import (
     SqlAlchemyDatasourceQueryBatchKwargs,
     SqlAlchemyDatasourceTableBatchKwargs,
-    BatchId
+    BatchMarkers
 )
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
 from .generator.query_generator import QueryGenerator
@@ -181,7 +181,7 @@ class SqlAlchemyDatasource(Datasource):
                              "must be a subclass of SqlAlchemyDataset." % data_asset_type.__name__)
 
         # We need to build a batch_id to be used in the dataframe
-        batch_id = BatchId({
+        batch_id = BatchMarkers({
             "timestamp": time.time()
         })
 

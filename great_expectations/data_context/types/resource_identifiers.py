@@ -1,10 +1,8 @@
 import logging
 
-from six import PY3
-
 from marshmallow import Schema, fields, post_load
 
-from great_expectations.core import DataContextKey, DataAssetIdentifier, DataAssetIdentifierSchema
+from great_expectations.core import DataContextKey, DataAssetIdentifierSchema
 from great_expectations.exceptions import InvalidDataContextKeyError
 
 logger = logging.getLogger(__name__)
@@ -12,40 +10,23 @@ logger = logging.getLogger(__name__)
 
 class ExpectationSuiteIdentifier(DataContextKey):
 
-    def __init__(self, data_asset_name, expectation_suite_name):
+    def __init__(self, expectation_suite_name):
         super(ExpectationSuiteIdentifier, self).__init__()
-        if isinstance(data_asset_name, DataAssetIdentifier):
-            self._data_asset_name = data_asset_name
-        elif isinstance(data_asset_name, (tuple, list)):
-            self._data_asset_name = DataAssetIdentifier(*data_asset_name)
-        else:
-            self._data_asset_name = DataAssetIdentifier(**data_asset_name)
         self._expectation_suite_name = expectation_suite_name
-
-    @property
-    def data_asset_name(self):
-        return self._data_asset_name
 
     @property
     def expectation_suite_name(self):
         return self._expectation_suite_name
 
     def to_tuple(self):
-        # PYTHON 2--convert to (*self.data_asset_name.to_tuple(), self.expectation_suite_name) when no longer needed
-        expectation_suite_identifier_tuple_list = \
-            list(self.data_asset_name.to_tuple()) + [self.expectation_suite_name]
-        return tuple(expectation_suite_identifier_tuple_list)
+        return tuple(self.expectation_suite_name.split("."))
 
     @classmethod
     def from_tuple(cls, tuple_):
-        return cls(
-            data_asset_name=DataAssetIdentifier.from_tuple(tuple_[:-1]),
-            expectation_suite_name=tuple_[-1]
-        )
+        return cls(".".join(tuple_))
 
 
 class ExpectationSuiteIdentifierSchema(Schema):
-    data_asset_name = fields.Nested(DataAssetIdentifierSchema)
     expectation_suite_name = fields.Str()
 
     # noinspection PyUnusedLocal
@@ -54,12 +35,43 @@ class ExpectationSuiteIdentifierSchema(Schema):
         return ExpectationSuiteIdentifier(**data)
 
 
+class BatchIdentifier(DataContextKey):
+
+    def __init__(self, batch_identifier):
+        super(BatchIdentifier, self).__init__()
+        # batch_kwargs
+        # if isinstance(batch_identifier, (BatchKwargs, dict)):
+        #     self._batch_identifier = batch_identifier.batch_fingerprint
+        # else:
+        self._batch_identifier = batch_identifier
+
+    @property
+    def batch_identifier(self):
+        return self._batch_identifier
+
+    def to_tuple(self):
+        return self.batch_identifier,
+
+    @classmethod
+    def from_tuple(cls, tuple_):
+        return cls(batch_identifier=tuple_[0])
+
+
+class BatchIdentifierSchema(Schema):
+    batch_identifier = fields.Str()
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_batch_identifier(self, data, **kwargs):
+        return BatchIdentifier(**data)
+
+
 class ValidationResultIdentifier(DataContextKey):
     """A ValidationResultIdentifier identifies a validation result by the fully qualified expectation_suite_identifer
     and run_id.
     """
 
-    def __init__(self, expectation_suite_identifier, run_id):
+    def __init__(self, batch_identifier, expectation_suite_identifier, run_id):
         """Constructs a ValidationResultIdentifier
 
         Args:
@@ -68,13 +80,13 @@ class ValidationResultIdentifier(DataContextKey):
             run_id (str): The run_id for which validation occurred
         """
         super(ValidationResultIdentifier, self).__init__()
-        if isinstance(expectation_suite_identifier, ExpectationSuiteIdentifier):
-            self._expectation_suite_identifier = expectation_suite_identifier
-        elif isinstance(expectation_suite_identifier, (tuple, list)):
-            self._expectation_suite_identifier = ExpectationSuiteIdentifier(*expectation_suite_identifier)
-        else:
-            self._expectation_suite_identifier = ExpectationSuiteIdentifier(**expectation_suite_identifier)
+        self._batch_identifier = batch_identifier
+        self._expectation_suite_identifier = expectation_suite_identifier
         self._run_id = run_id
+
+    @property
+    def batch_identifier(self):
+        return self._batch_identifier
 
     @property
     def expectation_suite_identifier(self):
@@ -85,21 +97,20 @@ class ValidationResultIdentifier(DataContextKey):
         return self._run_id
 
     def to_tuple(self):
-        # if PY3:
-        #     return (*self.expectation_suite_identifier.to_tuple(), self.run_id)
-        # else:
-        validation_result_identifier_tuple_list = list(self.expectation_suite_identifier.to_tuple()) + [self.run_id]
-        return tuple(validation_result_identifier_tuple_list)
+        return tuple(
+            [self.batch_identifier] +
+            list(self.expectation_suite_identifier.to_tuple()) +
+            [self._run_id or ""]
+        )
+        # return self.batch_identifier, self.expectation_suite_identifier, self.run_id
 
     @classmethod
     def from_tuple(cls, tuple_):
-        return cls(
-            expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[:-1]),
-            run_id=tuple_[-1]
-        )
+        return cls(tuple_[0], ExpectationSuiteIdentifier.from_tuple(tuple_[1:-1]), tuple_[-1])
 
 
 class ValidationResultIdentifierSchema(Schema):
+    batch_identifier = fields.Nested(BatchIdentifierSchema, required=True)
     expectation_suite_identifier = fields.Nested(ExpectationSuiteIdentifierSchema, required=True, error_messages={
         'required': 'expectation_suite_identifier is required for a ValidationResultIdentifier'})
     run_id = fields.Str(required=True, error_messages={'required': "run_id is required for a "

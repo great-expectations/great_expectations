@@ -1,5 +1,9 @@
 import datetime
 import logging
+
+from ..data_context.types.resource_identifiers import BatchIdentifier, ExpectationSuiteIdentifier, \
+    ValidationResultIdentifier
+
 logger = logging.getLogger(__name__)
 
 from six import string_types
@@ -7,17 +11,13 @@ from six import string_types
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
-from ..data_context.types import (
-    DataAssetIdentifier,
-    ValidationResultIdentifier,
-    ExpectationSuiteIdentifier,
-)
 from great_expectations.data_asset import (
     DataAsset,
 )
 from .util import send_slack_notification
 
 # NOTE: Abe 2019/08/24 : This is first implementation of all these classes. Consider them UNSTABLE for now. 
+
 
 class ValidationOperator(object):
     """
@@ -122,13 +122,13 @@ class ActionListValidationOperator(ValidationOperator):
         for item in assets_to_validate:
             batch = self._build_batch_from_item(item)
             expectation_suite_identifier = ExpectationSuiteIdentifier(
-                data_asset_name=self.data_context.normalize_data_asset_name(batch._expectation_suite.data_asset_name),
                 expectation_suite_name=batch._expectation_suite.expectation_suite_name
             )
-            validation_result_id = ValidationResultIdentifier(
-                expectation_suite_identifier=expectation_suite_identifier,
-                run_id=run_id,
-            )
+            # validation_result_id = ValidationResultIdentifier(
+            #     batch_identifier=BatchIdentifier(batch.batch_id),
+            #     expectation_suite_identifier=expectation_suite_identifier,
+            #     run_id=run_id,
+            # )
             result_object["details"][expectation_suite_identifier] = {}
             batch_validation_result = batch.validate(run_id=run_id, result_format="SUMMARY")
             result_object["details"][expectation_suite_identifier]["validation_result"] = batch_validation_result
@@ -158,6 +158,7 @@ class ActionListValidationOperator(ValidationOperator):
             logger.debug("Processing validation action with name {}".format(action["name"]))
 
             validation_result_id = ValidationResultIdentifier(
+                batch_identifier=batch.batch_id,
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
             )

@@ -1,3 +1,4 @@
+import datetime
 import time
 import hashlib
 import logging
@@ -17,7 +18,7 @@ from great_expectations.datasource.generator.subdir_reader_generator import Subd
 from great_expectations.datasource.generator.glob_reader_generator import GlobReaderGenerator
 from great_expectations.datasource.generator.s3_generator import S3Generator
 from great_expectations.datasource.types import (
-    BatchId
+    BatchMarkers
 )
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.types import ClassConfig
@@ -34,6 +35,7 @@ class PandasDatasource(Datasource):
     interacting with the local filesystem (the default subdir_reader generator), and from
     existing in-memory dataframes.
     """
+    recognized_batch_parameters = {'reader_method', 'reader_options', 'limit'}
 
     @classmethod
     def build_configuration(cls, data_asset_type=None, generators=None, boto3_options=None, **kwargs):
@@ -118,15 +120,34 @@ class PandasDatasource(Datasource):
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
-    def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
-        for k, v in kwargs.items():
-            if isinstance(v, dict):
-                if k in batch_kwargs and isinstance(batch_kwargs[k], dict):
-                    batch_kwargs[k].update(v)
-                else:
-                    batch_kwargs[k] = v
-            else:
-                batch_kwargs[k] = v
+    def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None):
+        batch_parameters = self.config.get("batch_parameters", {})
+        batch_kwargs = dict()
+
+        # Apply globally-configured reader options first
+        if reader_options:
+            # Then update with any locally-specified reader options
+            if not batch_parameters.get("reader_options"):
+                batch_parameters["reader_options"] = dict()
+            batch_parameters["reader_options"].update(reader_options)
+        if batch_parameters.get("reader_options"):
+            batch_kwargs["reader_options"] = batch_parameters["reader_options"]
+
+        limit = batch_parameters.get("limit", limit)
+        if limit is not None:
+            batch_parameters["limit"] = limit
+            if not batch_kwargs.get("reader_options"):
+                batch_kwargs["reader_options"] = dict()
+            batch_kwargs['reader_options']['nrows'] = limit
+
+        reader_method = batch_parameters.get("reader_method", reader_method)
+        if reader_method is not None:
+            batch_parameters["reader_method"] = reader_method
+            batch_kwargs["reader_method"] = reader_method
+
+        return batch_parameters, batch_kwargs
+
+    def get_batch(self, batch_kwargs, batch_parameters=None):
         # pandas cannot take unicode as a delimiter, which can happen in py2. Handle this case explicitly.
         # We handle it here so that the updated value will be in the batch_kwargs for transparency to the user.
         if PY2 and "reader_options" in batch_kwargs and "sep" in batch_kwargs['reader_options'] and \
@@ -135,29 +156,26 @@ class PandasDatasource(Datasource):
         # We will use and manipulate reader_options along the way
         reader_options = batch_kwargs.get("reader_options", {})
 
-        # We need to build a batch_id to be used in the dataframe
-        batch_id = BatchId({
-            "timestamp": time.time()
+        # We need to build a batch_markers to be used in the dataframe
+        batch_markers = BatchMarkers({
+            "ge_load_time": datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
         })
-
-        if "data_asset_type" in batch_kwargs:
-            data_asset_type_config = reader_options.pop("data_asset_type")  # Get and remove the config
-            try:
-                data_asset_type_config = ClassConfig(**data_asset_type_config)
-            except TypeError:
-                # We tried; we'll pass the config downstream, probably as a string, and handle an error later
-                pass
-        else:
-            data_asset_type_config = self._data_asset_type
-
-        data_asset_type = self._get_data_asset_class(data_asset_type_config)
-
-        if not issubclass(data_asset_type, PandasDataset):
-            raise ValueError("PandasDatasource cannot instantiate batch with data_asset_type: '%s'. It "
-                             "must be a subclass of PandasDataset." % data_asset_type.__name__)
-
-        if "limit" in batch_kwargs:
-            reader_options['nrows'] = batch_kwargs['limit']
+        #
+        # if "data_asset_type" in batch_kwargs:
+        #     data_asset_type_config = reader_options.pop("data_asset_type")  # Get and remove the config
+        #     try:
+        #         data_asset_type_config = ClassConfig(**data_asset_type_config)
+        #     except TypeError:
+        #         # We tried; we'll pass the config downstream, probably as a string, and handle an error later
+        #         pass
+        # else:
+        #     data_asset_type_config = self._data_asset_type
+        #
+        # data_asset_type = self._get_data_asset_class(data_asset_type_config)
+        #
+        # if not issubclass(data_asset_type, PandasDataset):
+        #     raise ValueError("PandasDatasource cannot instantiate batch with data_asset_type: '%s'. It "
+        #                      "must be a subclass of PandasDataset." % data_asset_type.__name__)
 
         if "path" in batch_kwargs:
             path = batch_kwargs['path']
@@ -197,19 +215,22 @@ class PandasDatasource(Datasource):
             batch_kwargs = {k: batch_kwargs[k] for k in batch_kwargs if k != 'dataset'}
             # Record this in the kwargs *and* the id
             batch_kwargs["PandasInMemoryDF"] = True
-            batch_id["PandasInMemoryDF"] = True
+            batch_markers["PandasInMemoryDF"] = True
 
         else:
             raise BatchKwargsError("Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
                                    batch_kwargs)
 
         if df.memory_usage().sum() < HASH_THRESHOLD:
-            batch_id["fingerprint"] = hashlib.md5(pd.util.hash_pandas_object(df, index=True).values).hexdigest()
-        return data_asset_type(df,
-                               expectation_suite=expectation_suite,
-                               data_context=self._data_context,
-                               batch_kwargs=batch_kwargs,
-                               batch_id=batch_id)
+            batch_markers["fingerprint"] = hashlib.md5(pd.util.hash_pandas_object(df, index=True).values).hexdigest()
+        return {
+            "datasource_name": self.name,
+            "batch_kwargs": batch_kwargs,
+            "batch_parameters": batch_parameters,
+            "batch_markers": batch_markers,
+            "data": df,
+            "data_context": self._data_context
+        }
 
     def get_reader_fn(self, reader_method, path, reader_options):
         if reader_method is None:

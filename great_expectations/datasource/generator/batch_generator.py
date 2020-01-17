@@ -2,6 +2,8 @@
 
 import logging
 
+from six import string_types
+
 from great_expectations.datasource.types import BatchKwargs
 
 logger = logging.getLogger(__name__)
@@ -79,6 +81,10 @@ class BatchGenerator(object):
         self._data_asset_iterators = {}
         self._datasource = datasource
 
+    @property
+    def name(self):
+        return self._name
+
     def _get_iterator(self, generator_asset, **kwargs):
         raise NotImplementedError
 
@@ -121,47 +127,62 @@ class BatchGenerator(object):
             self.reset_iterator(generator_asset, **kwargs)
             return self._data_asset_iterators[generator_asset][0]
 
-    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
-        """
-        Build batch kwargs for the named generator_asset based on partition_id and optionally existing batch_kwargs.
-        Args:
-            generator_asset: the generator_asset for which to build batch_kwargs
-            partition_id: the partition id
-            batch_kwargs: any existing batch_kwargs object to use. Will be supplemented with configured information.
-            **kwargs: any addition kwargs to use. Will be added to returned batch_kwargs
+    def build_batch_kwargs(self, batch_parameters=None, **kwargs):
+        """The key workhorse. Docs forthcoming."""
+        if batch_parameters is None:
+            batch_parameters = {}
+        elif isinstance(batch_parameters, string_types):
+            batch_parameters = {"name": batch_parameters}
+        batch_parameters.update(kwargs)
+        batch_params, batch_kwargs = self._build_batch_kwargs(batch_parameters)
+        batch_params["generator"] = self.name
+        return batch_params, batch_kwargs
 
-        Returns: BatchKwargs object
-
-        """
+    def _build_batch_kwargs(self, batch_parameters):
         raise NotImplementedError
 
-    def yield_batch_kwargs(self, generator_asset, **kwargs):
-        if generator_asset not in self._data_asset_iterators:
-            self.reset_iterator(generator_asset, **kwargs)
-        data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
-        if passed_kwargs != kwargs:
-            logger.warning("Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "
-                           "use new supplemental kwargs.")
-            self.reset_iterator(generator_asset, **kwargs)
-            data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
-        try:
-            return next(data_asset_iterator)
-        except StopIteration:
-            self.reset_iterator(generator_asset, **kwargs)
-            data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
-            if passed_kwargs != kwargs:
-                logger.warning(
-                    "Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "
-                    "use different supplemental kwargs.")
-                self.reset_iterator(generator_asset, **kwargs)
-                data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
-            try:
-                return next(data_asset_iterator)
-            except StopIteration:
-                # This is a degenerate case in which no kwargs are actually being generated
-                logger.warning("No batch_kwargs found for generator_asset %s" % generator_asset)
-                return {}
-        except TypeError:
-            # If we don't actually have an iterator we can generate, even after resetting, just return empty
-            logger.warning("Unable to generate batch_kwargs for generator_asset %s" % generator_asset)
-            return {}
+    #
+    # def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+    #     """
+    #     Build batch kwargs for the named generator_asset based on partition_id and optionally existing batch_kwargs.
+    #     Args:
+    #         generator_asset: the generator_asset for which to build batch_kwargs
+    #         partition_id: the partition id
+    #         batch_kwargs: any existing batch_kwargs object to use. Will be supplemented with configured information.
+    #         **kwargs: any addition kwargs to use. Will be added to returned batch_kwargs
+    #
+    #     Returns: BatchKwargs object
+    #
+    #     """
+    #     raise NotImplementedError
+    #
+    # def yield_batch_kwargs(self, generator_asset, **kwargs):
+    #     if generator_asset not in self._data_asset_iterators:
+    #         self.reset_iterator(generator_asset, **kwargs)
+    #     data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
+    #     if passed_kwargs != kwargs:
+    #         logger.warning("Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "
+    #                        "use new supplemental kwargs.")
+    #         self.reset_iterator(generator_asset, **kwargs)
+    #         data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
+    #     try:
+    #         return next(data_asset_iterator)
+    #     except StopIteration:
+    #         self.reset_iterator(generator_asset, **kwargs)
+    #         data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
+    #         if passed_kwargs != kwargs:
+    #             logger.warning(
+    #                 "Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "
+    #                 "use different supplemental kwargs.")
+    #             self.reset_iterator(generator_asset, **kwargs)
+    #             data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
+    #         try:
+    #             return next(data_asset_iterator)
+    #         except StopIteration:
+    #             # This is a degenerate case in which no kwargs are actually being generated
+    #             logger.warning("No batch_kwargs found for generator_asset %s" % generator_asset)
+    #             return {}
+    #     except TypeError:
+    #         # If we don't actually have an iterator we can generate, even after resetting, just return empty
+    #         logger.warning("Unable to generate batch_kwargs for generator_asset %s" % generator_asset)
+    #         return {}
