@@ -46,30 +46,40 @@ If you inspect the ``great_expectations/`` directory after the init command has 
         ├── config_variables.yml
         ├── documentation
         │   └── local_site
-        ├── samples
         └── validations
 
 
 Creating expectation suites
 ----------------------------------------
 
-TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
-TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
+CLI
+`great_expectations suite new`
 
+stores as JSON filed and renders the expectation suite into an HTML page in Data Docs.
+
+
+Reviewing expectation suites
+----------------------------------------
+
+DataDocs
 
 Editing expectation suites
 ----------------------------------------
 
-TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
-TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
+`great_expectations suite edit`
+
+    - This command compiles a jupyter notebook from the JSON Expectation suite.
+    - Because this notebook is compiled fromt the source-of-truth JSON, it can be treated as discardable.
+4. In the jupyter notebook, run all the expectation cells you wish to retain in the suite.
 
 
 Deploying validation into a pipeline
 ----------------------------------------
 
-TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
-TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
+You end up creating one or multiple expectation suites for various data assets in your pipeline - a file, a Pandas or Spark dataframe, a result of a SQL query. Depending on the technolog ... your pipeline uses Airflow, a custom script, a cron job...
+you will
 
+Test this batch of data against this expectation suite. If the data meets the expectations in the suite, great. If some expectations are not met, you want to save the validation result for review, maybe stop the pipeline from continuing its run and notify 
 
 Reacting to validation results
 ----------------------------------------
@@ -77,3 +87,15 @@ Reacting to validation results
 TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
 TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
 
+
+
+
+
+1. Checkout the master branch.
+2. Create a branch with a representative name. This will be used to create a Pull Request (PR) back into the master branch.
+3. Edit the suite using the command `great_expectations edit-suite`. **Note** in a near term release (0.9.0) this command will be renamed to `great_expectations suite edit`.
+    - This command compiles a jupyter notebook from the JSON Expectation suite.
+    - Because this notebook is compiled fromt the source-of-truth JSON, it can be treated as discardable.
+4. In the jupyter notebook, run all the expectation cells you wish to retain in the suite.
+5. You can adjust or add additional expectations in this notebook.
+6. Be sure to run the last cells in the notebook which save the modifed suite to disk as JSON.
