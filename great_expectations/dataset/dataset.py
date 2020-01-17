@@ -3224,7 +3224,7 @@ class Dataset(MetaDataset):
                 if isinstance(column_min, datetime):
                     try:
                         min_value = parse(min_value)
-                    except ValueError as e:
+                    except (ValueError, TypeError) as e:
                         pass
 
                 if strict_min:
@@ -3238,7 +3238,7 @@ class Dataset(MetaDataset):
                 if isinstance(column_min, datetime):
                     try:
                         max_value = parse(max_value)
-                    except ValueError as e:
+                    except (ValueError, TypeError) as e:
                         pass
 
                 if strict_max:
@@ -3358,7 +3358,7 @@ class Dataset(MetaDataset):
                 if isinstance(column_max, datetime):
                     try:
                         min_value = parse(min_value)
-                    except ValueError as e:
+                    except (ValueError, TypeError) as e:
                         pass
 
                 if strict_min:
@@ -3372,7 +3372,7 @@ class Dataset(MetaDataset):
                 if isinstance(column_max, datetime):
                     try:
                         max_value = parse(max_value)
-                    except ValueError as e:
+                    except (ValueError, TypeError) as e:
                         pass
 
                 if strict_max:
