@@ -846,3 +846,21 @@ class SparkDFDataset(MetaSparkDFDataset):
         meta=None,
     ):
         return column.withColumn('__success', ~column[0].rlike(regex))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_pair_map_expectation
+    def expect_column_pair_values_to_be_equal(
+        self,
+        column_A,
+        column_B,
+        ignore_row_if="both_values_are_missing",
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None
+    ):
+        column_A_name = column_A.schema.names[1]
+        column_B_name = column_B.schema.names[1]
+        join_df = column_A.join(column_B, column_A["__row"] == column_B["__row"], how="inner")
+        return join_df.withColumn('__success',
+                                  when(col(column_A_name) == col(column_B_name), True).otherwise(False))
