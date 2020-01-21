@@ -8,7 +8,7 @@ Expectations are the workhorse abstraction in Great Expectations. Like assertion
 Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests,
 Great Expectations applies Expectations to data instead of code.
 
-Expectations *enhance communication* about your data and and *amplify quality* in data applications. Using expectations
+Expectations *enhance communication* about your data and *amplify quality* in data applications. Using expectations
 helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."
 
 **************************
@@ -144,7 +144,7 @@ practical use cases:
 * Form validation and regex pattern-matching for names, URLs, dates, addresses, etc.
 * Checks for missing data
 * Crosstabs
-* Distributions for statistical modeling. 
+* Distributions for statistical modeling.
 * etc.
 
 You can also add notes or even structured metadata to expectations to describe the intent of an expectation or anything

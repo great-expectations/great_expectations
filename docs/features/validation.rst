@@ -7,7 +7,7 @@ Validation
 Once you've constructed and stored Expectations, you can use them to validate new data. Validation generates a report
 that details any specific deviations from expected values.
 
-We recommend using a :ref:`data_context` to manage expectation suites and coordinate validation across runs.
+We recommend using :ref:`data_context` to manage expectation suites and coordinate validation across runs.
 
 *******************
 Validation results

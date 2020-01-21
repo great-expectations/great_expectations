@@ -68,7 +68,7 @@ Custom Profilers
 
 Like most things in Great Expectations, Profilers are designed to be extensibile. You can develop your own profiler
 by subclassing ``DataetProfiler``, or from the parent ``DataAssetProfiler`` class itself. For help, advice, and ideas
-on developing custom profilers, please get in touch on `the Great Expectations slack channel \
+on developing custom profilers, please get in touch on `the Great Expectations slack channel\
 <https://greatexpectations.io/slack>`_.
 
 
