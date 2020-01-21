@@ -1,5 +1,6 @@
 import logging
-import time
+import datetime
+import uuid
 
 from great_expectations.datasource.types import BatchMarkers
 from ..exceptions import BatchKwargsError
@@ -144,9 +145,9 @@ class SparkDFDatasource(Datasource):
 
         reader_options = batch_kwargs.get("reader_options", {})
 
-        # We need to build a batch_id to be used in the dataframe
-        batch_id = BatchMarkers({
-            "timestamp": time.time()
+        # We need to build batch_markers to be used with the DataFrame
+        batch_markers = BatchMarkers({
+            "ge_load_time": datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
         })
 
         if "data_asset_type" in batch_kwargs:
@@ -206,7 +207,7 @@ class SparkDFDatasource(Datasource):
                 df = df.spark_df
             # Record this in the kwargs *and* the id
             batch_kwargs["SparkDFRef"] = True
-            batch_id["SparkDFRef"] = True
+            batch_kwargs["ge_batch_id"] = uuid.uuid1()
 
         else:
             raise BatchKwargsError("Unrecognized batch_kwargs for spark_source", batch_kwargs)
@@ -219,4 +220,4 @@ class SparkDFDatasource(Datasource):
                                data_context=self._data_context,
                                batch_kwargs=batch_kwargs,
                                caching=caching,
-                               batch_id=batch_id)
+                               batch_markers=batch_markers)
