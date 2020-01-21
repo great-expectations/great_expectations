@@ -213,9 +213,8 @@ class PandasDatasource(Datasource):
             df = batch_kwargs.get("dataset")
             # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs
             batch_kwargs = {k: batch_kwargs[k] for k in batch_kwargs if k != 'dataset'}
-            # Record this in the kwargs *and* the id
             batch_kwargs["PandasInMemoryDF"] = True
-            batch_markers["PandasInMemoryDF"] = True
+            batch_kwargs["ge_batch_id"] = uuid.uuid1()
 
         else:
             raise BatchKwargsError("Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
