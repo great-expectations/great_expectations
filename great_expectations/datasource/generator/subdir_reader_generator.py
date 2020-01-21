@@ -61,10 +61,10 @@ class SubdirReaderGenerator(BatchGenerator):
     def base_directory(self):
         # If base directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
-        if os.path.isabs(self._base_directory) or self._datasource.get_data_context() is None:
+        if os.path.isabs(self._base_directory) or self._datasource.data_context is None:
             return self._base_directory
         else:
-            return os.path.join(self._datasource.get_data_context().root_directory, self._base_directory)
+            return os.path.join(self._datasource.data_context.root_directory, self._base_directory)
 
     def get_available_data_asset_names(self):
         if not os.path.isdir(self.base_directory):
