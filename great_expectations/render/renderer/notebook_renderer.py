@@ -1,6 +1,6 @@
 import os
+import autopep8
 import nbformat
-import black
 
 from great_expectations.core import NamespaceAwareExpectationSuite
 from great_expectations.render.renderer.renderer import Renderer
@@ -14,8 +14,6 @@ class NotebookRenderer(Renderer):
     - Make an easy path to edit a suite that a Profiler created.
     - Make it easy to edit a suite where only JSON exists.
     """
-
-    black_file_mode = black.FileMode()
 
     @classmethod
     def _get_expectations_by_column(cls, expectations):
@@ -56,7 +54,9 @@ Use this notebook to recreate and modify your expectation suite for:
 **Data Asset**: `{}`<br>
 **Expectation Suite Name**: `{}`
 
-We'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)""".format(data_asset_name, suite_name)
+We'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)""".format(
+                data_asset_name, suite_name
+            )
         )
 
         # TODO such brittle hacks to fix paths
@@ -78,7 +78,9 @@ context.create_expectation_suite("{}", expectation_suite_name, overwrite_existin
 
 batch_kwargs = {}
 batch = context.get_batch("{}", expectation_suite_name, batch_kwargs)
-batch.head()""".format(suite_name, data_asset_name, batch_kwargs, data_asset_name)
+batch.head()""".format(
+                suite_name, data_asset_name, batch_kwargs, data_asset_name
+            )
         )
 
     def add_footer(self):
@@ -108,12 +110,11 @@ context.open_data_docs()"""
     def add_code_cell(self, code, lint=False):
         """
         Add the given code as a new code cell.
-        :param code:
         """
         if lint:
             try:
-                code = black.format_file_contents(code, fast=True, mode=self.black_file_mode).rstrip("\n")
-            except (black.NothingChanged, RuntimeError):
+                code = autopep8.fix_code(code, options={"aggressive": 2}).rstrip("\n")
+            except RuntimeError:
                 pass
 
         cell = nbformat.v4.new_code_cell(code)
@@ -122,7 +123,6 @@ context.open_data_docs()"""
     def add_markdown_cell(self, markdown):
         """
         Add the given markdown as a new markdown cell.
-        :param markdown:
         """
         cell = nbformat.v4.new_markdown_cell(markdown)
         self.notebook["cells"].append(cell)
@@ -133,7 +133,7 @@ context.open_data_docs()"""
         if expectations_by_column["table_expectations"]:
             for exp in expectations_by_column["table_expectations"]:
                 kwargs_string = self._build_kwargs_string(exp)
-                code = "batch.{}({})".format(exp['expectation_type'], kwargs_string)
+                code = "batch.{}({})".format(exp["expectation_type"], kwargs_string)
                 self.add_code_cell(code, lint=True)
         else:
             self.add_markdown_cell(
@@ -152,7 +152,9 @@ context.open_data_docs()"""
             for exp in expectations:
                 kwargs_string = self._build_kwargs_string(exp)
                 meta_args = ", meta={}".format(exp.meta) if exp.meta else ""
-                code = "batch.{}({}{})".format(exp['expectation_type'], kwargs_string, meta_args)
+                code = "batch.{}({}{})".format(
+                    exp["expectation_type"], kwargs_string, meta_args
+                )
                 self.add_code_cell(code, lint=True)
 
     @classmethod
