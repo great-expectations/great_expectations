@@ -1,5 +1,5 @@
 import datetime
-import time
+import uuid
 import hashlib
 import logging
 
@@ -222,7 +222,8 @@ class PandasDatasource(Datasource):
                                    batch_kwargs)
 
         if df.memory_usage().sum() < HASH_THRESHOLD:
-            batch_markers["fingerprint"] = hashlib.md5(pd.util.hash_pandas_object(df, index=True).values).hexdigest()
+            batch_markers["data_fingerprint"] = hashlib.md5(pd.util.hash_pandas_object(
+                df, index=True).values).hexdigest()
         return {
             "datasource_name": self.name,
             "batch_kwargs": batch_kwargs,
