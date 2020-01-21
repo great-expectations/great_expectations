@@ -24,7 +24,7 @@ Configuring data docs requires three simple steps:
 
 Configure your bucket policy to enable appropriate access. **IMPORTANT**: your policy should provide access only
 to appropriate users; data-docs can include critical information about raw data and should generally **not** be
-publicly accessible. The example policy below **enforces IP-based access** access.
+publicly accessible. The example policy below **enforces IP-based access**.
 
 **Modify the bucket name and IP addresses below for your situation.**
 
