@@ -1,20 +1,14 @@
 import os
 
-import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.exceptions import DataContextError
 from tests.cli.test_cli import yaml
 
 
-@pytest.fixture()
-def sql_engine(sqlitedb_engine):
-    """Silly shim to allow pluggable sql engines"""
-    return sqlitedb_engine
-
-
-def test_cli_datasorce_list(empty_data_context, sql_engine):
+def test_cli_datasorce_list(empty_data_context, empty_sqlite_db):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
@@ -27,7 +21,9 @@ def test_cli_datasorce_list(empty_data_context, sql_engine):
     assert context.list_datasources() == []
 
     datasource_name = "wow_a_datasource"
-    _add_datasource_and_credentials_to_context(context, datasource_name, sql_engine)
+    _add_datasource_and_credentials_to_context(
+        context, datasource_name, empty_sqlite_db
+    )
 
     runner = CliRunner()
     result = runner.invoke(cli, ["datasource", "list", "-d", project_root_dir])
@@ -38,10 +34,13 @@ def test_cli_datasorce_list(empty_data_context, sql_engine):
 
     # This is important to make sure the user isn't seeing tracebacks
     assert "Traceback" not in stdout
+    assert not result.exc_info[2]
 
 
-def _add_datasource_and_credentials_to_context(context, datasource_name, sql_engine):
-    credentials = {"url": str(sql_engine.url)}
+def _add_datasource_and_credentials_to_context(
+    context, datasource_name, empty_sqlite_db
+):
+    credentials = {"url": str(empty_sqlite_db.url)}
     context.save_config_variable(datasource_name, credentials)
     context.add_datasource(
         datasource_name,
@@ -58,7 +57,7 @@ def _add_datasource_and_credentials_to_context(context, datasource_name, sql_eng
     return context
 
 
-def test_cli_datasorce_new_connection_string(empty_data_context, sql_engine):
+def test_cli_datasorce_new_connection_string(empty_data_context, empty_sqlite_db):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     assert context.list_datasources() == []
@@ -67,7 +66,7 @@ def test_cli_datasorce_new_connection_string(empty_data_context, sql_engine):
     result = runner.invoke(
         cli,
         ["datasource", "new", "-d", project_root_dir],
-        input="2\n5\nmynewsource\n{}\n".format(str(sql_engine.url)),
+        input="2\n5\nmynewsource\n{}\n".format(str(empty_sqlite_db.url)),
     )
     stdout = result.stdout
 
@@ -95,12 +94,12 @@ def test_cli_datasorce_new_connection_string(empty_data_context, sql_engine):
     assert "Traceback" not in stdout
 
 
-def test_cli_datasource_profile_answering_no(empty_data_context, sql_engine):
+def test_cli_datasource_profile_answering_no(empty_data_context, empty_sqlite_db):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     datasource_name = "wow_a_datasource"
     context = _add_datasource_and_credentials_to_context(
-        context, datasource_name, sql_engine
+        context, datasource_name, empty_sqlite_db
     )
 
     runner = CliRunner()
@@ -212,10 +211,13 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert "Traceback" not in stdout
 
 
-# TODO this is busted. temp table problems in sqlite
-def test_cli_datasource_profile_with_additional_batch_kwargs(
+def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_should_raise_helpful_error(
     empty_data_context, titanic_sqlite_db
 ):
+    """
+    Passing additional batch kwargs along with a data assete name to a sql
+    backend is an invalid operation and should display a helpful error message.
+    """
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     datasource_name = "wow_a_datasource"
@@ -231,6 +233,8 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
             "profile",
             "-d",
             project_root_dir,
+            "--data_assets",
+            "main.titanic",
             "--batch_kwargs",
             '{"query": "select * from main.titanic"}',
             "--no-view",
@@ -240,31 +244,20 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
     stdout = result.output
     print(result.exception)
     print(stdout)
-    assert result.exit_code == 0
+    assert result.exit_code == 1
 
-    context = DataContext(project_root_dir)
-    assert len(context.list_datasources()) == 1
-
+    # There should not be a suite created
     expectations_store = context.stores["expectations_store"]
     suites = expectations_store.list_keys()
-    assert len(suites) == 1
-    assert suites[0].expectation_suite_name == "BasicDatasetProfiler"
+    assert len(suites) == 0
 
+    # There should not be a validation created
     validations_store = context.stores["validations_store"]
     validation_keys = validations_store.list_keys()
-    assert len(validation_keys) == 1
+    assert len(validation_keys) == 0
 
-    validation = validations_store.get(validation_keys[0])
-    assert validation.meta["expectation_suite_name"] == "BasicDatasetProfiler"
-    assert validation.success is False
-    assert len(validation.results) == 8
-
-    evr = context.get_validation_result(
-        "f1", expectation_suite_name="BasicDatasetProfiler"
-    )
-    reader_options = evr.meta["batch_kwargs"]["reader_options"]
-    assert reader_options["parse_dates"] == [0]
-    assert reader_options["sep"] == ","
+    # TODO is DataContextError the best error to raise? Should it be a CLI error?
+    assert isinstance(result.exception, DataContextError)
 
     # This is important to make sure the user isn't seeing tracebacks
     assert "Traceback" not in stdout

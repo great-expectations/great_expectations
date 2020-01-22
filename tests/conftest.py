@@ -533,6 +533,18 @@ def titanic_sqlite_db():
 
 
 @pytest.fixture
+def empty_sqlite_db():
+    """An empty in-memory sqlite db that always gets run."""
+    try:
+        from sqlalchemy import create_engine
+        engine = create_engine('sqlite://')
+        assert engine.execute("select 1").fetchall()[0] == (1,)
+        return engine
+    except ImportError:
+        raise ValueError("sqlite tests require sqlalchemy to be installed")
+
+
+@pytest.fixture
 def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, filesystem_csv_3):
     base_dir = str(tmp_path_factory.mktemp("project_dir"))
     project_dir = os.path.join(base_dir, "project_path")
