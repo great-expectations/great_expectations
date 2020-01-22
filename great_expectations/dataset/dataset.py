@@ -94,12 +94,15 @@ class MetaDataset(DataAsset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(self, column, result_format=None, *args, **kwargs):
+        def inner_wrapper(self, column, result_format=None, condition=None, *args, **kwargs):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
             # Retain support for string-only output formats:
             result_format = parse_result_format(result_format)
+
+            if condition:
+                self = self.query(condition).reset_index(drop=True)
 
             element_count = self.get_row_count()
             nonnull_count = self.get_column_nonnull_count(column)
@@ -1252,8 +1255,6 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.

@@ -366,14 +366,28 @@ class DataAsset(object):
         # !!!    it needs to be documented, and
         # !!!    we need to provide syntax to override it.
 
-        if 'column' in expectation_config.kwargs:
+        if 'column' in expectation_config.kwargs and 'condition' in expectation_config.kwargs:
             column = expectation_config.kwargs['column']
+            condition = expectation_config.kwargs['condition']
 
             self._expectation_suite.expectations = [f for f in filter(
-                lambda exp: (exp.expectation_type != expectation_type) or (
-                    'column' in exp.kwargs and exp.kwargs['column'] != column),
+                lambda exp: (exp.expectation_type != expectation_type) or
+                            ('column' in exp.kwargs and exp.kwargs['column'] != column) or
+                            ('condition' in exp.kwargs and exp.kwargs['condition'] != condition) or
+                            ('condition' not in exp.kwargs),
                 self._expectation_suite.expectations
             )]
+
+        elif 'column' in expectation_config.kwargs:
+            column = expectation_config.kwargs['column']
+            
+            self._expectation_suite.expectations = [f for f in filter(
+                lambda exp: (exp.expectation_type != expectation_type) or
+                            ('column' in exp.kwargs and exp.kwargs['column'] != column) or
+                            ('condition' in expectation_config.kwargs and 'condition' not in exp.kwargs),
+                self._expectation_suite.expectations
+            )]
+
         else:
             self._expectation_suite.expectations = [f for f in filter(
                 lambda exp: exp.expectation_type != expectation_type,
