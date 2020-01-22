@@ -6,7 +6,6 @@ import datetime
 import pandas as pd
 import numpy as np
 import great_expectations as ge
-import great_expectations.dataset.autoinspect as autoinspect
 
 from .test_utils import assertDeepAlmostEqual
 
@@ -21,11 +20,11 @@ def duplicate_and_obfuscuate(df):
     for column in df_b.columns:
         if column == "group":
             continue
-        
+
         if df_b[column].dtype in ['int', 'float']:
             df_b[column] += np.max(df_b[column])
             continue
-        
+
         if df_b[column].dtype == 'object' and all([(type(elem) == str) or (elem is None) for elem in df_b[column]]):
             df_b[column] = df_b[column].astype(str) + '__obfuscate'
             continue
