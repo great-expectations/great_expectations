@@ -160,6 +160,9 @@ great_expectations/
 """
     )
 
+    # This is important to make sure the user isn't seeing tracebacks
+    assert "Traceback" not in stdout
+
 
 # TODO this test is failing because the behavior is broken
 def test_init_on_existing_project_with_no_datasources_should_add_one(
@@ -188,6 +191,9 @@ def test_init_on_existing_project_with_no_datasources_should_add_one(
 
     config = _load_config_file(os.path.join(ge_dir, DataContext.GE_YML))
     assert "my_data_dir" in config["datasources"].keys()
+
+    # This is important to make sure the user isn't seeing tracebacks
+    assert "Traceback" not in stdout
 
 
 def _remove_all_datasources(ge_dir):
@@ -263,6 +269,9 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert "appears complete" in stdout
     assert "Would you like to build & view this project's Data Docs" in stdout
 
+    # This is important to make sure the user isn't seeing tracebacks
+    assert "Traceback" not in stdout
+
 
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs(
     initialized_project,
@@ -281,6 +290,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert "This looks like an existing project that" in stdout
     assert "appears complete" in stdout
     assert "Would you like to build & view this project's Data Docs" in stdout
+
+    # This is important to make sure the user isn't seeing tracebacks
+    assert "Traceback" not in stdout
 
 
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
@@ -319,6 +331,9 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert "The following Data Docs sites were built" in stdout
     assert "Great Expectations is now set up" in stdout
     assert "A new Expectation suite 'warning' was added to your project" in stdout
+
+    # This is important to make sure the user isn't seeing tracebacks
+    assert "Traceback" not in stdout
 
 
 def _delete_and_recreate_dir(directory):
