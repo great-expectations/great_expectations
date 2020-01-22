@@ -49,7 +49,7 @@ def test_expectation_decorator_summary_mode():
         "result": {
             "element_count": 10,
             "missing_count": 2,
-            "missing_percent": .2,
+            "missing_percent": 20.0,
             "unexpected_count": 3,
             "partial_unexpected_counts": [
                 {"value": 7.0,
@@ -57,8 +57,8 @@ def test_expectation_decorator_summary_mode():
                 {"value": 6.0,
                     "count": 1}
             ],
-            "unexpected_percent": 0.3,
-            "unexpected_percent_nonmissing": 0.375,
+            "unexpected_percent": 30.0,
+            "unexpected_percent_nonmissing": 37.5,
             "partial_unexpected_list": [6.0, 7.0, 7.0],
             "partial_unexpected_index_list": [5, 6, 7],
         }
@@ -75,7 +75,7 @@ def test_expectation_decorator_summary_mode():
             'observed_value': 4.375,
             'element_count': 10,
             'missing_count': 2,
-            'missing_percent': .2
+            'missing_percent': 20.0
         },
     }
 
@@ -175,8 +175,8 @@ def test_result_format_argument_in_decorators():
                                 'unexpected_count': 2,
                                 'unexpected_index_list': [3, 4],
                                 'unexpected_list': [8, 10],
-                                'unexpected_percent': 0.4,
-                                'unexpected_percent_nonmissing': 0.4},
+                                'unexpected_percent': 40.0,
+                                'unexpected_percent_nonmissing': 40.0},
                     'success': False}
 
     assert df.expect_column_values_to_be_between('y', 1, 6, result_format=None, condition="group=='a'")\
