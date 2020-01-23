@@ -5,6 +5,7 @@ branches:
   - /^\d.*/
 # dist: xenial
 language: python
+cache: pip
 os:
   - linux
 matrix:
