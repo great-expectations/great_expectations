@@ -26,6 +26,7 @@ def mock_s3_bucket():
             "other/to/you.csv",
             "other/for/you.csv",
             "other/is/you.csv",
+            "delta_files/blarg.parquet",
             "data/is/you.csv"
         ]
         for key in keys:
@@ -64,6 +65,11 @@ def s3_generator(mock_s3_bucket):
                                         "sep": "\t"
                                     }
                                 },
+                                "delta_files": {
+                                    "prefix": "delta_files/",
+                                    "regex_filter": r".*/blarg\.parquet",
+                                    "reader_method": "delta"
+                                },
                                 "other_empty_delimiter": {
                                     "prefix": "other/",
                                     "delimiter": "",
@@ -81,7 +87,7 @@ def s3_generator(mock_s3_bucket):
 def test_s3_generator_basic_operation(s3_generator):
     # S3 Generator sees *only* configured assets
     assets = s3_generator.get_available_data_asset_names()
-    assert set(assets) == {"data", "data_dirs", "other", "other_empty_delimiter"}
+    assert set(assets) == {"data", "data_dirs", "other", "delta_files", "other_empty_delimiter"}
 
     # We should observe that glob, prefix, delimiter all work together
     # They can be defined in the generator or overridden by a particular asset
@@ -129,3 +135,8 @@ def test_s3_generator_get_directories(s3_generator):
 def test_s3_generator_limit(s3_generator):
     batch_kwargs_list = [kwargs for kwargs in s3_generator.get_iterator("data", limit=10)]
     assert all(["limit" in batch_kwargs for batch_kwargs in batch_kwargs_list])
+
+
+def test_s3_generator_reader_method_configuration(s3_generator):
+    batch_kwargs_list = [kwargs for kwargs in s3_generator.get_iterator("delta_files", limit=10)]
+    assert batch_kwargs_list[0]["reader_method"] == "delta"
