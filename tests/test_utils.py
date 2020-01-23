@@ -577,7 +577,7 @@ def evaluate_json_test(data_asset, expectation_type, test):
                     "Invalid test specification: unknown key " + key + " in 'out'")
 
 
-def is_library_installed(library_name: str) -> bool:
+def is_library_installed(library_name):
     """
     Tests if a library is installed.
 
