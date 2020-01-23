@@ -1,16 +1,20 @@
-import pytest
-
 import json
 from collections import OrderedDict
 
-from great_expectations.core import DataAssetIdentifier
-from great_expectations.profile.base import DatasetProfiler
-from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from great_expectations.profile.columns_exist import ColumnsExistProfiler
-from great_expectations.dataset.pandas_dataset import PandasDataset
-import great_expectations as ge
-from ..test_utils import assertDeepAlmostEqual, expectationSuiteValidationResultSchema
+import pytest
 from six import PY2
+
+import great_expectations as ge
+from great_expectations.core import DataAssetIdentifier
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.dataset.pandas_dataset import PandasDataset
+from great_expectations.profile.base import DatasetProfiler
+from great_expectations.profile.basic_dataset_profiler import (
+    BasicDatasetProfiler,
+)
+from great_expectations.profile.columns_exist import ColumnsExistProfiler
+
+from ..test_utils import expectationSuiteValidationResultSchema
 
 # Tests to write:
 # test_cli_method_works  -> test_cli
@@ -173,9 +177,6 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
     expectation_suite, validation_results = BasicDatasetProfiler.profile(
         batch)
 
-    # print(batch.get_batch_kwargs())
-    # print(json.dumps(expectations_config, indent=2))
-
     assert expectation_suite.data_asset_name == DataAssetIdentifier(datasource="my_datasource",
                                                                     generator="default", generator_asset="f1")
     assert expectation_suite.expectation_suite_name == "default"
@@ -233,11 +234,10 @@ def test_BasicDatasetProfiler_on_titanic():
     and comparing the EVRs to ones retrieved from a
     previously stored file.
     """
-    df = ge.read_csv("./tests/test_sets/Titanic.csv")
+    df = ge.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
     suite, evrs = df.profile(BasicDatasetProfiler)
 
     # Check to make sure BasicDatasetProfiler is adding meta.columns with a single "description" field for each column
-    # print(json.dumps(suite.meta, indent=2))
     assert "columns" in suite.meta
     for k, v in suite.meta["columns"].items():
         assert v == {"description": ""}
@@ -245,14 +245,7 @@ def test_BasicDatasetProfiler_on_titanic():
     # Note: the above already produces an EVR; rerunning isn't strictly necessary just for EVRs
     evrs = df.validate(result_format="SUMMARY")
 
-    # with open('tests/test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json', 'w+') as file:
-    #     json.dump(expectationSuiteValidationResultSchema.dump(evrs).data, file, indent=2)
-    #
-    # with open('tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'w+') as file:
-    #     json.dump(expectationSuiteValidationResultSchema.dump(evrs).data, file, indent=2)
-
-    with open('tests/test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json', 'r') as file:
-        # expected_evrs = expectationSuiteValidationResultSchema.load(json.load(file)).data
+    with open(file_relative_path(__file__, '../test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json'), 'r') as file:
         expected_evrs = expectationSuiteValidationResultSchema.load(json.load(file, object_pairs_hook=OrderedDict)).data
 
     # We know that python 2 does not guarantee the order of value_counts, which causes a different
