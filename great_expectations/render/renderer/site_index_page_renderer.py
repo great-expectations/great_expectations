@@ -25,7 +25,8 @@ class SiteIndexPageRenderer(Renderer):
         validations_links = index_links_dict.get("validations_links")
         expectations_links = index_links_dict.get("expectations_links")
 
-        cell_width_pct = 100.0/(column_count)
+        if column_count:
+            cell_width_pct = 100.0/column_count
 
         if "expectations_links" in link_list_keys_to_render:
             for expectation_suite_link_dict in expectations_links:
