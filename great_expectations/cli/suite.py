@@ -5,14 +5,19 @@ import sys
 
 import click
 
-from great_expectations import DataContext, exceptions as ge_exceptions
-from great_expectations.cli.datasource import (
-    create_expectation_suite as create_expectation_suite_impl,
+from great_expectations import DataContext
+from great_expectations import exceptions as ge_exceptions
+from great_expectations.cli.cli_logging import logger
+from great_expectations.cli.datasource import \
+    create_expectation_suite as create_expectation_suite_impl
+from great_expectations.cli.util import (
+    _offer_to_install_new_template,
+    cli_message,
 )
-from great_expectations.cli.logging import logger
-from great_expectations.cli.util import cli_message, _offer_to_install_new_template
 from great_expectations.datasource.generator import ManualGenerator
-from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
+from great_expectations.render.renderer.notebook_renderer import (
+    NotebookRenderer,
+)
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -103,7 +108,7 @@ Please re-run with one of these selected data assets:
         )
 
     human_data_asset_name = suite.data_asset_name.generator_asset
-    notebook_name = f"{human_data_asset_name}_{suite.expectation_suite_name}.ipynb"
+    notebook_name = "{}_{}.ipynb".format(human_data_asset_name, suite.expectation_suite_name)
 
     notebook_path = os.path.join(context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
     NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path)
@@ -216,4 +221,3 @@ def suite_new(data_asset, suite, directory, view, batch_kwargs):
     ) as e:
         cli_message("<red>{}</red>".format(e))
         sys.exit(1)
-
