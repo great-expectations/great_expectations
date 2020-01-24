@@ -94,7 +94,7 @@ class SiteBuilder(object):
     def __init__(self,
                  data_context,
                  store_backend,
-                 site_name,
+                 site_name=None,
                  site_index_builder=None,
                  site_section_builders=None,
                  datasource_whitelist=None,
