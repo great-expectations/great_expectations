@@ -1,9 +1,13 @@
+{% if expectation_suite_name %}
+  {% set expectation_suite_name_dot_count = expectation_suite_name.count(".") -%}
+{% endif %}
+
 {% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
-  {% set home_url = "../../../../../index.html" -%}
-  {% set static_images_dir = "../../../../../static/images/" -%}
+  {% set home_url =  ((expectation_suite_name_dot_count + 3) * "../") + "index.html" -%}
+  {% set static_images_dir = ((expectation_suite_name_dot_count + 3) * "../") + "static/images/" -%}
 {% elif utm_medium == "expectation-suite-page" %}
-  {% set home_url = "../../../../index.html" -%}
-  {% set static_images_dir = "../../../../static/images/" -%}
+  {% set home_url = ((expectation_suite_name_dot_count + 1) * "../") + "index.html" -%}
+  {% set static_images_dir = ((expectation_suite_name_dot_count + 1) * "../") + "static/images/" -%}
 {% elif utm_medium == "index-page" %}
   {% set home_url = "#" -%}
   {% set static_images_dir = "./static/images/" -%}
