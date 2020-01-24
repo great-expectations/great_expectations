@@ -383,7 +383,7 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
     @classmethod
     def _profile(cls, dataset):
 
-        dataset.set_default_expectation_argument("catch_exceptions", True)
+        dataset.set_default_expectation_argument("catch_exceptions", False)
 
         value = dataset.expect_table_row_count_to_be_between(min_value=0, max_value=None).result["observed_value"]
         dataset.expect_table_row_count_to_be_between(min_value=max(0, value-10), max_value=value+10)

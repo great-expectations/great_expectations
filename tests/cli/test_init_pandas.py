@@ -5,68 +5,64 @@ import shutil
 import pytest
 from click.testing import CliRunner
 
+from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import ConfigNotFoundError
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
-from tests.test_utils import is_library_installed
 
 
 def test_cli_init_on_new_project(tmp_path_factory):
-    curdir = os.path.abspath(os.getcwd())
+    basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
+    os.makedirs(os.path.join(basedir, "data"))
+    data_path = os.path.join(basedir, "data/Titanic.csv")
+    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    shutil.copy(fixture_path, data_path)
 
-    try:
-        basedir = tmp_path_factory.mktemp("test_cli_init_diff")
-        basedir = str(basedir)
-        os.makedirs(os.path.join(basedir, "data"))
-        data_path = os.path.join(basedir, "data/Titanic.csv")
-        fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
-        shutil.copy(fixture_path, data_path)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["init", "--no-view", "-d", basedir],
+        input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
+    )
+    stdout = result.output
 
-        os.chdir(basedir)
+    assert len(stdout) < 3000, "CLI output is unreasonably long."
 
-        runner = CliRunner()
-        result = runner.invoke(
-            cli, ["init", "--no-view"], input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
-        )
-        stdout = result.output
+    assert "Always know what to expect from your data" in stdout
+    assert "What data would you like Great Expectations to connect to" in stdout
+    assert "What are you processing your files with" in stdout
+    assert "Enter the path (relative or absolute) of a data file" in stdout
+    assert "Give your new data asset a short name" in stdout
+    assert "Name the new expectation suite [warning]" in stdout
+    assert (
+        "Great Expectations will choose a couple of columns and generate expectations about them"
+        in stdout
+    )
+    assert "Profiling Titanic" in stdout
+    assert "Building" in stdout
+    assert "Data Docs" in stdout
+    assert "A new Expectation suite 'warning' was added to your project" in stdout
+    assert "Great Expectations is now set up" in stdout
 
-        assert len(stdout) < 2000, "CLI output is unreasonably long."
+    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
+    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
+    assert os.path.isfile(config_path)
 
-        assert "Always know what to expect from your data" in stdout
-        assert "What data would you like Great Expectations to connect to" in stdout
-        assert "What are you processing your files with" in stdout
-        assert "Enter the path (relative or absolute) of a data file" in stdout
-        assert "Give your new data asset a short name" in stdout
-        assert "Name the new expectation suite [warning]" in stdout
-        assert (
-            "Great Expectations will choose a couple of columns and generate expectations about them"
-            in stdout
-        )
-        assert "Profiling Titanic" in stdout
-        assert "Building" in stdout
-        assert "Data Docs" in stdout
-        assert "Great Expectations is now set up" in stdout
+    config = yaml.load(open(config_path, "r"))
+    data_source_class = config["datasources"]["files_datasource"]["data_asset_type"][
+        "class_name"
+    ]
+    assert data_source_class == "PandasDataset"
 
-        assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-        config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
-        assert os.path.isfile(config_path)
+    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
 
-        config = yaml.load(open(config_path, "r"))
-        data_source_class = config["datasources"]["files_datasource"][
-            "data_asset_type"
-        ]["class_name"]
-        assert data_source_class == "PandasDataset"
+    # Instead of monkey patching datetime, just regex out the time directories
+    date_safe_obs_tree = re.sub(r"\d*T\d*\.\d*Z", "9999.9999", obs_tree)
 
-        obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
-
-        # Instead of monkey patching datetime, just regex out the time directories
-        date_safe_obs_tree = re.sub(r"\d*T\d*\.\d*Z", "9999.9999", obs_tree)
-
-        assert (
-            date_safe_obs_tree
-            == """\
+    assert (
+        date_safe_obs_tree
+        == """\
 great_expectations/
     .gitignore
     great_expectations.yml
@@ -162,138 +158,186 @@ great_expectations/
                         Titanic/
                             warning.json
 """
-        )
-    except Exception as e:
-        raise e
-    finally:
-        os.chdir(curdir)
+    )
+
+    # This is important to make sure the user isn't seeing tracebacks
+    assert "Traceback" not in stdout
 
 
-@pytest.mark.skipif(
-    is_library_installed("pymssql"), reason="requires pymssql to NOT be installed"
-)
-def test_cli_init_connection_string_invalid_mssql_connection_instructs_user(
-    tmp_path_factory,
+# TODO this test is failing because the behavior is broken
+def test_init_on_existing_project_with_no_datasources_should_add_one(
+    initialized_project,
 ):
-    basedir = tmp_path_factory.mktemp("test_cli_init_diff")
-    basedir = str(basedir)
-    os.chdir(basedir)
+    project_dir = initialized_project
+    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+
+    _remove_all_datasources(ge_dir)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["init", "--no-view", "-d", project_dir], input="1\n1\ndata\nmy_data_dir\n"
+    )
+    stdout = result.stdout
+    print(stdout)
+
+    assert result.exit_code == 0
+
+    assert "Error: invalid input" not in stdout
+
+    assert "Always know what to expect from your data" in stdout
+    assert "What data would you like Great Expectations to connect to" in stdout
+    assert "A new datasource 'my_data_dir' was added to your project" in stdout
+    assert "Would you like to build & view this project's Data Docs" in stdout
+
+    config = _load_config_file(os.path.join(ge_dir, DataContext.GE_YML))
+    assert "my_data_dir" in config["datasources"].keys()
+
+    # This is important to make sure the user isn't seeing tracebacks
+    assert "Traceback" not in stdout
+
+
+def _remove_all_datasources(ge_dir):
+    config_path = os.path.join(ge_dir, DataContext.GE_YML)
+
+    config = _load_config_file(config_path)
+    config["datasources"] = {}
+
+    with open(config_path, "w") as f:
+        yaml.dump(config, f)
+
+    context = DataContext(ge_dir)
+    assert context.list_datasources() == []
+
+
+def _load_config_file(config_path):
+    assert os.path.isfile(config_path), "Config file is missing. Check path"
+
+    with open(config_path, "r") as f:
+        read = f.read()
+        config = yaml.load(read)
+
+    assert isinstance(config, dict)
+    return config
+
+
+@pytest.fixture
+def initialized_project(tmp_path_factory):
+    """This is an initialized project through the CLI."""
+    basedir = str(tmp_path_factory.mktemp("my_rad_project"))
+    os.makedirs(os.path.join(basedir, "data"))
+    data_path = os.path.join(basedir, "data/Titanic.csv")
+    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    shutil.copy(fixture_path, data_path)
+    runner = CliRunner()
+    _ = runner.invoke(
+        cli,
+        ["init", "--no-view", "-d", basedir],
+        input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
+    )
+
+    context = DataContext(os.path.join(basedir, DataContext.GE_DIR))
+    assert isinstance(context, DataContext)
+    assert len(context.list_datasources()) == 1
+    return basedir
+
+
+def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
+    initialized_project, filesystem_csv_2
+):
+    project_dir = initialized_project
+    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+
+    context = DataContext(ge_dir)
+    context.add_datasource(
+        "another_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        base_directory=str(filesystem_csv_2),
+    )
+    assert len(context.list_datasources()) == 2
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n")
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+
+    assert "Error: invalid input" not in stdout
+
+    assert "Always know what to expect from your data" in stdout
+    assert "This looks like an existing project that" in stdout
+    assert "appears complete" in stdout
+    assert "Would you like to build & view this project's Data Docs" in stdout
+
+    # This is important to make sure the user isn't seeing tracebacks
+    assert "Traceback" not in stdout
+
+
+def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs(
+    initialized_project,
+):
+    project_dir = initialized_project
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n")
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+
+    assert "Error: invalid input" not in stdout
+
+    assert "Always know what to expect from your data" in stdout
+    assert "This looks like an existing project that" in stdout
+    assert "appears complete" in stdout
+    assert "Would you like to build & view this project's Data Docs" in stdout
+
+    # This is important to make sure the user isn't seeing tracebacks
+    assert "Traceback" not in stdout
+
+
+def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
+    initialized_project,
+):
+    project_dir = initialized_project
+    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+
+    # mangle the setup to remove all traces of any suite
+    expectations_dir = os.path.join(ge_dir, "expectations")
+    data_docs_dir = os.path.join(uncommitted_dir, "data_docs")
+    validations_dir = os.path.join(uncommitted_dir, "validations")
+
+    _delete_and_recreate_dir(expectations_dir)
+    _delete_and_recreate_dir(data_docs_dir)
+    _delete_and_recreate_dir(validations_dir)
+
+    context = DataContext(ge_dir)
+    assert context.list_expectation_suite_keys() == []
 
     runner = CliRunner()
     result = runner.invoke(
         cli,
-        ["init", "--no-view"],
-        input="Y\n2\n5\nmy_db\nmssql+pymssql://scott:tiger@not_a_real_host:1234/dbname\n",
+        ["init", "--no-view", "-d", project_dir],
+        input="{}\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
     )
-    stdout = result.output
+    stdout = result.stdout
 
+    assert result.exit_code == 0
+
+    assert "Error: invalid input" not in stdout
     assert "Always know what to expect from your data" in stdout
-    assert "What data would you like Great Expectations to connect to" in stdout
-    assert "Which database backend are you using" in stdout
-    assert "What is the url/connection string for the sqlalchemy connection" in stdout
-    assert "Give your new data source a short name" in stdout
-    assert "Attempting to connect to your database. This may take a moment" in stdout
-    assert "Cannot connect to the database" in stdout
-    assert "Database Error: No module named 'pymssql'" in stdout
+    assert "Enter the path (relative or absolute) of a data file" in stdout
+    assert "Profiling sink_me" in stdout
+    assert "The following Data Docs sites were built" in stdout
+    assert "Great Expectations is now set up" in stdout
+    assert "A new Expectation suite 'warning' was added to your project" in stdout
 
-    assert "Profiling" not in stdout
-    assert "Building" not in stdout
-    assert "Data Docs" not in stdout
-    assert "Great Expectations is now set up" not in stdout
-
-    assert result.exit_code == 1
-
-    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
-
-    config = yaml.load(open(config_path, "r"))
-    assert config["datasources"] == dict()
-
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
-    assert (
-        obs_tree
-        == """\
-great_expectations/
-    .gitignore
-    great_expectations.yml
-    datasources/
-    expectations/
-    notebooks/
-        pandas/
-            create_expectations.ipynb
-            validation_playground.ipynb
-        spark/
-            create_expectations.ipynb
-            validation_playground.ipynb
-        sql/
-            create_expectations.ipynb
-            validation_playground.ipynb
-    plugins/
-        custom_data_docs/
-            renderers/
-            styles/
-                data_docs_custom_styles.css
-            views/
-    uncommitted/
-        config_variables.yml
-        data_docs/
-        samples/
-        validations/
-"""
-    )
+    # This is important to make sure the user isn't seeing tracebacks
+    assert "Traceback" not in stdout
 
 
-def test_cli_config_not_found(tmp_path_factory):
-    tmp_dir = str(tmp_path_factory.mktemp("test_cli_config_not_found"))
-    curdir = os.path.abspath(os.getcwd())
-    try:
-        os.chdir(tmp_dir)
-        runner = CliRunner()
-        error_message = ConfigNotFoundError().message
-
-        # datasource list
-        result = runner.invoke(cli, ["datasource", "list", "-d", "./"])
-        assert error_message in result.output
-        result = runner.invoke(cli, ["datasource", "list"])
-        assert error_message in result.output
-
-        # datasource new
-        result = runner.invoke(cli, ["datasource", "new", "-d", "./"])
-        assert error_message in result.output
-        result = runner.invoke(cli, ["datasource", "new"])
-        assert error_message in result.output
-
-        # datasource profile
-        result = runner.invoke(cli, ["datasource", "profile", "-d", "./", "--no-view"])
-        assert error_message in result.output
-        result = runner.invoke(cli, ["datasource", "profile", "--no-view"])
-        assert error_message in result.output
-
-        # docs build
-        result = runner.invoke(cli, ["docs", "build", "-d", "./", "--no-view"])
-        assert error_message in result.output
-        result = runner.invoke(cli, ["docs", "build", "--no-view"])
-        assert error_message in result.output
-
-        # project check-config
-        result = runner.invoke(cli, ["project", "check-config", "-d", "./"])
-        assert error_message in result.output
-        result = runner.invoke(cli, ["project", "check-config"])
-        assert error_message in result.output
-
-        # suite new
-        result = runner.invoke(cli, ["suite", "new", "-d", "./"])
-        assert error_message in result.output
-        result = runner.invoke(cli, ["suite", "new"])
-        assert error_message in result.output
-
-        # suite edit
-        result = runner.invoke(cli, ["suite", "edit", "FAKE", "FAKE", "-d", "./"])
-        assert error_message in result.output
-        result = runner.invoke(cli, ["suite", "edit", "FAKE", "FAKE"])
-        assert error_message in result.output
-    except:
-        raise
-    finally:
-        os.chdir(curdir)
+def _delete_and_recreate_dir(directory):
+    shutil.rmtree(directory)
+    assert not os.path.isdir(directory)
+    os.mkdir(directory)
+    assert os.path.isdir(directory)

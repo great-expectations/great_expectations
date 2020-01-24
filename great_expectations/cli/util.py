@@ -1,15 +1,15 @@
 import os
+import re
 import shutil
 import sys
 
 import click
 import six
-import re
 
 from great_expectations import DataContext
 from great_expectations.cli.init_messages import (
-    NEW_TEMPLATE_PROMPT,
     NEW_TEMPLATE_INSTALLED,
+    NEW_TEMPLATE_PROMPT,
 )
 
 try:

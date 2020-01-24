@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from great_expectations import DataContext
 
-
 GREETING = """<cyan>\
   ___              _     ___                  _        _   _             
  / __|_ _ ___ __ _| |_  | __|_ ___ __  ___ __| |_ __ _| |_(_)___ _ _  ___
