@@ -3,35 +3,36 @@ import sys
 
 import click
 
-from great_expectations import DataContext, exceptions as ge_exceptions
-from great_expectations.exceptions import DatasourceInitializationError
-from great_expectations.cli.datasource import (
-    create_expectation_suite as create_expectation_suite_impl,
-    add_datasource as add_datasource_impl,
-)
+from great_expectations import DataContext
+from great_expectations import exceptions as ge_exceptions
+from great_expectations.cli.datasource import \
+    add_datasource as add_datasource_impl
+from great_expectations.cli.datasource import \
+    create_expectation_suite as create_expectation_suite_impl
 from great_expectations.cli.docs import build_docs
-
 from great_expectations.cli.init_messages import (
-    GREETING,
-    PROJECT_IS_COMPLETE,
     BUILD_DOCS_PROMPT,
+    COMPLETE_ONBOARDING_PROMPT,
+    GREETING,
     LETS_BEGIN_PROMPT,
+    ONBOARDING_COMPLETE,
+    PROJECT_IS_COMPLETE,
     RUN_INIT_AGAIN,
+    SLACK_LATER,
+    SLACK_SETUP_COMPLETE,
     SLACK_SETUP_INTRO,
     SLACK_SETUP_PROMPT,
-    SLACK_LATER,
     SLACK_WEBHOOK_PROMPT,
-    SLACK_SETUP_COMPLETE,
-    COMPLETE_ONBOARDING_PROMPT,
-    ONBOARDING_COMPLETE,
 )
-from great_expectations.cli.logging import logger
 from great_expectations.cli.util import cli_message, is_sane_slack_webhook
-from great_expectations.core import (
-    ExpectationSuite,
-    ExpectationSuiteValidationResult,
-)
-from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
+from great_expectations.exceptions import DatasourceInitializationError
+
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
+    # just fall through
+    SQLAlchemyError = ge_exceptions.ProfilerError
 
 
 @click.command()
@@ -109,25 +110,24 @@ def init(target_directory, view):
             if len(datasources) == 1:
                 datasource_name = datasources[0]["name"]
 
-
-                # we need only one of the values returned here - profiling_results
-                (
-                    datasource_name,
-                    generator_name,
-                    data_asset_name,
-                    batch_kwargs,
-                    profiling_results,
-                ) = create_expectation_suite_impl(
+                success, suite_name = create_expectation_suite_impl(
                     context,
                     datasource_name=datasource_name,
                     show_intro_message=False,
                     additional_batch_kwargs={"limit": 1000},
                     open_docs=view,
                 )
+                if success:
+                    cli_message(
+                        "A new Expectation suite '{}' was added to your project".format(suite_name)
+                    )
 
-                cli_message("""\n<cyan>Great Expectations is now set up.</cyan>""")
+                cli_message("\n<cyan>Great Expectations is now set up.</cyan>")
 
-    except ge_exceptions.DataContextError as e:
+    except (ge_exceptions.DataContextError,
+            ge_exceptions.ProfilerError,
+            IOError,
+            SQLAlchemyError)  as e:
         cli_message("<red>{}</red>".format(e))
         sys.exit(1)
 
