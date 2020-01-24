@@ -3,7 +3,7 @@ import json
 from great_expectations.core import ensure_json_serializable, BatchKwargs, MetricKwargs
 from great_expectations.data_context.store.database_store_backend import DatabaseStoreBackend
 from great_expectations.data_context.store.store import Store
-from great_expectations.data_context.types.metrics import EvaluationParameterIdentifier
+from great_expectations.data_context.types.metrics import EvaluationParameterIdentifier, BatchMetricIdentifier
 from great_expectations.util import load_class
 
 
@@ -39,11 +39,15 @@ class EvaluationParameterStore(Store):
         for k in self._store_backend.list_keys((run_id,)):
             backend_value = json.loads(self._store_backend.get(k))
             batch_kwargs = backend_value["batch_kwargs"]
+            metric_name = backend_value["metric_name"]
             metric_kwargs = backend_value["metric_kwargs"]
             evaluation_parameter_identifier = EvaluationParameterIdentifier(
                 run_id=run_id,
-                batch_identifier=BatchKwargs(batch_kwargs).to_id(),
-                metric_identifier=MetricKwargs(metric_kwargs).to_id()
+                batch_metric_identifier=BatchMetricIdentifier(
+                    batch_identifier=BatchKwargs(batch_kwargs).to_id(),
+                    metric_name=metric_name,
+                    metric_kwargs_identifier=MetricKwargs(metric_kwargs).to_id()
+                )
             )
             params[evaluation_parameter_identifier.to_urn()] = backend_value["value"]
         return params

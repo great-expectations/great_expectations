@@ -297,11 +297,7 @@ class DefaultSiteSectionBuilder(object):
 
             if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.expectation_suite_name
-                data_asset_name = resource_key.data_asset_name.generator_asset
-                logger.debug(
-                    "        Rendering expectation suite {}".format(
-                        expectation_suite_name,
-                    ))
+                logger.debug("        Rendering expectation suite {}".format(expectation_suite_name))
             elif isinstance(resource_key, ValidationResultIdentifier):
                 run_id = resource_key.run_id
                 expectation_suite_name = resource_key.expectation_suite_identifier.expectation_suite_name

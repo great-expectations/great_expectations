@@ -620,7 +620,7 @@ class ConfigOnlyDataContext(object):
         batch_kwargs["datasource"] = datasource
         return batch_params, batch_kwargs
 
-    def get_validator(self, batch_kwargs, expectation_suite_name, data_asset_type=None, batch_parameters=None):
+    def get_batch(self, batch_kwargs, expectation_suite_name, data_asset_type=None, batch_parameters=None):
         """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If
         batch_parameters are included, they will be available as attributes of the batch.
 
@@ -1508,11 +1508,9 @@ class ConfigOnlyDataContext(object):
                         }
                     )
                     index_page_resource_identifier_tuple = site_builder.build(resource_identifiers)
-                    index_page_locator_info = site_builder.build(
-                        resource_identifiers)[0] if index_page_resource_identifier_tuple else None
+                    if index_page_resource_identifier_tuple:
+                        index_page_locator_infos[site_name] = index_page_resource_identifier_tuple[0]
 
-                    if index_page_locator_info:
-                        index_page_locator_infos[site_name] = index_page_locator_info
         else:
             logger.debug("No data_docs_config found. No site(s) built.")
 
