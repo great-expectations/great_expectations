@@ -410,6 +410,7 @@ class ExpectationSuitePageRenderer(Renderer):
         return RenderedDocumentContent(**{
             "renderer_type": "ExpectationSuitePageRenderer",
             "page_title": expectation_suite_name,
+            "expectation_suite_name": expectation_suite_name,
             "utm_medium": "expectation-suite-page",
             "sections": sections
         })
@@ -622,6 +623,7 @@ class ProfilingResultsPageRenderer(Renderer):
         return RenderedDocumentContent(**{
             "renderer_type": "ProfilingResultsPageRenderer",
             "page_title": run_id + "-" + expectation_suite_name + "-ProfilingResults",
+            "expectation_suite_name": expectation_suite_name,
             "utm_medium": "profiling-results-page",
             "sections":
                 [
