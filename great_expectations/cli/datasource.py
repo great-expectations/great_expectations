@@ -898,10 +898,10 @@ We could not determine the format of the file. What is it?
 """
 
     reader_methods = {
-        "1": "csv", # ReaderMethods.csv
-        "2": "parquet", # ReaderMethods.parquet
-        "3": "excel", # ReaderMethods.excel
-        "4": "json", # ReaderMethods.json
+        "1": "csv",
+        "2": "parquet",
+        "3": "excel",
+        "4": "json",
     }
 
     datasource = context.get_datasource(datasource_name)

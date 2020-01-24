@@ -5,7 +5,7 @@ import uuid
 from great_expectations.datasource.types import BatchMarkers
 from ..exceptions import BatchKwargsError
 
-from .datasource import Datasource, ReaderMethods
+from .datasource import Datasource
 from great_expectations.datasource.generator.subdir_reader_generator import SubdirReaderGenerator
 from great_expectations.datasource.generator.databricks_generator import DatabricksTableGenerator
 from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
@@ -175,11 +175,6 @@ class SparkDFDatasource(Datasource):
                 reader_method = self.guess_reader_method_from_path(path)
                 if reader_method is None:
                     raise BatchKwargsError("Unable to determine reader for path: %s" % path, batch_kwargs)
-            else:
-                try:
-                    reader_method = ReaderMethods[reader_method]
-                except KeyError:
-                    raise BatchKwargsError("Unknown reader method: %s" % reader_method, batch_kwargs)
 
             reader = self.spark.read
 
@@ -221,3 +216,27 @@ class SparkDFDatasource(Datasource):
                                batch_kwargs=batch_kwargs,
                                caching=caching,
                                batch_markers=batch_markers)
+
+    @staticmethod
+    def guess_reader_method_from_path(path):
+        """Static helper for parsing reader types from file path extensions.
+
+        Args:
+            path (str): the to use to guess
+
+        Returns:
+            ReaderMethod to use for the filepath
+
+        """
+        if path.endswith(".csv") or path.endswith(".tsv"):
+            return pd.read_csv
+        elif path.endswith(".parquet"):
+            return pd.read_parquet
+        elif path.endswith(".xlsx") or path.endswith(".xls"):
+            return pd.read_excel
+        elif path.endswith(".json"):
+            return pd.read_json()
+        elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
+            return partial(pd.read_csv, compression="gzip")
+        else:
+            return None
