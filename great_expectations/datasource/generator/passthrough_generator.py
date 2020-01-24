@@ -1,12 +1,12 @@
 import logging
 
-from .batch_generator import BatchGenerator
+from .batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.datasource.types import BatchKwargs
 
 logger = logging.getLogger(__name__)
 
 
-class PassthroughGenerator(BatchGenerator):
+class PassthroughGenerator(BatchKwargsGenerator):
     """PassthroughGenerator does not yield or describe data assets; it simply provides a namespace for
     manually-constructed BatchKwargs."""
 

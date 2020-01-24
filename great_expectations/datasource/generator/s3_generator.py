@@ -8,14 +8,14 @@ except ImportError:
     boto3 = None
 
 from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.datasource.generator.batch_generator import BatchGenerator
-from great_expectations.datasource.types import ReaderMethods, S3BatchKwargs
+from great_expectations.datasource.generator.batch_kwargs_generator import BatchKwargsGenerator
+from great_expectations.datasource.types import S3BatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
 
 
-class S3Generator(BatchGenerator):
+class S3Generator(BatchKwargsGenerator):
     """
     S3 Generator provides support for generating batches of data from an S3 bucket. For the S3 generator, assets must
     be individually defined using a prefix and glob, although several additional configuration parameters are available
@@ -177,9 +177,9 @@ class S3Generator(BatchGenerator):
             batch_kwargs['reader_options'].update(reader_options)
 
         if self._reader_method is not None:
-            batch_kwargs["reader_method"] = ReaderMethods(self._reader_method)
+            batch_kwargs["reader_method"] = self._reader_method
         if asset_config.get("reader_method"):
-            batch_kwargs['reader_method'] = ReaderMethods(asset_config.get("reader_method"))
+            batch_kwargs['reader_method'] = asset_config.get("reader_method")
 
         if limit:
             batch_kwargs['limit'] = limit

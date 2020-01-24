@@ -8,14 +8,14 @@ from copy import deepcopy
 
 from six import string_types
 
-from great_expectations.datasource.generator.batch_generator import BatchGenerator
+from great_expectations.datasource.generator.batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, InvalidBatchKwargsError
 
 logger = logging.getLogger(__name__)
 
 
-class ManualGenerator(BatchGenerator):
+class ManualGenerator(BatchKwargsGenerator):
     """ManualGenerator returns manually-configured batch_kwargs for named data assets. It provides a convenient way to
     capture complete batch definitions without requiring the configuration of a more fully-featured generator.
 

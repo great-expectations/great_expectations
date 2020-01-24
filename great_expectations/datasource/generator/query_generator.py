@@ -2,7 +2,7 @@ import os
 import logging
 from string import Template
 
-from .batch_generator import BatchGenerator
+from .batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
@@ -19,7 +19,7 @@ except ImportError:
     logger.debug("Unable to import sqlalchemy.")
 
 
-class QueryGenerator(BatchGenerator):
+class QueryGenerator(BatchKwargsGenerator):
     """Produce query-style batch_kwargs from sql files stored on disk
     """
 

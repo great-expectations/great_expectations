@@ -176,8 +176,6 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch_actions_results
 
-
-
         result_object = {}
 
         for item in assets_to_validate:

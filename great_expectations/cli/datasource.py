@@ -1,16 +1,21 @@
+import datetime
+import enum
 import importlib
 import json
-import os
 import logging
-import enum
+import os
 import sys
 
 import click
-import datetime
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
-from great_expectations.cli.util import cli_message, _offer_to_install_new_template
+from great_expectations.cli.util import (
+    _offer_to_install_new_template,
+    cli_message,
+)
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
     ExpectationSuiteIdentifier
 from great_expectations.datasource import (
@@ -18,17 +23,15 @@ from great_expectations.datasource import (
     SparkDFDatasource,
     SqlAlchemyDatasource,
 )
-from great_expectations.exceptions import DatasourceInitializationError
-from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
 from great_expectations.datasource.generator import (
     InMemoryGenerator,
     ManualGenerator,
     PassthroughGenerator,
 )
-
-from great_expectations import rtd_url_ge_version, DataContext
-import great_expectations.exceptions as ge_exceptions
-
+from great_expectations.exceptions import DatasourceInitializationError
+from great_expectations.profile.basic_dataset_profiler import (
+    SampleExpectationsDatasetProfiler,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -90,10 +93,10 @@ def datasource_new(directory):
 
     datasource_name, data_source_type = add_datasource(context)
 
-    cli_message("A new datasource '{}' was added to your project.".format(datasource_name))
-
-    if not datasource_name:  # no datasource was created
-        return
+    if datasource_name:
+        cli_message("A new datasource '{}' was added to your project.".format(datasource_name))
+    else:  # no datasource was created
+        sys.exit(1)
 
 
 @datasource.command(name="list")
@@ -221,7 +224,6 @@ What are you processing your files with?
     2. PySpark
 """
 
-    # cli_message("\n<cyan>========== Where is your data? ===========</cyan>")
     data_source_location_selection = click.prompt(
         msg_prompt_where_is_your_data,
         type=click.Choice(["1", "2"]),
@@ -437,7 +439,7 @@ Since we could not connect to the database, you can complete troubleshooting in 
 
 After you connect to the datasource, run great_expectations profile to continue.
 
-""".format(datasource_name, DataContext.GE_YML, context.get_project_config()["config_variables_file_path"], rtd_url_ge_version, selected_database.value.lower()))
+""".format(datasource_name, DataContext.GE_YML, context.get_config()["config_variables_file_path"], rtd_url_ge_version, selected_database.value.lower()))
                 return None
 
     return datasource_name
@@ -793,7 +795,7 @@ def create_expectation_suite(
     :param batch_kwargs:
     :param expectation_suite_name:
     :param additional_batch_kwargs:
-    :return: a tuple: (datasource_name, generator_name, data_asset_name, batch_kwargs, profiling_results)
+    :return: a tuple: (success, suite name)
     """
 
     msg_intro = """
@@ -868,7 +870,7 @@ Name the new expectation suite"""
             )
             context.open_data_docs(resource_identifier=validation_result_identifier)
 
-        return (datasource_name, generator_name, generator_asset, batch_kwargs, profiling_results)
+        return True, expectation_suite_name
 
     if profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND:
         raise ge_exceptions.DataContextError(msg_some_data_assets_not_found.format(",".join(profiling_results['error']['not_found_data_assets'])))
@@ -898,10 +900,10 @@ We could not determine the format of the file. What is it?
 """
 
     reader_methods = {
-        "1": "csv", # ReaderMethods.csv
-        "2": "parquet", # ReaderMethods.parquet
-        "3": "excel", # ReaderMethods.excel
-        "4": "json", # ReaderMethods.json
+        "1": "csv",
+        "2": "parquet",
+        "3": "excel",
+        "4": "json",
     }
 
     datasource = context.get_datasource(datasource_name)

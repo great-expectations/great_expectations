@@ -1,16 +1,22 @@
 from __future__ import division
 
 import warnings
+
 import pytest
+
 import great_expectations as ge
-from great_expectations.core import ExpectationValidationResult, ExpectationConfiguration, ExpectationKwargs
-from tests.test_utils import assertDeepAlmostEqual
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationKwargs,
+    ExpectationValidationResult,
+)
+from great_expectations.data_context.util import file_relative_path
 
 
 def test_autoinspect_filedata_asset():
     #Expect an error to be raised since a file object doesn't have a columns attribute
     warnings.simplefilter('always', UserWarning)
-    file_path = './tests/test_sets/toy_data_complete.csv'
+    file_path = file_relative_path(__file__, '../test_sets/toy_data_complete.csv')
     my_file_data = ge.data_asset.FileDataAsset(file_path)
 
     with pytest.raises(ge.exceptions.GreatExpectationsError) as exc:
@@ -27,7 +33,7 @@ def test_autoinspect_filedata_asset():
 
 def test_expectation_suite_filedata_asset():
     # Load in data files
-    file_path = './tests/test_sets/toy_data_complete.csv'
+    file_path = file_relative_path(__file__, '../test_sets/toy_data_complete.csv')
 
     # Create FileDataAsset objects
     f_dat = ge.data_asset.FileDataAsset(file_path)
@@ -88,11 +94,11 @@ def test_expectation_suite_filedata_asset():
 
 
 def test_file_format_map_output():
-    incomplete_file_path = './tests/test_sets/toy_data_incomplete.csv'
+    incomplete_file_path = file_relative_path(__file__, '../test_sets/toy_data_incomplete.csv')
     incomplete_file_dat = ge.data_asset.FileDataAsset(incomplete_file_path)
-    null_file_path = './tests/test_sets/null_file.csv'
+    null_file_path = file_relative_path(__file__, '../test_sets/null_file.csv')
     null_file_dat = ge.data_asset.FileDataAsset(null_file_path)
-    white_space_path = './tests/test_sets/white_space.txt'
+    white_space_path = file_relative_path(__file__, '../test_sets/white_space.txt')
     white_space_dat = ge.data_asset.FileDataAsset(white_space_path)
 
     # Boolean Expectation Output

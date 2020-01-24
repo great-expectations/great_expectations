@@ -1,11 +1,6 @@
-import pytest
+import json
 
-import sys
-from freezegun import freeze_time
-
-from great_expectations.core import ExpectationConfiguration, dataAssetIdentifierSchema, expectationSuiteSchema
-from great_expectations.data_context.store import ExpectationsStore
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
 
 try:
     from unittest import mock
@@ -14,24 +9,38 @@ except ImportError:
 
 import os
 import shutil
-import json
 from collections import OrderedDict
+
+import pytest
 from ruamel.yaml import YAML
 
-from great_expectations.exceptions import DataContextError
+from great_expectations.core import (
+    ExpectationConfiguration,
+    dataAssetIdentifierSchema,
+    expectationSuiteSchema,
+)
 from great_expectations.data_context import (
     ConfigOnlyDataContext,
     DataContext,
     ExplorerDataContext,
 )
-from great_expectations.data_context.util import safe_mmkdir
-from great_expectations.data_context.types import (
+from great_expectations.data_context.store import ExpectationsStore
+from great_expectations.core import (
     DataAssetIdentifier,
-    ExpectationSuiteIdentifier,
 )
-from great_expectations.util import (
-    gen_directory_tree_str,
+from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.util import (
+    safe_mmkdir,
 )
+from great_expectations.exceptions import DataContextError
+from great_expectations.util import gen_directory_tree_str
+
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
+
 
 yaml = YAML()
 
@@ -66,12 +75,7 @@ def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
 def test_list_expectation_suite_keys(data_context):
     assert data_context.list_expectation_suite_keys() == [
         ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(
-                "mydatasource",
-                "mygenerator",
-                "my_dag_node",
-            ),
-            expectation_suite_name="default"
+            expectation_suite_name="my_dag_node.default"
         )
     ]
 
@@ -380,7 +384,7 @@ def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem
     os.makedirs(os.path.join(project_dir, "data"))
     os.makedirs(os.path.join(project_dir, "data/titanic"))
     shutil.copy(
-        "./tests/test_sets/Titanic.csv",
+        file_relative_path(__file__, "../test_sets/Titanic.csv"),
         str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
     )
 
@@ -648,7 +652,7 @@ def test_load_data_context_from_environment_variables(tmp_path_factory):
         project_path = str(tmp_path_factory.mktemp('data_context'))
         context_path = os.path.join(project_path, "great_expectations")
         safe_mmkdir(context_path)
-        shutil.copy("./tests/test_fixtures/great_expectations_basic.yml",
+        shutil.copy(file_relative_path(__file__, "../test_fixtures/great_expectations_basic.yml"),
                     str(os.path.join(context_path, "great_expectations.yml")))
         with pytest.raises(DataContextError) as err:
             DataContext.find_context_root_dir()

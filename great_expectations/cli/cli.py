@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
-import click
 import logging
 
-from great_expectations.cli.logging import logger, _set_up_logger
+import click
+
+from great_expectations import __version__ as ge_version
+from great_expectations.cli.cli_logging import _set_up_logger, logger
 from great_expectations.cli.datasource import datasource
 from great_expectations.cli.docs import docs
 from great_expectations.cli.init import init
 from great_expectations.cli.project import project
 from great_expectations.cli.suite import suite
 
-from great_expectations import __version__ as ge_version
 
 # TODO: consider using a specified-order supporting class for help (but wasn't working with python 2)
 @click.group()
