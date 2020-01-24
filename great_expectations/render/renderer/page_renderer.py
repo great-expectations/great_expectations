@@ -385,15 +385,15 @@ class ExpectationSuitePageRenderer(Renderer):
         expectation_suite_name = expectations.expectation_suite_name
 
         overview_content_blocks = [
-            self._render_asset_header(expectations),
-            self._render_asset_info(expectations)
+            self._render_expectation_suite_header(),
+            self._render_expectation_suite_info(expectations)
         ]
 
         table_level_expectations_content_block = self._render_table_level_expectations(columns)
         if table_level_expectations_content_block is not None:
             overview_content_blocks.append(table_level_expectations_content_block)
 
-        asset_notes_content_block = self._render_asset_notes(expectations)
+        asset_notes_content_block = self._render_expectation_suite_notes(expectations)
         if asset_notes_content_block is not None:
             overview_content_blocks.append(asset_notes_content_block)
 
@@ -434,7 +434,7 @@ class ExpectationSuitePageRenderer(Renderer):
             return expectation_bullet_list
 
     @classmethod
-    def _render_asset_header(cls, expectations):
+    def _render_expectation_suite_header(cls):
         return RenderedHeaderContent(**{
             "content_block_type": "header",
             "header": RenderedStringTemplateContent(**{
@@ -456,7 +456,7 @@ class ExpectationSuitePageRenderer(Renderer):
         })
 
     @classmethod
-    def _render_asset_info(cls, expectations):
+    def _render_expectation_suite_info(cls, expectations):
         expectation_suite_name = expectations.expectation_suite_name
         ge_version = expectations.meta["great_expectations.__version__"]
 
@@ -486,7 +486,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
     # TODO: Update tests
     @classmethod
-    def _render_asset_notes(cls, expectations):
+    def _render_expectation_suite_notes(cls, expectations):
 
         content = []
 
