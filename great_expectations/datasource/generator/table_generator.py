@@ -3,7 +3,7 @@ from string import Template
 
 from marshmallow import Schema, fields, post_load, ValidationError
 
-from .batch_generator import BatchGenerator
+from .batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
 from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
 
@@ -47,7 +47,7 @@ class AssetConfiguration(object):
 assetConfigurationSchema = AssetConfigurationSchema()
 
 
-class TableGenerator(BatchGenerator):
+class TableGenerator(BatchKwargsGenerator):
     """Provide access to already materialized tables or views in a database.
 
     TableGenerator can be used to define specific data asset names that take and substitute parameters,

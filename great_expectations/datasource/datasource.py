@@ -62,7 +62,14 @@ class Datasource(object):
         return cls(**kwargs)
 
     @classmethod
-    def build_configuration(cls, class_name, module_name="great_expectations.datasource", data_asset_type=None, generators=None, **kwargs):
+    def build_configuration(
+            cls,
+            class_name,
+            module_name="great_expectations.datasource",
+            data_asset_type=None,
+            generators=None,
+            **kwargs
+    ):
         """
         Build a full configuration object for a datasource, potentially including generators with defaults.
 
@@ -154,7 +161,7 @@ class Datasource(object):
                 "type": generator_config
             }
         generator_config.update(kwargs)
-        generator = self.build_generator(**generator_config)
+        generator = self._build_generator(**generator_config)
         self._datasource_config["generators"][name] = generator_config
 
         return generator
@@ -189,7 +196,7 @@ class Datasource(object):
             raise ValueError(
                 "Unable to load generator %s -- no configuration found or invalid configuration." % generator_name
             )
-        generator = self.build_generator(**generator_config)
+        generator = self._build_generator(**generator_config)
         self._generators[generator_name] = generator
         return generator
 
@@ -200,21 +207,30 @@ class Datasource(object):
             List(dict): each dictionary includes "name" and "type" keys
         """
         generators = []
-        # NOTE: 20190916 - JPC - Upon deprecation of support for type: configuration, this can be simplified
         for key, value in self._datasource_config["generators"].items():
-            if "type" in value:
-                logger.warning("Generator %s configured using type. Please use class_name instead." % key)
-                generators.append({
-                    "name": key,
-                    "type": value["type"],
-                    "class_name": self._get_generator_class_from_type(value["type"]).__name__
-                })
-            else:
-                generators.append({
-                    "name": key,
-                    "class_name": value["class_name"]
-                })
+            generators.append({
+                "name": key,
+                "class_name": value["class_name"]
+            })
         return generators
+
+    def process_batch_parameters(self, limit=None):
+        """Use datasource-specific configuration to translate any batch parameters into batch kwargs at the datasource
+        level.
+
+        Args:
+            limit (int): a parameter all datasources must accept to allow limiting a batch to a smaller number of rows.
+
+        Returns:
+            batch_parameters, batch_kwargs: a tuple containing all defined batch_parameters and batch_kwargs. Result
+            will include both parameters passed via argument and configured parameters.
+        """
+        batch_kwargs = self.config.get("batch_kwargs", {})
+
+        if limit is not None:
+            batch_kwargs["limit"] = limit
+
+        return batch_kwargs
 
     def get_batch(self, batch_kwargs, batch_parameters=None):
         """Get a batch of data from the datasource.
@@ -262,19 +278,4 @@ class Datasource(object):
 
     def build_batch_kwargs(self, generator, batch_parameters=None, **kwargs):
         generator_obj = self.get_generator(generator)
-        batch_params, batch_kwargs = generator_obj.build_batch_kwargs(batch_parameters, **kwargs)
-        batch_params["datasource"] = self.name
-        return batch_params, batch_kwargs
-
-    def process_batch_parameters(self, limit=None, **kwargs):
-        """Use datasource-specific configuration to translate any batch parameters into batch kwargs at the datasource
-        level.
-
-        Args:
-            limit (int): a parameter all datasources must accept to allow limiting a batch to a smaller number of rows.
-
-        Returns:
-            batch_parameters, batch_kwargs: a tuple containing all defined batch_parameters and batch_kwargs. Result
-            will include both parameters passed via argument and configured parameters.
-        """
-        raise NotImplementedError
+        return generator_obj.build_batch_kwargs(batch_parameters, **kwargs)

@@ -1,12 +1,12 @@
 import logging
 
-from .batch_generator import BatchGenerator
+from .batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.datasource.types import InMemoryBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
 
-class InMemoryGenerator(BatchGenerator):
+class InMemoryGenerator(BatchKwargsGenerator):
     """A basic generator that simply captures an existing object."""
 
     def __init__(self, name="default", datasource=None):

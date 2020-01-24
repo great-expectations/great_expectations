@@ -105,31 +105,25 @@ class PandasDatasource(Datasource):
         self._boto3_options = configuration_with_defaults.get("boto3_options", {})
 
     def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None):
-        batch_parameters = self.config.get("batch_parameters", {})
-        batch_kwargs = dict()
+        # Note that we do not pass any parameters up, since *all* will be handled by PandasDatasource
+        batch_kwargs = super(PandasDatasource, self).process_batch_parameters()
 
         # Apply globally-configured reader options first
         if reader_options:
             # Then update with any locally-specified reader options
-            if not batch_parameters.get("reader_options"):
-                batch_parameters["reader_options"] = dict()
-            batch_parameters["reader_options"].update(reader_options)
-        if batch_parameters.get("reader_options"):
-            batch_kwargs["reader_options"] = batch_parameters["reader_options"]
+            if not batch_kwargs.get("reader_options"):
+                batch_kwargs["reader_options"] = dict()
+            batch_kwargs["reader_options"].update(reader_options)
 
-        limit = batch_parameters.get("limit", limit)
         if limit is not None:
-            batch_parameters["limit"] = limit
             if not batch_kwargs.get("reader_options"):
                 batch_kwargs["reader_options"] = dict()
             batch_kwargs['reader_options']['nrows'] = limit
 
-        reader_method = batch_parameters.get("reader_method", reader_method)
         if reader_method is not None:
-            batch_parameters["reader_method"] = reader_method
             batch_kwargs["reader_method"] = reader_method
 
-        return batch_parameters, batch_kwargs
+        return batch_kwargs
 
     def get_batch(self, batch_kwargs, batch_parameters=None):
         # pandas cannot take unicode as a delimiter, which can happen in py2. Handle this case explicitly.

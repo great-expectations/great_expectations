@@ -1,7 +1,7 @@
 import time
 import logging
 
-from great_expectations.datasource.generator.batch_generator import BatchGenerator
+from great_expectations.datasource.generator.batch_kwargs_generator import BatchKwargsGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +11,7 @@ except ImportError:
     logger.debug("Unable to load spark context; install optional spark dependency for support.")
 
 
-class DatabricksTableGenerator(BatchGenerator):
+class DatabricksTableGenerator(BatchKwargsGenerator):
     """Meant to be used in a Databricks notebook
     """
 

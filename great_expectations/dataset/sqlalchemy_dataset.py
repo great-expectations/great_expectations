@@ -45,6 +45,29 @@ except ImportError:
     pybigquery = None
 
 
+class SqlAlchemyBatchReference(object):
+
+    def __init__(self, engine, table_name=None, query=None):
+        self._engine = engine
+        if (table_name is None and query is None) or (table_name is not None and query is not None):
+            raise ValueError("Exactly one of table_name or query must be specified")
+
+        self._table_name = table_name
+        self._query = query
+
+    def get_init_kwargs(self):
+        if self._table_name:
+            return {
+                "engine": self._engine,
+                "table_name": self._table_name
+            }
+        else:
+            return {
+                "engine": self._engine,
+                "custom_sql": self._query
+            }
+
+
 class MetaSqlAlchemyDataset(Dataset):
 
     def __init__(self, *args, **kwargs):
