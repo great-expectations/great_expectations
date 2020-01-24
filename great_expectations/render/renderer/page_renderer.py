@@ -64,11 +64,11 @@ class ValidationResultsPageRenderer(Renderer):
 
         collapse_content_blocks = [self._render_validation_info(validation_results=validation_results)]
 
-        if validation_results["meta"].get("batch_id"):
+        if validation_results["meta"].get("batch_markers"):
             collapse_content_blocks.append(
                 self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_id"),
-                    header="Batch ID"
+                    input_dict=validation_results["meta"].get("batch_markers"),
+                    header="Batch Markers"
                 )
             )
 
@@ -77,6 +77,14 @@ class ValidationResultsPageRenderer(Renderer):
                 self._render_nested_table_from_dict(
                     input_dict=validation_results["meta"].get("batch_kwargs"),
                     header="Batch Kwargs"
+                )
+            )
+
+        if validation_results["meta"].get("batch_parameters"):
+            collapse_content_blocks.append(
+                self._render_nested_table_from_dict(
+                    input_dict=validation_results["meta"].get("batch_parameters"),
+                    header="Batch Parameters"
                 )
             )
 
