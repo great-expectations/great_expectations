@@ -19,7 +19,7 @@ class ValidationsStore(Store):
 
             if issubclass(store_backend_class, TupleStoreBackend):
                 # Provide defaults for this common case
-                store_backend["filepath_template"] = store_backend.get("filepath_template", "{2}/{1}/{0}.json")
+                store_backend["filepath_suffix"] = store_backend.get("filepath_suffix", ".json")
             elif issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
                 store_backend["table_name"] = store_backend.get("table_name", "ge_validations_store")
