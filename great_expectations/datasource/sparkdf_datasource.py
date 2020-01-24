@@ -2,8 +2,11 @@ import logging
 import datetime
 import uuid
 
+from pandas import DataFrame
+
 from great_expectations.datasource.types import BatchMarkers
 from ..core.batch import Batch
+from ..dataset import SparkDFDataset
 from ..exceptions import BatchKwargsError
 
 from .datasource import Datasource
@@ -12,8 +15,7 @@ from great_expectations.types import ClassConfig
 logger = logging.getLogger(__name__)
 
 try:
-    from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
-    from pyspark.sql import SparkSession, DataFrame
+    from pyspark.sql import SparkSession
 except ImportError:
     SparkSession = None
     # TODO: review logging more detail here
@@ -118,29 +120,19 @@ class SparkDFDatasource(Datasource):
         self._build_generators()
 
     def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None):
-        batch_parameters = self.config.get("batch_parameters", {})
-        batch_kwargs = dict()
+        batch_kwargs = super(SparkDFDatasource, self).process_batch_parameters(limit=limit)
 
         # Apply globally-configured reader options first
         if reader_options:
             # Then update with any locally-specified reader options
-            if not batch_parameters.get("reader_options"):
-                batch_parameters["reader_options"] = dict()
-            batch_parameters["reader_options"].update(reader_options)
-        if batch_parameters.get("reader_options"):
-            batch_kwargs["reader_options"] = batch_parameters["reader_options"]
+            if not batch_kwargs.get("reader_options"):
+                batch_kwargs["reader_options"] = dict()
+            batch_kwargs["reader_options"].update(reader_options)
 
-        limit = batch_parameters.get("limit", limit)
-        if limit is not None:
-            batch_parameters["limit"] = limit
-            batch_kwargs["limit"] = limit
-
-        reader_method = batch_parameters.get("reader_method", reader_method)
         if reader_method is not None:
-            batch_parameters["reader_method"] = reader_method
             batch_kwargs["reader_method"] = reader_method
 
-        return batch_parameters, batch_kwargs
+        return batch_kwargs
 
     def get_batch(self, batch_kwargs, batch_parameters=None):
         """class-private implementation of get_data_asset"""

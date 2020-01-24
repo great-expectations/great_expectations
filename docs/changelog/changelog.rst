@@ -9,7 +9,7 @@
   BREAKING: existing configurations using enum-based reader_method in batch_kwargs will need to update their code. For
   example, a pandas datasource would use reader_method: read_csv instead of reader_method: csv
 * Changed batch_id to batch_markers to clarify that it can include multiple key-value pairs.
-
+* Removed support for type as a configuration key of datasource and generator objects
 
 
 

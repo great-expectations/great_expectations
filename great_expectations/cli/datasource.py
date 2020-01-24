@@ -439,7 +439,7 @@ Since we could not connect to the database, you can complete troubleshooting in 
 
 After you connect to the datasource, run great_expectations profile to continue.
 
-""".format(datasource_name, DataContext.GE_YML, context.get_project_config()["config_variables_file_path"], rtd_url_ge_version, selected_database.value.lower()))
+""".format(datasource_name, DataContext.GE_YML, context.get_config()["config_variables_file_path"], rtd_url_ge_version, selected_database.value.lower()))
                 return None
 
     return datasource_name

@@ -490,7 +490,7 @@ class ConfigOnlyDataContext(object):
             # A ConfigOnlyDataContext does not have a directory in which to look
             return {}
 
-        config_variables_file_path = self.get_project_config().config_variables_file_path
+        config_variables_file_path = self.get_config().config_variables_file_path
         if config_variables_file_path:
             try:
                 with open(os.path.join(self.root_directory,
@@ -507,11 +507,6 @@ class ConfigOnlyDataContext(object):
                 return base_config_variables_store
         else:
             return {}
-
-    def get_project_config(self):
-        project_config = self._project_config
-
-        return project_config
 
     def get_config_with_variables_substituted(self, config=None):
         if not config:
@@ -531,7 +526,7 @@ class ConfigOnlyDataContext(object):
         """
         config_variables = self._load_config_variables_file()
         config_variables[config_variable_name] = value
-        config_variables_filepath = self.get_project_config().config_variables_file_path
+        config_variables_filepath = self.get_config().config_variables_file_path
         if not config_variables_filepath:
             raise ge_exceptions.InvalidConfigError("'config_variables_file_path' property is not found in config - setting it is required to use this feature")
 
@@ -615,10 +610,10 @@ class ConfigOnlyDataContext(object):
 
         """
         datasource_obj = self.get_datasource(datasource)
-        batch_params, batch_kwargs = datasource_obj.build_batch_kwargs(generator, batch_parameters, **kwargs)
+        batch_kwargs = datasource_obj.build_batch_kwargs(generator, batch_parameters, **kwargs)
         # Track the datasource *in batch_kwargs* when building from a context so that the context can easily reuse them.
         batch_kwargs["datasource"] = datasource
-        return batch_params, batch_kwargs
+        return batch_kwargs
 
     def get_batch(self, batch_kwargs, expectation_suite_name, data_asset_type=None, batch_parameters=None):
         """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If
@@ -660,7 +655,7 @@ class ConfigOnlyDataContext(object):
     #             (See :py:meth:`normalize_data_asset_name` )
     #         expectation_suite_name: name of the expectation suite to attach to the data_asset returned
     #         batch_kwargs: key-value pairs describing the batch of data the datasource should fetch. \
-    #             (See :class:`BatchGenerator` ) If no batch_kwargs are specified, then the context will get the next
+    #             (See :class:`BatchKwargsGenerator` ) If no batch_kwargs are specified, then the context will get the next
     #             available batch_kwargs for the data_asset.
     #         **kwargs: additional key-value pairs to pass to the datasource when fetching the batch.
     #

@@ -1,5 +1,5 @@
-import time
 import logging
+import datetime
 from string import Template
 
 from great_expectations.datasource import Datasource
@@ -8,10 +8,10 @@ from great_expectations.datasource.types import (
     SqlAlchemyDatasourceTableBatchKwargs,
     BatchMarkers
 )
-from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
-from .generator.query_generator import QueryGenerator
+from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.types import ClassConfig
+from ..core.batch import Batch
 
 logger = logging.getLogger(__name__)
 
@@ -146,43 +146,10 @@ class SqlAlchemyDatasource(Datasource):
 
         return options, drivername
 
-    def _get_generator_class_from_type(self, type_):
-        if type_ == "queries":
-            return QueryGenerator
-        else:
-            raise ValueError("Unrecognized DataAssetGenerator type %s" % type_)
-
-    def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
-        for k, v in kwargs.items():
-            if isinstance(v, dict):
-                if k in batch_kwargs and isinstance(batch_kwargs[k], dict):
-                    batch_kwargs[k].update(v)
-                else:
-                    batch_kwargs[k] = v
-            else:
-                batch_kwargs[k] = v
-
-        if "data_asset_type" in batch_kwargs:
-            # Sqlalchemy does not use reader_options or need to remove batch_kwargs since it does not pass
-            # options through to a later reader
-            data_asset_type_config = batch_kwargs["data_asset_type"]
-            try:
-                data_asset_type_config = ClassConfig(**data_asset_type_config)
-            except TypeError:
-                # We tried; we'll pass the config downstream, probably as a string, and handle an error later
-                pass
-        else:
-            data_asset_type_config = self._data_asset_type
-
-        data_asset_type = self._get_data_asset_class(data_asset_type_config)
-
-        if not issubclass(data_asset_type, SqlAlchemyDataset):
-            raise ValueError("SqlAlchemyDatasource cannot instantiate batch with data_asset_type: '%s'. It "
-                             "must be a subclass of SqlAlchemyDataset." % data_asset_type.__name__)
-
+    def get_batch(self, batch_kwargs, batch_parameters=None, **kwargs):
         # We need to build a batch_id to be used in the dataframe
-        batch_id = BatchMarkers({
-            "timestamp": time.time()
+        batch_markers = BatchMarkers({
+            "ge_load_time": datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
         })
 
         if "schema" in batch_kwargs:
@@ -200,25 +167,9 @@ class SqlAlchemyDatasource(Datasource):
                     .offset(offset)\
                     .limit(limit)
                 query = str(raw_query.compile(self.engine, compile_kwargs={"literal_binds": True}))
-                return data_asset_type(
-                    custom_sql=query,
-                    engine=self.engine,
-                    data_context=self._data_context,
-                    expectation_suite=expectation_suite,
-                    batch_kwargs=batch_kwargs,
-                    batch_id=batch_id
-                )
-
+                batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query)
             else:
-                return data_asset_type(
-                    table_name=batch_kwargs["table"],
-                    engine=self.engine,
-                    schema=schema,
-                    data_context=self._data_context,
-                    expectation_suite=expectation_suite,
-                    batch_kwargs=batch_kwargs,
-                    batch_id=batch_id
-                )
+                batch_reference = SqlAlchemyBatchReference(engine=self.engine, table_name=batch_kwargs["table"])
 
         elif "query" in batch_kwargs:
             if "limit" in batch_kwargs or "offset" in batch_kwargs:
@@ -230,15 +181,16 @@ class SqlAlchemyDatasource(Datasource):
                 table_name = None
 
             query = Template(batch_kwargs["query"]).safe_substitute(**kwargs)
-            return data_asset_type(
-                custom_sql=query,
-                engine=self.engine,
-                table_name=table_name,
-                data_context=self._data_context,
-                expectation_suite=expectation_suite,
-                batch_kwargs=batch_kwargs,
-                batch_id=batch_id
-            )
+            batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query)
 
         else:
             raise ValueError("Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified")
+
+        return Batch(
+            datasource_name=self.name,
+            batch_kwargs=batch_kwargs,
+            data=batch_reference,
+            batch_parameters=batch_parameters,
+            batch_markers=batch_markers,
+            data_context=self._data_context
+        )
