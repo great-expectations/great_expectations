@@ -202,6 +202,8 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             return infile.read()
 
     def _set(self, key, value, **kwargs):
+        if not isinstance(key, tuple):
+            key = key.to_tuple()
         filepath = os.path.join(
             self.full_base_directory,
             self._convert_key_to_filepath(key)
