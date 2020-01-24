@@ -41,20 +41,6 @@ class ValidationResultsPageRenderer(Renderer):
 
     def render(self, validation_results):
         run_id = validation_results.meta['run_id']
-        full_data_asset_identifier = validation_results.meta['data_asset_name'] or "//"
-        if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
-            try:
-                # This will cause a validation error if the data asset name is not properly formatted
-                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
-            except ValidationError:
-                if isinstance(full_data_asset_identifier, string_types):
-                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
-                else:
-                    raise
-        if isinstance(full_data_asset_identifier, string_types):
-            short_data_asset_name = full_data_asset_identifier
-        else:
-            short_data_asset_name = full_data_asset_identifier.generator_asset
         expectation_suite_name = validation_results.meta['expectation_suite_name']
 
         # Group EVRs by column
@@ -107,11 +93,6 @@ class ValidationResultsPageRenderer(Renderer):
 
         overview_content_blocks.append(collapse_content_block)
 
-        if "data_asset_name" in validation_results.meta and validation_results.meta["data_asset_name"]:
-            data_asset_name = short_data_asset_name
-        else:
-            data_asset_name = None
-
         sections = [
             RenderedSectionContent(**{
                 "section_name": "Overview",
@@ -134,8 +115,6 @@ class ValidationResultsPageRenderer(Renderer):
 
         return RenderedDocumentContent(**{
             "renderer_type": "ValidationResultsPageRenderer",
-            "data_asset_name": data_asset_name,
-            "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": run_id + "-" + expectation_suite_name + "-ValidationResults",
             "expectation_suite_name": expectation_suite_name,
             "sections": sections,
@@ -196,16 +175,6 @@ class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def _render_validation_info(cls, validation_results):
         run_id = validation_results.meta['run_id']
-        full_data_asset_identifier = validation_results.meta['data_asset_name'] or ""
-        if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
-            try:
-                # This will cause a validation error if the data asset name is not properly formatted
-                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
-            except ValidationError:
-                if isinstance(full_data_asset_identifier, string_types):
-                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
-                else:
-                    raise
         ge_version = validation_results.meta["great_expectations.__version__"]
 
         return RenderedTableContent(**{
@@ -221,7 +190,6 @@ class ValidationResultsPageRenderer(Renderer):
                 }
             }),
             "table": [
-                ["Full Data Asset Identifier", full_data_asset_identifier.to_path()],
                 ["Great Expectations Version", ge_version],
                 ["Run ID", run_id]
             ],
@@ -406,16 +374,6 @@ class ExpectationSuitePageRenderer(Renderer):
 
     def render(self, expectations):
         columns, ordered_columns = self._group_and_order_expectations_by_column(expectations)
-        full_data_asset_identifier = expectations.data_asset_name
-        if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
-            try:
-                # This will cause a validation error if the data asset name is not properly formatted
-                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
-            except ValidationError:
-                if isinstance(full_data_asset_identifier, string_types):
-                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
-                else:
-                    raise
         expectation_suite_name = expectations.expectation_suite_name
 
         overview_content_blocks = [
@@ -442,9 +400,7 @@ class ExpectationSuitePageRenderer(Renderer):
             self._column_section_renderer.render(expectations=columns[column]) for column in ordered_columns if column != "_nocolumn"
         ]
         return RenderedDocumentContent(**{
-            # "data_asset_name": short_data_asset_name,
             "renderer_type": "ExpectationSuitePageRenderer",
-            "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": expectation_suite_name,
             "utm_medium": "expectation-suite-page",
             "sections": sections
@@ -493,17 +449,6 @@ class ExpectationSuitePageRenderer(Renderer):
 
     @classmethod
     def _render_asset_info(cls, expectations):
-        full_data_asset_identifier = expectations.data_asset_name
-        if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
-            try:
-                # This will cause a validation error if the data asset name is not properly formatted
-                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
-            except ValidationError:
-                if isinstance(full_data_asset_identifier, string_types):
-                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
-                else:
-                    raise
-        data_asset_type = expectations.data_asset_type
         expectation_suite_name = expectations.expectation_suite_name
         ge_version = expectations.meta["great_expectations.__version__"]
 
@@ -520,8 +465,6 @@ class ExpectationSuitePageRenderer(Renderer):
                 }
             }),
             "table": [
-                ["Full Data Asset Identifier", full_data_asset_identifier.to_path()],
-                ["Data Asset Type", data_asset_type],
                 ["Expectation Suite Name", expectation_suite_name],
                 ["Great Expectations Version", ge_version]
             ],
@@ -659,20 +602,6 @@ class ProfilingResultsPageRenderer(Renderer):
 
     def render(self, validation_results):
         run_id = validation_results.meta['run_id']
-        full_data_asset_identifier = validation_results.meta['data_asset_name'] or "//"
-        if not isinstance(full_data_asset_identifier, DataAssetIdentifier):
-            try:
-                # This will cause a validation error if the data asset name is not properly formatted
-                full_data_asset_identifier = dataAssetIdentifierSchema.load(full_data_asset_identifier).data
-            except ValidationError:
-                if isinstance(full_data_asset_identifier, string_types):
-                    logger.warning("Rendering validation results using incomplete data_asset_identifier.")
-                else:
-                    raise
-        if isinstance(full_data_asset_identifier, string_types):
-            short_data_asset_name = full_data_asset_identifier
-        else:
-            short_data_asset_name = full_data_asset_identifier.generator_asset
         expectation_suite_name = validation_results.meta['expectation_suite_name']
 
         # Group EVRs by column
@@ -682,15 +611,8 @@ class ProfilingResultsPageRenderer(Renderer):
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
         column_types = self._overview_section_renderer._get_column_types(validation_results)
 
-        if "data_asset_name" in validation_results.meta and validation_results.meta["data_asset_name"]:
-            data_asset_name = short_data_asset_name
-        else:
-            data_asset_name = None
-
         return RenderedDocumentContent(**{
             "renderer_type": "ProfilingResultsPageRenderer",
-            "data_asset_name": data_asset_name,
-            "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": run_id + "-" + expectation_suite_name + "-ProfilingResults",
             "utm_medium": "profiling-results-page",
             "sections":
