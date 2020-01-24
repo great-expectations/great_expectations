@@ -15,10 +15,6 @@ from six import PY2
 import pandas as pd
 
 from .datasource import Datasource
-from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
-from great_expectations.datasource.generator.subdir_reader_generator import SubdirReaderGenerator
-from great_expectations.datasource.generator.glob_reader_generator import GlobReaderGenerator
-from great_expectations.datasource.generator.s3_generator import S3Generator
 from great_expectations.datasource.types import BatchMarkers
 from great_expectations.core.batch import Batch
 from great_expectations.types import ClassConfig
@@ -152,7 +148,7 @@ class PandasDatasource(Datasource):
         if "path" in batch_kwargs:
             path = batch_kwargs['path']
             reader_method = batch_kwargs.get("reader_method")
-            reader_fn = self.get_reader_fn(reader_method, path)
+            reader_fn = self._get_reader_fn(reader_method, path)
             df = reader_fn(path, **reader_options)
 
         elif "s3" in batch_kwargs:
@@ -166,7 +162,7 @@ class PandasDatasource(Datasource):
             url = S3Url(raw_url)
             logger.debug("Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key))
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
-            reader_fn = self.get_reader_fn(reader_method, url.key)
+            reader_fn = self._get_reader_fn(reader_method, url.key)
             df = reader_fn(
                 StringIO(s3_object["Body"].read().decode(s3_object.get("ContentEncoding", "utf-8"))),
                 **reader_options
@@ -197,7 +193,7 @@ class PandasDatasource(Datasource):
         )
 
     @staticmethod
-    def get_reader_fn(reader_method=None, path=None):
+    def _get_reader_fn(reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
         correct reader_method.
 
@@ -230,5 +226,5 @@ class PandasDatasource(Datasource):
             return pd.read_json
         elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
             return partial(pd.read_csv, compression="gzip")
-        else:
-            raise BatchKwargsError("Unknown reader method: %s" % reader_method, {"reader_method": reader_method})
+
+        raise BatchKwargsError("Unknown reader method: %s" % reader_method, {"reader_method": reader_method})
