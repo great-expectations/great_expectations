@@ -8,11 +8,8 @@ from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.store import (
     ValidationsStore,
 )
-from great_expectations.data_context.types import (
-    ExpectationSuiteIdentifier,
-    DataAssetIdentifier,
-    ValidationResultIdentifier,
-)
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
+    ExpectationSuiteIdentifier
 
 from great_expectations.util import (
     gen_directory_tree_str,
@@ -20,7 +17,7 @@ from great_expectations.util import (
 
 
 @mock_s3
-def test_ValidationsStore_with_FixedLengthTupleS3StoreBackend():
+def test_ValidationsStore_with_TupleS3StoreBackend():
     bucket = "test_validation_store_bucket"
     prefix = "test/prefix"
 
@@ -28,10 +25,10 @@ def test_ValidationsStore_with_FixedLengthTupleS3StoreBackend():
     conn = boto3.resource('s3', region_name='us-east-1')
     conn.create_bucket(Bucket=bucket)
 
-    # First, demonstrate that we pick up default configuration including from an S3FixedLengthTupleS3StoreBackend
+    # First, demonstrate that we pick up default configuration including from an S3TupleS3StoreBackend
     my_store = ValidationsStore(
         store_backend={
-            "class_name": "FixedLengthTupleS3StoreBackend",
+            "class_name": "TupleS3StoreBackend",
             "bucket": bucket,
             "prefix": prefix
         }
@@ -42,12 +39,7 @@ def test_ValidationsStore_with_FixedLengthTupleS3StoreBackend():
 
     ns_1 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(
-                datasource="a",
-                generator="b",
-                generator_asset="c"
-            ),
-            expectation_suite_name="quarantine",
+            expectation_suite_name="a.b.c.quarantine",
         ),
         run_id="20191007T151224.1234Z_prod_100"
     )
@@ -56,12 +48,7 @@ def test_ValidationsStore_with_FixedLengthTupleS3StoreBackend():
 
     ns_2 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(
-                datasource="a",
-                generator="b",
-                generator_asset="c"
-            ),
-            expectation_suite_name="quarantine",
+            expectation_suite_name="a.b.c.quarantine",
         ),
         run_id="20191007T151224.1234Z_prod_200"
     )
@@ -109,14 +96,14 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
     }
 
 
-def test_ValidationsStore_with_FixedLengthTupleFileSystemStoreBackend(tmp_path_factory):
-    path = str(tmp_path_factory.mktemp('test_ValidationResultStore_with_FixedLengthTupleFileSystemStoreBackend__dir'))
+def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
+    path = str(tmp_path_factory.mktemp('test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
 
     my_store = ValidationsStore(
         store_backend={
             "module_name": "great_expectations.data_context.store",
-            "class_name": "FixedLengthTupleFilesystemStoreBackend",
+            "class_name": "TupleFilesystemStoreBackend",
             "base_directory": "my_store/",
             "filepath_template": "{4}/{0}/{1}/{2}/{3}.txt",
         },
@@ -144,7 +131,7 @@ def test_ValidationsStore_with_FixedLengthTupleFileSystemStoreBackend(tmp_path_f
 
     print(gen_directory_tree_str(path))
     assert gen_directory_tree_str(path) == """\
-test_ValidationResultStore_with_FixedLengthTupleFileSystemStoreBackend__dir0/
+test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir0/
     my_store/
         prod-100/
             a/
@@ -178,12 +165,7 @@ def test_ValidationsStore_with_DatabaseStoreBackend():
 
     ns_1 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(
-                datasource="a",
-                generator="b",
-                generator_asset="c"
-            ),
-            expectation_suite_name="quarantine",
+            expectation_suite_name="a.b.c.quarantine",
         ),
         run_id="20191007T151224.1234Z_prod_100"
     )
@@ -192,12 +174,7 @@ def test_ValidationsStore_with_DatabaseStoreBackend():
 
     ns_2 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(
-                datasource="a",
-                generator="b",
-                generator_asset="c"
-            ),
-            expectation_suite_name="quarantine",
+            expectation_suite_name="a.b.c.quarantine",
         ),
         run_id="20191007T151224.1234Z_prod_200"
     )
