@@ -190,6 +190,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 raise ValueError("root_directory must be an absolute path. Got {0} instead.".format(root_directory))
             else:
                 self.full_base_directory = os.path.join(root_directory, base_directory)
+
         safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
     def _get(self, key):
@@ -236,7 +237,12 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                         file_name
                     )
 
-                key = self._convert_filepath_to_key(filepath)
+                if self.filepath_prefix and not filepath.startswith(self.filepath_prefix):
+                    continue
+                elif self.filepath_suffix and not filepath.endswith(self.filepath_suffix):
+                    continue
+                else:
+                    key = self._convert_filepath_to_key(filepath)
                 if key:
                     key_list.append(key)
 
