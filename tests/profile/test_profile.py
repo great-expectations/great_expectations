@@ -245,6 +245,13 @@ def test_BasicDatasetProfiler_on_titanic():
     # Note: the above already produces an EVR; rerunning isn't strictly necessary just for EVRs
     evrs = df.validate(result_format="SUMMARY")
 
+    # THIS IS NOT DEAD CODE. UNCOMMENT TO SAVE A SNAPSHOT WHEN UPDATING THIS TEST
+    # with open('tests/test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json', 'w+') as file:
+    #     json.dump(expectationSuiteValidationResultSchema.dump(evrs).data, file, indent=2)
+    #
+    # with open('tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'w+') as file:
+    #     json.dump(expectationSuiteValidationResultSchema.dump(evrs).data, file, indent=2)
+
     with open(file_relative_path(__file__, '../test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json'), 'r') as file:
         expected_evrs = expectationSuiteValidationResultSchema.load(json.load(file, object_pairs_hook=OrderedDict)).data
 
