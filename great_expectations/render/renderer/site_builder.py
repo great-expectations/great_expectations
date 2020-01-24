@@ -94,11 +94,13 @@ class SiteBuilder(object):
     def __init__(self,
                  data_context,
                  store_backend,
+                 site_name,
                  site_index_builder=None,
                  site_section_builders=None,
                  datasource_whitelist=None,
                  runtime_environment=None
                  ):
+        self.site_name = site_name
         self.data_context = data_context
         self.store_backend = store_backend
 
@@ -132,6 +134,7 @@ class SiteBuilder(object):
                 "data_context": data_context,
                 "custom_styles_directory": custom_styles_directory,
                 "target_store": self.target_store,
+                "site_name": self.site_name
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -354,6 +357,7 @@ class DefaultSiteIndexBuilder(object):
     def __init__(
             self,
             name,
+            site_name,
             data_context,
             target_store,
             custom_styles_directory=None,
@@ -364,6 +368,7 @@ class DefaultSiteIndexBuilder(object):
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
         self.name = name
+        self.site_name = site_name
         self.data_context = data_context
         self.target_store = target_store
         self.show_cta_footer = show_cta_footer
@@ -530,6 +535,7 @@ class DefaultSiteIndexBuilder(object):
             validation_result_keys = validation_result_keys[:self.validation_results_limit]
 
         index_links_dict = OrderedDict()
+        index_links_dict["site_name"] = self.site_name
 
         if self.show_cta_footer:
             index_links_dict["cta_object"] = self.get_calls_to_action()
