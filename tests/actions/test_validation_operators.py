@@ -17,7 +17,6 @@ from great_expectations.validation_operators.validation_operators import (
 from great_expectations.data_context import (
     ConfigOnlyDataContext,
 )
-from great_expectations.data_context.types import DataAssetIdentifier
 from ..test_utils import modify_locale
 
 
@@ -84,16 +83,13 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
     )
 
     my_df_1 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, None]})
-    my_ge_df_1 = ge.dataset.PandasDataset(my_df_1, data_asset_name=DataAssetIdentifier("my_datasource", "default",
-                                                                                       "f1"))
+    my_ge_df_1 = ge.dataset.PandasDataset(my_df_1, data_asset_name="f1")
 
     my_df_2 = pd.DataFrame({"x": [1, 2, 3, 4, 99], "y": [1, 2, 3, 4, 5]})
-    my_ge_df_2 = ge.dataset.PandasDataset(my_df_2, data_asset_name=DataAssetIdentifier("my_datasource", "default",
-                                                                                       "f2"))
+    my_ge_df_2 = ge.dataset.PandasDataset(my_df_2, data_asset_name="f2")
 
     my_df_3 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, 5]})
-    my_ge_df_3 = ge.dataset.PandasDataset(my_df_3, data_asset_name=DataAssetIdentifier("my_datasource", "default",
-                                                                                       "f3"))
+    my_ge_df_3 = ge.dataset.PandasDataset(my_df_3, data_asset_name="f3")
 
     return_obj = vo.run(
         assets_to_validate=[

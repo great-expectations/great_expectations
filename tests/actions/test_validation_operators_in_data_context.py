@@ -1,5 +1,3 @@
-import pytest
-import json
 import os
 import shutil
 
@@ -8,11 +6,6 @@ import pandas as pd
 from great_expectations.data_context import (
     ConfigOnlyDataContext,
     DataContext,
-)
-from great_expectations.data_context.types import (
-#     DataContextConfig,
-    DataAssetIdentifier,
-    ExpectationSuiteIdentifier,
 )
 from great_expectations.util import (
     gen_directory_tree_str
@@ -145,8 +138,8 @@ project/
     my_df = pd.DataFrame({"x": [1, 2, 3, 4, 5]})
 
     data_asset_name = "data__dir/default/bob-ross"
-    data_context.create_expectation_suite(data_asset_name=data_asset_name, expectation_suite_name="default")
-    batch = data_context.get_batch(data_asset_name=data_asset_name, expectation_suite_name="default",
+    data_context.create_expectation_suite(expectation_suite_name="default")
+    batch = data_context.get_batch(expectation_suite_name="default",
                                    batch_kwargs=data_context.yield_batch_kwargs(data_asset_name))
 
     validation_store_path = os.path.join(project_path, "great_expectations/uncommitted/validations")
@@ -159,7 +152,6 @@ validations/
                     BasicDatasetProfiler.json
 """
 
-    data_asset_identifier = DataAssetIdentifier("data__dir", "default", "bob-ross")
     results = data_context.run_validation_operator(
         assets_to_validate=[batch],
         run_id="test-100",

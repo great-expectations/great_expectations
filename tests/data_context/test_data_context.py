@@ -596,7 +596,7 @@ def basic_data_context_config():
             "expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
-                    "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                    "class_name": "TupleFilesystemStoreBackend",
                     "base_directory": "expectations/",
                 },
             },
@@ -1023,7 +1023,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
         "my_rad_site": {
             "class_name": "SiteBuilder",
             "store_backend": {
-                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/data_docs/some/local/path/"
             }
         }
@@ -1052,14 +1052,14 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
         "my_rad_site": {
             "class_name": "SiteBuilder",
             "store_backend": {
-                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/data_docs/some/path/"
             }
         },
         "another_just_amazing_site": {
             "class_name": "SiteBuilder",
             "store_backend": {
-                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/data_docs/another/path/"
             }
         }
