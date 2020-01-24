@@ -1,7 +1,3 @@
-{% if full_data_asset_identifier %}
-  {% set identifier_list = full_data_asset_identifier.split("/") -%}
-{% endif %}
-
 {% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
   {% set home_url = "../../../../../index.html" -%}
   {% set static_images_dir = "../../../../../static/images/" -%}
@@ -25,12 +21,9 @@
           />
         </a>
       </div>
-      {% if identifier_list %}
+      {% if page_title %}
         <ol class="ge-breadcrumbs breadcrumb d-inline-flex bg-light ml-2 mr-0 mt-0 mb-0 pt-0 pb-0">
             <li class="ge-breadcrumbs-item breadcrumb-item"><a href="{{ home_url }}">Home</a></li>
-            {% for el in identifier_list %}
-                <li class="ge-breadcrumbs-item breadcrumb-item">{{ el }}</li>
-            {% endfor %}
             <li class="ge-breadcrumbs-item breadcrumb-item active" aria-current="page">{{page_title}}</li>
         </ol>
       {% endif %}
