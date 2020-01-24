@@ -1,7 +1,9 @@
-import pytest
 import os
-from great_expectations.exceptions import InvalidConfigError
+
+import pytest
+
 from great_expectations.data_context.util import substitute_config_variable
+from great_expectations.exceptions import InvalidConfigError
 
 
 def test_config_variables_on_context_without_config_variables_filepath_configured(data_context_without_config_variables_filepath_configured):

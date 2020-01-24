@@ -3,7 +3,6 @@ import pytest
 from copy import copy, deepcopy
 
 from great_expectations.core import ExpectationSuite, ExpectationConfiguration
-from great_expectations.data_context.types import DataAssetIdentifier
 
 
 @pytest.fixture

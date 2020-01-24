@@ -1,74 +1,14 @@
 import os
 import shutil
 
-import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.util import file_relative_path
-
-
-@pytest.mark.skip(reason="TBD if this behavior is desired")
-def test_cli_init_with_no_datasource_has_correct_cli_output_and_writes_config_yml(
-    tmp_path_factory,
-):
-    """
-    This is a low-key snapshot test used to sanity check some of the config yml
-    inline comments, and some CLI output.
-    """
-    curdir = os.path.abspath(os.getcwd())
-
-    try:
-        basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
-        os.chdir(basedir)
-        runner = CliRunner()
-        result = runner.invoke(cli, ["init", "--no-view"], input="Y\n4\n")
-
-        assert "Skipping datasource configuration." in result.output
-        print(result.output)
-
-        assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-        config_file_path = os.path.join(
-            basedir, "great_expectations/great_expectations.yml"
-        )
-        assert os.path.isfile(config_file_path)
-        with open(config_file_path, "r") as f:
-            observed_config = f.read()
-
-        assert (
-            """# Welcome to Great Expectations! Always know what to expect from your data."""
-            in observed_config
-        )
-        assert (
-            """# Datasources tell Great Expectations where your data lives and how to get it.
-# You can use the CLI command `great_expectations add-datasource` to help you"""
-            in observed_config
-        )
-        assert (
-            """# The plugins_directory will be added to your python path for custom modules
-# used to override and extend Great Expectations."""
-            in observed_config
-        )
-        assert (
-            """# Stores are configurable places to store things like Expectations, Validations
-# Data Docs, and more. These are for advanced users only - most users can simply
-# leave this section alone.
-# 
-# Three stores are required: expectations, validations, and
-# evaluation_parameters, and must exist with a valid store entry. Additional
-# stores can be configured for uses such as data_docs, validation_operators, etc."""
-            in observed_config
-        )
-        assert (
-            """# Data Docs make it simple to visualize data quality in your project. These"""
-            in observed_config
-        )
-    except:
-        raise
-    finally:
-        os.chdir(curdir)
+from great_expectations.util import gen_directory_tree_str
+from tests.cli.test_cli import yaml
 
 
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them(
@@ -96,7 +36,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     stdout = result.output
     assert result.exit_code == 0
     assert "Great Expectations is now set up." in stdout
-    print(stdout)
 
     context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
     uncommitted_dir = os.path.join(context.root_directory, "uncommitted")
@@ -107,7 +46,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     runner = CliRunner()
     result = runner.invoke(cli, ["init", "-d", root_dir], input="Y\nn\n")
     stdout = result.stdout
-    print(stdout)
 
     assert result.exit_code == 0
     assert "To run locally, we need some files that are not in source control" in stdout
@@ -151,7 +89,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_f
     stdout = result.output
     assert result.exit_code == 0
     assert "Great Expectations is now set up." in stdout
-    print(stdout)
 
     context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
     uncommitted_dir = os.path.join(context.root_directory, "uncommitted")
@@ -162,7 +99,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_f
     runner = CliRunner()
     result = runner.invoke(cli, ["init", "-d", root_dir], input="n\nn\n")
     stdout = result.stdout
-    print(stdout)
 
     assert result.exit_code == 0
     assert "To run locally, we need some files that are not in source control" in stdout
@@ -199,16 +135,110 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     )
     stdout = result.output
     assert result.exit_code == 0
-    print(stdout)
 
     # Test the second invocation of init
     runner = CliRunner()
     result = runner.invoke(cli, ["init", "--no-view", "-d", root_dir], input="n\n")
     stdout = result.stdout
-    print(stdout)
 
     assert result.exit_code == 0
     assert "This looks like an existing project that" in stdout
     assert "appears complete" in stdout
     assert "ready to roll" in stdout
     assert "Would you like to build & view this project's Data Docs" in stdout
+
+
+def test_cli_init_connection_string_non_working_mssql_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
+    tmp_path_factory,
+):
+    basedir = tmp_path_factory.mktemp("mssql_test")
+    basedir = str(basedir)
+    os.chdir(basedir)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["init", "--no-view"],
+        input="Y\n2\n5\nmy_db\nmssql+pymssql://scott:tiger@not_a_real_host:1234/dbname\n",
+    )
+    stdout = result.output
+
+    assert "Always know what to expect from your data" in stdout
+    assert "What data would you like Great Expectations to connect to" in stdout
+    assert "Which database backend are you using" in stdout
+    assert "What is the url/connection string for the sqlalchemy connection" in stdout
+    assert "Give your new data source a short name" in stdout
+    assert "Attempting to connect to your database. This may take a moment" in stdout
+    assert "Cannot connect to the database" in stdout
+    assert "Database Error: No module named 'pymssql'" in stdout
+
+    assert "Profiling" not in stdout
+    assert "Building" not in stdout
+    assert "Data Docs" not in stdout
+    assert "Great Expectations is now set up" not in stdout
+
+    assert result.exit_code == 1
+
+    ge_dir = os.path.join(basedir, DataContext.GE_DIR)
+    assert os.path.isdir(ge_dir)
+    config_path = os.path.join(ge_dir, DataContext.GE_YML)
+    assert os.path.isfile(config_path)
+
+    # TODO this entry might not be totally right, but one needs to be here.
+    config = yaml.load(open(config_path, "r"))
+    assert config["datasources"] == {
+        "my_db": {
+            "data_asset_type": {
+                "module_name": None,
+                "class_name": "SqlAlchemyDataset",
+            },
+            "credentials": "${my_db}",
+            "class_name": "SqlAlchemyDatasource",
+            "generators": {
+                "default": {"class_name": "TableGenerator"},
+                "passthrough": {"class_name": "PassthroughGenerator"},
+            },
+        }
+    }
+
+    # TODO add entry in config_vars this entry might not be totally right, but one needs to be here.
+    config_path = os.path.join(
+        ge_dir, DataContext.GE_UNCOMMITTED_DIR, "config_variables.yml"
+    )
+    config = yaml.load(open(config_path, "r"))
+    assert config["my_db"] == {
+        "connection_string": "mssql+pymssql://scott:tiger@not_a_real_host:1234/dbname"
+    }
+
+    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+    assert (
+        obs_tree
+        == """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    datasources/
+    expectations/
+    notebooks/
+        pandas/
+            create_expectations.ipynb
+            validation_playground.ipynb
+        spark/
+            create_expectations.ipynb
+            validation_playground.ipynb
+        sql/
+            create_expectations.ipynb
+            validation_playground.ipynb
+    plugins/
+        custom_data_docs/
+            renderers/
+            styles/
+                data_docs_custom_styles.css
+            views/
+    uncommitted/
+        config_variables.yml
+        data_docs/
+        samples/
+        validations/
+"""
+    )

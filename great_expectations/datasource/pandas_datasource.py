@@ -2,6 +2,8 @@ import datetime
 import uuid
 import hashlib
 import logging
+from functools import partial
+
 
 try:
     from io import StringIO
@@ -12,15 +14,9 @@ from six import PY2
 
 import pandas as pd
 
-from .datasource import Datasource, ReaderMethods
-from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
-from great_expectations.datasource.generator.subdir_reader_generator import SubdirReaderGenerator
-from great_expectations.datasource.generator.glob_reader_generator import GlobReaderGenerator
-from great_expectations.datasource.generator.s3_generator import S3Generator
-from great_expectations.datasource.types import (
-    BatchMarkers
-)
-from great_expectations.dataset.pandas_dataset import PandasDataset
+from .datasource import Datasource
+from great_expectations.datasource.types import BatchMarkers
+from great_expectations.core.batch import Batch
 from great_expectations.types import ClassConfig
 from great_expectations.exceptions import BatchKwargsError
 from .util import S3Url
@@ -108,44 +104,26 @@ class PandasDatasource(Datasource):
         self._build_generators()
         self._boto3_options = configuration_with_defaults.get("boto3_options", {})
 
-    def _get_generator_class_from_type(self, type_):
-        if type_ == "subdir_reader":
-            return SubdirReaderGenerator
-        elif type_ == "glob_reader":
-            return GlobReaderGenerator
-        elif type_ == "memory":
-            return InMemoryGenerator
-        elif type_ == "s3":
-            return S3Generator
-        else:
-            raise ValueError("Unrecognized BatchGenerator type %s" % type_)
-
     def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None):
-        batch_parameters = self.config.get("batch_parameters", {})
-        batch_kwargs = dict()
+        # Note that we do not pass any parameters up, since *all* will be handled by PandasDatasource
+        batch_kwargs = super(PandasDatasource, self).process_batch_parameters()
 
         # Apply globally-configured reader options first
         if reader_options:
             # Then update with any locally-specified reader options
-            if not batch_parameters.get("reader_options"):
-                batch_parameters["reader_options"] = dict()
-            batch_parameters["reader_options"].update(reader_options)
-        if batch_parameters.get("reader_options"):
-            batch_kwargs["reader_options"] = batch_parameters["reader_options"]
+            if not batch_kwargs.get("reader_options"):
+                batch_kwargs["reader_options"] = dict()
+            batch_kwargs["reader_options"].update(reader_options)
 
-        limit = batch_parameters.get("limit", limit)
         if limit is not None:
-            batch_parameters["limit"] = limit
             if not batch_kwargs.get("reader_options"):
                 batch_kwargs["reader_options"] = dict()
             batch_kwargs['reader_options']['nrows'] = limit
 
-        reader_method = batch_parameters.get("reader_method", reader_method)
         if reader_method is not None:
-            batch_parameters["reader_method"] = reader_method
             batch_kwargs["reader_method"] = reader_method
 
-        return batch_parameters, batch_kwargs
+        return batch_kwargs
 
     def get_batch(self, batch_kwargs, batch_parameters=None):
         # pandas cannot take unicode as a delimiter, which can happen in py2. Handle this case explicitly.
@@ -160,31 +138,12 @@ class PandasDatasource(Datasource):
         batch_markers = BatchMarkers({
             "ge_load_time": datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
         })
-        #
-        # if "data_asset_type" in batch_kwargs:
-        #     data_asset_type_config = reader_options.pop("data_asset_type")  # Get and remove the config
-        #     try:
-        #         data_asset_type_config = ClassConfig(**data_asset_type_config)
-        #     except TypeError:
-        #         # We tried; we'll pass the config downstream, probably as a string, and handle an error later
-        #         pass
-        # else:
-        #     data_asset_type_config = self._data_asset_type
-        #
-        # data_asset_type = self._get_data_asset_class(data_asset_type_config)
-        #
-        # if not issubclass(data_asset_type, PandasDataset):
-        #     raise ValueError("PandasDatasource cannot instantiate batch with data_asset_type: '%s'. It "
-        #                      "must be a subclass of PandasDataset." % data_asset_type.__name__)
 
         if "path" in batch_kwargs:
             path = batch_kwargs['path']
             reader_method = batch_kwargs.get("reader_method")
-            reader_fn, reader_fn_options = self.get_reader_fn(reader_method, path, reader_options)
-            try:
-                df = getattr(pd, reader_fn)(path, **reader_fn_options)
-            except AttributeError:
-                raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
+            reader_fn = self._get_reader_fn(reader_method, path)
+            df = reader_fn(path, **reader_options)
 
         elif "s3" in batch_kwargs:
             try:
@@ -197,17 +156,11 @@ class PandasDatasource(Datasource):
             url = S3Url(raw_url)
             logger.debug("Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key))
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
-            reader_fn, reader_fn_options = self.get_reader_fn(reader_method, url.key, reader_options)
-
-            try:
-                df = getattr(pd, reader_fn)(
-                    StringIO(s3_object["Body"].read().decode(s3_object.get("ContentEncoding", "utf-8"))),
-                    **reader_fn_options
-                )
-            except AttributeError:
-                raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
-            except IOError:
-                raise
+            reader_fn = self._get_reader_fn(reader_method, url.key)
+            df = reader_fn(
+                StringIO(s3_object["Body"].read().decode(s3_object.get("ContentEncoding", "utf-8"))),
+                **reader_options
+            )
 
         elif "dataset" in batch_kwargs and isinstance(batch_kwargs["dataset"], (pd.DataFrame, pd.Series)):
             df = batch_kwargs.get("dataset")
@@ -221,37 +174,51 @@ class PandasDatasource(Datasource):
                                    batch_kwargs)
 
         if df.memory_usage().sum() < HASH_THRESHOLD:
-            batch_markers["data_fingerprint"] = hashlib.md5(pd.util.hash_pandas_object(
+            batch_markers["pandas_data_fingerprint"] = hashlib.md5(pd.util.hash_pandas_object(
                 df, index=True).values).hexdigest()
-        return {
-            "datasource_name": self.name,
-            "batch_kwargs": batch_kwargs,
-            "batch_parameters": batch_parameters,
-            "batch_markers": batch_markers,
-            "data": df,
-            "data_context": self._data_context
-        }
 
-    def get_reader_fn(self, reader_method, path, reader_options):
-        if reader_method is None:
-            reader_method = self.guess_reader_method_from_path(path)
-            if reader_method is None:
-                raise BatchKwargsError("Unable to determine reader for path: %s" % path, reader_options)
-        else:
+        return Batch(
+            datasource_name=self.name,
+            batch_kwargs=batch_kwargs,
+            data=df,
+            batch_parameters=batch_parameters,
+            batch_markers=batch_markers,
+            data_context=self._data_context
+        )
+
+    @staticmethod
+    def _get_reader_fn(reader_method=None, path=None):
+        """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
+        correct reader_method.
+
+        Args:
+            reader_method (str): the name of the reader method to use, if available.
+            path (str): the to use to guess
+
+        Returns:
+            ReaderMethod to use for the filepath
+
+        """
+        if reader_method is None and path is None:
+            raise BatchKwargsError("Unable to determine pandas reader function without reader_method or path.",
+                                   {"reader_method": reader_method})
+
+        if reader_method is not None:
             try:
-                reader_method = ReaderMethods[reader_method]
-            except KeyError:
-                raise BatchKwargsError("Unknown reader method: %s" % reader_method, reader_options)
+                return getattr(pd, reader_method)
+            except AttributeError:
+                raise BatchKwargsError("Unable to find reader_method %s in pandas." % reader_method,
+                                       {"reader_method": reader_method})
 
-        if reader_method == ReaderMethods.CSV:
-            return "read_csv", reader_options
-        elif reader_method == ReaderMethods.parquet:
-            return "read_parquet", reader_options
-        elif reader_method == ReaderMethods.excel:
-            return "read_excel", reader_options
-        elif reader_method == ReaderMethods.JSON:
-            return "read_json", reader_options
-        elif reader_method == ReaderMethods.CSV_GZ:
-            return "read_csv", reader_options.update({"compression": "gzip"})
+        if path.endswith(".csv") or path.endswith(".tsv"):
+            return pd.read_csv
+        elif path.endswith(".parquet"):
+            return pd.read_parquet
+        elif path.endswith(".xlsx") or path.endswith(".xls"):
+            return pd.read_excel
+        elif path.endswith(".json"):
+            return pd.read_json
+        elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
+            return partial(pd.read_csv, compression="gzip")
 
-        return None
+        raise BatchKwargsError("Unknown reader method: %s" % reader_method, {"reader_method": reader_method})

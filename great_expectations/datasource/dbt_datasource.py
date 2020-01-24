@@ -6,7 +6,7 @@ import errno
 from ruamel.yaml import YAML
 
 from .sqlalchemy_datasource import SqlAlchemyDatasource
-from great_expectations.datasource.generator.batch_generator import BatchGenerator
+from great_expectations.datasource.generator.batch_kwargs_generator import BatchKwargsGenerator
 
 yaml = YAML()
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ except ImportError:
     logger.debug("Unable to import sqlalchemy.")
 
 
-class DBTModelGenerator(BatchGenerator):
+class DBTModelGenerator(BatchKwargsGenerator):
     """This is a helper class that makes using great expectations with dbt easy!"""
 
     def __init__(self, name="dbt_models", datasource=None):

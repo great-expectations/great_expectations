@@ -1,14 +1,20 @@
 #Test File Expectations
 from __future__ import division
-import pytest
-import great_expectations as ge
+
+import os
 import platform
+
+import pytest
+
+import great_expectations as ge
+from great_expectations.data_context.util import file_relative_path
 
 
 def test_expect_file_line_regex_match_count_to_be_between():
 
     #####Invlaid File Path######
     joke_file_path = "joke.txt"
+    assert not os.path.isfile(joke_file_path)
     joke_dat = ge.data_asset.FileDataAsset(joke_file_path)
 
     with pytest.raises(IOError):
@@ -17,7 +23,7 @@ def test_expect_file_line_regex_match_count_to_be_between():
                                                                   expected_max_count=4,
                                                                   skip=1)
 
-    complete_file_path = './tests/test_sets/toy_data_complete.csv'
+    complete_file_path = file_relative_path(__file__, '../test_sets/toy_data_complete.csv')
     file_dat = ge.data_asset.FileDataAsset(complete_file_path)
 
     #Invalid Skip Parameter
@@ -91,8 +97,8 @@ def test_expect_file_line_regex_match_count_to_be_between():
 
 
 def test_expect_file_line_regex_match_count_to_equal():
-    complete_file_path = './tests/test_sets/toy_data_complete.csv'
-    incomplete_file_path = './tests/test_sets/toy_data_incomplete.csv'
+    complete_file_path = file_relative_path(__file__, '../test_sets/toy_data_complete.csv')
+    incomplete_file_path = file_relative_path(__file__, '../test_sets/toy_data_incomplete.csv')
     file_dat = ge.data_asset.FileDataAsset(complete_file_path)
     file_incomplete_dat = ge.data_asset.FileDataAsset(incomplete_file_path)
 
@@ -151,7 +157,7 @@ def test_expect_file_hash_to_equal():
         fake_file.expect_file_hash_to_equal(value='abc')
 
     # Test for non-existent hash algorithm
-    titanic_path = './tests/test_sets/Titanic.csv'
+    titanic_path = file_relative_path(__file__, '../test_sets/Titanic.csv')
     titanic_file = ge.data_asset.FileDataAsset(titanic_path)
 
     with pytest.raises(ValueError):
@@ -180,7 +186,7 @@ def test_expect_file_size_to_be_between():
     with pytest.raises(OSError):
         fake_file.expect_file_size_to_be_between(0, 10000)
 
-    titanic_path = './tests/test_sets/Titanic.csv'
+    titanic_path = file_relative_path(__file__, '../test_sets/Titanic.csv')
     titanic_file = ge.data_asset.FileDataAsset(titanic_path)
 
     # Test minsize not an integer
@@ -219,7 +225,7 @@ def test_expect_file_to_exist():
     assert not fake_file_existence.success
 
     # Test for existing file
-    real_file = ge.data_asset.FileDataAsset('./tests/test_sets/Titanic.csv')
+    real_file = ge.data_asset.FileDataAsset(file_relative_path(__file__, '../test_sets/Titanic.csv'))
     real_file_existence = real_file.expect_file_to_exist()
     assert real_file_existence.success
 
@@ -230,13 +236,13 @@ def test_expect_file_to_have_valid_table_header():
         fake_file.expect_file_to_have_valid_table_header(regex='')
 
     # Test for non-unique column names
-    invalid_header_dat = ge.data_asset.FileDataAsset('./tests/test_sets/same_column_names.csv')
+    invalid_header_dat = ge.data_asset.FileDataAsset(file_relative_path(__file__, '../test_sets/same_column_names.csv'))
     invalid_header_dat_expectation = invalid_header_dat.expect_file_to_have_valid_table_header(regex='\|',
                                                                                                skip=2)
     assert not invalid_header_dat_expectation.success
 
     # Test for unique column names
-    valid_header_dat = ge.data_asset.FileDataAsset('./tests/test_sets/Titanic.csv')
+    valid_header_dat = ge.data_asset.FileDataAsset(file_relative_path(__file__, '../test_sets/Titanic.csv'))
     valid_header_dat_expectation = valid_header_dat.expect_file_to_have_valid_table_header(regex=',')
     assert valid_header_dat_expectation.success
 
@@ -248,23 +254,23 @@ def test_expect_file_to_be_valid_json():
         fake_file.expect_file_to_be_valid_json()
 
     # Test invalid JSON file
-    invalid_JSON_file = ge.data_asset.FileDataAsset('./tests/test_sets/invalid_json_file.json')
+    invalid_JSON_file = ge.data_asset.FileDataAsset(file_relative_path(__file__, '../test_sets/invalid_json_file.json'))
     invalid_JSON_expectation = invalid_JSON_file.expect_file_to_be_valid_json()
     assert not invalid_JSON_expectation.success
 
     # Test valid JSON file
-    valid_JSON_file = ge.data_asset.FileDataAsset('./tests/test_sets/titanic_expectations.json')
+    valid_JSON_file = ge.data_asset.FileDataAsset(file_relative_path(__file__, '../test_sets/titanic_expectations.json'))
     valid_JSON_expectation = valid_JSON_file.expect_file_to_be_valid_json()
     assert valid_JSON_expectation.success
 
     # Test valid JSON file with non-matching schema
-    schema_file = './tests/test_sets/sample_schema.json'
-    test_file = ge.data_asset.FileDataAsset('./tests/test_sets/json_test1_against_schema.json')
+    schema_file = file_relative_path(__file__, '../test_sets/sample_schema.json')
+    test_file = ge.data_asset.FileDataAsset(file_relative_path(__file__, '../test_sets/json_test1_against_schema.json'))
     test_file_expectation = test_file.expect_file_to_be_valid_json(schema=schema_file)
     assert not test_file_expectation.success
 
     # Test valid JSON file with valid schema
-    test_file = ge.data_asset.FileDataAsset('./tests/test_sets/json_test2_against_schema.json')
-    schema_file = './tests/test_sets/sample_schema.json'
+    test_file = ge.data_asset.FileDataAsset(file_relative_path(__file__, '../test_sets/json_test2_against_schema.json'))
+    schema_file = file_relative_path(__file__, '../test_sets/sample_schema.json')
     test_file_expectation = test_file.expect_file_to_be_valid_json(schema=schema_file)
     assert test_file_expectation.success

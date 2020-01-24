@@ -1,31 +1,8 @@
 """This is currently helping bridge APIs"""
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
+from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.util import load_class
 
-
-class SqlAlchemyTable(object):
-
-    def __init__(self, engine, table_name):
-        self._engine = engine
-        self._table_name = table_name
-
-    @property
-    def engine(self):
-        return self._engine
-
-    @property
-    def table_name(self):
-        return self._table_name
-
-
-# class Batch(object):
-#     def __init__(self, datasource, data, batch_kwargs, batch_markers, batch_parameters=None):
-#         self._datasource = datasource
-#         self._data = data
-#         self._batch_kwargs = batch_kwargs
-#         self._batch_markers = batch_markers
-#         self._batch_parameters = batch_parameters
-#
 
 class Validator(object):
 
@@ -45,39 +22,42 @@ class Validator(object):
             if not isinstance(self.batch["data"], pd.DataFrame):
                 raise ValueError("PandasDataset expectation_engine requires a Pandas Dataframe for its batch")
             return self.expectation_engine(
-                self.batch["data"],
+                self.batch.data,
                 expectation_suite=self.expectation_suite,
-                batch_kwargs=self.batch["batch_kwargs"],
-                batch_parameters=self.batch["batch_parameters"],
-                batch_markers=self.batch["batch_markers"],
-                data_context=self.batch["data_context"],
+                batch_kwargs=self.batch.batch_kwargs,
+                batch_parameters=self.batch.batch_parameters,
+                batch_markers=self.batch.batch_markers,
+                data_context=self.batch.data_context,
                 **self.init_kwargs
             )
 
         elif issubclass(self.expectation_engine, SqlAlchemyDataset):
-            if not isinstance(self.batch["data"], SqlAlchemyTable):
-                raise ValueError("SqlAlchemyDataset expectation_engine requires a SqlAlchemyTable for its batch")
+            if not isinstance(self.batch.data, SqlAlchemyBatchReference):
+                raise ValueError("SqlAlchemyDataset expectation_engine requires a SqlAlchemyBatchReference for its batch")
+            init_kwargs = self.batch.data.get_init_kwargs()
+            init_kwargs.update(self.init_kwargs)
             return self.expectation_engine(
-                table_name=self.batch["data"].table_name,
-                engine=self.batch["data"].engine,
-                batch_kwargs=self.batch["batch_kwargs"],
-                batch_parameters=self.batch["batch_parameters"],
-                batch_markers=self.batch["batch_markers"],
-                data_context=self.batch["data_context"],
-                expectation_suite=self.expectation_suite
+                batch_kwargs=self.batch.batch_kwargs,
+                batch_parameters=self.batch.batch_parameters,
+                batch_markers=self.batch.batch_markers,
+                data_context=self.batch.data_context,
+                expectation_suite=self.expectation_suite,
+                **init_kwargs
             )
 
         elif issubclass(self.expectation_engine, SparkDFDataset):
             import pyspark
+            caching = self.init_kwargs.pop("caching", True)
 
-            if not isinstance(self.batch["data"], pyspark.sql.DataFrame):
+            if not isinstance(self.batch.data, pyspark.sql.DataFrame):
                 raise ValueError("SparkDFDataset expectation_engine requires a spark DataFrame for its batch")
             return self.expectation_engine(
-                spark_df=self.batch["data"],
+                spark_df=self.batch.data,
                 expectation_suite=self.expectation_suite,
-                batch_kwargs=self.batch["batch_kwargs"],
-                batch_parameters=self.batch["batch_parameters"],
-                batch_markers=self.batch["batch_markers"],
-                data_context=self.batch["data_context"],
+                batch_kwargs=self.batch.batch_kwargs,
+                batch_parameters=self.batch.batch_parameters,
+                batch_markers=self.batch.batch_markers,
+                data_context=self.batch.data_context,
+                caching=caching,
                 **self.init_kwargs
             )

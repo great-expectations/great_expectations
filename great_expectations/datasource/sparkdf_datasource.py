@@ -2,22 +2,20 @@ import logging
 import datetime
 import uuid
 
+from pandas import DataFrame
+
 from great_expectations.datasource.types import BatchMarkers
+from ..core.batch import Batch
+from ..dataset import SparkDFDataset
 from ..exceptions import BatchKwargsError
 
-from .datasource import Datasource, ReaderMethods
-from great_expectations.datasource.generator.subdir_reader_generator import SubdirReaderGenerator
-from great_expectations.datasource.generator.databricks_generator import DatabricksTableGenerator
-from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
-from great_expectations.datasource.generator.s3_generator import S3Generator
-
+from .datasource import Datasource
 from great_expectations.types import ClassConfig
 
 logger = logging.getLogger(__name__)
 
 try:
-    from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
-    from pyspark.sql import SparkSession, DataFrame
+    from pyspark.sql import SparkSession
 except ImportError:
     SparkSession = None
     # TODO: review logging more detail here
@@ -27,6 +25,11 @@ except ImportError:
 class SparkDFDatasource(Datasource):
     """The SparkDFDatasource produces SparkDFDatasets and supports generators capable of interacting with local
     filesystem (the default subdir_reader generator) and databricks notebooks.
+
+    Accepted Batch Kwargs:
+        - PathBatchKwargs ("path" or "s3" keys)
+        - InMemoryBatchKwargs ("dataset" key)
+        - QueryBatchKwargs ("query" key)
     """
 
     @classmethod
@@ -116,32 +119,26 @@ class SparkDFDatasource(Datasource):
 
         self._build_generators()
 
-    def _get_generator_class_from_type(self, type_):
-        if type_ == "subdir_reader":
-            return SubdirReaderGenerator
-        elif type_ == "databricks":
-            return DatabricksTableGenerator
-        elif type_ == "memory":
-            return InMemoryGenerator
-        elif type_ == "s3":
-            return S3Generator
-        else:
-            raise ValueError("Unrecognized BatchGenerator type %s" % type_)
+    def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None):
+        batch_kwargs = super(SparkDFDatasource, self).process_batch_parameters(limit=limit)
 
-    def _get_data_asset(self, batch_kwargs, expectation_suite, caching=True, **kwargs):
+        # Apply globally-configured reader options first
+        if reader_options:
+            # Then update with any locally-specified reader options
+            if not batch_kwargs.get("reader_options"):
+                batch_kwargs["reader_options"] = dict()
+            batch_kwargs["reader_options"].update(reader_options)
+
+        if reader_method is not None:
+            batch_kwargs["reader_method"] = reader_method
+
+        return batch_kwargs
+
+    def get_batch(self, batch_kwargs, batch_parameters=None):
         """class-private implementation of get_data_asset"""
         if self.spark is None:
             logger.error("No spark session available")
             return None
-
-        for k, v in kwargs.items():
-            if isinstance(v, dict):
-                if k in batch_kwargs and isinstance(batch_kwargs[k], dict):
-                    batch_kwargs[k].update(v)
-                else:
-                    batch_kwargs[k] = v
-            else:
-                batch_kwargs[k] = v
 
         reader_options = batch_kwargs.get("reader_options", {})
 
@@ -150,50 +147,17 @@ class SparkDFDatasource(Datasource):
             "ge_load_time": datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
         })
 
-        if "data_asset_type" in batch_kwargs:
-            data_asset_type_config = reader_options.pop("data_asset_type")  # Get and remove the config
-            try:
-                data_asset_type_config = ClassConfig(**data_asset_type_config)
-            except TypeError:
-                # We tried; we'll pass the config downstream, probably as a string, and handle an error later
-                pass
-        else:
-            data_asset_type_config = self._data_asset_type
-
-        data_asset_type = self._get_data_asset_class(data_asset_type_config)
-
-        if not issubclass(data_asset_type, SparkDFDataset):
-            raise ValueError("SparkDFDatasource cannot instantiate batch with data_asset_type: '%s'. It "
-                             "must be a subclass of SparkDFDataset." % data_asset_type.__name__)
-
         if "path" in batch_kwargs or "s3" in batch_kwargs:
             # If both are present, let s3 override
             path = batch_kwargs.get("path")
             path = batch_kwargs.get("s3", path)
             reader_method = batch_kwargs.get("reader_method")
-            if reader_method is None:
-                reader_method = self.guess_reader_method_from_path(path)
-                if reader_method is None:
-                    raise BatchKwargsError("Unable to determine reader for path: %s" % path, batch_kwargs)
-            else:
-                try:
-                    reader_method = ReaderMethods[reader_method]
-                except KeyError:
-                    raise BatchKwargsError("Unknown reader method: %s" % reader_method, batch_kwargs)
-
             reader = self.spark.read
 
             for option in reader_options.items():
                 reader = reader.option(*option)
-
-            if reader_method == ReaderMethods.CSV:
-                df = reader.csv(path)
-            elif reader_method == ReaderMethods.parquet:
-                df = reader.parquet(path)
-            elif reader_method == ReaderMethods.delta:
-                df = reader.format("delta").load(path)
-            else:
-                raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
+            reader_fn = self._get_reader_fn(reader, reader_method, path)
+            df = reader_fn(path)
 
         elif "query" in batch_kwargs:
             df = self.spark.sql(batch_kwargs["query"])
@@ -215,9 +179,45 @@ class SparkDFDatasource(Datasource):
         if "limit" in batch_kwargs:
             df = df.limit(batch_kwargs['limit'])
 
-        return data_asset_type(df,
-                               expectation_suite=expectation_suite,
-                               data_context=self._data_context,
-                               batch_kwargs=batch_kwargs,
-                               caching=caching,
-                               batch_markers=batch_markers)
+        return Batch(
+            datasource_name=self.name,
+            batch_kwargs=batch_kwargs,
+            data=df,
+            batch_parameters=batch_parameters,
+            batch_markers=batch_markers,
+            data_context=self._data_context
+        )
+
+    @staticmethod
+    def _get_reader_fn(reader, reader_method=None, path=None):
+        """Static helper for providing reader_fn
+
+        Args:
+            reader: the base spark reader to use; this should have had reader_options applied already
+            reader_method: the name of the reader_method to use, if specified
+            path (str): the path to use to guess reader_method if it was not specified
+
+        Returns:
+            ReaderMethod to use for the filepath
+
+        """
+        if reader_method is None and path is None:
+            raise BatchKwargsError("Unable to determine spark reader function without reader_method or path.",
+                                   {"reader_method": reader_method})
+
+        if reader_method is not None:
+            try:
+                if reader_method.lower() == "delta":
+                    return reader.format("delta").load
+
+                return getattr(reader, reader_method)
+            except AttributeError:
+                raise BatchKwargsError("Unable to find reader_method %s in spark." % reader_method,
+                                       {"reader_method": reader_method})
+
+        if path.endswith(".csv") or path.endswith(".tsv"):
+            return reader.csv
+        elif path.endswith(".parquet"):
+            return reader.parquet
+
+        raise BatchKwargsError("Unknown reader method: %s" % reader_method, {"reader_method": reader_method})

@@ -196,6 +196,16 @@ class HtmlSiteStore(object):
                     store_key = tuple(os.path.normpath(source_name).split(os.sep))
                     store_key = store_key[store_key.index('static'):]
                     content_type, content_encoding = guess_type(item, strict=False)
+
+                    if content_type is None:
+                        # Use GE-known content-type if possible
+                        if source_name.endswith(".otf"):
+                            content_type = "font/opentype"
+                        else:
+                            # fallback
+                            logger.warning("Unable to automatically determine content_type for {}".format(source_name))
+                            content_type = "text/html; charset=utf8"
+
                     self.store_backends["static_assets"].set(
                         store_key,
                         f.read(),

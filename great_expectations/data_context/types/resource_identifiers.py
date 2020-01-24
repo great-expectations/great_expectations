@@ -19,11 +19,13 @@ class ExpectationSuiteIdentifier(DataContextKey):
         return self._expectation_suite_name
 
     def to_tuple(self):
-        return tuple(self.expectation_suite_name.split("."))
+        return self.expectation_suite_name,
+        # return tuple(self.expectation_suite_name.split("."))
 
     @classmethod
     def from_tuple(cls, tuple_):
-        return cls(".".join(tuple_))
+        return cls(expectation_suite_name=tuple_[0])
+        # return cls(".".join(tuple_))
 
 
 class ExpectationSuiteIdentifierSchema(Schema):

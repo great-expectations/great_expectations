@@ -490,7 +490,7 @@ class ConfigOnlyDataContext(object):
             # A ConfigOnlyDataContext does not have a directory in which to look
             return {}
 
-        config_variables_file_path = self.get_project_config().config_variables_file_path
+        config_variables_file_path = self.get_config().config_variables_file_path
         if config_variables_file_path:
             try:
                 with open(os.path.join(self.root_directory,
@@ -507,11 +507,6 @@ class ConfigOnlyDataContext(object):
                 return base_config_variables_store
         else:
             return {}
-
-    def get_project_config(self):
-        project_config = self._project_config
-
-        return project_config
 
     def get_config_with_variables_substituted(self, config=None):
         if not config:
@@ -531,7 +526,7 @@ class ConfigOnlyDataContext(object):
         """
         config_variables = self._load_config_variables_file()
         config_variables[config_variable_name] = value
-        config_variables_filepath = self.get_project_config().config_variables_file_path
+        config_variables_filepath = self.get_config().config_variables_file_path
         if not config_variables_filepath:
             raise ge_exceptions.InvalidConfigError("'config_variables_file_path' property is not found in config - setting it is required to use this feature")
 
@@ -615,12 +610,12 @@ class ConfigOnlyDataContext(object):
 
         """
         datasource_obj = self.get_datasource(datasource)
-        batch_params, batch_kwargs = datasource_obj.build_batch_kwargs(generator, batch_parameters, **kwargs)
+        batch_kwargs = datasource_obj.build_batch_kwargs(generator, batch_parameters, **kwargs)
         # Track the datasource *in batch_kwargs* when building from a context so that the context can easily reuse them.
         batch_kwargs["datasource"] = datasource
-        return batch_params, batch_kwargs
+        return batch_kwargs
 
-    def get_validator(self, batch_kwargs, expectation_suite_name, data_asset_type=None, batch_parameters=None):
+    def get_batch(self, batch_kwargs, expectation_suite_name, data_asset_type=None, batch_parameters=None):
         """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If
         batch_parameters are included, they will be available as attributes of the batch.
 
@@ -660,7 +655,7 @@ class ConfigOnlyDataContext(object):
     #             (See :py:meth:`normalize_data_asset_name` )
     #         expectation_suite_name: name of the expectation suite to attach to the data_asset returned
     #         batch_kwargs: key-value pairs describing the batch of data the datasource should fetch. \
-    #             (See :class:`BatchGenerator` ) If no batch_kwargs are specified, then the context will get the next
+    #             (See :class:`BatchKwargsGenerator` ) If no batch_kwargs are specified, then the context will get the next
     #             available batch_kwargs for the data_asset.
     #         **kwargs: additional key-value pairs to pass to the datasource when fetching the batch.
     #
@@ -1509,11 +1504,9 @@ class ConfigOnlyDataContext(object):
                         }
                     )
                     index_page_resource_identifier_tuple = site_builder.build(resource_identifiers)
-                    index_page_locator_info = site_builder.build(
-                        resource_identifiers)[0] if index_page_resource_identifier_tuple else None
+                    if index_page_resource_identifier_tuple:
+                        index_page_locator_infos[site_name] = index_page_resource_identifier_tuple[0]
 
-                    if index_page_locator_info:
-                        index_page_locator_infos[site_name] = index_page_locator_info
         else:
             logger.debug("No data_docs_config found. No site(s) built.")
 
@@ -1715,177 +1708,163 @@ class ConfigOnlyDataContext(object):
         profiling_results['success'] = True
         return profiling_results
 
-    # def profile_data_asset(self,
-    #                        datasource_name,
-    #                        generator_name=None,
-    #                        data_asset_name=None,
-    #                        batch_kwargs=None,
-    #                        expectation_suite_name=None,
-    #                        profiler=BasicDatasetProfiler,
-    #                        run_id="profiling",
-    #                        additional_batch_kwargs=None):
-    #     """
-    #     Profile a data asset
-    #
-    #     :param datasource_name: the name of the datasource to which the profiled data asset belongs
-    #     :param generator_name: the name of the generator to use to get batches (only if batch_kwargs are not provided)
-    #     :param data_asset_name: the name of the profiled data asset
-    #     :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the generator (generator_name arg) will choose a batch
-    #     :param profiler: the profiler class to use
-    #     :param run_id: optional - if set, the validation result created by the profiler will be under the provided run_id
-    #     :param additional_batch_kwargs:
-    #     :returns
-    #         A dictionary::
-    #
-    #             {
-    #                 "success": True/False,
-    #                 "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
-    #             }
-    #
-    #         When success = False, the error details are under "error" key
-    #     """
-    #
-    #     logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
-    #
-    #     profiling_results = {}
-    #
-    #     if batch_kwargs is None:
-    #         # Get data_asset_name_list
-    #         data_asset_names = self.get_available_data_asset_names(datasource_name)
-    #         if generator_name is None:
-    #             if len(data_asset_names[datasource_name].keys()) == 1:
-    #                 generator_name = list(data_asset_names[datasource_name].keys())[0]
-    #         if generator_name not in data_asset_names[datasource_name]:
-    #             raise ge_exceptions.ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
-    #
-    #         data_asset_name_list = [name[0] for name in data_asset_names[datasource_name][generator_name]["names"]]
-    #         total_data_assets = len(data_asset_name_list)
-    #
-    #         if data_asset_name not in data_asset_name_list:
-    #             not_found_data_assets = [data_asset_name]
-    #             if len(not_found_data_assets) > 0:
-    #                 profiling_results = {
-    #                     'success': False,
-    #                     'error': {
-    #                         'code': DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
-    #                         'not_found_data_assets': not_found_data_assets,
-    #                         'data_assets': data_asset_name_list
-    #                     }
-    #                 }
-    #                 return profiling_results
-    #
-    #
-    #             data_asset_name_list = [data_asset_name]
-    #             data_asset_name_list.sort()
-    #             total_data_assets = len(data_asset_name_list)
-    #
-    #
-    #     profiling_results['success'] = True
-    #
-    #     profiling_results['results'] = []
-    #     total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
-    #     total_start_time = datetime.datetime.now()
-    #
-    #     name = data_asset_name
-    #     # logger.info("\tProfiling '%s'..." % name)
-    #     try:
-    #         start_time = datetime.datetime.now()
-    #
-    #         # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
-    #         if additional_batch_kwargs is None:
-    #             additional_batch_kwargs = {}
-    #
-    #         if datasource_name is None or generator_name is None:
-    #             normalized_data_asset_name = self.normalize_data_asset_name(name)
-    #         else:
-    #             normalized_data_asset_name = DataAssetIdentifier(datasource_name, generator_name,
-    #                                                              name)
-    #         if expectation_suite_name is None:
-    #             expectation_suite_name = profiler.__name__
-    #         self.create_expectation_suite(
-    #             data_asset_name=normalized_data_asset_name,
-    #             expectation_suite_name=expectation_suite_name,
-    #             overwrite_existing=True
-    #         )
-    #
-    #         if batch_kwargs is None:
-    #
-    #             batch_kwargs = self.yield_batch_kwargs(
-    #                 data_asset_name=normalized_data_asset_name,
-    #                 **additional_batch_kwargs
-    #             )
-    #         else:
-    #             batch_kwargs.update(additional_batch_kwargs)
-    #
-    #         batch = self.get_batch(
-    #             data_asset_name=normalized_data_asset_name,
-    #             expectation_suite_name=expectation_suite_name,
-    #             batch_kwargs=batch_kwargs
-    #         )
-    #
-    #         if not profiler.validate(batch):
-    #             raise ge_exceptions.ProfilerError(
-    #                 "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
-    #             )
-    #
-    #         # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
-    #         # will have more to unpack.
-    #         expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
-    #         profiling_results['results'].append((expectation_suite, validation_results))
-    #
-    #         self.validations_store.set(
-    #             key=ValidationResultIdentifier(
-    #                 expectation_suite_identifier=ExpectationSuiteIdentifier(
-    #                     data_asset_name=normalized_data_asset_name,
-    #                     expectation_suite_name=expectation_suite_name
-    #                 ),
-    #                 run_id=run_id
-    #             ),
-    #             value=validation_results
-    #         )
-    #
-    #         if isinstance(batch, Dataset):
-    #             # For datasets, we can produce some more detailed statistics
-    #             row_count = batch.get_row_count()
-    #             total_rows += row_count
-    #             new_column_count = len(set([exp.kwargs["column"] for exp in expectation_suite.expectations if "column" in exp.kwargs]))
-    #             total_columns += new_column_count
-    #
-    #         new_expectation_count = len(expectation_suite.expectations)
-    #         total_expectations += new_expectation_count
-    #
-    #         self.save_expectation_suite(expectation_suite)
-    #         duration = (datetime.datetime.now() - start_time).total_seconds()
-    #         logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
-    #                     (new_column_count, row_count, name, duration))
-    #
-    #     except ge_exceptions.ProfilerError as err:
-    #         logger.warning(err.message)
-    #     except IOError as err:
-    #         logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % name)
-    #         logger.debug(str(err))
-    #         skipped_data_assets += 1
-    #     except SQLAlchemyError as e:
-    #         logger.warning("SqlAlchemyError while profiling %s. Skipping." % name)
-    #         logger.debug(str(e))
-    #         skipped_data_assets += 1
-    #
-    #         total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
-    #         logger.info("""
-    # Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
-    # Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs.""" % (
-    #             len(data_asset_name_list),
-    #             total_data_assets,
-    #             total_rows,
-    #             total_columns,
-    #             total_duration,
-    #             total_expectations,
-    #         ))
-    #         if skipped_data_assets > 0:
-    #             logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
-    #
-    #     profiling_results['success'] = True
-    #     return profiling_results
+#     def profile_data_asset(self,
+#                            datasource_name,
+#                            generator_name=None,
+#                            data_asset_name=None,
+#                            batch_kwargs=None,
+#                            expectation_suite_name=None,
+#                            profiler=BasicDatasetProfiler,
+#                            run_id="profiling",
+#                            additional_batch_kwargs=None):
+#         """
+#         Profile a data asset
+#
+#         :param datasource_name: the name of the datasource to which the profiled data asset belongs
+#         :param generator_name: the name of the generator to use to get batches (only if batch_kwargs are not provided)
+#         :param data_asset_name: the name of the profiled data asset
+#         :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the generator (generator_name arg) will choose a batch
+#         :param profiler: the profiler class to use
+#         :param run_id: optional - if set, the validation result created by the profiler will be under the provided run_id
+#         :param additional_batch_kwargs:
+#         :returns
+#             A dictionary::
+#
+#                 {
+#                     "success": True/False,
+#                     "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
+#                 }
+#
+#             When success = False, the error details are under "error" key
+#         """
+#
+#         logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
+#
+#         profiling_results = {}
+#
+#         if batch_kwargs is None:
+#             # Get data_asset_name_list
+#             data_asset_names = self.get_available_data_asset_names(datasource_name)
+#             if generator_name is None:
+#                 if len(data_asset_names[datasource_name].keys()) == 1:
+#                     generator_name = list(data_asset_names[datasource_name].keys())[0]
+#             if generator_name not in data_asset_names[datasource_name]:
+#                 raise ge_exceptions.ProfilerError("Generator %s not found for datasource %s" % (generator_name, datasource_name))
+#
+#             data_asset_name_list = [name[0] for name in data_asset_names[datasource_name][generator_name]["names"]]
+#             total_data_assets = len(data_asset_name_list)
+#
+#             if data_asset_name not in data_asset_name_list:
+#                 not_found_data_assets = [data_asset_name]
+#                 if len(not_found_data_assets) > 0:
+#                     profiling_results = {
+#                         'success': False,
+#                         'error': {
+#                             'code': DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
+#                             'not_found_data_assets': not_found_data_assets,
+#                             'data_assets': data_asset_name_list
+#                         }
+#                     }
+#                     return profiling_results
+#
+#
+#                 data_asset_name_list = [data_asset_name]
+#                 data_asset_name_list.sort()
+#                 total_data_assets = len(data_asset_name_list)
+#
+#
+#         profiling_results['success'] = True
+#
+#         profiling_results['results'] = []
+#         total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
+#         total_start_time = datetime.datetime.now()
+#
+#         name = data_asset_name
+#         # logger.info("\tProfiling '%s'..." % name)
+#
+#         start_time = datetime.datetime.now()
+#
+#         # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
+#         if additional_batch_kwargs is None:
+#             additional_batch_kwargs = {}
+#
+#         if datasource_name is None or generator_name is None:
+#             normalized_data_asset_name = self.normalize_data_asset_name(name)
+#         else:
+#             normalized_data_asset_name = DataAssetIdentifier(datasource_name, generator_name,
+#                                                              name)
+#         if expectation_suite_name is None:
+#             expectation_suite_name = profiler.__name__
+#         self.create_expectation_suite(
+#             data_asset_name=normalized_data_asset_name,
+#             expectation_suite_name=expectation_suite_name,
+#             overwrite_existing=True
+#         )
+#
+#         if batch_kwargs is None:
+#
+#             batch_kwargs = self.yield_batch_kwargs(
+#                 data_asset_name=normalized_data_asset_name,
+#                 **additional_batch_kwargs
+#             )
+#         else:
+#             batch_kwargs.update(additional_batch_kwargs)
+#
+#         batch = self.get_batch(
+#             data_asset_name=normalized_data_asset_name,
+#             expectation_suite_name=expectation_suite_name,
+#             batch_kwargs=batch_kwargs
+#         )
+#
+#         if not profiler.validate(batch):
+#             raise ge_exceptions.ProfilerError(
+#                 "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
+#             )
+#
+#         # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
+#         # will have more to unpack.
+#         expectation_suite, validation_results = profiler.profile(batch, run_id=run_id)
+#         profiling_results['results'].append((expectation_suite, validation_results))
+#
+#         self.validations_store.set(
+#             key=ValidationResultIdentifier(
+#                 expectation_suite_identifier=ExpectationSuiteIdentifier(
+#                     data_asset_name=normalized_data_asset_name,
+#                     expectation_suite_name=expectation_suite_name
+#                 ),
+#                 run_id=run_id
+#             ),
+#             value=validation_results
+#         )
+#
+#         if isinstance(batch, Dataset):
+#             # For datasets, we can produce some more detailed statistics
+#             row_count = batch.get_row_count()
+#             total_rows += row_count
+#             new_column_count = len(set([exp.kwargs["column"] for exp in expectation_suite.expectations if "column" in exp.kwargs]))
+#             total_columns += new_column_count
+#
+#         new_expectation_count = len(expectation_suite.expectations)
+#         total_expectations += new_expectation_count
+#
+#         self.save_expectation_suite(expectation_suite)
+#         duration = (datetime.datetime.now() - start_time).total_seconds()
+#         logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
+#                     (new_column_count, row_count, name, duration))
+#
+#
+#         total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+#         logger.info("""
+# Profiled the data asset, with %d total rows and %d columns in %.2f seconds.
+# Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs.""" % (
+#             total_rows,
+#             total_columns,
+#             total_duration,
+#             total_expectations,
+#         ))
+#
+#         profiling_results['success'] = True
+#         return profiling_results
 
 class DataContext(ConfigOnlyDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for

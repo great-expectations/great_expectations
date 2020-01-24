@@ -1,7 +1,4 @@
-from six import PY3
-
 from great_expectations.core import DataContextKey
-from great_expectations.profile.metrics_utils import kwargs_to_tuple, tuple_to_hash
 
 try:
     from urllib.parse import urlencode
@@ -24,48 +21,67 @@ except ImportError:
 #
 #     def to_tuple(self):
 #         return self.metric_name, self.metric_value
-#
-#
-# class MetricIdentifier(DataContextKey):
-#     def __init__(self, batch_identifier, metric_identifier, run_id):
-#         self._batch_identifier = batch_identifier
-#         self._metric_identifier = metric_identifier
-#         self._run_id = run_id
-#
-#     @property
-#     def batch_identifier(self):
-#         return self._batch_identifier
-#
-#     @property
-#     def metric_identifier(self):
-#         return self._metric_identifier
 
 
-class EvaluationParameterIdentifier(DataContextKey):
-    def __init__(self, run_id, batch_identifier, metric_identifier):
-        if run_id is None:
-            raise ValueError("run_id must not be None")
-        self._run_id = run_id
-        self._batch_identifier = batch_identifier
-        self._metric_identifier = metric_identifier
+class MetricIdentifier(DataContextKey):
+    def __init__(self, metric_name, metric_kwargs_identifier):
+        self._metric_name = metric_name
+        self._metric_kwargs_identifier = metric_kwargs_identifier
 
     @property
-    def run_id(self):
-        return self._run_id
+    def metric_name(self):
+        return self._metric_name
+
+    @property
+    def metric_kwargs_identifier(self):
+        return self._metric_kwargs_identifier
+
+    def to_tuple(self):
+        return self.metric_name, self._metric_kwargs_identifier
+
+
+class BatchMetricIdentifier(DataContextKey):
+    def __init__(self, batch_identifier, metric_name, metric_kwargs_identifier):
+        self._batch_identifier = batch_identifier
+        self._metric_name = metric_name
+        self._metric_kwargs_identifier = metric_kwargs_identifier
 
     @property
     def batch_identifier(self):
         return self._batch_identifier
 
     @property
-    def metric_identifier(self):
-        return self._metric_identifier
+    def metric_name(self):
+        return self._metric_name
+
+    @property
+    def metric_kwargs_identifier(self):
+        return self._metric_kwargs_identifier
 
     def to_tuple(self):
-        return self.run_id, self.batch_identifier, self.metric_identifier
+        return self.batch_identifier, self.metric_name, self._metric_kwargs_identifier
+
+
+class EvaluationParameterIdentifier(DataContextKey):
+    def __init__(self, run_id, batch_metric_identifier):
+        if run_id is None:
+            raise ValueError("run_id must not be None")
+        self._run_id = run_id
+        self._batch_metric_identifier = batch_metric_identifier
+
+    @property
+    def run_id(self):
+        return self._run_id
+
+    @property
+    def batch_metric_identifier(self):
+        return self._batch_metric_identifier
+
+    def to_tuple(self):
+        return tuple([self.run_id] + list(self.batch_metric_identifier.to_tuple()))
 
     def to_urn(self):
-        urn = "urn:great_expectations:metrics:" + self.batch_identifier + ":" + self.metric_identifier
+        urn = "urn:great_expectations:metrics:" + ":".join(self.to_tuple())
         return urn
 
     # # def __init__(self, data_asset_name, batch_kwargs, batch_id, metric_name, metric_kwargs, metric_value):

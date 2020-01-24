@@ -1,30 +1,29 @@
-import pytest
 import json
-
 from collections import OrderedDict
 
-from great_expectations.core import expectationSuiteSchema, ExpectationConfiguration, ExpectationValidationResult, \
-    ExpectationSuiteValidationResult
+import pytest
+
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+    expectationSuiteSchema,
+)
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ProfilingResultsColumnSectionRenderer,
     ProfilingResultsOverviewSectionRenderer,
-    ValidationResultsColumnSectionRenderer
+    ValidationResultsColumnSectionRenderer,
 )
 from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
-from great_expectations.render.view import (
-    DefaultJinjaPageView,
-)
-from great_expectations.render.types import (
-    RenderedComponentContent,
-    RenderedHeaderContent)
 
 
 @pytest.fixture(scope="module")
 def titanic_expectations():
-    with open("./tests/test_sets/titanic_expectations.json", "r") as infile:
+    with open(file_relative_path(__file__, "../test_sets/titanic_expectations.json"), "r") as infile:
         return expectationSuiteSchema.load(json.load(infile, object_pairs_hook=OrderedDict)).data
 
 
@@ -43,7 +42,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
             pass
 
     for column in evrs.keys():
-        with open('./tests/render/output/test_render_profiling_results_column_section_renderer__' + column + '.json', 'w') \
+        with open(file_relative_path(__file__, './output/test_render_profiling_results_column_section_renderer__' + column + '.json'), 'w') \
                 as outfile:
             json.dump(ProfilingResultsColumnSectionRenderer().render(evrs[column]).to_json_dict(), outfile, indent=2)
 
@@ -64,14 +63,9 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
             pass
 
     for column in exp_groups.keys():
-        with open('./tests/render/output/test_render_expectation_suite_column_section_renderer' + column + '.json', 'w') \
+        with open(file_relative_path(__file__, './output/test_render_expectation_suite_column_section_renderer' + column + '.json'), 'w') \
                 as outfile:
             json.dump(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]).to_json_dict(), outfile, indent=2)
-
-    # # This can be used for regression testing
-    # for column in exp_groups.keys():
-    #     with open('./tests/render/output/test_render_expectation_suite_column_section_renderer' + column + '.json') as infile:
-    #         assert json.dumps(ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]), indent=2) == infile
 
 
 @pytest.mark.smoketest
@@ -97,11 +91,6 @@ def test_ProfilingResultsColumnSectionRenderer_render(titanic_profiled_evrs_1, t
 
     document = ProfilingResultsColumnSectionRenderer().render(age_column_evrs)
     print(document)
-
-    # Save output to view
-    # html = DefaultJinjaPageView.render({"sections":[document]})
-    # print(html)
-    # open('./tests/render/output/titanic.html', 'w').write(html)
 
 
 def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
@@ -224,35 +213,6 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(titanic_pr
         assert content_block["content_block_type"] == "graph"
         assert set(content_block.keys()) == {"header", "content_block_type", "graph", "styling"}
         assert json.loads(content_block["graph"])
-
-    # expect_column_kl_divergence_to_be_less_than
-
-    # #This is a janky way to fetch expectations matching a specific name from an EVR suite.
-    # #TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
-    # from great_expectations.render.renderer.renderer import (
-    #     Renderer,
-    # )
-    # evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
-    # print(evrs_by_column.keys())
-
-    # age_column_evrs = evrs_by_column["Survived"]
-    # # print(json.dumps(age_column_evrs, indent=2))
-
-    # document = ProfilingResultsColumnSectionRenderer().render(age_column_evrs)
-    # # print(document)
-
-    # html = DefaultJinjaPageView.render({"sections":[document]})
-    # # print(html)
-    # open('./tests/render/output/titanic_age.html', 'w').write(html)
-
-
-# def test_ProfilingResultsColumnSectionRenderer_render_expectation_types():
-#     evrs = {}
-#     ProfilingResultsColumnSectionRenderer()._render_expectation_types(evrs, content_blocks)
-
-# def test_ProfilingResultsColumnSectionRenderer_render_failed():
-#     evrs = {}
-#     ExpectationSuiteColumnSectionRenderer()._render_failed(evrs, content_blocks)
 
 
 def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_name_column_expectations):

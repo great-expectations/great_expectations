@@ -3,9 +3,13 @@ import sys
 
 import click
 
-from great_expectations import DataContext, exceptions as ge_exceptions
-from great_expectations.cli.logging import logger
-from great_expectations.cli.util import cli_message, _offer_to_install_new_template
+from great_expectations import DataContext
+from great_expectations import exceptions as ge_exceptions
+from great_expectations.cli.cli_logging import logger
+from great_expectations.cli.util import (
+    _offer_to_install_new_template,
+    cli_message,
+)
 
 
 @click.group()

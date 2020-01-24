@@ -7,14 +7,14 @@ import warnings
 
 from six import string_types
 
-from great_expectations.datasource.generator.batch_generator import BatchGenerator
+from great_expectations.datasource.generator.batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
 
 
-class GlobReaderGenerator(BatchGenerator):
+class GlobReaderGenerator(BatchKwargsGenerator):
     r"""GlobReaderGenerator processes files in a directory according to glob patterns to produce batches of data.
 
     A more interesting asset_glob might look like the following::
