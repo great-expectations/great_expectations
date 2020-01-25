@@ -23,6 +23,7 @@ class TupleStoreBackend(StoreBackend):
     def __init__(
             self,
             filepath_template=None,
+            filepath_prefix=None,
             filepath_suffix=None,
             forbidden_substrings=None,
             platform_specific_separator=True
@@ -36,6 +37,7 @@ class TupleStoreBackend(StoreBackend):
             raise ValueError("filepath_suffix may only be used when filepath_template is None")
 
         self.filepath_template = filepath_template
+        self.filepath_prefix = filepath_prefix
         self.filepath_suffix = filepath_suffix
 
         if filepath_template is not None:
@@ -75,15 +77,26 @@ class TupleStoreBackend(StoreBackend):
             converted_string = self.filepath_template.format(*list(key))
         else:
             converted_string = '/'.join(key)
-        if self.platform_specific_separator:
-            converted_string = os.path.join(*converted_string.split('/'))
+
+        if self.filepath_prefix:
+            converted_string = self.filepath_prefix + converted_string
         if self.filepath_suffix:
             converted_string += self.filepath_suffix
+        if self.platform_specific_separator:
+            converted_string = os.path.join(*converted_string.split('/'))
+
         return converted_string
 
     def _convert_filepath_to_key(self, filepath):
         # filepath_template (for now) is always specified with forward slashes, but it is then
         # used to (1) dynamically construct and evaluate a regex, and (2) split the provided (observed) filepath
+        if self.filepath_prefix:
+            if not filepath.startswith(self.filepath_prefix):
+                # If filepath_prefix is set, we expect that it is the first component of a valid filepath.
+                raise ValueError("filepath must start with the filepath_prefix when one is set by the store_backend")
+            else:
+                # Remove the prefix before processing
+                filepath = filepath[len(self.filepath_prefix):]
 
         if self.filepath_suffix:
             if not filepath.endswith(self.filepath_suffix):
@@ -156,12 +169,14 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
     def __init__(self,
                  base_directory,
                  filepath_template=None,
+                 filepath_prefix=None,
                  filepath_suffix=None,
                  forbidden_substrings=None,
                  platform_specific_separator=True,
                  root_directory=None):
         super(TupleFilesystemStoreBackend, self).__init__(
             filepath_template=filepath_template,
+            filepath_prefix=filepath_prefix,
             filepath_suffix=filepath_suffix,
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator
@@ -175,6 +190,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 raise ValueError("root_directory must be an absolute path. Got {0} instead.".format(root_directory))
             else:
                 self.full_base_directory = os.path.join(root_directory, base_directory)
+
         safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
     def _get(self, key):
@@ -186,6 +202,8 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             return infile.read()
 
     def _set(self, key, value, **kwargs):
+        if not isinstance(key, tuple):
+            key = key.to_tuple()
         filepath = os.path.join(
             self.full_base_directory,
             self._convert_key_to_filepath(key)
@@ -221,7 +239,12 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                         file_name
                     )
 
-                key = self._convert_filepath_to_key(filepath)
+                if self.filepath_prefix and not filepath.startswith(self.filepath_prefix):
+                    continue
+                elif self.filepath_suffix and not filepath.endswith(self.filepath_suffix):
+                    continue
+                else:
+                    key = self._convert_filepath_to_key(filepath)
                 if key:
                     key_list.append(key)
 
@@ -254,12 +277,14 @@ class TupleS3StoreBackend(TupleStoreBackend):
             bucket,
             prefix="",
             filepath_template=None,
+            filepath_prefix=None,
             filepath_suffix=None,
             forbidden_substrings=None,
             platform_specific_separator=False
     ):
         super(TupleS3StoreBackend, self).__init__(
             filepath_template=filepath_template,
+            filepath_prefix=filepath_prefix,
             filepath_suffix=filepath_suffix,
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator
@@ -345,12 +370,14 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             prefix,
             project,
             filepath_template=None,
+            filepath_prefix=None,
             filepath_suffix=None,
             forbidden_substrings=None,
             platform_specific_separator=False
     ):
         super(TupleGCSStoreBackend, self).__init__(
             filepath_template=filepath_template,
+            filepath_prefix=filepath_prefix,
             filepath_suffix=filepath_suffix,
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator
