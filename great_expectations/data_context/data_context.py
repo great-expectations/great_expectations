@@ -379,7 +379,7 @@ class ConfigOnlyDataContext(object):
     def get_docs_sites_urls(self, resource_identifier=None):
         """
         Get URLs for a resource for all data docs sites.
-        
+
         This function will return URLs for any configured site even if the sites have not
         been built yet.
 
@@ -1496,7 +1496,8 @@ class ConfigOnlyDataContext(object):
                         config=complete_site_config,
                         runtime_environment={
                             "data_context": self,
-                            "root_directory": self.root_directory
+                            "root_directory": self.root_directory,
+                            "site_name": site_name
                         },
                         config_defaults={
                             "module_name": "great_expectations.render.renderer.site_builder"
