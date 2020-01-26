@@ -229,5 +229,7 @@ class PandasDatasource(Datasource):
             return "read_json", reader_options
         elif reader_method == ReaderMethods.CSV_GZ:
             return "read_csv", reader_options.update({"compression": "gzip"})
+        elif reader_method == ReaderMethods.pickle:
+            return "read_pickle", reader_options
 
         return None
