@@ -36,10 +36,10 @@ def test_cli_datasorce_list(empty_data_context, empty_sqlite_db):
     assert "Traceback" not in stdout
 
 
-def _add_datasource_and_credentials_to_context(
-    context, datasource_name, empty_sqlite_db
-):
-    credentials = {"url": str(empty_sqlite_db.url)}
+def _add_datasource_and_credentials_to_context(context, datasource_name, sqlite_engine):
+    original_datasources = context.list_datasources()
+
+    credentials = {"url": str(sqlite_engine.url)}
     context.save_config_variable(datasource_name, credentials)
     context.add_datasource(
         datasource_name,
@@ -50,9 +50,13 @@ def _add_datasource_and_credentials_to_context(
         credentials="${" + datasource_name + "}",
         generators={"default": {"class_name": "TableGenerator"}},
     )
-    assert context.list_datasources() == [
+
+    expected_datasources = original_datasources
+    expected_datasources.append(
         {"name": datasource_name, "class_name": "SqlAlchemyDatasource"}
-    ]
+    )
+
+    assert context.list_datasources() == expected_datasources
     return context
 
 
