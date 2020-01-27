@@ -67,6 +67,6 @@ def test_get_available_data_asset_names_for_query_path(empty_data_context):
                                                                     "generators", "mygenerator", "queries")))
 
     data_source = Datasource(name="mydatasource", data_context=empty_data_context)
-    generator: QueryGenerator = QueryGenerator(name="mygenerator", datasource=data_source)
+    generator = QueryGenerator(name="mygenerator", datasource=data_source)
     sql_list = generator.get_available_data_asset_names()
     assert "dummy.sql" in sql_list
