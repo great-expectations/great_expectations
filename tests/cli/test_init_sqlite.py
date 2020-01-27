@@ -14,6 +14,7 @@ from tests.cli.test_cli import yaml
 from tests.cli.test_datasource_sqlalchemy import (
     _add_datasource_and_credentials_to_context,
 )
+from tests.cli.test_init_pandas import _delete_and_recreate_dir
 
 
 @pytest.fixture
@@ -205,9 +206,9 @@ great_expectations/
 
 # TODO this behavior is broken
 def test_init_on_existing_project_with_no_datasources_should_add_one(
-    initialized_project,
+    initialized_sqlite_project,
 ):
-    project_dir = initialized_project
+    project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
 
     _remove_all_datasources(ge_dir)
@@ -265,7 +266,7 @@ def _load_config_file(config_path):
 
 
 @pytest.fixture
-def initialized_project(tmp_path_factory, titanic_sqlite_db_file):
+def initialized_sqlite_project(tmp_path_factory, titanic_sqlite_db_file):
     """This is an initialized project through the CLI."""
     basedir = str(tmp_path_factory.mktemp("my_rad_project"))
 
@@ -290,9 +291,9 @@ def initialized_project(tmp_path_factory, titanic_sqlite_db_file):
 
 
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
-    initialized_project, titanic_sqlite_db, empty_sqlite_db
+    initialized_sqlite_project, titanic_sqlite_db, empty_sqlite_db
 ):
-    project_dir = initialized_project
+    project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
 
     context = DataContext(ge_dir)
@@ -319,11 +320,10 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert "Traceback" not in stdout
 
 
-@pytest.mark.skip(reason="not converted to sqlite")
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs(
-    initialized_project,
+    initialized_sqlite_project,
 ):
-    project_dir = initialized_project
+    project_dir = initialized_sqlite_project
 
     runner = CliRunner()
     result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n")
@@ -342,11 +342,11 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert "Traceback" not in stdout
 
 
-@pytest.mark.skip(reason="not converted to sqlite")
+# TODO this behavior is broken
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
-    initialized_project,
+    initialized_sqlite_project,
 ):
-    project_dir = initialized_project
+    project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
 
@@ -366,26 +366,25 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", project_dir],
-        input="{}\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
+        input="1\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
     )
     stdout = result.stdout
+    print(stdout)
 
     assert result.exit_code == 0
 
-    assert "Error: invalid input" not in stdout
     assert "Always know what to expect from your data" in stdout
-    assert "Enter the path (relative or absolute) of a data file" in stdout
-    assert "Profiling sink_me" in stdout
+    assert "Which data would you like to use?" in stdout
+    assert "Profiling main.titanic" in stdout
     assert "The following Data Docs sites were built" in stdout
     assert "Great Expectations is now set up" in stdout
-    assert "A new Expectation suite 'warning' was added to your project" in stdout
+    assert "A new Expectation suite 'sink_me' was added to your project" in stdout
+
+    assert "Error: invalid input" not in stdout
+    assert "This looks like an existing project that" not in stdout
 
     # This is important to make sure the user isn't seeing tracebacks
     assert "Traceback" not in stdout
 
-
-def _delete_and_recreate_dir(directory):
-    shutil.rmtree(directory)
-    assert not os.path.isdir(directory)
-    os.mkdir(directory)
-    assert os.path.isdir(directory)
+    context = DataContext(ge_dir)
+    assert len(context.list_expectation_suite_keys()) == 1
