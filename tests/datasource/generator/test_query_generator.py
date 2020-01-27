@@ -60,14 +60,13 @@ def test_partition_id():
 
 def test_get_available_data_asset_names_for_query_path(empty_data_context):
 
-    #create folders
-    #queries paths
+    # create queries path
     context_path = empty_data_context.root_directory
     safe_mmkdir(os.path.join(context_path, "datasources/mydatasource/generators/mygenerator/queries"))
     shutil.copy("./tests/test_fixtures/dummy.sql", str(os.path.join(context_path, "datasources", "mydatasource",
                                                                     "generators", "mygenerator", "queries")))
 
     data_source = Datasource(name="mydatasource", data_context=empty_data_context)
-    generator:QueryGenerator = QueryGenerator(name="mygenerator", datasource=data_source)
+    generator: QueryGenerator = QueryGenerator(name="mygenerator", datasource=data_source)
     sql_list = generator.get_available_data_asset_names()
     assert "dummy.sql" in sql_list
