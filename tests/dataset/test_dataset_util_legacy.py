@@ -1,8 +1,10 @@
 import json
-import numpy as np
 import unittest
 
+import numpy as np
+
 import great_expectations as ge
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset.util import build_categorical_partition_object
 
 
@@ -61,10 +63,9 @@ def test_build_categorical_partition(non_numeric_high_card_dataset):
 class TestUtilMethods(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestUtilMethods, self).__init__(*args, **kwargs)
-        self.D = ge.read_csv(
-            './tests/test_sets/distributional_expectations_data_base.csv')
+        self.D = ge.read_csv(file_relative_path(__file__, '../test_sets/distributional_expectations_data_base.csv'))
 
-        with open('./tests/test_sets/test_partitions.json', 'r') as file:
+        with open(file_relative_path(__file__, '../test_sets/test_partitions.json'), 'r') as file:
             self.test_partitions = json.loads(file.read())
 
     def test_continuous_partition_data_error(self):
@@ -165,8 +166,7 @@ class TestUtilMethods(unittest.TestCase):
             ge.dataset.util.is_valid_partition_object({'bins': [0, 1, 2]}))
 
     def test_validate_distribution_parameters(self):
-        D = ge.read_csv(
-            './tests/test_sets/fixed_distributional_test_dataset.csv')
+        D = ge.read_csv(file_relative_path(__file__, '../test_sets/fixed_distributional_test_dataset.csv'))
 
         # ------ p_value ------
         with self.assertRaises(ValueError):
@@ -464,8 +464,7 @@ class TestUtilMethods(unittest.TestCase):
                                                                                           params=[0, 1])
 
     def test_infer_distribution_parameters(self):
-        D = ge.read_csv(
-            './tests/test_sets/fixed_distributional_test_dataset.csv')
+        D = ge.read_csv(file_relative_path(__file__, '../test_sets/fixed_distributional_test_dataset.csv'))
 
         with self.assertRaises(TypeError):
             ge.dataset.util.infer_distribution_parameters(data=D.norm,

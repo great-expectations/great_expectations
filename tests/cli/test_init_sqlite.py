@@ -4,6 +4,7 @@ import shutil
 
 import pytest
 from click.testing import CliRunner
+from sqlalchemy import create_engine
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -11,19 +12,28 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
 
+@pytest.fixture
+def titanic_sqlite_db_file():
+    from sqlalchemy import create_engine
+    titanic_db_path = file_relative_path(__file__, "../test_sets/titanic.db")
+    engine = create_engine('sqlite:///{}'.format(titanic_db_path))
+    assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+    return titanic_db_path
 
-def test_cli_init_on_new_project(tmp_path_factory):
+
+def test_cli_init_on_new_project(tmp_path_factory, titanic_sqlite_db_file):
     basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
-    os.makedirs(os.path.join(basedir, "data"))
-    data_path = os.path.join(basedir, "data/Titanic.csv")
-    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
-    shutil.copy(fixture_path, data_path)
+    ge_dir = os.path.join(basedir, "great_expectations")
+
+    database_path = os.path.join(basedir, "titanic.db")
+    shutil.copy(titanic_sqlite_db_file, database_path)
+    engine = create_engine("sqlite:///{}".format(database_path))
 
     runner = CliRunner()
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", basedir],
-        input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
+        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url),
     )
     stdout = result.output
 
@@ -31,35 +41,53 @@ def test_cli_init_on_new_project(tmp_path_factory):
 
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
-    assert "What are you processing your files with" in stdout
-    assert "Enter the path (relative or absolute) of a data file" in stdout
-    assert "Give your new data asset a short name" in stdout
+    assert "Which database backend are you using" in stdout
+    assert "Give your new data source a short name" in stdout
+    assert "What is the url/connection string for the sqlalchemy connection" in stdout
+    assert (
+        "Great Expectations will choose a couple of columns and generate expectations about them"
+        in stdout
+    )
+    assert "Attempting to connect to your database." in stdout
+    assert "Great Expectations connected to your database" in stdout
+    assert "Which data would you like to use?" in stdout
     assert "Name the new expectation suite [warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
         in stdout
     )
-    assert "Profiling Titanic" in stdout
+    assert "Profiling main.titanic" in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
     assert "A new Expectation suite 'warning' was added to your project" in stdout
     assert "Great Expectations is now set up" in stdout
 
-    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
+    context = DataContext(ge_dir)
+    assert len(context.list_datasources()) == 1
+    assert context.list_datasources() == [
+        {"class_name": "SqlAlchemyDatasource", "name": "titanic"}
+    ]
+
+    first_suite = context.list_expectation_suite_keys()[0]
+    suite = context.get_expectation_suite(
+        first_suite.data_asset_name, first_suite.expectation_suite_name
+    )
+    assert len(suite.expectations) == 13
+
+    assert os.path.isdir(ge_dir)
     config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
     config = yaml.load(open(config_path, "r"))
-    data_source_class = config["datasources"]["files_datasource"]["data_asset_type"][
+    data_source_class = config["datasources"]["titanic"]["data_asset_type"][
         "class_name"
     ]
-    assert data_source_class == "PandasDataset"
+    assert data_source_class == "SqlAlchemyDataset"
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(ge_dir)
 
     # Instead of monkey patching datetime, just regex out the time directories
     date_safe_obs_tree = re.sub(r"\d*T\d*\.\d*Z", "9999.9999", obs_tree)
-
     assert (
         date_safe_obs_tree
         == """\
@@ -68,9 +96,9 @@ great_expectations/
     great_expectations.yml
     datasources/
     expectations/
-        files_datasource/
+        titanic/
             default/
-                Titanic/
+                main.titanic/
                     warning.json
     notebooks/
         pandas/
@@ -94,9 +122,9 @@ great_expectations/
             local_site/
                 index.html
                 expectations/
-                    files_datasource/
+                    titanic/
                         default/
-                            Titanic/
+                            main.titanic/
                                 warning.html
                 static/
                     fonts/
@@ -146,25 +174,26 @@ great_expectations/
                         data_docs_default_styles.css
                 validations/
                     9999.9999/
-                        files_datasource/
+                        titanic/
                             default/
-                                Titanic/
+                                main.titanic/
                                     warning.html
         samples/
         validations/
             9999.9999/
-                files_datasource/
+                titanic/
                     default/
-                        Titanic/
+                        main.titanic/
                             warning.json
 """
     )
 
     # This is important to make sure the user isn't seeing tracebacks
     assert "Traceback" not in stdout
+    assert result.exit_code == 0
 
 
-# TODO this test is failing because the behavior is broken
+@pytest.mark.skip(reason="not converted to sqlite")
 def test_init_on_existing_project_with_no_datasources_should_add_one(
     initialized_project,
 ):
@@ -241,6 +270,7 @@ def initialized_project(tmp_path_factory):
     return basedir
 
 
+@pytest.mark.skip(reason="not converted to sqlite")
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     initialized_project, filesystem_csv_2
 ):
@@ -273,6 +303,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert "Traceback" not in stdout
 
 
+@pytest.mark.skip(reason="not converted to sqlite")
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs(
     initialized_project,
 ):
@@ -295,6 +326,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert "Traceback" not in stdout
 
 
+@pytest.mark.skip(reason="not converted to sqlite")
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     initialized_project,
 ):

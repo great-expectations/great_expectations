@@ -3,35 +3,29 @@ import sys
 
 import click
 
-from great_expectations import DataContext, exceptions as ge_exceptions
-from great_expectations.exceptions import DatasourceInitializationError
-from great_expectations.cli.datasource import (
-    create_expectation_suite as create_expectation_suite_impl,
-    add_datasource as add_datasource_impl,
-)
+from great_expectations import DataContext
+from great_expectations import exceptions as ge_exceptions
+from great_expectations.cli.datasource import \
+    add_datasource as add_datasource_impl
+from great_expectations.cli.datasource import \
+    create_expectation_suite as create_expectation_suite_impl
 from great_expectations.cli.docs import build_docs
-
 from great_expectations.cli.init_messages import (
-    GREETING,
-    PROJECT_IS_COMPLETE,
     BUILD_DOCS_PROMPT,
+    COMPLETE_ONBOARDING_PROMPT,
+    GREETING,
     LETS_BEGIN_PROMPT,
+    ONBOARDING_COMPLETE,
+    PROJECT_IS_COMPLETE,
     RUN_INIT_AGAIN,
+    SLACK_LATER,
+    SLACK_SETUP_COMPLETE,
     SLACK_SETUP_INTRO,
     SLACK_SETUP_PROMPT,
-    SLACK_LATER,
     SLACK_WEBHOOK_PROMPT,
-    SLACK_SETUP_COMPLETE,
-    COMPLETE_ONBOARDING_PROMPT,
-    ONBOARDING_COMPLETE,
 )
-from great_expectations.cli.logging import logger
 from great_expectations.cli.util import cli_message, is_sane_slack_webhook
-from great_expectations.core import (
-    NamespaceAwareExpectationSuite,
-    ExpectationSuiteValidationResult,
-)
-from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
+from great_expectations.exceptions import DatasourceInitializationError
 
 try:
     from sqlalchemy.exc import SQLAlchemyError

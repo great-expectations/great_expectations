@@ -1,20 +1,26 @@
-import pytest
-import locale
-
-import shutil
-import os
 import json
+import locale
+import os
+import shutil
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 
 import great_expectations as ge
-from great_expectations.core import ExpectationConfiguration, ExpectationValidationResult, expectationSuiteSchema, \
-    ExpectationSuite
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    ExpectationValidationResult,
+    expectationSuiteSchema,
+)
+from great_expectations.data_context.util import (
+    file_relative_path,
+    safe_mmkdir,
+)
 from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.data_context.util import safe_mmkdir, file_relative_path
 
-from .test_utils import get_dataset, expectationSuiteValidationResultSchema
+from .test_utils import expectationSuiteValidationResultSchema, get_dataset
 
 ###
 #
@@ -524,6 +530,27 @@ def titanic_data_context(tmp_path_factory):
 
 
 @pytest.fixture
+def titanic_sqlite_db():
+    from sqlalchemy import create_engine
+    titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
+    engine = create_engine('sqlite:///{}'.format(titanic_db_path))
+    assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+    return engine
+
+
+@pytest.fixture
+def empty_sqlite_db():
+    """An empty in-memory sqlite db that always gets run."""
+    try:
+        from sqlalchemy import create_engine
+        engine = create_engine('sqlite://')
+        assert engine.execute("select 1").fetchall()[0] == (1,)
+        return engine
+    except ImportError:
+        raise ValueError("sqlite tests require sqlalchemy to be installed")
+
+
+@pytest.fixture
 def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, filesystem_csv_3):
     base_dir = str(tmp_path_factory.mktemp("project_dir"))
     project_dir = os.path.join(base_dir, "project_path")
@@ -583,35 +610,57 @@ def titanic_multibatch_data_context(tmp_path_factory):
     safe_mmkdir(os.path.join(context_path, "expectations"), exist_ok=True)
     data_path = os.path.join(context_path, "../data/titanic")
     safe_mmkdir(os.path.join(data_path), exist_ok=True)
-    shutil.copy("./tests/test_fixtures/great_expectations_titanic.yml",
+    shutil.copy(file_relative_path(__file__, "./test_fixtures/great_expectations_titanic.yml"),
                 str(os.path.join(context_path, "great_expectations.yml")))
-    shutil.copy("./tests/test_sets/Titanic.csv",
+    shutil.copy(file_relative_path(__file__, "./test_sets/Titanic.csv"),
                 str(os.path.join(context_path, "../data/titanic/Titanic_1911.csv")))
-    shutil.copy("./tests/test_sets/Titanic.csv",
+    shutil.copy(file_relative_path(__file__, "./test_sets/Titanic.csv"),
                 str(os.path.join(context_path, "../data/titanic/Titanic_1912.csv")))
     return ge.data_context.DataContext(context_path)
 
 
 @pytest.fixture
 def data_context(tmp_path_factory):
-    # This data_context is *manually* created to have the config we want, vs created with DataContext.create
-    project_path = str(tmp_path_factory.mktemp('data_context'))
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
-    safe_mmkdir(os.path.join(asset_config_path,
-                             "mydatasource/mygenerator/my_dag_node"), exist_ok=True)
-    shutil.copy("./tests/test_fixtures/great_expectations_basic.yml",
-                str(os.path.join(context_path, "great_expectations.yml")))
-    shutil.copy("./tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
-                os.path.join(asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"))
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+
+    safe_mmkdir(
+        os.path.join(asset_config_path, "mydatasource/mygenerator/my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_basic.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(
+            asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"
+        ),
+    )
 
     safe_mmkdir(os.path.join(context_path, "plugins"))
-    shutil.copy("./tests/test_fixtures/custom_pandas_dataset.py",
-                str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")))
-    shutil.copy("./tests/test_fixtures/custom_sqlalchemy_dataset.py",
-                str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")))
-    shutil.copy("./tests/test_fixtures/custom_sparkdf_dataset.py",
-                str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")))
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_pandas_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+    )
     return ge.data_context.DataContext(context_path)
 
 
@@ -678,7 +727,7 @@ def filesystem_csv_4(tmp_path_factory):
 
 @pytest.fixture
 def titanic_profiled_evrs_1():
-    with open('./tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'r') as infile:
+    with open(file_relative_path(__file__, './render/fixtures/BasicDatasetProfiler_evrs.json'), 'r') as infile:
         return expectationSuiteValidationResultSchema.loads(infile.read()).data
 
 
@@ -691,7 +740,7 @@ def titanic_profiled_name_column_evrs():
         Renderer,
     )
 
-    with open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json", "r") as infile:
+    with open(file_relative_path(__file__, "./render/fixtures/BasicDatasetProfiler_evrs.json"), "r") as infile:
         titanic_profiled_evrs_1 = expectationSuiteValidationResultSchema.load(json.load(infile)).data
 
     evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
@@ -702,7 +751,7 @@ def titanic_profiled_name_column_evrs():
 
 @pytest.fixture
 def titanic_profiled_expectations_1():
-    with open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json", 'r') as infile:
+    with open(file_relative_path(__file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"), 'r') as infile:
         return expectationSuiteSchema.load(json.load(infile)).data
 
 
@@ -710,22 +759,18 @@ def titanic_profiled_expectations_1():
 def titanic_profiled_name_column_expectations():
     from great_expectations.render.renderer.renderer import Renderer
 
-    with open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json", 'r') as infile:
+    with open(file_relative_path(__file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"), 'r') as infile:
         titanic_profiled_expectations = expectationSuiteSchema.load(json.load(infile)).data
 
     columns, ordered_columns = Renderer()._group_and_order_expectations_by_column(titanic_profiled_expectations)
-    # print(columns)
-    # print(ordered_columns)
-
     name_column_expectations = columns["Name"]
-    # print(json.dumps(name_column_expectations, indent=2))
 
     return name_column_expectations
 
 
 @pytest.fixture
 def titanic_validation_results():
-    with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
+    with open(file_relative_path(__file__, "./test_sets/expected_cli_results_default.json"), "r") as infile:
         return expectationSuiteValidationResultSchema.load(json.load(infile)).data
 
 
