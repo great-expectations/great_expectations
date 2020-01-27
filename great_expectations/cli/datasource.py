@@ -934,7 +934,7 @@ We could not determine the format of the file. What is it?
 
     batch_kwargs = {"path": path}
 
-    reader_method = datasource.guess_reader_method_from_path(path)
+    reader_method = datasource.guess_reader_method_from_path(path)["reader_method"]
 
     if reader_method is None:
 
@@ -948,17 +948,12 @@ We could not determine the format of the file. What is it?
 
             batch_kwargs["reader_method"] = reader_methods[option_selection]
 
-            batch = datasource.get_data_asset(generator_asset,
-                                              generator_name=generator_name,
-                                              batch_kwargs=batch_kwargs)
+            batch = datasource.get_batch(batch_kwargs=batch_kwargs)
 
             break
     else:
         # TODO: read the file and confirm with user that we read it correctly (headers, columns, etc.)
-        batch = datasource.get_data_asset(
-            generator_asset,
-            generator_name=generator_name,
-            batch_kwargs=batch_kwargs)
+        batch = datasource.get_batch(batch_kwargs=batch_kwargs)
 
 
     return (generator_asset, batch_kwargs)
@@ -982,7 +977,7 @@ Enter an SQL query
             batch_kwargs = {"query": query}
 
 
-            batch = datasource.get_data_asset(data_asset_name, batch_kwargs=batch_kwargs)
+            batch = datasource.batch(batch_kwargs=batch_kwargs)
 
             break
         except Exception as error: # TODO: catch more specific exception

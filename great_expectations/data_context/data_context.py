@@ -1707,35 +1707,44 @@ class ConfigOnlyDataContext(object):
         profiling_results['success'] = True
         return profiling_results
 
-#     def profile_data_asset(self,
-#                            datasource_name,
-#                            generator_name=None,
-#                            data_asset_name=None,
-#                            batch_kwargs=None,
-#                            expectation_suite_name=None,
-#                            profiler=BasicDatasetProfiler,
-#                            run_id="profiling",
-#                            additional_batch_kwargs=None):
-#         """
-#         Profile a data asset
-#
-#         :param datasource_name: the name of the datasource to which the profiled data asset belongs
-#         :param generator_name: the name of the generator to use to get batches (only if batch_kwargs are not provided)
-#         :param data_asset_name: the name of the profiled data asset
-#         :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the generator (generator_name arg) will choose a batch
-#         :param profiler: the profiler class to use
-#         :param run_id: optional - if set, the validation result created by the profiler will be under the provided run_id
-#         :param additional_batch_kwargs:
-#         :returns
-#             A dictionary::
-#
-#                 {
-#                     "success": True/False,
-#                     "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
-#                 }
-#
-#             When success = False, the error details are under "error" key
-#         """
+    def profile_data_asset(self,
+                           datasource_name,
+                           generator_name=None,
+                           data_asset_name=None,
+                           batch_kwargs=None,
+                           expectation_suite_name=None,
+                           profiler=BasicDatasetProfiler,
+                           run_id="profiling",
+                           additional_batch_kwargs=None):
+        """
+        Profile a data asset
+
+        :param datasource_name: the name of the datasource to which the profiled data asset belongs
+        :param generator_name: the name of the generator to use to get batches (only if batch_kwargs are not provided)
+        :param data_asset_name: the name of the profiled data asset
+        :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the generator (generator_name arg) will choose a batch
+        :param profiler: the profiler class to use
+        :param run_id: optional - if set, the validation result created by the profiler will be under the provided run_id
+        :param additional_batch_kwargs:
+        :returns
+            A dictionary::
+
+                {
+                    "success": True/False,
+                    "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
+                }
+
+            When success = False, the error details are under "error" key
+        """
+        logger.warning("profile_data_asset is NOT IMPLEMENTED in the new API")
+        return {
+            "success": False,
+            "error": {
+                "code": DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
+                "not_found_data_assets": ["hello"]
+            }
+        }
+
 #
 #         logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
 #

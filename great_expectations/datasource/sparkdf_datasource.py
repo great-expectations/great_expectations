@@ -189,7 +189,15 @@ class SparkDFDatasource(Datasource):
         )
 
     @staticmethod
-    def _get_reader_fn(reader, reader_method=None, path=None):
+    def guess_reader_method_from_path(path):
+        if path.endswith(".csv") or path.endswith(".tsv"):
+            return {"reader_method": "csv"}
+        elif path.endswith(".parquet"):
+            return {"reader_method": "parquet"}
+
+        raise BatchKwargsError("Unable to determine reader method from path: %s" % path, {"path": path})
+
+    def _get_reader_fn(self, reader, reader_method=None, path=None):
         """Static helper for providing reader_fn
 
         Args:
@@ -205,19 +213,14 @@ class SparkDFDatasource(Datasource):
             raise BatchKwargsError("Unable to determine spark reader function without reader_method or path.",
                                    {"reader_method": reader_method})
 
-        if reader_method is not None:
-            try:
-                if reader_method.lower() == "delta":
-                    return reader.format("delta").load
+        if reader_method is None:
+            reader_method = self.guess_reader_method_from_path(path=path)["reader_method"]
 
-                return getattr(reader, reader_method)
-            except AttributeError:
-                raise BatchKwargsError("Unable to find reader_method %s in spark." % reader_method,
-                                       {"reader_method": reader_method})
+        try:
+            if reader_method.lower() == "delta":
+                return reader.format("delta").load
 
-        if path.endswith(".csv") or path.endswith(".tsv"):
-            return reader.csv
-        elif path.endswith(".parquet"):
-            return reader.parquet
-
-        raise BatchKwargsError("Unknown reader method: %s" % reader_method, {"reader_method": reader_method})
+            return getattr(reader, reader_method)
+        except AttributeError:
+            raise BatchKwargsError("Unable to find reader_method %s in spark." % reader_method,
+                                   {"reader_method": reader_method})

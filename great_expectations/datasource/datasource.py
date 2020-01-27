@@ -179,7 +179,7 @@ class Datasource(object):
         )
         return generator
 
-    def get_generator(self, generator_name="default"):
+    def get_generator(self, generator_name):
         """Get the (named) generator from a datasource)
 
         Args:

@@ -34,7 +34,8 @@ class PandasDatasource(Datasource):
     recognized_batch_parameters = {'reader_method', 'reader_options', 'limit'}
 
     @classmethod
-    def build_configuration(cls, data_asset_type=None, generators=None, boto3_options=None, **kwargs):
+    def build_configuration(cls, data_asset_type=None, generators=None, boto3_options=None, reader_method=None,
+                            reader_options=None, limit=None, **kwargs):
         """
         Build a full configuration object for a datasource, potentially including generators with defaults.
 
@@ -42,6 +43,9 @@ class PandasDatasource(Datasource):
             data_asset_type: A ClassConfig dictionary
             generators: Generator configuration dictionary
             boto3_options: Optional dictionary with key-value pairs to pass to boto3 during instantiation.
+            reader_method: Optional default reader_method for generated batches
+            reader_options: Optional default reader_options for generated batches
+            limit: Optional default limit for generated batches
             **kwargs: Additional kwargs to be part of the datasource constructor's initialization
 
         Returns:
@@ -58,14 +62,14 @@ class PandasDatasource(Datasource):
                 "engine": "python"
             })
             generators = {
-                "default": {
-                    "class_name": "SubdirReaderGenerator",
-                    "base_directory": base_directory,
-                    "reader_options": reader_options
-                },
-                "passthrough": {
-                    "class_name": "PassthroughGenerator",
-                }
+                # "default": {
+                #     "class_name": "SubdirReaderGenerator",
+                #     "base_directory": base_directory,
+                #     "reader_options": reader_options
+                # },
+                # "passthrough": {
+                #     "class_name": "PassthroughGenerator",
+                # }
             }
         if data_asset_type is None:
             data_asset_type = ClassConfig(
@@ -88,10 +92,24 @@ class PandasDatasource(Datasource):
             else:
                 raise ValueError("boto3_options must be a dictionary of key-value pairs to pass to boto3 upon "
                                  "initialization.")
+
+        if reader_options is not None:
+            if isinstance(reader_options, dict):
+                configuration.update(reader_options)
+            else:
+                raise ValueError("boto3_options must be a dictionary of key-value pairs to pass to boto3 upon "
+                                 "initialization.")
+
+        if reader_method is not None:
+            configuration["reader_method"] = reader_method
+
+        if limit is not None:
+            configuration["limit"] = limit
+
         return configuration
 
     def __init__(self, name="pandas", data_context=None, data_asset_type=None, generators=None,
-                 boto3_options=None, **kwargs):
+                 boto3_options=None, reader_method=None, reader_options=None, limit=None, **kwargs):
         configuration_with_defaults = PandasDatasource.build_configuration(data_asset_type, generators,
                                                                            boto3_options, **kwargs)
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
@@ -103,22 +121,39 @@ class PandasDatasource(Datasource):
                                                **configuration_with_defaults)
         self._build_generators()
         self._boto3_options = configuration_with_defaults.get("boto3_options", {})
+        self._reader_method = configuration_with_defaults.get("reader_method", None)
+        self._reader_options = configuration_with_defaults.get("reader_options", None)
+        self._limit = configuration_with_defaults.get("limit", None)
 
     def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None):
         # Note that we do not pass any parameters up, since *all* will be handled by PandasDatasource
         batch_kwargs = super(PandasDatasource, self).process_batch_parameters()
 
         # Apply globally-configured reader options first
-        if reader_options:
+        if self._reader_options:
             # Then update with any locally-specified reader options
             if not batch_kwargs.get("reader_options"):
                 batch_kwargs["reader_options"] = dict()
+            batch_kwargs["reader_options"].update(self._reader_options)
+
+        # Then update with any locally-specified reader options
+        if reader_options:
+            if not batch_kwargs.get("reader_options"):
+                batch_kwargs["reader_options"] = dict()
             batch_kwargs["reader_options"].update(reader_options)
+
+        if self._limit:
+            if not batch_kwargs.get("reader_options"):
+                batch_kwargs["reader_options"] = dict()
+            batch_kwargs['reader_options']['nrows'] = self._limit
 
         if limit is not None:
             if not batch_kwargs.get("reader_options"):
                 batch_kwargs["reader_options"] = dict()
             batch_kwargs['reader_options']['nrows'] = limit
+
+        if self._reader_method:
+            batch_kwargs["reader_method"] = self._reader_method
 
         if reader_method is not None:
             batch_kwargs["reader_method"] = reader_method
@@ -187,7 +222,21 @@ class PandasDatasource(Datasource):
         )
 
     @staticmethod
-    def _get_reader_fn(reader_method=None, path=None):
+    def guess_reader_method_from_path(path):
+        if path.endswith(".csv") or path.endswith(".tsv"):
+            return {"reader_method": "read_csv"}
+        elif path.endswith(".parquet"):
+            return {"reader_method": "read_parquet"}
+        elif path.endswith(".xlsx") or path.endswith(".xls"):
+            return {"reader_method": "read_excel"}
+        elif path.endswith(".json"):
+            return {"reader_method": "read_json"}
+        elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
+            return {"reader_method": "read_csv", "reader_options": {"compression": "gzip"}}
+
+        raise BatchKwargsError("Unable to determine reader method from path: %s" % path, {"path": path})
+
+    def _get_reader_fn(self, reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
         correct reader_method.
 
@@ -203,22 +252,17 @@ class PandasDatasource(Datasource):
             raise BatchKwargsError("Unable to determine pandas reader function without reader_method or path.",
                                    {"reader_method": reader_method})
 
-        if reader_method is not None:
-            try:
-                return getattr(pd, reader_method)
-            except AttributeError:
-                raise BatchKwargsError("Unable to find reader_method %s in pandas." % reader_method,
-                                       {"reader_method": reader_method})
+        reader_options = None
+        if reader_method is None:
+            path_guess = self.guess_reader_method_from_path(path)
+            reader_method = path_guess["reader_method"]
+            reader_options = path_guess.get("reader_options")  # This may not be there; use None in that case
 
-        if path.endswith(".csv") or path.endswith(".tsv"):
-            return pd.read_csv
-        elif path.endswith(".parquet"):
-            return pd.read_parquet
-        elif path.endswith(".xlsx") or path.endswith(".xls"):
-            return pd.read_excel
-        elif path.endswith(".json"):
-            return pd.read_json
-        elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
-            return partial(pd.read_csv, compression="gzip")
-
-        raise BatchKwargsError("Unknown reader method: %s" % reader_method, {"reader_method": reader_method})
+        try:
+            reader_fn = getattr(pd, reader_method)
+            if reader_options:
+                reader_fn = partial(reader_fn, **reader_options)
+            return reader_fn
+        except AttributeError:
+            raise BatchKwargsError("Unable to find reader_method %s in pandas." % reader_method, {"reader_method":
+                                                                                                      reader_method})
