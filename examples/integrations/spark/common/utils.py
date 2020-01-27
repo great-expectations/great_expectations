@@ -3,12 +3,14 @@ from datetime import datetime
 import tzlocal
 import uuid  # used to generate run_id
 from pathlib import Path
+from io import TextIOWrapper
 from pyspark import SparkContext
 from pyspark.sql import (
     SparkSession,
     SQLContext,
     DataFrame
 )
+from pyspark.sql.functions import concat_ws
 from pyspark.sql.types import StructType
 import great_expectations as ge
 from great_expectations import DataContext
@@ -75,6 +77,46 @@ def load_csv_file_into_data_frame(
     print(f'Finished Loading csv file from "{path_to_csv}".')
 
     return df
+
+
+def write_data_frame_csv_of_file(
+    df: DataFrame,
+    file: TextIOWrapper,
+    separator: str = ",",
+    limit: int = -1,
+    gzip: bool = False
+):
+    """
+    :param gzip:
+    :param file:
+    :param separator:
+    :param df:
+    :param limit:
+    :return:
+    """
+
+    cols = df.columns
+
+    if limit > 0:
+        df = df.limit(limit)
+
+    df = df.na.fill('""').na.fill(0)
+
+    df_csv = df.select(concat_ws(separator, *cols).alias("contents"))
+
+    result = df_csv.select("contents")
+
+    rows = (f"{row['contents']}\n" for row in result.collect())
+
+    if gzip:
+        file.write(bytearray(separator.join(cols), encoding="utf-8"))
+        file.write(bytearray("\n", encoding="utf-8"))
+        for row in rows:
+            file.write(bytearray(f"{row}", encoding="utf-8"))
+    else:
+        file.write(separator.join(cols))
+        file.write("\n")
+        file.writelines(rows)
 
 
 def create_empty_data_frame(spark_session: SparkSession) -> DataFrame:
