@@ -49,14 +49,22 @@ class SqlAlchemyBatchReference(object):
 
     def __init__(self, engine, table_name=None, query=None):
         self._engine = engine
-        if (table_name is None and query is None) or (table_name is not None and query is not None):
-            raise ValueError("Exactly one of table_name or query must be specified")
+        if (table_name is None and query is None):
+            raise ValueError("Table_name or query must be specified")
 
         self._table_name = table_name
         self._query = query
 
     def get_init_kwargs(self):
-        if self._table_name:
+        if self._table_name and self._query:
+            # This is allowed in BigQuery where a temporary table name must be provided *with* the
+            # custom sql to execute.
+            return {
+                "engine": self._engine,
+                "table_name": self._table_name,
+                "custom_sql": self._query
+            }
+        elif self._table_name:
             return {
                 "engine": self._engine,
                 "table_name": self._table_name

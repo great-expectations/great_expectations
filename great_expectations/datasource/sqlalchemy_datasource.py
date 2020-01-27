@@ -48,15 +48,18 @@ class SqlAlchemyDatasource(Datasource):
             A complete datasource configuration.
 
         """
+
+        # As of 0.9.0, we do not require generators be configured
         if generators is None:
-            generators = {
-                "default": {
-                    "class_name": "TableGenerator"
-                },
-                "passthrough": {
-                    "class_name": "PassthroughGenerator",
-                }
-            }
+            generators = {}
+        #     generators = {
+        #         "default": {
+        #             "class_name": "TableGenerator"
+        #         },
+        #         "passthrough": {
+        #             "class_name": "PassthroughGenerator",
+        #         }
+        #     }
 
         if data_asset_type is None:
             data_asset_type = ClassConfig(
@@ -135,7 +138,7 @@ class SqlAlchemyDatasource(Datasource):
 
         # if a connection string or url was provided in the profile, use that
         if "connection_string" in credentials:
-            options = credentials["connectcarion_string"]
+            options = credentials["connection_string"]
         elif "url" in credentials:
             options = credentials["url"]
         else:
@@ -181,7 +184,7 @@ class SqlAlchemyDatasource(Datasource):
                 table_name = None
 
             query = Template(batch_kwargs["query"]).safe_substitute(**kwargs)
-            batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query)
+            batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query, table_name=table_name)
 
         else:
             raise ValueError("Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified")
