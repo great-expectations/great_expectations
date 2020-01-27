@@ -325,22 +325,26 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
                                                            result_format="SUMMARY").result["observed_value"]
         dataset.expect_column_median_to_be_between(column, min_value=value - 1, max_value=value + 1)
 
-        try:
-            # TODO these are not implemented correctly on sqlite, and likely other sql dialects
-            result = dataset.expect_column_quantile_values_to_be_between(
-                column,
-                quantile_ranges={
-                    "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
-                    "value_ranges": [
-                        [None, None],
-                        [None, None],
-                        [None, None],
-                        [None, None],
-                        [None, None],
-                    ],
-                },
-                result_format="SUMMARY",
-            )
+        result = dataset.expect_column_quantile_values_to_be_between(
+            column,
+            quantile_ranges={
+                "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                "value_ranges": [
+                    [None, None],
+                    [None, None],
+                    [None, None],
+                    [None, None],
+                    [None, None],
+                ],
+            },
+            result_format="SUMMARY",
+            catch_exceptions=True
+        )
+        if result.exception_info:
+            # TODO quantiles are not implemented correctly on sqlite, and likely other sql dialects
+            logger.warning(result.exception_info["exception_traceback"])
+        else:
+            dataset.set_config_value('interactive_evaluation', False)
             dataset.expect_column_quantile_values_to_be_between(
                 column,
                 quantile_ranges={
@@ -351,8 +355,7 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
                     ],
                 },
             )
-        except OperationalError as e:
-            logger.warning(e)
+            dataset.set_config_value('interactive_evaluation', True)
 
     @classmethod
     def _create_expectations_for_string_column(cls, dataset, column):
