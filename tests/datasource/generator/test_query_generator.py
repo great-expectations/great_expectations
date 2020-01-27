@@ -1,5 +1,11 @@
+import os
+import shutil
+
 import pytest
 
+from great_expectations import DataContext
+from great_expectations.data_context.util import safe_mmkdir
+from great_expectations.datasource import SqlAlchemyDatasource, Datasource
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
 from great_expectations.datasource.generator import QueryGenerator
@@ -50,3 +56,18 @@ def test_partition_id():
     batch_kwargs = generator.build_batch_kwargs_from_partition_id("my_asset", "foo")
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceQueryBatchKwargs)
     assert batch_kwargs.query == "SELECT * FROM my_table WHERE value = foo"
+
+
+def test_get_available_data_asset_names_for_query_path(empty_data_context):
+
+    #create folders
+    #queries paths
+    context_path = empty_data_context.root_directory
+    safe_mmkdir(os.path.join(context_path, "datasources/mydatasource/generators/mygenerator/queries"))
+    shutil.copy("./tests/test_fixtures/dummy.sql", str(os.path.join(context_path, "datasources", "mydatasource",
+                                                                    "generators", "mygenerator", "queries")))
+
+    data_source = Datasource(name="mydatasource", data_context=empty_data_context)
+    generator:QueryGenerator = QueryGenerator(name="mygenerator", datasource=data_source)
+    sql_list = generator.get_available_data_asset_names()
+    assert "dummy.sql" in sql_list
