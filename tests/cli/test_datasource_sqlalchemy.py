@@ -34,7 +34,6 @@ def test_cli_datasorce_list(empty_data_context, empty_sqlite_db):
 
     # This is important to make sure the user isn't seeing tracebacks
     assert "Traceback" not in stdout
-    assert not result.exc_info[2]
 
 
 def _add_datasource_and_credentials_to_context(
@@ -143,7 +142,6 @@ def test_cli_datasource_profile_with_datasource_arg(
         input="Y\n",
     )
     stdout = result.stdout
-    print(stdout)
 
     assert result.exit_code == 0
     assert "Profiling '{}'".format(datasource_name) in stdout
@@ -215,7 +213,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_shou
     empty_data_context, titanic_sqlite_db
 ):
     """
-    Passing additional batch kwargs along with a data assete name to a sql
+    Passing additional batch kwargs along with a data asset name to a sql
     backend is an invalid operation and should display a helpful error message.
     """
     project_root_dir = empty_data_context.root_directory
@@ -242,8 +240,8 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_shou
         input="Y\n",
     )
     stdout = result.output
-    print(result.exception)
     print(stdout)
+    print(result.exception)
     assert result.exit_code == 1
 
     # There should not be a suite created
@@ -289,7 +287,6 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     )
 
     stdout = result.stdout
-    print(stdout)
     assert result.exit_code == 0
     assert "Profiling '{}'".format(datasource_name) in stdout
     assert "The following Data Docs sites were built:\n- local_site:" in stdout

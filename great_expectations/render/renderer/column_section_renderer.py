@@ -1,22 +1,31 @@
 import json
-from builtins import str  # PY2 compatibility
 import logging
 import re
+from builtins import str  # PY2 compatibility
 
 import altair as alt
 import pandas as pd
 
-from great_expectations.core import ExpectationConfiguration, ExpectationValidationResult
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.data_context.util import instantiate_class_from_config
-from .renderer import Renderer
+from great_expectations.render.renderer.content_block import (
+    ExceptionListContentBlockRenderer,
+)
+from great_expectations.render.renderer.renderer import Renderer
+from great_expectations.render.types import (
+    RenderedBulletListContent,
+    RenderedGraphContent,
+    RenderedHeaderContent,
+    RenderedSectionContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+    TextContent,
+    ValueListContent,
+)
 from great_expectations.util import load_class
-from .content_block import ExceptionListContentBlockRenderer
-from .content_block import ExpectationStringRenderer
-
-from ..types import RenderedSectionContent, RenderedHeaderContent, RenderedGraphContent, RenderedBulletListContent, \
-    RenderedTableContent, ValueListContent, TextContent, RenderedStringTemplateContent
-
-logger = logging.getLogger(__name__)
 
 logger = logging.getLogger(__name__)
 
@@ -265,7 +274,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_quantile_values_to_be_between"
         )
 
-        if not quantile_evr:
+        if not quantile_evr or quantile_evr.exception_info["raised_exception"]:
             return
 
         quantiles = quantile_evr.result["observed_value"]["quantiles"]
@@ -319,7 +328,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_mean_to_be_between"
         )
 
-        if not mean_evr:
+        if not mean_evr or mean_evr.exception_info["raised_exception"]:
             return
 
         mean_value = "{:.2f}".format(
@@ -406,7 +415,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_values_to_be_in_set"
         )
 
-        if not set_evr:
+        if not set_evr or set_evr.exception_info["raised_exception"]:
             return
 
         if set_evr and "partial_unexpected_counts" in set_evr.result:
@@ -496,8 +505,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             evrs,
             "expect_column_distinct_values_to_be_in_set"
         )
-        # print(json.dumps(kl_divergence_evr, indent=2))
-        if not distinct_values_set_evr:
+        if not distinct_values_set_evr or distinct_values_set_evr.exception_info["raised_exception"]:
             return
 
         value_count_dicts = distinct_values_set_evr.result['details']['value_counts']
