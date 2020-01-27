@@ -1,37 +1,40 @@
+import datetime
+import enum
 import importlib
 import json
-import os
 import logging
-import enum
+import os
 import sys
 
 import click
-import datetime
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
-from great_expectations.cli.util import cli_message, _offer_to_install_new_template
+from great_expectations.cli.util import (
+    _offer_to_install_new_template,
+    cli_message,
+)
+from great_expectations.data_context.types import (
+    DataAssetIdentifier,
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
     SqlAlchemyDatasource,
 )
-from great_expectations.exceptions import DatasourceInitializationError
-from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
 from great_expectations.datasource.generator import (
     InMemoryGenerator,
     ManualGenerator,
     PassthroughGenerator,
 )
-from great_expectations.data_context.types import (
-    DataAssetIdentifier,
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier
+from great_expectations.exceptions import DatasourceInitializationError
+from great_expectations.profile.basic_dataset_profiler import (
+    SampleExpectationsDatasetProfiler,
 )
-
-from great_expectations import rtd_url_ge_version, DataContext
-import great_expectations.exceptions as ge_exceptions
-
 
 logger = logging.getLogger(__name__)
 
