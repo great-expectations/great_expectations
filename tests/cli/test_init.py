@@ -9,10 +9,11 @@ from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them(
-    tmp_path_factory,
+    caplog, tmp_path_factory,
 ):
     """
     This test walks through the onboarding experience.
@@ -61,9 +62,11 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     with open(config_var_path, "r") as f:
         assert f.read() == CONFIG_VARIABLES_TEMPLATE
 
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
 
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_fixing_them(
-    tmp_path_factory,
+    caplog, tmp_path_factory,
 ):
     """
     This test walks through the onboarding experience.
@@ -112,7 +115,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_f
 
 
 def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
-    tmp_path_factory,
+    caplog, tmp_path_factory,
 ):
     """
     This test walks through the onboarding experience.
@@ -146,10 +149,11 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     assert "appears complete" in stdout
     assert "ready to roll" in stdout
     assert "Would you like to build & view this project's Data Docs" in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_cli_init_connection_string_non_working_mssql_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
-    tmp_path_factory,
+    caplog, tmp_path_factory,
 ):
     basedir = tmp_path_factory.mktemp("mssql_test")
     basedir = str(basedir)
@@ -242,3 +246,5 @@ great_expectations/
         validations/
 """
     )
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)

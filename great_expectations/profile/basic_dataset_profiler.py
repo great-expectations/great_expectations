@@ -294,7 +294,7 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
         partition_object = build_categorical_partition_object(dataset, column)
 
         dataset.expect_column_kl_divergence_to_be_less_than(column, partition_object=partition_object,
-                                                            threshold=0.6)
+                                                            threshold=0.6, catch_exceptions=True)
 
     @classmethod
     def _create_non_nullity_expectations(cls, dataset, column):
@@ -354,6 +354,7 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
                         result.result["observed_value"]["values"]
                     ],
                 },
+                catch_exceptions=True
             )
             dataset.set_config_value('interactive_evaluation', True)
 
