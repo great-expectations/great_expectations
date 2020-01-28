@@ -33,7 +33,7 @@ stores:
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store

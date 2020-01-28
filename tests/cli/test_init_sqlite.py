@@ -11,14 +11,25 @@ from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
+from tests.cli.test_datasource_sqlite import (
+    _add_datasource_and_credentials_to_context,
+)
+from tests.cli.test_init_pandas import _delete_and_recreate_dir
+
 
 @pytest.fixture
-def titanic_sqlite_db_file():
+def titanic_sqlite_db_file(tmp_path_factory):
     from sqlalchemy import create_engine
-    titanic_db_path = file_relative_path(__file__, "../test_sets/titanic.db")
-    engine = create_engine('sqlite:///{}'.format(titanic_db_path))
+
+    temp_dir = str(tmp_path_factory.mktemp("foo_path"))
+    fixture_db_path = file_relative_path(__file__, "../test_sets/titanic.db")
+
+    db_path = os.path.join(temp_dir, "titanic.db")
+    shutil.copy(fixture_db_path, db_path)
+
+    engine = create_engine("sqlite:///{}".format(db_path))
     assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
-    return titanic_db_path
+    return db_path
 
 
 def test_cli_init_on_new_project(tmp_path_factory, titanic_sqlite_db_file):
@@ -193,18 +204,21 @@ great_expectations/
     assert result.exit_code == 0
 
 
-@pytest.mark.skip(reason="not converted to sqlite")
+# TODO this behavior is broken
 def test_init_on_existing_project_with_no_datasources_should_add_one(
-    initialized_project,
+    initialized_sqlite_project,
 ):
-    project_dir = initialized_project
+    project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
 
     _remove_all_datasources(ge_dir)
 
     runner = CliRunner()
+    # TODO this behavior is broken and the input may need to be adjusted
     result = runner.invoke(
-        cli, ["init", "--no-view", "-d", project_dir], input="1\n1\ndata\nmy_data_dir\n"
+        cli,
+        ["init", "--no-view", "-d", project_dir],
+        input="2\n5\nsqlite\nsqlite:///data/titanic.db\n",
     )
     stdout = result.stdout
     print(stdout)
@@ -215,11 +229,13 @@ def test_init_on_existing_project_with_no_datasources_should_add_one(
 
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
-    assert "A new datasource 'my_data_dir' was added to your project" in stdout
+    assert "Great Expectations connected to your database" in stdout
+    assert "A new datasource 'sqlite' was added to your project" in stdout
     assert "Would you like to build & view this project's Data Docs" in stdout
+    assert "This looks like an existing project that" not in stdout
 
     config = _load_config_file(os.path.join(ge_dir, DataContext.GE_YML))
-    assert "my_data_dir" in config["datasources"].keys()
+    assert "sqlite" in config["datasources"].keys()
 
     # This is important to make sure the user isn't seeing tracebacks
     assert "Traceback" not in stdout
@@ -250,39 +266,40 @@ def _load_config_file(config_path):
 
 
 @pytest.fixture
-def initialized_project(tmp_path_factory):
+def initialized_sqlite_project(tmp_path_factory, titanic_sqlite_db_file):
     """This is an initialized project through the CLI."""
     basedir = str(tmp_path_factory.mktemp("my_rad_project"))
-    os.makedirs(os.path.join(basedir, "data"))
-    data_path = os.path.join(basedir, "data/Titanic.csv")
-    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
-    shutil.copy(fixture_path, data_path)
+
+    engine = create_engine("sqlite:///{}".format(titanic_sqlite_db_file))
+
     runner = CliRunner()
-    _ = runner.invoke(
+    result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", basedir],
-        input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
+        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url),
     )
+    assert result.exit_code == 0
+    assert "Traceback" not in result.stdout
 
     context = DataContext(os.path.join(basedir, DataContext.GE_DIR))
     assert isinstance(context, DataContext)
     assert len(context.list_datasources()) == 1
+    assert context.list_datasources() == [
+        {"class_name": "SqlAlchemyDatasource", "name": "titanic"}
+    ]
     return basedir
 
 
-@pytest.mark.skip(reason="not converted to sqlite")
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
-    initialized_project, filesystem_csv_2
+    initialized_sqlite_project, titanic_sqlite_db, empty_sqlite_db
 ):
-    project_dir = initialized_project
+    project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
 
     context = DataContext(ge_dir)
-    context.add_datasource(
-        "another_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
+    datasource_name = "wow_a_datasource"
+    context = _add_datasource_and_credentials_to_context(
+        context, datasource_name, empty_sqlite_db
     )
     assert len(context.list_datasources()) == 2
 
@@ -303,11 +320,10 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert "Traceback" not in stdout
 
 
-@pytest.mark.skip(reason="not converted to sqlite")
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs(
-    initialized_project,
+    initialized_sqlite_project,
 ):
-    project_dir = initialized_project
+    project_dir = initialized_sqlite_project
 
     runner = CliRunner()
     result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n")
@@ -326,11 +342,11 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert "Traceback" not in stdout
 
 
-@pytest.mark.skip(reason="not converted to sqlite")
+# TODO this behavior is broken
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
-    initialized_project,
+    initialized_sqlite_project,
 ):
-    project_dir = initialized_project
+    project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
 
@@ -350,26 +366,25 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", project_dir],
-        input="{}\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
+        input="1\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
     )
     stdout = result.stdout
+    print(stdout)
 
     assert result.exit_code == 0
 
-    assert "Error: invalid input" not in stdout
     assert "Always know what to expect from your data" in stdout
-    assert "Enter the path (relative or absolute) of a data file" in stdout
-    assert "Profiling sink_me" in stdout
+    assert "Which data would you like to use?" in stdout
+    assert "Profiling main.titanic" in stdout
     assert "The following Data Docs sites were built" in stdout
     assert "Great Expectations is now set up" in stdout
-    assert "A new Expectation suite 'warning' was added to your project" in stdout
+    assert "A new Expectation suite 'sink_me' was added to your project" in stdout
+
+    assert "Error: invalid input" not in stdout
+    assert "This looks like an existing project that" not in stdout
 
     # This is important to make sure the user isn't seeing tracebacks
     assert "Traceback" not in stdout
 
-
-def _delete_and_recreate_dir(directory):
-    shutil.rmtree(directory)
-    assert not os.path.isdir(directory)
-    os.mkdir(directory)
-    assert os.path.isdir(directory)
+    context = DataContext(ge_dir)
+    assert len(context.list_expectation_suite_keys()) == 1
