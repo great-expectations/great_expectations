@@ -41,7 +41,8 @@ class HtmlSiteStore(object):
                 runtime_environment=runtime_environment,
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
-                    "filepath_template": 'expectations/{0}/{1}/{2}/{3}.html',
+                    "filepath_prefix": "expectations/",
+                    "filepath_suffix": ".html"
                 }
             ),
             ValidationResultIdentifier: instantiate_class_from_config(
@@ -49,7 +50,8 @@ class HtmlSiteStore(object):
                 runtime_environment=runtime_environment,
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
-                    "filepath_template": 'validations/{4}/{0}/{1}/{2}/{3}.html',
+                    "filepath_prefix": "validations/",
+                    "filepath_suffix": ".html"
                 }
             ),
             "index_page":  instantiate_class_from_config(
