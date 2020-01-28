@@ -455,7 +455,10 @@ class DefaultSiteIndexBuilder(object):
             last_datasource = self.data_context.datasources[last_datasource_name]
 
             if last_datasource_class_name == "SqlAlchemyDatasource":
-                db_driver = last_datasource.drivername
+                try:
+                    db_driver = last_datasource.drivername
+                except AttributeError:
+                    pass
 
             datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
             telemetry = "?utm_source={}&utm_medium={}&utm_campaign={}".format(

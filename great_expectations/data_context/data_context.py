@@ -596,13 +596,13 @@ class ConfigOnlyDataContext(object):
 
         return data_asset_names
 
-    def build_batch_kwargs(self, datasource, generator, batch_parameters=None, **kwargs):
+    def build_batch_kwargs(self, datasource, generator, name=None, **kwargs):
         """Builds batch kwargs using the provided datasource, generator, and batch_parameters.
 
         Args:
             datasource (str): the name of the datasource for which to build batch_kwargs
             generator (str): the name of the generator to use to build batch_kwargs
-            batch_parameters (str): a dictionary of batch_parameters to use for building the batch_kwargs
+            name (str): an optional name batch_parameter
             **kwargs: additional batch_parameters
 
         Returns:
@@ -610,7 +610,7 @@ class ConfigOnlyDataContext(object):
 
         """
         datasource_obj = self.get_datasource(datasource)
-        batch_kwargs = datasource_obj.build_batch_kwargs(generator, batch_parameters, **kwargs)
+        batch_kwargs = datasource_obj.build_batch_kwargs(generator=generator, name=name, **kwargs)
         # Track the datasource *in batch_kwargs* when building from a context so that the context can easily reuse them.
         batch_kwargs["datasource"] = datasource
         return batch_kwargs
@@ -722,19 +722,23 @@ class ConfigOnlyDataContext(object):
             datasource (Datasource)
         """
         logger.debug("Starting ConfigOnlyDataContext.add_datasource for %s" % name)
-        if "generators" not in kwargs:
-            logger.warning("Adding a datasource without configuring a generator will rely on default "
-                           "generator behavior. Consider adding a generator.")
 
-        if "type" in kwargs:
-            warnings.warn("Using type_ configuration to build datasource. Please update to using class_name.")
-            type_ = kwargs["type"]
-            datasource_class = self._get_datasource_class_from_type(type_)
-        else:
-            datasource_class = load_class(
-                kwargs.get("class_name"),
-                kwargs.get("module_name", "great_expectations.datasource")
-            )
+        # In 0.9.0, generators are no longer required
+        # if "generators" not in kwargs:
+        #     logger.warning("Adding a datasource without configuring a generator will rely on default "
+        #                    "generator behavior. Consider adding a generator.")
+
+
+        # In 0.9.0, type is no longer supported:
+        # if "type" in kwargs:
+        #     warnings.warn("Using type_ configuration to build datasource. Please update to using class_name.")
+        #     type_ = kwargs["type"]
+        #     datasource_class = self._get_datasource_class_from_type(type_)
+        # else:
+        datasource_class = load_class(
+            kwargs.get("class_name"),
+            kwargs.get("module_name", "great_expectations.datasource")
+        )
 
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
@@ -756,6 +760,21 @@ class ConfigOnlyDataContext(object):
             datasource = None
 
         return datasource
+
+    def add_generator(self, datasource_name, generator_name, class_name, **kwargs):
+        """Add a generator to the named datasource, using the provided configuration.
+
+        Args:
+            datasource_name: name of datasource to which to add the new generator
+            generator_name: name of the generator to add
+            class_name: class of the generator to add
+            **kwargs: generator configuration, provided as kwargs
+
+        Returns:
+
+        """
+        datasource_obj = self.get_datasource(datasource_name)
+        datasource_obj.add_generator(name=generator_name, class_name=class_name, **kwargs)
 
     def get_config(self):
         return self._project_config
