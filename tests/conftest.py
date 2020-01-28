@@ -581,12 +581,12 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
 
     context.add_datasource(
         "titanic",
-        type="pandas",
+        class_name="PandasDatasource",
         base_directory=os.path.join(project_dir, "data/titanic/")
     )
     context.add_datasource(
         "random",
-        type="pandas",
+        class_name="PandasDatasource",
         base_directory=os.path.join(project_dir, "data/random/")
     )
 
