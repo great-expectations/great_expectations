@@ -548,9 +548,13 @@ class ExpectationConfigurationSchema(Schema):
 
 class ExpectationSuite(object):
     def __init__(
-            self,
-            expectation_suite_name,
-            expectations=None, evaluation_parameters=None, data_asset_type=None, meta=None):
+        self,
+        expectation_suite_name,
+        expectations=None,
+        evaluation_parameters=None,
+        data_asset_type=None,
+        meta=None
+    ):
         self.expectation_suite_name = expectation_suite_name
         if expectations is None:
             expectations = []
