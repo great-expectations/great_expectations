@@ -69,6 +69,7 @@ We'd love it if you **reach out to us on** the [**Great Expectations Slack Chann
 from datetime import datetime
 import great_expectations as ge
 import great_expectations.jupyter_ux
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 
 context = ge.data_context.DataContext()
 
@@ -102,8 +103,13 @@ batch.save_expectation_suite(discard_failed_expectations=False)
 run_id = datetime.utcnow().isoformat().replace(":", "") + "Z"
 
 results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
+expectation_suite_identifier = list(results["details"].keys())[0]
+validation_result_identifier = ValidationResultIdentifier(
+    expectation_suite_identifier=expectation_suite_identifier,
+    run_id=run_id
+)
 context.build_data_docs()
-context.open_data_docs()"""
+context.open_data_docs(validation_result_identifier)"""
         )
 
     def add_code_cell(self, code, lint=False):
