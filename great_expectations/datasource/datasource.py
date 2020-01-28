@@ -106,15 +106,12 @@ class Datasource(object):
                 "String-only configuration for data_asset_type is deprecated. Use module_name and class_name instead.",
                 DeprecationWarning)
         self._data_asset_type = data_asset_type
-        self._generators = {}
-        if generators is None:
-            generators = {}
         self._datasource_config = kwargs
+        self._generators = generators or {}
 
-        self._datasource_config.update({
-            "generators": generators,
-            "data_asset_type": data_asset_type
-        })
+        self._datasource_config["data_asset_type"] = data_asset_type
+        if generators is not None:
+            self._datasource_config["generators"] = generators
 
     @property
     def name(self):
@@ -141,8 +138,11 @@ class Datasource(object):
         Returns:
             None
         """
-        for generator in self._datasource_config["generators"].keys():
-            self.get_generator(generator)
+        try:
+            for generator in self._datasource_config["generators"].keys():
+                self.get_generator(generator)
+        except KeyError:
+            pass
 
     def add_generator(self, name, class_name, **kwargs):
         """Add a generator to the datasource.

@@ -55,22 +55,22 @@ class PandasDatasource(Datasource):
         if generators is None:
             # Provide a gentle way to build a datasource with a sane default,
             # including ability to specify the base_directory and reader_options
-            base_directory = kwargs.pop("base_directory", "data")
+            # base_directory = kwargs.pop("base_directory", "data")
             # By default, use CSV sniffer to infer separator, which requires the python engine
             reader_options = kwargs.pop("reader_options", {
                 "sep": None,
                 "engine": "python"
             })
-            generators = {
-                # "default": {
-                #     "class_name": "SubdirReaderGenerator",
-                #     "base_directory": base_directory,
-                #     "reader_options": reader_options
-                # },
-                # "passthrough": {
-                #     "class_name": "PassthroughGenerator",
-                # }
-            }
+            # generators = {
+            #     # "default": {
+            #     #     "class_name": "SubdirReaderGenerator",
+            #     #     "base_directory": base_directory,
+            #     #     "reader_options": reader_options
+            #     # },
+            #     # "passthrough": {
+            #     #     "class_name": "PassthroughGenerator",
+            #     # }
+            # }
         if data_asset_type is None:
             data_asset_type = ClassConfig(
                 class_name="PandasDataset")
@@ -82,10 +82,10 @@ class PandasDatasource(Datasource):
                 pass
 
         configuration = kwargs
-        configuration.update({
-            "data_asset_type": data_asset_type,
-            "generators": generators,
-        })
+        configuration["data_asset_type"] = data_asset_type
+        if generators:
+            configuration["generators"] = generators
+
         if boto3_options is not None:
             if isinstance(boto3_options, dict):
                 configuration.update(boto3_options)
@@ -113,7 +113,7 @@ class PandasDatasource(Datasource):
         configuration_with_defaults = PandasDatasource.build_configuration(data_asset_type, generators,
                                                                            boto3_options, **kwargs)
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        generators = configuration_with_defaults.pop("generators")
+        generators = configuration_with_defaults.pop("generators", None)
         super(PandasDatasource, self).__init__(name,
                                                data_context=data_context,
                                                data_asset_type=data_asset_type,
