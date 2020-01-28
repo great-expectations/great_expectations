@@ -120,7 +120,7 @@ To learn more about setting up Great Expectations for your team read :ref:`using
 Validation Operators
 *********************
 
-The example above demonstrates how to validate one batch of data against one expectation suite. The `validate` method returns a dictionary of validation results. This is sufficient when you explore your data and get to know Great Expectations.
+The example above demonstrates how to validate one batch of data against one expectation suite. The `validate` method returns a dictionary of validation results. This is sufficient when exploring your data and getting to know Great Expectations.
 When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
 
 * validating a group of batches that are logically related
