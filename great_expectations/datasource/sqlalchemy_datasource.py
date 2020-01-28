@@ -84,7 +84,7 @@ class SqlAlchemyDatasource(Datasource):
 
         configuration_with_defaults = SqlAlchemyDatasource.build_configuration(data_asset_type, generators, **kwargs)
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        generators = configuration_with_defaults.pop("generators")
+        generators = configuration_with_defaults.pop("generators", None)
         super(SqlAlchemyDatasource, self).__init__(
             name,
             data_context=data_context,

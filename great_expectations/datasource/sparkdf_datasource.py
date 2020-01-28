@@ -48,21 +48,23 @@ class SparkDFDatasource(Datasource):
             A complete datasource configuration.
 
         """
-        if generators is None:
-            # Provide a gentle way to build a datasource with a sane default,
-            # including ability to specify the base_directory
-            base_directory = kwargs.pop("base_directory", "/data")
-            reader_options = kwargs.pop("reader_options", {})
-            generators = {
-                "default": {
-                    "class_name": "SubdirReaderGenerator",
-                    "base_directory": base_directory,
-                    "reader_options": reader_options
-                },
-                "passthrough": {
-                    "class_name": "PassthroughGenerator",
-                }
-            }
+        # No more default generators
+
+        # if generators is None:
+        #     # Provide a gentle way to build a datasource with a sane default,
+        #     # including ability to specify the base_directory
+        #     base_directory = kwargs.pop("base_directory", "/data")
+        #     reader_options = kwargs.pop("reader_options", {})
+        #     generators = {
+        #         "default": {
+        #             "class_name": "SubdirReaderGenerator",
+        #             "base_directory": base_directory,
+        #             "reader_options": reader_options
+        #         },
+        #         "passthrough": {
+        #             "class_name": "PassthroughGenerator",
+        #         }
+        #     }
 
         if data_asset_type is None:
             data_asset_type = ClassConfig(
@@ -81,9 +83,11 @@ class SparkDFDatasource(Datasource):
         configuration = kwargs
         configuration.update({
             "data_asset_type": data_asset_type,
-            "generators": generators,
             "spark_config": spark_config
         })
+        if generators:
+            configuration["generators"] = generators
+
         return configuration
 
     def __init__(self, name="default", data_context=None, data_asset_type=None, generators=None,
@@ -101,7 +105,7 @@ class SparkDFDatasource(Datasource):
         configuration_with_defaults = SparkDFDatasource.build_configuration(data_asset_type, generators,
                                                                             spark_config, **kwargs)
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        generators = configuration_with_defaults.pop("generators")
+        generators = configuration_with_defaults.pop("generators", None)
         super(SparkDFDatasource, self).__init__(
             name,
             data_context=data_context,
