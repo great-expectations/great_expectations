@@ -350,6 +350,8 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
     selected_database = list(SupportedDatabases)[selected_database]
 
     datasource_name = "my_{}_db".format(selected_database.value.lower())
+    if selected_database == SupportedDatabases.OTHER:
+        datasource_name = "my_database"
     if prompt_for_datasource_name:
         datasource_name = click.prompt(
             msg_prompt_datasource_name,
