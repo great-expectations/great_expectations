@@ -611,8 +611,6 @@ class ConfigOnlyDataContext(object):
         """
         datasource_obj = self.get_datasource(datasource)
         batch_kwargs = datasource_obj.build_batch_kwargs(generator=generator, name=name, **kwargs)
-        # Track the datasource *in batch_kwargs* when building from a context so that the context can easily reuse them.
-        batch_kwargs["datasource"] = datasource
         return batch_kwargs
 
     def get_batch(self, batch_kwargs, expectation_suite_name, data_asset_type=None, batch_parameters=None):
@@ -774,7 +772,8 @@ class ConfigOnlyDataContext(object):
 
         """
         datasource_obj = self.get_datasource(datasource_name)
-        datasource_obj.add_generator(name=generator_name, class_name=class_name, **kwargs)
+        generator = datasource_obj.add_generator(name=generator_name, class_name=class_name, **kwargs)
+        return generator
 
     def get_config(self):
         return self._project_config

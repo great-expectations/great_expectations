@@ -122,6 +122,7 @@ class SparkDFDatasource(Datasource):
             logger.error("Unable to load spark context; install optional spark dependency for support.")
             self.spark = None
 
+        self._generators = generators or {}
         self._build_generators()
 
     def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None):

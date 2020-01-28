@@ -141,6 +141,8 @@ class BatchKwargsGenerator(object):
             logger.warning("Unrecognized batch_parameter(s): %s" % str(param_keys - recognized_params))
 
         batch_kwargs = self._build_batch_kwargs(batch_parameters)
+        # Track the datasource *in batch_kwargs* when building from a context so that the context can easily reuse them.
+        batch_kwargs["datasource"] = self._datasource.name
         return batch_kwargs
 
     def _build_batch_kwargs(self, batch_parameters):

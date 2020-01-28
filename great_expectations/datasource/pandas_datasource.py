@@ -52,15 +52,15 @@ class PandasDatasource(Datasource):
             A complete datasource configuration.
 
         """
-        if generators is None:
+        # if generators is None:
             # Provide a gentle way to build a datasource with a sane default,
             # including ability to specify the base_directory and reader_options
             # base_directory = kwargs.pop("base_directory", "data")
             # By default, use CSV sniffer to infer separator, which requires the python engine
-            reader_options = kwargs.pop("reader_options", {
-                "sep": None,
-                "engine": "python"
-            })
+            # reader_options = kwargs.pop("reader_options", {
+            #     "sep": None,
+            #     "engine": "python"
+            # })
             # generators = {
             #     # "default": {
             #     #     "class_name": "SubdirReaderGenerator",
@@ -111,7 +111,12 @@ class PandasDatasource(Datasource):
     def __init__(self, name="pandas", data_context=None, data_asset_type=None, generators=None,
                  boto3_options=None, reader_method=None, reader_options=None, limit=None, **kwargs):
         configuration_with_defaults = PandasDatasource.build_configuration(data_asset_type, generators,
-                                                                           boto3_options, **kwargs)
+                                                                           boto3_options,
+                                                                           reader_method=reader_method,
+                                                                           reader_options=reader_options,
+                                                                           limit=limit,
+                                                                           **kwargs)
+
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
         generators = configuration_with_defaults.pop("generators", None)
         super(PandasDatasource, self).__init__(name,
@@ -119,6 +124,8 @@ class PandasDatasource(Datasource):
                                                data_asset_type=data_asset_type,
                                                generators=generators,
                                                **configuration_with_defaults)
+
+        self._generators = generators or {}
         self._build_generators()
         self._boto3_options = configuration_with_defaults.get("boto3_options", {})
         self._reader_method = configuration_with_defaults.get("reader_method", None)

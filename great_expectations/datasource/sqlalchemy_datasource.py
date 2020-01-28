@@ -50,8 +50,6 @@ class SqlAlchemyDatasource(Datasource):
         """
 
         # As of 0.9.0, we do not require generators be configured
-        if generators is None:
-            generators = {}
         #     generators = {
         #         "default": {
         #             "class_name": "TableGenerator"
@@ -72,10 +70,10 @@ class SqlAlchemyDatasource(Datasource):
                 pass
 
         configuration = kwargs
-        configuration.update({
-            "data_asset_type": data_asset_type,
-            "generators": generators,
-        })
+        configuration["data_asset_type"] = data_asset_type
+        if generators is not None:
+            configuration["generators"] = generators
+
         return configuration
 
     def __init__(self, name="default", data_context=None, data_asset_type=None, credentials=None, generators=None, **kwargs):
