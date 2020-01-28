@@ -6,6 +6,7 @@ from collections import OrderedDict
 import great_expectations as ge
 import great_expectations.render as render
 from great_expectations.core import ExpectationSuiteValidationResult
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer import (
     ProfilingResultsPageRenderer,
 )
@@ -58,7 +59,7 @@ def test_render_DefaultJinjaPageView_meta_info():
 
     document = ProfilingResultsPageRenderer().render(validation_results)
     html = DefaultJinjaPageView().render(document)
-    with open('./tests/render/output/test_render_DefaultJinjaPageView_meta_info.html', 'w') as outfile:
+    with open(file_relative_path(__file__, './output/test_render_DefaultJinjaPageView_meta_info.html)'), 'w') as outfile:
         outfile.write(html)
 
 
