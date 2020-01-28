@@ -14,7 +14,7 @@ from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource.types.batch_kwargs import (
     PathBatchKwargs,
-    BatchId,
+    BatchMarkers,
     BatchFingerprint
 )
 from great_expectations.dataset import PandasDataset
@@ -60,7 +60,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
 
     # A datasource should always return an object with a typed batch_id
     assert isinstance(dataset.batch_kwargs, PathBatchKwargs)
-    assert isinstance(dataset.batch_id, BatchId)
+    assert isinstance(dataset.batch_id, BatchMarkers)
     assert isinstance(dataset.batch_fingerprint, BatchFingerprint)
 
 
@@ -229,5 +229,5 @@ def test_read_limit(test_folder_connection_path):
 
     # A datasource should always return an object with a typed batch_id
     assert isinstance(dataset.batch_kwargs, PathBatchKwargs)
-    assert isinstance(dataset.batch_id, BatchId)
+    assert isinstance(dataset.batch_id, BatchMarkers)
     assert isinstance(dataset.batch_fingerprint, BatchFingerprint)

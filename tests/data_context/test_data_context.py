@@ -1,4 +1,12 @@
 import json
+
+from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
+
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
 import os
 import shutil
 from collections import OrderedDict
@@ -9,7 +17,7 @@ from ruamel.yaml import YAML
 from great_expectations.core import (
     ExpectationConfiguration,
     dataAssetIdentifierSchema,
-    namespaceAwareExpectationSuiteSchema,
+    expectationSuiteSchema,
 )
 from great_expectations.data_context import (
     ConfigOnlyDataContext,
@@ -17,13 +25,11 @@ from great_expectations.data_context import (
     ExplorerDataContext,
 )
 from great_expectations.data_context.store import ExpectationsStore
-from great_expectations.data_context.types import (
+from great_expectations.core import (
     DataAssetIdentifier,
-    ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.util import (
-    file_relative_path,
     safe_mmkdir,
 )
 from great_expectations.exceptions import DataContextError
@@ -69,12 +75,7 @@ def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
 def test_list_expectation_suite_keys(data_context):
     assert data_context.list_expectation_suite_keys() == [
         ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(
-                "mydatasource",
-                "mygenerator",
-                "my_dag_node",
-            ),
-            expectation_suite_name="default"
+            expectation_suite_name="my_dag_node.default"
         )
     ]
 
@@ -595,7 +596,7 @@ def basic_data_context_config():
             "expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
-                    "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                    "class_name": "TupleFilesystemStoreBackend",
                     "base_directory": "expectations/",
                 },
             },
@@ -767,7 +768,7 @@ def test_data_context_updates_expectation_suite_names(data_context):
                 "a_new_new_data_asset",
                 "a_new_new_suite_name.json"
                 ), 'r') as suite_file:
-        loaded_suite = namespaceAwareExpectationSuiteSchema.load(json.load(suite_file)).data
+        loaded_suite = expectationSuiteSchema.load(json.load(suite_file)).data
         assert loaded_suite.data_asset_name == DataAssetIdentifier(
                 data_asset_name.datasource,
                 data_asset_name.generator,
@@ -1022,7 +1023,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
         "my_rad_site": {
             "class_name": "SiteBuilder",
             "store_backend": {
-                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/data_docs/some/local/path/"
             }
         }
@@ -1051,14 +1052,14 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
         "my_rad_site": {
             "class_name": "SiteBuilder",
             "store_backend": {
-                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/data_docs/some/path/"
             }
         },
         "another_just_amazing_site": {
             "class_name": "SiteBuilder",
             "store_backend": {
-                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/data_docs/another/path/"
             }
         }

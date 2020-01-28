@@ -7,7 +7,7 @@ branches:
 language: python
 cache: pip
 os:
-  - linux
+- linux
 env:
   global:
     secure: kEzD0ak7sXZspOv4014PRC5+DWQirM1NsQyTfwuZt7u0flTCtYg80Sw4lOuYZmtdztXrY/XresnK6HpCUkFtwwVuODDnrOnj1nO4l4Sb9awoxZn6zo3Q5TyC/sflDrakPsxwKEvxIH1cvzWqRwzmGXc5LEqn5SJyHR8RBhx6zUSgt8KIXLkfLTu0naj4dJH0Hmu4pqjRTmekwfoFHnYJ7aWopZChvxc6Mo2FmFFhl7Zt70EKh6RRB+aUG5xwvwf5iE+YX9YUQfqnA+2ys3O3m4wWGTxwJcdt8ZoexlYjAnSrOePdVO7EvosaBQYEyyU3xS28DzKPQXGoyJLCLNuAmzpxq4yRzPCJJF4Swl0yqY4+ab2OJrNP4A7MuMrQUDdNebUA4BY6PoTM82zfVkDCxf/fDqYPgMOAlNJb+R3jUffRJVlVq/M4sCr3sbGrnzELeTAf63jNIyH0U5LNQzzQUAT/Kyiimey17YqC9RhOUTNrojTkyXJ+ckc7z24yEfT1hUo6DAMM2b0ko/iB1MT3+ujT6qxamHe5imeX+4W1PpZsqkaRgo/dvhIsYoVPFeoBkY/N7PLgIwXhBuuFCH61p2Kx+z8hs34lVZ5GYVHDjeoDEEfm3SQrOuM2uASL9rGWj5yXiUs0OtTjmmKgEBZtNQ9JWHPY0AAdnfgS/GhWm54=
@@ -16,12 +16,6 @@ matrix:
   - dist: trusty
     python: 2.7
     env: PANDAS=0.22.0
-#  - dist: trusty
-#    python: 2.7
-#    env: PANDAS=0.23.4
-#  - dist: trusty
-#    python: 2.7
-#    env: PANDAS=0.24.2
   - dist: trusty
     python: 2.7
     env: PANDAS=latest
@@ -44,10 +38,10 @@ matrix:
   #   python: 3.7
   #   env: PANDAS=latest
 addons:
-  postgresql: "9.4"
+  postgresql: '9.4'
 services:
-  - postgresql
-  - mysql
+ - postgresql
+ - mysql
 install:
 #   - ./travis-java.sh
   - sudo apt-get install -y pandoc
@@ -59,6 +53,6 @@ before_script:
   - psql -c 'create database test_ci;' -U postgres
   - mysql -u root --password="" -e 'create database test_ci;'
 script:
-  - pytest --cov=great_expectations --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL --slack_channel=notifications-great_expectations tests/
+ - pytest --cov=great_expectations --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL --slack_channel=notifications-great_expectations tests/
 after_success:
   - coveralls

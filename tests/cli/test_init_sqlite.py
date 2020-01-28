@@ -11,7 +11,7 @@ from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
-from tests.cli.test_datasource_sqlalchemy import (
+from tests.cli.test_datasource_sqlite import (
     _add_datasource_and_credentials_to_context,
 )
 from tests.cli.test_init_pandas import _delete_and_recreate_dir

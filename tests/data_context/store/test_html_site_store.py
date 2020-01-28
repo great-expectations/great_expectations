@@ -4,16 +4,11 @@ from marshmallow import ValidationError
 from moto import mock_s3
 import boto3
 
-from great_expectations.data_context.types.resource_identifiers import validationResultIdentifierSchema
+from great_expectations.data_context.types.resource_identifiers import validationResultIdentifierSchema, \
+    SiteSectionIdentifier, ValidationResultIdentifier, ExpectationSuiteIdentifier
 from great_expectations.exceptions import MissingTopLevelConfigKeyError
 from great_expectations.util import (
     gen_directory_tree_str,
-)
-from great_expectations.data_context.types import (
-    ValidationResultIdentifier,
-    SiteSectionIdentifier,
-    DataAssetIdentifier,
-    ExpectationSuiteIdentifier
 )
 from great_expectations.data_context.store import (
     HtmlSiteStore
@@ -22,11 +17,11 @@ from great_expectations.data_context.store import (
 
 def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
 
-    path = str(tmp_path_factory.mktemp('test_HtmlSiteStore_with_FixedLengthTupleFileSystemStoreBackend__dir'))
+    path = str(tmp_path_factory.mktemp('test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir'))
 
     my_store = HtmlSiteStore(
         store_backend={
-            "class_name": "FixedLengthTupleFilesystemStoreBackend",
+            "class_name": "TupleFilesystemStoreBackend",
             "base_directory": "my_store"
         },
         runtime_environment={
@@ -63,7 +58,7 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
 
     print(gen_directory_tree_str(path))
     assert gen_directory_tree_str(path) == """\
-test_HtmlSiteStore_with_FixedLengthTupleFileSystemStoreBackend__dir0/
+test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir0/
     my_store/
         validations/
             prod-100/
@@ -90,7 +85,7 @@ def test_HtmlSiteStore_S3_backend():
 
     my_store = HtmlSiteStore(
         store_backend={
-            "class_name": "FixedLengthTupleS3StoreBackend",
+            "class_name": "TupleS3StoreBackend",
             "bucket": bucket,
             "prefix": prefix
         }
@@ -103,12 +98,7 @@ def test_HtmlSiteStore_S3_backend():
         site_section_name="validations",
         resource_identifier=ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
-                data_asset_name=DataAssetIdentifier(
-                    datasource="a",
-                    generator="b",
-                    generator_asset="c"
-                ),
-                expectation_suite_name="quarantine",
+                expectation_suite_name="a.b.c.quarantine",
             ),
             run_id="20191007T151224.1234Z_prod_100"
         )
@@ -118,12 +108,7 @@ def test_HtmlSiteStore_S3_backend():
     ns_2 = SiteSectionIdentifier(
         site_section_name="expectations",
         resource_identifier=ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(
-                datasource="a",
-                generator="b",
-                generator_asset="c"
-            ),
-            expectation_suite_name="quarantine",
+            expectation_suite_name="a.b.c.quarantine",
         )
     )
     my_store.set(ns_2, "bbb")
@@ -137,14 +122,16 @@ def test_HtmlSiteStore_S3_backend():
     my_store.write_index_page("index_html_string_content")
 
     # Verify that internals are working as expected, including the default filepath
+    assert False  # UPDATE
+    # paths below should include the batch_parameters
     assert set(
         [s3_object_info['Key'] for s3_object_info in
          boto3.client('s3').list_objects(Bucket=bucket, Prefix=prefix)['Contents']
          ]
     ) == {
         'test/prefix/index.html',
-        'test/prefix/expectations/a/b/c/quarantine.html',
-        'test/prefix/validations/20191007T151224.1234Z_prod_100/a/b/c/quarantine.html'
+        'test/prefix/expectations/a.b.c.quarantine.html',
+        'test/prefix/validations/20191007T151224.1234Z_prod_100/a.b.c.quarantine.html'
     }
 
     index_content = boto3.client('s3').get_object(Bucket=bucket, Key='test/prefix/index.html')["Body"]\

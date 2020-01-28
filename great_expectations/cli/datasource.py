@@ -16,11 +16,8 @@ from great_expectations.cli.util import (
     _offer_to_install_new_template,
     cli_message,
 )
-from great_expectations.data_context.types import (
-    DataAssetIdentifier,
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
-)
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
+    ExpectationSuiteIdentifier
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
@@ -444,7 +441,7 @@ Since we could not connect to the database, you can complete troubleshooting in 
 
 After you connect to the datasource, run great_expectations profile to continue.
 
-""".format(datasource_name, DataContext.GE_YML, context.get_project_config()["config_variables_file_path"], rtd_url_ge_version, selected_database.value.lower()))
+""".format(datasource_name, DataContext.GE_YML, context.get_config()["config_variables_file_path"], rtd_url_ge_version, selected_database.value.lower()))
                 return None
 
     return datasource_name
@@ -864,15 +861,12 @@ Name the new expectation suite"""
     if profiling_results['success']:
         build_docs(context, view=open_docs)
         if open_docs:  # This is mostly to keep tests from spawning windows
-            data_asset_id = DataAssetIdentifier(datasource=datasource_name, generator=generator_name,
-                                                generator_asset=generator_asset)
-
             expectation_suite_identifier = ExpectationSuiteIdentifier(
-                data_asset_name=data_asset_id,
                 expectation_suite_name=expectation_suite_name
             )
 
             validation_result_identifier = ValidationResultIdentifier(
+                batch_identifier=None,
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
             )
@@ -908,10 +902,10 @@ We could not determine the format of the file. What is it?
 """
 
     reader_methods = {
-        "1": "csv", # ReaderMethods.csv
-        "2": "parquet", # ReaderMethods.parquet
-        "3": "excel", # ReaderMethods.excel
-        "4": "json", # ReaderMethods.json
+        "1": "csv",
+        "2": "parquet",
+        "3": "excel",
+        "4": "json",
     }
 
     datasource = context.get_datasource(datasource_name)
@@ -942,7 +936,7 @@ We could not determine the format of the file. What is it?
 
     batch_kwargs = {"path": path}
 
-    reader_method = datasource.guess_reader_method_from_path(path)
+    reader_method = datasource.guess_reader_method_from_path(path)["reader_method"]
 
     if reader_method is None:
 
@@ -956,17 +950,12 @@ We could not determine the format of the file. What is it?
 
             batch_kwargs["reader_method"] = reader_methods[option_selection]
 
-            batch = datasource.get_data_asset(generator_asset,
-                                              generator_name=generator_name,
-                                              batch_kwargs=batch_kwargs)
+            batch = datasource.get_batch(batch_kwargs=batch_kwargs)
 
             break
     else:
         # TODO: read the file and confirm with user that we read it correctly (headers, columns, etc.)
-        batch = datasource.get_data_asset(
-            generator_asset,
-            generator_name=generator_name,
-            batch_kwargs=batch_kwargs)
+        batch = datasource.get_batch(batch_kwargs=batch_kwargs)
 
 
     return (generator_asset, batch_kwargs)
@@ -990,7 +979,7 @@ Enter an SQL query
             batch_kwargs = {"query": query}
 
 
-            batch = datasource.get_data_asset(data_asset_name, batch_kwargs=batch_kwargs)
+            batch = datasource.batch(batch_kwargs=batch_kwargs)
 
             break
         except Exception as error: # TODO: catch more specific exception

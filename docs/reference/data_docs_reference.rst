@@ -28,7 +28,7 @@ The default Data Docs site configuration looks like this:
     local_site:
       class_name: SiteBuilder
       store_backend:
-        class_name: FixedLengthTupleFilesystemStoreBackend
+        class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
 
 Here is an example of a site configuration from great_expectations.yml with defaults defined explicitly:
@@ -41,7 +41,7 @@ Here is an example of a site configuration from great_expectations.yml with defa
       module_name: great_expectations.render.renderer.site_builder
       class_name: SiteBuilder
       store_backend:
-        class_name: FixedLengthTupleFilesystemStoreBackend
+        class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
       site_index_builder:
         class_name: DefaultSiteIndexBuilder
@@ -89,7 +89,7 @@ do so by setting the `validation_results_limit` key in your Data Docs configurat
     local_site:
       class_name: SiteBuilder
       store_backend:
-        class_name: FixedLengthTupleFilesystemStoreBackend
+        class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
       site_index_builder:
         class_name: DefaultSiteIndexBuilder
@@ -107,7 +107,7 @@ will automatically save the resulting site to that bucket.
 .. code-block:: yaml
 
   store_backend:
-    class_name: FixedLengthTupleS3StoreBackend
+    class_name: TupleS3StoreBackend
     bucket: data-docs.my_org.org
     prefix:
 
@@ -131,7 +131,7 @@ the validations renderer, and no profiling results are rendered at all.
       local_site:
         class_name: SiteBuilder
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
         site_section_builders:
           expectations:
@@ -363,7 +363,7 @@ Before modifying your project configuration, the relevant section looks like thi
     local_site:
       class_name: SiteBuilder
       store_backend:
-        class_name: FixedLengthTupleFilesystemStoreBackend
+        class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
 
 This is what it looks like after your changes are added:
@@ -374,7 +374,7 @@ This is what it looks like after your changes are added:
       local_site:
         class_name: SiteBuilder
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
         site_section_builders:
           expectations:
