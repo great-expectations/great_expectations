@@ -5,9 +5,10 @@ from click.testing import CliRunner
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from tests.cli.test_cli import yaml
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
-def test_cli_datasorce_list(empty_data_context, filesystem_csv_2):
+def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
@@ -34,12 +35,10 @@ def test_cli_datasorce_list(empty_data_context, filesystem_csv_2):
 
     stdout = result.output.strip()
     assert "[{'name': 'wow_a_datasource', 'class_name': 'PandasDatasource'}]" in stdout
-
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
+def test_cli_datasorce_new(caplog, empty_data_context, filesystem_csv_2, capsys):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     assert context.list_datasources() == []
@@ -66,12 +65,12 @@ def test_cli_datasorce_new(empty_data_context, filesystem_csv_2, capsys):
     assert "mynewsource" in datasources.keys()
     data_source_class = datasources["mynewsource"]["data_asset_type"]["class_name"]
     assert data_source_class == "PandasDataset"
-
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_cli_datasource_profile_answering_no(empty_data_context, filesystem_csv_2):
+def test_cli_datasource_profile_answering_no(
+    caplog, empty_data_context, filesystem_csv_2
+):
     empty_data_context.add_datasource(
         "my_datasource",
         module_name="great_expectations.datasource",
@@ -99,13 +98,11 @@ def test_cli_datasource_profile_answering_no(empty_data_context, filesystem_csv_
     assert result.exit_code == 0
     assert "Profiling 'my_datasource'" in stdout
     assert "Skipping profiling for now." in stdout
-
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_cli_datasource_profile_with_datasource_arg(
-    empty_data_context, filesystem_csv_2, capsys
+    caplog, empty_data_context, filesystem_csv_2, capsys
 ):
     empty_data_context.add_datasource(
         "my_datasource",
@@ -151,13 +148,11 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert validation.meta["expectation_suite_name"] == "BasicDatasetProfiler"
     assert validation.success is False
     assert len(validation.results) == 13
-
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_cli_datasource_profile_with_no_datasource_args(
-    empty_data_context, filesystem_csv_2, capsys
+    caplog, empty_data_context, filesystem_csv_2, capsys
 ):
     empty_data_context.add_datasource(
         "my_datasource",
@@ -197,13 +192,11 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert validation.meta["expectation_suite_name"] == "BasicDatasetProfiler"
     assert validation.success is False
     assert len(validation.results) == 13
-
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_cli_datasource_profile_with_additional_batch_kwargs(
-    empty_data_context, filesystem_csv_2
+    caplog, empty_data_context, filesystem_csv_2
 ):
     empty_data_context.add_datasource(
         "my_datasource",
@@ -254,13 +247,11 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
     reader_options = evr.meta["batch_kwargs"]["reader_options"]
     assert reader_options["parse_dates"] == [0]
     assert reader_options["sep"] == ","
-
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_cli_datasource_profile_with_valid_data_asset_arg(
-    empty_data_context, filesystem_csv_2, capsys
+    caplog, empty_data_context, filesystem_csv_2, capsys
 ):
     empty_data_context.add_datasource(
         "my_datasource",
@@ -309,13 +300,11 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert validation.meta["expectation_suite_name"] == "BasicDatasetProfiler"
     assert validation.success is False
     assert len(validation.results) == 13
-
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
-    empty_data_context, filesystem_csv_2
+    caplog, empty_data_context, filesystem_csv_2
 ):
     empty_data_context.add_datasource(
         "my_datasource",
@@ -356,6 +345,4 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
     expectations_store = context.stores["expectations_store"]
     suites = expectations_store.list_keys()
     assert len(suites) == 0
-
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)

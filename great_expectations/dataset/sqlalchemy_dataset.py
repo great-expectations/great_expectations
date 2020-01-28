@@ -267,7 +267,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_module("sqlalchemy.dialects." + self.engine.dialect.name)
 
-            if engine.dialect.name.lower() == "sqlite":
+            if engine and engine.dialect.name.lower() == "sqlite":
                 # sqlite temp tables only persist within a connection so override the engine
                 self.engine = engine.connect()
         elif self.engine.dialect.name.lower() == "snowflake":
