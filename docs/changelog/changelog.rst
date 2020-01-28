@@ -2,6 +2,17 @@
 
 * INTERNAL TYPES
 * Change data_asset get_data_asset_name and save_data_asset_name to be properties.
+* Removed data_asset_name, replacing it with top-level expectation_suite_name and batch_kwargs; batch_parameters can
+  be used to specify how to slice data_assets defined in generators. Read more in our blog.
+* Removed reader_methods enum; reader_method is now directly used as a batch_kwarg by relevant datasources (pandas
+  and spark). This allows you to specify arbitrary reader_methods via batch_kwargs (including read_pickle).
+  BREAKING: existing configurations using enum-based reader_method in batch_kwargs will need to update their code. For
+  example, a pandas datasource would use reader_method: read_csv instead of reader_method: csv
+* Changed batch_id to batch_markers to clarify that it can include multiple key-value pairs.
+* Removed support for type as a configuration key of datasource and generator objects
+
+
+
 
 0.8.7__develop
 -----------------

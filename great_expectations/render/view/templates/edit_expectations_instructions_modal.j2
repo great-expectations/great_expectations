@@ -1,22 +1,13 @@
-{% if full_data_asset_identifier %}
-  {% set identifier_list = full_data_asset_identifier.split("/") -%}
+{% if expectation_suite_name %}
+  {% set expectation_suite_name_dot_count = expectation_suite_name.count(".") -%}
 {% endif %}
 
 {% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
-  {% set static_images_dir = "../../../../../static/images/" -%}
+  {% set static_images_dir = ((expectation_suite_name_dot_count + 3) * "../") + "static/images/" -%}
 {% elif utm_medium == "expectation-suite-page" %}
-  {% set static_images_dir = "../../../../static/images/" -%}
+  {% set static_images_dir = ((expectation_suite_name_dot_count + 1) * "../") + "static/images/" -%}
 {% elif utm_medium == "index-page" %}
   {% set static_images_dir = "./static/images/" -%}
-{% endif %}
-
-{% set generator_asset_name = identifier_list[2] %}
-
-{% if renderer_type == "ExpectationSuitePageRenderer" %}
-  {% set expectation_suite_name = page_title %}
-{% endif %}
-{% if renderer_type == "ValidationResultPageRenderer" %}
-  {% set expectation_suite_name = expectation_suite_name %}
 {% endif %}
 
 <script type="text/javascript">
@@ -43,7 +34,7 @@ $(function() {
         <p>Expectations are best <strong>edited interactively in Jupyter notebooks</strong>.</p>
         <p>To automatically generate a notebook that does this run:</p>
         <div class="input-group mb-3">
-            <input type="text" class="form-control edit-command" readonly value="great_expectations suite edit '{{ full_data_asset_identifier }}' {{ expectation_suite_name }}">
+            <input type="text" class="form-control edit-command" readonly value="great_expectations suite edit {{ expectation_suite_name }}">
             <div class="input-group-append">
                 <button class="btn btn-primary copy-edit-command" type="button"><i class="far fa-clipboard"></i> Copy</button>
             </div>

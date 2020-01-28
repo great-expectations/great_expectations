@@ -23,11 +23,7 @@ from great_expectations.data_context.store import (
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
-    ExpectationSuiteIdentifier,
-    DataAssetIdentifier
-)
-from great_expectations.data_context.types import (
-    ValidationResultIdentifier
+    ExpectationSuiteIdentifier
 )
 
 
@@ -76,7 +72,6 @@ def test_StoreAction():
     action.run(
         validation_result_suite_identifier=ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
-                data_asset_name=DataAssetIdentifier("my_db", "default_generator", "my_table"),
                 expectation_suite_name="default_expectations"
             ),
             run_id="prod_20190801"
@@ -98,7 +93,6 @@ def test_StoreAction():
 
     assert fake_in_memory_store.get(ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier("my_db", "default_generator", "my_table"),
             expectation_suite_name="default_expectations"
         ),
         run_id="prod_20190801"

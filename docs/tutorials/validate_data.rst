@@ -383,7 +383,7 @@ as ``s3`` or ``gcs``, edit stores section of the DataContext configuration objec
       validations_store:
         class_name: ValidationsStore
         store_backend:
-          class_name: FixedLengthTupleS3Backend
+          class_name: TupleS3Backend
           bucket: my_bucket
           prefix: my_prefix
 

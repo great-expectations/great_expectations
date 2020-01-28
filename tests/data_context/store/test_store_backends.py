@@ -11,9 +11,9 @@ if six.PY2:
 
 from great_expectations.data_context.store import (
     InMemoryStoreBackend,
-    FixedLengthTupleFilesystemStoreBackend,
-    FixedLengthTupleS3StoreBackend,
-    FixedLengthTupleGCSStoreBackend,
+    TupleFilesystemStoreBackend,
+    TupleS3StoreBackend,
+    TupleGCSStoreBackend,
 )
 from great_expectations.util import (
     gen_directory_tree_str,
@@ -66,10 +66,9 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_FilesystemStoreBackend_two_way_string_conversion__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
 
-    my_store = FixedLengthTupleFilesystemStoreBackend(
+    my_store = TupleFilesystemStoreBackend(
         root_directory=os.path.abspath(path),
         base_directory=project_path,
-        key_length=3,
         filepath_template="{0}/{1}/{2}/foo-{2}-expectations.txt",
     )
 
@@ -88,32 +87,30 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
         print(converted_string)
 
 
-def test_FixedLengthTupleFilesystemStoreBackend_verify_that_key_to_filepath_operation_is_reversible(tmp_path_factory):
+def test_TupleFilesystemStoreBackend_verify_that_key_to_filepath_operation_is_reversible(tmp_path_factory):
     path = str(tmp_path_factory.mktemp(
-        'test_FixedLengthTupleFilesystemStoreBackend_verify_that_key_to_filepath_operation_is_reversible__dir'
+        'test_TupleFilesystemStoreBackend_verify_that_key_to_filepath_operation_is_reversible__dir'
     ))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
 
-    my_store = FixedLengthTupleFilesystemStoreBackend(
+    my_store = TupleFilesystemStoreBackend(
         root_directory=os.path.abspath(path),
         base_directory=project_path,
-        key_length=3,
         filepath_template="{0}/{1}/{2}/foo-{2}-expectations.txt",
     )
     # This should pass silently
     my_store.verify_that_key_to_filepath_operation_is_reversible()
 
-    my_store = FixedLengthTupleFilesystemStoreBackend(
+    my_store = TupleFilesystemStoreBackend(
         root_directory=os.path.abspath(path),
         base_directory=project_path,
-        key_length=3,
         filepath_template="{0}/{1}/foo-{2}-expectations.txt",
     )
     # This also should pass silently
     my_store.verify_that_key_to_filepath_operation_is_reversible()
 
     with pytest.raises(ValueError):
-        FixedLengthTupleFilesystemStoreBackend(
+        TupleFilesystemStoreBackend(
             root_directory=os.path.abspath(path),
             base_directory=project_path,
             key_length=3,
@@ -121,14 +118,13 @@ def test_FixedLengthTupleFilesystemStoreBackend_verify_that_key_to_filepath_oper
         )
 
 
-def test_FixedLengthTupleFilesystemStoreBackend(tmp_path_factory):
+def test_TupleFilesystemStoreBackend(tmp_path_factory):
     path = "dummy_str"
-    project_path = str(tmp_path_factory.mktemp('test_FixedLengthTupleFilesystemStoreBackend__dir'))
+    project_path = str(tmp_path_factory.mktemp('test_TupleFilesystemStoreBackend__dir'))
 
-    my_store = FixedLengthTupleFilesystemStoreBackend(
+    my_store = TupleFilesystemStoreBackend(
         root_directory=os.path.abspath(path),
         base_directory=project_path,
-        key_length=1,
         filepath_template="my_file_{0}",
     )
 
@@ -147,14 +143,14 @@ def test_FixedLengthTupleFilesystemStoreBackend(tmp_path_factory):
 
     print(gen_directory_tree_str(project_path))
     assert gen_directory_tree_str(project_path) == """\
-test_FixedLengthTupleFilesystemStoreBackend__dir0/
+test_TupleFilesystemStoreBackend__dir0/
     my_file_AAA
     my_file_BBB
 """
 
 
 @mock_s3
-def test_FixedLengthTupleS3StoreBackend():
+def test_TupleS3StoreBackend():
     """
     What does this test test and why?
 
@@ -171,7 +167,7 @@ def test_FixedLengthTupleS3StoreBackend():
     conn = boto3.resource('s3', region_name='us-east-1')
     conn.create_bucket(Bucket=bucket)
 
-    my_store = FixedLengthTupleS3StoreBackend(
+    my_store = TupleS3StoreBackend(
         key_length=1,
         filepath_template="my_file_{0}",
         bucket=bucket,
@@ -196,7 +192,7 @@ def test_FixedLengthTupleS3StoreBackend():
         'this_is_a_test_prefix/my_file_AAA', 'this_is_a_test_prefix/my_file_BBB'}
 
 
-def test_FixedLengthTupleGCSStoreBackend():
+def test_TupleGCSStoreBackend():
 
     """
     What does this test test and why?
@@ -209,7 +205,7 @@ def test_FixedLengthTupleGCSStoreBackend():
     prefix = "this_is_a_test_prefix"
     project = "dummy-project"
 
-    my_store = FixedLengthTupleGCSStoreBackend(
+    my_store = TupleGCSStoreBackend(
         key_length=1,
         filepath_template="my_file_{0}",
         bucket=bucket,
@@ -217,7 +213,7 @@ def test_FixedLengthTupleGCSStoreBackend():
         project=project
     )
 
-    my_store_with_no_filepath_template = FixedLengthTupleGCSStoreBackend(
+    my_store_with_no_filepath_template = TupleGCSStoreBackend(
         key_length=None,
         filepath_template=None,
         bucket=bucket,
