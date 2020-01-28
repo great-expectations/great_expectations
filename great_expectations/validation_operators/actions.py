@@ -1,5 +1,8 @@
 import logging
 import requests
+
+from ..data_context.types.metrics import EvaluationParameterIdentifier
+
 logger = logging.getLogger(__name__)
 
 
@@ -7,7 +10,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 
-from ..data_context.types import (
+from ..data_context.types.resource_identifiers import (
     ValidationResultIdentifier
 )
 
@@ -202,13 +205,32 @@ class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
             raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
                 type(validation_result_suite_identifier)
             ))
+        logger.error("ExtractAndStoreEvaluationParamsAction is not yet implemented")
 
-        self.data_context._extract_and_store_parameters_from_validation_results(
-            validation_result_suite,
-            validation_result_suite_identifier.expectation_suite_identifier.data_asset_name,
-            validation_result_suite_identifier.expectation_suite_identifier.expectation_suite_name,
-            validation_result_suite_identifier.run_id,
-        )
+        # requested_metric_keys = self.data_context.get_required_metric_keys()
+        # for metric_key in requested_metric_keys:
+        #     metric_kwargs, metric = validation_result_suite.get_metric(metric_key)
+        #     if metric:
+        #         key = EvaluationParameterIdentifier(
+        #             batch_identifier=validation_result_suite_identifier.batch_identifier,
+        #             metric_identifier=metric_key,
+        #             run_id=validation_result_suite_identifier.run_id
+        #         )
+        #         self.data_context.evaluation_parameter_store.set(
+        #             key=key,
+        #             value={
+        #                 "metric_kwargs": metric_kwargs,
+        #                 "batch_kwargs": validation_result_suite.batch_kwargs,
+        #                 "metric": metric
+        #             }
+        #         )
+
+        # self.data_context._extract_and_store_parameters_from_validation_results(
+        #     validation_result_suite,
+        #     validation_result_suite_identifier.expectation_suite_identifier.data_asset_name,
+        #     validation_result_suite_identifier.expectation_suite_identifier.expectation_suite_name,
+        #     validation_result_suite_identifier.run_id,
+        # )
 
 
 class UpdateDataDocsAction(NamespacedValidationAction):

@@ -70,12 +70,12 @@ Modify the policy above and save it to a file called `ip-policy.json` in your lo
       local_site:
         class_name: SiteBuilder
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
       s3_site:
         class_name: SiteBuilder
         store_backend:
-          class_name: FixedLengthTupleS3StoreBackend
+          class_name: TupleS3StoreBackend
           bucket: data-docs.my_org  # UPDATE the bucket name here to match the bucket you configured above.
     # ... additional configuration below
 

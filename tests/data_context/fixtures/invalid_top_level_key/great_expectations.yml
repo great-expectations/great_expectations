@@ -11,7 +11,7 @@ stores:
   validations_store:
     class_name: ValidationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
       filepath_template: '{4}/{0}/{1}/{2}/{3}.json'
 data_docs_sites: not_a_real_configuration

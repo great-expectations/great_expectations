@@ -1,6 +1,5 @@
 import pytest
 
-from great_expectations.data_context.types import DataAssetIdentifier
 from great_expectations.data_context.types.metrics import MetricIdentifier
 from great_expectations.datasource.types import BatchFingerprint
 

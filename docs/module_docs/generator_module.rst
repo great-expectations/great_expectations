@@ -10,9 +10,9 @@ Generator Module
     :members:
     :undoc-members:
     :show-inheritance:
-    :exclude-members: BatchGenerator
+    :exclude-members: BatchKwargsGenerator
 
-    .. autoclass:: great_expectations.datasource.generator.batch_generator.BatchGenerator
+    .. autoclass:: great_expectations.datasource.generator.batch_generator.BatchKwargsGenerator
         :members:
         :undoc-members:
 

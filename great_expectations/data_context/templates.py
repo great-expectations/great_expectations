@@ -88,13 +88,13 @@ stores:
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
 
   validations_store:
     class_name: ValidationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
   evaluation_parameter_store:
@@ -114,7 +114,7 @@ data_docs_sites:
   local_site:
     class_name: SiteBuilder
     store_backend:
-        class_name: FixedLengthTupleFilesystemStoreBackend
+        class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
         class_name: DefaultSiteIndexBuilder
