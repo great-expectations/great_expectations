@@ -10,7 +10,7 @@ that details any specific deviations from expected values.
 We recommend using :ref:`data_context` to manage expectation suites and coordinate validation across runs.
 
 *******************
-Validation results
+Validation Results
 *******************
 
 The report contains information about:
@@ -106,9 +106,10 @@ Reviewing Validation Results
 *****************************
 
 The easiest way to review Validation Results is to view them from your local Data Docs site, where you can also conveniently
-view Profiling Results and Expectation Suites. Out of the box, Great Expectations Data Docs is configured to compile a local
+view Expectation Suites and with additional configuration, Profiling Results (see :ref:`data_docs_site_configuration`). Out of the box, Great Expectations Data Docs is configured to compile a local
 data documentation site when you start a new project by running ``great_expectations init``. By default, this local site is
-saved to the ``uncommitted/data_docs/local_site/`` directory of your project.
+saved to the ``uncommitted/data_docs/local_site/`` directory of your project and will contain pages for Expectation Suites \
+and Validation Results.
 
 If you would like to review the raw validation results in JSON format, the default Validation Results directory is ``uncommitted/validations/``.
 Note that by default, Data Docs will only compile Validation Results located in this directory.
