@@ -166,6 +166,8 @@ class Datasource(object):
         # generator_config.update(kwargs)
         kwargs["class_name"] = class_name
         generator = self._build_generator(**kwargs)
+        if "generators" not in self._datasource_config:
+            self._datasource_config["generators"] = dict()
         self._datasource_config["generators"][name] = kwargs
 
         return generator
@@ -194,7 +196,7 @@ class Datasource(object):
         """
         if generator_name in self._generators:
             return self._generators[generator_name]
-        elif generator_name in self._datasource_config["generators"]:
+        elif "generators" in self._datasource_config and generator_name in self._datasource_config["generators"]:
             generator_config = copy.deepcopy(self._datasource_config["generators"][generator_name])
         else:
             raise ValueError(
