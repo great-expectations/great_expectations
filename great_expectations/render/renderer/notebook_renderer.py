@@ -2,7 +2,6 @@ import os
 import autopep8
 import nbformat
 
-from great_expectations.core import NamespaceAwareExpectationSuite
 from great_expectations.render.renderer.renderer import Renderer
 
 
@@ -172,9 +171,9 @@ context.open_data_docs(validation_result_identifier)"""
         """
         Render a notebook dict from an expectation suite.
         """
-        if not isinstance(suite, NamespaceAwareExpectationSuite):
+        if not isinstance(suite, ExpectationSuite):
             raise RuntimeWarning(
-                "render must be given a NamespaceAwareExpectationSuite."
+                "render must be given an ExpectationSuite."
             )
         if not isinstance(batch_kwargs, dict):
             raise RuntimeWarning("render must be given a dictionary of batch_kwargs.")

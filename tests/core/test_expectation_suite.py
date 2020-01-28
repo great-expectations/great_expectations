@@ -2,8 +2,7 @@ import pytest
 
 from copy import copy, deepcopy
 
-from great_expectations.core import ExpectationSuite, ExpectationConfiguration, NamespaceAwareExpectationSuite
-from great_expectations.data_context.types import DataAssetIdentifier
+from great_expectations.core import ExpectationSuite, ExpectationConfiguration
 
 
 @pytest.fixture
@@ -68,9 +67,7 @@ def exp4():
 
 @pytest.fixture
 def baseline_suite(exp1, exp2):
-    return NamespaceAwareExpectationSuite(
-        data_asset_name=DataAssetIdentifier(datasource="my_source", generator="my_generator",
-                                            generator_asset="my_asset"),
+    return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp2],
         meta={
@@ -81,9 +78,7 @@ def baseline_suite(exp1, exp2):
 
 @pytest.fixture
 def identical_suite(exp1, exp3):
-    return NamespaceAwareExpectationSuite(
-        data_asset_name=DataAssetIdentifier(datasource="my_source", generator="my_generator",
-                                            generator_asset="my_asset"),
+    return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp3],
         meta={
@@ -94,9 +89,7 @@ def identical_suite(exp1, exp3):
 
 @pytest.fixture
 def equivalent_suite(exp1, exp3):
-    return NamespaceAwareExpectationSuite(
-        data_asset_name=DataAssetIdentifier(datasource="my_source", generator="my_generator",
-                                            generator_asset="my_other_asset"),
+    return ExpectationSuite(
         expectation_suite_name="danger",
         expectations=[exp1, exp3],
         meta={
@@ -107,9 +100,7 @@ def equivalent_suite(exp1, exp3):
 
 @pytest.fixture
 def different_suite(exp1, exp4):
-    return NamespaceAwareExpectationSuite(
-        data_asset_name=DataAssetIdentifier(datasource="my_source", generator="my_generator",
-                                            generator_asset="my_asset"),
+    return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp4],
         meta={

@@ -4,7 +4,7 @@ config_version: 1
 datasources:
   # For example, this one.
   mydatasource:
-    type: pandas
+    class_name: PandasDatasource
     generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
@@ -20,12 +20,12 @@ stores:
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
   validations_store:
     class_name: ValidationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
   local_site_html_store:
@@ -60,7 +60,7 @@ stores:
   fixture_validation_results_store:
     class_name: ValidationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: fixtures/validations
 
   evaluation_parameter_store:

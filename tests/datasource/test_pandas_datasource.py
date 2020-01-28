@@ -9,12 +9,12 @@ import pandas as pd
 from six import PY3
 import shutil
 
-
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource.types.batch_kwargs import (
     PathBatchKwargs,
-    BatchId,
+    BatchMarkers,
     BatchFingerprint
 )
 from great_expectations.dataset import PandasDataset
@@ -60,7 +60,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
 
     # A datasource should always return an object with a typed batch_id
     assert isinstance(dataset.batch_kwargs, PathBatchKwargs)
-    assert isinstance(dataset.batch_id, BatchId)
+    assert isinstance(dataset.batch_id, BatchMarkers)
     assert isinstance(dataset.batch_fingerprint, BatchFingerprint)
 
 
@@ -125,10 +125,9 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
 
 def test_pandas_source_read_csv(data_context, tmp_path_factory):
     if not PY3:
-        # We don't specifically test py2 unicode reading since this test is about our handling of kwargs *to* read_csv
-        pytest.skip()
+        pytest.skip(reason="We don't specifically test py2 unicode reading since this test is about our handling of kwargs *to* read_csv")
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
-    shutil.copy("./tests/test_sets/unicode.csv", basedir)
+    shutil.copy(file_relative_path(__file__, "../test_sets/unicode.csv"), basedir)
     data_context.add_datasource("mysource",
                                 module_name="great_expectations.datasource",
                                 class_name="PandasDatasource",
@@ -230,5 +229,5 @@ def test_read_limit(test_folder_connection_path):
 
     # A datasource should always return an object with a typed batch_id
     assert isinstance(dataset.batch_kwargs, PathBatchKwargs)
-    assert isinstance(dataset.batch_id, BatchId)
+    assert isinstance(dataset.batch_id, BatchMarkers)
     assert isinstance(dataset.batch_fingerprint, BatchFingerprint)

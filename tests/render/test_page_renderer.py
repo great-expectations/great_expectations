@@ -13,8 +13,8 @@ from great_expectations.render.renderer import (
 from great_expectations.render.types import RenderedHeaderContent, RenderedTableContent, RenderedContent
 
 
-def test_ExpectationSuitePageRenderer_render_asset_notes():
-    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
+    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
         data_asset_name="test", expectation_suite_name="test",
         meta={
             "notes": "*hi*"
@@ -24,7 +24,7 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
     assert RenderedContent.rendered_content_list_to_json(
         result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.', "*hi*"]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
         data_asset_name="test", expectation_suite_name="test",
         meta={
             "notes": ["*alpha*", "_bravo_", "charlie"]
@@ -35,7 +35,7 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
         result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
                               "*alpha*", "_bravo_", "charlie"]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
         data_asset_name="test", expectation_suite_name="test",
         meta={
             "notes": {
@@ -49,7 +49,7 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
         result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
                            "*alpha*", "_bravo_", "charlie"]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
         data_asset_name="test", expectation_suite_name="test",
         meta={
             "notes": {
@@ -72,7 +72,7 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
             result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
                                "*alpha*"]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
         data_asset_name="test", expectation_suite_name="test",
         meta={
             "notes": {
@@ -98,8 +98,8 @@ def test_ExpectationSuitePageRenderer_render_asset_notes():
                                "*alpha*", "_bravo_", "charlie"]
 
 
-def test_expectation_summary_in_ExpectationSuitePageRenderer_render_asset_notes():
-    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_suite_notes():
+    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
         data_asset_name="test", expectation_suite_name="test",
         meta={},
         expectations=None
@@ -108,7 +108,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_asset_notes(
     assert RenderedContent.rendered_content_list_to_json(
         result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.']
 
-    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
         data_asset_name="test", expectation_suite_name="test",
         meta={
             "notes": {
@@ -131,7 +131,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_asset_notes(
             'hi',
         ]
 
-    result = ExpectationSuitePageRenderer._render_asset_notes(ExpectationSuite(
+    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
         data_asset_name="test", expectation_suite_name="test",
         meta={},
         expectations=[
