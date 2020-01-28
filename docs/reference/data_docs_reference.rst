@@ -16,6 +16,8 @@ add a new site to the configuration is to copy the "local_site" configuration
 block in great_expectations.yml, give the copy a new name and modify the details
 as needed.
 
+.. _data_docs_site_configuration:
+
 ***************************************
 Data Docs Site Configuration
 ***************************************
