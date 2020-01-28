@@ -39,6 +39,7 @@ class ManualGenerator(BatchKwargsGenerator):
                 logs:
                   path: data/log.csv
     """
+    recognized_batch_parameters = {"name"}
 
     def __init__(self, name="default",
                  datasource=None,
@@ -59,11 +60,12 @@ class ManualGenerator(BatchKwargsGenerator):
         return {"names": list(self.assets.keys())}
 
     def _get_generator_asset_config(self, generator_asset):
-        for asset_name, asset_definition in self.assets.items():
-            if asset_name != generator_asset:
-                continue
-            else:
-                return asset_definition
+        if generator_asset is None:
+            return
+
+        elif generator_asset in self.assets:
+            return self.assets[generator_asset]
+
         raise InvalidBatchKwargsError("No asset definition for requested asset %s" % generator_asset)
 
     def _get_iterator(self, generator_asset, **kwargs):
@@ -92,26 +94,29 @@ class ManualGenerator(BatchKwargsGenerator):
                 pass
         return partition_ids
 
-    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, batch_kwargs=None, **kwargs):
+    def _build_batch_kwargs(self, batch_parameters):
         """Build batch kwargs from a partition id."""
-        asset_definition = self._get_generator_asset_config(generator_asset=generator_asset)
-        if isinstance(asset_definition, list):
-            for batch_definition in asset_definition:
+        batch_kwargs = None
+        if "partition_id" in batch_parameters:
+            asset_definition = self._get_generator_asset_config(generator_asset=batch_parameters.get("name"))
+            if isinstance(asset_definition, list):
+                for batch_definition in asset_definition:
+                    try:
+                        if batch_definition['partition_id'] == batch_parameters.get("partition_id"):
+                            batch_kwargs = deepcopy(batch_definition)
+                    except KeyError:
+                        pass
+            elif isinstance(asset_definition, dict):
                 try:
-                    if batch_definition['partition_id'] == partition_id:
-                        batch_kwargs = deepcopy(batch_definition)
+                    if asset_definition['partition_id'] == batch_parameters.get("partition_id"):
+                        batch_kwargs = deepcopy(asset_definition)
                 except KeyError:
                     pass
-        elif isinstance(asset_definition, dict):
-            try:
-                if asset_definition['partition_id'] == partition_id:
-                    batch_kwargs = deepcopy(asset_definition)
-            except KeyError:
-                pass
+        else:
+            batch_kwargs = next(self._get_iterator(batch_parameters.get("name")))
+
         if batch_kwargs is not None:
-            batch_kwargs.update(kwargs)
             return batch_kwargs
         else:
-            raise BatchKwargsError("Unable to identify batch_kwargs for given partition_id", {
-                "partition_id": partition_id
-            })
+            raise BatchKwargsError("Unable to find batch_kwargs for given batch_parameters", batch_parameters)
+

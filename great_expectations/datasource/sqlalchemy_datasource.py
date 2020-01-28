@@ -170,9 +170,11 @@ class SqlAlchemyDatasource(Datasource):
                     .offset(offset)\
                     .limit(limit)
                 query = str(raw_query.compile(self.engine, compile_kwargs={"literal_binds": True}))
-                batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query)
+                batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query,
+                                                           schema=batch_kwargs.get("schema"))
             else:
-                batch_reference = SqlAlchemyBatchReference(engine=self.engine, table_name=batch_kwargs["table"])
+                batch_reference = SqlAlchemyBatchReference(engine=self.engine, table_name=batch_kwargs["table"],
+                                                           schema=batch_kwargs.get("schema"))
 
         elif "query" in batch_kwargs:
             if "limit" in batch_kwargs or "offset" in batch_kwargs:
@@ -184,7 +186,8 @@ class SqlAlchemyDatasource(Datasource):
                 table_name = None
 
             query = Template(batch_kwargs["query"]).safe_substitute(**kwargs)
-            batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query, table_name=table_name)
+            batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query, table_name=table_name,
+                                                       schema=batch_kwargs.get("schema"))
 
         else:
             raise ValueError("Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified")

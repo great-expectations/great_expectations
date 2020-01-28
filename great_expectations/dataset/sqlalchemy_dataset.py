@@ -47,33 +47,38 @@ except ImportError:
 
 class SqlAlchemyBatchReference(object):
 
-    def __init__(self, engine, table_name=None, query=None):
+    def __init__(self, engine, table_name=None, schema=None, query=None):
         self._engine = engine
-        if (table_name is None and query is None):
+        if table_name is None and query is None:
             raise ValueError("Table_name or query must be specified")
 
         self._table_name = table_name
+        self._schema = schema
         self._query = query
 
     def get_init_kwargs(self):
         if self._table_name and self._query:
             # This is allowed in BigQuery where a temporary table name must be provided *with* the
             # custom sql to execute.
-            return {
+            kwargs = {
                 "engine": self._engine,
                 "table_name": self._table_name,
                 "custom_sql": self._query
             }
         elif self._table_name:
-            return {
+            kwargs = {
                 "engine": self._engine,
                 "table_name": self._table_name
             }
         else:
-            return {
+            kwargs = {
                 "engine": self._engine,
                 "custom_sql": self._query
             }
+        if self._schema:
+            kwargs["schema"] = self._schema
+
+        return kwargs
 
 
 class MetaSqlAlchemyDataset(Dataset):

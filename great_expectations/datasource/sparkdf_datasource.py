@@ -31,6 +31,7 @@ class SparkDFDatasource(Datasource):
         - InMemoryBatchKwargs ("dataset" key)
         - QueryBatchKwargs ("query" key)
     """
+    recognized_batch_parameters = {'reader_method', 'reader_options', 'limit'}
 
     @classmethod
     def build_configuration(cls, data_asset_type=None, generators=None, spark_config=None, **kwargs):

@@ -69,6 +69,7 @@ class TableGenerator(BatchKwargsGenerator):
     defined in batch_kwargs.
 
     """
+    recognized_batch_parameters = {'name', 'limit', 'offset'}
 
     def __init__(self, name="default", datasource=None, assets=None):
         super(TableGenerator, self).__init__(name=name, datasource=datasource)
@@ -191,13 +192,15 @@ class TableGenerator(BatchKwargsGenerator):
                 "is_complete_list": is_complete_list
                 }
 
-    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, limit=None, offset=None,
-                                             query_params=None):
-        if query_params is None:
-            query_params = {}
-
-        return next(self._get_iterator(generator_asset, query_params=query_params, limit=limit,
-                                       offset=offset, partition_id=partition_id))
+    def _build_batch_kwargs(self, batch_parameters):
+        return next(
+            self._get_iterator(
+                batch_parameters.get("name"),
+                query_params=batch_parameters.get("query_params", {}),
+                limit=batch_parameters.get("limit"),
+                offset=batch_parameters.get("offset")
+            )
+        )
 
     def get_available_partition_ids(self, generator_asset):
         raise BatchKwargsError("TableGenerator cannot identify partitions, however any existing table may"

@@ -46,6 +46,7 @@ class Datasource(object):
     When adding custom expectations by subclassing an existing DataAsset type, use the data_asset_type parameter
     to configure the datasource to load and return DataAssets of the custom type.
     """
+    recognized_batch_parameters = {'limit'}
 
     @classmethod
     def from_configuration(cls, **kwargs):
@@ -143,26 +144,29 @@ class Datasource(object):
         for generator in self._datasource_config["generators"].keys():
             self.get_generator(generator)
 
-    def add_generator(self, name, generator_config, **kwargs):
+    def add_generator(self, name, class_name, **kwargs):
         """Add a generator to the datasource.
 
         Args:
             name (str): the name of the new generator to add
-            generator_config: the configuration parameters to add to the datasource
+            class_name: class of the generator to add
             kwargs: additional keyword arguments will be passed directly to the new generator's constructor
 
         Returns:
              generator (Generator)
         """
-        if isinstance(generator_config, string_types):
-            warnings.warn("Configuring generators with a type name is no longer supported. Please update to new-style "
-                          "configuration.")
-            generator_config = {
-                "type": generator_config
-            }
-        generator_config.update(kwargs)
-        generator = self._build_generator(**generator_config)
-        self._datasource_config["generators"][name] = generator_config
+
+        # 0.9.0 removes support for the type system
+        # if isinstance(generator_config, string_types):
+        #     warnings.warn("Configuring generators with a type name is no longer supported. Please update to new-style "
+        #                   "configuration.")
+        #     generator_config = {
+        #         "type": generator_config
+        #     }
+        # generator_config.update(kwargs)
+        kwargs["class_name"] = class_name
+        generator = self._build_generator(**kwargs)
+        self._datasource_config["generators"][name] = kwargs
 
         return generator
 
@@ -276,6 +280,6 @@ class Datasource(object):
             available_data_asset_names[generator_name] = generator.get_available_data_asset_names()
         return available_data_asset_names
 
-    def build_batch_kwargs(self, generator, batch_parameters=None, **kwargs):
+    def build_batch_kwargs(self, generator, name=None, **kwargs):
         generator_obj = self.get_generator(generator)
-        return generator_obj.build_batch_kwargs(batch_parameters, **kwargs)
+        return generator_obj.build_batch_kwargs(name=name, **kwargs)
