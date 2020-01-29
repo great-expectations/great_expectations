@@ -508,8 +508,7 @@ def empty_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('empty_data_context'))
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(
-        context_path, "expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
     safe_mmkdir(asset_config_path, exist_ok=True)
     return context
 
@@ -557,14 +556,12 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
 
     os.makedirs(os.path.join(project_dir, "data"))
     os.makedirs(os.path.join(project_dir, "data/titanic"))
-    curdir = os.path.abspath(os.getcwd())
     shutil.copy(
         file_relative_path(__file__, "./test_sets/Titanic.csv"),
         str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
     )
 
     os.makedirs(os.path.join(project_dir, "data/random"))
-    curdir = os.path.abspath(os.getcwd())
     shutil.copy(
         os.path.join(filesystem_csv_3, "f1.csv"),
         str(os.path.join(project_dir, "data/random/f1.csv"))

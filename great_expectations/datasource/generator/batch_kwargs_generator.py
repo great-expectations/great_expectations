@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class BatchKwargsGenerator(object):
-    """Generators produce identifying information, called "batch_kwargs" that datasources 
+    """
+    BatchKwargsGenerators produce identifying information, called "batch_kwargs" that datasources
     can use to get individual batches of data. They add flexibility in how to obtain data 
     such as with time-based partitioning, downsampling, or other techniques appropriate 
     for the datasource.
