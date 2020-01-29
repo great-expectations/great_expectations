@@ -1,7 +1,9 @@
 import os
+
 import autopep8
 import nbformat
 
+from great_expectations.core import ExpectationSuite
 from great_expectations.render.renderer.renderer import Renderer
 
 
@@ -167,20 +169,18 @@ context.open_data_docs(validation_result_identifier)"""
         with open(notebook_file_path, "w") as f:
             nbformat.write(notebook, f)
 
-    def render(self, suite, batch_kwargs):
+    def render(self, suite, batch_kwargs, data_asset_name=None):
         """
         Render a notebook dict from an expectation suite.
         """
         if not isinstance(suite, ExpectationSuite):
-            raise RuntimeWarning(
-                "render must be given an ExpectationSuite."
-            )
+            raise RuntimeWarning("render must be given an ExpectationSuite.")
+        # TODO check for proper BatchKwargs type
         if not isinstance(batch_kwargs, dict):
             raise RuntimeWarning("render must be given a dictionary of batch_kwargs.")
 
         self.notebook = nbformat.v4.new_notebook()
 
-        data_asset_name = suite.data_asset_name
         suite_name = suite.expectation_suite_name
 
         self.add_header(data_asset_name, suite_name, batch_kwargs)
@@ -190,15 +190,18 @@ context.open_data_docs(validation_result_identifier)"""
 
         return self.notebook
 
-    def render_to_disk(self, suite, batch_kwargs, notebook_file_path):
+    def render_to_disk(
+        self, suite, batch_kwargs, notebook_file_path, data_asset_name=None
+    ):
         """
         Render a notebook to disk from an expectation suite.
 
+        :param data_asset_name:
         :param batch_kwargs:
         :type suite: dict
         :type notebook_file_path: str
         """
-        self.render(suite, batch_kwargs)
+        self.render(suite, batch_kwargs, data_asset_name)
         self._write_notebook_to_disk(self.notebook, notebook_file_path)
 
     def add_authoring_intro(self):
