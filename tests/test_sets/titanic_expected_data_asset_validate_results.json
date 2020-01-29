@@ -1,8 +1,10 @@
 {
   "meta": {
-    "data_asset_name": "titanic",
     "expectation_suite_name": "default",
-    "run_id": "19551105T000000.000000Z"
+    "run_id": "19551105T000000.000000Z",
+    "batch_kwargs": {},
+    "batch_markers": {},
+    "batch_parameters": {}
   },
   "results": [
     {
