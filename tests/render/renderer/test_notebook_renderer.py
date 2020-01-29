@@ -9,7 +9,6 @@ from great_expectations.render.renderer.notebook_renderer import NotebookRendere
 def critical_suite():
     schema = ExpectationSuiteSchema(strict=True)
     critical_suite = {
-        "data_asset_name": "edw/default/pre_prod_staging.staging_npi",
         "expectation_suite_name": "critical",
         "meta": {"great_expectations.__version__": "0.7.10"},
         "expectations": [
@@ -35,7 +34,6 @@ def critical_suite():
 def warning_suite():
     schema = ExpectationSuiteSchema(strict=True)
     warning_suite = {
-        "data_asset_name": "edw/default/pre_prod_staging.staging_npi",
         "expectation_suite_name": "warning",
         "meta": {"great_expectations.__version__": "0.8.4.post0"},
         "expectations": [
@@ -252,7 +250,7 @@ def warning_suite():
 
 
 def test_simple_suite(critical_suite):
-    obs = NotebookRenderer().render(critical_suite, {"path": "foo/data"})
+    obs = NotebookRenderer().render(critical_suite, {"path": "foo/data"}, "foo_asset")
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -261,14 +259,14 @@ def test_simple_suite(critical_suite):
         "cells": [
             {
                 "cell_type": "markdown",
-                "source": "# Edit Your Expectation Suite\nUse this notebook to recreate and modify your expectation suite for:\n\n**Data Asset**: `edw/default/pre_prod_staging.staging_npi`<br>\n**Expectation Suite Name**: `critical`\n\nWe'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)",
+                "source": "# Edit Your Expectation Suite\nUse this notebook to recreate and modify your expectation suite for:\n\n**Data Asset**: `foo_asset`<br>\n**Expectation Suite Name**: `critical`\n\nWe'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "critical"  # Feel free to change the name of your suite here. Renaming this will not remove the other one.\ncontext.create_expectation_suite("edw/default/pre_prod_staging.staging_npi", expectation_suite_name, overwrite_existing=True)\n\nbatch_kwargs = {\'path\': \'../../foo/data\'}\nbatch = context.get_batch("edw/default/pre_prod_staging.staging_npi", expectation_suite_name, batch_kwargs)\nbatch.head()',
+                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "critical"  # Feel free to change the name of your suite here. Renaming this will not remove the other one.\ncontext.create_expectation_suite("foo_asset", expectation_suite_name, overwrite_existing=True)\n\nbatch_kwargs = {\'path\': \'../../foo/data\'}\nbatch = context.get_batch("foo_asset", expectation_suite_name, batch_kwargs)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -316,11 +314,13 @@ def test_simple_suite(critical_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n# Let\'s make a simple sortable timestamp. Note this could come from your pipeline runner.\nrun_id = datetime.utcnow().isoformat().replace(":", "") + "Z"\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\ncontext.build_data_docs()\ncontext.open_data_docs()',
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n# Let\'s make a simple sortable timestamp. Note this could come from your pipeline runner.\nrun_id = datetime.utcnow().isoformat().replace(":", "") + "Z"\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nexpectation_suite_identifier = list(results["details"].keys())[0]\nvalidation_result_identifier = ValidationResultIdentifier(\n    expectation_suite_identifier=expectation_suite_identifier,\n    run_id=run_id\n)\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
     }
+    for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        assert obs_cell == expected_cell
     assert obs == expected
 
 
@@ -374,7 +374,7 @@ def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
 
 
 def test_complex_suite(warning_suite):
-    obs = NotebookRenderer().render(warning_suite, {"path": "foo/data"})
+    obs = NotebookRenderer().render(warning_suite, {"path": "foo/data"}, "pre_prod_staging.staging_npi")
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -383,14 +383,14 @@ def test_complex_suite(warning_suite):
         "cells": [
             {
                 "cell_type": "markdown",
-                "source": "# Edit Your Expectation Suite\nUse this notebook to recreate and modify your expectation suite for:\n\n**Data Asset**: `edw/default/pre_prod_staging.staging_npi`<br>\n**Expectation Suite Name**: `warning`\n\nWe'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)",
+                "source": "# Edit Your Expectation Suite\nUse this notebook to recreate and modify your expectation suite for:\n\n**Data Asset**: `pre_prod_staging.staging_npi`<br>\n**Expectation Suite Name**: `warning`\n\nWe'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "warning"  # Feel free to change the name of your suite here. Renaming this will not remove the other one.\ncontext.create_expectation_suite("edw/default/pre_prod_staging.staging_npi", expectation_suite_name, overwrite_existing=True)\n\nbatch_kwargs = {\'path\': \'../../foo/data\'}\nbatch = context.get_batch("edw/default/pre_prod_staging.staging_npi", expectation_suite_name, batch_kwargs)\nbatch.head()',
+                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "warning"  # Feel free to change the name of your suite here. Renaming this will not remove the other one.\ncontext.create_expectation_suite("pre_prod_staging.staging_npi", expectation_suite_name, overwrite_existing=True)\n\nbatch_kwargs = {\'path\': \'../../foo/data\'}\nbatch = context.get_batch("pre_prod_staging.staging_npi", expectation_suite_name, batch_kwargs)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -640,9 +640,11 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n# Let\'s make a simple sortable timestamp. Note this could come from your pipeline runner.\nrun_id = datetime.utcnow().isoformat().replace(":", "") + "Z"\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\ncontext.build_data_docs()\ncontext.open_data_docs()',
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n# Let\'s make a simple sortable timestamp. Note this could come from your pipeline runner.\nrun_id = datetime.utcnow().isoformat().replace(":", "") + "Z"\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nexpectation_suite_identifier = list(results["details"].keys())[0]\nvalidation_result_identifier = ValidationResultIdentifier(\n    expectation_suite_identifier=expectation_suite_identifier,\n    run_id=run_id\n)\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
     }
+    for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        assert obs_cell == expected_cell
     assert obs == expected

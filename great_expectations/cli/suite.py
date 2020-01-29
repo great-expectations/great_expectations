@@ -111,7 +111,7 @@ Please re-run with one of these selected data assets:
     notebook_name = "{}_{}.ipynb".format(human_data_asset_name, suite.expectation_suite_name)
 
     notebook_path = os.path.join(context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
-    NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path)
+    NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path, data_asset)
 
     cli_message(
         "To continue editing this suite, run <green>jupyter notebook {}</green>".format(
