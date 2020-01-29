@@ -618,14 +618,13 @@ def titanic_multibatch_data_context(tmp_path_factory):
 @pytest.fixture
 def data_context(tmp_path_factory):
     """
-    This data_context is *manually* created to have the config we want, vs
-    created with DataContext.create()
-    """
+        This data_context is *manually* created to have the config we want, vs
+        created with DataContext.create()
+        """
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
-
     safe_mmkdir(
         os.path.join(asset_config_path, "my_dag_node"),
         exist_ok=True,
@@ -643,7 +642,6 @@ def data_context(tmp_path_factory):
             asset_config_path, "my_dag_node/default.json"
         ),
     )
-
     safe_mmkdir(os.path.join(context_path, "plugins"))
     shutil.copy(
         os.path.join(fixture_dir, "custom_pandas_dataset.py"),
