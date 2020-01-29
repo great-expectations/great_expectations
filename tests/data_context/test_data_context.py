@@ -63,13 +63,22 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
 
 
 def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
+
     empty_data_context.add_datasource("my_datasource",
-                                      module_name="great_expectations.datasource",
-                                      class_name="PandasDatasource",
-                                      base_directory=str(filesystem_csv))
+                           module_name="great_expectations.datasource",
+                           class_name="PandasDatasource",
+                           generators={
+                             "subdir_reader": {
+                                 "class_name": "SubdirReaderGenerator",
+                                 "base_directory": str(filesystem_csv)
+                             }
+                           }
+                           )
+
+
     available_asset_names = empty_data_context.get_available_data_asset_names()
 
-    assert set(available_asset_names["my_datasource"]["default"]["names"]) == {('f3', 'directory'), ('f2', 'file'), ('f1', 'file')}
+    assert set(available_asset_names["my_datasource"]["subdir_reader"]["names"]) == {('f3', 'directory'), ('f2', 'file'), ('f1', 'file')}
 
 
 def test_list_expectation_suite_keys(data_context):
