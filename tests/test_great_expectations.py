@@ -1,26 +1,31 @@
 import os
 import random
+import re
 import unittest
 from datetime import datetime
 
-from great_expectations.core import ExpectationValidationResult, ExpectationSuiteValidationResult, \
-    ExpectationConfiguration, expectationSuiteSchema, expectationSuiteValidationResultSchema, ExpectationSuite
+import pandas as pd
+
+import great_expectations as ge
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+    expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
+)
+from great_expectations.data_asset.data_asset import (
+    ValidationStatistics,
+    _calc_validation_statistics,
+)
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.dataset import MetaPandasDataset, PandasDataset
 
 try:
     from unittest import mock
 except ImportError:
     import mock
-
-import pandas as pd
-import re
-
-import great_expectations as ge
-from great_expectations.dataset import PandasDataset, MetaPandasDataset
-from great_expectations.data_asset.data_asset import (
-    _calc_validation_statistics,
-    ValidationStatistics,
-)
-from .test_utils import assertDeepAlmostEqual
 
 
 def isprime(n):
@@ -171,7 +176,7 @@ def test_base_class_expectation():
 
 def test_validate():
 
-    with open("./tests/test_sets/titanic_expectations.json") as f:
+    with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
         my_expectation_suite = expectationSuiteSchema.loads(f.read()).data
 
     my_df = ge.read_csv(
@@ -184,7 +189,7 @@ def test_validate():
         mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
         results = my_df.validate(catch_exceptions=False)
 
-    with open('./tests/test_sets/titanic_expected_data_asset_validate_results.json') as f:
+    with open(file_relative_path(__file__, './test_sets/titanic_expected_data_asset_validate_results.json')) as f:
         expected_results = expectationSuiteValidationResultSchema.loads(f.read()).data
 
     del results.meta["great_expectations.__version__"]
@@ -240,7 +245,6 @@ def test_validate_catch_non_existent_expectation():
     })
 
     validation_config_non_existent_expectation = ExpectationSuite(
-        data_asset_name="test",
         expectation_suite_name="default",
         meta={
             "great_expectations.__version__": ge.__version__
@@ -264,7 +268,6 @@ def test_validate_catch_invalid_parameter():
     })
 
     validation_config_invalid_parameter = ExpectationSuite(
-        data_asset_name="test",
         expectation_suite_name="default",
         meta={
             "great_expectations.__version__": ge.__version__

@@ -212,7 +212,7 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
 
     assert len(not_so_empty_data_context.list_expectation_suite_keys()) == 1
 
-    profiled_expectations = not_so_empty_data_context.get_expectation_suite('f1', "BasicDatasetProfiler")
+    profiled_expectations = not_so_empty_data_context.get_expectation_suite("BasicDatasetProfiler")
 
     for exp in profiled_expectations.expectations:
         assert "BasicDatasetProfiler" in exp.meta

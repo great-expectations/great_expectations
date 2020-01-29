@@ -79,9 +79,7 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_fil
     ]
 
     first_suite = context.list_expectation_suite_keys()[0]
-    suite = context.get_expectation_suite(
-        first_suite.data_asset_name, first_suite.expectation_suite_name
-    )
+    suite = context.get_expectation_suite(first_suite.expectation_suite_name)
     assert len(suite.expectations) == 13
 
     assert os.path.isdir(ge_dir)

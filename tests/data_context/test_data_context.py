@@ -30,6 +30,7 @@ from great_expectations.core import (
 )
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.util import (
+    file_relative_path,
     safe_mmkdir,
 )
 from great_expectations.exceptions import DataContextError
@@ -81,7 +82,7 @@ def test_list_expectation_suite_keys(data_context):
 
 
 def test_get_existing_expectation_suite(data_context):
-    expectation_suite = data_context.get_expectation_suite('mydatasource/mygenerator/my_dag_node', 'default')
+    expectation_suite = data_context.get_expectation_suite('default')
     assert expectation_suite.data_asset_name == DataAssetIdentifier.from_tuple(('mydatasource', 'mygenerator',
                                                                                'my_dag_node'))
     assert expectation_suite.expectation_suite_name == 'default'
@@ -681,10 +682,7 @@ def test_data_context_updates_expectation_suite_names(data_context):
 
     # We'll get that expectation suite and then update its name and re-save, then verify that everything
     # has been properly updated
-    expectation_suite = data_context.get_expectation_suite(
-        data_asset_name=data_asset_name,
-        expectation_suite_name=expectation_suite_name
-    )
+    expectation_suite = data_context.get_expectation_suite(expectation_suite_name)
 
     # Note we codify here the current behavior of having a string data_asset_name though typed ExpectationSuite objects
     # will enable changing that
@@ -714,20 +712,7 @@ def test_data_context_updates_expectation_suite_names(data_context):
         expectation_suite_name='a_new_suite_name'
     )
 
-    fetched_expectation_suite = data_context.get_expectation_suite(
-        data_asset_name=DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_new_data_asset"
-        ),
-        expectation_suite_name='a_new_suite_name'
-    )
-
-    assert fetched_expectation_suite.data_asset_name == DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_new_data_asset"
-        )
+    fetched_expectation_suite = data_context.get_expectation_suite('a_new_suite_name')
 
     assert fetched_expectation_suite.expectation_suite_name == 'a_new_suite_name'
 
@@ -742,20 +727,7 @@ def test_data_context_updates_expectation_suite_names(data_context):
         expectation_suite_name='a_new_new_suite_name'
     )
 
-    fetched_expectation_suite = data_context.get_expectation_suite(
-        data_asset_name=DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_new_new_data_asset"
-        ),
-        expectation_suite_name='a_new_new_suite_name'
-    )
-
-    assert fetched_expectation_suite.data_asset_name == DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_new_new_data_asset"
-        )
+    fetched_expectation_suite = data_context.get_expectation_suite('a_new_new_suite_name')
 
     assert fetched_expectation_suite.expectation_suite_name == 'a_new_new_suite_name'
 
@@ -788,19 +760,7 @@ def test_data_context_updates_expectation_suite_names(data_context):
         expectation_suite=expectation_suite
     )
 
-    fetched_expectation_suite = data_context.get_expectation_suite(
-        data_asset_name=DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_third_name"
-        ),
-        expectation_suite_name="a_third_suite_name"
-    )
-    assert fetched_expectation_suite.data_asset_name == DataAssetIdentifier(
-        data_asset_name.datasource,
-        data_asset_name.generator,
-        "a_third_name"
-    )
+    fetched_expectation_suite = data_context.get_expectation_suite("a_third_suite_name")
     assert fetched_expectation_suite.expectation_suite_name == "a_third_suite_name"
 
 

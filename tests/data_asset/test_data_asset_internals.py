@@ -48,7 +48,6 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
                 }
             )
         ],
-        data_asset_name="default",
         expectation_suite_name="default",
         data_asset_type="Dataset",
         meta={
@@ -97,7 +96,6 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
                 }
             )
         ],
-        data_asset_name="default",
         expectation_suite_name="default",
         data_asset_type="Dataset",
         meta={
@@ -139,7 +137,6 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
                 }
             )
         ],
-        data_asset_name="default",
         expectation_suite_name="default",
         data_asset_type="Dataset",
         meta={
@@ -268,15 +265,19 @@ def test_meta_version_warning():
     asset = ge.data_asset.DataAsset()
 
     with pytest.warns(UserWarning) as w:
-        out = asset.validate(expectation_suite=ExpectationSuite(expectations=[], data_asset_name="default",
-                                                                expectation_suite_name="test",
-                                                                meta={}))
+        out = asset.validate(expectation_suite=ExpectationSuite(
+            expectations=[],
+            expectation_suite_name="test",
+            meta={})
+        )
     assert w[0].message.args[0] == "WARNING: No great_expectations version found in configuration object."
 
     with pytest.warns(UserWarning) as w:
-        out = asset.validate(expectation_suite=ExpectationSuite(expectations=[], data_asset_name="default",
-                                                                expectation_suite_name="test",
-                                                                meta={"great_expectations.__version__": "0.0.0"}))
+        out = asset.validate(expectation_suite=ExpectationSuite(
+            expectations=[],
+            expectation_suite_name="test",
+            meta={"great_expectations.__version__": "0.0.0"})
+        )
     assert w[0].message.args[0] == \
             "WARNING: This configuration object was built using version 0.0.0 of great_expectations, but is currently "\
             "being validated by version %s." % ge.__version__
@@ -806,7 +807,6 @@ def test_remove_expectation():
                     kwargs={"column": "y", "type_": "int"}
                 )
             ],
-            data_asset_name="default",
             expectation_suite_name="default",
             data_asset_type="Dataset",
             meta={
