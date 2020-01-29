@@ -1531,8 +1531,6 @@ class ConfigOnlyDataContext(object):
 
         return index_page_locator_infos
 
-    # Proposed TODO : Abe 2019/09/21 : I think we want to convert this method into a configurable profiler class, so that
-    # it can be pluggable and configurable
     def profile_datasource(self,
                            datasource_name,
                            generator_name=None,
@@ -1643,6 +1641,7 @@ class ConfigOnlyDataContext(object):
                             datasource_name=datasource_name,
                             generator_name=name[0],
                             data_asset_name=name[1],
+                            run_id=run_id,
                             additional_batch_kwargs=additional_batch_kwargs
                         )["results"][0]
                     )
@@ -1742,7 +1741,13 @@ class ConfigOnlyDataContext(object):
         start_time = datetime.datetime.now()
 
         if expectation_suite_name is None:
-            expectation_suite_name = profiler.__name__ + "." + BatchKwargs(batch_kwargs).to_id()
+            if generator_name is None and data_asset_name is None:
+                expectation_suite_name = datasource_name + "." + profiler.__name__ + "." + BatchKwargs(
+                    batch_kwargs).to_id()
+            else:
+                expectation_suite_name = datasource_name + "." + generator_name + "." + data_asset_name + "." + \
+                                         profiler.__name__
+
         self.create_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             overwrite_existing=True
