@@ -64,7 +64,8 @@ def test_validate_using_data_context_path(dataset, data_context):
         dataset,
         data_asset_name="mydatasource/mygenerator/my_dag_node",
         expectation_suite_name="default",
-        data_context=data_context_path)
+        data_context=data_context_path
+    )
 
     # We should have now found the right suite with expectations to evaluate
     assert res.success is False

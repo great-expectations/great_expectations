@@ -180,7 +180,7 @@ def test_validate():
         my_expectation_suite = expectationSuiteSchema.loads(f.read()).data
 
     my_df = ge.read_csv(
-        "./tests/test_sets/Titanic.csv",
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
         expectation_suite=my_expectation_suite
     )
     my_df.set_default_expectation_argument("result_format", "COMPLETE")
@@ -209,9 +209,11 @@ def test_validate():
 
     expected_results = ExpectationSuiteValidationResult(
         meta={
-            "data_asset_name": "titanic",
             "expectation_suite_name": "default",
-            "run_id": "19551105T000000.000000Z"
+            "run_id": "19551105T000000.000000Z",
+            "batch_kwargs": {},
+            "batch_markers": {},
+            "batch_parameters": {}
         },
         results=[ExpectationValidationResult(
             expectation_config=ExpectationConfiguration(

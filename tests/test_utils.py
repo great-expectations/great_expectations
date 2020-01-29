@@ -214,6 +214,7 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         return SqlAlchemyDataset(tablename, engine=conn, profiler=profiler, caching=caching)
 
     elif dataset_type == 'mysql':
+        from sqlalchemy import create_engine
         engine = create_engine('mysql://root@localhost/test_ci')
         conn = engine.connect()
 
