@@ -90,10 +90,8 @@ def test_list_expectation_suite_keys(data_context):
 
 
 def test_get_existing_expectation_suite(data_context):
-    expectation_suite = data_context.get_expectation_suite('default')
-    assert expectation_suite.data_asset_name == DataAssetIdentifier.from_tuple(('mydatasource', 'mygenerator',
-                                                                               'my_dag_node'))
-    assert expectation_suite.expectation_suite_name == 'default'
+    expectation_suite = data_context.get_expectation_suite('my_dag_node.default')
+    assert expectation_suite.expectation_suite_name == 'my_dag_node.default'
     assert len(expectation_suite.expectations) == 2
 
 
