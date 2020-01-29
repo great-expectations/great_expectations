@@ -101,7 +101,7 @@ class QueryGenerator(BatchGenerator):
 
     def get_available_data_asset_names(self):
         if self._queries_path:
-            defined_queries = [path for path in os.walk(self._queries_path) if str(path).endswith(".sql")]
+            defined_queries = [path[:-4] for path in os.listdir(self._queries_path) if str(path).endswith(".sql")]
         else:
             defined_queries = list(self._queries.keys())
 
