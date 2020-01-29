@@ -1137,6 +1137,7 @@ class ConfigOnlyDataContext(object):
         if expectation_suite_name is None:
             key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite.expectation_suite_name)
         else:
+            expectation_suite.expectation_suite_name = expectation_suite_name
             key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
         self.stores[self.expectations_store_name].set(key, expectation_suite)
