@@ -96,10 +96,8 @@ def test_get_existing_expectation_suite(data_context):
 
 
 def test_get_new_expectation_suite(data_context):
-    expectation_suite = data_context.create_expectation_suite('this_data_asset_does_not_exist', 'default')
-    assert expectation_suite.data_asset_name == DataAssetIdentifier.from_tuple(
-        ('mydatasource', 'mygenerator', 'this_data_asset_does_not_exist'))
-    assert expectation_suite.expectation_suite_name == 'default'
+    expectation_suite = data_context.create_expectation_suite('this_data_asset_does_not_exist.default')
+    assert expectation_suite.expectation_suite_name == 'this_data_asset_does_not_exist.default'
     assert len(expectation_suite.expectations) == 0
 
 
