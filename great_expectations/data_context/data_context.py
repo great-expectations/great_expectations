@@ -1573,9 +1573,16 @@ class ConfigOnlyDataContext(object):
         # Get data_asset_name_list
         data_asset_names = self.get_available_data_asset_names(datasource_name)
 
-        data_asset_name_list = [(generator_name, name[0]) for name in data_asset_names[datasource_name][generator_name]["names"]
-                                for generator_name in data_asset_names[datasource_name]
-                                ]
+        # KeyError will happen if there are no generators
+        data_asset_name_list = []
+        try:
+            for generator_name in data_asset_names[datasource_name].keys():
+                for name in data_asset_names[datasource_name][generator_name]["names"]:
+                    data_asset_name_list.append((generator_name, name[0]))
+
+        except KeyError:
+            data_asset_name_list = []
+
         if len(data_asset_name_list) == 0:
             raise ge_exceptions.ProfilerError(
                 "No Data Assets found in Datasource {}. Used generators: {}.".format(datasource_name, list(data_asset_names[datasource_name].keys())))
@@ -1628,7 +1635,7 @@ class ConfigOnlyDataContext(object):
             total_start_time = datetime.datetime.now()
 
             for name in data_asset_name_list:
-                logger.info("\tProfiling '%s'..." % name)
+                logger.info("\tProfiling '%s'..." % name[1])
                 try:
                     profiling_results['results'].append(
                         self.profile_data_asset(
@@ -1642,11 +1649,11 @@ class ConfigOnlyDataContext(object):
                 except ge_exceptions.ProfilerError as err:
                     logger.warning(err.message)
                 except IOError as err:
-                    logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % name)
+                    logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % name[1])
                     logger.debug(str(err))
                     skipped_data_assets += 1
                 except SQLAlchemyError as e:
-                    logger.warning("SqlAlchemyError while profiling %s. Skipping." % name)
+                    logger.warning("SqlAlchemyError while profiling %s. Skipping." % name[1])
                     logger.debug(str(e))
                     skipped_data_assets += 1
 

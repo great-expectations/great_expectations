@@ -31,14 +31,14 @@ class Datasource(object):
     relevant sources such as an existing object from a DAG runner, a SQL database, S3 bucket, or local filesystem.
 
     To bridge the gap between those worlds, Datasources interact closely with *generators* which
-    are aware of a source of data and can produce produce identifying information, called 
-    "batch_kwargs" that datasources can use to get individual batches of data. They add flexibility 
+    are aware of a source of data and can produce produce identifying information, called
+    "batch_kwargs" that datasources can use to get individual batches of data. They add flexibility
     in how to obtain data such as with time-based partitioning, downsampling, or other techniques
     appropriate for the datasource.
 
     For example, a generator could produce a SQL query that logically represents "rows in the Events
     table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource could use to materialize
-    a SqlAlchemyDataset corresponding to that batch of data and ready for validation. 
+    a SqlAlchemyDataset corresponding to that batch of data and ready for validation.
 
     Since opinionated DAG managers such as airflow, dbt, prefect.io, dagster can also act as datasources
     and/or generators for a more generic datasource.
@@ -107,7 +107,7 @@ class Datasource(object):
                 DeprecationWarning)
         self._data_asset_type = data_asset_type
         self._datasource_config = kwargs
-        self._generators = generators or {}
+        self._generators = {}
 
         self._datasource_config["data_asset_type"] = data_asset_type
         if generators is not None:
@@ -213,10 +213,17 @@ class Datasource(object):
             List(dict): each dictionary includes "name" and "type" keys
         """
         generators = []
-        for key, value in self._datasource_config["generators"].items():
+
+        if "generators" in self._datasource_config:
+            for key, value in self._datasource_config["generators"].items():
+                generators.append({
+                    "name": key,
+                    "class_name": value["class_name"]
+                })
+        else:
             generators.append({
-                "name": key,
-                "class_name": value["class_name"]
+                "name": None,
+                "class_name": None
             })
         return generators
 

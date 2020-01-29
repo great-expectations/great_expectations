@@ -27,7 +27,7 @@ HASH_THRESHOLD = 1e9
 
 
 class PandasDatasource(Datasource):
-    """The PandasDatasource produces PandasDataset objects and supports generators capable of 
+    """The PandasDatasource produces PandasDataset objects and supports generators capable of
     interacting with the local filesystem (the default subdir_reader generator), and from
     existing in-memory dataframes.
     """
@@ -125,7 +125,6 @@ class PandasDatasource(Datasource):
                                                generators=generators,
                                                **configuration_with_defaults)
 
-        self._generators = generators or {}
         self._build_generators()
         self._boto3_options = configuration_with_defaults.get("boto3_options", {})
         self._reader_method = configuration_with_defaults.get("reader_method", None)
