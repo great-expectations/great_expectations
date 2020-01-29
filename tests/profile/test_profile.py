@@ -168,7 +168,14 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
     empty_data_context.add_datasource("my_datasource",
                                     module_name="great_expectations.datasource",
                                     class_name="PandasDatasource",
-                                    base_directory=str(filesystem_csv_2))
+                                    generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(filesystem_csv_2)
+    }
+}
+)
+
     not_so_empty_data_context = empty_data_context
 
     not_so_empty_data_context.create_expectation_suite("my_datasource/f1", "default")
@@ -204,7 +211,14 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
     empty_data_context.add_datasource("my_datasource",
                                       module_name="great_expectations.datasource",
                                       class_name="PandasDatasource",
-                                      base_directory=str(filesystem_csv_2))
+                                      generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(filesystem_csv_2)
+    }
+}
+)
+
     not_so_empty_data_context = empty_data_context
 
     assert not_so_empty_data_context.list_expectation_suite_keys() == []

@@ -297,7 +297,14 @@ def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_
                 show_default=True
             )
 
-        configuration = PandasDatasource.build_configuration(base_directory=os.path.join("..", path))
+        configuration = PandasDatasource.build_configuration(generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": os.path.join("..", path)
+    }
+}
+)
+
 
     context.add_datasource(name=datasource_name, class_name='PandasDatasource', **configuration)
     return datasource_name
@@ -617,7 +624,14 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
                 show_default=True
             )
 
-        configuration = SparkDFDatasource.build_configuration(base_directory=os.path.join("..", path))
+        configuration = SparkDFDatasource.build_configuration(generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": os.path.join("..", path)
+    }
+}
+)
+
 
     context.add_datasource(name=datasource_name, class_name='SparkDFDatasource', **configuration)
     return datasource_name

@@ -251,8 +251,14 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
         "another_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
-    )
+        generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(filesystem_csv_2)
+    }
+}
+)
+
     assert len(context.list_datasources()) == 2
 
     runner = CliRunner()

@@ -24,8 +24,13 @@ def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
         "wow_a_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
-    )
+        generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(filesystem_csv_2)
+    }
+})
+
     assert context.list_datasources() == [
         {"name": "wow_a_datasource", "class_name": "PandasDatasource"}
     ]
@@ -75,8 +80,14 @@ def test_cli_datasource_profile_answering_no(
         "my_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
-    )
+        generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(filesystem_csv_2)
+    }
+}
+)
+
     not_so_empty_data_context = empty_data_context
     project_root_dir = not_so_empty_data_context.root_directory
 
@@ -108,8 +119,14 @@ def test_cli_datasource_profile_with_datasource_arg(
         "my_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
-    )
+        generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(filesystem_csv_2)
+    }
+}
+)
+
     not_so_empty_data_context = empty_data_context
     project_root_dir = not_so_empty_data_context.root_directory
 
@@ -158,8 +175,14 @@ def test_cli_datasource_profile_with_no_datasource_args(
         "my_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
-    )
+        generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(filesystem_csv_2)
+    }
+}
+)
+
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -201,8 +224,14 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
     empty_data_context.add_datasource(
         "my_datasource",
         class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
-    )
+        generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(filesystem_csv_2)
+    }
+}
+)
+
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -257,8 +286,13 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
         "my_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
-    )
+        generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(filesystem_csv_2)
+    }
+}
+)
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
@@ -310,8 +344,14 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
         "my_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        base_directory=str(filesystem_csv_2),
-    )
+        generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(filesystem_csv_2)
+    }
+}
+)
+
     not_so_empty_data_context = empty_data_context
 
     project_root_dir = not_so_empty_data_context.root_directory
