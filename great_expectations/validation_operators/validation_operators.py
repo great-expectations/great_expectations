@@ -103,10 +103,12 @@ class ActionListValidationOperator(ValidationOperator):
 
         """
         if not isinstance(item, DataAsset):
+            if not (isinstance(item, tuple) and len(item) == 2 and isinstance(item[0], dict) and isinstance(
+                    item[1], string_types)):
+                raise ValueError("Unable to build batch from item.")
             batch = self.data_context.get_batch(
-                data_asset_name=item[0],
-                expectation_suite_name=item[1],
-                batch_kwargs=item[2]
+                batch_kwargs=item[0],
+                expectation_suite_name=item[1]
             )
         else:
             batch = item

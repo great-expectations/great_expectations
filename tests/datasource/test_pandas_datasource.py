@@ -33,7 +33,14 @@ def test_folder_connection_path(tmp_path_factory):
 
 
 def test_standalone_pandas_datasource(test_folder_connection_path):
-    datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
+    datasource = PandasDatasource('PandasCSV', generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": test_folder_connection_path
+    }
+}
+)
+
 
     assert datasource.get_available_data_asset_names() == {'default': {'names': [('test', 'file')], 'is_complete_list': True}, 'passthrough': {'names': []}}
     manual_batch_kwargs = PathBatchKwargs(path=os.path.join(str(test_folder_connection_path), "test.csv"))
@@ -71,7 +78,14 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
     # OLD STYLE: Remove even from record later...
     # type_ = "pandas"
     # data_context.add_datasource(name, type_, base_directory=str(basedir))
-    data_context.add_datasource(name, class_name=class_name, base_directory=str(basedir))
+    data_context.add_datasource(name, class_name=class_name, generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(basedir)
+    }
+}
+)
+
     data_context_config = data_context.get_config()
 
     assert name in data_context_config["datasources"]
@@ -132,7 +146,14 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
                                 module_name="great_expectations.datasource",
                                 class_name="PandasDatasource",
                                 reader_options={"encoding": "utf-8"},
-                                base_directory=str(basedir))
+                                generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(basedir)
+    }
+}
+)
+
 
     data_context.create_expectation_suite(data_asset_name="mysource/unicode", expectation_suite_name="default")
     batch = data_context.get_batch("mysource/unicode",
@@ -144,7 +165,14 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
     data_context.add_datasource("mysource2",
                                 module_name="great_expectations.datasource",
                                 class_name="PandasDatasource",
-                                base_directory=str(basedir))
+                                generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(basedir)
+    }
+}
+)
+
 
     data_context.create_expectation_suite(data_asset_name="mysource2/unicode", expectation_suite_name="default")
     batch = data_context.get_batch("mysource2/unicode",
@@ -157,7 +185,14 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
                                 module_name="great_expectations.datasource",
                                 class_name="PandasDatasource",
                                 reader_options={"encoding": "utf-16"},
-                                base_directory=str(basedir))
+                                generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(basedir)
+    }
+}
+)
+
     with pytest.raises(UnicodeError, match="UTF-16 stream does not start with BOM"):
         data_context.create_expectation_suite(data_asset_name="mysource3/unicode", expectation_suite_name="default")
         batch = data_context.get_batch("mysource3/unicode",
@@ -187,7 +222,14 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
 
 def test_invalid_reader_pandas_datasource(tmp_path_factory):
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_pandas_datasource"))
-    datasource = PandasDatasource('mypandassource', base_directory=basepath)
+    datasource = PandasDatasource('mypandassource', generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": basepath
+    }
+}
+)
+
 
     with open(os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w") as newfile:
         newfile.write("a,b\n1,2\n3,4\n")
@@ -211,7 +253,14 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
 
 
 def test_read_limit(test_folder_connection_path):
-    datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
+    datasource = PandasDatasource('PandasCSV', generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": test_folder_connection_path
+    }
+}
+)
+
     dataset = datasource.get_data_asset("test",
                                         generator_name="default",
                                         batch_kwargs=PathBatchKwargs({

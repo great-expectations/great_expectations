@@ -71,6 +71,7 @@ def test_StoreAction():
 
     action.run(
         validation_result_suite_identifier=ValidationResultIdentifier(
+            batch_identifier="1234",
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 expectation_suite_name="default_expectations"
             ),
@@ -85,13 +86,12 @@ def test_StoreAction():
 
     assert len(fake_in_memory_store.list_keys()) == 1
     stored_identifier = fake_in_memory_store.list_keys()[0]
-    assert stored_identifier.expectation_suite_identifier.data_asset_name.datasource == "my_db"
-    assert stored_identifier.expectation_suite_identifier.data_asset_name.generator == "default_generator"
-    assert stored_identifier.expectation_suite_identifier.data_asset_name.generator_asset == "my_table"
+    assert stored_identifier.batch_identifier == "1234"
     assert stored_identifier.expectation_suite_identifier.expectation_suite_name == "default_expectations"
     assert stored_identifier.run_id == "prod_20190801"
 
     assert fake_in_memory_store.get(ValidationResultIdentifier(
+        batch_identifier="1234",
         expectation_suite_identifier=ExpectationSuiteIdentifier(
             expectation_suite_name="default_expectations"
         ),

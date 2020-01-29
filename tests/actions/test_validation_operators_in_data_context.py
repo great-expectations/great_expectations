@@ -22,25 +22,27 @@ def test_ActionListValidationOperator(basic_data_context_config_for_validation_o
 
     data_context.add_datasource("my_datasource",
                                 class_name="PandasDatasource",
-                                base_directory=str(filesystem_csv_4))
+                                generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(filesystem_csv_4)
+    }
+})
 
-    data_context.create_expectation_suite("my_datasource/default/f1", "foo")
-    df = data_context.get_batch("my_datasource/default/f1", "foo",
-                                batch_kwargs=data_context.yield_batch_kwargs("my_datasource/default/f1"))
+    data_context.create_expectation_suite("f1.foo")
+    df = data_context.get_batch(batch_kwargs=data_context.build_batch_kwargs("my_datasource",
+                                                                                       "subdir_reader", "f1"), expectation_suite_name="f1.foo")
     df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
     failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
-    data_context.save_expectation_suite(failure_expectations, data_asset_name="my_datasource/default/f1",
-                                        expectation_suite_name="failure")
-    data_context.save_expectation_suite(warning_expectations, data_asset_name="my_datasource/default/f1",
-                                        expectation_suite_name="warning")
+    data_context.save_expectation_suite(failure_expectations, expectation_suite_name="f1.failure")
+    data_context.save_expectation_suite(warning_expectations, expectation_suite_name="f1.warning")
 
-    validator_batch_kwargs = data_context.yield_batch_kwargs("my_datasource/default/f1")
-    batch = data_context.get_batch("my_datasource/default/f1",
-                                   expectation_suite_name="failure",
+    validator_batch_kwargs = data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1")
+    batch = data_context.get_batch(expectation_suite_name="f1.failure",
                                    batch_kwargs=validator_batch_kwargs
                                    )
 
@@ -48,7 +50,7 @@ def test_ActionListValidationOperator(basic_data_context_config_for_validation_o
     # We want to demonstrate running the validation operator with both a pre-built batch (DataAsset) and with
     # a tuple of parameters for get_batch
     operator_result = data_context.run_validation_operator(
-        assets_to_validate=[batch, ("my_datasource/default/f1", "warning", validator_batch_kwargs)],
+        assets_to_validate=[batch, (validator_batch_kwargs, "f1.warning")],
         run_id="test-100",
         validation_operator_name="store_val_res_and_extract_eval_params",
     )

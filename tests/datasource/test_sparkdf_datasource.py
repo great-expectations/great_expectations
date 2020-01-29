@@ -47,8 +47,15 @@ def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connecti
     }
     data_context.add_datasource(name,
                                 class_name=class_name,
-                                base_directory=test_folder_connection_path,
-                                data_asset_type=data_asset_type_config)
+                                data_asset_type=data_asset_type_config,
+                                generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": test_folder_connection_path
+    }
+}
+)
+
 
     # We should now see updated configs
     with open(os.path.join(data_context.root_directory, "great_expectations.yml"), "r") as data_context_config_file:
@@ -129,11 +136,17 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory):
 
 def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path, spark_session):
     assert spark_session  # Ensure a sparksession exists
-    datasource = SparkDFDatasource('SparkParquet', base_directory=test_parquet_folder_connection_path)
+    datasource = SparkDFDatasource('SparkParquet', generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": test_parquet_folder_connection_path
+    }
+}
+)
+
 
     assert datasource.get_available_data_asset_names()["default"]["names"] == [('test', 'file')]
-    dataset = datasource.get_batch('test',
-                                   expectation_suite_name="default",
+    dataset = datasource.get_batch(expectation_suite_name="default",
                                    batch_kwargs={
                                        "path": os.path.join(test_parquet_folder_connection_path,
                                                             'test.parquet')
@@ -144,8 +157,7 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
     assert dataset.spark_df.count() == 5
 
     # Limit should also work
-    dataset = datasource.get_batch('test',
-                                   expectation_suite_name="default",
+    dataset = datasource.get_batch(expectation_suite_name="default",
                                    batch_kwargs={
                                        "path": os.path.join(test_parquet_folder_connection_path,
                                                             'test.parquet'),
@@ -159,7 +171,14 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
 
 def test_standalone_spark_csv_datasource(test_folder_connection_path):
     pyspark_skip = pytest.importorskip("pyspark")
-    datasource = SparkDFDatasource('SparkParquet', base_directory=test_folder_connection_path)
+    datasource = SparkDFDatasource('SparkParquet', generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": test_folder_connection_path
+    }
+}
+)
+
     assert datasource.get_available_data_asset_names()["default"]["names"] == [('test', 'file')]
     dataset = datasource.get_batch('test',
                                    expectation_suite_name="default",
@@ -209,7 +228,14 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
 def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
     pyspark_skip = pytest.importorskip("pyspark")
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_sparkdf_datasource"))
-    datasource = SparkDFDatasource('mysparksource', base_directory=basepath)
+    datasource = SparkDFDatasource('mysparksource', generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": basepath
+    }
+}
+)
+
 
     with open(os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w") as newfile:
         newfile.write("a,b\n1,2\n3,4\n")
