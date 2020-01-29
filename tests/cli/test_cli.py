@@ -7,12 +7,13 @@ from ruamel.yaml import YAML
 from great_expectations import __version__ as ge_version
 from great_expectations.cli import cli
 from great_expectations.exceptions import ConfigNotFoundError
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 yaml = YAML()
 yaml.default_flow_style = False
 
 
-def test_cli_command_entrance():
+def test_cli_command_entrance(caplog):
     runner = CliRunner()
     result = runner.invoke(cli)
     assert result.exit_code == 0
@@ -49,9 +50,10 @@ Commands:
   suite       expectation suite operations
 """
     )
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_cli_command_invalid_command():
+def test_cli_command_invalid_command(caplog,):
     runner = CliRunner()
     result = runner.invoke(cli, ["blarg"])
     assert result.exit_code == 2
@@ -63,15 +65,17 @@ Try "cli --help" for help.
 Error: No such command "blarg".
 """
     )
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_cli_version():
+def test_cli_version(caplog,):
     runner = CliRunner()
     result = runner.invoke(cli, ["--version"])
     assert ge_version in str(result.output)
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_cli_config_not_found(tmp_path_factory):
+def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
     tmp_dir = str(tmp_path_factory.mktemp("test_cli_config_not_found"))
     curdir = os.path.abspath(os.getcwd())
     try:

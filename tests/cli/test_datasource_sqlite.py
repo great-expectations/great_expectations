@@ -6,9 +6,10 @@ from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.exceptions import DataContextError
 from tests.cli.test_cli import yaml
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
-def test_cli_datasorce_list(empty_data_context, empty_sqlite_db):
+def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
@@ -32,8 +33,7 @@ def test_cli_datasorce_list(empty_data_context, empty_sqlite_db):
         "[{'name': 'wow_a_datasource', 'class_name': 'SqlAlchemyDatasource'}]" in stdout
     )
 
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def _add_datasource_and_credentials_to_context(context, datasource_name, sqlite_engine):
@@ -60,7 +60,9 @@ def _add_datasource_and_credentials_to_context(context, datasource_name, sqlite_
     return context
 
 
-def test_cli_datasorce_new_connection_string(empty_data_context, empty_sqlite_db):
+def test_cli_datasorce_new_connection_string(
+    empty_data_context, empty_sqlite_db, caplog
+):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     assert context.list_datasources() == []
@@ -93,11 +95,12 @@ def test_cli_datasorce_new_connection_string(empty_data_context, empty_sqlite_db
     data_source_class = datasources["mynewsource"]["data_asset_type"]["class_name"]
     assert data_source_class == "SqlAlchemyDataset"
 
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_cli_datasource_profile_answering_no(empty_data_context, empty_sqlite_db):
+def test_cli_datasource_profile_answering_no(
+    empty_data_context, empty_sqlite_db, caplog
+):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     datasource_name = "wow_a_datasource"
@@ -118,12 +121,11 @@ def test_cli_datasource_profile_answering_no(empty_data_context, empty_sqlite_db
     assert "Profiling 'wow_a_datasource'" in stdout
     assert "Skipping profiling for now." in stdout
 
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_cli_datasource_profile_with_datasource_arg(
-    empty_data_context, titanic_sqlite_db
+    empty_data_context, titanic_sqlite_db, caplog
 ):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
@@ -167,12 +169,11 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert validation.success is False
     assert len(validation.results) == 51
 
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_cli_datasource_profile_with_no_datasource_args(
-    empty_data_context, titanic_sqlite_db
+    empty_data_context, titanic_sqlite_db, caplog
 ):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
@@ -209,12 +210,11 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert validation.success is False
     assert len(validation.results) == 51
 
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_should_raise_helpful_error(
-    empty_data_context, titanic_sqlite_db
+    empty_data_context, titanic_sqlite_db, caplog
 ):
     """
     Passing additional batch kwargs along with a data asset name to a sql
@@ -261,12 +261,12 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_shou
     # TODO is DataContextError the best error to raise? Should it be a CLI error?
     assert isinstance(result.exception, DataContextError)
 
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    # TODO this may not be appropriate for this test...
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_cli_datasource_profile_with_valid_data_asset_arg(
-    empty_data_context, titanic_sqlite_db
+    empty_data_context, titanic_sqlite_db, caplog
 ):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
@@ -312,12 +312,11 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert validation.success is False
     assert len(validation.results) == 51
 
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
-    empty_data_context, titanic_sqlite_db
+    empty_data_context, titanic_sqlite_db, caplog
 ):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
@@ -356,5 +355,4 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
     suites = expectations_store.list_keys()
     assert len(suites) == 0
 
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)

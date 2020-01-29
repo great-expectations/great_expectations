@@ -11,10 +11,9 @@ from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
-from tests.cli.test_datasource_sqlite import (
-    _add_datasource_and_credentials_to_context,
-)
+from tests.cli.test_datasource_sqlite import _add_datasource_and_credentials_to_context
 from tests.cli.test_init_pandas import _delete_and_recreate_dir
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
 @pytest.fixture
@@ -32,7 +31,7 @@ def titanic_sqlite_db_file(tmp_path_factory):
     return db_path
 
 
-def test_cli_init_on_new_project(tmp_path_factory, titanic_sqlite_db_file):
+def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_file):
     basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     ge_dir = os.path.join(basedir, "great_expectations")
 
@@ -199,14 +198,14 @@ great_expectations/
 """
     )
 
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
     assert result.exit_code == 0
 
 
 # TODO this behavior is broken
 def test_init_on_existing_project_with_no_datasources_should_add_one(
-    initialized_sqlite_project,
+    caplog, initialized_sqlite_project,
 ):
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
@@ -237,8 +236,7 @@ def test_init_on_existing_project_with_no_datasources_should_add_one(
     config = _load_config_file(os.path.join(ge_dir, DataContext.GE_YML))
     assert "sqlite" in config["datasources"].keys()
 
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def _remove_all_datasources(ge_dir):
@@ -266,7 +264,7 @@ def _load_config_file(config_path):
 
 
 @pytest.fixture
-def initialized_sqlite_project(tmp_path_factory, titanic_sqlite_db_file):
+def initialized_sqlite_project(caplog, tmp_path_factory, titanic_sqlite_db_file):
     """This is an initialized project through the CLI."""
     basedir = str(tmp_path_factory.mktemp("my_rad_project"))
 
@@ -279,7 +277,7 @@ def initialized_sqlite_project(tmp_path_factory, titanic_sqlite_db_file):
         input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url),
     )
     assert result.exit_code == 0
-    assert "Traceback" not in result.stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
     context = DataContext(os.path.join(basedir, DataContext.GE_DIR))
     assert isinstance(context, DataContext)
@@ -291,7 +289,7 @@ def initialized_sqlite_project(tmp_path_factory, titanic_sqlite_db_file):
 
 
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
-    initialized_sqlite_project, titanic_sqlite_db, empty_sqlite_db
+    caplog, initialized_sqlite_project, titanic_sqlite_db, empty_sqlite_db
 ):
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
@@ -316,12 +314,11 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert "appears complete" in stdout
     assert "Would you like to build & view this project's Data Docs" in stdout
 
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs(
-    initialized_sqlite_project,
+    caplog, initialized_sqlite_project,
 ):
     project_dir = initialized_sqlite_project
 
@@ -338,13 +335,12 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert "appears complete" in stdout
     assert "Would you like to build & view this project's Data Docs" in stdout
 
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 # TODO this behavior is broken
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
-    initialized_sqlite_project,
+    caplog, initialized_sqlite_project,
 ):
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
@@ -383,8 +379,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert "Error: invalid input" not in stdout
     assert "This looks like an existing project that" not in stdout
 
-    # This is important to make sure the user isn't seeing tracebacks
-    assert "Traceback" not in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
     context = DataContext(ge_dir)
     assert len(context.list_expectation_suite_keys()) == 1

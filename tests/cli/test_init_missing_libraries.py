@@ -6,11 +6,12 @@ from click.testing import CliRunner
 from great_expectations.cli import cli
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 from tests.test_utils import is_library_installed
 
 
 def _library_not_loaded_test(
-    tmp_path_factory, cli_input, library_name, library_import_name
+    tmp_path_factory, cli_input, library_name, library_import_name, my_caplog
 ):
     """
     This test requires that a library is NOT installed. It tests that:
@@ -88,22 +89,28 @@ great_expectations/
 """
     )
 
+    assert_no_logging_messages_or_tracebacks(my_caplog, result)
+
 
 @pytest.mark.skipif(
     is_library_installed("pymysql"), reason="requires pymysql to NOT be installed"
 )
-def test_cli_init_db_mysql_without_library_installed_instructs_user(tmp_path_factory):
-    _library_not_loaded_test(tmp_path_factory, "Y\n2\n1\nmy_db\n", "pymysql", "pymysql")
+def test_cli_init_db_mysql_without_library_installed_instructs_user(
+    caplog, tmp_path_factory
+):
+    _library_not_loaded_test(
+        tmp_path_factory, "Y\n2\n1\nmy_db\n", "pymysql", "pymysql", caplog
+    )
 
 
 @pytest.mark.skipif(
     is_library_installed("psycopg2"), reason="requires psycopg2 to NOT be installed"
 )
 def test_cli_init_db_postgres_without_library_installed_instructs_user(
-    tmp_path_factory,
+    caplog, tmp_path_factory,
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "Y\n2\n2\nmy_db\n", "psycopg2", "psycopg2"
+        tmp_path_factory, "Y\n2\n2\nmy_db\n", "psycopg2", "psycopg2", caplog
     )
 
 
@@ -111,10 +118,10 @@ def test_cli_init_db_postgres_without_library_installed_instructs_user(
     is_library_installed("psycopg2"), reason="requires psycopg2 to NOT be installed"
 )
 def test_cli_init_db_redshift_without_library_installed_instructs_user(
-    tmp_path_factory,
+    caplog, tmp_path_factory,
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "Y\n2\n3\nmy_db\n", "psycopg2", "psycopg2"
+        tmp_path_factory, "Y\n2\n3\nmy_db\n", "psycopg2", "psycopg2", caplog
     )
 
 
@@ -123,17 +130,23 @@ def test_cli_init_db_redshift_without_library_installed_instructs_user(
     reason="requires snowflake-sqlalchemy to NOT be installed",
 )
 def test_cli_init_db_snowflake_without_library_installed_instructs_user(
-    tmp_path_factory,
+    caplog, tmp_path_factory,
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "Y\n2\n4\nmy_db\n", "snowflake-sqlalchemy", "snowflake"
+        tmp_path_factory,
+        "Y\n2\n4\nmy_db\n",
+        "snowflake-sqlalchemy",
+        "snowflake",
+        caplog,
     )
 
 
 @pytest.mark.skipif(
     is_library_installed("pyspark"), reason="requires pyspark to NOT be installed"
 )
-def test_cli_init_spark_without_library_installed_instructs_user(tmp_path_factory):
+def test_cli_init_spark_without_library_installed_instructs_user(
+    caplog, tmp_path_factory
+):
     basedir = tmp_path_factory.mktemp("test_cli_init_diff")
     basedir = str(basedir)
     os.chdir(basedir)
@@ -194,3 +207,5 @@ great_expectations/
         validations/
 """
     )
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
