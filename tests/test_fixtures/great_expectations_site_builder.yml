@@ -4,7 +4,7 @@ config_version: 1
 datasources:
   # For example, this one.
   mydatasource:
-    type: pandas
+    class_name: PandasDatasource
     generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
