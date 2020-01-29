@@ -526,7 +526,6 @@ def test_data_context_updates_expectation_suite_names(data_context):
     # We should have a single expectation suite defined
     assert len(expectation_suites) == 1
 
-    data_asset_name = expectation_suites[0].data_asset_name
     expectation_suite_name = expectation_suites[0].expectation_suite_name
 
     # We'll get that expectation suite and then update its name and re-save, then verify that everything
@@ -535,7 +534,6 @@ def test_data_context_updates_expectation_suite_names(data_context):
 
     # Note we codify here the current behavior of having a string data_asset_name though typed ExpectationSuite objects
     # will enable changing that
-    assert expectation_suite.data_asset_name == data_asset_name
     assert expectation_suite.expectation_suite_name == expectation_suite_name
 
     # We will now change the data_asset_name and then save the suite in three ways:
@@ -544,20 +542,12 @@ def test_data_context_updates_expectation_suite_names(data_context):
     #   3. Using the new name but having the context draw that from the suite
 
     # Finally, we will try to save without a name (deleting it first) to demonstrate that saving will fail.
-    expectation_suite.data_asset_name = str(DataAssetIdentifier(
-        data_asset_name.datasource,
-        data_asset_name.generator,
-        "a_new_data_asset"
-    ))
+
+
     expectation_suite.expectation_suite_name = 'a_new_suite_name'
 
     data_context.save_expectation_suite(
         expectation_suite=expectation_suite,
-        data_asset_name=DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_new_data_asset"
-        ),
         expectation_suite_name='a_new_suite_name'
     )
 
@@ -568,11 +558,6 @@ def test_data_context_updates_expectation_suite_names(data_context):
     #   2. Using a different name that should be overwritten
     data_context.save_expectation_suite(
         expectation_suite=expectation_suite,
-        data_asset_name=DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_new_new_data_asset"
-        ),
         expectation_suite_name='a_new_new_suite_name'
     )
 
@@ -584,26 +569,12 @@ def test_data_context_updates_expectation_suite_names(data_context):
     with open(os.path.join(
                 data_context.root_directory,
                 "expectations",
-                data_asset_name.datasource,
-                data_asset_name.generator,
-                "a_new_new_data_asset",
                 "a_new_new_suite_name.json"
                 ), 'r') as suite_file:
         loaded_suite = expectationSuiteSchema.load(json.load(suite_file)).data
-        assert loaded_suite.data_asset_name == DataAssetIdentifier(
-                data_asset_name.datasource,
-                data_asset_name.generator,
-                "a_new_new_data_asset"
-            )
-
         assert loaded_suite.expectation_suite_name == 'a_new_new_suite_name'
 
     #   3. Using the new name but having the context draw that from the suite
-    expectation_suite.data_asset_name = DataAssetIdentifier(
-        data_asset_name.datasource,
-        data_asset_name.generator,
-        "a_third_name"
-    )
     expectation_suite.expectation_suite_name = "a_third_suite_name"
     data_context.save_expectation_suite(
         expectation_suite=expectation_suite
