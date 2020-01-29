@@ -61,16 +61,12 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
 test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir0/
     my_store/
         validations/
-            prod-100/
-                a/
-                    b/
-                        c/
-                            quarantine.html
-            prod-20/
-                a/
-                    b/
-                        c/
-                            quarantine.html
+            a/
+                b/
+                    c/
+                        quarantine/
+                            prod-100.html
+                            prod-20.html
 """
 
 

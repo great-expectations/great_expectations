@@ -125,7 +125,7 @@ Please re-run with one of these selected data assets:
 
 def _load_suite(context, data_asset_name, suite_name):
     try:
-        suite = context.get_expectation_suite(data_asset_name, suite_name)
+        suite = context.get_expectation_suite(suite_name)
     except ge_exceptions.DataContextError as e:
         cli_message(
             "<red>Could not locate a suite named {} for {}</red>".format(

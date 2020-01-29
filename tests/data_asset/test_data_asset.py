@@ -9,7 +9,6 @@ from great_expectations.dataset import Dataset, PandasDataset
 def test_data_asset_expectation_suite():
     asset = DataAsset()
     default_suite = ExpectationSuite(
-        data_asset_name="default",
         expectation_suite_name="default",
         data_asset_type="DataAsset",
         meta={

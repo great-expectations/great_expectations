@@ -139,7 +139,6 @@ def empty_expectation_suite():
 @pytest.fixture
 def basic_expectation_suite():
     expectation_suite = ExpectationSuite(
-        data_asset_name="basic_suite_fixture",
         expectation_suite_name="default",
         meta={},
         expectations=[

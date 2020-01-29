@@ -105,8 +105,6 @@ class BasicDatasetProfilerBase(DatasetProfiler):
         return cardinality
 
 
-
-
 class BasicDatasetProfiler(BasicDatasetProfilerBase):
     """BasicDatasetProfiler is inspired by the beloved pandas_profiling project.
 
@@ -449,9 +447,6 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
             cls._create_expectations_for_string_column(dataset, column)
             profiled_columns["low_card"].append(column)
 
-
-
-
         expectation_suite = dataset.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=True)
         if not expectation_suite.meta:
             expectation_suite.meta = {"columns": meta_columns, "notes": {""}}
@@ -471,4 +466,3 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
         }
 
         return expectation_suite
-

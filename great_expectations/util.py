@@ -377,7 +377,6 @@ def validate(
             from great_expectations.data_context import DataContext
             data_context = DataContext(data_context)
         expectation_suite = data_context.get_expectation_suite(
-            data_asset_name=data_asset_name,
             expectation_suite_name=expectation_suite_name
         )
     else:
@@ -388,7 +387,7 @@ def validate(
         if expectation_suite_name is not None:
             raise ValueError("When providing an expectation suite, expectation_suite_name cannot also be provided.")
         logger.info(
-            "Validating data_asset_name %s with expectation_suite_name %s" % (expectation_suite.data_asset_name,
+            "Validating data_asset_name %s with expectation_suite_name %s" % (data_asset_name,
                                                                               expectation_suite.expectation_suite_name)
         )
 
