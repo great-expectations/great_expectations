@@ -418,7 +418,7 @@ class DefaultSiteIndexBuilder(object):
             path_components = ["validations", batch_identifier] + expectation_suite_name.split(".") + [run_id]
             # py2 doesn't support
             # filepath = os.path.join("validations", batch_identifier, *expectation_suite_name.split("."), run_id)
-            filepath = os.path.join(path_components)
+            filepath = os.path.join(*path_components)
             filepath += ".html"
         else:
             filepath = os.path.join("expectations", *expectation_suite_name.split("."))
