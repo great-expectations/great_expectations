@@ -413,12 +413,24 @@ project_path/
     context.add_datasource("titanic",
                            module_name="great_expectations.datasource",
                            class_name="PandasDatasource",
-                           base_directory=os.path.join(project_dir, "data/titanic/"))
+                           generators={
+                             "subdir_reader": {
+                                 "class_name": "SubdirReaderGenerator",
+                                 "base_directory": os.path.join(project_dir, "data/titanic/")
+                             }
+                           }
+                           )
 
     context.add_datasource("random",
                            module_name="great_expectations.datasource",
                            class_name="PandasDatasource",
-                           base_directory=os.path.join(project_dir, "data/random/"))
+                           generators={
+                               "subdir_reader": {
+                                   "class_name": "SubdirReaderGenerator",
+                                   "base_directory": os.path.join(project_dir, "data/random/")
+                               }
+                           }
+                           )
 
     context.profile_datasource("titanic")
 
