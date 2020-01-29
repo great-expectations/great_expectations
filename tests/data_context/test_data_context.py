@@ -54,13 +54,12 @@ def parameterized_expectation_suite():
 
 def test_create_duplicate_expectation_suite(titanic_data_context):
     # create new expectation suite
-    assert titanic_data_context.create_expectation_suite(data_asset_name="titanic", expectation_suite_name="test_create_expectation_suite")
+    assert titanic_data_context.create_expectation_suite(expectation_suite_name="titanic.test_create_expectation_suite")
     # attempt to create expectation suite with name that already exists on data asset
     with pytest.raises(DataContextError):
-        titanic_data_context.create_expectation_suite(data_asset_name="titanic",
-                                                      expectation_suite_name="test_create_expectation_suite")
+        titanic_data_context.create_expectation_suite(expectation_suite_name="titanic.test_create_expectation_suite")
     # create expectation suite with name that already exists on data asset, but pass overwrite_existing=True
-    assert titanic_data_context.create_expectation_suite(data_asset_name="titanic", expectation_suite_name="test_create_expectation_suite", overwrite_existing=True)
+    assert titanic_data_context.create_expectation_suite(expectation_suite_name="titanic.test_create_expectation_suite", overwrite_existing=True)
 
 
 def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
