@@ -25,9 +25,9 @@ class ValidationsStore(Store):
                 store_backend["table_name"] = store_backend.get("table_name", "ge_validations_store")
                 store_backend["key_columns"] = store_backend.get(
                     "key_columns", [
-                        "expectation_suite_name"
+                        "expectation_suite_name",
                         "run_id",
-                        "batch_identifier",
+                        "batch_identifier"
                     ]
                 )
         super(ValidationsStore, self).__init__(store_backend=store_backend, runtime_environment=runtime_environment)
