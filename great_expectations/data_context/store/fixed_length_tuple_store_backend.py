@@ -44,6 +44,7 @@ class TupleStoreBackend(StoreBackend):
             )
 
             self.verify_that_key_to_filepath_operation_is_reversible()
+            self._fixed_length_key = True
 
     def _validate_key(self, key):
         super(TupleStoreBackend, self)._validate_key(key)
