@@ -52,9 +52,6 @@ class SiteBuilder(object):
                 class_name: TupleS3StoreBackend
                 bucket: data_docs.my_company.com
                 prefix: /data_docs/
-            datasource_whitelist:
-              - my_source
-              - my_second_source
             site_index_builder:
                 class_name: DefaultSiteIndexBuilder
 
@@ -97,7 +94,6 @@ class SiteBuilder(object):
                  site_name=None,
                  site_index_builder=None,
                  site_section_builders=None,
-                 datasource_whitelist=None,
                  runtime_environment=None
                  ):
         self.site_name = site_name
@@ -117,12 +113,6 @@ class SiteBuilder(object):
             store_backend=store_backend,
             runtime_environment=runtime_environment
         )
-
-        # the site config may specify the list of datasource names to document.
-        # if the config property is absent or is *, treat as "all"
-        self.datasource_whitelist = datasource_whitelist
-        if not self.datasource_whitelist or self.datasource_whitelist == '*':
-            self.datasource_whitelist = [datasource['name'] for datasource in data_context.list_datasources()]
 
         if site_index_builder is None:
             site_index_builder = {
@@ -205,9 +195,7 @@ class SiteBuilder(object):
         self.target_store.copy_static_assets()
 
         for site_section, site_section_builder in self.site_section_builders.items():
-            site_section_builder.build(datasource_whitelist=self.datasource_whitelist,
-                                       resource_identifiers=resource_identifiers
-                                       )
+            site_section_builder.build(resource_identifiers=resource_identifiers)
 
         return self.site_index_builder.build()
 
@@ -275,7 +263,7 @@ class DefaultSiteSectionBuilder(object):
             }
         )
 
-    def build(self, datasource_whitelist, resource_identifiers=None):
+    def build(self, resource_identifiers=None):
         source_store_keys = self.source_store.list_keys()
         if self.name == "validations" and self.validation_results_limit:
             source_store_keys = sorted(source_store_keys, key=lambda x: x.run_id, reverse=True)[:self.validation_results_limit]
@@ -292,9 +280,6 @@ class DefaultSiteSectionBuilder(object):
             if self.run_id_filter:
                 if not self._resource_key_passes_run_id_filter(resource_key):
                     continue
-
-            if not self._resource_key_passes_datasource_whitelist(resource_key, datasource_whitelist):
-                continue
 
             resource = self.source_store.get(resource_key)
 
@@ -326,15 +311,6 @@ class DefaultSiteSectionBuilder(object):
                 ),
                 viewable_content
             )
-
-    def _resource_key_passes_datasource_whitelist(self, resource_key, datasource_whitelist):
-        logger.warning("_resource_key_passes_datasource_whitelist is not yet reimplemented")
-        return True
-        # if type(resource_key) is ExpectationSuiteIdentifier:
-        #     datasource = resource_key.data_asset_name.datasource
-        # elif type(resource_key) is ValidationResultIdentifier:
-        #     datasource = resource_key.expectation_suite_identifier.data_asset_name.datasource
-        # return datasource in datasource_whitelist
 
     def _resource_key_passes_run_id_filter(self, resource_key):
         if type(resource_key) == ValidationResultIdentifier:
