@@ -33,4 +33,3 @@ freezegun>=0.3.12
 google-cloud-storage>=1.20.0
 pybigquery>=0.4.11
 autopep8>=1.4.4
-
