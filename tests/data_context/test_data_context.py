@@ -1,6 +1,7 @@
 import json
 
 from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
+from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 
 try:
     from unittest import mock
@@ -272,6 +273,14 @@ project_path/
 
     context.profile_datasource("titanic")
 
+    # Replicate the batch id of the batch that will be profiled in order to generate the file path of the
+    # validation result
+    titanic_profiled_batch_id = PathBatchKwargs({
+        'path': os.path.join(project_dir, 'data/titanic/Titanic.csv'),
+        'datasource': 'titanic'}
+    ).to_id()
+
+
     tree_str = gen_directory_tree_str(project_dir)
     print(tree_str)
     assert tree_str == """project_path/
@@ -287,7 +296,7 @@ project_path/
         datasources/
         expectations/
             titanic/
-                default/
+                subdir_reader/
                     Titanic/
                         BasicDatasetProfiler.json
         notebooks/
@@ -311,15 +320,26 @@ project_path/
             data_docs/
             samples/
             validations/
-                profiling/
-                    titanic/
-                        default/
-                            Titanic/
-                                BasicDatasetProfiler.json
-"""
+                titanic/
+                    subdir_reader/
+                        Titanic/
+                            BasicDatasetProfiler/
+                                profiling/
+                                    {0:s}.json
+""".format(titanic_profiled_batch_id)
 
     context.profile_datasource("random")
     context.build_data_docs()
+
+    f1_profiled_batch_id = PathBatchKwargs({
+        'path': os.path.join(project_dir, 'data/random/f1.csv'),
+        'datasource': 'random'}
+    ).to_id()
+
+    f2_profiled_batch_id = PathBatchKwargs({
+        'path': os.path.join(project_dir, 'data/random/f2.csv'),
+        'datasource': 'random'}
+    ).to_id()
 
     data_docs_dir = os.path.join(project_dir, "great_expectations/uncommitted/data_docs")
     observed = gen_directory_tree_str(data_docs_dir)
@@ -330,13 +350,13 @@ data_docs/
         index.html
         expectations/
             random/
-                default/
+                subdir_reader/
                     f1/
                         BasicDatasetProfiler.html
                     f2/
                         BasicDatasetProfiler.html
             titanic/
-                default/
+                subdir_reader/
                     Titanic/
                         BasicDatasetProfiler.html
         static/
@@ -386,18 +406,23 @@ data_docs/
                 data_docs_custom_styles_template.css
                 data_docs_default_styles.css
         validations/
-            profiling/
-                random/
-                    default/
-                        f1/
-                            BasicDatasetProfiler.html
-                        f2/
-                            BasicDatasetProfiler.html
-                titanic/
-                    default/
-                        Titanic/
-                            BasicDatasetProfiler.html
-"""
+            random/
+                subdir_reader/
+                    f1/
+                        BasicDatasetProfiler/
+                            profiling/
+                                {0:s}.html
+                    f2/
+                        BasicDatasetProfiler/
+                            profiling/
+                                {1:s}.html
+            titanic/
+                subdir_reader/
+                    Titanic/
+                        BasicDatasetProfiler/
+                            profiling/
+                                {2:s}.html
+""".format(f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id)
 
     # save data_docs locally
     safe_mmkdir("./tests/data_context/output")
