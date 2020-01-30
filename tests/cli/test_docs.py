@@ -35,10 +35,10 @@ def test_docs_build(caplog, site_builder_data_context_with_html_store_titanic_ra
     assert (
         "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]
     )
-    uncommitted_dir = os.path.join(root_dir, "uncommitted/data_docs/local_site/")
+    local_site_dir = os.path.join(root_dir, "uncommitted/data_docs/local_site/")
 
-    assert os.path.isdir(os.path.join(uncommitted_dir))
-    assert os.path.isfile(os.path.join(uncommitted_dir, "index.html"))
-    assert os.path.isfile(os.path.join(uncommitted_dir, "expectations"))
-    assert os.path.isfile(os.path.join(uncommitted_dir, "validations"))
+    assert os.path.isdir(os.path.join(local_site_dir))
+    assert os.path.isfile(os.path.join(local_site_dir, "index.html"))
+    assert os.path.isdir(os.path.join(local_site_dir, "expectations"))
+    assert os.path.isdir(os.path.join(local_site_dir, "validations"))
     assert_no_logging_messages_or_tracebacks(caplog, result)
