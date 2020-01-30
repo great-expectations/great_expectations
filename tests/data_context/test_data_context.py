@@ -772,11 +772,20 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
 
 
 def test_build_batch_kwargs(titanic_multibatch_data_context):
-    data_asset_name = titanic_multibatch_data_context.normalize_data_asset_name("titanic")
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(data_asset_name, "Titanic_1911")
+    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs("mydatasource", "mygenerator", name="titanic", partition_id="Titanic_1912")
+    assert os.path.relpath("./data/titanic/Titanic_1912.csv") in batch_kwargs["path"]
+
+    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs("mydatasource", "mygenerator", name="titanic", partition_id="Titanic_1911")
     assert os.path.relpath("./data/titanic/Titanic_1911.csv") in batch_kwargs["path"]
-    assert "partition_id" in batch_kwargs
-    assert batch_kwargs["partition_id"] == "Titanic_1911"
+
+    paths = []
+    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs("mydatasource", "mygenerator", name="titanic")
+    paths.append(os.path.basename(batch_kwargs["path"]))
+
+    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs("mydatasource", "mygenerator", name="titanic")
+    paths.append(os.path.basename(batch_kwargs["path"]))
+
+    assert set(["Titanic_1912.csv", "Titanic_1911.csv"]) == set(paths)
 
 
 def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasources_and_a_site_configured(tmp_path_factory):

@@ -579,23 +579,22 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
         "titanic",
         class_name="PandasDatasource",
         generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
-        "base_directory": os.path.join(project_dir, "data/titanic/")
-    }
-}
-)
-
+            "subdir_reader": {
+                "class_name": "SubdirReaderGenerator",
+                "base_directory": os.path.join(project_dir, "data/titanic/")
+            }
+        }
+    )
     context.add_datasource(
         "random",
         class_name="PandasDatasource",
         generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
-        "base_directory": os.path.join(project_dir, "data/random/")
-    }
-}
-)
+            "subdir_reader": {
+                "class_name": "SubdirReaderGenerator",
+                "base_directory": os.path.join(project_dir, "data/random/")
+            }
+        }
+    )
 
     context.profile_datasource("titanic")
     context.profile_datasource("random")

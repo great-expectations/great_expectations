@@ -181,7 +181,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(titanic_profiled
 
 def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_evrs_1):
     validation_info = ValidationResultsPageRenderer._render_validation_info(titanic_profiled_evrs_1).to_json_dict()
-    # print(validation_info)
+    print(validation_info)
 
     expected_validation_info = {'content_block_type': 'table',
                                 'styling': {'classes': ['col-12', 'table-responsive', 'mt-1'],
@@ -189,8 +189,7 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
                                 'header': {'content_block_type': 'string_template',
                                            'string_template': {'template': 'Info', 'tag': 'h6',
                                                                'styling': {'classes': ['m-0']}}},
-                                'table': [['Full Data Asset Identifier', 'my_datasource/my_generator/titanic_data'],
-                                          ['Great Expectations Version', '__fixture__'],
+                                'table': [['Great Expectations Version', '__fixture__'],
                                           ['Run ID', '__run_id_fixture__']]}
 
     assert validation_info == expected_validation_info
