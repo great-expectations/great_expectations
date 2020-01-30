@@ -29,8 +29,9 @@ class HtmlSiteStore(object):
 
         if not issubclass(store_class, TupleStoreBackend):
             raise DataContextError("Invalid configuration: HtmlSiteStore needs a TupleStoreBackend")
-        if "filepath_template" in store_backend or "key_length" in store_backend:
-            logger.warning("Configuring a filepath_template or key_length is not supported in SiteBuilder: "
+        if "filepath_template" in store_backend or ("fixed_length_key" in store_backend and
+                                                    store_backend["fixed_length_key"] is True):
+            logger.warning("Configuring a filepath_template or using fixed_length_key is not supported in SiteBuilder: "
                            "filepaths will be selected based on the type of asset rendered.")
 
         # One thing to watch for is reversibility of keys.
