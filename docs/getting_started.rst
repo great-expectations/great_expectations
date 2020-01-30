@@ -14,7 +14,7 @@ It's easy! Just use pip install:
 Once Great Expectations is installed, follow this tutorial for a quick start.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    /getting_started/cli_init
    /getting_started/typical_workflow
