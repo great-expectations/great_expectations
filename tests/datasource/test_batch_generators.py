@@ -60,7 +60,7 @@ def test_glob_reader_generator(tmp_path_factory):
     names for data_assets, and an associated glob; the generator
     will take care of providing batches consisting of one file per
     batch corresponding to the glob."""
-    
+
     basedir = str(tmp_path_factory.mktemp("test_glob_reader_generator"))
 
     with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:
@@ -145,7 +145,7 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     # Do not include: valid extension, but dot prefix
     with open(os.path.join(basedir, ".f5.csv"), "w") as outfile:
         outfile.write("\n\n\n")
-    
+
     # Include: valid extensions
     with open(os.path.join(basedir, "f6.tsv"), "w") as outfile:
         outfile.write("\n\n\n")
