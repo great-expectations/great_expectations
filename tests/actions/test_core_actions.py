@@ -124,15 +124,11 @@ def test_SlackNotificationAction(data_context):
                                                                            'success_percent': None},
                                                                meta={
                                                                    'great_expectations.__version__': 'v0.8.0__develop',
-                                                                   'data_asset_name': {'datasource': 'x',
-                                                                                       'generator': 'y',
-                                                                                       'generator_asset': 'z'},
-                                                                   'expectation_suite_name': 'default',
-                                                                   'run_id': '2019-09-25T060538.829112Z'})
+                                                                   'expectation_suite_name': 'asset.default',
+                                                                   'run_id': 'test_100'})
 
-    validation_result_suite_id = ValidationResultIdentifier(**{'expectation_suite_identifier': {
-        'data_asset_name': {'datasource': 'x', 'generator': 'y', 'generator_asset': 'z'},
-        'expectation_suite_name': 'default'}, 'run_id': 'test_100'})
+    validation_result_suite_id = ValidationResultIdentifier(expectation_suite_identifier=ExpectationSuiteIdentifier(
+        "asset.default"), run_id="test_100", batch_identifier="1234")
 
     # TODO: improve this test - currently it is verifying a failed call to Slack
     assert slack_action.run(

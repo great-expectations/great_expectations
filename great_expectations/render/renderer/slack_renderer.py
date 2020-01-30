@@ -1,6 +1,7 @@
 import datetime
 
 from .renderer import Renderer
+from ...core import BatchKwargs
 
 
 class SlackRenderer(Renderer):
@@ -29,18 +30,14 @@ class SlackRenderer(Renderer):
         }
 
         # TODO improve this nested logic
-        expectation_suite_name = None
-        data_asset_name = None
         if validation_result:
-            data_asset_name = validation_result.meta.get(
-                "data_asset_name",
-                "no_name_provided_" + datetime.datetime.utcnow().isoformat().replace(":", "") + "Z"
-            )
-            expectation_suite_name = validation_result.meta.get("expectation_suite_name", "default")
+            expectation_suite_name = validation_result.meta.get("expectation_suite_name",
+                                                                "__no_expectation_suite_name__")
         
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]
-            run_id = validation_result.meta.get("run_id", None)
+            run_id = validation_result.meta.get("run_id", "__no_run_id__")
+            batch_id = BatchKwargs(validation_result.meta.get("batch_kwargs", {})).to_id()
             check_details_text = "*{}* of *{}* expectations were met".format(
                 n_checks_succeeded, n_checks)
         
@@ -48,21 +45,21 @@ class SlackRenderer(Renderer):
                 status = "Success :tada:"
 
             summary_text = """*Batch Validation Status*: {}
-*Data Asset:* `{}`
 *Expectation suite name*: `{}`
 *Run ID*: `{}`
+*Batch ID*: `{}`
 *Timestamp*: `{}`
 *Summary*: {}""".format(
                 status,
-                data_asset_name,
                 expectation_suite_name,
                 run_id,
+                batch_id,
                 timestamp,
                 check_details_text
             )
             query["blocks"][0]["text"]["text"] = summary_text
             # this abbreviated root level "text" will show up in the notification and not the message
-            query["text"] = "{}: {}".format(data_asset_name, status)
+            query["text"] = "{}: {}".format(expectation_suite_name, status)
 
             if "result_reference" in validation_result.meta:
                 report_element = {
