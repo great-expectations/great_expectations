@@ -462,9 +462,9 @@ class TestIO(unittest.TestCase):
         Since pyarrow is not in our actual requirements, we are not going to adjust up the required numpy version.
         """
 
-        # Pass this test if the available version of pandas is less than 0.21.0, because prior
+        # Skip and pass this test if the available version of pandas is less than 0.21.0, because prior
         # versions of pandas did not include the read_parquet function.
-        pandas_version = re.match('0\.(.*)\..*', pd.__version__)
+        pandas_version = re.match('.+\.(.+)\..+', pd.__version__)
         if pandas_version is None:
             raise ValueError("Unrecognized pandas version!")
         else:
