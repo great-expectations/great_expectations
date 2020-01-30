@@ -160,9 +160,9 @@ class ActionListValidationOperator(ValidationOperator):
             logger.debug("Processing validation action with name {}".format(action["name"]))
 
             validation_result_id = ValidationResultIdentifier(
-                batch_identifier=batch.batch_id,
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
+                batch_identifier=batch.batch_id
             )
             try:
                 action_result = self.actions[action["name"]].run(
@@ -183,12 +183,12 @@ class ActionListValidationOperator(ValidationOperator):
         for item in assets_to_validate:
             batch = self._build_batch_from_item(item)
             expectation_suite_identifier = ExpectationSuiteIdentifier(
-                data_asset_name=batch.data_asset_identifier,
                 expectation_suite_name=batch._expectation_suite.expectation_suite_name
             )
             validation_result_id = ValidationResultIdentifier(
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
+                batch_identifier=batch.batch_id
             )
             result_object[validation_result_id] = {}
             batch_validation_result = batch.validate(result_format="SUMMARY")
@@ -424,6 +424,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             failure_validation_result_id = ValidationResultIdentifier(
                 expectation_suite_identifier=failure_expectation_suite_identifier,
                 run_id=run_id,
+                batch_identifier=batch.batch_id
             )
 
             failure_expectation_suite = None
@@ -464,6 +465,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             warning_validation_result_id = ValidationResultIdentifier(
                 expectation_suite_identifier=warning_expectation_suite_identifier,
                 run_id=run_id,
+                batch_identifier=batch.batch_id
             )
 
             warning_expectation_suite = None
