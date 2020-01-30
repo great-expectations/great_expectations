@@ -335,6 +335,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 s3_object_key,
                 self.prefix,
             )
+            if self.filepath_prefix and not s3_object_key.startswith(self.filepath_prefix):
+                # There can be other keys located in the same bucket; they are *not* our keys
+                continue
 
             key = self._convert_filepath_to_key(s3_object_key)
             if key:
