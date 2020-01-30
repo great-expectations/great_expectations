@@ -186,7 +186,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         expectation_suite_identifier=[key for key in operator_result["details"].keys()][0],
         run_id=run_id,
         batch_identifier=batch.batch_id)
-        res = site_builder.build(resource_identifiers=[validation_result_id])
+    res = site_builder.build(resource_identifiers=[validation_result_id])
 
     index_links_dict = res[1]
 
