@@ -1411,9 +1411,9 @@ class ConfigOnlyDataContext(object):
 
     def get_validation_result(
         self,
-        batch_identifier,
-        expectation_suite_name="default",
+        expectation_suite_name,
         run_id=None,
+        batch_identifier=None,
         validations_store_name=None,
         failed_only=False,
     ):
@@ -1434,18 +1434,31 @@ class ConfigOnlyDataContext(object):
             validations_store_name = self.validations_store_name
         selected_store = self.stores[validations_store_name]
 
-        if run_id is None:
+        if run_id is None or batch_identifier is None:
             #Get most recent run id
             # NOTE : This method requires a (potentially very inefficient) list_keys call.
             # It should probably move to live in an appropriate Store class,
             # but when we do so, that Store will need to function as more than just a key-value Store.
             key_list = selected_store.list_keys()
-            run_id_set = set([key.run_id for key in key_list])
-            if len(run_id_set) == 0:
+            filtered_key_list = []
+            for key in key_list:
+                if run_id is not None and key.run_id != run_id:
+                    continue
+                if batch_identifier is not None and key.batch_identifier != batch_identifier:
+                    continue
+                filtered_key_list.append(key)
+
+            # run_id_set = set([key.run_id for key in filtered_key_list])
+            if len(filtered_key_list) == 0:
                 logger.warning("No valid run_id values found.")
                 return {}
 
-            run_id = max(run_id_set)
+            filtered_key_list = sorted(filtered_key_list, key=lambda x: x.run_id)
+
+            if run_id is None:
+                run_id = filtered_key_list[-1].run_id
+            if batch_identifier is None:
+                batch_identifier = filtered_key_list[-1].batch_identifier
 
         key = ValidationResultIdentifier(
                 expectation_suite_identifier=ExpectationSuiteIdentifier(

@@ -185,26 +185,21 @@ def test_list_datasources(data_context):
     ])
 
 
-def test_data_context_result_store(titanic_data_context):
+def test_data_context_get_validation_result(titanic_data_context):
     """
     Test that validation results can be correctly fetched from the configured results store
     """
     profiling_results = titanic_data_context.profile_datasource("mydatasource")
 
-    for profiling_result in profiling_results['results']:
-        data_asset_name = profiling_result[0].data_asset_name
-        validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
-        assert data_asset_name == dataAssetIdentifierSchema.load(validation_result.meta["data_asset_name"]).data
-
     all_validation_result = titanic_data_context.get_validation_result(
-        "mydatasource/mygenerator/Titanic",
-        "BasicDatasetProfiler",
+        "mydatasource.mygenerator.Titanic.BasicDatasetProfiler",
+        run_id="profiling"
     )
     assert len(all_validation_result.results) == 51
 
     failed_validation_result = titanic_data_context.get_validation_result(
-        "mydatasource/mygenerator/Titanic",
-        "BasicDatasetProfiler",
+        "mydatasource.mygenerator.Titanic.BasicDatasetProfiler",
+        run_id="profiling",
         failed_only=True,
     )
     assert len(failed_validation_result.results) == 8
