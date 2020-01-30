@@ -446,7 +446,7 @@ We saved datasource {0:s} in {1:s} and the credentials you entered in {2:s}.
 Since we could not connect to the database, you can complete troubleshooting in the configuration files documented here:
 <blue>https://docs.greatexpectations.io/en/latest/tutorials/add-sqlalchemy-datasource.html?utm_source=cli&utm_medium=init&utm_campaign={3:s}#{4:s}</blue> .
 
-After you connect to the datasource, run great_expectations profile to continue.
+After you connect to the datasource, run great_expectations datasource profile to continue.
 
 """.format(datasource_name, DataContext.GE_YML, context.get_config()["config_variables_file_path"], rtd_url_ge_version, selected_database.value.lower()))
                 return None
@@ -1021,7 +1021,7 @@ Profiling '{0:s}' will create expectations and documentation.
     msg_confirm_ok_to_proceed = """Would you like to profile '{0:s}'?"""
 
     msg_skipping = "Skipping profiling for now. You can always do this later " \
-                   "by running `<green>great_expectations profile</green>`."
+                   "by running `<green>great_expectations datasource profile</green>`."
 
     msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
 """

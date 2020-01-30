@@ -76,9 +76,6 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     # local_site_config.pop('module_name')  # This isn't necessary
     local_site_config.pop('class_name')
 
-    # set datasource_whitelist
-    local_site_config['datasource_whitelist'] = ['titanic']
-
     validations_set = set(context.stores["validations_store"].list_keys())
     assert len(validations_set) == 4
     assert ValidationResultIdentifier(
@@ -141,11 +138,6 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     assert "profiling_links" in index_links_dict
     assert len(index_links_dict["profiling_links"]) == 3
 
-    # TODO: Update assertion if/when datasource whitelist is re-implemented in site builder
-    # assert "random" not in index_links_dict, \
-    #     """`random` must not appear in this documentation,
-    #     because `datasource_whitelist` config option specifies only `titanic`"""
-
     # save documentation locally
     safe_mmkdir("./tests/render/output")
     safe_mmkdir("./tests/render/output/documentation")
@@ -186,7 +178,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
         expectation_suite_identifier=[key for key in operator_result["details"].keys()][0],
         run_id=run_id,
         batch_identifier=batch.batch_id)
-        res = site_builder.build(resource_identifiers=[validation_result_id])
+    res = site_builder.build(resource_identifiers=[validation_result_id])
 
     index_links_dict = res[1]
 
