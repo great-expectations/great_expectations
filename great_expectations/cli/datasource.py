@@ -880,9 +880,9 @@ Name the new expectation suite"""
             )
 
             validation_result_identifier = ValidationResultIdentifier(
-                batch_identifier=None,
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
+                batch_identifier=None
             )
             context.open_data_docs(resource_identifier=validation_result_identifier)
 

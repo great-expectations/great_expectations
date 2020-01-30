@@ -1448,12 +1448,12 @@ class ConfigOnlyDataContext(object):
             run_id = max(run_id_set)
 
         key = ValidationResultIdentifier(
-                batch_identifier=batch_identifier,
                 expectation_suite_identifier=ExpectationSuiteIdentifier(
                     expectation_suite_name=expectation_suite_name
                 ),
-                run_id=run_id
-            )
+                run_id=run_id,
+                batch_identifier=batch_identifier
+        )
         results_dict = selected_store.get(key)
 
         #TODO: This should be a convenience method of ValidationResultSuite
@@ -1771,11 +1771,11 @@ class ConfigOnlyDataContext(object):
 
         self.validations_store.set(
             key=ValidationResultIdentifier(
-                batch_identifier=batch.batch_id,
                 expectation_suite_identifier=ExpectationSuiteIdentifier(
                     expectation_suite_name=expectation_suite_name
                 ),
-                run_id=run_id
+                run_id=run_id,
+                batch_identifier=batch.batch_id
             ),
             value=validation_results
         )
