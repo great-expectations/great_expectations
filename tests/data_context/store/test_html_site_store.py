@@ -96,7 +96,8 @@ def test_HtmlSiteStore_S3_backend():
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 expectation_suite_name="a.b.c.quarantine",
             ),
-            run_id="20191007T151224.1234Z_prod_100"
+            run_id="20191007T151224.1234Z_prod_100",
+            batch_identifier="1234"
         )
     )
     my_store.set(ns_1, "aaa")

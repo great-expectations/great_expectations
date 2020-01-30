@@ -82,32 +82,32 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     validations_set = set(context.stores["validations_store"].list_keys())
     assert len(validations_set) == 4
     assert ValidationResultIdentifier(
-        batch_identifier=batch.batch_id,
         expectation_suite_identifier=ExpectationSuiteIdentifier(
             expectation_suite_name=expectation_suite_name
         ),
-        run_id="test_run_id_12345"
+        run_id="test_run_id_12345",
+        batch_identifier=batch.batch_id
     ) in validations_set
     assert ValidationResultIdentifier(
-        batch_identifier=batch.batch_id,
         expectation_suite_identifier=ExpectationSuiteIdentifier(
             expectation_suite_name=expectation_suite_name
         ),
-        run_id="profiling"
+        run_id="profiling",
+        batch_identifier=batch.batch_id
     ) in validations_set
     assert ValidationResultIdentifier(
-        batch_identifier=batch.batch_id,
         expectation_suite_identifier=ExpectationSuiteIdentifier(
             expectation_suite_name=expectation_suite_name
         ),
-        run_id="profiling"
+        run_id="profiling",
+        batch_identifier=batch.batch_id
     ) in validations_set
     assert ValidationResultIdentifier(
-        batch_identifier=batch.batch_id,
         expectation_suite_identifier=ExpectationSuiteIdentifier(
             expectation_suite_name=expectation_suite_name
         ),
-        run_id="profiling"
+        run_id="profiling",
+        batch_identifier=batch.batch_id
     ) in validations_set
 
     site_builder = SiteBuilder(
@@ -183,10 +183,10 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     )
 
     validation_result_id = ValidationResultIdentifier(
-        batch_identifier=batch.batch_id,
         expectation_suite_identifier=[key for key in operator_result["details"].keys()][0],
-        run_id=run_id)
-    res = site_builder.build(resource_identifiers=[validation_result_id])
+        run_id=run_id,
+        batch_identifier=batch.batch_id)
+        res = site_builder.build(resource_identifiers=[validation_result_id])
 
     index_links_dict = res[1]
 
