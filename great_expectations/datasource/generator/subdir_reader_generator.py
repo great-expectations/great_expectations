@@ -112,7 +112,7 @@ class SubdirReaderGenerator(BatchKwargsGenerator):
                     path = os.path.join(self.base_directory, generator_asset, partition_id + extension)
 
             # if path is None:
-            #     logger.warning("Unable to find path with the provided parittion")
+            #     logger.warning("Unable to find path with the provided partition")
             #     # Fall through to this case in the event that there is not a subdir available, or if partition_id was
             #     # not provided
             #     if os.path.isfile(os.path.join(self.base_directory, generator_asset)):
