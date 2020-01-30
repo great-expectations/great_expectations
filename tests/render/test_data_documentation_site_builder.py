@@ -4,7 +4,6 @@ import os
 import json
 import shutil
 
-from great_expectations.core import DataAssetIdentifier
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
     ExpectationSuiteIdentifier
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -38,14 +37,33 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     # profiling the Titanic datasource will generate one expectation suite and one validation
     # that is a profiling result
-    context.profile_datasource(context.list_datasources()[0]["name"])
+    datasource_name = context.list_datasources()[0]["name"]
+    data_asset_name = "Titanic"
+    profiler_name = 'BasicDatasetProfiler'
+    generator_name = "subdir_reader"
+    context.profile_datasource(datasource_name)
 
     # creating another validation result using the profiler's suite (no need to use a new expectation suite
     # for this test). having two validation results - one with run id "profiling" - allows us to test
     # the logic of run_id_filter that helps filtering validation results to be included in
     # the profiling and the validation sections.
-    batch = context.get_batch('Titanic', expectation_suite_name='BasicDatasetProfiler',
-                              batch_kwargs=context.yield_batch_kwargs('Titanic'))
+    batch_kwargs = context.build_batch_kwargs(
+        datasource=datasource_name,
+        generator=generator_name,
+        name=data_asset_name
+    )
+
+    expectation_suite_name = "{}.{}.{}.{}".format(
+            datasource_name,
+            generator_name,
+            data_asset_name,
+            profiler_name
+        )
+
+    batch = context.get_batch(
+        batch_kwargs=batch_kwargs,
+        expectation_suite_name=expectation_suite_name,
+    )
     run_id = "test_run_id_12345"
     context.run_validation_operator(
         assets_to_validate=[batch],
@@ -64,30 +82,30 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     validations_set = set(context.stores["validations_store"].list_keys())
     assert len(validations_set) == 4
     assert ValidationResultIdentifier(
+        batch_identifier=batch.batch_id,
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier("titanic", "default", "Titanic"),
-            expectation_suite_name="BasicDatasetProfiler"
+            expectation_suite_name=expectation_suite_name
         ),
         run_id="test_run_id_12345"
     ) in validations_set
     assert ValidationResultIdentifier(
+        batch_identifier=batch.batch_id,
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier("titanic", "default", "Titanic"),
-            expectation_suite_name="BasicDatasetProfiler"
+            expectation_suite_name=expectation_suite_name
         ),
         run_id="profiling"
     ) in validations_set
     assert ValidationResultIdentifier(
+        batch_identifier=batch.batch_id,
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier("random", "default", "f1"),
-            expectation_suite_name="BasicDatasetProfiler"
+            expectation_suite_name=expectation_suite_name
         ),
         run_id="profiling"
     ) in validations_set
     assert ValidationResultIdentifier(
+        batch_identifier=batch.batch_id,
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier("random", "default", "f2"),
-            expectation_suite_name="BasicDatasetProfiler"
+            expectation_suite_name=expectation_suite_name
         ),
         run_id="profiling"
     ) in validations_set
@@ -108,61 +126,26 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     assert index_page_locator_info == context.root_directory + '/uncommitted/data_docs/local_site/index.html'
 
     print(json.dumps(index_links_dict, indent=2))
-    assert json.loads(json.dumps(index_links_dict)) == json.loads("""\
-{
-  "titanic": {
-    "default": {
-      "Titanic": {
-        "profiling_links": [
-          {
-            "full_data_asset_name": "titanic/default/Titanic",
-            "expectation_suite_name": "BasicDatasetProfiler",
-            "filepath": "validations/profiling/titanic/default/Titanic/BasicDatasetProfiler.html",
-            "source": "titanic",
-            "generator": "default",
-            "asset": "Titanic",
-            "run_id": "profiling",
-            "validation_success": false
-          }
-        ],
-        "validations_links": [
-          {
-            "full_data_asset_name": "titanic/default/Titanic",
-            "expectation_suite_name": "BasicDatasetProfiler",
-            "filepath": "validations/test_run_id_12345/titanic/default/Titanic/BasicDatasetProfiler.html",
-            "source": "titanic",
-            "generator": "default",
-            "asset": "Titanic",
-            "run_id": "test_run_id_12345",
-            "validation_success": false
-          }
-        ],
-        "expectations_links": [
-          {
-            "full_data_asset_name": "titanic/default/Titanic",
-            "expectation_suite_name": "BasicDatasetProfiler",
-            "filepath": "expectations/titanic/default/Titanic/BasicDatasetProfiler.html",
-            "source": "titanic",
-            "generator": "default",
-            "asset": "Titanic",
-            "run_id": null,
-            "validation_success": null
-          }
-        ]
-      }
-    }
-  }
-}
-    """)
-    assert "random" not in index_links_dict, \
-        """`random` must not appear in this documentation,
-        because `datasource_whitelist` config option specifies only `titanic`"""
 
-    assert len(index_links_dict['titanic']['default']['Titanic']['validations_links']) == 1, \
+    assert "site_name" in index_links_dict
+
+    assert "expectations_links" in index_links_dict
+    assert len(index_links_dict["expectations_links"]) == 3
+
+    assert "validations_links" in index_links_dict
+    assert len(index_links_dict["validations_links"]) == 1, \
     """
     The only rendered validation should be the one not generated by the profiler
     """
-    
+
+    assert "profiling_links" in index_links_dict
+    assert len(index_links_dict["profiling_links"]) == 3
+
+    # TODO: Update assertion if/when datasource whitelist is re-implemented in site builder
+    # assert "random" not in index_links_dict, \
+    #     """`random` must not appear in this documentation,
+    #     because `datasource_whitelist` config option specifies only `titanic`"""
+
     # save documentation locally
     safe_mmkdir("./tests/render/output")
     safe_mmkdir("./tests/render/output/documentation")
@@ -182,7 +165,15 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     # the operator does not have an StoreAction action configured, so the site
     # will not be updated without our call to site builder
 
-    ts_last_mod_0 = os.path.getmtime(os.path.join(site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory, "validations/test_run_id_12345/titanic/default/Titanic/BasicDatasetProfiler.html"))
+    expectation_suite_path_component = expectation_suite_name.replace('.', '/')
+    validation_result_page_path = os.path.join(
+        site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory,
+        "validations",
+        batch.batch_id,
+        expectation_suite_path_component,
+        run_id + ".html")
+
+    ts_last_mod_0 = os.path.getmtime(validation_result_page_path)
 
     run_id = "test_run_id_12346"
     operator_result = context.run_validation_operator(
@@ -192,6 +183,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     )
 
     validation_result_id = ValidationResultIdentifier(
+        batch_identifier=batch.batch_id,
         expectation_suite_identifier=[key for key in operator_result["details"].keys()][0],
         run_id=run_id)
     res = site_builder.build(resource_identifiers=[validation_result_id])
@@ -199,22 +191,27 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     index_links_dict = res[1]
 
     # verify that an additional validation result HTML file was generated
-    assert len(index_links_dict["titanic"]["default"]["Titanic"]["validations_links"]) == 2
+    assert len(index_links_dict["validations_links"]) == 2
 
     site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory
 
     # verify that the validation result HTML file rendered in the previous run was NOT updated
-    ts_last_mod_1 = os.path.getmtime(os.path.join(site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory, "validations/test_run_id_12345/titanic/default/Titanic/BasicDatasetProfiler.html"))
+    ts_last_mod_1 = os.path.getmtime(validation_result_page_path)
 
     assert ts_last_mod_0 == ts_last_mod_1
 
     # verify that the new method of the site builder that returns the URL of the HTML file that renders
     # a resource
 
+    new_validation_result_page_path = os.path.join(
+        site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory,
+        "validations",
+        batch.batch_id,
+        expectation_suite_path_component,
+        run_id + ".html")
+
     html_url = site_builder.get_resource_url(resource_identifier=validation_result_id)
-    assert "file://" + os.path.join(site_builder.site_index_builder.target_store.store_backends[\
-                                        ValidationResultIdentifier].full_base_directory,
-                                        "validations/test_run_id_12346/titanic/default/Titanic/BasicDatasetProfiler.html") == html_url
+    assert "file://" + new_validation_result_page_path == html_url
 
     html_url = site_builder.get_resource_url()
     assert "file://" + os.path.join(site_builder.site_index_builder.target_store.store_backends[\
