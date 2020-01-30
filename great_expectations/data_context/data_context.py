@@ -685,6 +685,7 @@ class ConfigOnlyDataContext(object):
             validation_operator_name,
             assets_to_validate,
             run_id=None,
+            **kwargs
     ):
         """
         Run a validation operator to validate data assets and to perform the business logic around
@@ -703,6 +704,7 @@ class ConfigOnlyDataContext(object):
         return self.validation_operators[validation_operator_name].run(
             assets_to_validate=assets_to_validate,
             run_id=run_id,
+            **kwargs
         )
 
     def add_datasource(self, name, initialize=True, **kwargs):
@@ -721,6 +723,8 @@ class ConfigOnlyDataContext(object):
         """
         logger.debug("Starting ConfigOnlyDataContext.add_datasource for %s" % name)
 
+
+        # PENDING DELETION - JPC - 20200130
         # In 0.9.0, generators are no longer required
         # if "generators" not in kwargs:
         #     logger.warning("Adding a datasource without configuring a generator will rely on default "
@@ -873,6 +877,8 @@ class ConfigOnlyDataContext(object):
                 })
         return datasources
 
+
+    # PENDING DELETION - JPC - 20200130
     # def normalize_data_asset_name(self, data_asset_name):
     #     """Normalizes data_asset_names for a data context.
     #

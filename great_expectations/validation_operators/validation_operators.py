@@ -183,7 +183,7 @@ class ActionListValidationOperator(ValidationOperator):
         for item in assets_to_validate:
             batch = self._build_batch_from_item(item)
             expectation_suite_identifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=batch._expectation_suite.expectation_suite_name
+                expectation_suite_name=batch.expectation_suite_name
             )
             validation_result_id = ValidationResultIdentifier(
                 expectation_suite_identifier=expectation_suite_identifier,
@@ -206,9 +206,9 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
     The operator retrieves 2 expectation suites for each data asset/batch - one containing
     the critical expectations ("failure") and the other containing non-critical expectations
     ("warning"). By default, the operator assumes that the first is called "failure" and the
-    second is called "warning", but "expectation_suite_name_prefix" attribute can be specified
-    in the operator's configuration to make sure it searched for "{expectation_suite_name_prefix}failure"
-    and {expectation_suite_name_prefix}warning" expectation suites for each data asset.
+    second is called "warning", but "base_expectation_suite_name" attribute can be specified
+    in the operator's configuration to make sure it searched for "{base_expectation_suite_name}.failure"
+    and {base_expectation_suite_name}.warning" expectation suites for each data asset.
 
     The operator validates each batch against its "failure" and "warning" expectation suites and
     invokes a list of actions on every validation result.
@@ -275,8 +275,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
     def __init__(self,
         data_context,
         action_list,
-        expectation_suite_name_prefix="",
-        expectation_suite_name_suffixes=["failure", "warning"],
+        base_expectation_suite_name=None,
+        expectation_suite_name_suffixes=[".failure", ".warning"],
         stop_on_first_error=False,
         slack_webhook=None,
         notify_on="all"
@@ -287,7 +287,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         )
 
         self.stop_on_first_error = stop_on_first_error
-        self.expectation_suite_name_prefix = expectation_suite_name_prefix
+        self.base_expectation_suite_name = base_expectation_suite_name
 
         assert len(expectation_suite_name_suffixes) == 2
         for suffix in expectation_suite_name_suffixes:
@@ -388,12 +388,14 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         
         return query
 
-    def run(self, assets_to_validate, run_id):
-        # NOTE : Abe 2019/09/12: We should consider typing this object, since it's passed between classes.
-        # Maybe use a Store, since it's a key-value thing...?
-        # For now, I'm NOT typing it until we gain more practical experience with operators and actions.
+    def run(self, assets_to_validate, run_id, base_expectation_suite_name=None):
+        if base_expectation_suite_name is None:
+            if self.base_expectation_suite_name is None:
+                raise ValueError("base_expectation_suite_name must be configured in the validation operator or passed at runtime")
+            base_expectation_suite_name = self.base_expectation_suite_name
+
         return_obj = {
-            "data_asset_identifiers": [],
+            "batch_identifiers": [],
             "success": None,
             "failure": {},
             "warning": {},
@@ -403,28 +405,22 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         for item in assets_to_validate:
             batch = self._build_batch_from_item(item)
 
-            data_asset_identifier = batch.data_asset_name
+            batch_id = batch.batch_id
             run_id = run_id
 
-            assert not data_asset_identifier is None
+            assert not batch_id is None
             assert not run_id is None
 
-            return_obj["data_asset_identifiers"].append(data_asset_identifier)
-
-            # NOTE : Abe 2019/09/12 : Perhaps this could be generalized to a loop.
-            # I'm NOT doing that, because lots of user research suggests that these 3 specific behaviors
-            # (failure, warning, quarantine) will cover most of the common use cases for
-            # post-validation data treatment.
+            return_obj["batch_identifiers"].append(batch_id)
 
             failure_expectation_suite_identifier = ExpectationSuiteIdentifier(
-                data_asset_name=data_asset_identifier,
-                expectation_suite_name=self.expectation_suite_name_prefix + self.expectation_suite_name_suffixes[0]
+                expectation_suite_name=base_expectation_suite_name + self.expectation_suite_name_suffixes[0]
             )
 
             failure_validation_result_id = ValidationResultIdentifier(
                 expectation_suite_identifier=failure_expectation_suite_identifier,
                 run_id=run_id,
-                batch_identifier=batch.batch_id
+                batch_identifier=batch_id
             )
 
             failure_expectation_suite = None
@@ -458,8 +454,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
 
             warning_expectation_suite_identifier = ExpectationSuiteIdentifier(
-                data_asset_name=data_asset_identifier,
-                expectation_suite_name=self.expectation_suite_name_prefix + self.expectation_suite_name_suffixes[1]
+                expectation_suite_name=base_expectation_suite_name + self.expectation_suite_name_suffixes[1]
             )
 
             warning_validation_result_id = ValidationResultIdentifier(
