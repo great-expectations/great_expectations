@@ -19,13 +19,18 @@ class ExpectationSuiteIdentifier(DataContextKey):
         return self._expectation_suite_name
 
     def to_tuple(self):
-        # return self.expectation_suite_name,
         return tuple(self.expectation_suite_name.split("."))
+
+    def to_fixed_length_tuple(self):
+        return self.expectation_suite_name,
 
     @classmethod
     def from_tuple(cls, tuple_):
-        # return cls(expectation_suite_name=tuple_[0])
         return cls(".".join(tuple_))
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls(expectation_suite_name=tuple_[0])
 
 
 class ExpectationSuiteIdentifierSchema(Schema):
@@ -105,11 +110,19 @@ class ValidationResultIdentifier(DataContextKey):
                 self.batch_identifier
             ]
         )
-        # return self.batch_identifier, self.expectation_suite_identifier, self.run_id
+
+    def to_fixed_length_tuple(self):
+        return self.expectation_suite_identifier.expectation_suite_name, self.run_id or "__none__", \
+               self.batch_identifier
 
     @classmethod
     def from_tuple(cls, tuple_):
         return cls(ExpectationSuiteIdentifier.from_tuple(tuple_[0:-2]), tuple_[-2], tuple_[-1])
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls(ExpectationSuiteIdentifier(tuple_[0]), tuple_[1], tuple_[2])
+
 
 
 class ValidationResultIdentifierSchema(Schema):

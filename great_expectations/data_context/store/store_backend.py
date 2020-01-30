@@ -16,6 +16,13 @@ class StoreBackend(object):
       - _has_key
     """
 
+    def __init__(self, fixed_length_key=False):
+        self._fixed_length_key = fixed_length_key
+
+    @property
+    def fixed_length_key(self):
+        return self._fixed_length_key
+
     def get(self, key):
         self._validate_key(key)
         value = self._get(key)
@@ -77,7 +84,8 @@ class InMemoryStoreBackend(StoreBackend):
     """
 
     # noinspection PyUnusedLocal
-    def __init__(self, runtime_environment=None):
+    def __init__(self, runtime_environment=None, fixed_length_key=False):
+        super(InMemoryStoreBackend, self).__init__(fixed_length_key=fixed_length_key)
         self._store = {}
 
     def _get(self, key):

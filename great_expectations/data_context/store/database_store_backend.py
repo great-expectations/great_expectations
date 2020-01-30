@@ -14,9 +14,14 @@ from great_expectations.data_context.store.store_backend import StoreBackend
 
 class DatabaseStoreBackend(StoreBackend):
 
-    def __init__(self, credentials, table_name, key_columns):
+    def __init__(self, credentials, table_name, key_columns, fixed_length_key=True):
+        super(DatabaseStoreBackend, self).__init__(fixed_length_key=fixed_length_key)
         if not sqlalchemy:
             raise ge_exceptions.DataContextError("ModuleNotFoundError: No module named 'sqlalchemy'")
+
+        if not self.fixed_length_key:
+            raise ValueError("DatabaseStoreBackend requires use of a fixed-length-key")
+
         meta = MetaData()
         self.key_columns = key_columns
         # Dynamically construct a SQLAlchemy table with the name and column names we'll use
