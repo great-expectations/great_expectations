@@ -99,6 +99,7 @@ def test_cli_datasorce_new_connection_string(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+# TODO profiling is broken due to generators
 def test_cli_datasource_profile_answering_no(
     empty_data_context, empty_sqlite_db, caplog
 ):
@@ -116,7 +117,8 @@ def test_cli_datasource_profile_answering_no(
         input="n\n",
     )
 
-    stdout = result.stdout
+    stdout = result.output
+    print(stdout)
     assert result.exit_code == 0
 
     assert "Profiling 'wow_a_datasource'" in stdout
@@ -159,14 +161,20 @@ def test_cli_datasource_profile_with_datasource_arg(
     expectations_store = context.stores["expectations_store"]
     suites = expectations_store.list_keys()
     assert len(suites) == 1
-    assert suites[0].expectation_suite_name == "BasicDatasetProfiler"
+    assert (
+        suites[0].expectation_suite_name
+        == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
+    )
 
     validations_store = context.stores["validations_store"]
     validation_keys = validations_store.list_keys()
     assert len(validation_keys) == 1
 
     validation = validations_store.get(validation_keys[0])
-    assert validation.meta["expectation_suite_name"] == "BasicDatasetProfiler"
+    assert (
+        validation.meta["expectation_suite_name"]
+        == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
+    )
     assert validation.success is False
     assert len(validation.results) == 51
 
@@ -200,21 +208,26 @@ def test_cli_datasource_profile_with_no_datasource_args(
     expectations_store = context.stores["expectations_store"]
     suites = expectations_store.list_keys()
     assert len(suites) == 1
-    assert suites[0].expectation_suite_name == "BasicDatasetProfiler"
+    assert (
+        suites[0].expectation_suite_name
+        == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
+    )
 
     validations_store = context.stores["validations_store"]
     validation_keys = validations_store.list_keys()
     assert len(validation_keys) == 1
 
     validation = validations_store.get(validation_keys[0])
-    assert validation.meta["expectation_suite_name"] == "BasicDatasetProfiler"
+    assert (
+        validation.meta["expectation_suite_name"]
+        == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
+    )
     assert validation.success is False
     assert len(validation.results) == 51
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.skip(reason="hangs until profiling is working")
 def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_should_raise_helpful_error(
     empty_data_context, titanic_sqlite_db, caplog
 ):
@@ -267,7 +280,6 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_shou
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.skip(reason="hangs until profiling is working")
 def test_cli_datasource_profile_with_valid_data_asset_arg(
     empty_data_context, titanic_sqlite_db, caplog
 ):

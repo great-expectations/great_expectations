@@ -65,7 +65,6 @@ Try "cli --help" for help.
 Error: No such command "blarg".
 """
     )
-    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_cli_version(caplog,):
