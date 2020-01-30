@@ -1,9 +1,7 @@
 import logging
-import sys
 
 import great_expectations as ge
 import great_expectations.jupyter_ux as jux
-from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
 
 def test_styling_elements_exist():
