@@ -2,6 +2,7 @@ from __future__ import division
 import json
 import inspect
 import copy
+import uuid
 from functools import wraps
 import traceback
 import warnings
@@ -50,7 +51,7 @@ class DataAsset(object):
         expectation_suite = kwargs.pop("expectation_suite", None)
         expectation_suite_name = kwargs.pop("expectation_suite_name", None)
         data_context = kwargs.pop("data_context", None)
-        batch_kwargs = kwargs.pop("batch_kwargs", BatchKwargs())
+        batch_kwargs = kwargs.pop("batch_kwargs", BatchKwargs(ge_batch_id=str(uuid.uuid1())))
         batch_parameters = kwargs.pop("batch_parameters", {})
         batch_markers = kwargs.pop("batch_markers", {})
 

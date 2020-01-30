@@ -52,6 +52,8 @@ class PandasDatasource(Datasource):
             A complete datasource configuration.
 
         """
+
+        # PENDING DELETION - JPC - 20200130
         # if generators is None:
             # Provide a gentle way to build a datasource with a sane default,
             # including ability to specify the base_directory and reader_options
@@ -208,7 +210,7 @@ class PandasDatasource(Datasource):
             # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs
             batch_kwargs = {k: batch_kwargs[k] for k in batch_kwargs if k != 'dataset'}
             batch_kwargs["PandasInMemoryDF"] = True
-            batch_kwargs["ge_batch_id"] = uuid.uuid1()
+            batch_kwargs["ge_batch_id"] = str(uuid.uuid1())
 
         else:
             raise BatchKwargsError("Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
