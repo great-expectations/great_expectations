@@ -54,7 +54,7 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
                                 )
 
     data_context.create_expectation_suite(expectation_suite_name="f1.failure")
-    df = data_context.get_batch(expectation_suite_name="failure",
+    df = data_context.get_batch(expectation_suite_name="f1.failure",
                                 batch_kwargs=data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1"))
     df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
     failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
@@ -81,13 +81,16 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
     )
 
     my_df_1 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, None]})
-    my_ge_df_1 = ge.dataset.PandasDataset(my_df_1)
+    my_ge_df_1 = ge.dataset.PandasDataset(my_df_1, batch_kwargs={"ge_batch_id":
+                                                                     "82a8de83-e063-11e9-8226-acde48001122"})
 
     my_df_2 = pd.DataFrame({"x": [1, 2, 3, 4, 99], "y": [1, 2, 3, 4, 5]})
-    my_ge_df_2 = ge.dataset.PandasDataset(my_df_2)
+    my_ge_df_2 = ge.dataset.PandasDataset(my_df_2, batch_kwargs={"ge_batch_id":
+                                                                     "82a8de83-e063-11e9-8133-acde48001122"})
 
     my_df_3 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, 5]})
-    my_ge_df_3 = ge.dataset.PandasDataset(my_df_3)
+    my_ge_df_3 = ge.dataset.PandasDataset(my_df_3, batch_kwargs={"ge_batch_id":
+                                                                     "82a8de83-e063-11e9-a53d-acde48001122"})
 
     return_obj = vo.run(
         assets_to_validate=[
@@ -95,7 +98,8 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
             my_ge_df_2,
             my_ge_df_3
         ],
-        run_id="test_100"
+        run_id="test_100",
+        base_expectation_suite_name="f1"
     )
     slack_query = vo._build_slack_query(return_obj)
     expected_slack_query = {
@@ -115,13 +119,15 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
             {'type': 'section',
              'text': {
                  'type': 'mrkdwn',
-                 'text': '*Data Asset List:* [my_datasource/default/f1, my_datasource/default/f2, my_datasource/default/f3]'
+                 'text': "*Batch Id List:* ['ge_batch_id:82a8de83-e063-11e9-8226-acde48001122', "
+                         "'ge_batch_id:82a8de83-e063-11e9-8133-acde48001122', "
+                         "'ge_batch_id:82a8de83-e063-11e9-a53d-acde48001122']"
              }
              },
             {'type': 'section',
              'text': {''
                       'type': 'mrkdwn',
-                      'text': '*Failed Data Assets:* [my_datasource/default/f2]'
+                      'text': "*Failed Batches:* ['f1.failure-ge_batch_id:82a8de83-e063-11e9-8133-acde48001122']"
                       }
              },
             {'type': 'section',

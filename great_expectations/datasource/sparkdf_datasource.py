@@ -176,7 +176,7 @@ class SparkDFDatasource(Datasource):
                 df = df.spark_df
             # Record this in the kwargs *and* the id
             batch_kwargs["SparkDFRef"] = True
-            batch_kwargs["ge_batch_id"] = uuid.uuid1()
+            batch_kwargs["ge_batch_id"] = str(uuid.uuid1())
 
         else:
             raise BatchKwargsError("Unrecognized batch_kwargs for spark_source", batch_kwargs)

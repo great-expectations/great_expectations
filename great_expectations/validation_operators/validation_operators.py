@@ -249,7 +249,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
 
         {
-            "data_asset_identifiers": [list, of, data, asset, identifiers],
+            "batch_identifiers": [list, of, batch, identifiers],
             "success": True/False,
             "failure": {
                 "expectation_suite_identifier": {
@@ -302,12 +302,15 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         success = run_return_obj.get("success")
         status_text = "Success :tada:" if success else "Failed :x:"
         run_id = run_return_obj.get("run_id")
-        data_asset_identifiers = run_return_obj.get("data_asset_identifiers")
+        batch_identifiers = run_return_obj.get("batch_identifiers")
         failed_data_assets = []
-        
+
         if run_return_obj.get("failure"):
             failed_data_assets = [
-                validation_result_identifier.expectation_suite_identifier.data_asset_name for validation_result_identifier, value in run_return_obj.get("failure").items() \
+                validation_result_identifier.expectation_suite_identifier.expectation_suite_name + "-" +
+                validation_result_identifier.batch_identifier
+                for
+                validation_result_identifier, value in run_return_obj.get("failure").items()
                 if not value["validation_result"].success
             ]
     
@@ -332,21 +335,21 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         }
         query["blocks"].append(status_element)
         
-        data_asset_identifiers_element = {
+        batch_identifiers_element = {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "*Data Asset List:* {}".format(data_asset_identifiers)
+                "text": "*Batch Id List:* {}".format(batch_identifiers)
             }
         }
-        query["blocks"].append(data_asset_identifiers_element)
+        query["blocks"].append(batch_identifiers_element)
     
         if not success:
             failed_data_assets_element = {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Failed Data Assets:* {}".format(failed_data_assets)
+                    "text": "*Failed Batches:* {}".format(failed_data_assets)
                 }
             }
             query["blocks"].append(failed_data_assets_element)

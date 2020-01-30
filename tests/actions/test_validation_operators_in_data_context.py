@@ -77,8 +77,7 @@ def test_warning_and_failure_validation_operator(validation_operators_data_conte
     validator_batch_kwargs = data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1")
 
     batch = data_context.get_batch(expectation_suite_name="f1.warning",
-                                   batch_kwargs=validator_batch_kwargs
-                                   )
+                                   batch_kwargs=validator_batch_kwargs)
 
     # NOTE: 20200130 - JPC - currently the warning and failure validation operator ignores the batch-provided suite and
     # fetches its own
