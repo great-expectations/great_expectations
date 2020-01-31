@@ -114,6 +114,7 @@ def test_save_expectation_suite(data_context):
     assert expectation_suite.expectations == expectation_suite_saved.expectations
 
 
+@pytest.mark.xfail
 def test_compile(data_context):
     data_context._compile()
     assert data_context._compiled_parameters == {
