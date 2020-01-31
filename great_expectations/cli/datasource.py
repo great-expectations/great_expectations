@@ -982,7 +982,7 @@ We could not determine the format of the file. What is it?
             except BatchKwargsError:
                 pass
 
-            batch_kwargs["reader_method"] = reader_methods[option_selection]
+            # batch_kwargs["reader_method"] = reader_methods[option_selection]
 
             batch = datasource.get_batch(batch_kwargs=batch_kwargs)
 
@@ -1036,8 +1036,6 @@ Enter an SQL query
                         pass
                 except ValueError:
                     query = selection
-
-                print(generator_asset)
 
             else:
                 query = click.prompt(msg_prompt_query, default=None, show_default=False)
