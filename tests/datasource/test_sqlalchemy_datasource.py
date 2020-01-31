@@ -5,7 +5,9 @@ import os
 from ruamel.yaml import YAML
 import pandas as pd
 
+from great_expectations.core.batch import Batch
 from great_expectations.dataset import SqlAlchemyDataset
+from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.datasource import SqlAlchemyDatasource
 
 yaml = YAML()
@@ -33,7 +35,6 @@ def test_db_connection_string(tmp_path_factory, test_backends):
 
 def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connection_string):
     name = "test_sqlalchemy_datasource"
-    # type_ = "sqlalchemy"
     class_name = "SqlAlchemyDatasource"
 
     data_asset_type_config = {
@@ -58,11 +59,10 @@ def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connectio
     assert data_context_file_config["datasources"][name]["data_asset_type"]["class_name"] == "CustomSqlAlchemyDataset"
 
     # We should be able to get a dataset of the correct type from the datasource.
-    data_context.create_expectation_suite("test_sqlalchemy_datasource/default/table_1", "boo")
+    data_context.create_expectation_suite("table_1.boo")
     batch = data_context.get_batch(
-        "test_sqlalchemy_datasource/default/table_1",
-        "boo",
-        data_context.yield_batch_kwargs("test_sqlalchemy_datasource/default/table_1")
+        data_context.build_batch_kwargs("test_sqlalchemy_datasource", "default", "table_1"),
+        "table_1.boo"
     )
     assert type(batch).__name__ == "CustomSqlAlchemyDataset"
     res = batch.expect_column_func_value_to_be("col_1", 1)
