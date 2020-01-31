@@ -44,6 +44,7 @@ class TupleStoreBackend(StoreBackend):
             )
 
             self.verify_that_key_to_filepath_operation_is_reversible()
+            self._fixed_length_key = True
 
     def _validate_key(self, key):
         super(TupleStoreBackend, self)._validate_key(key)
@@ -334,6 +335,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 s3_object_key,
                 self.prefix,
             )
+            if self.filepath_prefix and not s3_object_key.startswith(self.filepath_prefix):
+                # There can be other keys located in the same bucket; they are *not* our keys
+                continue
 
             key = self._convert_filepath_to_key(s3_object_key)
             if key:

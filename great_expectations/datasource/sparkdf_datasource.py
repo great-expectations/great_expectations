@@ -2,8 +2,6 @@ import logging
 import datetime
 import uuid
 
-from pandas import DataFrame
-
 from great_expectations.datasource.types import BatchMarkers
 from ..core.batch import Batch
 from ..dataset import SparkDFDataset
@@ -15,7 +13,7 @@ from great_expectations.types import ClassConfig
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql import SparkSession
+    from pyspark.sql import SparkSession, DataFrame
 except ImportError:
     SparkSession = None
     # TODO: review logging more detail here
@@ -50,6 +48,7 @@ class SparkDFDatasource(Datasource):
         """
         # No more default generators
 
+        # PENDING DELETION - JPC - 20200130
         # if generators is None:
         #     # Provide a gentle way to build a datasource with a sane default,
         #     # including ability to specify the base_directory

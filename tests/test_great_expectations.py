@@ -179,10 +179,12 @@ def test_validate():
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
         my_expectation_suite = expectationSuiteSchema.loads(f.read()).data
 
-    my_df = ge.read_csv(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        expectation_suite=my_expectation_suite
-    )
+    with mock.patch("uuid.uuid1") as uuid:
+        uuid.return_value = "1234"
+        my_df = ge.read_csv(
+            file_relative_path(__file__, "./test_sets/Titanic.csv"),
+            expectation_suite=my_expectation_suite
+        )
     my_df.set_default_expectation_argument("result_format", "COMPLETE")
 
     with mock.patch("datetime.datetime") as mock_datetime:
@@ -209,9 +211,9 @@ def test_validate():
 
     expected_results = ExpectationSuiteValidationResult(
         meta={
-            "expectation_suite_name": "default",
+            "expectation_suite_name": "titanic",
             "run_id": "19551105T000000.000000Z",
-            "batch_kwargs": {},
+            "batch_kwargs": {"ge_batch_id": "1234"},
             "batch_markers": {},
             "batch_parameters": {}
         },
