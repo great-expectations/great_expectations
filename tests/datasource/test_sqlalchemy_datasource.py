@@ -5,10 +5,12 @@ import os
 from ruamel.yaml import YAML
 import pandas as pd
 
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.datasource import SqlAlchemyDatasource
+from great_expectations.validator.validator import Validator
 
 yaml = YAML()
 
@@ -145,13 +147,11 @@ def test_sqlalchemy_source_templating(sqlitedb_engine):
     })
     generator = datasource.get_generator("foo")
     generator.add_query("test", "select 'cat' as ${col_name};")
-    df = datasource.get_batch("test",
-                              "my_suite",
-                              generator.yield_batch_kwargs("test", query_params={'col_name': "animal_name"})
-                              )
-    res = df.expect_column_to_exist("animal_name")
+    batch = datasource.get_batch(generator.build_batch_kwargs("test", query_parameters={'col_name': "animal_name"}))
+    dataset = Validator(batch, expectation_suite=ExpectationSuite("test")).get_dataset()
+    res = dataset.expect_column_to_exist("animal_name")
     assert res.success is True
-    res = df.expect_column_values_to_be_in_set('animal_name', ['cat'])
+    res = dataset.expect_column_values_to_be_in_set('animal_name', ['cat'])
     assert res.success is True
 
 
