@@ -577,15 +577,16 @@ def evaluate_json_test(data_asset, expectation_type, test):
                     "Invalid test specification: unknown key " + key + " in 'out'")
 
 
-def is_library_installed(library_name: str) -> bool:
+def is_library_installed(library_name):
     """
     Tests if a library is installed.
-
-    :rtype: bool
-    :type library_name: str
-    :param library_name:
-    :return:
     """
+    # Gross legacy python 2 hacks
+    try:
+        ModuleNotFoundError
+    except NameError:
+        ModuleNotFoundError = ImportError
+
     try:
         importlib.import_module(library_name)
         return True

@@ -1,4 +1,16 @@
 import logging
+
+# Gross legacy python 2 hacks
+try:
+    ModuleNotFoundError
+except NameError:
+    ModuleNotFoundError = ImportError
+
+try:
+    from sqlalchemy.exc import OperationalError
+except ModuleNotFoundError:
+    OperationalError = RuntimeError
+
 from .base import DatasetProfiler
 from ..dataset.util import build_categorical_partition_object
 import datetime
@@ -285,7 +297,7 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
         if cls._get_column_cardinality_with_caching(dataset, column, column_cache) in ["two", "very few"]:
             partition_object = build_categorical_partition_object(dataset, column)
             dataset.expect_column_kl_divergence_to_be_less_than(column, partition_object=partition_object,
-                                                                threshold=0.6)
+                                                                threshold=0.6, catch_exceptions=True)
 
     @classmethod
     def _create_non_nullity_expectations(cls, dataset, column):
@@ -316,24 +328,38 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
                                                            result_format="SUMMARY").result["observed_value"]
         dataset.expect_column_median_to_be_between(column, min_value=value - 1, max_value=value + 1)
 
-        result = dataset.expect_column_quantile_values_to_be_between(column,
-                                                                     quantile_ranges={
-                                                                         "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
-                                                                         "value_ranges": [[None, None], [None, None],
-                                                                                          [None, None], [None, None],
-                                                                                          [None, None]]
-                                                                     },
-                                                                     result_format="SUMMARY"
-                                                                     )
-        dataset.expect_column_quantile_values_to_be_between(column,
-                                                            quantile_ranges={
-                                                                "quantiles": result.result["observed_value"][
-                                                                    "quantiles"],
-                                                                "value_ranges": [[v - 1, v + 1] for v in
-                                                                                 result.result["observed_value"][
-                                                                                     "values"]]
-                                                            }
-                                                            )
+        result = dataset.expect_column_quantile_values_to_be_between(
+            column,
+            quantile_ranges={
+                "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                "value_ranges": [
+                    [None, None],
+                    [None, None],
+                    [None, None],
+                    [None, None],
+                    [None, None],
+                ],
+            },
+            result_format="SUMMARY",
+            catch_exceptions=True
+        )
+        if result.exception_info:
+            # TODO quantiles are not implemented correctly on sqlite, and likely other sql dialects
+            logger.warning(result.exception_info["exception_traceback"])
+        else:
+            dataset.set_config_value('interactive_evaluation', False)
+            dataset.expect_column_quantile_values_to_be_between(
+                column,
+                quantile_ranges={
+                    "quantiles": result.result["observed_value"]["quantiles"],
+                    "value_ranges": [
+                        [v - 1, v + 1] for v in
+                        result.result["observed_value"]["values"]
+                    ],
+                },
+                catch_exceptions=True
+            )
+            dataset.set_config_value('interactive_evaluation', True)
 
     @classmethod
     def _create_expectations_for_string_column(cls, dataset, column):

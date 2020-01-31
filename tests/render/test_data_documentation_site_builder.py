@@ -4,10 +4,10 @@ import os
 import json
 import shutil
 
+from great_expectations.core import DataAssetIdentifier
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
+    ExpectationSuiteIdentifier
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.data_context.types import (
-    ValidationResultIdentifier, ExpectationSuiteIdentifier, DataAssetIdentifier
-)
 
 from great_expectations.data_context.util import safe_mmkdir
 

@@ -34,6 +34,20 @@ your original yaml file will be archived automatically for you. Even so, it's
 in your source control system already, right? ;-)
 
 *************************
+Upgrading to 0.9.x
+*************************
+
+In the 0.9.0 release, there are several additional changes to the DataContext API.
+
+BREAKING:
+- FixedLengthTupleXXXX stores are renamed to TupleXXXX stores; they no longer allow or require a key_length to be
+  specified.
+- data_asset_name is not used as a parameter in the create_expectation_suite, get_expectation_suite, or get_batch
+  commands. Instead, batch_kwargs alone now define the batch to be received, and expectation suite names exist in an
+  independent namespace.
+
+
+*************************
 Upgrading to 0.8.x
 *************************
 

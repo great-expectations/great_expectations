@@ -7,7 +7,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
     SiteSectionIdentifier,
 )
-from .fixed_length_tuple_store_backend import FixedLengthTupleStoreBackend
+from .fixed_length_tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.util import (
     load_class,
     instantiate_class_from_config,
@@ -24,11 +24,11 @@ class HtmlSiteStore(object):
 
     def __init__(self, store_backend=None, runtime_environment=None):
         store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
-        store_backend_class_name = store_backend.get("class_name", "FixedLengthTupleFilesystemStoreBackend")
+        store_backend_class_name = store_backend.get("class_name", "TupleFilesystemStoreBackend")
         store_class = load_class(store_backend_class_name, store_backend_module_name)
 
-        if not issubclass(store_class, FixedLengthTupleStoreBackend):
-            raise DataContextError("Invalid configuration: HtmlSiteStore needs a FixedLengthTupleStoreBackend")
+        if not issubclass(store_class, TupleStoreBackend):
+            raise DataContextError("Invalid configuration: HtmlSiteStore needs a TupleStoreBackend")
         if "filepath_template" in store_backend or "key_length" in store_backend:
             logger.warning("Configuring a filepath_template or key_length is not supported in SiteBuilder: "
                            "filepaths will be selected based on the type of asset rendered.")
@@ -41,8 +41,8 @@ class HtmlSiteStore(object):
                 runtime_environment=runtime_environment,
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
-                    "key_length": 4,
-                    "filepath_template": 'expectations/{0}/{1}/{2}/{3}.html',
+                    "filepath_prefix": "expectations/",
+                    "filepath_suffix": ".html"
                 }
             ),
             ValidationResultIdentifier: instantiate_class_from_config(
@@ -50,8 +50,8 @@ class HtmlSiteStore(object):
                 runtime_environment=runtime_environment,
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
-                    "key_length": 5,
-                    "filepath_template": 'validations/{4}/{0}/{1}/{2}/{3}.html',
+                    "filepath_prefix": "validations/",
+                    "filepath_suffix": ".html"
                 }
             ),
             "index_page":  instantiate_class_from_config(
@@ -59,7 +59,6 @@ class HtmlSiteStore(object):
                 runtime_environment=runtime_environment,
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
-                    "key_length": 0,
                     "filepath_template": 'index.html',
                 }
             ),
@@ -68,7 +67,6 @@ class HtmlSiteStore(object):
                 runtime_environment=runtime_environment,
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
-                    "key_length": None,
                     "filepath_template": None,
                 }
             ),
@@ -109,7 +107,7 @@ class HtmlSiteStore(object):
                 not supplied, the method returns the URL of the index page.
         :return: URL (string)
         """
-        from great_expectations.data_context.store import FixedLengthTupleFilesystemStoreBackend
+        from great_expectations.data_context.store import TupleFilesystemStoreBackend
 
         if resource_identifier is None:
             store_backend = self.store_backends["index_page"]
@@ -198,6 +196,16 @@ class HtmlSiteStore(object):
                     store_key = tuple(os.path.normpath(source_name).split(os.sep))
                     store_key = store_key[store_key.index('static'):]
                     content_type, content_encoding = guess_type(item, strict=False)
+
+                    if content_type is None:
+                        # Use GE-known content-type if possible
+                        if source_name.endswith(".otf"):
+                            content_type = "font/opentype"
+                        else:
+                            # fallback
+                            logger.warning("Unable to automatically determine content_type for {}".format(source_name))
+                            content_type = "text/html; charset=utf8"
+
                     self.store_backends["static_assets"].set(
                         store_key,
                         f.read(),

@@ -6,8 +6,8 @@ from .evaluation_parameter_store import EvaluationParameterStore
 
 from .store_backend import StoreBackend, InMemoryStoreBackend
 from .fixed_length_tuple_store_backend import (
-    FixedLengthTupleFilesystemStoreBackend,
-    FixedLengthTupleS3StoreBackend,
-    FixedLengthTupleGCSStoreBackend
+    TupleFilesystemStoreBackend,
+    TupleS3StoreBackend,
+    TupleGCSStoreBackend
 )
 from .database_store_backend import DatabaseStoreBackend

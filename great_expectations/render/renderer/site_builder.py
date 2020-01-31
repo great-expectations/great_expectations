@@ -2,17 +2,14 @@ import logging
 
 from collections import OrderedDict
 import os
-import shutil
 
 from great_expectations.cli.datasource import DATASOURCE_TYPE_BY_DATASOURCE_CLASS
-from great_expectations.data_context.types import (
-    ValidationResultIdentifier,
-    ExpectationSuiteIdentifier,
-)
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
 )
+from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier, \
+    ValidationResultIdentifier
 
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.data_context.util import file_relative_path
@@ -42,7 +39,7 @@ class SiteBuilder(object):
         local_site:
             class_name: SiteBuilder
             store_backend:
-                class_name: FixedLengthTupleS3StoreBackend
+                class_name: TupleS3StoreBackend
                 bucket: data_docs.my_company.com
                 prefix: /data_docs/
 
@@ -52,7 +49,7 @@ class SiteBuilder(object):
         local_site:
             class_name: SiteBuilder
             store_backend:
-                class_name: FixedLengthTupleS3StoreBackend
+                class_name: TupleS3StoreBackend
                 bucket: data_docs.my_company.com
                 prefix: /data_docs/
             datasource_whitelist:
@@ -97,11 +94,13 @@ class SiteBuilder(object):
     def __init__(self,
                  data_context,
                  store_backend,
+                 site_name=None,
                  site_index_builder=None,
                  site_section_builders=None,
                  datasource_whitelist=None,
                  runtime_environment=None
                  ):
+        self.site_name = site_name
         self.data_context = data_context
         self.store_backend = store_backend
 
@@ -135,6 +134,7 @@ class SiteBuilder(object):
                 "data_context": data_context,
                 "custom_styles_directory": custom_styles_directory,
                 "target_store": self.target_store,
+                "site_name": self.site_name
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -300,23 +300,17 @@ class DefaultSiteSectionBuilder(object):
 
             if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.expectation_suite_name
-                data_asset_name = resource_key.data_asset_name.generator_asset
-                logger.debug(
-                    "        Rendering expectation suite {} for data asset {}".format(
-                        expectation_suite_name,
-                        data_asset_name
-                    ))
+                logger.debug("        Rendering expectation suite {}".format(expectation_suite_name))
             elif isinstance(resource_key, ValidationResultIdentifier):
-                data_asset_name = resource_key.expectation_suite_identifier.data_asset_name.generator_asset
                 run_id = resource_key.run_id
                 expectation_suite_name = resource_key.expectation_suite_identifier.expectation_suite_name
                 if run_id == "profiling":
-                    logger.debug("        Rendering profiling for data asset {}".format(data_asset_name))
+                    logger.debug("        Rendering profiling for batch {}".format(resource_key.batch_identifier))
                 else:
 
-                    logger.debug("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id,
+                    logger.debug("        Rendering validation: run id: {}, suite {} for batch {}".format(run_id,
                                                                                                               expectation_suite_name,
-                                                                                                              data_asset_name))
+                                                                                                              resource_key.batch_identifier))
 
             try:
                 rendered_content = self.renderer_class.render(resource)
@@ -334,11 +328,13 @@ class DefaultSiteSectionBuilder(object):
             )
 
     def _resource_key_passes_datasource_whitelist(self, resource_key, datasource_whitelist):
-        if type(resource_key) is ExpectationSuiteIdentifier:
-            datasource = resource_key.data_asset_name.datasource
-        elif type(resource_key) is ValidationResultIdentifier:
-            datasource = resource_key.expectation_suite_identifier.data_asset_name.datasource
-        return datasource in datasource_whitelist
+        logger.warning("_resource_key_passes_datasource_whitelist is not yet reimplemented")
+        return True
+        # if type(resource_key) is ExpectationSuiteIdentifier:
+        #     datasource = resource_key.data_asset_name.datasource
+        # elif type(resource_key) is ValidationResultIdentifier:
+        #     datasource = resource_key.expectation_suite_identifier.data_asset_name.datasource
+        # return datasource in datasource_whitelist
 
     def _resource_key_passes_run_id_filter(self, resource_key):
         if type(resource_key) == ValidationResultIdentifier:
@@ -358,6 +354,7 @@ class DefaultSiteIndexBuilder(object):
     def __init__(
             self,
             name,
+            site_name,
             data_context,
             target_store,
             custom_styles_directory=None,
@@ -368,6 +365,7 @@ class DefaultSiteIndexBuilder(object):
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
         self.name = name
+        self.site_name = site_name
         self.data_context = data_context
         self.target_store = target_store
         self.show_cta_footer = show_cta_footer
@@ -404,45 +402,32 @@ class DefaultSiteIndexBuilder(object):
         )
 
     def add_resource_info_to_index_links_dict(self,
-                                              data_context,
                                               index_links_dict,
-                                              data_asset_name,
-                                              datasource,
-                                              generator,
-                                              generator_asset,
                                               expectation_suite_name,
                                               section_name,
+                                              batch_identifier=None,
                                               run_id=None,
                                               validation_success=None
                                               ):
         import os
 
-        if datasource not in index_links_dict:
-            index_links_dict[datasource] = OrderedDict()
-
-        if generator not in index_links_dict[datasource]:
-            index_links_dict[datasource][generator] = OrderedDict()
-
-        if generator_asset not in index_links_dict[datasource][generator]:
-            index_links_dict[datasource][generator][generator_asset] = {
-                'profiling_links': [],
-                'validations_links': [],
-                'expectations_links': []
-            }
+        if section_name + "_links" not in index_links_dict:
+            index_links_dict[section_name + "_links"] = []
 
         if run_id:
-            base_path = "validations/" + run_id
+            path_components = ["validations", batch_identifier] + expectation_suite_name.split(".") + [run_id]
+            # py2 doesn't support
+            # filepath = os.path.join("validations", batch_identifier, *expectation_suite_name.split("."), run_id)
+            filepath = os.path.join(path_components)
+            filepath += ".html"
         else:
-            base_path = "expectations"
+            filepath = os.path.join("expectations", *expectation_suite_name.split("."))
+            filepath += ".html"
 
-        index_links_dict[datasource][generator][generator_asset][section_name + "_links"].append(
+        index_links_dict[section_name + "_links"].append(
             {
-                "full_data_asset_name": str(data_asset_name),
                 "expectation_suite_name": expectation_suite_name,
-                "filepath": os.path.join(base_path, data_asset_name.to_path(), expectation_suite_name + ".html"),
-                "source": datasource,
-                "generator": generator,
-                "asset": generator_asset,
+                "filepath": filepath,
                 "run_id": run_id,
                 "validation_success": validation_success
             }
@@ -462,7 +447,10 @@ class DefaultSiteIndexBuilder(object):
             last_datasource = self.data_context.datasources[last_datasource_name]
 
             if last_datasource_class_name == "SqlAlchemyDatasource":
-                db_driver = last_datasource.drivername
+                try:
+                    db_driver = last_datasource.drivername
+                except AttributeError:
+                    pass
 
             datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
             telemetry = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
@@ -528,6 +516,7 @@ class DefaultSiteIndexBuilder(object):
     def build(self):
         # Loop over sections in the HtmlStore
         logger.debug("DefaultSiteIndexBuilder.build")
+
         expectation_suite_keys = [
             ExpectationSuiteIdentifier.from_tuple(expectation_suite_tuple) for expectation_suite_tuple in
             self.target_store.store_backends[ExpectationSuiteIdentifier].list_keys()
@@ -549,25 +538,21 @@ class DefaultSiteIndexBuilder(object):
             validation_result_keys = validation_result_keys[:self.validation_results_limit]
 
         index_links_dict = OrderedDict()
+        index_links_dict["site_name"] = self.site_name
 
         if self.show_cta_footer:
             index_links_dict["cta_object"] = self.get_calls_to_action()
 
         for expectation_suite_key in expectation_suite_keys:
             self.add_resource_info_to_index_links_dict(
-                data_context=self.data_context,
                 index_links_dict=index_links_dict,
-                data_asset_name=expectation_suite_key.data_asset_name,
-                datasource=expectation_suite_key.data_asset_name.datasource,
-                generator=expectation_suite_key.data_asset_name.generator,
-                generator_asset=expectation_suite_key.data_asset_name.generator_asset,
                 expectation_suite_name=expectation_suite_key.expectation_suite_name,
                 section_name="expectations"
             )
 
         for profiling_result_key in profiling_result_keys:
             validation = self.data_context.get_validation_result(
-                data_asset_name=profiling_result_key.expectation_suite_identifier.data_asset_name,
+                batch_identifier=profiling_result_key.batch_identifier,
                 expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
                 run_id=profiling_result_key.run_id
             )
@@ -575,21 +560,17 @@ class DefaultSiteIndexBuilder(object):
             validation_success = validation.success
 
             self.add_resource_info_to_index_links_dict(
-                data_context=self.data_context,
                 index_links_dict=index_links_dict,
-                data_asset_name=profiling_result_key.expectation_suite_identifier.data_asset_name,
-                datasource=profiling_result_key.expectation_suite_identifier.data_asset_name.datasource,
-                generator=profiling_result_key.expectation_suite_identifier.data_asset_name.generator,
-                generator_asset=profiling_result_key.expectation_suite_identifier.data_asset_name.generator_asset,
                 expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
                 section_name="profiling",
+                batch_identifier=profiling_result_key.batch_identifier,
                 run_id=profiling_result_key.run_id,
                 validation_success=validation_success
             )
 
         for validation_result_key in validation_result_keys:
             validation = self.data_context.get_validation_result(
-                data_asset_name=validation_result_key.expectation_suite_identifier.data_asset_name,
+                batch_identifier=validation_result_key.batch_identifier,
                 expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
                 run_id=validation_result_key.run_id
             )
@@ -597,14 +578,10 @@ class DefaultSiteIndexBuilder(object):
             validation_success = validation.success
 
             self.add_resource_info_to_index_links_dict(
-                data_context=self.data_context,
                 index_links_dict=index_links_dict,
-                data_asset_name=validation_result_key.expectation_suite_identifier.data_asset_name,
-                datasource=validation_result_key.expectation_suite_identifier.data_asset_name.datasource,
-                generator=validation_result_key.expectation_suite_identifier.data_asset_name.generator,
-                generator_asset=validation_result_key.expectation_suite_identifier.data_asset_name.generator_asset,
                 expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
                 section_name="validations",
+                batch_identifier=validation_result_key.batch_identifier,
                 run_id=validation_result_key.run_id,
                 validation_success=validation_success
             )

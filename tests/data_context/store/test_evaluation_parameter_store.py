@@ -3,7 +3,6 @@ import pytest
 import datetime
 
 from great_expectations.core import DataAssetIdentifier
-from great_expectations.data_context.types.metrics import ExpectationDefinedMetricIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 
 
@@ -137,20 +136,21 @@ def test_evaluation_parameter_store_methods(data_context):
 
 def test_database_evaluation_parameter_store_basics(param_store):
     run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-    metric_identifier = ExpectationDefinedMetricIdentifier(
-        run_id=run_id,
-        data_asset_name=DataAssetIdentifier(
-            datasource="mysource",
-            generator="mygenerator",
-            generator_asset="asset"
-        ),
-        expectation_suite_name="warning",
-        expectation_type="expect_column_values_to_match_regex",
-        metric_name="unexpected_percent",
-        metric_kwargs={
-            "column": "mycol"
-        }
-    )
+    assert False  # UPDATE
+    # metric_identifier = ExpectationDefinedMetricIdentifier(
+    #     run_id=run_id,
+    #     data_asset_name=DataAssetIdentifier(
+    #         datasource="mysource",
+    #         generator="mygenerator",
+    #         generator_asset="asset"
+    #     ),
+    #     expectation_suite_name="warning",
+    #     expectation_type="expect_column_values_to_match_regex",
+    #     metric_name="unexpected_percent",
+    #     metric_kwargs={
+    #         "column": "mycol"
+    #     }
+    # )
     metric_value = 12.3456789
 
     param_store.set(metric_identifier, metric_value)
@@ -162,21 +162,22 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
     run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-    metric_identifier = ExpectationDefinedMetricIdentifier(
-        run_id=run_id,
-        data_asset_name=DataAssetIdentifier(
-            datasource="mysource",
-            generator="mygenerator",
-            generator_asset="asset"
-        ),
-        expectation_suite_name="warning",
-        expectation_type="expect_column_values_to_match_regex",
-        metric_name="unexpected_percent",
-        metric_kwargs={
-            "column": "mycol",
-            "regex": r"^[123]+$"
-        }
-    )
+    assert False  # UPDATE
+    # metric_identifier = ExpectationDefinedMetricIdentifier(
+    #     run_id=run_id,
+    #     data_asset_name=DataAssetIdentifier(
+    #         datasource="mysource",
+    #         generator="mygenerator",
+    #         generator_asset="asset"
+    #     ),
+    #     expectation_suite_name="warning",
+    #     expectation_type="expect_column_values_to_match_regex",
+    #     metric_name="unexpected_percent",
+    #     metric_kwargs={
+    #         "column": "mycol",
+    #         "regex": r"^[123]+$"
+    #     }
+    # )
     metric_value = 12.3456789
     param_store.set(metric_identifier, metric_value)
 
