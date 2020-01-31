@@ -148,7 +148,7 @@ def test_sqlalchemy_source_templating(sqlitedb_engine):
     generator = datasource.get_generator("foo")
     generator.add_query("test", "select 'cat' as ${col_name};")
     batch = datasource.get_batch(generator.build_batch_kwargs("test", query_parameters={'col_name': "animal_name"}))
-    dataset = Validator(batch, expectation_suite=ExpectationSuite("test")).get_dataset()
+    dataset = Validator(batch, expectation_suite=ExpectationSuite("test"), expectation_engine=SqlAlchemyDataset).get_dataset()
     res = dataset.expect_column_to_exist("animal_name")
     assert res.success is True
     res = dataset.expect_column_values_to_be_in_set('animal_name', ['cat'])
@@ -163,8 +163,10 @@ def test_sqlalchemy_source_limit(sqlitedb_engine):
     df1.to_sql('table_1', con=sqlitedb_engine, index=True)
     df2.to_sql('table_2', con=sqlitedb_engine, index=True, schema='main')
     datasource = SqlAlchemyDatasource('SqlAlchemy', engine=sqlitedb_engine)
-    limited_dataset = datasource.get_data_asset("table_1", "default", limit=1, offset=2)
-    assert isinstance(limited_dataset, SqlAlchemyDataset)
+    limited_batch = datasource.get_batch({"table": "table_1", "limit": 1, "offset": 2})
+    assert isinstance(limited_batch, Batch)
+    limited_dataset = Validator(limited_batch, expectation_suite=ExpectationSuite("test"),
+                         expectation_engine=SqlAlchemyDataset).get_dataset()
     assert limited_dataset._table.name.startswith("ge_tmp_")  # we have generated a temporary table
     assert len(limited_dataset.head(10)) == 1  # and it is only one row long
     assert limited_dataset.head(10)['col_1'][0] == 3  # offset should have been applied
