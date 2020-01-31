@@ -33,6 +33,8 @@ from great_expectations.profile.basic_dataset_profiler import (
 
 from great_expectations.validator.validator import Validator
 from great_expectations.core import ExpectationSuite
+from great_expectations.datasource.generator.table_generator import TableGenerator
+from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
 
@@ -864,7 +866,7 @@ Name the new expectation suite"""
 
     click.prompt(msg_prompt_what_will_profiler_do, default="Enter", hide_input=True)
 
-    cli_message("\nProfiling {0:s}...".format(generator_asset))
+    cli_message("\nProfiling...")
     run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
 
     profiling_results = context.profile_data_asset(
@@ -921,10 +923,10 @@ We could not determine the format of the file. What is it?
     4. JSON
 """
 
-    reader_methods = {
+    reader_method_file_extensions = {
         "1": "csv",
         "2": "parquet",
-        "3": "excel",
+        "3": "xlsx",
         "4": "json",
     }
 
@@ -946,17 +948,24 @@ We could not determine the format of the file. What is it?
 
     path = os.path.abspath(path)
 
-    if generator_asset is None:
-        generator_asset = os.path.splitext(os.path.basename(path))[0]
-        generator_asset = click.prompt(
-            msg_prompt_data_asset_name,
-            default=generator_asset,
-            show_default=True
-        )
+    # if generator_asset is None:
+    #     generator_asset = os.path.splitext(os.path.basename(path))[0]
+    #     generator_asset = click.prompt(
+    #         msg_prompt_data_asset_name,
+    #         default=generator_asset,
+    #         show_default=True
+    #     )
 
-    batch_kwargs = {"path": path}
+    batch_kwargs = {
+        "path": path,
+        "datasource": datasource_name
+    }
 
-    reader_method = datasource.guess_reader_method_from_path(path)["reader_method"]
+    reader_method = None
+    try:
+        reader_method = datasource.guess_reader_method_from_path(path)["reader_method"]
+    except BatchKwargsError:
+        pass
 
     if reader_method is None:
 
@@ -967,6 +976,11 @@ We could not determine the format of the file. What is it?
                 type=click.Choice(["1", "2", "3", "4"]),
                 show_choices=False
             )
+
+            try:
+                reader_method = datasource.guess_reader_method_from_path(path + reader_method_file_extensions[option_selection]) ["reader_method"]
+            except BatchKwargsError:
+                pass
 
             batch_kwargs["reader_method"] = reader_methods[option_selection]
 
@@ -988,24 +1002,56 @@ Enter an SQL query
     msg_prompt_data_asset_name = """
     Give your new data asset a short name
 """
+    msg_prompt_enter_data_asset_name = "\nWhich table would you like to use? (Choose one)\n"
+
+    msg_prompt_enter_data_asset_name_suffix = "    Don't see the table in the list above? Just type the SQL query\n"
 
     datasource = context.get_datasource(datasource_name)
 
+    temp_generator = TableGenerator(name="temp", datasource=datasource)
+
+    available_data_asset_names = temp_generator.get_available_data_asset_names()["names"]
+    available_data_asset_names_str = ["{} ({})".format(name[0], name[1]) for name in
+                                      available_data_asset_names]
+
+    data_asset_names_to_display = available_data_asset_names_str[:5]
+    choices = "\n".join(["    {}. {}".format(i, name) for i, name in enumerate(data_asset_names_to_display, 1)])
+    prompt = msg_prompt_enter_data_asset_name + choices + "\n" + msg_prompt_enter_data_asset_name_suffix.format(
+        len(data_asset_names_to_display))
 
     while True:
         try:
-            query = click.prompt(msg_prompt_query, default=None, show_default=False)
+            query = None
 
-            if data_asset_name is None:
-                data_asset_name = click.prompt(msg_prompt_data_asset_name, default=data_asset_name, show_default=False) # TODO: check non-zero length
+            if len(available_data_asset_names) > 0:
+                selection = click.prompt(prompt, default=None, show_default=False)
+
+                selection = selection.strip()
+                try:
+                    data_asset_index = int(selection) - 1
+                    try:
+                        generator_asset = \
+                            [name[0] for name in available_data_asset_names][data_asset_index]
+                    except IndexError:
+                        pass
+                except ValueError:
+                    query = selection
+
+                print(generator_asset)
+
+            else:
+                query = click.prompt(msg_prompt_query, default=None, show_default=False)
 
 
-            batch_kwargs = {
-                "query": query,
-                "datasource": datasource_name
-            }
+            if query is None:
+                batch_kwargs = temp_generator.build_batch_kwargs(generator_asset)
+            else:
+                batch_kwargs = {
+                    "query": query,
+                    "datasource": datasource_name
+                }
 
-            Validator(batch=datasource.get_batch(batch_kwargs), expectation_suite=ExpectationSuite("throwaway")).get_dataset()
+                Validator(batch=datasource.get_batch(batch_kwargs), expectation_suite=ExpectationSuite("throwaway")).get_dataset()
 
             break
         except Exception as error: # TODO: catch more specific exception
