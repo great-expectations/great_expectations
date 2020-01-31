@@ -189,8 +189,8 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
                                 'header': {'content_block_type': 'string_template',
                                            'string_template': {'template': 'Info', 'tag': 'h6',
                                                                'styling': {'classes': ['m-0']}}},
-                                'table': [['Great Expectations Version', '__fixture__'],
-                                          ['Run ID', '__run_id_fixture__']]}
+                                'table': [['Great Expectations Version', "0.9.0b1+310.g05637d48.dirty"],
+                                          ['Run ID', "20200130T171315.316592Z"]]}
 
     assert validation_info == expected_validation_info
 
@@ -210,19 +210,26 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_prof
     assert validation_statistics == expected_validation_statistics
 
 
-def test_ValidationResultsPageRenderer_render_nested_table_from_dict(titanic_profiled_evrs_1):
+def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
+    batch_kwargs = {
+        "path": "project_dir/project_path/data/titanic/Titanic.csv",
+        "datasource": "Titanic",
+        "reader_options": {
+            "sep": None,
+            "engine": "python"
+        }
+    }
     batch_kwargs_table = ValidationResultsPageRenderer._render_nested_table_from_dict(
-        titanic_profiled_evrs_1.meta["batch_kwargs"], header="Batch Kwargs").to_json_dict()
+        batch_kwargs, header="Batch Kwargs").to_json_dict()
+    print(batch_kwargs_table)
 
     expected_batch_kwarg_table = {
         'content_block_type': 'table',
-        'styling': {
-            'classes': ['col-6', 'table-responsive', 'mt-1'],
-            'body': {'classes': ['table', 'table-sm']}},
-        'header': {
-            'content_block_type': 'string_template',
-            'string_template': {'template': 'Batch Kwargs', 'tag': 'h6',
-                                'styling': {'classes': ['m-0']}}}, 'table': [[{
+        'styling': {'classes': ['col-6', 'table-responsive', 'mt-1'],
+                    'body': {'classes': ['table', 'table-sm']}},
+        'header': {'content_block_type': 'string_template',
+                   'string_template': {'template': 'Batch Kwargs', 'tag': 'h6',
+                                       'styling': {'classes': ['m-0']}}}, 'table': [[{
             'content_block_type': 'string_template',
             'styling': {
                 'parent': {
@@ -231,7 +238,7 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict(titanic_pro
             'string_template': {
                 'template': '$value',
                 'params': {
-                    'value': 'partition_id'},
+                    'value': 'datasource'},
                 'styling': {
                     'default': {
                         'styles': {
@@ -363,5 +370,5 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict(titanic_pro
                                         'default': {
                                             'styles': {
                                                 'word-break': 'break-all'}}}}}]]}]]}
-    # print(batch_kwargs_table)
+
     assert batch_kwargs_table == expected_batch_kwarg_table
