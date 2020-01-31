@@ -55,7 +55,7 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
         assert batch["path"] in f3_batches
 
 
-def test_glob_reader_generator(tmp_path_factory):
+def test_glob_reader_generator(basic_pandas_datasource, tmp_path_factory):
     """Provides an example of how glob generator works: we specify our own
     names for data_assets, and an associated glob; the generator
     will take care of providing batches consisting of one file per
@@ -84,7 +84,7 @@ def test_glob_reader_generator(tmp_path_factory):
     with open(os.path.join(basedir, "f0.json"), "w") as outfile:
         outfile.write("\n\n\n")
 
-    g2 = GlobReaderGenerator(base_directory=basedir, asset_globs={
+    g2 = GlobReaderGenerator(base_directory=basedir, datasource=basic_pandas_datasource, asset_globs={
         "blargs": {
             "glob": "*.blarg"
         },
@@ -95,16 +95,7 @@ def test_glob_reader_generator(tmp_path_factory):
 
     g2_assets = g2.get_available_data_asset_names()
     # Use set in test to avoid order issues
-    assert set(g2_assets) == {"blargs", "fs"}
-
-    with pytest.warns(DeprecationWarning):
-        # This is an old style of asset_globs configuration that should raise a deprecationwarning
-        g2 = GlobReaderGenerator(base_directory=basedir, asset_globs={
-            "blargs": "*.blarg",
-            "fs": "f*"
-        })
-        g2_assets = g2.get_available_data_asset_names()
-        assert set(g2_assets) == {"blargs", "fs"}
+    assert set(g2_assets) == {("blargs", "path"), ("fs", "path")}
 
     blargs_kwargs = [x["path"] for x in g2.get_iterator("blargs")]
     real_blargs = [
@@ -158,15 +149,15 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     with open(os.path.join(basedir, "f0.json"), "w") as outfile:
         outfile.write("\n\n\n")
 
-    g1 = SubdirReaderGenerator(base_directory=basedir)
+    g1 = SubdirReaderGenerator(datasource="foo", base_directory=basedir)
 
     g1_assets = g1.get_available_data_asset_names()
     # Use set in test to avoid order issues
     assert set(g1_assets["names"]) == {('f7', 'file'), ('f4', 'directory'), ('f6', 'file'), ('f0', 'file'), ('f2', 'file'), ('f9', 'file'), ('f8', 'file')}
 
 
-def test_databricks_generator():
-    generator = DatabricksTableGenerator()
+def test_databricks_generator(basic_sparkdf_datasource):
+    generator = DatabricksTableGenerator(datasource=basic_sparkdf_datasource)
     available_assets = generator.get_available_data_asset_names()
 
     # We have no tables available

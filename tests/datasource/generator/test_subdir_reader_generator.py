@@ -8,7 +8,7 @@ from great_expectations.datasource.generator import SubdirReaderGenerator
 from great_expectations.exceptions import BatchKwargsError
 
 
-def test_subdir_reader_path_partitioning(tmp_path_factory):
+def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_folder_connection_path"))
     mock_files = [
         "asset_1/20190101__asset_1.csv",
@@ -21,7 +21,8 @@ def test_subdir_reader_path_partitioning(tmp_path_factory):
         safe_mmkdir(os.path.join(base_directory, file.split("/")[0]))
         open(os.path.join(base_directory, file), "w").close()
 
-    subdir_reader_generator = SubdirReaderGenerator("test_generator", base_directory=base_directory)
+    subdir_reader_generator = SubdirReaderGenerator("test_generator", datasource=basic_pandas_datasource,
+                                                    base_directory=base_directory)
 
     # We should see two assets
     known_assets = subdir_reader_generator.get_available_data_asset_names()["names"]
@@ -31,9 +32,9 @@ def test_subdir_reader_path_partitioning(tmp_path_factory):
     # We should see three partitions for the first:
     known_partitions = subdir_reader_generator.get_available_partition_ids("asset_1")
     assert set(known_partitions) == {
-        ("20190101__asset_1", "file"),
-        ("20190102__asset_1", "file"),
-        ("20190103__asset_1", "file")
+        "20190101__asset_1",
+        "20190102__asset_1",
+        "20190103__asset_1"
     }
 
     asset_1_kwargs = [kwargs for kwargs in subdir_reader_generator.get_iterator("asset_1")]
@@ -48,7 +49,7 @@ def test_subdir_reader_path_partitioning(tmp_path_factory):
         os.path.join(base_directory, "asset_1/20190102__asset_1.csv"),
         os.path.join(base_directory, "asset_1/20190103__asset_1.csv")
     }
-    partitions = [kwargs["partition_id"] for kwargs in asset_1_kwargs]
+    partitions = subdir_reader_generator.get_available_partition_ids("asset_1")
 
     # SubdirReaderGenerator uses filenames from subdirectories to generate partition names
     assert set(partitions) == {
@@ -56,7 +57,7 @@ def test_subdir_reader_path_partitioning(tmp_path_factory):
         "20190102__asset_1",
         "20190103__asset_1"
     }
-    assert len(asset_1_kwargs[0].keys()) == 3
+    assert len(asset_1_kwargs[0].keys()) == 2
 
     assert len(asset_2_kwargs) == 2
     paths = [kwargs["path"] for kwargs in asset_2_kwargs]
@@ -64,15 +65,15 @@ def test_subdir_reader_path_partitioning(tmp_path_factory):
         os.path.join(base_directory, "asset_2/20190101__asset_2.csv"),
         os.path.join(base_directory, "asset_2/20190102__asset_2.csv")
     }
-    partitions = [kwargs["partition_id"] for kwargs in asset_2_kwargs]
+    partitions = subdir_reader_generator.get_available_partition_ids("asset_2")
     assert set(partitions) == {
-        "20190101__asset_2",
-        "20190102__asset_2"
+        ("20190101__asset_2"),
+        ("20190102__asset_2")
     }
-    assert len(asset_2_kwargs[0].keys()) == 3
+    assert len(asset_2_kwargs[0].keys()) == 2
 
 
-def test_subdir_reader_file_partitioning(tmp_path_factory):
+def test_subdir_reader_file_partitioning(basic_pandas_datasource, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_folder_connection_path"))
     mock_files = [
         "20190101__asset_1.csv",
@@ -87,7 +88,8 @@ def test_subdir_reader_file_partitioning(tmp_path_factory):
         open(os.path.join(base_directory, file), "w").close()
 
     # If we have files, we should see them as individual assets
-    subdir_reader_generator = SubdirReaderGenerator("test_generator", base_directory=base_directory)
+    subdir_reader_generator = SubdirReaderGenerator("test_generator",
+                                                    datasource=basic_pandas_datasource, base_directory=base_directory)
 
     known_assets = subdir_reader_generator.get_available_data_asset_names()["names"]
     assert set(known_assets) == {
@@ -101,17 +103,17 @@ def test_subdir_reader_file_partitioning(tmp_path_factory):
     known_partitions = subdir_reader_generator.get_available_partition_ids("20190101__asset_1")
     assert set(known_partitions) == {"20190101__asset_1"}
 
-    kwargs = subdir_reader_generator.build_batch_kwargs_from_partition_id("20190101__asset_1", "20190101__asset_1")
+    kwargs = subdir_reader_generator.build_batch_kwargs("20190101__asset_1", "20190101__asset_1")
     assert kwargs["path"] == os.path.join(base_directory, "20190101__asset_1.csv")
 
     # We should also be able to pass a limit
-    kwargs = subdir_reader_generator.build_batch_kwargs_from_partition_id("20190101__asset_1", "20190101__asset_1",
+    kwargs = subdir_reader_generator.build_batch_kwargs("20190101__asset_1", "20190101__asset_1",
                                                                           limit=10)
     assert kwargs["path"] == os.path.join(base_directory, "20190101__asset_1.csv")
-    assert kwargs["limit"] == 10
+    assert kwargs["reader_options"]["nrows"] == 10
 
 
-def test_subdir_reader_configurable_reader_method(tmp_path_factory):
+def test_subdir_reader_configurable_reader_method(basic_pandas_datasource, tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_folder_connection_path"))
     mock_files = [
         "20190101__asset_1.dat",
@@ -126,7 +128,8 @@ def test_subdir_reader_configurable_reader_method(tmp_path_factory):
         open(os.path.join(base_directory, file), "w").close()
 
     # If we have files, we should see them as individual assets
-    subdir_reader_generator = SubdirReaderGenerator("test_generator", base_directory=base_directory,
+    subdir_reader_generator = SubdirReaderGenerator("test_generator", datasource=basic_pandas_datasource,
+                                                    base_directory=base_directory,
                                                     reader_method='csv', known_extensions=['.dat'])
     batch_kwargs = next(subdir_reader_generator.get_iterator('asset_2'))
     assert batch_kwargs['reader_method'] == 'csv'
