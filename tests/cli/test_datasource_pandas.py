@@ -1,5 +1,6 @@
 import os
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -301,7 +302,7 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
 
     batch_id = validation_keys[0].batch_identifier
     evr = context.get_validation_result(
-        batch_id, expectation_suite_name=expected_suite_name
+        expectation_suite_name=expected_suite_name, batch_identifier=batch_id
     )
     reader_options = evr.meta["batch_kwargs"]["reader_options"]
     assert reader_options["parse_dates"] == [0]
