@@ -13,6 +13,7 @@ except ModuleNotFoundError:
 
 from .base import DatasetProfiler
 from ..dataset.util import build_categorical_partition_object
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ class BasicDatasetProfilerBase(DatasetProfiler):
 
     @classmethod
     def _get_column_type(cls, df, column):
+
         # list of types is used to support pandas and sqlalchemy
         df.set_config_value("interactive_evaluation", True)
         try:
@@ -282,17 +284,18 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
         return column_cardinality
 
     @classmethod
-    def _create_expectations_for_low_card_column(cls, dataset, column):
+    def _create_expectations_for_low_card_column(cls, dataset, column, column_cache):
         cls._create_non_nullity_expectations(dataset, column)
 
         value_set = \
         dataset.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY").result[
             "observed_value"]
         dataset.expect_column_distinct_values_to_be_in_set(column, value_set=value_set, result_format="SUMMARY")
-        partition_object = build_categorical_partition_object(dataset, column)
 
-        dataset.expect_column_kl_divergence_to_be_less_than(column, partition_object=partition_object,
-                                                            threshold=0.6, catch_exceptions=True)
+        if cls._get_column_cardinality_with_caching(dataset, column, column_cache) in ["two", "very few"]:
+            partition_object = build_categorical_partition_object(dataset, column)
+            dataset.expect_column_kl_divergence_to_be_less_than(column, partition_object=partition_object,
+                                                                threshold=0.6, catch_exceptions=True)
 
     @classmethod
     def _create_non_nullity_expectations(cls, dataset, column):
@@ -399,10 +402,54 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
             cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
             type = cls._get_column_type_with_caching(dataset, column, column_cache)
 
-            if cardinality in ["many", "very many", "unique"] and type not in ["int", "float"]:
+            if cardinality in ["many", "very many", "unique"] and type in ["string", "unknown"]:
                 return column
 
         return None
+
+    @classmethod
+    def _find_next_datetime_column(cls, dataset, columns, profiled_columns, column_cache):
+        for column in columns:
+            if column in profiled_columns["datetime"]:
+                continue
+
+            cardinality = cls._get_column_cardinality_with_caching(dataset, column, column_cache)
+            type = cls._get_column_type_with_caching(dataset, column, column_cache)
+
+            if cardinality in ["many", "very many", "unique"] and type in ["datetime"]:
+                return column
+
+        return None
+
+    @classmethod
+    def _create_expectations_for_datetime_column(cls, dataset, column):
+        cls._create_non_nullity_expectations(dataset, column)
+
+        min_value = \
+        dataset.expect_column_min_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY").result[
+            "observed_value"]
+
+        if min_value is not None:
+            dataset.remove_expectation(expectation_type="expect_column_min_to_be_between", column=column)
+            try:
+                min_value = min_value + datetime.timedelta(days=-365)
+            except OverflowError as o_err:
+                min_value = datetime.datetime.min
+
+
+        max_value = \
+        dataset.expect_column_max_to_be_between(column, min_value=None, max_value=None, result_format="SUMMARY").result[
+            "observed_value"]
+        if max_value is not None:
+            dataset.remove_expectation(expectation_type="expect_column_max_to_be_between", column=column)
+            try:
+                max_value = max_value + datetime.timedelta(days=365)
+            except OverflowError as o_err:
+                max_value = datetime.datetime.max
+
+        if min_value is not None or max_value is not None:
+            dataset.expect_column_values_to_be_between(column, min_value=min_value, max_value=max_value)
+
 
     @classmethod
     def _profile(cls, dataset):
@@ -427,25 +474,32 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
         profiled_columns = {
             "numeric": [],
             "low_card": [],
-            "string": []
+            "string": [],
+            "datetime": []
         }
 
         column = cls._find_next_low_card_column(dataset, columns, profiled_columns, column_cache)
         if column:
-            cls._create_expectations_for_low_card_column(dataset, column)
+            cls._create_expectations_for_low_card_column(dataset, column, column_cache)
             profiled_columns["low_card"].append(column)
 
 
         column = cls._find_next_numeric_column(dataset, columns, profiled_columns, column_cache)
         if column:
             cls._create_expectations_for_numeric_column(dataset, column)
-            profiled_columns["low_card"].append(column)
+            profiled_columns["numeric"].append(column)
 
 
         column = cls._find_next_string_column(dataset, columns, profiled_columns, column_cache)
         if column:
             cls._create_expectations_for_string_column(dataset, column)
-            profiled_columns["low_card"].append(column)
+            profiled_columns["string"].append(column)
+
+        column = cls._find_next_datetime_column(dataset, columns, profiled_columns, column_cache)
+        if column:
+            cls._create_expectations_for_datetime_column(dataset, column)
+            profiled_columns["datetime"].append(column)
+
 
         expectation_suite = dataset.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=True)
         if not expectation_suite.meta:

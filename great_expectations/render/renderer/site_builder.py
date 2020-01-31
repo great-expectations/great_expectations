@@ -391,7 +391,7 @@ class DefaultSiteIndexBuilder(object):
             index_links_dict[section_name + "_links"] = []
 
         if run_id:
-            path_components = ["validations", batch_identifier] + expectation_suite_name.split(".") + [run_id]
+            path_components = ["validations"] + expectation_suite_name.split(".") + [run_id] + [batch_identifier]
             # py2 doesn't support
             # filepath = os.path.join("validations", batch_identifier, *expectation_suite_name.split("."), run_id)
             filepath = os.path.join(*path_components)
