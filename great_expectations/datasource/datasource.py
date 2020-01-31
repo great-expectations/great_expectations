@@ -290,6 +290,8 @@ class Datasource(object):
             available_data_asset_names[generator_name] = generator.get_available_data_asset_names()
         return available_data_asset_names
 
-    def build_batch_kwargs(self, generator, name=None, **kwargs):
+    def build_batch_kwargs(self, generator, name=None, partition_id=None, **kwargs):
         generator_obj = self.get_generator(generator)
+        if partition_id is not None:
+            kwargs["partition_id"] = partition_id
         return generator_obj.build_batch_kwargs(name=name, **kwargs)

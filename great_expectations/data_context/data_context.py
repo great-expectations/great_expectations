@@ -37,7 +37,6 @@ from great_expectations.datasource import (
     PandasDatasource,
     SqlAlchemyDatasource,
     SparkDFDatasource,
-    DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
@@ -596,7 +595,7 @@ class ConfigOnlyDataContext(object):
 
         return data_asset_names
 
-    def build_batch_kwargs(self, datasource, generator, name=None, **kwargs):
+    def build_batch_kwargs(self, datasource, generator, name=None, partition_id=None, **kwargs):
         """Builds batch kwargs using the provided datasource, generator, and batch_parameters.
 
         Args:

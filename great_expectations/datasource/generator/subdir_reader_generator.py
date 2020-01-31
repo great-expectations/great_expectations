@@ -23,7 +23,6 @@ class SubdirReaderGenerator(BatchKwargsGenerator):
     SubdirReaderGenerator can also include configured reader_options which will be added to batch_kwargs generated
     by this generator.
     """
-
     _default_reader_options = {}
     recognized_batch_parameters = {'name', 'partition_id'}
 
