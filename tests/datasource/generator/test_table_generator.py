@@ -6,8 +6,9 @@ from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKw
 from great_expectations.datasource.generator import TableGenerator
 
 
-def test_basic_operation():
+def test_basic_operation(basic_sqlalchemy_datasource):
     table_generator = TableGenerator(
+        datasource=basic_sqlalchemy_datasource,
         assets={
             "my_asset": {
                 "table": "my_table",

@@ -2,9 +2,8 @@ from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource.generator.manual_generator import ManualGenerator
 
 
-def test_manual_generator():
-    datasource = PandasDatasource("test")
-    generator = ManualGenerator(datasource=datasource, assets={
+def test_manual_generator(basic_pandas_datasource):
+    generator = ManualGenerator(datasource=basic_pandas_datasource, assets={
         "asset1": [
             {
                 "partition_id": 1,
@@ -44,4 +43,4 @@ def test_manual_generator():
     assert len(kwargs) == 3
     assert kwargs['path'] == '/data/file_2.csv'
     assert kwargs['reader_options'] == {'header': 0}
-    assert kwargs['datasource'] == 'test'
+    assert kwargs['datasource'] == 'basic_pandas_datasource'

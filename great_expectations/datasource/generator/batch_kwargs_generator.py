@@ -131,12 +131,14 @@ class BatchKwargsGenerator(object):
             self.reset_iterator(generator_asset, **kwargs)
             return self._data_asset_iterators[generator_asset][0]
 
-    def build_batch_kwargs(self, name=None, **kwargs):
+    def build_batch_kwargs(self, name=None, partition_id=None, **kwargs):
         """The key workhorse. Docs forthcoming."""
         if name is not None:
             batch_parameters = {"name": name}
         else:
             batch_parameters = dict()
+        if partition_id is not None:
+            batch_parameters["partition_id"] = partition_id
         batch_parameters.update(kwargs)
         param_keys = set(batch_parameters.keys())
         recognized_params = (self.recognized_batch_parameters | self._datasource.recognized_batch_parameters)

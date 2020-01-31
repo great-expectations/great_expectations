@@ -38,11 +38,11 @@ def mock_s3_bucket():
 
 
 @pytest.fixture
-def s3_generator(mock_s3_bucket):
+def s3_generator(mock_s3_bucket, basic_sparkdf_datasource):
     # We configure a generator that will fetch from (mocked) my_bucket
     # and will use glob patterns to match returned assets into batches of the same asset
     generator = S3Generator("my_generator",
-                            datasource=None,
+                            datasource=basic_sparkdf_datasource,
                             bucket=mock_s3_bucket,
                             reader_options={
                                 "sep": ","

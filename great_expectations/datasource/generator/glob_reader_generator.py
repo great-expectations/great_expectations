@@ -47,6 +47,7 @@ class GlobReaderGenerator(BatchKwargsGenerator):
                   partition_regex: wifi-((0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])-20\d\d).*\.log
                   reader_method: csv
     """
+    recognized_batch_parameters = {"name", "reader_method", "reader_options", "limit"}
 
     def __init__(self, name="default",
                  datasource=None,
@@ -104,7 +105,7 @@ class GlobReaderGenerator(BatchKwargsGenerator):
             if len(batch_paths) > 0 and generator_asset not in known_assets:
                 known_assets.append(generator_asset)
 
-        return known_assets
+        return [(asset, "path") for asset in known_assets]
 
     def get_available_partition_ids(self, generator_asset):
         glob_config = self._get_generator_asset_config(generator_asset)
@@ -115,20 +116,30 @@ class GlobReaderGenerator(BatchKwargsGenerator):
         ]
         return partition_ids
 
-    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, reader_options=None, limit=None):
-        """Build batch kwargs from a partition id."""
+    def _build_batch_kwargs(self, batch_parameters):
+        try:
+            generator_asset = batch_parameters.pop("name")
+        except KeyError:
+            raise BatchKwargsError("Unable to build BatchKwargs: no name provided in batch_parameters.",
+                                   batch_kwargs=batch_parameters)
+
         glob_config = self._get_generator_asset_config(generator_asset)
         batch_paths = self._get_generator_asset_paths(generator_asset)
-        path = [path for path in batch_paths if self._partitioner(path, glob_config) == partition_id]
-        if len(path) != 1:
-            raise BatchKwargsError("Unable to identify partition %s for asset %s" % (partition_id, generator_asset),
-                                   {
-                                        generator_asset: generator_asset,
-                                        partition_id: partition_id
-                                    })
-        batch_kwargs = self._build_batch_kwargs_from_path(path[0], glob_config, reader_options=reader_options,
-                                                          limit=limit, partition_id=partition_id)
-        return batch_kwargs
+        partition_id = batch_parameters.pop("partition_id", None)
+
+        if partition_id:
+            path = [path for path in batch_paths if self._partitioner(path, glob_config) == partition_id]
+            if len(path) != 1:
+                raise BatchKwargsError("Unable to identify partition %s for asset %s" % (partition_id, generator_asset),
+                                       {
+                                            generator_asset: generator_asset,
+                                            partition_id: partition_id
+                                        })
+            batch_kwargs = self._build_batch_kwargs_from_path(path[0], glob_config, **batch_parameters)
+            return batch_kwargs
+
+        else:
+            return self.yield_batch_kwargs(generator_asset=generator_asset, **batch_parameters)
 
     def _get_generator_asset_paths(self, generator_asset):
         """
@@ -144,66 +155,37 @@ class GlobReaderGenerator(BatchKwargsGenerator):
         return glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
 
     def _get_generator_asset_config(self, generator_asset):
-        if generator_asset not in self._asset_globs:
+        try:
+            return self.asset_globs[generator_asset]
+        except KeyError:
             batch_kwargs = {
                 "generator_asset": generator_asset,
             }
             raise BatchKwargsError("Unknown asset_name %s" % generator_asset, batch_kwargs)
 
-        if isinstance(self.asset_globs[generator_asset], string_types):
-            warnings.warn("String-only glob configuration has been deprecated and will be removed in a future"
-                          "release. See GlobReaderGenerator docstring for more information on the new configuration"
-                          "format.", DeprecationWarning)
-            glob_config = {"glob": self.asset_globs[generator_asset]}
-        else:
-            glob_config = self.asset_globs[generator_asset]
-        return glob_config
-
-    def _get_iterator(self, generator_asset, reader_options=None, limit=None):
+    def _get_iterator(self, generator_asset, reader_method=None, reader_options=None, limit=None):
         glob_config = self._get_generator_asset_config(generator_asset)
         paths = glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
-        return self._build_batch_kwargs_path_iter(paths, glob_config, reader_options=reader_options, limit=limit)
+        return self._build_batch_kwargs_path_iter(paths, glob_config, reader_method=reader_method,
+                                                  reader_options=reader_options,
+                                                  limit=limit)
 
-    def _build_batch_kwargs_path_iter(self, path_list, glob_config, reader_options=None, limit=None):
+    def _build_batch_kwargs_path_iter(self, path_list, glob_config, reader_method=None, reader_options=None,
+                                      limit=None):
         for path in path_list:
-            yield self._build_batch_kwargs_from_path(path, glob_config, reader_options=reader_options, limit=limit)
+            yield self._build_batch_kwargs_from_path(path, glob_config, reader_method=reader_method,
+                                                     reader_options=reader_options,
+                                                     limit=limit)
 
-    def _build_batch_kwargs_from_path(self, path, glob_config, reader_options=None, limit=None, partition_id=None):
-        # We could add MD5 (e.g. for smallish files)
-        # but currently don't want to assume the extra read is worth it
-        # unless it's configurable
-        # with open(path,'rb') as f:
-        #     md5 = hashlib.md5(f.read()).hexdigest()
-        batch_kwargs = PathBatchKwargs({
-            "path": path
-        })
-        computed_partition_id = self._partitioner(path, glob_config)
-        if partition_id and computed_partition_id:
-            if partition_id != computed_partition_id:
-                logger.warning("Provided partition_id does not match computed partition_id; consider explicitly "
-                               "defining the asset or updating your partitioner.")
-            batch_kwargs["partition_id"] = partition_id
-        elif partition_id:
-            batch_kwargs["partition_id"] = partition_id
-        elif computed_partition_id:
-            batch_kwargs["partition_id"] = computed_partition_id
+    def _build_batch_kwargs_from_path(self, path, glob_config, reader_method=None, reader_options=None, limit=None):
+        batch_kwargs = self._datasource.process_batch_parameters(
+            reader_method=reader_method or glob_config.get("reader_method") or self.reader_method,
+            reader_options=reader_options or glob_config.get("reader_options") or self.reader_options,
+            limit=limit or glob_config.get("limit")
+        )
+        batch_kwargs["path"] = path
 
-        # Apply globally-configured reader options first
-        batch_kwargs['reader_options'] = self.reader_options
-        if reader_options:
-            # Then update with any locally-specified reader options
-            batch_kwargs['reader_options'].update(reader_options)
-
-        if limit is not None:
-            batch_kwargs['limit'] = limit
-
-        if self.reader_method is not None:
-            batch_kwargs['reader_method'] = self.reader_method
-        
-        if glob_config.get("reader_method"):
-            batch_kwargs['reader_method'] = glob_config.get("reader_method")
-
-        return batch_kwargs
+        return PathBatchKwargs(batch_kwargs)
 
     def _partitioner(self, path, glob_config):
         if "partition_regex" in glob_config:

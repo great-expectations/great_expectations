@@ -1,16 +1,11 @@
-import pytest
-
-from great_expectations.datasource import SqlAlchemyDatasource
-from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
 from great_expectations.datasource.generator import QueryGenerator
 
 
-def test_basic_operation(sqlitedb_engine):
+def test_basic_operation(basic_sqlalchemy_datasource):
     # We should be able to include defined queries as part of configuration
-    datasource = SqlAlchemyDatasource("test", engine=sqlitedb_engine)
     generator = QueryGenerator(
-        datasource=datasource,
+        datasource=basic_sqlalchemy_datasource,
         queries={
             "my_asset": "SELECT * FROM my_table WHERE value = $condition",
             "my_simple_asset": "SELECT c1, c2 FROM my_table"
@@ -29,11 +24,9 @@ def test_basic_operation(sqlitedb_engine):
     assert batch_kwargs.query == "SELECT c1, c2 FROM my_table"
 
 
-def test_partition_id(sqlitedb_engine):
-    datasource = SqlAlchemyDatasource("test", engine=sqlitedb_engine)
-
+def test_partition_id(basic_sqlalchemy_datasource):
     generator = QueryGenerator(
-        datasource=datasource,
+        datasource=basic_sqlalchemy_datasource,
         queries={
             "my_asset": "SELECT * FROM my_table WHERE value = $partition_id",
         }
