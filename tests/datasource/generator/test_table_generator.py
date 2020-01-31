@@ -23,13 +23,13 @@ def test_basic_operation():
         }
     )
 
-    batch_kwargs = table_generator.yield_batch_kwargs("my_asset", query_params={"schema": "foo"})
+    batch_kwargs = table_generator.yield_batch_kwargs("my_asset", query_parameters={"schema": "foo"})
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
     assert batch_kwargs.schema == "foo"
     assert batch_kwargs.table == "my_table"
 
     # Note that schema is ignored in this case -- it's not part of the defined asset
-    batch_kwargs = table_generator.yield_batch_kwargs("my_no_schema_asset", query_params={"schema": "foo"})
+    batch_kwargs = table_generator.yield_batch_kwargs("my_no_schema_asset", query_parameters={"schema": "foo"})
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
     assert batch_kwargs.schema is None
     assert batch_kwargs.table == "important_data"
@@ -42,7 +42,7 @@ def test_basic_operation():
 
     # Note that in this case, we have a confusingly named asset, since it "could" be a schema + table name
     # Since it's not available to be found via introspection, however, and it *is* a valid name, this works fine
-    batch_kwargs = table_generator.yield_batch_kwargs("dangerous.named_asset", query_params={"schema": "bar"})
+    batch_kwargs = table_generator.yield_batch_kwargs("dangerous.named_asset", query_parameters={"schema": "bar"})
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
     assert batch_kwargs.schema == "bar"
     assert batch_kwargs.table == "named_asset"
