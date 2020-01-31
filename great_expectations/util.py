@@ -3,10 +3,14 @@ import importlib
 import json
 import logging
 
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
+
 from six import string_types
 
-from great_expectations import __version__ as ge_version
-from great_expectations.core import expectationSuiteSchema, ExpectationSuite
+from great_expectations.core import expectationSuiteSchema
 
 logger = logging.getLogger(__name__)
 
@@ -458,3 +462,13 @@ def gen_directory_tree_str(startpath):
             output_str += '{}{}\n'.format(subindent, f)
     
     return output_str
+
+
+# https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+def nested_update(d, u):
+    for k, v in u.items():
+        if isinstance(v, Mapping):
+            d[k] = nested_update(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d

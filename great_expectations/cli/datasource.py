@@ -24,9 +24,7 @@ from great_expectations.datasource import (
     SqlAlchemyDatasource,
 )
 from great_expectations.datasource.generator import (
-    InMemoryGenerator,
     ManualGenerator,
-    PassthroughGenerator,
 )
 from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.profile.basic_dataset_profiler import (
@@ -58,7 +56,7 @@ DATASOURCE_TYPE_BY_DATASOURCE_CLASS = {
     "SqlAlchemyDatasource": DatasourceTypes.SQL,
 }
 
-MANUAL_GENERATOR_CLASSES = (InMemoryGenerator, ManualGenerator, PassthroughGenerator)
+MANUAL_GENERATOR_CLASSES = (ManualGenerator)
 
 
 class SupportedDatabases(enum.Enum):

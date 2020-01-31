@@ -2,6 +2,7 @@ import pytest
 import os
 
 import great_expectations as ge
+from great_expectations.util import nested_update
 
 
 def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
@@ -95,3 +96,25 @@ project_dir0/
         aaa.txt
         bbb.txt
 """
+
+
+def test_nested_update():
+    # nested_update is useful for update nested dictionaries (such as batch_kwargs with reader_options as a dictionary)
+    batch_kwargs = {
+        "path": "/a/path",
+        "reader_method": "read_csv",
+        "reader_options": {
+            "header": 0
+        }
+    }
+
+    nested_update(batch_kwargs, {"reader_options": {"nrows": 1}})
+
+    assert batch_kwargs == {
+        "path": "/a/path",
+        "reader_method": "read_csv",
+        "reader_options": {
+            "header": 0,
+            "nrows": 1
+        }
+    }
