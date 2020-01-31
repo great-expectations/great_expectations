@@ -284,7 +284,7 @@ def test_read_limit(test_folder_connection_path):
 
 
 def test_process_batch_parameters():
-    batch_kwargs = PandasDataset("test").process_batch_parameters(limit=1)
+    batch_kwargs = PandasDatasource("test").process_batch_parameters(limit=1)
     assert batch_kwargs == {
         "reader_options": {
             "nrows": 1
