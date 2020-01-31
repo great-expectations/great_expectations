@@ -104,7 +104,6 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
 
 def test_pandas_datasource_custom_data_asset(data_context, test_folder_connection_path):
     name = "test_pandas_datasource"
-    # type_ = "pandas"
     class_name = "PandasDatasource"
 
     data_asset_type_config = {
@@ -113,8 +112,14 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
     }
     data_context.add_datasource(name,
                                 class_name=class_name,
-                                base_directory=test_folder_connection_path,
-                                data_asset_type=data_asset_type_config)
+                                data_asset_type=data_asset_type_config,
+                                generators={
+                                    "subdir_reader": {
+                                        "class_name": "SubdirReaderGenerator",
+                                        "base_directory": str(test_folder_connection_path)
+                                    }
+                                }
+    )
 
     # We should now see updated configs
     with open(os.path.join(data_context.root_directory, "great_expectations.yml"), "r") as data_context_config_file:
@@ -124,11 +129,10 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
     assert data_context_file_config["datasources"][name]["data_asset_type"]["class_name"] == "CustomPandasDataset"
 
     # We should be able to get a dataset of the correct type from the datasource.
-    data_asset_name = "test_pandas_datasource/default/test"
-    data_context.create_expectation_suite(data_asset_name=data_asset_name, expectation_suite_name="default")
-    batch = data_context.get_batch(data_asset_name=data_asset_name,
-                                   expectation_suite_name="default",
-                                   batch_kwargs=data_context.yield_batch_kwargs(data_asset_name=data_asset_name)
+    data_context.create_expectation_suite(expectation_suite_name="test")
+    batch = data_context.get_batch(expectation_suite_name="test",
+                                   batch_kwargs=data_context.build_batch_kwargs(datasource=name,
+                                                                                generator="subdir_reader", name="test")
     )
     assert type(batch).__name__ == "CustomPandasDataset"
     res = batch.expect_column_values_to_have_odd_lengths("col_2")
