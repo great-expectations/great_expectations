@@ -33,6 +33,9 @@ from great_expectations.profile.basic_dataset_profiler import (
     SampleExpectationsDatasetProfiler,
 )
 
+from great_expectations.validator.validator import Validator
+from great_expectations.core import ExpectationSuite
+
 logger = logging.getLogger(__name__)
 
 # FIXME: This prevents us from seeing a huge stack of these messages in python 2. We'll need to fix that later.
@@ -733,11 +736,16 @@ def get_batch_kwargs(context,
 
     batch_kwargs = None
 
-    available_data_assets_dict = context.get_available_data_asset_names(datasource_names=datasource_name)
+    try:
+        available_data_assets_dict = context.get_available_data_asset_names(datasource_names=datasource_name)
+    except ValueError:
+        # the datasource has no generators
+        available_data_assets_dict = {datasource_name: {}}
 
     if generator_name is None:
         generator_name = select_generator(context, datasource_name,
                                           available_data_assets_dict=available_data_assets_dict)
+
 
     # if we have a generator that can list available data asset names, let's list them
 
@@ -764,27 +772,27 @@ def get_batch_kwargs(context,
 
     # If the data asset name is in the namespace (or we don't have it yet)
 
-    if generator_asset is None or generator_asset not in [name[0] for name in available_data_assets_dict[datasource_name][generator_name]["names"]]:
-        generator_name = None
-        for generator_info in data_source.list_generators():
-            generator = data_source.get_generator(generator_info["name"])
-            if isinstance(generator, MANUAL_GENERATOR_CLASSES):
-                generator_name = generator_info["name"]
-                break
-        if generator_name is None:
-            raise ge_exceptions.DataContextError("No manual generators found in datasource {0:s}".format(datasource_name))
+    # if generator_asset is None or generator_asset not in [name[0] for name in available_data_assets_dict[datasource_name][generator_name]["names"]]:
+    #     generator_name = None
+    #     for generator_info in data_source.list_generators():
+    #         generator = data_source.get_generator(generator_info["name"])
+    #         if isinstance(generator, MANUAL_GENERATOR_CLASSES):
+    #             generator_name = generator_info["name"]
+    #             break
+    #     if generator_name is None:
+    #         raise ge_exceptions.DataContextError("No manual generators found in datasource {0:s}".format(datasource_name))
 
 
-        if isinstance(context.get_datasource(datasource_name), (PandasDatasource, SparkDFDatasource)):
-            generator_asset, batch_kwargs = _load_file_from_filesystem_as_data_asset(context, datasource_name,
-                                                                                     generator_name=generator_name,
-                                                                                     generator_asset=generator_asset)
-        elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
-            generator_asset, batch_kwargs = _load_query_as_data_asset_from_sqlalchemy_datasource(context,
-                                                                                                 datasource_name,
-                                                                                                 data_asset_name=generator_asset)
-        else:
-            raise ge_exceptions.DataContextError("Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(datasource_name, str(type(context.get_datasource(datasource_name)))))
+    if isinstance(context.get_datasource(datasource_name), (PandasDatasource, SparkDFDatasource)):
+        generator_asset, batch_kwargs = _load_file_from_filesystem_as_data_asset(context, datasource_name,
+                                                                                 generator_name=generator_name,
+                                                                                 generator_asset=generator_asset)
+    elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
+        generator_asset, batch_kwargs = _load_query_as_data_asset_from_sqlalchemy_datasource(context,
+                                                                                             datasource_name,
+                                                                                             data_asset_name=generator_asset)
+    else:
+        raise ge_exceptions.DataContextError("Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(datasource_name, str(type(context.get_datasource(datasource_name)))))
 
     return (datasource_name, generator_name, generator_asset, batch_kwargs)
 
@@ -979,21 +987,24 @@ def _load_query_as_data_asset_from_sqlalchemy_datasource(context, datasource_nam
     msg_prompt_query = """
 Enter an SQL query
 """
+    msg_prompt_data_asset_name = """
+    Give your new data asset a short name
+"""
 
     datasource = context.get_datasource(datasource_name)
+
 
     while True:
         try:
             query = click.prompt(msg_prompt_query, default=None, show_default=False)
 
             if data_asset_name is None:
-                data_asset_name = click.prompt(msg_prompt_query, default=data_asset_name, show_default=False) # TODO: check non-zero length
+                data_asset_name = click.prompt(msg_prompt_data_asset_name, default=data_asset_name, show_default=False) # TODO: check non-zero length
 
 
             batch_kwargs = {"query": query}
 
-
-            batch = datasource.batch(batch_kwargs=batch_kwargs)
+            Validator(batch=datasource.get_batch(batch_kwargs), expectation_suite=ExpectationSuite("throwaway")).get_dataset()
 
             break
         except Exception as error: # TODO: catch more specific exception
