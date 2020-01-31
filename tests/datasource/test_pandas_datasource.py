@@ -149,18 +149,16 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
                                 class_name="PandasDatasource",
                                 reader_options={"encoding": "utf-8"},
                                 generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
-        "base_directory": str(basedir)
-    }
-}
-)
+            "subdir_reader": {
+                "class_name": "SubdirReaderGenerator",
+                "base_directory": str(basedir)
+            }
+        }
+        )
 
-
-    data_context.create_expectation_suite(data_asset_name="mysource/unicode", expectation_suite_name="default")
-    batch = data_context.get_batch("mysource/unicode",
-                                   "default",
-                                   data_context.yield_batch_kwargs("mysource/unicode"))
+    data_context.create_expectation_suite(expectation_suite_name="unicode")
+    batch = data_context.get_batch(data_context.build_batch_kwargs("mysource", "subdir_reader", "unicode"),
+                                   "unicode")
     assert len(batch["Μ"] == 1)
     assert "😁" in list(batch["Μ"])
 
@@ -168,56 +166,48 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
                                 module_name="great_expectations.datasource",
                                 class_name="PandasDatasource",
                                 generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
-        "base_directory": str(basedir)
-    }
-}
-)
-
-
-    data_context.create_expectation_suite(data_asset_name="mysource2/unicode", expectation_suite_name="default")
-    batch = data_context.get_batch("mysource2/unicode",
-                                   "default",
-                                   data_context.yield_batch_kwargs("mysource2/unicode")
+            "subdir_reader": {
+                "class_name": "SubdirReaderGenerator",
+                "base_directory": str(basedir)
+            }
+        }
     )
+
+    batch = data_context.get_batch(data_context.build_batch_kwargs("mysource2", "subdir_reader", "unicode"),
+                                   "unicode")
     assert "😁" in list(batch["Μ"])
 
     data_context.add_datasource("mysource3",
                                 module_name="great_expectations.datasource",
                                 class_name="PandasDatasource",
-                                reader_options={"encoding": "utf-16"},
                                 generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
-        "base_directory": str(basedir)
-    }
-}
-)
+            "subdir_reader": {
+                "class_name": "SubdirReaderGenerator",
+                "base_directory": str(basedir),
+                "reader_options": {"encoding": "utf-16"},
+            }
+        }
+    )
 
     with pytest.raises(UnicodeError, match="UTF-16 stream does not start with BOM"):
-        data_context.create_expectation_suite(data_asset_name="mysource3/unicode", expectation_suite_name="default")
-        batch = data_context.get_batch("mysource3/unicode",
-                                       "default",
-                                       data_context.yield_batch_kwargs("mysource3/unicode")
-                                       )
+        batch = data_context.get_batch(data_context.build_batch_kwargs("mysource3", "subdir_reader", "unicode"),
+                                       "unicode")
 
     with pytest.raises(LookupError, match="unknown encoding: blarg"):
-        batch = data_context.get_batch("mysource/unicode",
-                                       "default",
-                                       batch_kwargs=data_context.yield_batch_kwargs("mysource/unicode"),
-                                       reader_options={'encoding': 'blarg'})
+        batch_kwargs = data_context.build_batch_kwargs("mysource3", "subdir_reader", "unicode")
+        batch_kwargs.update({"reader_options": {"encoding": "blarg"}})
+        batch = data_context.get_batch(batch_kwargs=batch_kwargs,
+                                       expectation_suite_name="unicode")
 
     with pytest.raises(LookupError, match="unknown encoding: blarg"):
-        batch = data_context.get_batch("mysource/unicode",
-                                       "default",
-                                       batch_kwargs=data_context.yield_batch_kwargs(
-                                           "mysource/unicode", reader_options={'encoding': 'blarg'}))
+        batch = data_context.get_batch(expectation_suite_name="unicode",
+                                       batch_kwargs=data_context.build_batch_kwargs(
+                                           "mysource", "subdir_reader", "unicode", reader_options={'encoding': 'blarg'}))
 
-    batch = data_context.get_batch("mysource2/unicode",
-                                   "default",
-                                   batch_kwargs=data_context.yield_batch_kwargs("mysource2/unicode", reader_options={
-                                       'encoding': 'utf-8'})
+    batch = data_context.get_batch(batch_kwargs=data_context.build_batch_kwargs("mysource2", "subdir_reader",
+                                                                                "unicode", reader_options={
+                                       'encoding': 'utf-8'}),
+                                   expectation_suite_name="unicode"
                                    )
     assert "😁" in list(batch["Μ"])
 
