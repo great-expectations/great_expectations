@@ -5,7 +5,7 @@
     "great_expectations.__version__": "0.9.0b1+310.g05637d48.dirty",
     "expectation_suite_name": "default",
     "run_id": "20200130T171315.316592Z",
-    "batch_kwargs": {},
+    "batch_kwargs": {"ge_batch_id": "1234"},
     "batch_markers": {},
     "batch_parameters": {}
   },
