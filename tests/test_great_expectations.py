@@ -464,13 +464,14 @@ class TestIO(unittest.TestCase):
         """
 
         # Pass this test if the available version of pandas is less than 0.21.0, because prior
-        # versions of pandas did not include the read_parquet function.
-        pandas_version = re.match('0\.(.*)\..*', pd.__version__)
+        # versions of pandas did not include the read_parquet function and the test doesn't apply
+        pandas_version = re.match('(.+)\.(.+)\..+', pd.__version__)
         if pandas_version is None:
             raise ValueError("Unrecognized pandas version!")
         else:
-            pandas_version = int(pandas_version.group(1))
-            if pandas_version < 21:
+            pandas_version_major = int(pandas_version.group(1))
+            pandas_version_minor = int(pandas_version.group(2))
+            if (pandas_version_major == 0) and (pandas_version_minor < 21):
                 return
 
         script_path = os.path.dirname(os.path.realpath(__file__))
