@@ -77,12 +77,12 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
     # type_ = "pandas"
     # data_context.add_datasource(name, type_, base_directory=str(basedir))
     data_context.add_datasource(name, class_name=class_name, generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
-        "base_directory": str(basedir)
-    }
-}
-)
+            "subdir_reader": {
+                "class_name": "SubdirReaderGenerator",
+                "base_directory": str(basedir)
+            }
+        }
+    )
 
     data_context_config = data_context.get_config()
 
@@ -98,7 +98,7 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
     assert data_context_file_config["datasources"][name] == data_context_config["datasources"][name]
 
     # We should have added a default generator built from the default config
-    assert data_context_file_config["datasources"][name]["generators"]["default"]["class_name"] == \
+    assert data_context_file_config["datasources"][name]["generators"]["subdir_reader"]["class_name"] == \
         "SubdirReaderGenerator"
 
 
