@@ -161,9 +161,9 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     validation_result_page_path = os.path.join(
         site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory,
         "validations",
-        batch.batch_id,
         expectation_suite_path_component,
-        run_id + ".html")
+        run_id,
+        batch.batch_id + ".html")
 
     ts_last_mod_0 = os.path.getmtime(validation_result_page_path)
 
@@ -198,9 +198,9 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
     new_validation_result_page_path = os.path.join(
         site_builder.site_index_builder.target_store.store_backends[ValidationResultIdentifier].full_base_directory,
         "validations",
-        batch.batch_id,
         expectation_suite_path_component,
-        run_id + ".html")
+        run_id,
+        batch.batch_id + ".html")
 
     html_url = site_builder.get_resource_url(resource_identifier=validation_result_id)
     assert "file://" + new_validation_result_page_path == html_url
