@@ -39,7 +39,7 @@ class ManualGenerator(BatchKwargsGenerator):
                 logs:
                   path: data/log.csv
     """
-    recognized_batch_parameters = {"name"}
+    recognized_batch_parameters = {"name", "partition_id"}
 
     def __init__(self, name="default",
                  datasource=None,
@@ -57,7 +57,7 @@ class ManualGenerator(BatchKwargsGenerator):
         return self._assets
 
     def get_available_data_asset_names(self):
-        return {"names": list(self.assets.keys())}
+        return {"names": [(key, "manual") for key in self.assets.keys()]}
 
     def _get_generator_asset_config(self, generator_asset):
         if generator_asset is None:
@@ -69,13 +69,14 @@ class ManualGenerator(BatchKwargsGenerator):
         raise InvalidBatchKwargsError("No asset definition for requested asset %s" % generator_asset)
 
     def _get_iterator(self, generator_asset, **kwargs):
+        datasource_batch_kwargs = self._datasource.process_batch_parameters(**kwargs)
         asset_definition = deepcopy(self._get_generator_asset_config(generator_asset))
         if isinstance(asset_definition, list):
             for batch_definition in asset_definition:
-                batch_definition.update(kwargs)
+                batch_definition.update(datasource_batch_kwargs)
             return iter(asset_definition)
         else:
-            asset_definition.update(kwargs)
+            asset_definition.update(datasource_batch_kwargs)
             return iter([asset_definition])
 
     def get_available_partition_ids(self, generator_asset):
@@ -96,20 +97,23 @@ class ManualGenerator(BatchKwargsGenerator):
 
     def _build_batch_kwargs(self, batch_parameters):
         """Build batch kwargs from a partition id."""
-        batch_kwargs = None
-        if "partition_id" in batch_parameters:
+        partition_id = batch_parameters.pop("partition_id", None)
+        batch_kwargs = self._datasource.process_batch_parameters(batch_parameters)
+        if partition_id:
             asset_definition = self._get_generator_asset_config(generator_asset=batch_parameters.get("name"))
             if isinstance(asset_definition, list):
                 for batch_definition in asset_definition:
                     try:
-                        if batch_definition['partition_id'] == batch_parameters.get("partition_id"):
+                        if batch_definition['partition_id'] == partition_id:
                             batch_kwargs = deepcopy(batch_definition)
+                            batch_kwargs.pop("partition_id")
                     except KeyError:
                         pass
             elif isinstance(asset_definition, dict):
                 try:
-                    if asset_definition['partition_id'] == batch_parameters.get("partition_id"):
+                    if asset_definition['partition_id'] == partition_id:
                         batch_kwargs = deepcopy(asset_definition)
+                        batch_kwargs.pop("partition_id")
                 except KeyError:
                     pass
         else:
