@@ -432,6 +432,7 @@ class TestIO(unittest.TestCase):
                 script_path+'/test_sets/Titanic_multi_sheet.xlsx',
                 sheetname=None
             )
+
         else:
             dfs_dict = ge.read_excel(
                 script_path+'/test_sets/Titanic_multi_sheet.xlsx',
@@ -478,6 +479,14 @@ class TestIO(unittest.TestCase):
             script_path+'/test_sets/Titanic.parquet'
         )
         assert df['Name'][1] == 'Allen, Miss Elisabeth Walton'
+        assert isinstance(df, PandasDataset)
+
+    def test_read_pickle(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_pickle(
+            script_path+'/test_sets/Titanic.pkl',
+        )
+        assert df['Name'][0] == 'Allen, Miss Elisabeth Walton'
         assert isinstance(df, PandasDataset)
 
 
