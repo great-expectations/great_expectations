@@ -3,7 +3,7 @@ import logging
 from marshmallow import ValidationError
 from six import string_types
 
-from great_expectations.core import DataAssetIdentifier, dataAssetIdentifierSchema
+from great_expectations.core import DataAssetIdentifier, dataAssetIdentifierSchema, BatchKwargs
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import num_to_str
 
@@ -41,6 +41,7 @@ class ValidationResultsPageRenderer(Renderer):
 
     def render(self, validation_results):
         run_id = validation_results.meta['run_id']
+        batch_id = BatchKwargs(validation_results.meta['batch_kwargs']).to_id()
         expectation_suite_name = validation_results.meta['expectation_suite_name']
 
         # Group EVRs by column
@@ -123,7 +124,7 @@ class ValidationResultsPageRenderer(Renderer):
 
         return RenderedDocumentContent(**{
             "renderer_type": "ValidationResultsPageRenderer",
-            "page_title": run_id + "-" + expectation_suite_name + "-ValidationResults",
+            "page_title": expectation_suite_name + " / " + run_id + " / " + batch_id,
             "expectation_suite_name": expectation_suite_name,
             "sections": sections,
             "utm_medium": "validation-results-page",
