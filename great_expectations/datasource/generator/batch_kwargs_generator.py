@@ -75,7 +75,7 @@ class BatchKwargsGenerator(object):
     _batch_kwargs_type = BatchKwargs
     recognized_batch_parameters = set()
 
-    def __init__(self, name, datasource=None):
+    def __init__(self, name, datasource):
         self._name = name
         self._generator_config = {
             "class_name": self.__class__.__name__
@@ -159,7 +159,9 @@ class BatchKwargsGenerator(object):
             self.reset_iterator(generator_asset, **kwargs)
             data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
         try:
-            return next(data_asset_iterator)
+            batch_kwargs = next(data_asset_iterator)
+            batch_kwargs["datasource"] = self._datasource.name
+            return batch_kwargs
         except StopIteration:
             self.reset_iterator(generator_asset, **kwargs)
             data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
@@ -170,7 +172,9 @@ class BatchKwargsGenerator(object):
                 self.reset_iterator(generator_asset, **kwargs)
                 data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
             try:
-                return next(data_asset_iterator)
+                batch_kwargs = next(data_asset_iterator)
+                batch_kwargs["datasource"] = self._datasource.name
+                return batch_kwargs
             except StopIteration:
                 # This is a degenerate case in which no kwargs are actually being generated
                 logger.warning("No batch_kwargs found for generator_asset %s" % generator_asset)
