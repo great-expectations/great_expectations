@@ -978,15 +978,17 @@ We could not determine the format of the file. What is it?
             )
 
             try:
-                reader_method = datasource.guess_reader_method_from_path(path + reader_method_file_extensions[option_selection]) ["reader_method"]
+                print(path + reader_method_file_extensions[option_selection])
+                reader_method = datasource.guess_reader_method_from_path(path + "." + reader_method_file_extensions[option_selection])["reader_method"]
+                print(reader_method)
             except BatchKwargsError:
+                print("BOOM")
                 pass
 
-            # batch_kwargs["reader_method"] = reader_methods[option_selection]
-
-            batch = datasource.get_batch(batch_kwargs=batch_kwargs)
-
-            break
+            if reader_method is not None:
+                batch_kwargs["reader_method"] = reader_method
+                batch = datasource.get_batch(batch_kwargs=batch_kwargs)
+                break
     else:
         # TODO: read the file and confirm with user that we read it correctly (headers, columns, etc.)
         batch = datasource.get_batch(batch_kwargs=batch_kwargs)
