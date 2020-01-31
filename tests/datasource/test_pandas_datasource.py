@@ -9,13 +9,13 @@ import pandas as pd
 from six import PY3
 import shutil
 
+from great_expectations.core.batch import Batch
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource.types.batch_kwargs import (
     PathBatchKwargs,
-    BatchMarkers,
-    BatchFingerprint
+    BatchMarkers
 )
 from great_expectations.dataset import PandasDataset
 
@@ -34,41 +34,39 @@ def test_folder_connection_path(tmp_path_factory):
 
 def test_standalone_pandas_datasource(test_folder_connection_path):
     datasource = PandasDatasource('PandasCSV', generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
-        "base_directory": test_folder_connection_path
-    }
-}
-)
+            "subdir_reader": {
+                "class_name": "SubdirReaderGenerator",
+                "base_directory": test_folder_connection_path
+            }
+        }
+    )
 
 
-    assert datasource.get_available_data_asset_names() == {'default': {'names': [('test', 'file')], 'is_complete_list': True}, 'passthrough': {'names': []}}
+    assert datasource.get_available_data_asset_names() == {'subdir_reader': {'names': [('test', 'file')],
+                                                                        'is_complete_list':
+        True}}
     manual_batch_kwargs = PathBatchKwargs(path=os.path.join(str(test_folder_connection_path), "test.csv"))
 
-    # Get the default (subdir_path) generator
-    generator = datasource.get_generator()
+    generator = datasource.get_generator("subdir_reader")
     auto_batch_kwargs = generator.yield_batch_kwargs("test")
 
     assert manual_batch_kwargs["path"] == auto_batch_kwargs["path"]
 
     # Include some extra kwargs...
-    # Note that we are using get_data_asset NOT get_batch here, since we are standalone (no batch concept)
-    dataset = datasource.get_data_asset("test",
-                                        generator_name="default",
-                                        batch_kwargs=auto_batch_kwargs,
-                                        reader_options={
+    auto_batch_kwargs.update({"reader_options":{
                                             'sep': ",",
                                             'header': 0,
                                             'index_col': 0
-                                        })
-    assert isinstance(dataset, PandasDataset)
+                                        }})
+    batch = datasource.get_batch(batch_kwargs=auto_batch_kwargs)
+    assert isinstance(batch, Batch)
+    dataset = batch.data
     assert (dataset["col_1"] == [1, 2, 3, 4, 5]).all()
     assert len(dataset) == 5
 
     # A datasource should always return an object with a typed batch_id
-    assert isinstance(dataset.batch_kwargs, PathBatchKwargs)
-    assert isinstance(dataset.batch_id, BatchMarkers)
-    assert isinstance(dataset.batch_fingerprint, BatchFingerprint)
+    assert isinstance(batch.batch_kwargs, PathBatchKwargs)
+    assert isinstance(batch.batch_markers, BatchMarkers)
 
 
 def test_create_pandas_datasource(data_context, tmp_path_factory):
