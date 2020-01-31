@@ -1,12 +1,6 @@
-import pytest
+import json
 
-import sys
-from freezegun import freeze_time
-
-from great_expectations.core import ExpectationConfiguration, dataAssetIdentifierSchema, expectationSuiteSchema, \
-    namespaceAwareExpectationSuiteSchema
-from great_expectations.data_context.store import ExpectationsStore
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
 
 try:
     from unittest import mock
@@ -15,24 +9,38 @@ except ImportError:
 
 import os
 import shutil
-import json
 from collections import OrderedDict
+
+import pytest
 from ruamel.yaml import YAML
 
-from great_expectations.exceptions import DataContextError
+from great_expectations.core import (
+    ExpectationConfiguration,
+    dataAssetIdentifierSchema,
+    expectationSuiteSchema,
+)
 from great_expectations.data_context import (
     ConfigOnlyDataContext,
     DataContext,
     ExplorerDataContext,
 )
-from great_expectations.data_context.util import safe_mmkdir
-from great_expectations.data_context.types import (
+from great_expectations.data_context.store import ExpectationsStore
+from great_expectations.core import (
     DataAssetIdentifier,
-    ExpectationSuiteIdentifier,
 )
-from great_expectations.util import (
-    gen_directory_tree_str,
+from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.util import (
+    safe_mmkdir,
 )
+from great_expectations.exceptions import DataContextError
+from great_expectations.util import gen_directory_tree_str
+
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
+
 
 yaml = YAML()
 
@@ -67,12 +75,7 @@ def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
 def test_list_expectation_suite_keys(data_context):
     assert data_context.list_expectation_suite_keys() == [
         ExpectationSuiteIdentifier(
-            data_asset_name=DataAssetIdentifier(
-                "mydatasource",
-                "mygenerator",
-                "my_dag_node",
-            ),
-            expectation_suite_name="default"
+            expectation_suite_name="my_dag_node.default"
         )
     ]
 
@@ -381,7 +384,7 @@ def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem
     os.makedirs(os.path.join(project_dir, "data"))
     os.makedirs(os.path.join(project_dir, "data/titanic"))
     shutil.copy(
-        "./tests/test_sets/Titanic.csv",
+        file_relative_path(__file__, "../test_sets/Titanic.csv"),
         str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
     )
 
@@ -593,7 +596,7 @@ def basic_data_context_config():
             "expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
-                    "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                    "class_name": "TupleFilesystemStoreBackend",
                     "base_directory": "expectations/",
                 },
             },
@@ -649,7 +652,7 @@ def test_load_data_context_from_environment_variables(tmp_path_factory):
         project_path = str(tmp_path_factory.mktemp('data_context'))
         context_path = os.path.join(project_path, "great_expectations")
         safe_mmkdir(context_path)
-        shutil.copy("./tests/test_fixtures/great_expectations_basic.yml",
+        shutil.copy(file_relative_path(__file__, "../test_fixtures/great_expectations_basic.yml"),
                     str(os.path.join(context_path, "great_expectations.yml")))
         with pytest.raises(DataContextError) as err:
             DataContext.find_context_root_dir()
@@ -765,7 +768,7 @@ def test_data_context_updates_expectation_suite_names(data_context):
                 "a_new_new_data_asset",
                 "a_new_new_suite_name.json"
                 ), 'r') as suite_file:
-        loaded_suite = namespaceAwareExpectationSuiteSchema.load(json.load(suite_file)).data
+        loaded_suite = expectationSuiteSchema.load(json.load(suite_file)).data
         assert loaded_suite.data_asset_name == DataAssetIdentifier(
                 data_asset_name.datasource,
                 data_asset_name.generator,
@@ -1020,7 +1023,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
         "my_rad_site": {
             "class_name": "SiteBuilder",
             "store_backend": {
-                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/data_docs/some/local/path/"
             }
         }
@@ -1049,14 +1052,14 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
         "my_rad_site": {
             "class_name": "SiteBuilder",
             "store_backend": {
-                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/data_docs/some/path/"
             }
         },
         "another_just_amazing_site": {
             "class_name": "SiteBuilder",
             "store_backend": {
-                "class_name": "FixedLengthTupleFilesystemStoreBackend",
+                "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/data_docs/another/path/"
             }
         }

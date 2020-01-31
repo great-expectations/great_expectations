@@ -18,7 +18,7 @@ from great_expectations.data_asset.util import (
     parse_result_format,
 )
 from great_expectations.core import ExpectationSuite, ExpectationConfiguration, ExpectationValidationResult, \
-    ExpectationSuiteValidationResult, ExpectationSuiteSchema, expectationSuiteSchema
+    ExpectationSuiteValidationResult, BatchKwargs, expectationSuiteSchema
 from great_expectations.exceptions import GreatExpectationsError
 
 logger = logging.getLogger(__name__)
@@ -48,11 +48,11 @@ class DataAsset(object):
         interactive_evaluation = kwargs.pop("interactive_evaluation", True)
         profiler = kwargs.pop("profiler", None)
         expectation_suite = kwargs.pop("expectation_suite", None)
-        data_asset_name = kwargs.pop("data_asset_name", None)
         expectation_suite_name = kwargs.pop("expectation_suite_name", None)
         data_context = kwargs.pop("data_context", None)
-        batch_kwargs = kwargs.pop("batch_kwargs", None)
-        batch_id = kwargs.pop("batch_id", None)
+        batch_kwargs = kwargs.pop("batch_kwargs", BatchKwargs())
+        batch_parameters = kwargs.pop("batch_parameters", {})
+        batch_markers = kwargs.pop("batch_markers", {})
 
         if "autoinspect_func" in kwargs:
             warnings.warn("Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).",
@@ -63,12 +63,12 @@ class DataAsset(object):
         }
         self._initialize_expectations(
             expectation_suite=expectation_suite,
-            data_asset_name=data_asset_name,
             expectation_suite_name=expectation_suite_name
         )
         self._data_context = data_context
-        self._batch_kwargs = batch_kwargs
-        self._batch_id = batch_id
+        self._batch_kwargs = BatchKwargs(batch_kwargs)
+        self._batch_markers = batch_markers
+        self._batch_parameters = batch_parameters
 
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
@@ -278,7 +278,7 @@ class DataAsset(object):
 
         return outer_wrapper
 
-    def _initialize_expectations(self, expectation_suite=None, data_asset_name=None, expectation_suite_name=None):
+    def _initialize_expectations(self, expectation_suite=None, expectation_suite_name=None):
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
@@ -295,9 +295,6 @@ class DataAsset(object):
                 If None, creates default `_expectation_suite` with an empty list of expectations and \
                 key value `data_asset_name` as `data_asset_name`.
 
-            data_asset_name (string): \
-                The name to assign to `_expectation_suite.data_asset_name`
-
             expectation_suite_name (string): \
                 The name to assign to the `expectation_suite.expectation_suite_name`
 
@@ -311,14 +308,6 @@ class DataAsset(object):
                 expectation_suite = copy.deepcopy(expectation_suite)
             self._expectation_suite = expectation_suite
 
-            if data_asset_name is not None:
-                if self._expectation_suite.data_asset_name != data_asset_name:
-                    logger.warning(
-                        "Overriding existing data_asset_name {n1} with new name {n2}"
-                        .format(n1=self._expectation_suite.data_asset_name, n2=data_asset_name)
-                    )
-                self._expectation_suite.data_asset_name = data_asset_name
-
             if expectation_suite_name is not None:
                 if self._expectation_suite.expectation_suite_name != expectation_suite_name:
                     logger.warning(
@@ -330,10 +319,7 @@ class DataAsset(object):
         else:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
-            if data_asset_name is None:
-                data_asset_name = "default"
-            self._expectation_suite = ExpectationSuite(data_asset_name=data_asset_name,
-                                                       expectation_suite_name=expectation_suite_name)
+            self._expectation_suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
 
         self._expectation_suite.data_asset_type = self._data_asset_type
         self.default_expectation_args = {
@@ -633,11 +619,15 @@ class DataAsset(object):
 
     @property
     def batch_id(self):
-        return self._batch_id
+        return self.batch_kwargs.to_id()
 
     @property
-    def batch_fingerprint(self):
-        return self._batch_id.batch_fingerprint
+    def batch_markers(self):
+        return self._batch_markers
+
+    @property
+    def batch_parameters(self):
+        return self._batch_parameters
 
     def discard_failing_expectations(self):
         res = self.validate(only_return_failures=True).results
@@ -1064,7 +1054,6 @@ class DataAsset(object):
                         abbrev_results.append(exp)
                 results = abbrev_results
 
-            data_asset_name = expectation_suite.data_asset_name
             expectation_suite_name = expectation_suite.expectation_suite_name
 
             if run_id is None:
@@ -1082,17 +1071,13 @@ class DataAsset(object):
                 evaluation_parameters=runtime_evaluation_parameters,
                 meta={
                     "great_expectations.__version__": ge_version,
-                    "data_asset_name": data_asset_name,
                     "expectation_suite_name": expectation_suite_name,
-                    "run_id": run_id
+                    "run_id": run_id,
+                    "batch_kwargs": self.batch_kwargs,
+                    "batch_markers": self.batch_markers,
+                    "batch_parameters": self.batch_parameters
                 }
             )
-
-            if self._batch_kwargs is not None:
-                result.meta["batch_kwargs"] = self._batch_kwargs
-
-            if self._batch_id is not None:
-                result["meta"].update({"batch_id": self._batch_id})
 
             self._data_context = validate__data_context
         except Exception:

@@ -2,10 +2,7 @@ import pytest
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.store import ExpectationsStore
-from great_expectations.data_context.types import (
-    ExpectationSuiteIdentifier,
-    DataAssetIdentifier,
-)
+from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
 
 
 def test_expectations_store():
@@ -14,17 +11,13 @@ def test_expectations_store():
     with pytest.raises(TypeError):
         my_store.set("not_a_ValidationResultIdentifier")
 
-    ns_1 = ExpectationSuiteIdentifier.from_tuple(("a", "b", "c", "warning"))
-    my_store.set(ns_1, ExpectationSuite(data_asset_name=DataAssetIdentifier("a", "b", "c"),
-                                        expectation_suite_name="warning"))
-    assert my_store.get(ns_1) == ExpectationSuite(data_asset_name=DataAssetIdentifier("a", "b", "c"),
-                                                  expectation_suite_name="warning")
+    ns_1 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.warning"))
+    my_store.set(ns_1, ExpectationSuite(expectation_suite_name="a.b.c.warning"))
+    assert my_store.get(ns_1) == ExpectationSuite(expectation_suite_name="a.b.c.warning")
 
-    ns_2 = ExpectationSuiteIdentifier.from_tuple(("a", "b", "c", "failure"))
-    my_store.set(ns_2, ExpectationSuite(data_asset_name=DataAssetIdentifier("a", "b", "c"),
-                                        expectation_suite_name="failure"))
-    assert my_store.get(ns_2) == ExpectationSuite(data_asset_name=DataAssetIdentifier("a", "b", "c"),
-                                                  expectation_suite_name="failure")
+    ns_2 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.failure"))
+    my_store.set(ns_2, ExpectationSuite(expectation_suite_name="a.b.c.failure"))
+    assert my_store.get(ns_2) == ExpectationSuite(expectation_suite_name="a.b.c.failure")
 
     assert set(my_store.list_keys()) == {
         ns_1,
@@ -49,18 +42,14 @@ def test_ExpectationsStore_with_DatabaseStoreBackend():
     with pytest.raises(TypeError):
         my_store.get("not_a_ExpectationSuiteIdentifier")
 
-    ns_1 = ExpectationSuiteIdentifier.from_tuple(("a", "b", "c", "warning"))
-    my_store.set(ns_1,  ExpectationSuite(data_asset_name=DataAssetIdentifier("a", "b", "c"),
-                                         expectation_suite_name="warning"))
-    assert my_store.get(ns_1) == ExpectationSuite(data_asset_name=DataAssetIdentifier("a", "b", "c"),
-                                                  expectation_suite_name="warning")
+    ns_1 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.warning"))
+    my_store.set(ns_1,  ExpectationSuite(expectation_suite_name="a.b.c.warning"))
+    assert my_store.get(ns_1) == ExpectationSuite(expectation_suite_name="a.b.c.warning")
 
-    ns_2 = ExpectationSuiteIdentifier.from_tuple(("a", "b", "c", "failure"))
+    ns_2 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.failure"))
 
-    my_store.set(ns_2, ExpectationSuite(data_asset_name=DataAssetIdentifier("a", "b", "c"),
-                                        expectation_suite_name="failure"))
-    assert my_store.get(ns_2) == ExpectationSuite(data_asset_name=DataAssetIdentifier("a", "b", "c"),
-                                                  expectation_suite_name="failure")
+    my_store.set(ns_2, ExpectationSuite(expectation_suite_name="a.b.c.failure"))
+    assert my_store.get(ns_2) == ExpectationSuite(expectation_suite_name="a.b.c.failure")
 
     assert set(my_store.list_keys()) == {
         ns_1,

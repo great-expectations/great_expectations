@@ -35,17 +35,17 @@ stores:
   local_expectations_store:
     class_name: ExpectationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
   validations_store:
     class_name: ValidationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
   fixture_validation_results_store:
     class_name: ValidationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: fixtures/validations
 
   evaluation_parameter_store:
