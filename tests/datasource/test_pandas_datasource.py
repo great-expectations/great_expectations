@@ -18,6 +18,7 @@ from great_expectations.datasource.types.batch_kwargs import (
     BatchMarkers
 )
 from great_expectations.dataset import PandasDataset
+from great_expectations.util import nested_update
 
 yaml = YAML()
 
@@ -246,29 +247,41 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
 
 def test_read_limit(test_folder_connection_path):
     datasource = PandasDatasource('PandasCSV', generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
-        "base_directory": test_folder_connection_path
-    }
-}
-)
+            "subdir_reader": {
+                "class_name": "SubdirReaderGenerator",
+                "base_directory": test_folder_connection_path
+            }
+        }
+    )
 
-    dataset = datasource.get_data_asset("test",
-                                        generator_name="default",
-                                        batch_kwargs=PathBatchKwargs({
-                                            "path": os.path.join(str(test_folder_connection_path), "test.csv"),
-                                            "limit": 1
-                                        }),
-                                        reader_options={
-                                            'sep': ",",
-                                            'header': 0,
-                                            'index_col': 0
-                                        })
-    assert isinstance(dataset, PandasDataset)
+    batch_kwargs = PathBatchKwargs({
+            "path": os.path.join(str(test_folder_connection_path), "test.csv"),
+            "reader_options": {
+                'sep': ",",
+                'header': 0,
+                'index_col': 0
+            }
+        }
+    )
+    nested_update(batch_kwargs, datasource.process_batch_parameters(limit=1))
+
+    batch = datasource.get_batch(
+        batch_kwargs=batch_kwargs
+    )
+    assert isinstance(batch, Batch)
+    dataset = batch.data
     assert (dataset["col_1"] == [1]).all()
     assert len(dataset) == 1
 
     # A datasource should always return an object with a typed batch_id
-    assert isinstance(dataset.batch_kwargs, PathBatchKwargs)
-    assert isinstance(dataset.batch_id, BatchMarkers)
-    assert isinstance(dataset.batch_fingerprint, BatchFingerprint)
+    assert isinstance(batch.batch_kwargs, PathBatchKwargs)
+    assert isinstance(batch.batch_markers, BatchMarkers)
+
+
+def test_process_batch_parameters():
+    batch_kwargs = PandasDataset("test").process_batch_parameters(limit=1)
+    assert batch_kwargs == {
+        "reader_options": {
+            "nrows": 1
+        }
+    }
