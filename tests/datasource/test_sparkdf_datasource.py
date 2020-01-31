@@ -227,40 +227,43 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
     pyspark_skip = pytest.importorskip("pyspark")
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_sparkdf_datasource"))
     datasource = SparkDFDatasource('mysparksource', generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
-        "base_directory": basepath
-    }
-}
-)
+        "subdir_reader": {
+            "class_name": "SubdirReaderGenerator",
+            "base_directory": basepath
+        }
+        }
+    )
 
 
     with open(os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w") as newfile:
         newfile.write("a,b\n1,2\n3,4\n")
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
+        datasource.get_batch(batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         })
         assert "Unable to determine reader for path" in exc.value.message
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
-            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
-        }, reader_method="blarg")
+        datasource.get_batch(batch_kwargs={
+            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"),
+            "reader_method": "blarg"
+        })
         assert "Unknown reader method: blarg" in exc.value.message
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
-            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
-        }, reader_method="excel")
-        assert "Unsupported reader: excel" in exc.value.message
-
-    dataset = datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
+        datasource.get_batch(batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"),
-        },
-        reader_method="csv", reader_options={'header': True})
-    assert dataset.spark_df.head()["a"] == "1"
+            "reader_method": "excel"
+        })
+        assert "Unknown reader: excel" in exc.value.message
+
+    batch = datasource.get_batch(batch_kwargs={
+            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"),
+            "reader_method": "csv",
+            "reader_options": {'header': True}
+    })
+    assert batch.data.head()["a"] == "1"
 
 
 def test_spark_config():

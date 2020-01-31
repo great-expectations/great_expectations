@@ -216,33 +216,38 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
 def test_invalid_reader_pandas_datasource(tmp_path_factory):
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_pandas_datasource"))
     datasource = PandasDatasource('mypandassource', generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
-        "base_directory": basepath
-    }
-}
-)
+            "subdir_reader": {
+                "class_name": "SubdirReaderGenerator",
+                "base_directory": basepath
+            }
+        }
+    )
 
 
     with open(os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w") as newfile:
         newfile.write("a,b\n1,2\n3,4\n")
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
+        datasource.get_batch(batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         })
         assert "Unable to determine reader for path" in exc.value.message
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
-            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
-        }, reader_method="blarg")
+        datasource.get_batch(batch_kwargs={
+            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"),
+            "reader_method": "blarg"
+        })
         assert "Unknown reader method: blarg" in exc.value.message
 
-    dataset = datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
-            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
-        }, reader_method="csv", header=0)
-    assert dataset["a"][0] == 1
+    batch = datasource.get_batch(batch_kwargs={
+            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"),
+            "reader_method": "read_csv",
+            "reader_options": {
+                "header": 0
+            }
+    })
+    assert batch.data["a"][0] == 1
 
 
 def test_read_limit(test_folder_connection_path):
