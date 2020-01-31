@@ -84,7 +84,8 @@ class SubdirReaderGenerator(BatchKwargsGenerator):
             return [generator_asset]
 
         # Otherwise, subdir files are partition ids
-        return self._get_valid_file_options(base_directory=os.path.join(self.base_directory, generator_asset))
+        return [path for (path, type) in self._get_valid_file_options(base_directory=os.path.join(
+            self.base_directory, generator_asset))]
 
     def _build_batch_kwargs(self, batch_parameters):
         """
@@ -110,17 +111,16 @@ class SubdirReaderGenerator(BatchKwargsGenerator):
                 if os.path.isfile(os.path.join(self.base_directory, generator_asset, partition_id + extension)):
                     path = os.path.join(self.base_directory, generator_asset, partition_id + extension)
 
-            # PENDING DELETION - 20200130 - JPC
-            # if path is None:
-            #     logger.warning("Unable to find path with the provided partition")
-            #     # Fall through to this case in the event that there is not a subdir available, or if partition_id was
-            #     # not provided
-            #     if os.path.isfile(os.path.join(self.base_directory, generator_asset)):
-            #         path = os.path.join(self.base_directory, generator_asset)
-            #
-            #     for extension in self.known_extensions:
-            #         if os.path.isfile(os.path.join(self.base_directory, generator_asset + extension)):
-            #             path = os.path.join(self.base_directory, generator_asset + extension)
+            if path is None:
+                logger.warning("Unable to find path with the provided partition; searching for asset-name partitions.")
+                # Fall through to this case in the event that there is not a subdir available, or if partition_id was
+                # not provided
+                if os.path.isfile(os.path.join(self.base_directory, generator_asset)):
+                    path = os.path.join(self.base_directory, generator_asset)
+
+                for extension in self.known_extensions:
+                    if os.path.isfile(os.path.join(self.base_directory, generator_asset + extension)):
+                        path = os.path.join(self.base_directory, generator_asset + extension)
 
             if path is None:
                 raise BatchKwargsError("Unable to build batch kwargs from for asset '%s'" % generator_asset,
@@ -186,4 +186,5 @@ class SubdirReaderGenerator(BatchKwargsGenerator):
             reader_options=reader_options or self.reader_options,
             limit=limit)
         batch_kwargs["path"] = path
+        batch_kwargs["datasource"] = self._datasource.name
         return PathBatchKwargs(batch_kwargs)

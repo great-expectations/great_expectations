@@ -66,7 +66,7 @@ class GlobReaderGenerator(BatchKwargsGenerator):
                     "glob": "*",
                     "partition_regex": r"^((19|20)\d\d[- /.]?(0[1-9]|1[012])[- /.]?(0[1-9]|[12][0-9]|3[01])_(.*))\.csv",
                     "match_group_id": 1,
-                    "reader_method": 'csv'
+                    "reader_method": 'read_csv'
                 }
             }
 
@@ -184,7 +184,7 @@ class GlobReaderGenerator(BatchKwargsGenerator):
             limit=limit or glob_config.get("limit")
         )
         batch_kwargs["path"] = path
-
+        batch_kwargs["datasource"] = self._datasource.name
         return PathBatchKwargs(batch_kwargs)
 
     def _partitioner(self, path, glob_config):
