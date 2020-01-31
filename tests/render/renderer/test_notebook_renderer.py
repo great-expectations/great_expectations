@@ -319,6 +319,8 @@ def test_simple_suite(critical_suite):
             },
         ],
     }
+    del expected["nbformat_minor"]
+    del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
         assert obs_cell == expected_cell
     assert obs == expected
@@ -645,6 +647,8 @@ def test_complex_suite(warning_suite):
             },
         ],
     }
+    del expected["nbformat_minor"]
+    del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
         assert obs_cell == expected_cell
     assert obs == expected
