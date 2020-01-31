@@ -69,16 +69,18 @@ def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connectio
     assert res.success is True
 
 
-def test_standalone_sqlalchemy_datasource(test_db_connection_string):
+def test_standalone_sqlalchemy_datasource(test_db_connection_string, sa):
     datasource = SqlAlchemyDatasource(
-        'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
+        'SqlAlchemy', connection_string=test_db_connection_string, echo=False,
+        generators={"default": {"class_name": "TableGenerator"}})
 
     assert set(datasource.get_available_data_asset_names()["default"]["names"]) == {("main.table_1", "table"), ("main.table_2", "table")}
-    dataset1 = datasource.get_data_asset("main.table_1", "default")
-    dataset2 = datasource.get_data_asset("main.table_2", "default")
-    assert isinstance(dataset1, SqlAlchemyDataset)
-    assert isinstance(dataset2, SqlAlchemyDataset)
-    assert len(dataset1.head(10)) == 5
+    batch_kwargs = datasource.build_batch_kwargs("default", "main.table_1")
+    batch = datasource.get_batch(batch_kwargs=batch_kwargs)
+    assert isinstance(batch, Batch)
+    assert isinstance(batch.data, SqlAlchemyBatchReference)
+    dataset = SqlAlchemyDataset(**batch.data.get_init_kwargs())
+    assert len(dataset.head(10)) == 5
 
 def test_create_sqlalchemy_datasource(data_context):
     name = "test_sqlalchemy_datasource"
