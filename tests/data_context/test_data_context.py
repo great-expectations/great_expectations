@@ -278,7 +278,6 @@ project_path/
 
 
     tree_str = gen_directory_tree_str(project_dir)
-    print(tree_str)
     assert tree_str == """project_path/
     data/
         random/
@@ -297,13 +296,10 @@ project_path/
                         BasicDatasetProfiler.json
         notebooks/
             pandas/
-                create_expectations.ipynb
                 validation_playground.ipynb
             spark/
-                create_expectations.ipynb
                 validation_playground.ipynb
             sql/
-                create_expectations.ipynb
                 validation_playground.ipynb
         plugins/
             custom_data_docs/
@@ -321,7 +317,7 @@ project_path/
                         Titanic/
                             BasicDatasetProfiler/
                                 profiling/
-                                    {0:s}.json
+                                    {}.json
 """.format(titanic_profiled_batch_id)
 
     context.profile_datasource("random")
@@ -651,13 +647,10 @@ great_expectations/
     expectations/
     notebooks/
         pandas/
-            create_expectations.ipynb
             validation_playground.ipynb
         spark/
-            create_expectations.ipynb
             validation_playground.ipynb
         sql/
-            create_expectations.ipynb
             validation_playground.ipynb
     plugins/
         custom_data_docs/
@@ -682,13 +675,10 @@ great_expectations/
     expectations/
     notebooks/
         pandas/
-            create_expectations.ipynb
             validation_playground.ipynb
         spark/
-            create_expectations.ipynb
             validation_playground.ipynb
         sql/
-            create_expectations.ipynb
             validation_playground.ipynb
     plugins/
         custom_data_docs/
@@ -787,7 +777,6 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
     for subdir in DataContext.NOTEBOOK_SUBDIRECTORIES:
         subdir_path = os.path.join(empty_directory, "notebooks", subdir)
         assert set(os.listdir(subdir_path)) == {
-            "create_expectations.ipynb",
             "validation_playground.ipynb"
         }
 

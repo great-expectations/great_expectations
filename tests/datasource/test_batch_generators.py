@@ -158,7 +158,7 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     with open(os.path.join(basedir, "f0.json"), "w") as outfile:
         outfile.write("\n\n\n")
 
-    g1 = SubdirReaderGenerator(base_directory=basedir)
+    g1 = SubdirReaderGenerator(datasource="foo", base_directory=basedir)
 
     g1_assets = g1.get_available_data_asset_names()
     # Use set in test to avoid order issues
