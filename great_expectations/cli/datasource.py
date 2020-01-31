@@ -1000,7 +1000,10 @@ Enter an SQL query
                 data_asset_name = click.prompt(msg_prompt_data_asset_name, default=data_asset_name, show_default=False) # TODO: check non-zero length
 
 
-            batch_kwargs = {"query": query}
+            batch_kwargs = {
+                "query": query,
+                "datasource": datasource_name
+            }
 
             Validator(batch=datasource.get_batch(batch_kwargs), expectation_suite=ExpectationSuite("throwaway")).get_dataset()
 
