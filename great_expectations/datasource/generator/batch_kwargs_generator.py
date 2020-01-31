@@ -81,6 +81,8 @@ class BatchKwargsGenerator(object):
             "class_name": self.__class__.__name__
         }
         self._data_asset_iterators = {}
+        if datasource is None:
+            raise ValueError("datasource must be provided for a BatchKwargsGenerator")
         self._datasource = datasource
 
     @property

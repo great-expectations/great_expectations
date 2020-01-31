@@ -131,6 +131,10 @@ class SqlAlchemyDatasourceQueryBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     def query(self):
         return self.get("query")
 
+    @property
+    def query_parameters(self):
+        return self.get("query_parameters")
+
 
 class SparkDFDatasourceQueryBatchKwargs(SparkDFDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs):
