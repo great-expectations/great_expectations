@@ -156,6 +156,7 @@ class Datasource(object):
              generator (Generator)
         """
 
+        # PENDING DELETION - 20200130 - JPC
         # 0.9.0 removes support for the type system
         # if isinstance(generator_config, string_types):
         #     warnings.warn("Configuring generators with a type name is no longer supported. Please update to new-style "
@@ -238,7 +239,7 @@ class Datasource(object):
             batch_parameters, batch_kwargs: a tuple containing all defined batch_parameters and batch_kwargs. Result
             will include both parameters passed via argument and configured parameters.
         """
-        batch_kwargs = self.config.get("batch_kwargs", {})
+        batch_kwargs = self._datasource_config.get("batch_kwargs", {})
 
         if limit is not None:
             batch_kwargs["limit"] = limit
