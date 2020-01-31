@@ -31,9 +31,9 @@ def test_setting_config_variables_is_visible_immediately(data_context_with_varia
     assert os.path.isfile(os.path.join(context._context_root_directory, config_variables_file_path))
 
     # the context's config has two config variables - one using the ${} syntax and the other - $.
-    assert context.get_project_config()["datasources"]["mydatasource"]["generators"]["mygenerator"][
+    assert context.get_config()["datasources"]["mydatasource"]["generators"]["mygenerator"][
                "reader_options"]["test_variable_sub1"] == "${replace_me}"
-    assert context.get_project_config()["datasources"]["mydatasource"]["generators"]["mygenerator"][
+    assert context.get_config()["datasources"]["mydatasource"]["generators"]["mygenerator"][
                "reader_options"]["test_variable_sub2"] == "$replace_me"
 
     config_variables = context._load_config_variables_file()
