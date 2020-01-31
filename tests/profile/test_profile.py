@@ -377,6 +377,7 @@ def test_snapshot_BasicDatasetProfiler_on_titanic():
     del evrs.meta["great_expectations.__version__"]
     del expected_evrs.meta["run_id"]
     del evrs.meta["run_id"]
+    del evrs.meta["batch_kwargs"]["ge_batch_id"]
 
     # DISABLE TEST IN PY2 BECAUSE OF ORDER ISSUE AND NEAR-EOL
     if not PY2:
