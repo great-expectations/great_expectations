@@ -51,8 +51,9 @@ class QueryGenerator(BatchKwargsGenerator):
             }
 
         )
-        for query_name, query in queries.items():
-            self.add_query(query_name, query)
+        if queries is not None:
+            for query_name, query in queries.items():
+                self.add_query(query_name, query)
 
     def _get_raw_query(self, generator_asset):
         return self._store_backend.get(tuple(generator_asset))

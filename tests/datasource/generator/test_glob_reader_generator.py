@@ -15,7 +15,7 @@ from great_expectations.exceptions import BatchKwargsError
 
 
 @pytest.fixture(scope="module")
-def mocked_glob_kwargs():
+def mocked_glob_kwargs(basic_pandas_datasource):
     test_asset_globs = {
         "test_asset": {
             "glob": "*",
@@ -23,7 +23,8 @@ def mocked_glob_kwargs():
             "match_group_id": 1
         }
     }
-    glob_generator = GlobReaderGenerator("test_generator", asset_globs=test_asset_globs)
+    glob_generator = GlobReaderGenerator("test_generator",
+                                         datasource=basic_pandas_datasource, asset_globs=test_asset_globs)
 
     with mock.patch("glob.glob") as mock_glob:
         mock_glob_match = [
@@ -53,20 +54,19 @@ def test_glob_reader_path_partitioning(mocked_glob_kwargs):
     # GlobReaderGenerator uses partition_regex to extract partitions from filenames
     assert len(kwargs) == 5
     assert kwargs[0]["path"] == "20190101__my_data.csv"
-    assert kwargs[0]["partition_id"] == "20190101"
-    assert len(kwargs[0].keys()) == 3
+    assert len(kwargs[0].keys()) == 2
 
 
-def test_glob_reader_generator_partitioning():
+def test_glob_reader_generator_partitioning(basic_pandas_datasource):
     glob_generator = GlobReaderGenerator(
         "test_generator",
-        datasource=None,
+        datasource=basic_pandas_datasource,
         base_directory="/data/project/",
         reader_options={
             "sep": "|",
             "quoting": 3
         },
-        reader_method="csv",
+        reader_method="read_csv",
         asset_globs={
             "asset1": {
                 "glob": "asset1/*__my_data.csv",
@@ -110,7 +110,9 @@ def test_glob_reader_generator_partitioning():
         is_dir.return_value = True
         names = glob_generator.get_available_data_asset_names()
         # Use set in test to avoid order issues
-        assert set(names) == {"asset1", "asset2", "asset3", "no_partition_asset1", "no_partition_asset2"}
+        assert set(names) == {("asset1", "path"), ("asset2", "path"), ("asset3", "path"), ("no_partition_asset1", \
+                                                                                         "path"),
+                              ("no_partition_asset2", "path")}
 
     with mock.patch("glob.glob") as mock_glob, mock.patch("os.path.isdir") as is_dir:
         mock_glob_match = [
@@ -131,13 +133,13 @@ def test_glob_reader_generator_partitioning():
             "20190104",
             "20190105",
         }
-        batch_kwargs = glob_generator.build_batch_kwargs_from_partition_id("asset1", "20190101")
+        batch_kwargs = glob_generator.build_batch_kwargs("asset1", partition_id="20190101")
         assert isinstance(batch_kwargs, PathBatchKwargs)
         assert batch_kwargs["path"] == "/data/project/asset1/20190101__my_data.csv"
-        assert batch_kwargs["partition_id"] == "20190101"
         assert batch_kwargs["reader_options"]["sep"] == "|"
         assert batch_kwargs["reader_options"]["quoting"] == 3
-        assert batch_kwargs["reader_method"] == "csv"
+        assert batch_kwargs["reader_method"] == "read_csv"
+        assert batch_kwargs["datasource"] == "basic_pandas_datasource"
         assert len(batch_kwargs) == 4
 
     with mock.patch("glob.glob") as mock_glob, mock.patch("os.path.isdir") as is_dir:
@@ -155,20 +157,16 @@ def test_glob_reader_generator_partitioning():
         }
         with pytest.raises(BatchKwargsError):
             # There is no valid partition id defined
-            batch_kwargs = glob_generator.build_batch_kwargs_from_partition_id("no_partition_asset1", "this_is_a_batch_of_data.csv")
-
-        with pytest.raises(BatchKwargsError):
-            # ...and partition_id of none is unsuccessful
-            batch_kwargs = glob_generator.build_batch_kwargs_from_partition_id("no_partition_asset1", partition_id=None)
+            batch_kwargs = glob_generator.build_batch_kwargs("no_partition_asset1", "this_is_a_batch_of_data.csv")
 
         # ... but we *can* fall back to a path as the partition_id, though it is not advised
-        batch_kwargs = glob_generator.build_batch_kwargs_from_partition_id("no_partition_asset1",
+        batch_kwargs = glob_generator.build_batch_kwargs("no_partition_asset1",
                                                                         "no_partition_asset1/this_is_a_batch_of_data.csv")
         assert isinstance(batch_kwargs, PathBatchKwargs)
         assert batch_kwargs["path"] == "/data/project/no_partition_asset1/this_is_a_batch_of_data.csv"
-        assert batch_kwargs["partition_id"] == "no_partition_asset1/this_is_a_batch_of_data.csv"
         assert batch_kwargs["reader_options"]["sep"] == "|"
         assert batch_kwargs["reader_options"]["quoting"] == 3
+        assert batch_kwargs["datasource"] == "basic_pandas_datasource"
         assert len(batch_kwargs) == 4
 
         # When partition isn't really well defined, though, the preferred way is to use yield_batch_kwargs
@@ -177,9 +175,9 @@ def test_glob_reader_generator_partitioning():
         assert batch_kwargs["path"] in mock_glob_match
 
         # We do define a partition_id in this case, using the default fallback logic of relative path
-        assert batch_kwargs["partition_id"] == "no_partition_asset1/this_is_a_batch_of_data.csv"
         assert batch_kwargs["reader_options"]["sep"] == "|"
         assert batch_kwargs["reader_options"]["quoting"] == 3
+        assert batch_kwargs["datasource"] == "basic_pandas_datasource"
         assert len(batch_kwargs) == 4
 
         # We should be able to pass limit as well
@@ -187,11 +185,10 @@ def test_glob_reader_generator_partitioning():
         assert isinstance(batch_kwargs, PathBatchKwargs)
         assert batch_kwargs["path"] in mock_glob_match
 
-        assert batch_kwargs["partition_id"] == "no_partition_asset1/this_is_a_batch_of_data.csv"
         assert batch_kwargs["reader_options"]["sep"] == "|"
         assert batch_kwargs["reader_options"]["quoting"] == 3
-        assert batch_kwargs["limit"] == 10
-        assert len(batch_kwargs) == 5
+        assert batch_kwargs["reader_options"]["nrows"] == 10
+        assert len(batch_kwargs) == 4
 
     with mock.patch("glob.glob") as mock_glob, mock.patch("os.path.isdir") as is_dir:
         mock_glob_match = ["/data/project/asset3/mydata.parquet"]    
@@ -201,8 +198,7 @@ def test_glob_reader_generator_partitioning():
         assert batch_kwargs["reader_method"] == "parquet"
 
 
-
-def test_glob_reader_generator_customize_partitioning():
+def test_glob_reader_generator_customize_partitioning(basic_pandas_datasource):
     from dateutil.parser import parse as parse
 
     # We can subclass the generator to change the way that it builds partitions
@@ -210,7 +206,8 @@ def test_glob_reader_generator_customize_partitioning():
         def _partitioner(self, path, glob_):
             return parse(path, fuzzy=True).strftime("%Y-%m-%d")
 
-    glob_generator = DateutilPartitioningGlobReaderGenerator("test_generator")  # default asset blob is ok
+    # default asset blob is ok
+    glob_generator = DateutilPartitioningGlobReaderGenerator("test_generator", basic_pandas_datasource)
 
     with mock.patch("glob.glob") as mock_glob:
         mock_glob_match = [
@@ -221,9 +218,7 @@ def test_glob_reader_generator_customize_partitioning():
             "20190105__my_data.csv"
         ]
         mock_glob.return_value = mock_glob_match
-        default_asset_kwargs = [kwargs for kwargs in glob_generator.get_iterator("default")]
-
-    partitions = set([kwargs["partition_id"] for kwargs in default_asset_kwargs])
+        partitions = set(glob_generator.get_available_partition_ids("default"))
 
     # Our custom partitioner will have used dateutil to parse. Note that it can then use any date format we chose
     assert partitions == {
