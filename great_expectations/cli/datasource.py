@@ -265,12 +265,15 @@ def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_
     if passthrough_generator_only:
         datasource_name = "files_datasource"
 
-        configuration = PandasDatasource.build_configuration(generators={
-            "default": {
-                "class_name": "PassthroughGenerator",
-            }
-        }
-        )
+        # configuration = PandasDatasource.build_configuration(generators={
+        #     "default": {
+        #         "class_name": "PassthroughGenerator",
+        #     }
+        # }
+        # )
+
+
+        configuration = PandasDatasource.build_configuration()
 
     else:
         path = click.prompt(
@@ -592,12 +595,13 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
     if passthrough_generator_only:
         datasource_name = "files_spark_datasource"
 
-        configuration = SparkDFDatasource.build_configuration(generators={
-            "default": {
-                "class_name": "PassthroughGenerator",
-            }
-        }
-        )
+        # configuration = SparkDFDatasource.build_configuration(generators={
+        #     "default": {
+        #         "class_name": "PassthroughGenerator",
+        #     }
+        # }
+        # )
+        configuration = SparkDFDatasource.build_configuration()
 
     else:
         path = click.prompt(
