@@ -69,7 +69,7 @@ class TableGenerator(BatchKwargsGenerator):
     defined in batch_kwargs.
 
     """
-    recognized_batch_parameters = {'name', 'limit', 'offset'}
+    recognized_batch_parameters = {'name', 'limit', 'offset', 'query_parameters'}
 
     def __init__(self, name="default", datasource=None, assets=None):
         super(TableGenerator, self).__init__(name=name, datasource=datasource)
@@ -93,18 +93,18 @@ class TableGenerator(BatchKwargsGenerator):
                 logger.warning("Unable to create inspector from engine in generator '%s'" % name)
                 self.inspector = None
 
-    def _get_iterator(self, generator_asset, query_params=None, limit=None, offset=None, partition_id=None):
+    def _get_iterator(self, generator_asset, query_parameters=None, limit=None, offset=None, partition_id=None):
         batch_kwargs = None
         # First, we check if we have a configured asset
         if generator_asset in self._assets:
             asset_config = self._assets[generator_asset]
             try:
-                if query_params is None:
-                    query_params = {}
-                table_name = Template(asset_config.table).substitute(query_params)
+                if query_parameters is None:
+                    query_parameters = {}
+                table_name = Template(asset_config.table).substitute(query_parameters)
                 schema_name = None
                 if asset_config.schema is not None:
-                    schema_name = Template(asset_config.schema).substitute(query_params)
+                    schema_name = Template(asset_config.schema).substitute(query_parameters)
             except KeyError:
                 raise BatchKwargsError("Unable to generate batch kwargs for asset '" + generator_asset + "': "
                                        "missing template key",
@@ -196,7 +196,7 @@ class TableGenerator(BatchKwargsGenerator):
         return next(
             self._get_iterator(
                 batch_parameters.get("name"),
-                query_params=batch_parameters.get("query_params", {}),
+                query_parameters=batch_parameters.get("query_parameters", {}),
                 limit=batch_parameters.get("limit"),
                 offset=batch_parameters.get("offset")
             )

@@ -22,8 +22,9 @@ except ImportError:
 class QueryGenerator(BatchKwargsGenerator):
     """Produce query-style batch_kwargs from sql files stored on disk
     """
+    recognized_batch_parameters = {'query_parameters', 'partition_id'}
 
-    def __init__(self, name="default", datasource=None, query_store_backend=None):
+    def __init__(self, name="default", datasource=None, query_store_backend=None, queries=None):
         super(QueryGenerator, self).__init__(name=name, datasource=datasource)
         root_directory = None
         if query_store_backend is None:
@@ -50,6 +51,8 @@ class QueryGenerator(BatchKwargsGenerator):
             }
 
         )
+        for query_name, query in queries.items():
+            self.add_query(query_name, query)
 
     def _get_raw_query(self, generator_asset):
         return self._store_backend.get(tuple(generator_asset))
@@ -70,7 +73,7 @@ class QueryGenerator(BatchKwargsGenerator):
             iter_= iter([
                 SqlAlchemyDatasourceQueryBatchKwargs(
                     query=raw_query,
-                    query_params=query_parameters
+                    query_parameters=query_parameters
                 )])
 
         return iter_
@@ -84,13 +87,16 @@ class QueryGenerator(BatchKwargsGenerator):
 
     def _build_batch_kwargs(self, batch_parameters):
         """Build batch kwargs from a partition id."""
-        generator_asset = batch_parameters.get("name")
+        generator_asset = batch_parameters.pop("name")
         raw_query = self._get_raw_query(generator_asset)
-        batch_kwargs = {
-            "query": raw_query
-        }
-        if "query_parameters" in batch_parameters:
-            batch_kwargs["query_parameters"] = batch_parameters.get("query_parameters")
+        partition_id = batch_parameters.pop("partition_id", None)
+        batch_kwargs = self._datasource.process_batch_parameters(**batch_parameters)
+        batch_kwargs["query"] = raw_query
+
+        if partition_id:
+            if not batch_kwargs["query_parameters"]:
+                batch_kwargs["query_parameters"] = {}
+            batch_kwargs["query_parameters"]["partition_id"] = partition_id
 
         return SqlAlchemyDatasourceQueryBatchKwargs(batch_kwargs)
 
