@@ -435,6 +435,8 @@ class Datasource(object):
             return ReaderMethods.JSON
         elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
             return ReaderMethods.CSV_GZ
+        elif path.endswith(".pkl"):
+            return ReaderMethods.pickle
         else:
             return None
 
