@@ -1,18 +1,49 @@
 """This is currently helping bridge APIs"""
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
+from great_expectations.types import ClassConfig
 from great_expectations.util import load_class
 
 
 class Validator(object):
 
-    def __init__(self, batch, expectation_suite, expectation_engine, **kwargs):
+    def __init__(self, batch, expectation_suite, expectation_engine=None, **kwargs):
         self.batch = batch
         self.expectation_suite = expectation_suite
-        self.expectation_engine = load_class(
-            class_name=expectation_engine.class_name,
-            module_name=expectation_engine.module_name or "great_expectations.dataset"
-        )
+
+        if isinstance(expectation_engine, dict):
+            expectation_engine = ClassConfig(**expectation_engine)
+
+        if isinstance(expectation_engine, ClassConfig):
+            expectation_engine = load_class(
+                class_name=expectation_engine.class_name,
+                module_name=expectation_engine.module_name or "great_expectations.dataset"
+            )
+
+        self.expectation_engine = expectation_engine
+        if self.expectation_engine is None:
+            # Guess the engine
+            try:
+                import pandas as pd
+                if isinstance(batch.data, pd.DataFrame):
+                    self.expectation_engine = PandasDataset
+            except ImportError:
+                pass
+        if self.expectation_engine is None:
+            if isinstance(batch.data, SqlAlchemyBatchReference):
+                self.expectation_engine = SqlAlchemyDataset
+
+        if self.expectation_engine is None:
+            try:
+                import pyspark
+                if isinstance(batch.data, pyspark.sql.DataFrame):
+                    self.expectation_engine = SparkDFDataset
+            except ImportError:
+                pass
+
+        if self.expectation_engine is None:
+            raise ValueError("Unable to identify expectation_engine. It must be a subclass of DataAsset.")
+
         self.init_kwargs = kwargs
 
     def get_dataset(self):
