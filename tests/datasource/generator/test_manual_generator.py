@@ -1,8 +1,10 @@
+from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource.generator.manual_generator import ManualGenerator
 
 
 def test_manual_generator():
-    generator = ManualGenerator(assets={
+    datasource = PandasDatasource("test")
+    generator = ManualGenerator(datasource=datasource, assets={
         "asset1": [
             {
                 "partition_id": 1,
@@ -25,20 +27,21 @@ def test_manual_generator():
     })
 
     # We should be able to provide generator_asset names
-    assert generator.get_available_data_asset_names() == {"names": ["asset1", "logs"]}
+    assert generator.get_available_data_asset_names() == {"names": [("asset1", "manual"), ("logs", "manual")]}
 
-    # We should not be able to provide partition ids
+    # We should be able to get partition ids
     assert generator.get_available_partition_ids("asset1") == [1, 2]
     assert generator.get_available_partition_ids("logs") == []
 
     # We should be able to iterate over manually-specified kwargs
     kwargs = generator.yield_batch_kwargs("logs", limit=5)
-    assert len(kwargs) == 2
-    assert kwargs['limit'] == 5
+    assert len(kwargs) == 3
+    assert kwargs['reader_options'] == {"nrows": 5}  # IMPORTANT: Note that *limit* was a batch parameter,
+    # and *because we used a PandasDatasource was translated into reader_options
     assert kwargs['s3'] == "s3a://my_bucket/my_prefix/data/file.csv.gz"
 
-    kwargs = generator.build_batch_kwargs_from_partition_id("asset1", partition_id=1)
+    kwargs = generator.build_batch_kwargs("asset1", partition_id=2)
     assert len(kwargs) == 3
-    assert kwargs['path'] == '/data/file_1.csv'
-    assert kwargs['reader_options'] == {'sep': ';'}
-    assert kwargs['partition_id'] == 1
+    assert kwargs['path'] == '/data/file_2.csv'
+    assert kwargs['reader_options'] == {'header': 0}
+    assert kwargs['datasource'] == 'test'
