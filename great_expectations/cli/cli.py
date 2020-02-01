@@ -40,10 +40,10 @@ In addition, the CLI supports the following special commands:
 
 - great_expectations docs build : compile documentation from expectations
 """
+    _set_up_logger()
     if verbose:
         # Note we are explicitly not using a logger in all CLI output to have
         # more control over console UI.
-        _set_up_logger()
         logger.setLevel(logging.DEBUG)
 
 
