@@ -337,7 +337,7 @@ an additional argument to the ``save_expectation_suite`` method:
 
 Data Docs compiles Expectations and Validations into HTML documentation. By default the HTML website is hosted on your local filesystem. When you are working in a team, the website can be hosted in the cloud (e.g., on S3) and serve as the shared source of truth for the team working on the data pipeline.
 
-To view the expectation suite you just created as HTML, rebuild the data docs and open the webstite in the browser:
+To view the expectation suite you just created as HTML, rebuild the data docs and open the website in the browser:
 
 .. code-block:: python
 
