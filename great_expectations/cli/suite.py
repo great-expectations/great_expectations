@@ -207,7 +207,7 @@ def suite_new(data_asset, suite, directory, view, batch_kwargs):
             generator_asset=generator_asset,
             batch_kwargs=batch_kwargs,
             expectation_suite_name=suite,
-            additional_batch_kwargs=None,
+            additional_batch_kwargs={"limit": 1000},
             show_intro_message=False,
             open_docs=view,
         )

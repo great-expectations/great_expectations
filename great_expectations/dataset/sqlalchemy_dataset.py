@@ -239,6 +239,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                  custom_sql=None, schema=None, *args, **kwargs):
 
         if custom_sql and not table_name:
+            #NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
+            #was used for a temp table and raising an error
+            schema = None
             # dashes are special characters in most databases so use underscores
             table_name = "ge_tmp_" + str(uuid.uuid4()).replace("-", "_")
             generated_table_name = table_name
