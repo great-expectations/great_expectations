@@ -790,11 +790,13 @@ def get_batch_kwargs(context,
     if isinstance(context.get_datasource(datasource_name), (PandasDatasource, SparkDFDatasource)):
         generator_asset, batch_kwargs = _load_file_from_filesystem_as_data_asset(context, datasource_name,
                                                                                  generator_name=generator_name,
-                                                                                 generator_asset=generator_asset)
+                                                                                 generator_asset=generator_asset,
+                                                                                 additional_batch_kwargs=additional_batch_kwargs)
     elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
         generator_asset, batch_kwargs = _load_query_as_data_asset_from_sqlalchemy_datasource(context,
                                                                                              datasource_name,
-                                                                                             data_asset_name=generator_asset)
+                                                                                             data_asset_name=generator_asset,
+                                                                                             additional_batch_kwargs=additional_batch_kwargs)
     else:
         raise ge_exceptions.DataContextError("Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(datasource_name, str(type(context.get_datasource(datasource_name)))))
 
@@ -863,6 +865,7 @@ Name the new expectation suite"""
                                                                                            generator_name=generator_name,
                                                                                            generator_asset=generator_asset,
                                                                                            additional_batch_kwargs=additional_batch_kwargs)
+
     if expectation_suite_name is None:
         expectation_suite_name = click.prompt(msg_prompt_expectation_suite_name, default="warning", show_default=True)
 
@@ -982,11 +985,8 @@ We could not determine the format of the file. What is it?
             )
 
             try:
-                print(path + reader_method_file_extensions[option_selection])
                 reader_method = datasource.guess_reader_method_from_path(path + "." + reader_method_file_extensions[option_selection])["reader_method"]
-                print(reader_method)
             except BatchKwargsError:
-                print("BOOM")
                 pass
 
             if reader_method is not None:
@@ -1001,7 +1001,9 @@ We could not determine the format of the file. What is it?
     return (generator_asset, batch_kwargs)
 
 
-def _load_query_as_data_asset_from_sqlalchemy_datasource(context, datasource_name, data_asset_name=None):
+def _load_query_as_data_asset_from_sqlalchemy_datasource(context, datasource_name,
+                                                         data_asset_name=None,
+                                                         additional_batch_kwargs={}):
     msg_prompt_query = """
 Enter an SQL query
 """
@@ -1048,7 +1050,7 @@ Enter an SQL query
 
 
             if query is None:
-                batch_kwargs = temp_generator.build_batch_kwargs(generator_asset)
+                batch_kwargs = temp_generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
             else:
                 batch_kwargs = {
                     "query": query,
