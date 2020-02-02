@@ -329,7 +329,7 @@ an additional argument to the ``save_expectation_suite`` method:
 
 .. code-block:: python
 
-    df.save_expectation_suite(discard_failed_expectations=False)
+    batch.save_expectation_suite(discard_failed_expectations=False)
 
 
 8. View the Expectations in Data Docs
