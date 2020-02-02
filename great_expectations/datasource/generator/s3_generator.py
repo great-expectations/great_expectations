@@ -177,9 +177,9 @@ class S3Generator(BatchGenerator):
             batch_kwargs['reader_options'].update(reader_options)
 
         if self._reader_method is not None:
-            batch_kwargs["reader_method"] = ReaderMethods(self._reader_method)
+            batch_kwargs["reader_method"] = self._reader_method
         if asset_config.get("reader_method"):
-            batch_kwargs['reader_method'] = ReaderMethods(asset_config.get("reader_method"))
+            batch_kwargs['reader_method'] = asset_config.get("reader_method")
 
         if limit:
             batch_kwargs['limit'] = limit

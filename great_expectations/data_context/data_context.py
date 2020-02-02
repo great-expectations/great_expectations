@@ -1127,11 +1127,14 @@ class ConfigOnlyDataContext(object):
                 data_asset_name will be normalized if it is a string
             expectation_suite_name: The name of the expectation_suite to create
             overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
-                already exists
+                already exists.
 
         Returns:
             A new (empty) expectation suite.
         """
+        if not isinstance(overwrite_existing, bool):
+            raise ValueError("Parameter overwrite_existing must be of type BOOL")
+
         if not isinstance(data_asset_name, NormalizedDataAssetName):
             data_asset_name = self.normalize_data_asset_name(data_asset_name)
 
