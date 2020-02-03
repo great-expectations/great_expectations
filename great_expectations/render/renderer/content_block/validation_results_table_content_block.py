@@ -117,6 +117,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     table_rows.append([unexpected_count.get("value"), unexpected_count.get("count")])
                 elif unexpected_count.get("value") == "":
                     table_rows.append(["EMPTY", unexpected_count.get("count")])
+                elif unexpected_count.get("value") is not None:
+                    table_rows.append([unexpected_count.get("value"), unexpected_count.get("count")])
                 else:
                     table_rows.append(["null", unexpected_count.get("count")])
         else:
@@ -126,6 +128,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     table_rows.append([unexpected_value])
                 elif unexpected_value == "":
                     table_rows.append(["EMPTY"])
+                elif unexpected_value is not None:
+                    table_rows.append([unexpected_value])
                 else:
                     table_rows.append(["null"])
 
