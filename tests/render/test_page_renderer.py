@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import json
 import mistune
 
 from great_expectations.core import ExpectationSuite, ExpectationConfiguration
@@ -10,33 +9,33 @@ from great_expectations.render.renderer import (
     ProfilingResultsPageRenderer,
     ValidationResultsPageRenderer
 )
-from great_expectations.render.types import RenderedHeaderContent, RenderedTableContent, RenderedContent
+from great_expectations.render.types import RenderedContent
 
 
 def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
-        data_asset_name="test", expectation_suite_name="test",
+        expectation_suite_name="test",
         meta={
             "notes": "*hi*"
         }
     ))
-    print(RenderedContent.rendered_content_list_to_json(result.text))
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(
         result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.', "*hi*"]
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
-        data_asset_name="test", expectation_suite_name="test",
+        expectation_suite_name="test",
         meta={
             "notes": ["*alpha*", "_bravo_", "charlie"]
         }
     ))
-    print(RenderedContent.rendered_content_list_to_json(result.text))
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(
         result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
                               "*alpha*", "_bravo_", "charlie"]
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
-        data_asset_name="test", expectation_suite_name="test",
+        expectation_suite_name="test",
         meta={
             "notes": {
                 "format": "string",
@@ -44,13 +43,13 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
             }
         }
     ))
-    print(RenderedContent.rendered_content_list_to_json(result.text))
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(
         result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.',
                            "*alpha*", "_bravo_", "charlie"]
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
-        data_asset_name="test", expectation_suite_name="test",
+        expectation_suite_name="test",
         meta={
             "notes": {
                 "format": "markdown",
@@ -58,7 +57,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
             }
         }
     ))
-    print(RenderedContent.rendered_content_list_to_json(result.text))
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
 
     try:
         mistune.markdown("*test*")
@@ -73,7 +72,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
                                "*alpha*"]
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
-        data_asset_name="test", expectation_suite_name="test",
+        expectation_suite_name="test",
         meta={
             "notes": {
                 "format": "markdown",
@@ -81,7 +80,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
             }
         }
     ))
-    print(RenderedContent.rendered_content_list_to_json(result.text))
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
 
     try:
         mistune.markdown("*test*")
@@ -100,16 +99,16 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
 
 def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_suite_notes():
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
-        data_asset_name="test", expectation_suite_name="test",
+        expectation_suite_name="test",
         meta={},
         expectations=None
     ))
-    print(RenderedContent.rendered_content_list_to_json(result.text))
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(
         result.text) == ['This Expectation suite currently contains 0 total Expectations across 0 columns.']
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
-        data_asset_name="test", expectation_suite_name="test",
+        expectation_suite_name="test",
         meta={
             "notes": {
                 "format": "markdown",
@@ -117,7 +116,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
             }
         }
     ))
-    print(RenderedContent.rendered_content_list_to_json(result.text))
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
 
     try:
         mistune.markdown("*test*")
@@ -132,7 +131,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
         ]
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(ExpectationSuite(
-        data_asset_name="test", expectation_suite_name="test",
+        expectation_suite_name="test",
         meta={},
         expectations=[
             ExpectationConfiguration(
@@ -149,14 +148,14 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
             )
         ]
     ))
-    print(RenderedContent.rendered_content_list_to_json(result.text)[0])
+    # print(RenderedContent.rendered_content_list_to_json(result.text)[0])
     assert RenderedContent.rendered_content_list_to_json(
         result.text)[0] == 'This Expectation suite currently contains 3 total Expectations across 2 columns.'
 
 
 def test_ProfilingResultsPageRenderer(titanic_profiled_evrs_1):
     document = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
-    print(document)
+    # print(document)
     # assert document == 0
 
 
@@ -176,7 +175,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(titanic_profiled
             'styling': {'params': {'suite_title': {'classes': ['h6']},
                                    'status_title': {'classes': ['h6']}},
                         'classes': ['mb-0', 'mt-1']}}}}
-    print(validation_header)
+    # print(validation_header)
     assert validation_header == expected_validation_header
 
 
@@ -190,16 +189,15 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
                                 'header': {'content_block_type': 'string_template',
                                            'string_template': {'template': 'Info', 'tag': 'h6',
                                                                'styling': {'classes': ['m-0']}}},
-                                'table': [['Full Data Asset Identifier', 'my_datasource/my_generator/titanic_data'],
-                                          ['Great Expectations Version', '__fixture__'],
-                                          ['Run ID', '__run_id_fixture__']]}
+                                'table': [['Great Expectations Version', "0.9.0b1+310.g05637d48.dirty"],
+                                          ['Run ID', "20200130T171315.316592Z"]]}
 
     assert validation_info == expected_validation_info
 
 
 def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_profiled_evrs_1):
     validation_statistics = ValidationResultsPageRenderer._render_validation_statistics(titanic_profiled_evrs_1).to_json_dict()
-    print(validation_statistics)
+    # print(validation_statistics)
     expected_validation_statistics = {'content_block_type': 'table',
                                       'styling': {'classes': ['col-6', 'table-responsive', 'mt-1', 'p-1'],
                                                   'body': {'classes': ['table', 'table-sm']}},
@@ -212,19 +210,26 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(titanic_prof
     assert validation_statistics == expected_validation_statistics
 
 
-def test_ValidationResultsPageRenderer_render_nested_table_from_dict(titanic_profiled_evrs_1):
+def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
+    batch_kwargs = {
+        "path": "project_dir/project_path/data/titanic/Titanic.csv",
+        "datasource": "Titanic",
+        "reader_options": {
+            "sep": None,
+            "engine": "python"
+        }
+    }
     batch_kwargs_table = ValidationResultsPageRenderer._render_nested_table_from_dict(
-        titanic_profiled_evrs_1.meta["batch_kwargs"], header="Batch Kwargs").to_json_dict()
+        batch_kwargs, header="Batch Kwargs").to_json_dict()
+    print(batch_kwargs_table)
 
     expected_batch_kwarg_table = {
         'content_block_type': 'table',
-        'styling': {
-            'classes': ['col-6', 'table-responsive', 'mt-1'],
-            'body': {'classes': ['table', 'table-sm']}},
-        'header': {
-            'content_block_type': 'string_template',
-            'string_template': {'template': 'Batch Kwargs', 'tag': 'h6',
-                                'styling': {'classes': ['m-0']}}}, 'table': [[{
+        'styling': {'classes': ['col-6', 'table-responsive', 'mt-1'],
+                    'body': {'classes': ['table', 'table-sm']}},
+        'header': {'content_block_type': 'string_template',
+                   'string_template': {'template': 'Batch Kwargs', 'tag': 'h6',
+                                       'styling': {'classes': ['m-0']}}}, 'table': [[{
             'content_block_type': 'string_template',
             'styling': {
                 'parent': {
@@ -233,7 +238,7 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict(titanic_pro
             'string_template': {
                 'template': '$value',
                 'params': {
-                    'value': 'partition_id'},
+                    'value': 'datasource'},
                 'styling': {
                     'default': {
                         'styles': {
@@ -365,5 +370,5 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict(titanic_pro
                                         'default': {
                                             'styles': {
                                                 'word-break': 'break-all'}}}}}]]}]]}
-    print(batch_kwargs_table)
+
     assert batch_kwargs_table == expected_batch_kwarg_table

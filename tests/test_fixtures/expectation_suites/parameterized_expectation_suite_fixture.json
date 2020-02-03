@@ -1,6 +1,5 @@
 {
-    "data_asset_name": "mydatasource/mygenerator/my_dag_node",
-    "expectation_suite_name": "default",
+    "expectation_suite_name": "my_dag_node.default",
     "data_asset_type": "Dataset",
     "meta": {
     },

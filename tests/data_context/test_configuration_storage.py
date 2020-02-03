@@ -42,8 +42,14 @@ def test_preserve_comments_in_yml_after_adding_datasource(data_context):
         "test_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        base_directory="../data",
-    )
+        generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": "../data",
+    }
+}
+)
+
 
     # TODO The comments on lines 1,2 & 4 of the fixture exposes the bug.
     expected = """# This is a basic configuration for testing.

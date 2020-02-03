@@ -5,7 +5,7 @@ from .html_site_store import HtmlSiteStore
 from .evaluation_parameter_store import EvaluationParameterStore
 
 from .store_backend import StoreBackend, InMemoryStoreBackend
-from .fixed_length_tuple_store_backend import (
+from .tuple_store_backend import (
     TupleFilesystemStoreBackend,
     TupleS3StoreBackend,
     TupleGCSStoreBackend

@@ -19,13 +19,18 @@ class ExpectationSuiteIdentifier(DataContextKey):
         return self._expectation_suite_name
 
     def to_tuple(self):
-        # return self.expectation_suite_name,
         return tuple(self.expectation_suite_name.split("."))
+
+    def to_fixed_length_tuple(self):
+        return self.expectation_suite_name,
 
     @classmethod
     def from_tuple(cls, tuple_):
-        # return cls(expectation_suite_name=tuple_[0])
         return cls(".".join(tuple_))
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls(expectation_suite_name=tuple_[0])
 
 
 class ExpectationSuiteIdentifierSchema(Schema):
@@ -73,7 +78,7 @@ class ValidationResultIdentifier(DataContextKey):
     and run_id.
     """
 
-    def __init__(self, batch_identifier, expectation_suite_identifier, run_id):
+    def __init__(self, expectation_suite_identifier, run_id, batch_identifier):
         """Constructs a ValidationResultIdentifier
 
         Args:
@@ -100,23 +105,32 @@ class ValidationResultIdentifier(DataContextKey):
 
     def to_tuple(self):
         return tuple(
-            [self.batch_identifier] +
-            list(self.expectation_suite_identifier.to_tuple()) +
-            [self._run_id or ""]
+            list(self.expectation_suite_identifier.to_tuple()) + [
+                self.run_id or "__none__",
+                self.batch_identifier
+            ]
         )
-        # return self.batch_identifier, self.expectation_suite_identifier, self.run_id
+
+    def to_fixed_length_tuple(self):
+        return self.expectation_suite_identifier.expectation_suite_name, self.run_id or "__none__", \
+               self.batch_identifier
 
     @classmethod
     def from_tuple(cls, tuple_):
-        return cls(tuple_[0], ExpectationSuiteIdentifier.from_tuple(tuple_[1:-1]), tuple_[-1])
+        return cls(ExpectationSuiteIdentifier.from_tuple(tuple_[0:-2]), tuple_[-2], tuple_[-1])
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls(ExpectationSuiteIdentifier(tuple_[0]), tuple_[1], tuple_[2])
+
 
 
 class ValidationResultIdentifierSchema(Schema):
-    batch_identifier = fields.Nested(BatchIdentifierSchema, required=True)
     expectation_suite_identifier = fields.Nested(ExpectationSuiteIdentifierSchema, required=True, error_messages={
         'required': 'expectation_suite_identifier is required for a ValidationResultIdentifier'})
     run_id = fields.Str(required=True, error_messages={'required': "run_id is required for a "
                                                                    "ValidationResultIdentifier"})
+    batch_identifier = fields.Nested(BatchIdentifierSchema, required=True)
 
     # noinspection PyUnusedLocal
     @post_load

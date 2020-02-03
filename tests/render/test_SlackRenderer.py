@@ -31,30 +31,15 @@ def test_SlackRenderer():
               'expectation_suite_name': 'default', 'run_id': '2019-09-25T060538.829112Z'
               }
     )
-    expected_renderer_output = {
-        'blocks': [
-            {
-                'type': 'section',
-                'text': {
-                    'type': 'mrkdwn',
-                    'text': "*Batch Validation Status*: Success :tada:\n*Data Asset:* `{'datasource': 'x', 'generator': 'y', 'generator_asset': 'z'}`\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Timestamp*: `09/24/2019 23:18:36`\n*Summary*: *0* of *0* expectations were met"
-                }
-            },
-            {
-                'type': 'divider'
-            },
-            {
-                'type': 'context', 'elements': [
-                    {
-                        'type': 'mrkdwn',
-                        'text': 'Learn how to review validation results: https://docs.greatexpectations.io/en/latest/features/validation.html#reviewing-validation-results'
-                    }
-                ]
-            }
-        ],
-        'text': "{'datasource': 'x', 'generator': 'y', 'generator_asset': 'z'}: Success :tada:"
-    }
+
     rendered_output = SlackRenderer().render(validation_result_suite)
+    print(rendered_output)
+
+    expected_renderer_output = {'blocks': [{'type': 'section', 'text': {'type': 'mrkdwn',
+                                                                        'text': '*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `None`\n*Timestamp*: `09/24/2019 23:18:36`\n*Summary*: *0* of *0* expectations were met'}},
+                                           {'type': 'divider'}, {'type': 'context', 'elements': [{'type': 'mrkdwn',
+                                                                                                  'text': 'Learn how to review validation results: https://docs.greatexpectations.io/en/latest/features/validation.html#reviewing-validation-results'}]}],
+                                'text': 'default: Success :tada:'}
 
     # We're okay with system variation in locales (OS X likes 24 hour, but not Travis)
     expected_renderer_output['blocks'][0]['text']['text'] = \

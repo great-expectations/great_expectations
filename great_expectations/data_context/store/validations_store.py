@@ -1,7 +1,7 @@
 from great_expectations.core import ExpectationSuiteValidationResultSchema
 from great_expectations.data_context.store.database_store_backend import DatabaseStoreBackend
 from great_expectations.data_context.store.store import Store
-from great_expectations.data_context.store.fixed_length_tuple_store_backend import TupleStoreBackend
+from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 from great_expectations.data_context.util import load_class
 
@@ -25,9 +25,9 @@ class ValidationsStore(Store):
                 store_backend["table_name"] = store_backend.get("table_name", "ge_validations_store")
                 store_backend["key_columns"] = store_backend.get(
                     "key_columns", [
+                        "expectation_suite_name",
                         "run_id",
-                        "batch_identifier",
-                        "expectation_suite_name"
+                        "batch_identifier"
                     ]
                 )
         super(ValidationsStore, self).__init__(store_backend=store_backend, runtime_environment=runtime_environment)

@@ -189,8 +189,8 @@ def test_expectation_suite_dictionary_equivalence(baseline_suite):
 def test_expectation_suite_copy(baseline_suite):
     suite_copy = copy(baseline_suite)
     assert suite_copy == baseline_suite
-    suite_copy.data_asset_name = "blarg!"
-    assert baseline_suite.data_asset_name != "blarg"  # copy on primitive properties shouldn't propagate
+    suite_copy.data_asset_type = "blarg!"
+    assert baseline_suite.data_asset_type != "blarg"  # copy on primitive properties shouldn't propagate
     suite_copy.expectations[0].meta["notes"] = "a different note"
     assert baseline_suite.expectations[0].meta["notes"] == "a different note"  # copy on deep attributes does propagate
 
@@ -198,8 +198,8 @@ def test_expectation_suite_copy(baseline_suite):
 def test_expectation_suite_deepcopy(baseline_suite):
     suite_deepcopy = deepcopy(baseline_suite)
     assert suite_deepcopy == baseline_suite
-    suite_deepcopy.data_asset_name = "blarg!"
-    assert baseline_suite.data_asset_name != "blarg"  # copy on primitive properties shouldn't propagate
+    suite_deepcopy.data_asset_type = "blarg!"
+    assert baseline_suite.data_asset_type != "blarg"  # copy on primitive properties shouldn't propagate
     suite_deepcopy.expectations[0].meta["notes"] = "a different note"
     # deepcopy on deep attributes does not propagate
     assert baseline_suite.expectations[0].meta["notes"] == "This is an expectation."

@@ -5,8 +5,12 @@ import os
 from ruamel.yaml import YAML
 import pandas as pd
 
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch import Batch
 from great_expectations.dataset import SqlAlchemyDataset
+from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.datasource import SqlAlchemyDatasource
+from great_expectations.validator.validator import Validator
 
 yaml = YAML()
 
@@ -33,7 +37,6 @@ def test_db_connection_string(tmp_path_factory, test_backends):
 
 def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connection_string):
     name = "test_sqlalchemy_datasource"
-    # type_ = "sqlalchemy"
     class_name = "SqlAlchemyDatasource"
 
     data_asset_type_config = {
@@ -58,27 +61,28 @@ def test_sqlalchemy_datasource_custom_data_asset(data_context, test_db_connectio
     assert data_context_file_config["datasources"][name]["data_asset_type"]["class_name"] == "CustomSqlAlchemyDataset"
 
     # We should be able to get a dataset of the correct type from the datasource.
-    data_context.create_expectation_suite("test_sqlalchemy_datasource/default/table_1", "boo")
+    data_context.create_expectation_suite("table_1.boo")
     batch = data_context.get_batch(
-        "test_sqlalchemy_datasource/default/table_1",
-        "boo",
-        data_context.yield_batch_kwargs("test_sqlalchemy_datasource/default/table_1")
+        data_context.build_batch_kwargs("test_sqlalchemy_datasource", "default", "table_1"),
+        "table_1.boo"
     )
     assert type(batch).__name__ == "CustomSqlAlchemyDataset"
     res = batch.expect_column_func_value_to_be("col_1", 1)
     assert res.success is True
 
 
-def test_standalone_sqlalchemy_datasource(test_db_connection_string):
+def test_standalone_sqlalchemy_datasource(test_db_connection_string, sa):
     datasource = SqlAlchemyDatasource(
-        'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
+        'SqlAlchemy', connection_string=test_db_connection_string, echo=False,
+        generators={"default": {"class_name": "TableGenerator"}})
 
     assert set(datasource.get_available_data_asset_names()["default"]["names"]) == {("main.table_1", "table"), ("main.table_2", "table")}
-    dataset1 = datasource.get_data_asset("main.table_1", "default")
-    dataset2 = datasource.get_data_asset("main.table_2", "default")
-    assert isinstance(dataset1, SqlAlchemyDataset)
-    assert isinstance(dataset2, SqlAlchemyDataset)
-    assert len(dataset1.head(10)) == 5
+    batch_kwargs = datasource.build_batch_kwargs("default", "main.table_1")
+    batch = datasource.get_batch(batch_kwargs=batch_kwargs)
+    assert isinstance(batch, Batch)
+    assert isinstance(batch.data, SqlAlchemyBatchReference)
+    dataset = SqlAlchemyDataset(**batch.data.get_init_kwargs())
+    assert len(dataset.head(10)) == 5
 
 def test_create_sqlalchemy_datasource(data_context):
     name = "test_sqlalchemy_datasource"
@@ -143,13 +147,11 @@ def test_sqlalchemy_source_templating(sqlitedb_engine):
     })
     generator = datasource.get_generator("foo")
     generator.add_query("test", "select 'cat' as ${col_name};")
-    df = datasource.get_batch("test",
-                              "my_suite",
-                              generator.yield_batch_kwargs("test", query_params={'col_name': "animal_name"})
-                              )
-    res = df.expect_column_to_exist("animal_name")
+    batch = datasource.get_batch(generator.build_batch_kwargs("test", query_parameters={'col_name': "animal_name"}))
+    dataset = Validator(batch, expectation_suite=ExpectationSuite("test"), expectation_engine=SqlAlchemyDataset).get_dataset()
+    res = dataset.expect_column_to_exist("animal_name")
     assert res.success is True
-    res = df.expect_column_values_to_be_in_set('animal_name', ['cat'])
+    res = dataset.expect_column_values_to_be_in_set('animal_name', ['cat'])
     assert res.success is True
 
 
@@ -161,8 +163,10 @@ def test_sqlalchemy_source_limit(sqlitedb_engine):
     df1.to_sql('table_1', con=sqlitedb_engine, index=True)
     df2.to_sql('table_2', con=sqlitedb_engine, index=True, schema='main')
     datasource = SqlAlchemyDatasource('SqlAlchemy', engine=sqlitedb_engine)
-    limited_dataset = datasource.get_data_asset("table_1", "default", limit=1, offset=2)
-    assert isinstance(limited_dataset, SqlAlchemyDataset)
+    limited_batch = datasource.get_batch({"table": "table_1", "limit": 1, "offset": 2})
+    assert isinstance(limited_batch, Batch)
+    limited_dataset = Validator(limited_batch, expectation_suite=ExpectationSuite("test"),
+                         expectation_engine=SqlAlchemyDataset).get_dataset()
     assert limited_dataset._table.name.startswith("ge_tmp_")  # we have generated a temporary table
     assert len(limited_dataset.head(10)) == 1  # and it is only one row long
     assert limited_dataset.head(10)['col_1'][0] == 3  # offset should have been applied
