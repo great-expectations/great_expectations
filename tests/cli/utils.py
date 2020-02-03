@@ -49,9 +49,11 @@ def assert_no_logging_messages_or_tracebacks(my_caplog, click_result):
             assert False, "Found exception of type {} with message {}".format(
                 _type, value
             )
-    assert not click_result.exception, "Found exception {}".format(
-        click_result.exception
-    )
+    if not isinstance(click_result.exception, SystemExit):
+        # Ignore a SystemeExit, because some commands intentionally exit in an error state
+        assert not click_result.exception, "Found exception {}".format(
+            click_result.exception
+        )
 
     assert (
         "traceback" not in click_result.output.lower()
