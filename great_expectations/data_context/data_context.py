@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import glob
 import os
-import json
 import logging
 import shutil
 import webbrowser
@@ -39,7 +38,6 @@ from great_expectations.datasource import (
     SparkDFDatasource,
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
 
 
 from .templates import (
@@ -592,10 +590,10 @@ class ConfigOnlyDataContext(object):
             for datasource_name in datasource_names:
                 try:
                     datasource = self.get_datasource(datasource_name)
-                    data_asset_names[datasource_name] = datasource.get_available_data_asset_names(None)
+                    data_asset_names[datasource_name] = datasource.get_available_data_asset_names()
                 except ValueError:
                     # handle the edge case of a non-existent datasource
-                    pass
+                    data_asset_names[datasource_name] = {}
 
         return data_asset_names
 
