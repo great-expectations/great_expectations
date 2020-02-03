@@ -13,6 +13,11 @@ def basic_sqlalchemy_datasource(sqlitedb_engine):
     return SqlAlchemyDatasource("basic_sqlalchemy_datasource", engine=sqlitedb_engine)
 
 
+@pytest.fixture
+def postgresql_sqlalchemy_datasource(postgresql_engine):
+    return SqlAlchemyDatasource("postgresql_sqlalchemy_datasource", engine=postgresql_engine)
+
+
 @pytest.fixture(scope="module")
 def basic_sparkdf_datasource():
     return SparkDFDatasource("basic_sparkdf_datasource")

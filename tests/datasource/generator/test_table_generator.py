@@ -55,16 +55,8 @@ def test_basic_operation(basic_sqlalchemy_datasource):
     assert "missing template key" in exc.value.message
 
 
-def test_db_introspection(basic_sqlalchemy_datasource, test_backend, caplog):
-    import sqlalchemy as sa
-
-    mock_datasource = basic_sqlalchemy_datasource
-    # Frankenstein dissection of datasource to use postgres engine
-    if not test_backend != "postgresql":
-        pytest.skip("Skipping test that expects postgresql...")
-
-    mock_datasource.engine = sa.create_engine('postgresql://postgres@localhost/test_ci').connect()
-    table_generator = TableGenerator(datasource=mock_datasource)
+def test_db_introspection(postgresql_sqlalchemy_datasource, caplog):
+    table_generator = TableGenerator(datasource=postgresql_sqlalchemy_datasource)
 
     # Get a list of tables visible inside the defined database
     assets = table_generator.get_available_data_asset_names()
