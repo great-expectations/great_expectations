@@ -786,12 +786,14 @@ def get_batch_kwargs(context,
     #     if generator_name is None:
     #         raise ge_exceptions.DataContextError("No manual generators found in datasource {0:s}".format(datasource_name))
 
-
     if isinstance(context.get_datasource(datasource_name), (PandasDatasource, SparkDFDatasource)):
-        generator_asset, batch_kwargs = _load_file_from_filesystem_as_data_asset(context, datasource_name,
-                                                                                 generator_name=generator_name,
-                                                                                 generator_asset=generator_asset,
-                                                                                 additional_batch_kwargs=additional_batch_kwargs)
+        generator_asset, batch_kwargs = _load_file_from_filesystem_as_data_asset(
+            context,
+            datasource_name,
+            generator_name=generator_name,
+            generator_asset=generator_asset,
+        )
+
     elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
         generator_asset, batch_kwargs = _load_query_as_data_asset_from_sqlalchemy_datasource(context,
                                                                                              datasource_name,
