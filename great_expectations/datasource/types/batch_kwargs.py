@@ -45,6 +45,10 @@ class SqlAlchemyDatasourceBatchKwargs(BatchKwargs):
     a subclass is allowed
     """
     @property
+    def limit(self):
+        return self.get("limit")
+
+    @property
     def schema(self):
         return self.get("schema")
 
