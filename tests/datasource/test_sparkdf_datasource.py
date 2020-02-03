@@ -145,28 +145,26 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
 )
 
 
-    assert datasource.get_available_data_asset_names()["default"]["names"] == [('test', 'file')]
-    dataset = datasource.get_batch(expectation_suite_name="default",
-                                   batch_kwargs={
+    assert datasource.get_available_data_asset_names()["subdir_reader"]["names"] == [('test', 'file')]
+    batch = datasource.get_batch(batch_kwargs={
                                        "path": os.path.join(test_parquet_folder_connection_path,
                                                             'test.parquet')
                                    })
-    assert isinstance(dataset, SparkDFDataset)
+    assert isinstance(batch, Batch)
     # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
-    assert dataset.spark_df.head()['col_1'] == 1
-    assert dataset.spark_df.count() == 5
+    assert batch.data.head()['col_1'] == 1
+    assert batch.data.count() == 5
 
     # Limit should also work
-    dataset = datasource.get_batch(expectation_suite_name="default",
-                                   batch_kwargs={
+    batch = datasource.get_batch(batch_kwargs={
                                        "path": os.path.join(test_parquet_folder_connection_path,
                                                             'test.parquet'),
                                        "limit": 2
                                    })
-    assert isinstance(dataset, SparkDFDataset)
+    assert isinstance(batch, Batch)
     # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
-    assert dataset.spark_df.head()['col_1'] == 1
-    assert dataset.spark_df.count() == 2
+    assert batch.data.head()['col_1'] == 1
+    assert batch.data.count() == 2
 
 
 def test_standalone_spark_csv_datasource(test_folder_connection_path):
