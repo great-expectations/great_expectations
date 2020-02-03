@@ -1,3 +1,4 @@
+import pytest
 import os
 import shutil
 
@@ -12,35 +13,42 @@ from great_expectations.util import (
 )
 
 
-def test_ActionListValidationOperator(basic_data_context_config_for_validation_operator, tmp_path_factory, filesystem_csv_4):
-    project_path = str(tmp_path_factory.mktemp('great_expectations'))
-
+@pytest.fixture
+def validation_operators_data_context(basic_data_context_config_for_validation_operator, filesystem_csv_4):
     data_context = ConfigOnlyDataContext(
-        basic_data_context_config_for_validation_operator,
-        project_path,
+        basic_data_context_config_for_validation_operator
     )
 
     data_context.add_datasource("my_datasource",
                                 class_name="PandasDatasource",
-                                base_directory=str(filesystem_csv_4))
+                                generators={
+                                    "subdir_reader": {
+                                        "class_name": "SubdirReaderGenerator",
+                                        "base_directory": str(filesystem_csv_4)
+                                    }
+                                })
 
-    data_context.create_expectation_suite("my_datasource/default/f1", "foo")
-    df = data_context.get_batch("my_datasource/default/f1", "foo",
-                                batch_kwargs=data_context.yield_batch_kwargs("my_datasource/default/f1"))
+    data_context.create_expectation_suite("f1.foo")
+    df = data_context.get_batch(batch_kwargs=data_context.build_batch_kwargs("my_datasource",
+                                                                             "subdir_reader", "f1"),
+                                expectation_suite_name="f1.foo")
     df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
     failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
-    data_context.save_expectation_suite(failure_expectations, data_asset_name="my_datasource/default/f1",
-                                        expectation_suite_name="failure")
-    data_context.save_expectation_suite(warning_expectations, data_asset_name="my_datasource/default/f1",
-                                        expectation_suite_name="warning")
+    data_context.save_expectation_suite(failure_expectations, expectation_suite_name="f1.failure")
+    data_context.save_expectation_suite(warning_expectations, expectation_suite_name="f1.warning")
 
-    validator_batch_kwargs = data_context.yield_batch_kwargs("my_datasource/default/f1")
-    batch = data_context.get_batch("my_datasource/default/f1",
-                                   expectation_suite_name="failure",
+    return data_context
+
+
+def test_action_list_operator(validation_operators_data_context):
+    data_context = validation_operators_data_context
+    validator_batch_kwargs = data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1")
+
+    batch = data_context.get_batch(expectation_suite_name="f1.failure",
                                    batch_kwargs=validator_batch_kwargs
                                    )
 
@@ -48,7 +56,7 @@ def test_ActionListValidationOperator(basic_data_context_config_for_validation_o
     # We want to demonstrate running the validation operator with both a pre-built batch (DataAsset) and with
     # a tuple of parameters for get_batch
     operator_result = data_context.run_validation_operator(
-        assets_to_validate=[batch, ("my_datasource/default/f1", "warning", validator_batch_kwargs)],
+        assets_to_validate=[batch, (validator_batch_kwargs, "f1.warning")],
         run_id="test-100",
         validation_operator_name="store_val_res_and_extract_eval_params",
     )
@@ -64,112 +72,29 @@ def test_ActionListValidationOperator(basic_data_context_config_for_validation_o
     assert data_context.stores["validation_result_store"].get(validation_result_store_keys[0]).success is True
 
 
-def test_WarningAndFailureExpectationSuitesValidationOperator_with_file_structure(tmp_path_factory):
-    base_path = str(tmp_path_factory.mktemp('test_DefaultDataContextAwareValidationOperator_with_file_structure__dir'))
-    project_path = os.path.join( base_path, "project")
-    print(os.getcwd())
-    shutil.copytree(
-        os.path.join( os.getcwd(), "tests/data_context/fixtures/post_init_project_v0.8.0_A" ),
-        project_path,
-    )
-    print(gen_directory_tree_str(project_path))
+def test_warning_and_failure_validation_operator(validation_operators_data_context):
+    data_context = validation_operators_data_context
+    validator_batch_kwargs = data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1")
 
-    assert gen_directory_tree_str(project_path) == """\
-project/
-    data/
-        bob-ross/
-            README.md
-            cluster-paintings.py
-            elements-by-episode.csv
-    great_expectations/
-        .gitignore
-        great_expectations.yml
-        expectations/
-            data__dir/
-                default/
-                    bob-ross/
-                        BasicDatasetProfiler.json
-                        failure.json
-                        quarantine.json
-                        warning.json
-        notebooks/
-            pandas/
-                create_expectations.ipynb
-                validation_playground.ipynb
-            spark/
-                create_expectations.ipynb
-                validation_playground.ipynb
-            sql/
-                create_expectations.ipynb
-                validation_playground.ipynb
-        uncommitted/
-            documentation/
-                local_site/
-                    index.html
-                    expectations/
-                        data__dir/
-                            default/
-                                bob-ross/
-                                    BasicDatasetProfiler.html
-                    profiling/
-                        data__dir/
-                            default/
-                                bob-ross/
-                                    BasicDatasetProfiler.html
-                team_site/
-                    index.html
-                    expectations/
-                        data__dir/
-                            default/
-                                bob-ross/
-                                    BasicDatasetProfiler.html
-            validations/
-                profiling/
-                    data__dir/
-                        default/
-                            bob-ross/
-                                BasicDatasetProfiler.json
-"""
+    batch = data_context.get_batch(expectation_suite_name="f1.warning",
+                                   batch_kwargs=validator_batch_kwargs)
 
-    data_context = DataContext(
-        context_root_dir=os.path.join(project_path, "great_expectations"),
-    )
+    # NOTE: 20200130 - JPC - currently the warning and failure validation operator ignores the batch-provided suite and
+    # fetches its own
 
-    my_df = pd.DataFrame({"x": [1, 2, 3, 4, 5]})
+    assert data_context.validations_store.list_keys() == []
 
-    data_asset_name = "data__dir/default/bob-ross"
-    data_context.create_expectation_suite(expectation_suite_name="default")
-    batch = data_context.get_batch(expectation_suite_name="default",
-                                   batch_kwargs=data_context.yield_batch_kwargs(data_asset_name))
-
-    validation_store_path = os.path.join(project_path, "great_expectations/uncommitted/validations")
-    assert gen_directory_tree_str(validation_store_path) == """\
-validations/
-    profiling/
-        data__dir/
-            default/
-                bob-ross/
-                    BasicDatasetProfiler.json
-"""
-
+    # We want to demonstrate running the validation operator with both a pre-built batch (DataAsset) and with
+    # a tuple of parameters for get_batch
     results = data_context.run_validation_operator(
         assets_to_validate=[batch],
         run_id="test-100",
         validation_operator_name="errors_and_warnings_validation_operator",
+        base_expectation_suite_name="f1"
     )
 
-    print(gen_directory_tree_str(validation_store_path))
-    assert gen_directory_tree_str(validation_store_path) == """\
-validations/
-    profiling/
-        data__dir/
-            default/
-                bob-ross/
-                    BasicDatasetProfiler.json
-    test-100/
-        data__dir/
-            default/
-                bob-ross/
-                    failure.json
-                    warning.json
-"""
+    validations_keys = data_context.validations_store.list_keys()
+    assert len(validations_keys) == 2  # we should have run two suites even though there was only one batch
+    suite_names = [key.expectation_suite_identifier.expectation_suite_name for key in validations_keys]
+    assert "f1.warning" in suite_names
+    assert "f1.failure" in suite_names

@@ -1,14 +1,17 @@
 import logging
 from copy import deepcopy
+
 from six import integer_types
 
-from great_expectations.render.renderer.content_block.expectation_string import ExpectationStringRenderer
-from great_expectations.render.types import RenderedComponentContent, RenderedStringTemplateContent, \
-    RenderedTableContent, RenderedGraphContent, RenderedContentBlockContainer
+from great_expectations.render.renderer.content_block.expectation_string import (
+    ExpectationStringRenderer,
+)
+from great_expectations.render.types import (
+    RenderedContentBlockContainer,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+)
 from great_expectations.render.util import num_to_str
-
-import pandas as pd
-import altair as alt
 
 logger = logging.getLogger(__name__)
 

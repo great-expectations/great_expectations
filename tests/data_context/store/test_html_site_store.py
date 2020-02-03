@@ -61,16 +61,12 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
 test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir0/
     my_store/
         validations/
-            prod-100/
-                a/
-                    b/
-                        c/
-                            quarantine.html
-            prod-20/
-                a/
-                    b/
-                        c/
-                            quarantine.html
+            a/
+                b/
+                    c/
+                        quarantine/
+                            prod-100.html
+                            prod-20.html
 """
 
 
@@ -98,9 +94,10 @@ def test_HtmlSiteStore_S3_backend():
         site_section_name="validations",
         resource_identifier=ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
-                expectation_suite_name="a.b.c.quarantine",
+                expectation_suite_name="asset.quarantine",
             ),
-            run_id="20191007T151224.1234Z_prod_100"
+            run_id="20191007T151224.1234Z_prod_100",
+            batch_identifier="1234"
         )
     )
     my_store.set(ns_1, "aaa")
@@ -108,7 +105,7 @@ def test_HtmlSiteStore_S3_backend():
     ns_2 = SiteSectionIdentifier(
         site_section_name="expectations",
         resource_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="a.b.c.quarantine",
+            expectation_suite_name="asset.quarantine",
         )
     )
     my_store.set(ns_2, "bbb")
@@ -122,7 +119,6 @@ def test_HtmlSiteStore_S3_backend():
     my_store.write_index_page("index_html_string_content")
 
     # Verify that internals are working as expected, including the default filepath
-    assert False  # UPDATE
     # paths below should include the batch_parameters
     assert set(
         [s3_object_info['Key'] for s3_object_info in
@@ -130,8 +126,8 @@ def test_HtmlSiteStore_S3_backend():
          ]
     ) == {
         'test/prefix/index.html',
-        'test/prefix/expectations/a.b.c.quarantine.html',
-        'test/prefix/validations/20191007T151224.1234Z_prod_100/a.b.c.quarantine.html'
+        'test/prefix/expectations/asset/quarantine.html',
+        'test/prefix/validations/asset/quarantine/20191007T151224.1234Z_prod_100/1234.html'
     }
 
     index_content = boto3.client('s3').get_object(Bucket=bucket, Key='test/prefix/index.html')["Body"]\

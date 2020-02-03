@@ -39,18 +39,20 @@ def test_ValidationsStore_with_TupleS3StoreBackend():
 
     ns_1 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="a.b.c.quarantine",
+            expectation_suite_name="asset.quarantine",
         ),
-        run_id="20191007T151224.1234Z_prod_100"
+        run_id="20191007T151224.1234Z_prod_100",
+        batch_identifier="batch_id"
     )
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
     assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
 
     ns_2 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="a.b.c.quarantine",
+            expectation_suite_name="asset.quarantine",
         ),
-        run_id="20191007T151224.1234Z_prod_200"
+        run_id="20191007T151224.1234Z_prod_200",
+        batch_identifier="batch_id"
     )
 
     my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
@@ -61,8 +63,8 @@ def test_ValidationsStore_with_TupleS3StoreBackend():
         [s3_object_info['Key'] for s3_object_info in
          boto3.client('s3').list_objects(Bucket=bucket, Prefix=prefix)['Contents']
          ]
-    ) == {'test/prefix/20191007T151224.1234Z_prod_100/a/b/c/quarantine.json',
-          'test/prefix/20191007T151224.1234Z_prod_200/a/b/c/quarantine.json'}
+    ) == {'test/prefix/asset/quarantine/20191007T151224.1234Z_prod_100/batch_id.json',
+          'test/prefix/asset/quarantine/20191007T151224.1234Z_prod_200/batch_id.json'}
 
     print(my_store.list_keys())
     assert set(my_store.list_keys()) == {
@@ -105,7 +107,6 @@ def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
             "module_name": "great_expectations.data_context.store",
             "class_name": "TupleFilesystemStoreBackend",
             "base_directory": "my_store/",
-            "filepath_template": "{4}/{0}/{1}/{2}/{3}.txt",
         },
         runtime_environment={
             "root_directory": path
@@ -115,11 +116,11 @@ def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
     with pytest.raises(TypeError):
         my_store.get("not_a_ValidationResultIdentifier")
 
-    ns_1 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-100"))
+    ns_1 = ValidationResultIdentifier(expectation_suite_identifier=ExpectationSuiteIdentifier("asset.quarantine"), run_id="prod-100", batch_identifier="batch_id")
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
     assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
 
-    ns_2 = ValidationResultIdentifier.from_tuple(("a", "b", "c", "quarantine", "prod-20"))
+    ns_2 = ValidationResultIdentifier.from_tuple(("asset", "quarantine", "prod-20", "batch_id"))
     my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
     assert my_store.get(ns_2) == ExpectationSuiteValidationResult(success=False, statistics={}, results=[])
 
@@ -133,16 +134,12 @@ def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
     assert gen_directory_tree_str(path) == """\
 test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir0/
     my_store/
-        prod-100/
-            a/
-                b/
-                    c/
-                        quarantine.txt
-        prod-20/
-            a/
-                b/
-                    c/
-                        quarantine.txt
+        asset/
+            quarantine/
+                prod-100/
+                    batch_id.json
+                prod-20/
+                    batch_id.json
 """
 
 
@@ -165,18 +162,20 @@ def test_ValidationsStore_with_DatabaseStoreBackend():
 
     ns_1 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="a.b.c.quarantine",
+            expectation_suite_name="asset.quarantine",
         ),
-        run_id="20191007T151224.1234Z_prod_100"
+        run_id="20191007T151224.1234Z_prod_100",
+        batch_identifier="batch_id"
     )
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
     assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
 
     ns_2 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="a.b.c.quarantine",
+            expectation_suite_name="asset.quarantine",
         ),
-        run_id="20191007T151224.1234Z_prod_200"
+        run_id="20191007T151224.1234Z_prod_200",
+        batch_identifier="batch_id"
     )
 
     my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))

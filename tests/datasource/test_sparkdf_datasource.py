@@ -7,6 +7,7 @@ import os
 
 import pandas as pd
 
+from great_expectations.core.batch import Batch
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource import SparkDFDatasource
 from great_expectations.dataset import SparkDFDataset
@@ -47,8 +48,15 @@ def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connecti
     }
     data_context.add_datasource(name,
                                 class_name=class_name,
-                                base_directory=test_folder_connection_path,
-                                data_asset_type=data_asset_type_config)
+                                data_asset_type=data_asset_type_config,
+                                generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": test_folder_connection_path
+    }
+}
+)
+
 
     # We should now see updated configs
     with open(os.path.join(data_context.root_directory, "great_expectations.yml"), "r") as data_context_config_file:
@@ -58,16 +66,15 @@ def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connecti
     assert data_context_file_config["datasources"][name]["data_asset_type"]["class_name"] == "CustomSparkDFDataset"
 
     # We should be able to get a dataset of the correct type from the datasource.
-    data_context.create_expectation_suite("test_sparkdf_datasource/default/test", "default")
-    batch_kwargs = data_context.yield_batch_kwargs("test_sparkdf_datasource/default/test")
-    batch = data_context.get_batch(
-        "test_sparkdf_datasource/default/test",
-        expectation_suite_name="default",
-        batch_kwargs=batch_kwargs,
-        reader_options={
+    data_context.create_expectation_suite("test_sparkdf_datasource.default")
+    batch_kwargs = data_context.build_batch_kwargs(name, "subdir_reader", "test")
+    batch_kwargs["reader_options"] = {
             'header': True,
             'inferSchema': True
         }
+    batch = data_context.get_batch(
+        batch_kwargs=batch_kwargs,
+        expectation_suite_name="test_sparkdf_datasource.default"
     )
     assert type(batch).__name__ == "CustomSparkDFDataset"
     res = batch.expect_column_approx_quantile_values_to_be_between("col_1", quantile_ranges={
@@ -129,66 +136,73 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory):
 
 def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path, spark_session):
     assert spark_session  # Ensure a sparksession exists
-    datasource = SparkDFDatasource('SparkParquet', base_directory=test_parquet_folder_connection_path)
+    datasource = SparkDFDatasource('SparkParquet', generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": test_parquet_folder_connection_path
+    }
+}
+)
 
-    assert datasource.get_available_data_asset_names()["default"]["names"] == [('test', 'file')]
-    dataset = datasource.get_batch('test',
-                                   expectation_suite_name="default",
-                                   batch_kwargs={
+
+    assert datasource.get_available_data_asset_names()["subdir_reader"]["names"] == [('test', 'file')]
+    batch = datasource.get_batch(batch_kwargs={
                                        "path": os.path.join(test_parquet_folder_connection_path,
                                                             'test.parquet')
                                    })
-    assert isinstance(dataset, SparkDFDataset)
+    assert isinstance(batch, Batch)
     # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
-    assert dataset.spark_df.head()['col_1'] == 1
-    assert dataset.spark_df.count() == 5
+    assert batch.data.head()['col_1'] == 1
+    assert batch.data.count() == 5
 
     # Limit should also work
-    dataset = datasource.get_batch('test',
-                                   expectation_suite_name="default",
-                                   batch_kwargs={
+    batch = datasource.get_batch(batch_kwargs={
                                        "path": os.path.join(test_parquet_folder_connection_path,
                                                             'test.parquet'),
                                        "limit": 2
                                    })
-    assert isinstance(dataset, SparkDFDataset)
+    assert isinstance(batch, Batch)
     # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
-    assert dataset.spark_df.head()['col_1'] == 1
-    assert dataset.spark_df.count() == 2
+    assert batch.data.head()['col_1'] == 1
+    assert batch.data.count() == 2
 
 
 def test_standalone_spark_csv_datasource(test_folder_connection_path):
     pyspark_skip = pytest.importorskip("pyspark")
-    datasource = SparkDFDatasource('SparkParquet', base_directory=test_folder_connection_path)
-    assert datasource.get_available_data_asset_names()["default"]["names"] == [('test', 'file')]
-    dataset = datasource.get_batch('test',
-                                   expectation_suite_name="default",
-                                   batch_kwargs={
+    datasource = SparkDFDatasource('SparkParquet',
+                                   generators={"subdir_reader": {
+                                        "class_name": "SubdirReaderGenerator",
+                                        "base_directory": test_folder_connection_path
+                                        }
+                                    }
+    )
+
+    assert datasource.get_available_data_asset_names()["subdir_reader"]["names"] == [('test', 'file')]
+    batch = datasource.get_batch(batch_kwargs={
                                        "path": os.path.join(test_folder_connection_path,
-                                                            'test.csv')
-                                   },
-                                   reader_options={"header": True})
-    assert isinstance(dataset, SparkDFDataset)
+                                                            'test.csv'),
+                                       "reader_options": {"header": True}
+                                   })
+    assert isinstance(batch, Batch)
     # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
-    assert dataset.spark_df.head()['col_1'] == '1'
+    assert batch.data.head()['col_1'] == '1'
 
 
-def test_standalone_spark_passthrough_generator_datasource(data_context, dataset):
+def test_standalone_spark_passthrough_datasource(data_context, dataset):
     pyspark_skip = pytest.importorskip("pyspark")
     datasource = data_context.add_datasource("spark_source",
                                              module_name="great_expectations.datasource",
-                                             class_name="SparkDFDatasource",
-                                             generators={"passthrough": {"class_name": "InMemoryGenerator"}})
+                                             class_name="SparkDFDatasource")
 
     # We want to ensure that an externally-created spark DataFrame can be successfully instantiated using the
     # datasource built in a data context
     # Our dataset fixture is parameterized by all backends. The spark source should only accept a spark dataset
-    data_context.create_expectation_suite("spark_source/passthrough/new_asset", "new_suite")
-    batch_kwargs = InMemoryBatchKwargs(dataset=dataset)
+    data_context.create_expectation_suite("new_suite")
+    batch_kwargs = InMemoryBatchKwargs(datasource="spark_source", dataset=dataset)
 
     if isinstance(dataset, SparkDFDataset):
         # We should be smart enough to figure out this is a batch:
-        batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", batch_kwargs)
+        batch = data_context.get_batch(batch_kwargs=batch_kwargs, expectation_suite_name="new_suite")
         res = batch.expect_column_to_exist("infinities")
         assert res.success is True
         res = batch.expect_column_to_exist("not_a_column")
@@ -196,47 +210,57 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
         batch.save_expectation_suite()
         assert os.path.isfile(os.path.join(
             data_context.root_directory,
-            "expectations/spark_source/passthrough/new_asset/new_suite.json")
+            "expectations/new_suite.json")
         )
 
     else:
         with pytest.raises(BatchKwargsError) as exc:
             # noinspection PyUnusedLocal
-            batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", batch_kwargs)
+            batch = data_context.get_batch(batch_kwargs=batch_kwargs, expectation_suite_name="new_suite")
             assert "Unrecognized batch_kwargs for spark_source" in exc.value.message
 
 
 def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
     pyspark_skip = pytest.importorskip("pyspark")
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_sparkdf_datasource"))
-    datasource = SparkDFDatasource('mysparksource', base_directory=basepath)
+    datasource = SparkDFDatasource('mysparksource', generators={
+        "subdir_reader": {
+            "class_name": "SubdirReaderGenerator",
+            "base_directory": basepath
+        }
+        }
+    )
+
 
     with open(os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w") as newfile:
         newfile.write("a,b\n1,2\n3,4\n")
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
+        datasource.get_batch(batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         })
         assert "Unable to determine reader for path" in exc.value.message
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
-            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
-        }, reader_method="blarg")
+        datasource.get_batch(batch_kwargs={
+            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"),
+            "reader_method": "blarg"
+        })
         assert "Unknown reader method: blarg" in exc.value.message
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
-            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
-        }, reader_method="excel")
-        assert "Unsupported reader: excel" in exc.value.message
-
-    dataset = datasource.get_data_asset("idonotlooklikeacsvbutiam.notrecognized", batch_kwargs={
+        datasource.get_batch(batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"),
-        },
-        reader_method="csv", reader_options={'header': True})
-    assert dataset.spark_df.head()["a"] == "1"
+            "reader_method": "excel"
+        })
+        assert "Unknown reader: excel" in exc.value.message
+
+    batch = datasource.get_batch(batch_kwargs={
+            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"),
+            "reader_method": "csv",
+            "reader_options": {'header': True}
+    })
+    assert batch.data.head()["a"] == "1"
 
 
 def test_spark_config():

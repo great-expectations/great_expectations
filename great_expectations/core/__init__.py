@@ -250,6 +250,13 @@ class DataContextKey(object):
     def from_tuple(cls, tuple_):
         return cls(*tuple_)
 
+    def to_fixed_length_tuple(self):
+        raise NotImplementedError
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        raise NotImplementedError
+
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
@@ -548,9 +555,13 @@ class ExpectationConfigurationSchema(Schema):
 
 class ExpectationSuite(object):
     def __init__(
-            self,
-            expectation_suite_name,
-            expectations=None, evaluation_parameters=None, data_asset_type=None, meta=None):
+        self,
+        expectation_suite_name,
+        expectations=None,
+        evaluation_parameters=None,
+        data_asset_type=None,
+        meta=None
+    ):
         self.expectation_suite_name = expectation_suite_name
         if expectations is None:
             expectations = []

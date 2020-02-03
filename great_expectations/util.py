@@ -3,10 +3,14 @@ import importlib
 import json
 import logging
 
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
+
 from six import string_types
 
-from great_expectations import __version__ as ge_version
-from great_expectations.core import expectationSuiteSchema, ExpectationSuite
+from great_expectations.core import expectationSuiteSchema
 
 logger = logging.getLogger(__name__)
 
@@ -377,7 +381,6 @@ def validate(
             from great_expectations.data_context import DataContext
             data_context = DataContext(data_context)
         expectation_suite = data_context.get_expectation_suite(
-            data_asset_name=data_asset_name,
             expectation_suite_name=expectation_suite_name
         )
     else:
@@ -388,7 +391,7 @@ def validate(
         if expectation_suite_name is not None:
             raise ValueError("When providing an expectation suite, expectation_suite_name cannot also be provided.")
         logger.info(
-            "Validating data_asset_name %s with expectation_suite_name %s" % (expectation_suite.data_asset_name,
+            "Validating data_asset_name %s with expectation_suite_name %s" % (data_asset_name,
                                                                               expectation_suite.expectation_suite_name)
         )
 
@@ -459,3 +462,13 @@ def gen_directory_tree_str(startpath):
             output_str += '{}{}\n'.format(subindent, f)
     
     return output_str
+
+
+# https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+def nested_update(d, u):
+    for k, v in u.items():
+        if isinstance(v, Mapping):
+            d[k] = nested_update(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d

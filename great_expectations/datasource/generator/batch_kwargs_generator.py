@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class BatchKwargsGenerator(object):
-    """Generators produce identifying information, called "batch_kwargs" that datasources 
+    """
+    BatchKwargsGenerators produce identifying information, called "batch_kwargs" that datasources
     can use to get individual batches of data. They add flexibility in how to obtain data 
     such as with time-based partitioning, downsampling, or other techniques appropriate 
     for the datasource.
@@ -74,12 +75,14 @@ class BatchKwargsGenerator(object):
     _batch_kwargs_type = BatchKwargs
     recognized_batch_parameters = set()
 
-    def __init__(self, name, datasource=None):
+    def __init__(self, name, datasource):
         self._name = name
         self._generator_config = {
             "class_name": self.__class__.__name__
         }
         self._data_asset_iterators = {}
+        if datasource is None:
+            raise ValueError("datasource must be provided for a BatchKwargsGenerator")
         self._datasource = datasource
 
     @property
@@ -128,12 +131,14 @@ class BatchKwargsGenerator(object):
             self.reset_iterator(generator_asset, **kwargs)
             return self._data_asset_iterators[generator_asset][0]
 
-    def build_batch_kwargs(self, name=None, **kwargs):
+    def build_batch_kwargs(self, name=None, partition_id=None, **kwargs):
         """The key workhorse. Docs forthcoming."""
         if name is not None:
             batch_parameters = {"name": name}
         else:
             batch_parameters = dict()
+        if partition_id is not None:
+            batch_parameters["partition_id"] = partition_id
         batch_parameters.update(kwargs)
         param_keys = set(batch_parameters.keys())
         recognized_params = (self.recognized_batch_parameters | self._datasource.recognized_batch_parameters)
@@ -158,7 +163,9 @@ class BatchKwargsGenerator(object):
             self.reset_iterator(generator_asset, **kwargs)
             data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
         try:
-            return next(data_asset_iterator)
+            batch_kwargs = next(data_asset_iterator)
+            batch_kwargs["datasource"] = self._datasource.name
+            return batch_kwargs
         except StopIteration:
             self.reset_iterator(generator_asset, **kwargs)
             data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
@@ -169,7 +176,9 @@ class BatchKwargsGenerator(object):
                 self.reset_iterator(generator_asset, **kwargs)
                 data_asset_iterator, passed_kwargs = self._data_asset_iterators[generator_asset]
             try:
-                return next(data_asset_iterator)
+                batch_kwargs = next(data_asset_iterator)
+                batch_kwargs["datasource"] = self._datasource.name
+                return batch_kwargs
             except StopIteration:
                 # This is a degenerate case in which no kwargs are actually being generated
                 logger.warning("No batch_kwargs found for generator_asset %s" % generator_asset)
