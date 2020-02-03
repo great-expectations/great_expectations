@@ -55,27 +55,24 @@ def test_basic_operation(basic_sqlalchemy_datasource):
     assert "missing template key" in exc.value.message
 
 
-def test_db_introspection(sqlalchemy_dataset, caplog):
+def test_db_introspection(basic_sqlalchemy_datasource, test_backend, caplog):
     import sqlalchemy as sa
 
-    class MockDatasource(object):
-        def __init__(self, engine):
-            self.engine = engine
-
-    if sqlalchemy_dataset is None or not isinstance(sqlalchemy_dataset.engine.dialect, sa.dialects.postgresql.dialect):
+    mock_datasource = basic_sqlalchemy_datasource
+    # Frankenstein dissection of datasource to use postgres engine
+    if not test_backend != "postgresql":
         pytest.skip("Skipping test that expects postgresql...")
 
-    # Get the engine from the dataset
-    mock_datasource = MockDatasource(sqlalchemy_dataset.engine)
+    mock_datasource.engine = sa.create_engine('postgresql://postgres@localhost/test_ci').connect()
     table_generator = TableGenerator(datasource=mock_datasource)
 
     # Get a list of tables visible inside the defined database
     assets = table_generator.get_available_data_asset_names()
-    assert len(assets) > 0
-    table_name = assets.pop()
+    assert len(assets["names"]) > 0
+    table_name = assets["names"].pop()[0]
 
     # We should be able to get kwargs without having them specifically configured based on discovery
-    batch_kwargs = table_generator.yield_batch_kwargs(table_name)
+    batch_kwargs = table_generator.build_batch_kwargs(table_name)
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
     assert batch_kwargs.table == table_name
     assert batch_kwargs.schema == "public"

@@ -66,16 +66,15 @@ def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connecti
     assert data_context_file_config["datasources"][name]["data_asset_type"]["class_name"] == "CustomSparkDFDataset"
 
     # We should be able to get a dataset of the correct type from the datasource.
-    data_context.create_expectation_suite("test_sparkdf_datasource/default/test", "default")
-    batch_kwargs = data_context.yield_batch_kwargs("test_sparkdf_datasource/default/test")
-    batch = data_context.get_batch(
-        "test_sparkdf_datasource/default/test",
-        expectation_suite_name="default",
-        batch_kwargs=batch_kwargs,
-        reader_options={
+    data_context.create_expectation_suite("test_sparkdf_datasource.default")
+    batch_kwargs = data_context.build_batch_kwargs(name, "subdir_reader", "test")
+    batch_kwargs["reader_options"] = {
             'header': True,
             'inferSchema': True
         }
+    batch = data_context.get_batch(
+        batch_kwargs=batch_kwargs,
+        expectation_suite_name="test_sparkdf_datasource.default"
     )
     assert type(batch).__name__ == "CustomSparkDFDataset"
     res = batch.expect_column_approx_quantile_values_to_be_between("col_1", quantile_ranges={
