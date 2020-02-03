@@ -1,6 +1,7 @@
 import json
 
 from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
+from great_expectations.datasource import Datasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 
 try:
@@ -17,7 +18,6 @@ from ruamel.yaml import YAML
 
 from great_expectations.core import (
     ExpectationConfiguration,
-    dataAssetIdentifierSchema,
     expectationSuiteSchema,
 )
 from great_expectations.data_context import (
@@ -34,7 +34,7 @@ from great_expectations.data_context.util import (
     file_relative_path,
     safe_mmkdir,
 )
-from great_expectations.exceptions import DataContextError
+from great_expectations.exceptions import DataContextError, ProfilerError
 from great_expectations.util import gen_directory_tree_str
 
 try:
@@ -204,6 +204,21 @@ def test_data_context_get_validation_result(titanic_data_context):
         failed_only=True,
     )
     assert len(failed_validation_result.results) == 8
+
+
+def test_data_context_get_datasource(titanic_data_context):
+    isinstance(titanic_data_context.get_datasource("mydatasource"), Datasource)
+
+
+def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(titanic_data_context):
+    with pytest.raises(ValueError):
+        _ = titanic_data_context.get_datasource("fakey_mc_fake")
+
+
+def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_error(titanic_data_context):
+    # TODO verify that this behavior is correct - or should it return a profiling dict w/ an error message?
+    with pytest.raises(ProfilerError):
+        _ = titanic_data_context.profile_datasource("fakey_mc_fake")
 
 
 @pytest.mark.rendered_output
