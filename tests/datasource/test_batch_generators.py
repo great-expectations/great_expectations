@@ -17,25 +17,32 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
     datasource = data_context.add_datasource("default",
                                         module_name="great_expectations.datasource",
                                         class_name="PandasDatasource",
-                                        base_directory=str(base_dir))
-    generator = datasource.get_generator("default")
+                                        generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": str(base_dir),
+    }
+}
+)
+
+    generator = datasource.get_generator("subdir_reader")
     known_data_asset_names = datasource.get_available_data_asset_names()
 
     # Use set to avoid order dependency
-    assert set(known_data_asset_names["default"]["names"]) == {('f1', 'file'), ('f2', 'file'), ('f3', 'directory')}
+    assert set(known_data_asset_names["subdir_reader"]["names"]) == {('f1', 'file'), ('f2', 'file'), ('f3', 'directory')}
 
-    f1_batches = [batch_kwargs for batch_kwargs in generator.get_iterator("f1")]
+    f1_batches = [batch_kwargs["path"] for batch_kwargs in generator.get_iterator("f1")]
     assert len(f1_batches) == 1
-    assert f1_batches[0] == {
-            "path": os.path.join(base_dir, "f1.csv"),
-            "partition_id": "f1",
-            "reader_options": {
-                "sep": None,
-                "engine": "python"
-            }
+    expected_batches = [
+        {
+            "path": os.path.join(base_dir, "f1.csv")
         }
+    ]
+    for batch in expected_batches:
+        assert batch["path"] in f1_batches
 
     f3_batches = [batch_kwargs["path"] for batch_kwargs in generator.get_iterator("f3")]
+    assert len(f3_batches) == 2
     expected_batches = [
         {
             "path": os.path.join(base_dir, "f3", "f3_20190101.csv")
@@ -46,27 +53,14 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
     ]
     for batch in expected_batches:
         assert batch["path"] in f3_batches
-    assert len(f3_batches) == 2
 
 
-def test_file_kwargs_generator_error(data_context, filesystem_csv):
-    base_dir = filesystem_csv
-    data_context.add_datasource("default",
-                                module_name="great_expectations.datasource",
-                                class_name="PandasDatasource",
-                                base_directory=str(base_dir))
-
-    with pytest.raises(DataContextError) as exc:
-        data_context.yield_batch_kwargs("f4")
-    assert "Could not normalize data asset name. No existing data_asset has" in exc.value.message
-
-
-def test_glob_reader_generator(tmp_path_factory):
+def test_glob_reader_generator(basic_pandas_datasource, tmp_path_factory):
     """Provides an example of how glob generator works: we specify our own
     names for data_assets, and an associated glob; the generator
     will take care of providing batches consisting of one file per
     batch corresponding to the glob."""
-    
+
     basedir = str(tmp_path_factory.mktemp("test_glob_reader_generator"))
 
     with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:
@@ -90,7 +84,7 @@ def test_glob_reader_generator(tmp_path_factory):
     with open(os.path.join(basedir, "f0.json"), "w") as outfile:
         outfile.write("\n\n\n")
 
-    g2 = GlobReaderGenerator(base_directory=basedir, asset_globs={
+    g2 = GlobReaderGenerator(base_directory=basedir, datasource=basic_pandas_datasource, asset_globs={
         "blargs": {
             "glob": "*.blarg"
         },
@@ -101,16 +95,7 @@ def test_glob_reader_generator(tmp_path_factory):
 
     g2_assets = g2.get_available_data_asset_names()
     # Use set in test to avoid order issues
-    assert set(g2_assets) == {"blargs", "fs"}
-
-    with pytest.warns(DeprecationWarning):
-        # This is an old style of asset_globs configuration that should raise a deprecationwarning
-        g2 = GlobReaderGenerator(base_directory=basedir, asset_globs={
-            "blargs": "*.blarg",
-            "fs": "f*"
-        })
-        g2_assets = g2.get_available_data_asset_names()
-        assert set(g2_assets) == {"blargs", "fs"}
+    assert set(g2_assets) == {("blargs", "path"), ("fs", "path")}
 
     blargs_kwargs = [x["path"] for x in g2.get_iterator("blargs")]
     real_blargs = [
@@ -151,7 +136,7 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     # Do not include: valid extension, but dot prefix
     with open(os.path.join(basedir, ".f5.csv"), "w") as outfile:
         outfile.write("\n\n\n")
-    
+
     # Include: valid extensions
     with open(os.path.join(basedir, "f6.tsv"), "w") as outfile:
         outfile.write("\n\n\n")
@@ -164,15 +149,15 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     with open(os.path.join(basedir, "f0.json"), "w") as outfile:
         outfile.write("\n\n\n")
 
-    g1 = SubdirReaderGenerator(base_directory=basedir)
+    g1 = SubdirReaderGenerator(datasource="foo", base_directory=basedir)
 
     g1_assets = g1.get_available_data_asset_names()
     # Use set in test to avoid order issues
     assert set(g1_assets["names"]) == {('f7', 'file'), ('f4', 'directory'), ('f6', 'file'), ('f0', 'file'), ('f2', 'file'), ('f9', 'file'), ('f8', 'file')}
 
 
-def test_databricks_generator():
-    generator = DatabricksTableGenerator()
+def test_databricks_generator(basic_sparkdf_datasource):
+    generator = DatabricksTableGenerator(datasource=basic_sparkdf_datasource)
     available_assets = generator.get_available_data_asset_names()
 
     # We have no tables available

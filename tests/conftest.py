@@ -139,7 +139,6 @@ def empty_expectation_suite():
 @pytest.fixture
 def basic_expectation_suite():
     expectation_suite = ExpectationSuite(
-        data_asset_name="basic_suite_fixture",
         expectation_suite_name="default",
         meta={},
         expectations=[
@@ -509,8 +508,7 @@ def empty_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('empty_data_context'))
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(
-        context_path, "expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
     safe_mmkdir(asset_config_path, exist_ok=True)
     return context
 
@@ -558,14 +556,12 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
 
     os.makedirs(os.path.join(project_dir, "data"))
     os.makedirs(os.path.join(project_dir, "data/titanic"))
-    curdir = os.path.abspath(os.getcwd())
     shutil.copy(
         file_relative_path(__file__, "./test_sets/Titanic.csv"),
         str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
     )
 
     os.makedirs(os.path.join(project_dir, "data/random"))
-    curdir = os.path.abspath(os.getcwd())
     shutil.copy(
         os.path.join(filesystem_csv_3, "f1.csv"),
         str(os.path.join(project_dir, "data/random/f1.csv"))
@@ -582,12 +578,22 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
     context.add_datasource(
         "titanic",
         class_name="PandasDatasource",
-        base_directory=os.path.join(project_dir, "data/titanic/")
+        generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderGenerator",
+                "base_directory": os.path.join(project_dir, "data/titanic/")
+            }
+        }
     )
     context.add_datasource(
         "random",
         class_name="PandasDatasource",
-        base_directory=os.path.join(project_dir, "data/random/")
+        generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderGenerator",
+                "base_directory": os.path.join(project_dir, "data/random/")
+            }
+        }
     )
 
     context.profile_datasource("titanic")
@@ -629,9 +635,8 @@ def data_context(tmp_path_factory):
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
-
     safe_mmkdir(
-        os.path.join(asset_config_path, "mydatasource/mygenerator/my_dag_node"),
+        os.path.join(asset_config_path, "my_dag_node"),
         exist_ok=True,
     )
     shutil.copy(
@@ -644,10 +649,9 @@ def data_context(tmp_path_factory):
             "expectation_suites/parameterized_expectation_suite_fixture.json",
         ),
         os.path.join(
-            asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"
+            asset_config_path, "my_dag_node/default.json"
         ),
     )
-
     safe_mmkdir(os.path.join(context_path, "plugins"))
     shutil.copy(
         os.path.join(fixture_dir, "custom_pandas_dataset.py"),

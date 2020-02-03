@@ -38,6 +38,7 @@ class Store(object):
         )
         if not isinstance(self._store_backend, StoreBackend):
             raise DataContextError("Invalid StoreBackend configuration: expected a StoreBackend instance.")
+        self._use_fixed_length_key = self._store_backend.fixed_length_key
 
     def _validate_key(self, key):
         if not isinstance(key, self._key_class):
@@ -49,9 +50,13 @@ class Store(object):
 
     # noinspection PyMethodMayBeStatic
     def key_to_tuple(self, key):
+        if self._use_fixed_length_key:
+            return key.to_fixed_length_tuple()
         return key.to_tuple()
 
     def tuple_to_key(self, tuple_):
+        if self._use_fixed_length_key:
+            return self._key_class.from_fixed_length_tuple(tuple_)
         return self._key_class.from_tuple(tuple_)
 
     # noinspection PyMethodMayBeStatic

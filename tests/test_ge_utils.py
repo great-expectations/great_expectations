@@ -2,6 +2,7 @@ import pytest
 import os
 
 import great_expectations as ge
+from great_expectations.util import nested_update
 
 
 def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
@@ -44,9 +45,9 @@ def test_validate_using_data_context(dataset, data_context):
     assert data_context._compiled is False
     res = ge.validate(
         dataset,
-        data_asset_name="mydatasource/mygenerator/my_dag_node",
-        expectation_suite_name="default",
-        data_context=data_context)
+        expectation_suite_name="my_dag_node.default",
+        data_context=data_context
+    )
 
     # Since the handling of evaluation parameters is no longer happening without an action,
     # the context should still be not compiles after validation.
@@ -58,13 +59,12 @@ def test_validate_using_data_context(dataset, data_context):
 
 
 def test_validate_using_data_context_path(dataset, data_context):
-    print(data_context._project_config)
     data_context_path = data_context.root_directory
     res = ge.validate(
         dataset,
-        data_asset_name="mydatasource/mygenerator/my_dag_node",
-        expectation_suite_name="default",
-        data_context=data_context_path)
+        expectation_suite_name="my_dag_node.default",
+        data_context=data_context_path
+    )
 
     # We should have now found the right suite with expectations to evaluate
     assert res.success is False
@@ -96,3 +96,25 @@ project_dir0/
         aaa.txt
         bbb.txt
 """
+
+
+def test_nested_update():
+    # nested_update is useful for update nested dictionaries (such as batch_kwargs with reader_options as a dictionary)
+    batch_kwargs = {
+        "path": "/a/path",
+        "reader_method": "read_csv",
+        "reader_options": {
+            "header": 0
+        }
+    }
+
+    nested_update(batch_kwargs, {"reader_options": {"nrows": 1}})
+
+    assert batch_kwargs == {
+        "path": "/a/path",
+        "reader_method": "read_csv",
+        "reader_options": {
+            "header": 0,
+            "nrows": 1
+        }
+    }

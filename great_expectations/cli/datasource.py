@@ -24,14 +24,17 @@ from great_expectations.datasource import (
     SqlAlchemyDatasource,
 )
 from great_expectations.datasource.generator import (
-    InMemoryGenerator,
     ManualGenerator,
-    PassthroughGenerator,
 )
 from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.profile.basic_dataset_profiler import (
     SampleExpectationsDatasetProfiler,
 )
+
+from great_expectations.validator.validator import Validator
+from great_expectations.core import ExpectationSuite
+from great_expectations.datasource.generator.table_generator import TableGenerator
+from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +58,7 @@ DATASOURCE_TYPE_BY_DATASOURCE_CLASS = {
     "SqlAlchemyDatasource": DatasourceTypes.SQL,
 }
 
-MANUAL_GENERATOR_CLASSES = (InMemoryGenerator, ManualGenerator, PassthroughGenerator)
+MANUAL_GENERATOR_CLASSES = (ManualGenerator)
 
 
 class SupportedDatabases(enum.Enum):
@@ -262,12 +265,15 @@ def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_
     if passthrough_generator_only:
         datasource_name = "files_datasource"
 
-        configuration = PandasDatasource.build_configuration(generators={
-            "default": {
-                "class_name": "PassthroughGenerator",
-            }
-        }
-        )
+        # configuration = PandasDatasource.build_configuration(generators={
+        #     "default": {
+        #         "class_name": "PassthroughGenerator",
+        #     }
+        # }
+        # )
+
+
+        configuration = PandasDatasource.build_configuration()
 
     else:
         path = click.prompt(
@@ -297,7 +303,14 @@ def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_
                 show_default=True
             )
 
-        configuration = PandasDatasource.build_configuration(base_directory=os.path.join("..", path))
+        configuration = PandasDatasource.build_configuration(generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": os.path.join("..", path)
+    }
+}
+)
+
 
     context.add_datasource(name=datasource_name, class_name='PandasDatasource', **configuration)
     return datasource_name
@@ -439,7 +452,7 @@ We saved datasource {0:s} in {1:s} and the credentials you entered in {2:s}.
 Since we could not connect to the database, you can complete troubleshooting in the configuration files documented here:
 <blue>https://docs.greatexpectations.io/en/latest/tutorials/add-sqlalchemy-datasource.html?utm_source=cli&utm_medium=init&utm_campaign={3:s}#{4:s}</blue> .
 
-After you connect to the datasource, run great_expectations profile to continue.
+After you connect to the datasource, run great_expectations datasource profile to continue.
 
 """.format(datasource_name, DataContext.GE_YML, context.get_config()["config_variables_file_path"], rtd_url_ge_version, selected_database.value.lower()))
                 return None
@@ -582,12 +595,13 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
     if passthrough_generator_only:
         datasource_name = "files_spark_datasource"
 
-        configuration = SparkDFDatasource.build_configuration(generators={
-            "default": {
-                "class_name": "PassthroughGenerator",
-            }
-        }
-        )
+        # configuration = SparkDFDatasource.build_configuration(generators={
+        #     "default": {
+        #         "class_name": "PassthroughGenerator",
+        #     }
+        # }
+        # )
+        configuration = SparkDFDatasource.build_configuration()
 
     else:
         path = click.prompt(
@@ -617,7 +631,14 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
                 show_default=True
             )
 
-        configuration = SparkDFDatasource.build_configuration(base_directory=os.path.join("..", path))
+        configuration = SparkDFDatasource.build_configuration(generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderGenerator",
+        "base_directory": os.path.join("..", path)
+    }
+}
+)
+
 
     context.add_datasource(name=datasource_name, class_name='SparkDFDatasource', **configuration)
     return datasource_name
@@ -719,11 +740,16 @@ def get_batch_kwargs(context,
 
     batch_kwargs = None
 
-    available_data_assets_dict = context.get_available_data_asset_names(datasource_names=datasource_name)
+    try:
+        available_data_assets_dict = context.get_available_data_asset_names(datasource_names=datasource_name)
+    except ValueError:
+        # the datasource has no generators
+        available_data_assets_dict = {datasource_name: {}}
 
     if generator_name is None:
         generator_name = select_generator(context, datasource_name,
                                           available_data_assets_dict=available_data_assets_dict)
+
 
     # if we have a generator that can list available data asset names, let's list them
 
@@ -750,27 +776,31 @@ def get_batch_kwargs(context,
 
     # If the data asset name is in the namespace (or we don't have it yet)
 
-    if generator_asset is None or generator_asset not in [name[0] for name in available_data_assets_dict[datasource_name][generator_name]["names"]]:
-        generator_name = None
-        for generator_info in data_source.list_generators():
-            generator = data_source.get_generator(generator_info["name"])
-            if isinstance(generator, MANUAL_GENERATOR_CLASSES):
-                generator_name = generator_info["name"]
-                break
-        if generator_name is None:
-            raise ge_exceptions.DataContextError("No manual generators found in datasource {0:s}".format(datasource_name))
+    # if generator_asset is None or generator_asset not in [name[0] for name in available_data_assets_dict[datasource_name][generator_name]["names"]]:
+    #     generator_name = None
+    #     for generator_info in data_source.list_generators():
+    #         generator = data_source.get_generator(generator_info["name"])
+    #         if isinstance(generator, MANUAL_GENERATOR_CLASSES):
+    #             generator_name = generator_info["name"]
+    #             break
+    #     if generator_name is None:
+    #         raise ge_exceptions.DataContextError("No manual generators found in datasource {0:s}".format(datasource_name))
 
+    if isinstance(context.get_datasource(datasource_name), (PandasDatasource, SparkDFDatasource)):
+        generator_asset, batch_kwargs = _load_file_from_filesystem_as_data_asset(
+            context,
+            datasource_name,
+            generator_name=generator_name,
+            generator_asset=generator_asset,
+        )
 
-        if isinstance(context.get_datasource(datasource_name), (PandasDatasource, SparkDFDatasource)):
-            generator_asset, batch_kwargs = _load_file_from_filesystem_as_data_asset(context, datasource_name,
-                                                                                     generator_name=generator_name,
-                                                                                     generator_asset=generator_asset)
-        elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
-            generator_asset, batch_kwargs = _load_query_as_data_asset_from_sqlalchemy_datasource(context,
-                                                                                                 datasource_name,
-                                                                                                 data_asset_name=generator_asset)
-        else:
-            raise ge_exceptions.DataContextError("Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(datasource_name, str(type(context.get_datasource(datasource_name)))))
+    elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
+        generator_asset, batch_kwargs = _load_query_as_data_asset_from_sqlalchemy_datasource(context,
+                                                                                             datasource_name,
+                                                                                             data_asset_name=generator_asset,
+                                                                                             additional_batch_kwargs=additional_batch_kwargs)
+    else:
+        raise ge_exceptions.DataContextError("Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(datasource_name, str(type(context.get_datasource(datasource_name)))))
 
     return (datasource_name, generator_name, generator_asset, batch_kwargs)
 
@@ -837,6 +867,7 @@ Name the new expectation suite"""
                                                                                            generator_name=generator_name,
                                                                                            generator_asset=generator_asset,
                                                                                            additional_batch_kwargs=additional_batch_kwargs)
+
     if expectation_suite_name is None:
         expectation_suite_name = click.prompt(msg_prompt_expectation_suite_name, default="warning", show_default=True)
 
@@ -844,7 +875,7 @@ Name the new expectation suite"""
 
     click.prompt(msg_prompt_what_will_profiler_do, default="Enter", hide_input=True)
 
-    cli_message("\nProfiling {0:s}...".format(generator_asset))
+    cli_message("\nProfiling...")
     run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
 
     profiling_results = context.profile_data_asset(
@@ -866,9 +897,9 @@ Name the new expectation suite"""
             )
 
             validation_result_identifier = ValidationResultIdentifier(
-                batch_identifier=None,
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
+                batch_identifier=None
             )
             context.open_data_docs(resource_identifier=validation_result_identifier)
 
@@ -901,10 +932,10 @@ We could not determine the format of the file. What is it?
     4. JSON
 """
 
-    reader_methods = {
+    reader_method_file_extensions = {
         "1": "csv",
         "2": "parquet",
-        "3": "excel",
+        "3": "xlsx",
         "4": "json",
     }
 
@@ -926,17 +957,24 @@ We could not determine the format of the file. What is it?
 
     path = os.path.abspath(path)
 
-    if generator_asset is None:
-        generator_asset = os.path.splitext(os.path.basename(path))[0]
-        generator_asset = click.prompt(
-            msg_prompt_data_asset_name,
-            default=generator_asset,
-            show_default=True
-        )
+    # if generator_asset is None:
+    #     generator_asset = os.path.splitext(os.path.basename(path))[0]
+    #     generator_asset = click.prompt(
+    #         msg_prompt_data_asset_name,
+    #         default=generator_asset,
+    #         show_default=True
+    #     )
 
-    batch_kwargs = {"path": path}
+    batch_kwargs = {
+        "path": path,
+        "datasource": datasource_name
+    }
 
-    reader_method = datasource.guess_reader_method_from_path(path)["reader_method"]
+    reader_method = None
+    try:
+        reader_method = datasource.guess_reader_method_from_path(path)["reader_method"]
+    except BatchKwargsError:
+        pass
 
     if reader_method is None:
 
@@ -948,11 +986,15 @@ We could not determine the format of the file. What is it?
                 show_choices=False
             )
 
-            batch_kwargs["reader_method"] = reader_methods[option_selection]
+            try:
+                reader_method = datasource.guess_reader_method_from_path(path + "." + reader_method_file_extensions[option_selection])["reader_method"]
+            except BatchKwargsError:
+                pass
 
-            batch = datasource.get_batch(batch_kwargs=batch_kwargs)
-
-            break
+            if reader_method is not None:
+                batch_kwargs["reader_method"] = reader_method
+                batch = datasource.get_batch(batch_kwargs=batch_kwargs)
+                break
     else:
         # TODO: read the file and confirm with user that we read it correctly (headers, columns, etc.)
         batch = datasource.get_batch(batch_kwargs=batch_kwargs)
@@ -961,25 +1003,63 @@ We could not determine the format of the file. What is it?
     return (generator_asset, batch_kwargs)
 
 
-def _load_query_as_data_asset_from_sqlalchemy_datasource(context, datasource_name, data_asset_name=None):
+def _load_query_as_data_asset_from_sqlalchemy_datasource(context, datasource_name,
+                                                         data_asset_name=None,
+                                                         additional_batch_kwargs={}):
     msg_prompt_query = """
 Enter an SQL query
 """
+    msg_prompt_data_asset_name = """
+    Give your new data asset a short name
+"""
+    msg_prompt_enter_data_asset_name = "\nWhich table would you like to use? (Choose one)\n"
+
+    msg_prompt_enter_data_asset_name_suffix = "    Don't see the table in the list above? Just type the SQL query\n"
 
     datasource = context.get_datasource(datasource_name)
 
+    temp_generator = TableGenerator(name="temp", datasource=datasource)
+
+    available_data_asset_names = temp_generator.get_available_data_asset_names()["names"]
+    available_data_asset_names_str = ["{} ({})".format(name[0], name[1]) for name in
+                                      available_data_asset_names]
+
+    data_asset_names_to_display = available_data_asset_names_str[:5]
+    choices = "\n".join(["    {}. {}".format(i, name) for i, name in enumerate(data_asset_names_to_display, 1)])
+    prompt = msg_prompt_enter_data_asset_name + choices + "\n" + msg_prompt_enter_data_asset_name_suffix.format(
+        len(data_asset_names_to_display))
+
     while True:
         try:
-            query = click.prompt(msg_prompt_query, default=None, show_default=False)
+            query = None
 
-            if data_asset_name is None:
-                data_asset_name = click.prompt(msg_prompt_query, default=data_asset_name, show_default=False) # TODO: check non-zero length
+            if len(available_data_asset_names) > 0:
+                selection = click.prompt(prompt, default=None, show_default=False)
+
+                selection = selection.strip()
+                try:
+                    data_asset_index = int(selection) - 1
+                    try:
+                        generator_asset = \
+                            [name[0] for name in available_data_asset_names][data_asset_index]
+                    except IndexError:
+                        pass
+                except ValueError:
+                    query = selection
+
+            else:
+                query = click.prompt(msg_prompt_query, default=None, show_default=False)
 
 
-            batch_kwargs = {"query": query}
+            if query is None:
+                batch_kwargs = temp_generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
+            else:
+                batch_kwargs = {
+                    "query": query,
+                    "datasource": datasource_name
+                }
 
-
-            batch = datasource.batch(batch_kwargs=batch_kwargs)
+                Validator(batch=datasource.get_batch(batch_kwargs), expectation_suite=ExpectationSuite("throwaway")).get_dataset()
 
             break
         except Exception as error: # TODO: catch more specific exception
@@ -1007,7 +1087,7 @@ Profiling '{0:s}' will create expectations and documentation.
     msg_confirm_ok_to_proceed = """Would you like to profile '{0:s}'?"""
 
     msg_skipping = "Skipping profiling for now. You can always do this later " \
-                   "by running `<green>great_expectations profile</green>`."
+                   "by running `<green>great_expectations datasource profile</green>`."
 
     msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
 """

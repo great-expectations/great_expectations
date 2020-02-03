@@ -6,8 +6,9 @@ from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKw
 from great_expectations.datasource.generator import TableGenerator
 
 
-def test_basic_operation():
+def test_basic_operation(basic_sqlalchemy_datasource):
     table_generator = TableGenerator(
+        datasource=basic_sqlalchemy_datasource,
         assets={
             "my_asset": {
                 "table": "my_table",
@@ -23,13 +24,13 @@ def test_basic_operation():
         }
     )
 
-    batch_kwargs = table_generator.yield_batch_kwargs("my_asset", query_params={"schema": "foo"})
+    batch_kwargs = table_generator.yield_batch_kwargs("my_asset", query_parameters={"schema": "foo"})
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
     assert batch_kwargs.schema == "foo"
     assert batch_kwargs.table == "my_table"
 
     # Note that schema is ignored in this case -- it's not part of the defined asset
-    batch_kwargs = table_generator.yield_batch_kwargs("my_no_schema_asset", query_params={"schema": "foo"})
+    batch_kwargs = table_generator.yield_batch_kwargs("my_no_schema_asset", query_parameters={"schema": "foo"})
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
     assert batch_kwargs.schema is None
     assert batch_kwargs.table == "important_data"
@@ -42,7 +43,7 @@ def test_basic_operation():
 
     # Note that in this case, we have a confusingly named asset, since it "could" be a schema + table name
     # Since it's not available to be found via introspection, however, and it *is* a valid name, this works fine
-    batch_kwargs = table_generator.yield_batch_kwargs("dangerous.named_asset", query_params={"schema": "bar"})
+    batch_kwargs = table_generator.yield_batch_kwargs("dangerous.named_asset", query_parameters={"schema": "bar"})
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
     assert batch_kwargs.schema == "bar"
     assert batch_kwargs.table == "named_asset"
@@ -54,27 +55,24 @@ def test_basic_operation():
     assert "missing template key" in exc.value.message
 
 
-def test_db_introspection(sqlalchemy_dataset, caplog):
+def test_db_introspection(basic_sqlalchemy_datasource, test_backend, caplog):
     import sqlalchemy as sa
 
-    class MockDatasource(object):
-        def __init__(self, engine):
-            self.engine = engine
-
-    if sqlalchemy_dataset is None or not isinstance(sqlalchemy_dataset.engine.dialect, sa.dialects.postgresql.dialect):
+    mock_datasource = basic_sqlalchemy_datasource
+    # Frankenstein dissection of datasource to use postgres engine
+    if not test_backend != "postgresql":
         pytest.skip("Skipping test that expects postgresql...")
 
-    # Get the engine from the dataset
-    mock_datasource = MockDatasource(sqlalchemy_dataset.engine)
+    mock_datasource.engine = sa.create_engine('postgresql://postgres@localhost/test_ci').connect()
     table_generator = TableGenerator(datasource=mock_datasource)
 
     # Get a list of tables visible inside the defined database
     assets = table_generator.get_available_data_asset_names()
-    assert len(assets) > 0
-    table_name = assets.pop()
+    assert len(assets["names"]) > 0
+    table_name = assets["names"].pop()[0]
 
     # We should be able to get kwargs without having them specifically configured based on discovery
-    batch_kwargs = table_generator.yield_batch_kwargs(table_name)
+    batch_kwargs = table_generator.build_batch_kwargs(table_name)
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceTableBatchKwargs)
     assert batch_kwargs.table == table_name
     assert batch_kwargs.schema == "public"

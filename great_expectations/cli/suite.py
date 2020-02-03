@@ -111,7 +111,7 @@ Please re-run with one of these selected data assets:
     notebook_name = "{}_{}.ipynb".format(human_data_asset_name, suite.expectation_suite_name)
 
     notebook_path = os.path.join(context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
-    NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path)
+    NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path, data_asset)
 
     cli_message(
         "To continue editing this suite, run <green>jupyter notebook {}</green>".format(
@@ -125,7 +125,7 @@ Please re-run with one of these selected data assets:
 
 def _load_suite(context, data_asset_name, suite_name):
     try:
-        suite = context.get_expectation_suite(data_asset_name, suite_name)
+        suite = context.get_expectation_suite(suite_name)
     except ge_exceptions.DataContextError as e:
         cli_message(
             "<red>Could not locate a suite named {} for {}</red>".format(
@@ -207,7 +207,7 @@ def suite_new(data_asset, suite, directory, view, batch_kwargs):
             generator_asset=generator_asset,
             batch_kwargs=batch_kwargs,
             expectation_suite_name=suite,
-            additional_batch_kwargs=None,
+            additional_batch_kwargs={"limit": 1000},
             show_intro_message=False,
             open_docs=view,
         )

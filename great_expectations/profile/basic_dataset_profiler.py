@@ -107,8 +107,6 @@ class BasicDatasetProfilerBase(DatasetProfiler):
         return cardinality
 
 
-
-
 class BasicDatasetProfiler(BasicDatasetProfilerBase):
     """BasicDatasetProfiler is inspired by the beloved pandas_profiling project.
 
@@ -522,4 +520,3 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
         }
 
         return expectation_suite
-

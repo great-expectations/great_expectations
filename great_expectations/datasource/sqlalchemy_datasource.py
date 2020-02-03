@@ -12,6 +12,7 @@ from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReferen
 from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.types import ClassConfig
 from ..core.batch import Batch
+from ..util import nested_update
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,7 @@ class SqlAlchemyDatasource(Datasource):
         that query. The query can be parameterized according to the standard python Template engine, which
         uses $parameter, with additional kwargs passed to the get_batch method.
     """
+    recognized_batch_parameters = {'query_parameters', 'limit'}
 
     @classmethod
     def build_configuration(cls, data_asset_type=None, generators=None, **kwargs):
@@ -147,7 +149,7 @@ class SqlAlchemyDatasource(Datasource):
 
         return options, drivername
 
-    def get_batch(self, batch_kwargs, batch_parameters=None, **kwargs):
+    def get_batch(self, batch_kwargs, batch_parameters=None):
         # We need to build a batch_id to be used in the dataframe
         batch_markers = BatchMarkers({
             "ge_load_time": datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
@@ -183,7 +185,10 @@ class SqlAlchemyDatasource(Datasource):
             else:
                 table_name = None
 
-            query = Template(batch_kwargs["query"]).safe_substitute(**kwargs)
+            if "query_parameters" in batch_kwargs:
+                query = Template(batch_kwargs["query"]).safe_substitute(batch_kwargs["query_parameters"])
+            else:
+                query = batch_kwargs["query"]
             batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query, table_name=table_name,
                                                        schema=batch_kwargs.get("schema"))
 
@@ -198,3 +203,8 @@ class SqlAlchemyDatasource(Datasource):
             batch_markers=batch_markers,
             data_context=self._data_context
         )
+
+    def process_batch_parameters(self, query_parameters=None, limit=None):
+        batch_kwargs = super(SqlAlchemyDatasource, self).process_batch_parameters(limit=limit)
+        nested_update(batch_kwargs, {"query_parameters": query_parameters})
+        return batch_kwargs

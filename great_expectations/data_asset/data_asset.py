@@ -2,6 +2,7 @@ from __future__ import division
 import json
 import inspect
 import copy
+import uuid
 from functools import wraps
 import traceback
 import warnings
@@ -50,7 +51,7 @@ class DataAsset(object):
         expectation_suite = kwargs.pop("expectation_suite", None)
         expectation_suite_name = kwargs.pop("expectation_suite_name", None)
         data_context = kwargs.pop("data_context", None)
-        batch_kwargs = kwargs.pop("batch_kwargs", BatchKwargs())
+        batch_kwargs = kwargs.pop("batch_kwargs", BatchKwargs(ge_batch_id=str(uuid.uuid1())))
         batch_parameters = kwargs.pop("batch_parameters", {})
         batch_markers = kwargs.pop("batch_markers", {})
 
@@ -1113,15 +1114,17 @@ class DataAsset(object):
         self._expectation_suite.evaluation_parameters.update(
             {parameter_name: parameter_value})
 
-    @property
-    def data_asset_name(self):
-        """Gets the current name of this data_asset as stored in the expectations configuration."""
-        return self._expectation_suite.data_asset_name
-
-    @data_asset_name.setter
-    def data_asset_name(self, data_asset_name):
-        """Sets the name of this data_asset as stored in the expectations configuration."""
-        self._expectation_suite.data_asset_name = data_asset_name
+    # PENDING DELETION: 20200130 - JPC - Ready for deletion upon release of 0.9.0 with no data_asset_name
+    #
+    # @property
+    # def data_asset_name(self):
+    #     """Gets the current name of this data_asset as stored in the expectations configuration."""
+    #     return self._expectation_suite.data_asset_name
+    #
+    # @data_asset_name.setter
+    # def data_asset_name(self, data_asset_name):
+    #     """Sets the name of this data_asset as stored in the expectations configuration."""
+    #     self._expectation_suite.data_asset_name = data_asset_name
 
     @property
     def expectation_suite_name(self):
