@@ -1,26 +1,31 @@
 import os
 import random
+import re
 import unittest
 from datetime import datetime
 
-from great_expectations.core import ExpectationValidationResult, ExpectationSuiteValidationResult, \
-    ExpectationConfiguration, expectationSuiteSchema, expectationSuiteValidationResultSchema, ExpectationSuite
+import pandas as pd
+
+import great_expectations as ge
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+    expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
+)
+from great_expectations.data_asset.data_asset import (
+    ValidationStatistics,
+    _calc_validation_statistics,
+)
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.dataset import MetaPandasDataset, PandasDataset
 
 try:
     from unittest import mock
 except ImportError:
     import mock
-
-import pandas as pd
-import re
-
-import great_expectations as ge
-from great_expectations.dataset import PandasDataset, MetaPandasDataset
-from great_expectations.data_asset.data_asset import (
-    _calc_validation_statistics,
-    ValidationStatistics,
-)
-from .test_utils import assertDeepAlmostEqual
 
 
 def isprime(n):
@@ -171,20 +176,22 @@ def test_base_class_expectation():
 
 def test_validate():
 
-    with open("./tests/test_sets/titanic_expectations.json") as f:
+    with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
         my_expectation_suite = expectationSuiteSchema.loads(f.read()).data
 
-    my_df = ge.read_csv(
-        "./tests/test_sets/Titanic.csv",
-        expectation_suite=my_expectation_suite
-    )
+    with mock.patch("uuid.uuid1") as uuid:
+        uuid.return_value = "1234"
+        my_df = ge.read_csv(
+            file_relative_path(__file__, "./test_sets/Titanic.csv"),
+            expectation_suite=my_expectation_suite
+        )
     my_df.set_default_expectation_argument("result_format", "COMPLETE")
 
     with mock.patch("datetime.datetime") as mock_datetime:
         mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
         results = my_df.validate(catch_exceptions=False)
 
-    with open('./tests/test_sets/titanic_expected_data_asset_validate_results.json') as f:
+    with open(file_relative_path(__file__, './test_sets/titanic_expected_data_asset_validate_results.json')) as f:
         expected_results = expectationSuiteValidationResultSchema.loads(f.read()).data
 
     del results.meta["great_expectations.__version__"]
@@ -204,9 +211,11 @@ def test_validate():
 
     expected_results = ExpectationSuiteValidationResult(
         meta={
-            "data_asset_name": "titanic",
-            "expectation_suite_name": "default",
-            "run_id": "19551105T000000.000000Z"
+            "expectation_suite_name": "titanic",
+            "run_id": "19551105T000000.000000Z",
+            "batch_kwargs": {"ge_batch_id": "1234"},
+            "batch_markers": {},
+            "batch_parameters": {}
         },
         results=[ExpectationValidationResult(
             expectation_config=ExpectationConfiguration(
@@ -240,7 +249,6 @@ def test_validate_catch_non_existent_expectation():
     })
 
     validation_config_non_existent_expectation = ExpectationSuite(
-        data_asset_name="test",
         expectation_suite_name="default",
         meta={
             "great_expectations.__version__": ge.__version__
@@ -264,7 +272,6 @@ def test_validate_catch_invalid_parameter():
     })
 
     validation_config_invalid_parameter = ExpectationSuite(
-        data_asset_name="test",
         expectation_suite_name="default",
         meta={
             "great_expectations.__version__": ge.__version__
@@ -409,12 +416,13 @@ class TestIO(unittest.TestCase):
 
         # Pass this test if the available version of pandas is less than 0.21.0, because prior
         # versions of pandas did not include the read_parquet function.
-        pandas_version = re.match('0\.(.*)\..*', pd.__version__)
+        pandas_version = re.match('(\d+)\.(\d+)\..+', pd.__version__)
         if pandas_version is None:
             raise ValueError("Unrecognized pandas version!")
         else:
-            pandas_version = int(pandas_version.group(1))
-            if pandas_version < 21:
+            pandas_major_version = int(pandas_version.group(1))
+            pandas_minor_version = int(pandas_version.group(2))
+            if pandas_major_version == 0 and pandas_minor_version < 21:
                 return
 
         script_path = os.path.dirname(os.path.realpath(__file__))

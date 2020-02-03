@@ -74,7 +74,8 @@ def test_StoreAction():
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 expectation_suite_name="default_expectations"
             ),
-            run_id="prod_20190801"
+            run_id="prod_20190801",
+            batch_identifier="1234"
         ),
         validation_result_suite=ExpectationSuiteValidationResult(
             success=False,
@@ -85,9 +86,7 @@ def test_StoreAction():
 
     assert len(fake_in_memory_store.list_keys()) == 1
     stored_identifier = fake_in_memory_store.list_keys()[0]
-    assert stored_identifier.expectation_suite_identifier.data_asset_name.datasource == "my_db"
-    assert stored_identifier.expectation_suite_identifier.data_asset_name.generator == "default_generator"
-    assert stored_identifier.expectation_suite_identifier.data_asset_name.generator_asset == "my_table"
+    assert stored_identifier.batch_identifier == "1234"
     assert stored_identifier.expectation_suite_identifier.expectation_suite_name == "default_expectations"
     assert stored_identifier.run_id == "prod_20190801"
 
@@ -95,7 +94,8 @@ def test_StoreAction():
         expectation_suite_identifier=ExpectationSuiteIdentifier(
             expectation_suite_name="default_expectations"
         ),
-        run_id="prod_20190801"
+        run_id="prod_20190801",
+        batch_identifier="1234"
     )) == ExpectationSuiteValidationResult(
         success=False,
         results=[]
@@ -124,15 +124,11 @@ def test_SlackNotificationAction(data_context):
                                                                            'success_percent': None},
                                                                meta={
                                                                    'great_expectations.__version__': 'v0.8.0__develop',
-                                                                   'data_asset_name': {'datasource': 'x',
-                                                                                       'generator': 'y',
-                                                                                       'generator_asset': 'z'},
-                                                                   'expectation_suite_name': 'default',
-                                                                   'run_id': '2019-09-25T060538.829112Z'})
+                                                                   'expectation_suite_name': 'asset.default',
+                                                                   'run_id': 'test_100'})
 
-    validation_result_suite_id = ValidationResultIdentifier(**{'expectation_suite_identifier': {
-        'data_asset_name': {'datasource': 'x', 'generator': 'y', 'generator_asset': 'z'},
-        'expectation_suite_name': 'default'}, 'run_id': 'test_100'})
+    validation_result_suite_id = ValidationResultIdentifier(expectation_suite_identifier=ExpectationSuiteIdentifier(
+        "asset.default"), run_id="test_100", batch_identifier="1234")
 
     # TODO: improve this test - currently it is verifying a failed call to Slack
     assert slack_action.run(

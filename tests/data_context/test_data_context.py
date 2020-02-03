@@ -1,6 +1,7 @@
 import json
 
 from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
+from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 
 try:
     from unittest import mock
@@ -30,6 +31,7 @@ from great_expectations.core import (
 )
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.util import (
+    file_relative_path,
     safe_mmkdir,
 )
 from great_expectations.exceptions import DataContextError
@@ -53,23 +55,31 @@ def parameterized_expectation_suite():
 
 def test_create_duplicate_expectation_suite(titanic_data_context):
     # create new expectation suite
-    assert titanic_data_context.create_expectation_suite(data_asset_name="titanic", expectation_suite_name="test_create_expectation_suite")
+    assert titanic_data_context.create_expectation_suite(expectation_suite_name="titanic.test_create_expectation_suite")
     # attempt to create expectation suite with name that already exists on data asset
     with pytest.raises(DataContextError):
-        titanic_data_context.create_expectation_suite(data_asset_name="titanic",
-                                                      expectation_suite_name="test_create_expectation_suite")
+        titanic_data_context.create_expectation_suite(expectation_suite_name="titanic.test_create_expectation_suite")
     # create expectation suite with name that already exists on data asset, but pass overwrite_existing=True
-    assert titanic_data_context.create_expectation_suite(data_asset_name="titanic", expectation_suite_name="test_create_expectation_suite", overwrite_existing=True)
+    assert titanic_data_context.create_expectation_suite(expectation_suite_name="titanic.test_create_expectation_suite", overwrite_existing=True)
 
 
 def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
+
     empty_data_context.add_datasource("my_datasource",
-                                      module_name="great_expectations.datasource",
-                                      class_name="PandasDatasource",
-                                      base_directory=str(filesystem_csv))
+                           module_name="great_expectations.datasource",
+                           class_name="PandasDatasource",
+                           generators={
+                             "subdir_reader": {
+                                 "class_name": "SubdirReaderGenerator",
+                                 "base_directory": str(filesystem_csv)
+                             }
+                           }
+                           )
+
+
     available_asset_names = empty_data_context.get_available_data_asset_names()
 
-    assert set(available_asset_names["my_datasource"]["default"]["names"]) == {('f3', 'directory'), ('f2', 'file'), ('f1', 'file')}
+    assert set(available_asset_names["my_datasource"]["subdir_reader"]["names"]) == {('f3', 'directory'), ('f2', 'file'), ('f1', 'file')}
 
 
 def test_list_expectation_suite_keys(data_context):
@@ -81,18 +91,14 @@ def test_list_expectation_suite_keys(data_context):
 
 
 def test_get_existing_expectation_suite(data_context):
-    expectation_suite = data_context.get_expectation_suite('mydatasource/mygenerator/my_dag_node', 'default')
-    assert expectation_suite.data_asset_name == DataAssetIdentifier.from_tuple(('mydatasource', 'mygenerator',
-                                                                               'my_dag_node'))
-    assert expectation_suite.expectation_suite_name == 'default'
+    expectation_suite = data_context.get_expectation_suite('my_dag_node.default')
+    assert expectation_suite.expectation_suite_name == 'my_dag_node.default'
     assert len(expectation_suite.expectations) == 2
 
 
 def test_get_new_expectation_suite(data_context):
-    expectation_suite = data_context.create_expectation_suite('this_data_asset_does_not_exist', 'default')
-    assert expectation_suite.data_asset_name == DataAssetIdentifier.from_tuple(
-        ('mydatasource', 'mygenerator', 'this_data_asset_does_not_exist'))
-    assert expectation_suite.expectation_suite_name == 'default'
+    expectation_suite = data_context.create_expectation_suite('this_data_asset_does_not_exist.default')
+    assert expectation_suite.expectation_suite_name == 'this_data_asset_does_not_exist.default'
     assert len(expectation_suite.expectations) == 0
 
 
@@ -108,6 +114,7 @@ def test_save_expectation_suite(data_context):
     assert expectation_suite.expectations == expectation_suite_saved.expectations
 
 
+@pytest.mark.xfail
 def test_compile(data_context):
     data_context._compile()
     assert data_context._compiled_parameters == {
@@ -149,173 +156,6 @@ def test_compile(data_context):
         }
     }
 
-def test_normalize_data_asset_names_error(data_context):
-    with pytest.raises(DataContextError) as exc:
-        data_context.normalize_data_asset_name("this/should/never/work/because/it/is/so/long")
-    assert "found too many components using delimiter '/'" in exc.value.message
-
-
-def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_csv):
-    empty_data_context.add_datasource("my_datasource",
-                                    module_name="great_expectations.datasource",
-                                    class_name="PandasDatasource",
-                                    base_directory=str(filesystem_csv))
-    data_context = empty_data_context
-
-    data_context.data_asset_name_delimiter = '.'
-    assert data_context.normalize_data_asset_name("my_datasource.default.f1") == \
-        DataAssetIdentifier("my_datasource", "default", "f1")
-    assert data_context.normalize_data_asset_name("my_datasource.default.f1") == \
-        DataAssetIdentifier("my_datasource", "default", "f1")
-
-    data_context.data_asset_name_delimiter = '/'
-    assert data_context.normalize_data_asset_name("my_datasource/default/f1") == \
-        DataAssetIdentifier("my_datasource", "default", "f1")
-
-    with pytest.raises(DataContextError) as exc:
-        data_context.data_asset_name_delimiter = "$"
-    assert "Invalid delimiter" in exc.value.message
-
-    with pytest.raises(DataContextError) as exc:
-        data_context.data_asset_name_delimiter = "//"
-    assert "Invalid delimiter" in exc.value.message
-
-
-def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_csv, tmp_path_factory):
-    # If no datasource is configured, nothing should be allowed to normalize:
-    with pytest.raises(DataContextError) as exc:
-        empty_data_context.normalize_data_asset_name("f1")
-    assert "No datasource configured" in exc.value.message
-
-    with pytest.raises(DataContextError) as exc:
-        empty_data_context.normalize_data_asset_name("my_datasource/f1")
-    assert "No datasource configured" in exc.value.message
-
-    with pytest.raises(DataContextError) as exc:
-        empty_data_context.normalize_data_asset_name("my_datasource/default/f1")
-    assert "no configured datasource" in exc.value.message
-
-    ###
-    # Add a datasource
-    ###
-    generators = {
-        "default": {
-            "class_name": "SubdirReaderGenerator",
-            "base_directory": str(filesystem_csv)
-        },
-    }
-
-    empty_data_context.add_datasource("my_datasource",
-                                      module_name="great_expectations.datasource",
-                                      class_name="PandasDatasource",
-                                      generators=generators)
-    data_context = empty_data_context
-
-    # We can now reference existing or available data asset namespaces using
-    # a the data_asset_name; the datasource name and data_asset_name or all
-    # three components of the normalized data asset name
-    assert data_context.normalize_data_asset_name("f1") == \
-        DataAssetIdentifier("my_datasource", "default", "f1")
-
-    assert data_context.normalize_data_asset_name("my_datasource/f1") == \
-        DataAssetIdentifier("my_datasource", "default", "f1")
-
-    assert data_context.normalize_data_asset_name("my_datasource/default/f1") == \
-        DataAssetIdentifier("my_datasource", "default", "f1")
-
-    # With only one datasource and generator configured, we
-    # can create new namespaces at the generator asset level easily:
-    assert data_context.normalize_data_asset_name("f5") == \
-        DataAssetIdentifier("my_datasource", "default", "f5")
-
-    # We can also be more explicit in creating new namespaces at the generator asset level:
-    assert data_context.normalize_data_asset_name("my_datasource/f6") == \
-        DataAssetIdentifier("my_datasource", "default", "f6")
-
-    assert data_context.normalize_data_asset_name("my_datasource/default/f7") == \
-        DataAssetIdentifier("my_datasource", "default", "f7")
-
-    # However, we cannot create against nonexisting datasources or generators:
-    with pytest.raises(DataContextError) as exc:
-        data_context.normalize_data_asset_name("my_fake_datasource/default/f7")
-    assert "no configured datasource 'my_fake_datasource' with generator 'default'" in exc.value.message
-
-    with pytest.raises(DataContextError) as exc:
-        data_context.normalize_data_asset_name("my_datasource/my_fake_generator/f7")
-    assert "no configured datasource 'my_datasource' with generator 'my_fake_generator'" in exc.value.message
-
-    ###
-    # Add a second datasource
-    ###
-
-    second_datasource_basedir = str(tmp_path_factory.mktemp("test_normalize_data_asset_names_conditions_single_name"))
-    with open(os.path.join(second_datasource_basedir, "f3.tsv"), "w") as outfile:
-        outfile.write("\n\n\n")
-    with open(os.path.join(second_datasource_basedir, "f4.tsv"), "w") as outfile:
-        outfile.write("\n\n\n")
-    data_context.add_datasource("my_second_datasource",
-                                module_name="great_expectations.datasource",
-                                class_name="PandasDatasource",
-                                base_directory=second_datasource_basedir)
-
-    # We can still reference *unambiguous* data_asset_names:
-    assert data_context.normalize_data_asset_name("f1") == \
-        DataAssetIdentifier("my_datasource", "default", "f1")
-
-    assert data_context.normalize_data_asset_name("f4") == \
-        DataAssetIdentifier("my_second_datasource", "default", "f4")
-
-    # However, single-name resolution will fail with ambiguous entries
-    with pytest.raises(DataContextError) as exc:
-        data_context.normalize_data_asset_name("f3")
-    assert "Ambiguous data_asset_name 'f3'. Multiple candidates found" in exc.value.message
-
-    # Two-name resolution still works since generators are not ambiguous in that case
-    assert data_context.normalize_data_asset_name("my_datasource/f3") == \
-        DataAssetIdentifier("my_datasource", "default", "f3")
-
-    # We can also create new namespaces using only two components since that is not ambiguous
-    assert data_context.normalize_data_asset_name("my_datasource/f9") == \
-        DataAssetIdentifier("my_datasource", "default", "f9")
-
-    # However, we cannot create new names using only a single component
-    with pytest.raises(DataContextError) as exc:
-        data_context.normalize_data_asset_name("f10")
-    assert "Could not normalize data asset name. No existing data_asset has the provided name, no generator provides " \
-           "it and there are multiple datasources and/or generators configured" in exc.value.message
-
-    ###
-    # Add a second generator to one datasource
-    ###
-    my_datasource = data_context.get_datasource("my_datasource")
-    my_datasource.add_generator("in_memory_generator", "memory")
-
-    # We've chosen an interesting case: in_memory_generator does not by default provide its own names
-    # so we can still get some names if there is no ambiguity about the namespace
-    assert data_context.normalize_data_asset_name("f1") == \
-        DataAssetIdentifier("my_datasource", "default", "f1")
-
-    # However, if we add a data_asset that would cause that name to be ambiguous, it will then fail:
-    suite = data_context.create_expectation_suite("my_datasource/in_memory_generator/f1", "default")
-    data_context.save_expectation_suite(suite)
-
-    with pytest.raises(DataContextError) as exc:
-        name = data_context.normalize_data_asset_name("f1")
-    assert "Ambiguous data_asset_name 'f1'. Multiple candidates found" in exc.value.message
-
-    # It will also fail with two components since there is still ambiguity:
-    with pytest.raises(DataContextError) as exc:
-        data_context.normalize_data_asset_name("my_datasource/f1")
-    assert "Ambiguous data_asset_name 'my_datasource/f1'. Multiple candidates found" in exc.value.message
-
-    # But we can get the asset using all three components
-    assert data_context.normalize_data_asset_name("my_datasource/default/f1") == \
-        DataAssetIdentifier("my_datasource", "default", "f1")
-
-    assert data_context.normalize_data_asset_name("my_datasource/in_memory_generator/f1") == \
-        DataAssetIdentifier("my_datasource", "in_memory_generator", "f1")
-
-
 def test_list_datasources(data_context):
     datasources = data_context.list_datasources()
 
@@ -346,26 +186,21 @@ def test_list_datasources(data_context):
     ])
 
 
-def test_data_context_result_store(titanic_data_context):
+def test_data_context_get_validation_result(titanic_data_context):
     """
     Test that validation results can be correctly fetched from the configured results store
     """
     profiling_results = titanic_data_context.profile_datasource("mydatasource")
 
-    for profiling_result in profiling_results['results']:
-        data_asset_name = profiling_result[0].data_asset_name
-        validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
-        assert data_asset_name == dataAssetIdentifierSchema.load(validation_result.meta["data_asset_name"]).data
-
     all_validation_result = titanic_data_context.get_validation_result(
-        "mydatasource/mygenerator/Titanic",
-        "BasicDatasetProfiler",
+        "mydatasource.mygenerator.Titanic.BasicDatasetProfiler",
+        run_id="profiling"
     )
     assert len(all_validation_result.results) == 51
 
     failed_validation_result = titanic_data_context.get_validation_result(
-        "mydatasource/mygenerator/Titanic",
-        "BasicDatasetProfiler",
+        "mydatasource.mygenerator.Titanic.BasicDatasetProfiler",
+        run_id="profiling",
         failed_only=True,
     )
     assert len(failed_validation_result.results) == 8
@@ -413,17 +248,36 @@ project_path/
     context.add_datasource("titanic",
                            module_name="great_expectations.datasource",
                            class_name="PandasDatasource",
-                           base_directory=os.path.join(project_dir, "data/titanic/"))
+                           generators={
+                             "subdir_reader": {
+                                 "class_name": "SubdirReaderGenerator",
+                                 "base_directory": os.path.join(project_dir, "data/titanic/")
+                             }
+                           }
+                           )
 
     context.add_datasource("random",
                            module_name="great_expectations.datasource",
                            class_name="PandasDatasource",
-                           base_directory=os.path.join(project_dir, "data/random/"))
+                           generators={
+                               "subdir_reader": {
+                                   "class_name": "SubdirReaderGenerator",
+                                   "base_directory": os.path.join(project_dir, "data/random/")
+                               }
+                           }
+                           )
 
     context.profile_datasource("titanic")
 
+    # Replicate the batch id of the batch that will be profiled in order to generate the file path of the
+    # validation result
+    titanic_profiled_batch_id = PathBatchKwargs({
+        'path': os.path.join(project_dir, 'data/titanic/Titanic.csv'),
+        'datasource': 'titanic'}
+    ).to_id()
+
+
     tree_str = gen_directory_tree_str(project_dir)
-    print(tree_str)
     assert tree_str == """project_path/
     data/
         random/
@@ -437,18 +291,15 @@ project_path/
         datasources/
         expectations/
             titanic/
-                default/
+                subdir_reader/
                     Titanic/
                         BasicDatasetProfiler.json
         notebooks/
             pandas/
-                create_expectations.ipynb
                 validation_playground.ipynb
             spark/
-                create_expectations.ipynb
                 validation_playground.ipynb
             sql/
-                create_expectations.ipynb
                 validation_playground.ipynb
         plugins/
             custom_data_docs/
@@ -461,15 +312,26 @@ project_path/
             data_docs/
             samples/
             validations/
-                profiling/
-                    titanic/
-                        default/
-                            Titanic/
-                                BasicDatasetProfiler.json
-"""
+                titanic/
+                    subdir_reader/
+                        Titanic/
+                            BasicDatasetProfiler/
+                                profiling/
+                                    {}.json
+""".format(titanic_profiled_batch_id)
 
     context.profile_datasource("random")
     context.build_data_docs()
+
+    f1_profiled_batch_id = PathBatchKwargs({
+        'path': os.path.join(project_dir, 'data/random/f1.csv'),
+        'datasource': 'random'}
+    ).to_id()
+
+    f2_profiled_batch_id = PathBatchKwargs({
+        'path': os.path.join(project_dir, 'data/random/f2.csv'),
+        'datasource': 'random'}
+    ).to_id()
 
     data_docs_dir = os.path.join(project_dir, "great_expectations/uncommitted/data_docs")
     observed = gen_directory_tree_str(data_docs_dir)
@@ -480,13 +342,13 @@ data_docs/
         index.html
         expectations/
             random/
-                default/
+                subdir_reader/
                     f1/
                         BasicDatasetProfiler.html
                     f2/
                         BasicDatasetProfiler.html
             titanic/
-                default/
+                subdir_reader/
                     Titanic/
                         BasicDatasetProfiler.html
         static/
@@ -536,18 +398,23 @@ data_docs/
                 data_docs_custom_styles_template.css
                 data_docs_default_styles.css
         validations/
-            profiling/
-                random/
-                    default/
-                        f1/
-                            BasicDatasetProfiler.html
-                        f2/
-                            BasicDatasetProfiler.html
-                titanic/
-                    default/
-                        Titanic/
-                            BasicDatasetProfiler.html
-"""
+            random/
+                subdir_reader/
+                    f1/
+                        BasicDatasetProfiler/
+                            profiling/
+                                {0:s}.html
+                    f2/
+                        BasicDatasetProfiler/
+                            profiling/
+                                {1:s}.html
+            titanic/
+                subdir_reader/
+                    Titanic/
+                        BasicDatasetProfiler/
+                            profiling/
+                                {2:s}.html
+""".format(f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id)
 
     # save data_docs locally
     safe_mmkdir("./tests/data_context/output")
@@ -676,19 +543,14 @@ def test_data_context_updates_expectation_suite_names(data_context):
     # We should have a single expectation suite defined
     assert len(expectation_suites) == 1
 
-    data_asset_name = expectation_suites[0].data_asset_name
     expectation_suite_name = expectation_suites[0].expectation_suite_name
 
     # We'll get that expectation suite and then update its name and re-save, then verify that everything
     # has been properly updated
-    expectation_suite = data_context.get_expectation_suite(
-        data_asset_name=data_asset_name,
-        expectation_suite_name=expectation_suite_name
-    )
+    expectation_suite = data_context.get_expectation_suite(expectation_suite_name)
 
     # Note we codify here the current behavior of having a string data_asset_name though typed ExpectationSuite objects
     # will enable changing that
-    assert expectation_suite.data_asset_name == data_asset_name
     assert expectation_suite.expectation_suite_name == expectation_suite_name
 
     # We will now change the data_asset_name and then save the suite in three ways:
@@ -697,65 +559,26 @@ def test_data_context_updates_expectation_suite_names(data_context):
     #   3. Using the new name but having the context draw that from the suite
 
     # Finally, we will try to save without a name (deleting it first) to demonstrate that saving will fail.
-    expectation_suite.data_asset_name = str(DataAssetIdentifier(
-        data_asset_name.datasource,
-        data_asset_name.generator,
-        "a_new_data_asset"
-    ))
+
+
     expectation_suite.expectation_suite_name = 'a_new_suite_name'
 
     data_context.save_expectation_suite(
         expectation_suite=expectation_suite,
-        data_asset_name=DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_new_data_asset"
-        ),
         expectation_suite_name='a_new_suite_name'
     )
 
-    fetched_expectation_suite = data_context.get_expectation_suite(
-        data_asset_name=DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_new_data_asset"
-        ),
-        expectation_suite_name='a_new_suite_name'
-    )
-
-    assert fetched_expectation_suite.data_asset_name == DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_new_data_asset"
-        )
+    fetched_expectation_suite = data_context.get_expectation_suite('a_new_suite_name')
 
     assert fetched_expectation_suite.expectation_suite_name == 'a_new_suite_name'
 
     #   2. Using a different name that should be overwritten
     data_context.save_expectation_suite(
         expectation_suite=expectation_suite,
-        data_asset_name=DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_new_new_data_asset"
-        ),
         expectation_suite_name='a_new_new_suite_name'
     )
 
-    fetched_expectation_suite = data_context.get_expectation_suite(
-        data_asset_name=DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_new_new_data_asset"
-        ),
-        expectation_suite_name='a_new_new_suite_name'
-    )
-
-    assert fetched_expectation_suite.data_asset_name == DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_new_new_data_asset"
-        )
+    fetched_expectation_suite = data_context.get_expectation_suite('a_new_new_suite_name')
 
     assert fetched_expectation_suite.expectation_suite_name == 'a_new_new_suite_name'
 
@@ -763,44 +586,18 @@ def test_data_context_updates_expectation_suite_names(data_context):
     with open(os.path.join(
                 data_context.root_directory,
                 "expectations",
-                data_asset_name.datasource,
-                data_asset_name.generator,
-                "a_new_new_data_asset",
                 "a_new_new_suite_name.json"
                 ), 'r') as suite_file:
         loaded_suite = expectationSuiteSchema.load(json.load(suite_file)).data
-        assert loaded_suite.data_asset_name == DataAssetIdentifier(
-                data_asset_name.datasource,
-                data_asset_name.generator,
-                "a_new_new_data_asset"
-            )
-
         assert loaded_suite.expectation_suite_name == 'a_new_new_suite_name'
 
     #   3. Using the new name but having the context draw that from the suite
-    expectation_suite.data_asset_name = DataAssetIdentifier(
-        data_asset_name.datasource,
-        data_asset_name.generator,
-        "a_third_name"
-    )
     expectation_suite.expectation_suite_name = "a_third_suite_name"
     data_context.save_expectation_suite(
         expectation_suite=expectation_suite
     )
 
-    fetched_expectation_suite = data_context.get_expectation_suite(
-        data_asset_name=DataAssetIdentifier(
-            data_asset_name.datasource,
-            data_asset_name.generator,
-            "a_third_name"
-        ),
-        expectation_suite_name="a_third_suite_name"
-    )
-    assert fetched_expectation_suite.data_asset_name == DataAssetIdentifier(
-        data_asset_name.datasource,
-        data_asset_name.generator,
-        "a_third_name"
-    )
+    fetched_expectation_suite = data_context.get_expectation_suite("a_third_suite_name")
     assert fetched_expectation_suite.expectation_suite_name == "a_third_suite_name"
 
 
@@ -850,13 +647,10 @@ great_expectations/
     expectations/
     notebooks/
         pandas/
-            create_expectations.ipynb
             validation_playground.ipynb
         spark/
-            create_expectations.ipynb
             validation_playground.ipynb
         sql/
-            create_expectations.ipynb
             validation_playground.ipynb
     plugins/
         custom_data_docs/
@@ -881,13 +675,10 @@ great_expectations/
     expectations/
     notebooks/
         pandas/
-            create_expectations.ipynb
             validation_playground.ipynb
         spark/
-            create_expectations.ipynb
             validation_playground.ipynb
         sql/
-            create_expectations.ipynb
             validation_playground.ipynb
     plugins/
         custom_data_docs/
@@ -986,17 +777,25 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
     for subdir in DataContext.NOTEBOOK_SUBDIRECTORIES:
         subdir_path = os.path.join(empty_directory, "notebooks", subdir)
         assert set(os.listdir(subdir_path)) == {
-            "create_expectations.ipynb",
             "validation_playground.ipynb"
         }
 
 
 def test_build_batch_kwargs(titanic_multibatch_data_context):
-    data_asset_name = titanic_multibatch_data_context.normalize_data_asset_name("titanic")
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(data_asset_name, "Titanic_1911")
+    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs("mydatasource", "mygenerator", name="titanic", partition_id="Titanic_1912")
+    assert os.path.relpath("./data/titanic/Titanic_1912.csv") in batch_kwargs["path"]
+
+    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs("mydatasource", "mygenerator", name="titanic", partition_id="Titanic_1911")
     assert os.path.relpath("./data/titanic/Titanic_1911.csv") in batch_kwargs["path"]
-    assert "partition_id" in batch_kwargs
-    assert batch_kwargs["partition_id"] == "Titanic_1911"
+
+    paths = []
+    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs("mydatasource", "mygenerator", name="titanic")
+    paths.append(os.path.basename(batch_kwargs["path"]))
+
+    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs("mydatasource", "mygenerator", name="titanic")
+    paths.append(os.path.basename(batch_kwargs["path"]))
+
+    assert set(["Titanic_1912.csv", "Titanic_1911.csv"]) == set(paths)
 
 
 def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasources_and_a_site_configured(tmp_path_factory):

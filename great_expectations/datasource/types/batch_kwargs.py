@@ -9,31 +9,6 @@ from great_expectations.exceptions import InvalidBatchKwargsError, InvalidBatchI
 logger = logging.getLogger(__name__)
 
 
-class BatchFingerprint(DataContextKey):
-    def __init__(self, partition_id, fingerprint):
-        self.partition_id = partition_id
-        self.fingerprint = fingerprint
-
-    def to_tuple(self):
-        return self.partition_id, self.fingerprint
-#
-# class BatchFingerprint(OrderedDataContextKey):
-#     _allowed_keys = OrderedDataContextKey._allowed_keys | {
-#         "partition_id",
-#         "fingerprint"
-#     }
-#     _required_keys = OrderedDataContextKey._required_keys | {
-#         "partition_id",
-#         "fingerprint"
-#     }
-#     _key_types = copy.copy(OrderedDataContextKey._key_types)
-#     _key_types.update({
-#         "partition_id": string_types,
-#         "fingerprint": string_types
-#     })
-#     _key_order = copy.copy(OrderedDataContextKey._key_order)
-#     _key_order.extend(["partition_id", "fingerprint"])
-
 class BatchMarkers(BatchKwargs):
     """A BatchMarkers is a special type of BatchKwargs (so that it has a batch_fingerprint) but it generally does
     NOT require specific keys and instead captures information about the OUTPUT of a datasource's fetch
@@ -69,6 +44,10 @@ class SqlAlchemyDatasourceBatchKwargs(BatchKwargs):
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
+    @property
+    def limit(self):
+        return self.get("limit")
+
     @property
     def schema(self):
         return self.get("schema")
@@ -155,6 +134,10 @@ class SqlAlchemyDatasourceQueryBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     @property
     def query(self):
         return self.get("query")
+
+    @property
+    def query_parameters(self):
+        return self.get("query_parameters")
 
 
 class SparkDFDatasourceQueryBatchKwargs(SparkDFDatasourceBatchKwargs):

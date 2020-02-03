@@ -1,3 +1,5 @@
+import traceback
+
 from _pytest.logging import LogCaptureFixture
 from click.testing import Result
 
@@ -36,6 +38,22 @@ def assert_no_logging_messages_or_tracebacks(my_caplog, click_result):
     if messages:
         print(messages)
     assert not messages
+
+    if click_result.exc_info:
+        # introspect the call stack to make sure no exceptions found there way through
+        # https://docs.python.org/2/library/sys.html#sys.exc_info
+        _type, value, _traceback = click_result.exc_info
+        if not isinstance(value, SystemExit):
+            # SystemExit is a known "good" exit type
+            print("".join(traceback.format_tb(_traceback)))
+            assert False, "Found exception of type {} with message {}".format(
+                _type, value
+            )
+    if not isinstance(click_result.exception, SystemExit):
+        # Ignore a SystemeExit, because some commands intentionally exit in an error state
+        assert not click_result.exception, "Found exception {}".format(
+            click_result.exception
+        )
 
     assert (
         "traceback" not in click_result.output.lower()

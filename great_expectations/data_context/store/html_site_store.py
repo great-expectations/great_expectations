@@ -7,7 +7,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
     SiteSectionIdentifier,
 )
-from .fixed_length_tuple_store_backend import TupleStoreBackend
+from .tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.util import (
     load_class,
     instantiate_class_from_config,
@@ -29,8 +29,9 @@ class HtmlSiteStore(object):
 
         if not issubclass(store_class, TupleStoreBackend):
             raise DataContextError("Invalid configuration: HtmlSiteStore needs a TupleStoreBackend")
-        if "filepath_template" in store_backend or "key_length" in store_backend:
-            logger.warning("Configuring a filepath_template or key_length is not supported in SiteBuilder: "
+        if "filepath_template" in store_backend or ("fixed_length_key" in store_backend and
+                                                    store_backend["fixed_length_key"] is True):
+            logger.warning("Configuring a filepath_template or using fixed_length_key is not supported in SiteBuilder: "
                            "filepaths will be selected based on the type of asset rendered.")
 
         # One thing to watch for is reversibility of keys.

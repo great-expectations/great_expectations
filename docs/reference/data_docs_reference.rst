@@ -37,7 +37,6 @@ Here is an example of a site configuration from great_expectations.yml with defa
 
   data_docs_sites:
     local_site: # site name
-      datasource_whitelist: '*' # used to restrict the Datasources
       module_name: great_expectations.render.renderer.site_builder
       class_name: SiteBuilder
       store_backend:
