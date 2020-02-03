@@ -313,7 +313,7 @@ How do I know which types of expectations I can add?
 
 .. code-block:: python
 
-    df.save_expectation_suite()
+    batch.save_expectation_suite()
 
 The ``expectations_store`` attribute in the ``great_expectations.yml`` configuration file controls the location where the DataContext saves the expectation suite.
 
@@ -329,7 +329,7 @@ an additional argument to the ``save_expectation_suite`` method:
 
 .. code-block:: python
 
-    df.save_expectation_suite(discard_failed_expectations=False)
+    batch.save_expectation_suite(discard_failed_expectations=False)
 
 
 8. View the Expectations in Data Docs
