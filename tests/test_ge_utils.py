@@ -42,7 +42,7 @@ def test_validate_dataset(dataset, basic_expectation_suite):
 
 def test_validate_using_data_context(dataset, data_context):
     # Before running, the data context should not have compiled parameters
-    assert data_context._compiled is False
+    assert data_context._evaluation_parameter_dependencies_compiled is False
     res = ge.validate(
         dataset,
         expectation_suite_name="my_dag_node.default",
