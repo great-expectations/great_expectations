@@ -209,7 +209,7 @@ class SiteIndexPageRenderer(Renderer):
 
             header_dict = OrderedDict([
                 ["expectations_links", "Expectation Suite"],
-                ["validations_links", "Validation Results"]
+                ["validations_links", "Validation Results (run_id)"]
             ])
 
             for link_lists_key, header in header_dict.items():
