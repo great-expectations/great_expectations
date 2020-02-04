@@ -3,6 +3,7 @@ import shutil
 
 import pytest
 from click.testing import CliRunner
+from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -13,6 +14,7 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them(
     caplog, tmp_path_factory,
 ):
@@ -66,6 +68,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_fixing_them(
     caplog, tmp_path_factory,
 ):
