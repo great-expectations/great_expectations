@@ -405,6 +405,7 @@ class DefaultSiteIndexBuilder(object):
                 "expectation_suite_name": expectation_suite_name,
                 "filepath": filepath,
                 "run_id": run_id,
+                "batch_identifier": batch_identifier,
                 "validation_success": validation_success
             }
         )
