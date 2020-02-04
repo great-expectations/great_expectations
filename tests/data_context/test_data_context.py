@@ -1,13 +1,4 @@
 import json
-
-from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
-from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
 import os
 import shutil
 from collections import OrderedDict
@@ -16,8 +7,8 @@ import pytest
 from ruamel.yaml import YAML
 
 from great_expectations.core import (
+    DataAssetIdentifier,
     ExpectationConfiguration,
-    dataAssetIdentifierSchema,
     expectationSuiteSchema,
 )
 from great_expectations.data_context import (
@@ -26,15 +17,17 @@ from great_expectations.data_context import (
     ExplorerDataContext,
 )
 from great_expectations.data_context.store import ExpectationsStore
-from great_expectations.core import (
-    DataAssetIdentifier,
-)
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+)
 from great_expectations.data_context.util import (
     file_relative_path,
     safe_mmkdir,
 )
-from great_expectations.exceptions import DataContextError
+from great_expectations.datasource import Datasource
+from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
+from great_expectations.exceptions import DataContextError, ProfilerError
 from great_expectations.util import gen_directory_tree_str
 
 try:
@@ -42,14 +35,21 @@ try:
 except ImportError:
     import mock
 
-
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 yaml = YAML()
 
 
 @pytest.fixture()
 def parameterized_expectation_suite():
-    with open("tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json", "r") as suite:
+    fixture_path = file_relative_path(
+        __file__,
+        "../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
+    )
+    with open(fixture_path, "r",) as suite:
         return json.load(suite)
 
 
@@ -63,8 +63,7 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
     assert titanic_data_context.create_expectation_suite(expectation_suite_name="titanic.test_create_expectation_suite", overwrite_existing=True)
 
 
-def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
-
+def test_get_available_data_asset_names_with_one_datasource_including_a_single_generator(empty_data_context, filesystem_csv):
     empty_data_context.add_datasource("my_datasource",
                            module_name="great_expectations.datasource",
                            class_name="PandasDatasource",
@@ -76,10 +75,58 @@ def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
                            }
                            )
 
-
     available_asset_names = empty_data_context.get_available_data_asset_names()
 
     assert set(available_asset_names["my_datasource"]["subdir_reader"]["names"]) == {('f3', 'directory'), ('f2', 'file'), ('f1', 'file')}
+
+
+def test_get_available_data_asset_names_with_one_datasource_without_a_generator_returns_empty_dict(
+    empty_data_context,
+):
+    empty_data_context.add_datasource(
+        "my_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+    )
+
+    obs = empty_data_context.get_available_data_asset_names()
+    assert obs == {"my_datasource": {}}
+
+
+def test_get_available_data_asset_names_with_multiple_datasources_with_and_without_generators(
+        empty_data_context
+):
+    """Test datasources with and without generators."""
+    context = empty_data_context
+    connection_kwargs = {"drivername": "sqlite"}
+
+    context.add_datasource(
+        "first",
+        class_name="SqlAlchemyDatasource",
+        generators={"foo": {"class_name": "TableGenerator", }},
+        **connection_kwargs
+    )
+    context.add_datasource(
+        "second",
+        class_name="SqlAlchemyDatasource",
+        **connection_kwargs
+    )
+    context.add_datasource(
+        "third",
+        class_name="SqlAlchemyDatasource",
+        generators={"bar": {"class_name": "TableGenerator", }},
+        **connection_kwargs
+    )
+
+    obs = context.get_available_data_asset_names()
+
+    assert isinstance(obs, dict)
+    assert set(obs.keys()) == {"first", "second", "third"}
+    assert obs == {
+        "first": {"foo": {"is_complete_list": True, "names": []}},
+        "second": {},
+        "third": {"bar": {"is_complete_list": True, "names": []}},
+    }
 
 
 def test_list_expectation_suite_keys(data_context):
@@ -204,6 +251,21 @@ def test_data_context_get_validation_result(titanic_data_context):
         failed_only=True,
     )
     assert len(failed_validation_result.results) == 8
+
+
+def test_data_context_get_datasource(titanic_data_context):
+    isinstance(titanic_data_context.get_datasource("mydatasource"), Datasource)
+
+
+def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(titanic_data_context):
+    with pytest.raises(ValueError):
+        _ = titanic_data_context.get_datasource("fakey_mc_fake")
+
+
+def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_error(titanic_data_context):
+    # TODO verify that this behavior is correct - or should it return a profiling dict w/ an error message?
+    with pytest.raises(ProfilerError):
+        _ = titanic_data_context.profile_datasource("fakey_mc_fake")
 
 
 @pytest.mark.rendered_output

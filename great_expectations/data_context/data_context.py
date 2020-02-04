@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import glob
 import os
-import json
 import logging
 import shutil
 import webbrowser
@@ -39,7 +38,6 @@ from great_expectations.datasource import (
     SparkDFDatasource,
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
 
 
 from .templates import (
@@ -590,8 +588,12 @@ class ConfigOnlyDataContext(object):
                 )
         else:  # generator_names is None
             for datasource_name in datasource_names:
-                datasource = self.get_datasource(datasource_name)
-                data_asset_names[datasource_name] = datasource.get_available_data_asset_names(None)
+                try:
+                    datasource = self.get_datasource(datasource_name)
+                    data_asset_names[datasource_name] = datasource.get_available_data_asset_names()
+                except ValueError:
+                    # handle the edge case of a non-existent datasource
+                    data_asset_names[datasource_name] = {}
 
         return data_asset_names
 
@@ -1593,8 +1595,14 @@ class ConfigOnlyDataContext(object):
         # KeyError will happen if there are no generators
         data_asset_name_list = []
         try:
-            for generator_name in data_asset_names[datasource_name].keys():
-                for name in data_asset_names[datasource_name][generator_name]["names"]:
+            datasource = data_asset_names[datasource_name]
+        except KeyError:
+            # KeyError will happen if there is not datasource
+            raise ge_exceptions.ProfilerError(
+                "No datasource {} found.".format(datasource_name))
+        try:
+            for generator_name in datasource.keys():
+                for name in datasource[generator_name]["names"]:
                     data_asset_name_list.append((generator_name, name[0]))
 
         except KeyError:
@@ -1602,7 +1610,10 @@ class ConfigOnlyDataContext(object):
 
         if len(data_asset_name_list) == 0:
             raise ge_exceptions.ProfilerError(
-                "No Data Assets found in Datasource {}. Used generators: {}.".format(datasource_name, list(data_asset_names[datasource_name].keys())))
+                "No Data Assets found in Datasource {}. Used generators: {}.".format(
+                    datasource_name,
+                    list(datasource.keys()))
+            )
         total_data_assets = len(data_asset_name_list)
 
         if isinstance(data_assets, list) and len(data_assets) > 0:
