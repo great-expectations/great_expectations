@@ -1987,6 +1987,20 @@ class DataContext(ConfigOnlyDataContext):
 
         return yml_path
 
+    @classmethod
+    def does_config_exist_on_disk(cls, context_root_dir):
+        """Return True if the great_expectations.yml exists on disk."""
+        return os.path.isfile(os.path.join(context_root_dir, cls.GE_YML))
+
+    @classmethod
+    def is_project_initialized(cls, ge_dir):
+        """Return True if the project is initialized."""
+        return (
+            cls.does_config_exist_on_disk(ge_dir)
+            and cls.all_uncommitted_directories_exist(ge_dir)
+            and cls.config_variables_yml_exist(ge_dir)
+        )
+
 
 class ExplorerDataContext(DataContext):
 

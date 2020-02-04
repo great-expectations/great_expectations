@@ -29,6 +29,7 @@ from great_expectations.datasource import Datasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.exceptions import DataContextError, ProfilerError
 from great_expectations.util import gen_directory_tree_str
+from tests.test_utils import safe_remove
 
 try:
     from unittest import mock
@@ -666,6 +667,65 @@ def test_data_context_updates_expectation_suite_names(data_context):
 def test_data_context_create_does_not_raise_error_or_warning_if_ge_dir_exists(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('data_context'))
     DataContext.create(project_path)
+
+
+@pytest.fixture()
+def empty_context(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp('data_context'))
+    DataContext.create(project_path)
+    ge_dir = os.path.join(project_path, "great_expectations")
+    assert os.path.isdir(ge_dir)
+    assert os.path.isfile(os.path.join(ge_dir, DataContext.GE_YML))
+    context = DataContext(ge_dir)
+    assert isinstance(context, DataContext)
+    return context
+
+
+def test_data_context_does_ge_yml_exist_returns_true_when_it_does_exist(empty_context):
+    ge_dir = empty_context.root_directory
+    assert DataContext.does_config_exist_on_disk(ge_dir) == True
+
+
+def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(empty_context):
+    ge_dir = empty_context.root_directory
+
+    # mangle install
+    safe_remove(os.path.join(ge_dir, empty_context.GE_YML))
+
+    assert DataContext.does_config_exist_on_disk(ge_dir) == False
+
+
+def test_data_context_is_project_initialized_returns_true_when_it_is(empty_context):
+    ge_dir = empty_context.root_directory
+
+    assert DataContext.is_project_initialized(ge_dir) == True
+
+
+def test_data_context_is_project_initialized_returns_false_when_config_yml_is_missing(empty_context):
+    ge_dir = empty_context.root_directory
+
+    # mangle install
+    safe_remove(os.path.join(ge_dir, empty_context.GE_YML))
+
+    assert DataContext.is_project_initialized(ge_dir) == False
+
+
+def test_data_context_is_project_initialized_returns_false_when_uncommitted_dirs_are_missing(empty_context):
+    ge_dir = empty_context.root_directory
+
+    # mangle install
+    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR))
+
+    assert DataContext.is_project_initialized(ge_dir) == False
+
+
+def test_data_context_is_project_initialized_returns_false_when_config_variable_yml_is_missing(empty_context):
+    ge_dir = empty_context.root_directory
+
+    # mangle install
+    safe_remove(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "config_variables.yml"))
+
+    assert DataContext.is_project_initialized(ge_dir) == False
 
 
 def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(tmp_path_factory):
