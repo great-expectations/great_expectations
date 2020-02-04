@@ -3,6 +3,7 @@ from __future__ import division
 import copy
 import importlib
 import locale
+import os
 import random
 import string
 from functools import wraps
@@ -593,3 +594,12 @@ def is_library_installed(library_name):
         return True
     except ModuleNotFoundError as e:
         return False
+
+
+def safe_remove(path):
+    if path is not None:
+        try:
+            os.remove(path)
+        except OSError as e:
+            print(e)
+            pass

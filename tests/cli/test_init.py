@@ -228,13 +228,10 @@ great_expectations/
     expectations/
     notebooks/
         pandas/
-            create_expectations.ipynb
             validation_playground.ipynb
         spark/
-            create_expectations.ipynb
             validation_playground.ipynb
         sql/
-            create_expectations.ipynb
             validation_playground.ipynb
     plugins/
         custom_data_docs/
