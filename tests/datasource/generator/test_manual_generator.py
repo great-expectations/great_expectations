@@ -5,7 +5,7 @@ from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource.generator.manual_generator import ManualGenerator
 
 
-@pytest.mark.xfail(condition=PY2)
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_manual_generator(basic_pandas_datasource):
     generator = ManualGenerator(datasource=basic_pandas_datasource, assets={
         "asset1": [
