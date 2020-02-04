@@ -176,7 +176,7 @@ def test_base_class_expectation():
     assert df.expect_column_values_to_be_between("aaa", min_value=1, max_value=5).success is True
 
 
-@pytest.mark.xfail(condition=PY2)
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_validate():
 
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:

@@ -18,7 +18,7 @@ def test_docs_help_output(caplog):
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(condition=PY2)
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_docs_build(caplog, site_builder_data_context_with_html_store_titanic_random):
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
 

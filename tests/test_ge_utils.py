@@ -12,7 +12,7 @@ def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
         ge.validate(file_data_asset, empty_expectation_suite, data_asset_class=ge.data_asset.FileDataAsset)
 
 
-@pytest.mark.xfail(condition=PY2)
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_validate_dataset(dataset, basic_expectation_suite):
     res = ge.validate(dataset, basic_expectation_suite)
     assert res.success is True

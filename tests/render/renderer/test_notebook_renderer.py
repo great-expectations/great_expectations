@@ -250,7 +250,7 @@ def warning_suite():
     return schema.loads(json.dumps(warning_suite)).data
 
 
-@pytest.mark.xfail(condition=PY2)
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_simple_suite(critical_suite):
     obs = NotebookRenderer().render(critical_suite, {"path": "foo/data"}, "foo_asset")
     assert isinstance(obs, dict)
@@ -376,7 +376,7 @@ def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
 
     assert found_expected
 
-@pytest.mark.xfail(condition=PY2)
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_complex_suite(warning_suite):
     obs = NotebookRenderer().render(warning_suite, {"path": "foo/data"}, "pre_prod_staging.staging_npi")
     assert isinstance(obs, dict)
