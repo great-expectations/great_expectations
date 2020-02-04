@@ -688,8 +688,7 @@ def test_data_context_does_ge_yml_exist_returns_true_when_it_does_exist(empty_co
 
 def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(empty_context):
     ge_dir = empty_context.root_directory
-
-    # mangle install
+    # mangle project
     safe_remove(os.path.join(ge_dir, empty_context.GE_YML))
 
     assert DataContext.does_config_exist_on_disk(ge_dir) == False
@@ -703,26 +702,47 @@ def test_data_context_is_project_initialized_returns_true_when_it_is(empty_conte
 
 def test_data_context_is_project_initialized_returns_false_when_config_yml_is_missing(empty_context):
     ge_dir = empty_context.root_directory
-
-    # mangle install
+    # mangle project
     safe_remove(os.path.join(ge_dir, empty_context.GE_YML))
 
     assert DataContext.is_project_initialized(ge_dir) == False
 
 
-def test_data_context_is_project_initialized_returns_false_when_uncommitted_dirs_are_missing(empty_context):
+def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_is_missing(empty_context):
     ge_dir = empty_context.root_directory
-
-    # mangle install
+    # mangle project
     shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR))
+
+    assert DataContext.is_project_initialized(ge_dir) == False
+
+
+def test_data_context_is_project_initialized_returns_false_when_uncommitted_data_docs_dir_is_missing(empty_context):
+    ge_dir = empty_context.root_directory
+    # mangle project
+    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "data_docs"))
+
+    assert DataContext.is_project_initialized(ge_dir) == False
+
+
+def test_data_context_is_project_initialized_returns_false_when_uncommitted_validations_dir_is_missing(empty_context):
+    ge_dir = empty_context.root_directory
+    # mangle project
+    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "validations"))
+
+    assert DataContext.is_project_initialized(ge_dir) == False
+
+
+def test_data_context_is_project_initialized_returns_false_when_uncommitted_samples_dir_is_missing(empty_context):
+    ge_dir = empty_context.root_directory
+    # mangle project
+    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "samples"))
 
     assert DataContext.is_project_initialized(ge_dir) == False
 
 
 def test_data_context_is_project_initialized_returns_false_when_config_variable_yml_is_missing(empty_context):
     ge_dir = empty_context.root_directory
-
-    # mangle install
+    # mangle project
     safe_remove(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "config_variables.yml"))
 
     assert DataContext.is_project_initialized(ge_dir) == False
