@@ -8,7 +8,7 @@ except ImportError:
     import mock
 
 from great_expectations.validation_operators import (
-    BasicValidationAction,
+    ValidationAction,
     SlackNotificationAction,
     StoreAction
 )
@@ -30,7 +30,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 def test_subclass_of_BasicValidationAction():
     # I dunno. This is kind of a silly test.
 
-    class MyCountingValidationAction(BasicValidationAction):
+    class MyCountingValidationAction(ValidationAction):
         def __init__(self):
             super(MyCountingValidationAction, self).__init__()
             self._counter = 0
