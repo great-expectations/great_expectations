@@ -125,6 +125,12 @@ def datasource_list(directory):
 
 @datasource.command(name="profile")
 @click.argument('datasource_name', default=None, required=False)
+@click.option(
+    "--generator_name",
+    "-g",
+    default=None,
+    help="The name of the batch kwarg generator configured in the datasource. The generator will list data assets in the datasource"
+)
 @click.option('--data_assets', '-l', default=None,
               help='Comma-separated list of the names of data assets that should be profiled. Requires datasource_name specified.')
 @click.option('--profile_all_data_assets', '-A', is_flag=True, default=False,
@@ -143,7 +149,7 @@ def datasource_list(directory):
 )
 @click.option('--batch_kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
-def datasource_profile(datasource_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
+def datasource_profile(datasource_name, generator_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
     """
     Profile a datasource
 
@@ -188,6 +194,7 @@ def datasource_profile(datasource_name, data_assets, profile_all_data_assets, di
             profile_datasource(
                 context,
                 datasources[0],
+                generator_name=generator_name,
                 data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 open_docs=view,
@@ -197,6 +204,7 @@ def datasource_profile(datasource_name, data_assets, profile_all_data_assets, di
         profile_datasource(
             context,
             datasource_name,
+            generator_name=generator_name,
             data_assets=data_assets,
             profile_all_data_assets=profile_all_data_assets,
             open_docs=view,
@@ -1071,6 +1079,7 @@ Enter an SQL query
 def profile_datasource(
     context,
     datasource_name,
+    generator_name=None,
     data_assets=None,
     profile_all_data_assets=False,
     max_data_assets=20,
@@ -1093,6 +1102,14 @@ Profiling '{0:s}' will create expectations and documentation.
 """
 
     msg_too_many_data_assets = """There are {0:d} data assets in {1:s}. Profiling all of them might take too long.    
+"""
+
+    msg_error_multiple_generators_found = """<red>More than one batch kwarg generators found in datasource {0:s}.
+Specify the one you want the profiler to use in generator_name argument.</red>      
+"""
+
+    msg_error_no_generators_found = """<red>No batch kwarg generators can list available data assets in datasource {0:s}.
+The datasource might be empty or a generator not configured in the config file.</red>    
 """
 
     msg_prompt_enter_data_asset_list = """Enter comma-separated list of data asset names (e.g., {0:s})   
@@ -1144,6 +1161,14 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 cli_message(msg_some_data_assets_not_found.format("," .join(profiling_results['error']['not_found_data_assets'])))
             elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS:
                 cli_message(msg_too_many_data_assets.format(profiling_results['error']['num_data_assets'], datasource_name))
+            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_MULTIPLE_GENERATORS_FOUND:
+                cli_message(
+                    msg_error_multiple_generators_found.format(datasource_name))
+                sys.exit(-1)
+            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_NO_GENERATOR_FOUND:
+                cli_message(
+                    msg_error_no_generators_found.format(datasource_name))
+                sys.exit(-1)
             else: # unknown error
                 raise ValueError("Unknown profiling error code: " + profiling_results['error']['code'])
 
