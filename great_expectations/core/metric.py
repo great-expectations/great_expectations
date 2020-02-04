@@ -28,10 +28,6 @@ class Metric(object):
     def metric_kwargs_id(self):
         return self._metric_kwargs.to_id()
 
-    @property
-    def urn(self):
-        return ":".join((self.metric_name, self.metric_kwargs_id))
-
 
 class MetricIdentifier(DataContextKey):
     """A MetricIdentifier serves as a key to store and retrieve Metrics."""

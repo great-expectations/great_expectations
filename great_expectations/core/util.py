@@ -3,6 +3,8 @@ try:
 except ImportError:
     from collections import Mapping
 
+
+# Updated from the stack overflow version below to concatenate lists
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 def nested_update(d, u):
     for k, v in u.items():
