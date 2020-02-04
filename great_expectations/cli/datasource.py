@@ -1155,7 +1155,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
 
             if option_selection == "1":
                 data_assets = click.prompt(
-                    msg_prompt_enter_data_asset_list.format(", ".join(profiling_results['error']['data_assets'][:3])),
+                    msg_prompt_enter_data_asset_list.format(", ".join([data_asset[0] for data_asset in profiling_results['error']['data_assets']][:3])),
                     default=None,
                     show_default=False
                 )
@@ -1163,6 +1163,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                     data_assets = [item.strip() for item in data_assets.split(",")]
             elif option_selection == "3":
                 profile_all_data_assets = True
+                data_assets = None
             elif option_selection == "2": # skip
                 cli_message(msg_skipping)
                 return
