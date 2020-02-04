@@ -134,7 +134,7 @@ class ConfigOnlyDataContext(object):
         else:
             cls.scaffold_notebooks(ge_dir)
 
-        uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
         if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
             message = """Warning. An existing `config_variables.yml` was found here: {}.
     - No action was taken.""".format(uncommitted_dir)
@@ -147,7 +147,7 @@ class ConfigOnlyDataContext(object):
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir):
         """Check if all uncommitted direcotries exist."""
-        uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
         for directory in cls.UNCOMMITTED_DIRECTORIES:
             if not os.path.isdir(os.path.join(uncommitted_dir, directory)):
                 return False
@@ -197,7 +197,7 @@ class ConfigOnlyDataContext(object):
             else:
                 safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
 
-        uncommitted_dir = os.path.join(base_dir, "uncommitted")
+        uncommitted_dir = os.path.join(base_dir, cls.GE_UNCOMMITTED_DIR)
 
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
             new_directory_path = os.path.join(uncommitted_dir, new_directory)
@@ -1770,6 +1770,20 @@ class DataContext(ConfigOnlyDataContext):
             search_start_dir = os.path.dirname(search_start_dir)
 
         return yml_path
+
+    @classmethod
+    def does_config_exist_on_disk(cls, context_root_dir):
+        """Return True if the great_expectations.yml exists on disk."""
+        return os.path.isfile(os.path.join(context_root_dir, cls.GE_YML))
+
+    @classmethod
+    def is_project_initialized(cls, ge_dir):
+        """Return True if the project is initialized."""
+        return (
+            cls.does_config_exist_on_disk(ge_dir)
+            and cls.all_uncommitted_directories_exist(ge_dir)
+            and cls.config_variables_yml_exist(ge_dir)
+        )
 
 
 class ExplorerDataContext(DataContext):

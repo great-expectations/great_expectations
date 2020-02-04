@@ -25,7 +25,10 @@ from great_expectations.cli.init_messages import (
     SLACK_WEBHOOK_PROMPT,
 )
 from great_expectations.cli.util import cli_message, is_sane_slack_webhook
-from great_expectations.exceptions import DatasourceInitializationError
+from great_expectations.exceptions import (
+    DataContextError,
+    DatasourceInitializationError,
+)
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -60,36 +63,37 @@ def init(target_directory, view):
     """
     target_directory = os.path.abspath(target_directory)
     ge_dir = _get_full_path_to_ge_dir(target_directory)
-    ge_yml = os.path.join(ge_dir, DataContext.GE_YML)
 
     cli_message(GREETING)
 
-    # TODO this should be a property
-    if os.path.isfile(ge_yml):
-        if DataContext.all_uncommitted_directories_exist(
-            ge_dir
-        ) and DataContext.config_variables_yml_exist(ge_dir):
+    if DataContext.does_config_exist_on_disk(ge_dir):
+        if DataContext.is_project_initialized(ge_dir):
             # Ensure the context can be instantiated
             try:
                 context = DataContext(ge_dir)
                 cli_message(PROJECT_IS_COMPLETE)
-            except (ge_exceptions.DataContextError, DatasourceInitializationError) as e:
+                exit(0)
+            except (DataContextError, DatasourceInitializationError) as e:
                 cli_message("<red>{}</red>".format(e))
                 sys.exit(1)
         else:
             try:
                 if not _complete_onboarding(target_directory):
+                    # TODO ensure this is covered by a test
                     exit(0)
-            except ge_exceptions.DataContextError as e:
+            except DataContextError as e:
                 cli_message("<red>{}</red>".format(e))
+                # TODO ensure this is covered by a test
                 exit(5)
     else:
         if not click.confirm(LETS_BEGIN_PROMPT, default=True):
             cli_message(RUN_INIT_AGAIN)
+            # TODO ensure this is covered by a test
             exit(0)
         try:
             context = DataContext.create(target_directory)
-        except ge_exceptions.DataContextError as e:
+        except DataContextError as e:
+            # TODO ensure this is covered by a test
             cli_message("<red>{}</red>".format(e))
 
     try:
@@ -124,10 +128,12 @@ def init(target_directory, view):
 
                 cli_message("\n<cyan>Great Expectations is now set up.</cyan>")
 
-    except (ge_exceptions.DataContextError,
-            ge_exceptions.ProfilerError,
-            IOError,
-            SQLAlchemyError)  as e:
+    except (
+        DataContextError,
+        ge_exceptions.ProfilerError,
+        IOError,
+        SQLAlchemyError
+    ) as e:
         cli_message("<red>{}</red>".format(e))
         sys.exit(1)
 
