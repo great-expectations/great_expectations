@@ -21,7 +21,6 @@ class SiteIndexPageRenderer(Renderer):
         section_rows = []
 
         column_count = len(link_list_keys_to_render)
-        profiling_links = index_links_dict.get("profiling_links")
         validations_links = index_links_dict.get("validations_links")
         expectations_links = index_links_dict.get("expectations_links")
 
@@ -209,7 +208,6 @@ class SiteIndexPageRenderer(Renderer):
             link_list_keys_to_render = []
 
             header_dict = OrderedDict([
-                ["profiling_links", "Profiling Results"],
                 ["expectations_links", "Expectation Suite"],
                 ["validations_links", "Validation Results"]
             ])
@@ -251,6 +249,47 @@ class SiteIndexPageRenderer(Renderer):
             )
 
             content_blocks.append(generator_table)
+
+            if index_links_dict.get("profiling_links"):
+                profiling_table_rows = []
+                for profiling_link_dict in index_links_dict.get("profiling_links"):
+                    profiling_table_rows.append(
+                        [
+                            RenderedStringTemplateContent(**{
+                                "content_block_type": "string_template",
+                                "string_template": {
+                                    "template": "$link_text",
+                                    "params": {
+                                        "link_text": profiling_link_dict["expectation_suite_name"] + "." + profiling_link_dict["batch_identifier"]
+                                    },
+                                    "tag": "a",
+                                    "styling": {
+                                        "attributes": {
+                                            "href": profiling_link_dict["filepath"]
+                                        },
+                                        "classes": ["ge-index-page-table-expectation-suite-link"]
+                                    }
+                                },
+                            })
+                        ]
+                    )
+                content_blocks.append(
+                    RenderedTableContent(**{
+                        "content_block_type": "table",
+                        "header_row": ["Profiling Results"],
+                        "table": profiling_table_rows,
+                        "styling": {
+                            "classes": ["col-12", "ge-index-page-table-container", "pl-5", "pr-4"],
+                            "styles": {
+                                "margin-top": "10px"
+                            },
+                            "body": {
+                                "classes": ["table", "table-sm", "ge-index-page-generator-table"]
+                            }
+                        }
+                    })
+
+                )
 
             section = RenderedSectionContent(**{
                 "section_name": index_links_dict.get("site_name"),
