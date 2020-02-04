@@ -4,7 +4,7 @@ import logging
 
 from six import string_types
 
-from great_expectations.datasource.types import BatchKwargs
+from great_expectations.core.id_dict import BatchKwargs
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@ import os
 from six import PY2
 
 import great_expectations as ge
-from great_expectations.util import nested_update
+from great_expectations.core.util import nested_update
 
 
 def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
@@ -45,7 +45,7 @@ def test_validate_dataset(dataset, basic_expectation_suite):
 
 def test_validate_using_data_context(dataset, data_context):
     # Before running, the data context should not have compiled parameters
-    assert data_context._compiled is False
+    assert data_context._evaluation_parameter_dependencies_compiled is False
     res = ge.validate(
         dataset,
         expectation_suite_name="my_dag_node.default",
@@ -54,7 +54,7 @@ def test_validate_using_data_context(dataset, data_context):
 
     # Since the handling of evaluation parameters is no longer happening without an action,
     # the context should still be not compiles after validation.
-    assert data_context._compiled is False
+    assert data_context._evaluation_parameter_dependencies_compiled is False
 
     # And, we should have validated the right number of expectations from the context-provided config
     assert res.success is False
@@ -119,5 +119,36 @@ def test_nested_update():
         "reader_options": {
             "header": 0,
             "nrows": 1
+        }
+    }
+
+
+def test_nested_update_lists():
+    # nested_update is useful for update nested dictionaries (such as batch_kwargs with reader_options as a dictionary)
+    dependencies = {
+        "suite.warning": {
+            "metric.name": ["column=foo"]
+        },
+        "suite.failure": {
+            "metric.blarg": [""]
+        }
+    }
+
+    new_dependencies = {
+        "suite.warning": {
+            "metric.other_name": ["column=foo"],
+            "metric.name": ["column=bar"]
+        }
+    }
+
+    nested_update(dependencies, new_dependencies)
+
+    assert dependencies == {
+        "suite.warning": {
+            "metric.name": ["column=foo", "column=bar"],
+            "metric.other_name": ["column=foo"]
+        },
+        "suite.failure": {
+            "metric.blarg": [""]
         }
     }
