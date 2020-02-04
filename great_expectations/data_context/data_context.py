@@ -620,49 +620,6 @@ class ConfigOnlyDataContext(object):
         validator = Validator(batch=batch, expectation_suite=expectation_suite, expectation_engine=data_asset_type)
         return validator.get_dataset()
 
-    # def get_batch(self, data_asset_name, expectation_suite_name, batch_kwargs=None, **kwargs):
-    #     """
-    #     Get a batch of data, using the namespace of the provided data_asset_name.
-    #
-    #     get_batch constructs its batch by first normalizing the data_asset_name (if not already normalized) and then:
-    #       (1) getting data using the provided batch_kwargs; and
-    #       (2) attaching the named expectation suite
-    #
-    #     A single partition_id may be used in place of batch_kwargs when using a data_asset_name whose generator
-    #     supports that partition type, and additional kwargs will be used to supplement the provided batch_kwargs.
-    #
-    #     Args:
-    #         data_asset_name: name of the data asset. The name will be normalized. \
-    #             (See :py:meth:`normalize_data_asset_name` )
-    #         expectation_suite_name: name of the expectation suite to attach to the data_asset returned
-    #         batch_kwargs: key-value pairs describing the batch of data the datasource should fetch. \
-    #             (See :class:`BatchKwargsGenerator` ) If no batch_kwargs are specified, then the context will get the next
-    #             available batch_kwargs for the data_asset.
-    #         **kwargs: additional key-value pairs to pass to the datasource when fetching the batch.
-    #
-    #     Returns:
-    #         Great Expectations data_asset with attached expectation_suite and DataContext
-    #     """
-    #     normalized_data_asset_name = self.normalize_data_asset_name(data_asset_name)
-    #
-    #     datasource = self.get_datasource(normalized_data_asset_name.datasource)
-    #     if not datasource:
-    #         raise ge_exceptions.DataContextError(
-    #             "Can't find datasource {} in the config - please check your {}".format(
-    #                 normalized_data_asset_name,
-    #                 self.GE_YML
-    #             )
-    #         )
-    #
-    #     if batch_kwargs is None:
-    #         batch_kwargs = self.build_batch_kwargs(data_asset_name, **kwargs)
-    #
-    #     data_asset = datasource.get_batch(normalized_data_asset_name,
-    #                                       expectation_suite_name,
-    #                                       batch_kwargs,
-    #                                       **kwargs)
-    #     return data_asset
-
     def run_validation_operator(
             self,
             validation_operator_name,
