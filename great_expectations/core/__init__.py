@@ -1,19 +1,20 @@
-import hashlib
 import logging
 import json
 # PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
-from abc import ABCMeta, abstractmethod
+from collections import namedtuple
 from copy import deepcopy
 
 from six import string_types
 
-from marshmallow import Schema, fields, ValidationError, pre_load, post_load, pre_dump
+from marshmallow import Schema, fields, ValidationError, post_load, pre_dump
 
 from great_expectations import __version__ as ge_version
+from great_expectations.core.id_dict import IDDict
+from great_expectations.core.util import nested_update
 from great_expectations.types import DictDot
 
 from great_expectations.exceptions import InvalidExpectationConfigurationError, InvalidExpectationKwargsError, \
-    InvalidDataContextKeyError
+    UnavailableMetricError, ParserError
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,38 @@ RESULT_FORMATS = [
     "COMPLETE",
     "SUMMARY"
 ]
+
+EvaluationParameterIdentifier = namedtuple("EvaluationParameterIdentifier", ["expectation_suite_name", "metric_name",
+                                                                             "metric_kwargs_id"])
+
+
+def get_metric_kwargs_id(metric_name, metric_kwargs):
+    ###
+    #
+    # WARNING
+    # WARNING
+    # THIS IS A PLACEHOLDER UNTIL WE HAVE REFACTORED EXPECTATIONS TO HANDLE THIS LOGIC THEMSELVES
+    # WE ARE NO WORSE OFF THAN THE PREVIOUS SYSTEM, BUT NOT FULLY CUSTOMIZABLE
+    # WARNING
+    # WARNING
+    #
+    ###
+    if "column" in metric_kwargs:
+        return "column=" + metric_kwargs.get("column")
+    return None
+
+
+def parse_evaluation_parameter_urn(urn):
+    if urn.startswith("urn:great_expectations:validations:"):
+        split = urn.split(":")
+        if len(split) == 6:
+            return EvaluationParameterIdentifier(split[3], split[4], split[5])
+        elif len(split) == 5:
+            return EvaluationParameterIdentifier(split[3], split[4], None)
+        else:
+            raise ParserError("Unable to parse URN: must have 5 or 6 components to be a valid GE URN")
+
+    raise ParserError("Unrecognized evaluation parameter urn {}".format(urn))
 
 
 def convert_to_json_serializable(data):
@@ -46,14 +79,11 @@ def convert_to_json_serializable(data):
     import decimal
     import sys
 
-    # If it's one of our types, we use our own conversion; this can move to full schema (see DataAssetIdentifier below)
+    # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
     if isinstance(data, (ExpectationConfiguration, ExpectationSuite, ExpectationValidationResult,
                          ExpectationSuiteValidationResult)):
         return data.to_json_dict()
-
-    if isinstance(data, DataAssetIdentifier):
-        return dataAssetIdentifierSchema.dump(data).data
 
     try:
         if not isinstance(data, list) and np.isnan(data):
@@ -154,12 +184,11 @@ def ensure_json_serializable(data):
     from six import string_types, integer_types
     import datetime
     import decimal
-    import sys
 
-    # If it's one of our types, we use our own conversion; this can move to full schema (see DataAssetIdentifier below)
+    # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
     if isinstance(data, (ExpectationConfiguration, ExpectationSuite, ExpectationValidationResult,
-                         ExpectationSuiteValidationResult, DataAssetIdentifier)):
+                         ExpectationSuiteValidationResult)):
         return
 
     try:
@@ -192,7 +221,7 @@ def ensure_json_serializable(data):
         # test_obj[key] = test_obj[key].tolist()
         # If we have an array or index, convert it first to a list--causing coercion to float--and then round
         # to the number of digits for which the string representation will equal the float representation
-        dummy = [ensure_json_serializable(x) for x in data.tolist()]
+        _ = [ensure_json_serializable(x) for x in data.tolist()]
         return
 
     # Note: This clause has to come after checking for np.ndarray or we get:
@@ -221,8 +250,8 @@ def ensure_json_serializable(data):
         # keys must be strings. So, we use a very ugly serialization strategy
         index_name = data.index.name or "index"
         value_name = data.name or "value"
-        dummy = [{index_name: ensure_json_serializable(idx), value_name: ensure_json_serializable(val)}
-                 for idx, val in data.iteritems()]
+        _ = [{index_name: ensure_json_serializable(idx), value_name: ensure_json_serializable(val)}
+             for idx, val in data.iteritems()]
         return
     elif isinstance(data, pd.DataFrame):
         return ensure_json_serializable(data.to_dict(orient='records'))
@@ -233,177 +262,6 @@ def ensure_json_serializable(data):
     else:
         raise InvalidExpectationConfigurationError('%s is of type %s which cannot be serialized to json' % (
             str(data), type(data).__name__))
-
-
-class DataContextKey(object):
-    __metaclass__ = ABCMeta
-    """DataContextKey objects are used to uniquely identify resources used by the DataContext.
-
-    A DataContextKey is designed to support clear naming with multiple representations including a hashable
-    version making it suitable for use as the key in a dictionary.
-    """
-    @abstractmethod
-    def to_tuple(self):
-        pass
-
-    @classmethod
-    def from_tuple(cls, tuple_):
-        return cls(*tuple_)
-
-    def to_fixed_length_tuple(self):
-        raise NotImplementedError
-
-    @classmethod
-    def from_fixed_length_tuple(cls, tuple_):
-        raise NotImplementedError
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            # Delegate comparison to the other instance's __eq__.
-            return NotImplemented
-        return self.to_tuple() == other.to_tuple()
-
-    def __ne__(self, other):
-        return not self == other
-
-    def __hash__(self):
-        return hash(self.to_tuple())
-
-
-class IDDict(dict):
-    _id_ignore_keys = set()
-
-    def to_id(self, id_keys=None, id_ignore_keys=None):
-        if id_keys is None:
-            id_keys = self.keys()
-        if id_ignore_keys is None:
-            id_ignore_keys = self._id_ignore_keys
-        id_keys = set(id_keys) - set(id_ignore_keys)
-        if len(id_keys) == 0:
-            return None
-        elif len(id_keys) == 1:
-            key = list(id_keys)[0]
-            return key + ":" + str(self[key])
-
-        _id_dict = {k: self[k] for k in id_keys}
-        return hashlib.md5(json.dumps(_id_dict, sort_keys=True).encode('utf-8')).hexdigest()
-
-
-class BatchKwargs(IDDict):
-    """BatchKwargs represent information required by a datasource to fetch a batch of data.
-    BatchKwargs are usually generated by BatchKwargsGenerator objects and interpreted by Datasource objects.
-    """
-    # _partition_id_key = "partition_id"  # a partition id can be used as shorthand to access a batch of data
-    #
-    # @property
-    # def batch_fingerprint(self):
-    #     partition_id = self.get(self._partition_id_key, None)
-    #     # We do not allow a "None" partition_id, even if it's explicitly present as such in batch_kwargs
-    #     if partition_id is None:
-    #         partition_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-    #     id_keys = (set(self.keys()) - set(self._batch_fingerprint_ignored_keys)) - {self._partition_id_key}
-    #     if len(id_keys) == 1:
-    #         key = list(id_keys)[0]
-    #         hash_ = key + ":" + str(self[key])
-    #     else:
-    #         hash_dict = {k: self[k] for k in id_keys}
-    #         hash_ = md5(str(sorted(hash_dict.items())).encode("utf-8")).hexdigest()
-    #
-    #     return BatchFingerprint(partition_id=partition_id, fingerprint=hash_)
-    #
-    # @classmethod
-    # def build_batch_fingerprint(cls, dict_):
-    #     try:
-    #         return BatchKwargs(dict_).batch_fingerprint
-    #     except (KeyError, TypeError):
-    #         logger.warning("Unable to build BatchKwargs from provided dictionary.")
-    #         return None
-    pass
-
-
-class MetricKwargs(IDDict):
-    pass
-
-class DataAssetIdentifier(DataContextKey):
-
-    prioritized_valid_delimiter_list = ["/", "."]
-
-    def __init__(self, datasource, generator, generator_asset, delimiter='/'):
-        self._datasource = datasource
-        self._generator = generator
-        self._generator_asset = generator_asset
-        if delimiter not in self.prioritized_valid_delimiter_list:
-            raise InvalidDataContextKeyError("'%s' is not a valid delimiter for DataAssetIdentifier; valid delimiters"
-                                             "are %s" % (delimiter, str(self.prioritized_valid_delimiter_list)))
-        self._delimiter = delimiter
-
-    @property
-    def datasource(self):
-        return self._datasource
-
-    @property
-    def generator(self):
-        return self._generator
-
-    @property
-    def generator_asset(self):
-        return self._generator_asset
-
-    def to_tuple(self):
-        return self.datasource, self.generator, self.generator_asset
-
-    #####
-    # DataAssetIdentifier is treated specially to make it very string friendly.
-    # Use DataAssetIdentifierSchema to load from a string
-    #####
-
-    def to_path(self):
-        return "/".join((
-            self.datasource.replace("/", "__"),
-            self.generator.replace("/", "__"),
-            self.generator_asset.replace("/", "__")
-        ))
-
-    def __str__(self):
-        return self._delimiter.join((self.datasource, self.generator, self.generator_asset))
-
-    def __repr__(self):
-        return self._delimiter.join((self.datasource, self.generator, self.generator_asset))
-
-
-class DataAssetIdentifierSchema(Schema):
-    datasource = fields.Str(required=True)
-    generator = fields.Str(required=True)
-    generator_asset = fields.Str(required=True)
-
-    def parse_from_string(self, data):
-        if isinstance(data, string_types):
-            for delimiter in DataAssetIdentifier.prioritized_valid_delimiter_list:
-                if data.count(delimiter) == 2:
-                    data_split = data.split(delimiter)
-                    return {
-                        "datasource": data_split[0],
-                        "generator": data_split[1],
-                        "generator_asset": data_split[2]
-                    }
-            raise ValidationError("No valid delimiter found to parse DataAssetIdentifier: tried %s"
-                                  % str(DataAssetIdentifier.prioritized_valid_delimiter_list))
-        return data
-
-    # noinspection PyUnusedLocal
-    @pre_load(pass_many=False)
-    def load_handle_string(self, data, **kwargs):
-        return self.parse_from_string(data)
-
-    # noinspection PyUnusedLocal
-    @post_load(pass_many=False)
-    def make_data_asset_identifier(self, data, **kwargs):
-        return DataAssetIdentifier(**data)
-
-    # noinspection PyUnusedLocal
-    @pre_dump
-    def dump_handle_string(self, data, **kwargs):
-        return self.parse_from_string(data)
 
 
 class ExpectationKwargs(dict):
@@ -524,6 +382,22 @@ class ExpectationConfiguration(DictDot):
         myself['kwargs'] = convert_to_json_serializable(myself['kwargs'])
         return myself
 
+    def get_evaluation_parameter_dependencies(self):
+        dependencies = {}
+        for key, value in self.kwargs.items():
+            if isinstance(value, dict) and '$PARAMETER' in value:
+                if value["$PARAMETER"].startswith("urn:great_expectations:validations:"):
+                    try:
+                        evaluation_parameter_id = parse_evaluation_parameter_urn(value["$PARAMETER"])
+                    except ParserError:
+                        logger.warning("Unable to parse great_expectations urn {}".format(value["$PARAMETER"]))
+                        continue
+                    nested_update(dependencies, {evaluation_parameter_id.expectation_suite_name: {
+                        evaluation_parameter_id.metric_name: [evaluation_parameter_id.metric_kwargs_id]
+                    }})
+
+        return dependencies
+
 
 class ExpectationConfigurationSchema(Schema):
     expectation_type = fields.Str(
@@ -635,6 +509,14 @@ class ExpectationSuite(object):
         myself['meta'] = convert_to_json_serializable(myself['meta'])
         return myself
 
+    def get_evaluation_parameter_dependencies(self):
+        dependencies = {}
+        for expectation in self.expectations:
+            t = expectation.get_evaluation_parameter_dependencies()
+            nested_update(dependencies, t)
+
+        return dependencies
+
 
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
@@ -724,6 +606,36 @@ class ExpectationValidationResult(object):
             myself['exception_info'] = convert_to_json_serializable(myself['exception_info'])
         return myself
 
+    def get_metric(self, metric_name, metric_kwargs_id):
+        metric_name_parts = metric_name.split(".")
+
+        if metric_name_parts[0] == self.expectation_config.expectation_type:
+            if len(metric_name_parts) < 2:
+                raise UnavailableMetricError("Expectation-defined metrics must include a requested metric.")
+            elif len(metric_name_parts) == 2:
+                if metric_name_parts[1] == "success":
+                    if metric_kwargs_id != get_metric_kwargs_id(metric_name, self.expectation_config.kwargs):
+                        raise UnavailableMetricError("Configured metric_kwargs differ from requested.")
+                    return self.success
+                else:
+                    raise UnavailableMetricError("Metric name must have more than two parts for keys other than "
+                                                 "success.")
+            elif metric_name_parts[1] == "result":
+                try:
+                    if len(metric_name_parts) == 3:
+                        if metric_kwargs_id != get_metric_kwargs_id(metric_name, self.expectation_config.kwargs):
+                            raise UnavailableMetricError("Configured metric_kwargs differ from requested.")
+                        return self.result.get(metric_name_parts[2])
+                    elif metric_name_parts[2] == "details":
+                        if metric_kwargs_id != get_metric_kwargs_id(metric_name, self.expectation_config.kwargs):
+                            raise UnavailableMetricError("Configured metric_kwargs differ from requested.")
+                        return self.result["details"].get(metric_name_parts[3])
+                except KeyError:
+                    raise UnavailableMetricError("Unable to get metric {} -- KeyError in "
+                                                 "ExpectationValidationResult.".format(metric_name))
+            else:
+                raise UnavailableMetricError("Unrecognized metric name {}".format(metric_name))
+
 
 class ExpectationValidationResultSchema(Schema):
     success = fields.Bool()
@@ -771,6 +683,7 @@ class ExpectationSuiteValidationResult(DictDot):
             meta = {}
         ensure_json_serializable(meta)  # We require meta information to be serializable.
         self.meta = meta
+        self._metrics = {}
 
     def __eq__(self, other):
         """ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."""
@@ -801,6 +714,37 @@ class ExpectationSuiteValidationResult(DictDot):
         myself = expectationSuiteValidationResultSchema.dump(myself).data
         return myself
 
+    def get_metric(self, metric_name, metric_kwargs_id):
+        metric_name_parts = metric_name.split(".")
+
+        metric_value = None
+        # Expose overall statistics
+        if metric_name_parts[0] == "statistics":
+            if len(metric_name_parts) == 2:
+                return self.statistics.get(metric_name_parts[1])
+            else:
+                raise UnavailableMetricError("Unrecognized metric {}".format(metric_name))
+
+        # Expose expectation-defined metrics
+        elif metric_name_parts[0].lower().startswith("expect_"):
+            # Check our cache first
+            if (metric_name, metric_kwargs_id) in self._metrics:
+                return self._metrics[(metric_name, metric_kwargs_id)]
+            else:
+                for result in self.results:
+                    try:
+                        if metric_name_parts[0] == result.expectation_config.expectation_type:
+                            metric_value = result.get_metric(metric_name, metric_kwargs_id)
+                            break
+                    except UnavailableMetricError:
+                        pass
+                if metric_value is not None:
+                    self._metrics[(metric_name, metric_kwargs_id)] = metric_value
+                    return metric_value
+
+        raise UnavailableMetricError("Metric {} with metric_kwargs_id {} is not available.".format(metric_name,
+                                                                                                   metric_kwargs_id))
+
 
 class ExpectationSuiteValidationResultSchema(Schema):
     success = fields.Bool()
@@ -822,7 +766,6 @@ class ExpectationSuiteValidationResultSchema(Schema):
         return ExpectationSuiteValidationResult(**data)
 
 
-dataAssetIdentifierSchema = DataAssetIdentifierSchema(strict=True)
 expectationConfigurationSchema = ExpectationConfigurationSchema(strict=True)
 expectationSuiteSchema = ExpectationSuiteSchema(strict=True)
 expectationValidationResultSchema = ExpectationValidationResultSchema(strict=True)
