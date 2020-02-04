@@ -12,7 +12,7 @@
 * Removed support for type as a configuration key of datasource and generator objects
 * generators *require* a Datasource to function
 * Database store tables are not compatible between versions and require a manual migration
-
+* StoreEvaluationParametersAction
 
 0.8.7__develop
 -----------------

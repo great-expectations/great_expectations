@@ -14,13 +14,15 @@ from six import string_types
 import datetime
 import warnings
 
-from great_expectations.core import ExpectationSuite, nested_update
-from ..core.id_dict import BatchKwargs
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.id_dict import BatchKwargs
+from great_expectations.core.util import nested_update
+from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.data_context.types.base import DataContextConfig, dataContextConfigSchema
 from great_expectations.data_context.util import file_relative_path, substitute_config_variable
 from .types.resource_identifiers import ExpectationSuiteIdentifier, ValidationResultIdentifier
 from .util import safe_mmkdir, substitute_all_config_variables
-from ..core.metric import ValidationMetricIdentifier
+
 from ..types.base import DotDict
 
 import great_expectations.exceptions as ge_exceptions
@@ -34,11 +36,6 @@ except ImportError:
     from urlparse import urlparse
 
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import (
-    PandasDatasource,
-    SqlAlchemyDatasource,
-    SparkDFDatasource,
-)
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
 
@@ -64,18 +61,16 @@ yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
-ALLOWED_DELIMITERS = ['.', '/']
 
-
-class ConfigOnlyDataContext(object):
+class BaseDataContext(object):
     """
     This class implements most of the functionality of DataContext, with a few exceptions.
 
-    1. ConfigOnlyDataContext does not attempt to keep its project_config in sync with a file on disc.
-    2. ConfigOnlyDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
+    1. BaseDataContext does not attempt to keep its project_config in sync with a file on disc.
+    2. BaseDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
         into DataContext class.
 
-    Together, these changes make ConfigOnlyDataContext class more testable.
+    Together, these changes make BaseDataContext class more testable.
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
@@ -83,7 +78,6 @@ class ConfigOnlyDataContext(object):
     UNCOMMITTED_DIRECTORIES = ["data_docs", "samples", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
-        "datasources",
         "expectations",
         "notebooks",
         "plugins",
@@ -93,143 +87,6 @@ class ConfigOnlyDataContext(object):
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
     GE_EDIT_NOTEBOOK_DIR = os.path.join(GE_DIR, GE_UNCOMMITTED_DIR)
-
-    # TODO: Consider moving this to DataContext, instead of ConfigOnlyDataContext, since it writes to disc.
-    @classmethod
-    def create(cls, project_root_dir=None):
-        """
-        Build a new great_expectations directory and DataContext object in the provided project_root_dir.
-
-        `create` will not create a new "great_expectations" directory in the provided folder, provided one does not
-        already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
-
-        Args:
-            project_root_dir: path to the root directory in which to create a new great_expectations directory
-
-        Returns:
-            DataContext
-        """
-
-        if not os.path.isdir(project_root_dir):
-            raise ge_exceptions.DataContextError(
-                "The project_root_dir must be an existing directory in which "
-                "to initialize a new DataContext"
-            )
-
-        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
-        safe_mmkdir(ge_dir, exist_ok=True)
-        cls.scaffold_directories(ge_dir)
-
-        if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
-            message = """Warning. An existing `{}` was found here: {}.
-    - No action was taken.""".format(cls.GE_YML, ge_dir)
-            warnings.warn(message)
-        else:
-            cls.write_project_template_to_disk(ge_dir)
-
-        if os.path.isfile(os.path.join(ge_dir, "notebooks")):
-            message = """Warning. An existing `notebooks` directory was found here: {}.
-    - No action was taken.""".format(ge_dir)
-            warnings.warn(message)
-        else:
-            cls.scaffold_notebooks(ge_dir)
-
-        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
-        if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
-            message = """Warning. An existing `config_variables.yml` was found here: {}.
-    - No action was taken.""".format(uncommitted_dir)
-            warnings.warn(message)
-        else:
-            cls.write_config_variables_template_to_disk(uncommitted_dir)
-
-        return cls(ge_dir)
-
-    @classmethod
-    def all_uncommitted_directories_exist(cls, ge_dir):
-        """Check if all uncommitted direcotries exist."""
-        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
-        for directory in cls.UNCOMMITTED_DIRECTORIES:
-            if not os.path.isdir(os.path.join(uncommitted_dir, directory)):
-                return False
-
-        return True
-
-    @classmethod
-    def config_variables_yml_exist(cls, ge_dir):
-        """Check if all config_variables.yml exists."""
-        path_to_yml = os.path.join(ge_dir, cls.GE_YML)
-
-        # TODO this is so brittle and gross
-        with open(path_to_yml, "r") as f:
-            config = yaml.load(f)
-        config_var_path = config.get("config_variables_file_path")
-        config_var_path = os.path.join(ge_dir, config_var_path)
-        return os.path.isfile(config_var_path)
-
-    @classmethod
-    def write_config_variables_template_to_disk(cls, uncommitted_dir):
-        safe_mmkdir(uncommitted_dir)
-        config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
-        with open(config_var_file, "w") as template:
-            template.write(CONFIG_VARIABLES_TEMPLATE)
-
-    @classmethod
-    def write_project_template_to_disk(cls, ge_dir):
-        file_path = os.path.join(ge_dir, cls.GE_YML)
-        with open(file_path, "w") as template:
-            template.write(PROJECT_TEMPLATE)
-
-    @classmethod
-    def scaffold_directories(cls, base_dir):
-        """Safely create GE directories for a new project."""
-        safe_mmkdir(base_dir, exist_ok=True)
-        open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
-
-        for directory in cls.BASE_DIRECTORIES:
-            if directory == "plugins":
-                plugins_dir = os.path.join(base_dir, directory)
-                safe_mmkdir(plugins_dir, exist_ok=True)
-                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs"), exist_ok=True)
-                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "views"), exist_ok=True)
-                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "renderers"), exist_ok=True)
-                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "styles"), exist_ok=True)
-                cls.scaffold_custom_data_docs(plugins_dir)
-            else:
-                safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
-
-        uncommitted_dir = os.path.join(base_dir, cls.GE_UNCOMMITTED_DIR)
-
-        for new_directory in cls.UNCOMMITTED_DIRECTORIES:
-            new_directory_path = os.path.join(uncommitted_dir, new_directory)
-            safe_mmkdir(
-                new_directory_path,
-                exist_ok=True
-            )
-
-        notebook_path = os.path.join(base_dir, "notebooks")
-        for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
-            safe_mmkdir(os.path.join(notebook_path, subdir), exist_ok=True)
-
-    @classmethod
-    def scaffold_custom_data_docs(cls, plugins_dir):
-        """Copy custom data docs templates"""
-        styles_template = file_relative_path(
-            __file__, "../render/view/static/styles/data_docs_custom_styles_template.css")
-        styles_destination_path = os.path.join(
-            plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
-        shutil.copyfile(styles_template, styles_destination_path)
-
-    @classmethod
-    def scaffold_notebooks(cls, base_dir):
-        """Copy template notebooks into the notebooks directory for a project."""
-        template_dir = file_relative_path(__file__, "../init_notebooks/")
-        notebook_dir = os.path.join(base_dir, "notebooks/")
-        for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
-            subdir_path = os.path.join(notebook_dir, subdir)
-            for notebook in glob.glob(os.path.join(template_dir, subdir, "*.ipynb")):
-                notebook_name = os.path.basename(notebook)
-                destination_path = os.path.join(subdir_path, notebook_name)
-                shutil.copyfile(notebook, destination_path)
 
     @classmethod
     def validate_config(cls, project_config):
@@ -251,7 +108,7 @@ class ConfigOnlyDataContext(object):
         Returns:
             None
         """
-        if not ConfigOnlyDataContext.validate_config(project_config):
+        if not BaseDataContext.validate_config(project_config):
             raise ge_exceptions.InvalidConfigError("Your project_config is not valid. Try using the CLI check-config command.")
 
         self._project_config = project_config
@@ -466,7 +323,7 @@ class ConfigOnlyDataContext(object):
     def _load_config_variables_file(self):
         """Get all config variables from the default location."""
         if not hasattr(self, "root_directory"):
-            # A ConfigOnlyDataContext does not have a directory in which to look
+            # A BaseDataContext does not have a directory in which to look
             return {}
 
         config_variables_file_path = self.get_config().config_variables_file_path
@@ -661,7 +518,7 @@ class ConfigOnlyDataContext(object):
         Returns:
             datasource (Datasource)
         """
-        logger.debug("Starting ConfigOnlyDataContext.add_datasource for %s" % name)
+        logger.debug("Starting BaseDataContext.add_datasource for %s" % name)
         datasource_class = load_class(
             kwargs.get("class_name"),
             kwargs.get("module_name", "great_expectations.datasource")
@@ -836,26 +693,22 @@ class ConfigOnlyDataContext(object):
         self.stores[self.expectations_store_name].set(key, expectation_suite)
         self._evaluation_parameter_dependencies_compiled = False
 
-    def get_required_metric_keys(self):
-        logger.error("get_required_metric_keys IS NOT YET REIMPLEMENTED")
-        return []
-
-    def store_validation_result_metrics(self, validation_results):
-        if not self._evaluation_parameter_dependencies_compiled:
-            self._compile_evaluation_parameter_dependencies()
-
+    def _store_metrics(self, requested_metrics, validation_results, target_store_name):
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         run_id = validation_results.meta["run_id"]
 
-        for expectation_suite_dependency, metrics_dict in self._evaluation_parameter_dependencies.items():
-            if expectation_suite_dependency != expectation_suite_name:
+        for expectation_suite_dependency, metrics_dict in requested_metrics.items():
+            if (expectation_suite_dependency != "*") and (expectation_suite_dependency != expectation_suite_name):
                 continue
 
             for metric_name in metrics_dict.keys():
-                for metric_kwargs_id in metrics_dict[metric_name]:
+                metric_kwargs_ids = metrics_dict[metric_name]
+                if len(metric_kwargs_ids) == 0:
+                    metric_kwargs_ids = [None]
+                for metric_kwargs_id in metric_kwargs_ids:
                     try:
                         metric_value = validation_results.get_metric(metric_name, metric_kwargs_id)
-                        self.evaluation_parameter_store.set(
+                        self.stores[target_store_name].set(
                             ValidationMetricIdentifier(
                                 run_id=run_id,
                                 expectation_suite_identifier=ExpectationSuiteIdentifier(expectation_suite_name),
@@ -868,6 +721,18 @@ class ConfigOnlyDataContext(object):
                         # This will happen frequently in larger pipelines
                         logger.debug("metric {} was requested by another expectation suite but is not available in "
                                      "this validation result.".format(metric_name))
+
+    def store_validation_result_metrics(self, requested_metrics, validation_results, target_store_name):
+        self._store_metrics(requested_metrics, validation_results, target_store_name)
+
+    def store_evaluation_parameters(self, validation_results, target_store_name=None):
+        if not self._evaluation_parameter_dependencies_compiled:
+            self._compile_evaluation_parameter_dependencies()
+
+        if target_store_name is None:
+            target_store_name = self.evaluation_parameter_store_name
+
+        self._store_metrics(self._evaluation_parameter_dependencies, validation_results, target_store_name)
 
     @property
     def evaluation_parameter_store(self):
@@ -1316,7 +1181,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return profiling_results
 
 
-class DataContext(ConfigOnlyDataContext):
+class DataContext(BaseDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
     expectation suites, datasources, notification settings, and data fixtures.
 
@@ -1353,6 +1218,141 @@ class DataContext(ConfigOnlyDataContext):
 
     Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
     """
+    @classmethod
+    def create(cls, project_root_dir=None):
+        """
+        Build a new great_expectations directory and DataContext object in the provided project_root_dir.
+
+        `create` will not create a new "great_expectations" directory in the provided folder, provided one does not
+        already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
+
+        Args:
+            project_root_dir: path to the root directory in which to create a new great_expectations directory
+
+        Returns:
+            DataContext
+        """
+
+        if not os.path.isdir(project_root_dir):
+            raise ge_exceptions.DataContextError(
+                "The project_root_dir must be an existing directory in which "
+                "to initialize a new DataContext"
+            )
+
+        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
+        safe_mmkdir(ge_dir, exist_ok=True)
+        cls.scaffold_directories(ge_dir)
+
+        if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
+            message = """Warning. An existing `{}` was found here: {}.
+    - No action was taken.""".format(cls.GE_YML, ge_dir)
+            warnings.warn(message)
+        else:
+            cls.write_project_template_to_disk(ge_dir)
+
+        if os.path.isfile(os.path.join(ge_dir, "notebooks")):
+            message = """Warning. An existing `notebooks` directory was found here: {}.
+    - No action was taken.""".format(ge_dir)
+            warnings.warn(message)
+        else:
+            cls.scaffold_notebooks(ge_dir)
+
+        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
+        if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
+            message = """Warning. An existing `config_variables.yml` was found here: {}.
+    - No action was taken.""".format(uncommitted_dir)
+            warnings.warn(message)
+        else:
+            cls.write_config_variables_template_to_disk(uncommitted_dir)
+
+        return cls(ge_dir)
+
+    @classmethod
+    def all_uncommitted_directories_exist(cls, ge_dir):
+        """Check if all uncommitted direcotries exist."""
+        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
+        for directory in cls.UNCOMMITTED_DIRECTORIES:
+            if not os.path.isdir(os.path.join(uncommitted_dir, directory)):
+                return False
+
+        return True
+
+    @classmethod
+    def config_variables_yml_exist(cls, ge_dir):
+        """Check if all config_variables.yml exists."""
+        path_to_yml = os.path.join(ge_dir, cls.GE_YML)
+
+        # TODO this is so brittle and gross
+        with open(path_to_yml, "r") as f:
+            config = yaml.load(f)
+        config_var_path = config.get("config_variables_file_path")
+        config_var_path = os.path.join(ge_dir, config_var_path)
+        return os.path.isfile(config_var_path)
+
+    @classmethod
+    def write_config_variables_template_to_disk(cls, uncommitted_dir):
+        safe_mmkdir(uncommitted_dir)
+        config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
+        with open(config_var_file, "w") as template:
+            template.write(CONFIG_VARIABLES_TEMPLATE)
+
+    @classmethod
+    def write_project_template_to_disk(cls, ge_dir):
+        file_path = os.path.join(ge_dir, cls.GE_YML)
+        with open(file_path, "w") as template:
+            template.write(PROJECT_TEMPLATE)
+
+    @classmethod
+    def scaffold_directories(cls, base_dir):
+        """Safely create GE directories for a new project."""
+        safe_mmkdir(base_dir, exist_ok=True)
+        open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
+
+        for directory in cls.BASE_DIRECTORIES:
+            if directory == "plugins":
+                plugins_dir = os.path.join(base_dir, directory)
+                safe_mmkdir(plugins_dir, exist_ok=True)
+                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs"), exist_ok=True)
+                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "views"), exist_ok=True)
+                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "renderers"), exist_ok=True)
+                safe_mmkdir(os.path.join(plugins_dir, "custom_data_docs", "styles"), exist_ok=True)
+                cls.scaffold_custom_data_docs(plugins_dir)
+            else:
+                safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
+
+        uncommitted_dir = os.path.join(base_dir, cls.GE_UNCOMMITTED_DIR)
+
+        for new_directory in cls.UNCOMMITTED_DIRECTORIES:
+            new_directory_path = os.path.join(uncommitted_dir, new_directory)
+            safe_mmkdir(
+                new_directory_path,
+                exist_ok=True
+            )
+
+        notebook_path = os.path.join(base_dir, "notebooks")
+        for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
+            safe_mmkdir(os.path.join(notebook_path, subdir), exist_ok=True)
+
+    @classmethod
+    def scaffold_custom_data_docs(cls, plugins_dir):
+        """Copy custom data docs templates"""
+        styles_template = file_relative_path(
+            __file__, "../render/view/static/styles/data_docs_custom_styles_template.css")
+        styles_destination_path = os.path.join(
+            plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css")
+        shutil.copyfile(styles_template, styles_destination_path)
+
+    @classmethod
+    def scaffold_notebooks(cls, base_dir):
+        """Copy template notebooks into the notebooks directory for a project."""
+        template_dir = file_relative_path(__file__, "../init_notebooks/")
+        notebook_dir = os.path.join(base_dir, "notebooks/")
+        for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
+            subdir_path = os.path.join(notebook_dir, subdir)
+            for notebook in glob.glob(os.path.join(template_dir, subdir, "*.ipynb")):
+                notebook_name = os.path.basename(notebook)
+                destination_path = os.path.join(subdir_path, notebook_name)
+                shutil.copyfile(notebook, destination_path)
 
     def __init__(self, context_root_dir=None):
 

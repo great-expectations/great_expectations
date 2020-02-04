@@ -11,7 +11,7 @@ from great_expectations.core import (
     expectationSuiteSchema,
 )
 from great_expectations.data_context import (
-    ConfigOnlyDataContext,
+    BaseDataContext,
     DataContext,
     ExplorerDataContext,
 )
@@ -484,7 +484,6 @@ def basic_data_context_config():
         "commented_map": {},
         "config_version": 1,
         "plugins_directory": "plugins/",
-        "config_variables_file_path": None,
         "evaluation_parameter_store_name": "evaluation_parameter_store",
         "validations_store_name": "does_not_have_to_be_real",
         "expectations_store_name": "expectations_store",
@@ -521,7 +520,7 @@ def test_ExplorerDataContext(titanic_data_context):
 
 def test_ConfigOnlyDataContext__initialization(tmp_path_factory, basic_data_context_config):
     config_path = str(tmp_path_factory.mktemp('test_ConfigOnlyDataContext__initialization__dir'))
-    context = ConfigOnlyDataContext(
+    context = BaseDataContext(
         basic_data_context_config,
         config_path,
     )
@@ -532,7 +531,7 @@ def test_ConfigOnlyDataContext__initialization(tmp_path_factory, basic_data_cont
 
 def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_context_config):
     config_path = str(tmp_path_factory.mktemp('test__normalize_absolute_or_relative_path__dir'))
-    context = ConfigOnlyDataContext(
+    context = BaseDataContext(
         basic_data_context_config,
         config_path,
     )
@@ -1006,11 +1005,11 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
     try:
         # We should be able to load different files based on an environment variable
         os.environ["TEST_CONFIG_FILE_ENV"] = "dev"
-        context = ConfigOnlyDataContext(basic_data_context_config, context_root_dir=base_path)
+        context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
         config_vars = context._load_config_variables_file()
         assert config_vars['env'] == 'dev'
         os.environ["TEST_CONFIG_FILE_ENV"] = "prod"
-        context = ConfigOnlyDataContext(basic_data_context_config, context_root_dir=base_path)
+        context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
         config_vars = context._load_config_variables_file()
         assert config_vars['env'] == 'prod'
     except Exception:

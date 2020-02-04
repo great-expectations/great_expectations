@@ -7,7 +7,7 @@ from great_expectations.data_context.store.store import Store
 from great_expectations.util import load_class
 
 
-class EvaluationParameterStore(Store):
+class MetricStore(Store):
     _key_class = ValidationMetricIdentifier
 
     def __init__(self, store_backend=None):
@@ -28,32 +28,12 @@ class EvaluationParameterStore(Store):
                     ]
                 )
 
-        super(EvaluationParameterStore, self).__init__(store_backend=store_backend)
+        super(MetricStore, self).__init__(store_backend=store_backend)
 
     # noinspection PyMethodMayBeStatic
     def _validate_value(self, value):
         # Values must be json serializable since they must be inputs to expectation configurations
         ensure_json_serializable(value)
-
-    def get_bind_params(self, run_id):
-        params = {}
-        for k in self._store_backend.list_keys((run_id,)):
-            key = self.tuple_to_key(k)
-            params[key.to_evaluation_parameter_urn()] = self.get(key)
-            # backend_value = json.loads(self._store_backend.get(k))
-            # batch_kwargs = backend_value["batch_kwargs"]
-            # metric_name = backend_value["metric_name"]
-            # metric_kwargs = backend_value["metric_kwargs"]
-            # evaluation_parameter_identifier = EvaluationParameterIdentifier(
-            #     run_id=run_id,
-            #     batch_metric_identifier=BatchMetricIdentifier(
-            #         batch_identifier=BatchKwargs(batch_kwargs).to_id(),
-            #         metric_name=metric_name,
-            #         metric_kwargs_identifier=MetricKwargs(metric_kwargs).to_id()
-            #     )
-            # )
-            # params[evaluation_parameter_identifier.to_urn()] = backend_value["value"]
-        return params
 
     def serialize(self, key, value):
         return json.dumps({"value": value})
@@ -61,3 +41,13 @@ class EvaluationParameterStore(Store):
     def deserialize(self, key, value):
         if value:
             return json.loads(value)["value"]
+
+
+class EvaluationParameterStore(MetricStore):
+
+    def get_bind_params(self, run_id):
+        params = {}
+        for k in self._store_backend.list_keys((run_id,)):
+            key = self.tuple_to_key(k)
+            params[key.to_evaluation_parameter_urn()] = self.get(key)
+        return params

@@ -2,8 +2,9 @@ import logging
 
 from marshmallow import Schema, fields, post_load
 
+from great_expectations.core import IDDict
 from great_expectations.core.data_context_key import DataContextKey
-from great_expectations.exceptions import InvalidDataContextKeyError
+from great_expectations.exceptions import InvalidDataContextKeyError, DataContextError
 
 logger = logging.getLogger(__name__)
 
@@ -87,13 +88,9 @@ class ValidationResultIdentifier(DataContextKey):
             run_id (str): The run_id for which validation occurred
         """
         super(ValidationResultIdentifier, self).__init__()
-        self._batch_identifier = batch_identifier
         self._expectation_suite_identifier = expectation_suite_identifier
         self._run_id = run_id
-
-    @property
-    def batch_identifier(self):
-        return self._batch_identifier
+        self._batch_identifier = batch_identifier
 
     @property
     def expectation_suite_identifier(self):
@@ -102,6 +99,10 @@ class ValidationResultIdentifier(DataContextKey):
     @property
     def run_id(self):
         return self._run_id
+
+    @property
+    def batch_identifier(self):
+        return self._batch_identifier
 
     def to_tuple(self):
         return tuple(
@@ -123,6 +124,20 @@ class ValidationResultIdentifier(DataContextKey):
     def from_fixed_length_tuple(cls, tuple_):
         return cls(ExpectationSuiteIdentifier(tuple_[0]), tuple_[1], tuple_[2])
 
+    @classmethod
+    def from_object(cls, validation_result):
+        batch_kwargs = validation_result.meta.get("batch_kwargs", {})
+        if isinstance(batch_kwargs, IDDict):
+            batch_identifier = batch_kwargs.to_id()
+        elif isinstance(batch_kwargs, dict):
+            batch_identifier = IDDict(batch_kwargs).to_id()
+        else:
+            raise DataContextError("Unable to construct ValidationResultIdentifier from provided object.")
+        return cls(
+            expectation_suite_identifier=ExpectationSuiteIdentifier(validation_result.meta["expectation_suite_name"]),
+            run_id=validation_result.meta.get("run_id"),
+            batch_identifier=batch_identifier
+        )
 
 
 class ValidationResultIdentifierSchema(Schema):

@@ -15,7 +15,7 @@ from great_expectations.validation_operators.validation_operators import (
 )
 
 from great_expectations.data_context import (
-    ConfigOnlyDataContext,
+    BaseDataContext,
 )
 from ..test_utils import modify_locale
 
@@ -38,7 +38,7 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
     # NOTE: This setup is almost identical to test_DefaultDataContextAwareValidationOperator.
     # Consider converting to a single fixture.
 
-    data_context = ConfigOnlyDataContext(
+    data_context = BaseDataContext(
         basic_data_context_config_for_validation_operator,
         project_path,
     )

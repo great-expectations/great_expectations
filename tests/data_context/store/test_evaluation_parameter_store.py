@@ -71,7 +71,7 @@ def test_evaluation_parameter_store_methods(data_context):
         success=True
     )
 
-    data_context.store_validation_result_metrics(source_patient_data_results)
+    data_context.store_evaluation_parameters(source_patient_data_results)
 
     bound_parameters = data_context.evaluation_parameter_store.get_bind_params(run_id)
     assert bound_parameters == {
@@ -109,7 +109,7 @@ def test_evaluation_parameter_store_methods(data_context):
         success=True
     )
 
-    data_context.store_validation_result_metrics(source_diabetes_data_results)
+    data_context.store_evaluation_parameters(source_diabetes_data_results)
     bound_parameters = data_context.evaluation_parameter_store.get_bind_params(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result'

@@ -9,7 +9,7 @@ ActionListValidationOperator validates each batch in its `run` method's `assets_
 
 Then it invokes a list of configured actions on every validation result.
 
-Each action in the list must be an instance of NamespacedValidationAction
+Each action in the list must be an instance of ValidationAction
 class (or its descendants). Read more about actions here: :ref:`actions`.
 
 The init command includes this operator in the default configuration file.
@@ -60,7 +60,7 @@ This is an example of invoking an instance of a Validation Operator from Python:
         validation_operator_name="perform_action_list_operator",
     )
 
-* `assets_to_validate` - an iterable that specifies the data assets that the operator will validate. The members of the list can be either batches or triples that will allow the operator to fetch the batch: (data_asset_name, expectation_suite_name, batch_kwargs) using this method: :py:meth:`~great_expectations.data_context.ConfigOnlyDataContext.get_batch`
+* `assets_to_validate` - an iterable that specifies the data assets that the operator will validate. The members of the list can be either batches or triples that will allow the operator to fetch the batch: (data_asset_name, expectation_suite_name, batch_kwargs) using this method: :py:meth:`~great_expectations.data_context.BaseDataContext.get_batch`
 * run_id - pipeline run id, a timestamp or any other string that is meaningful to you and will help you refer to the result of this operation later
 * validation_operator_name you can instances of a class that implements a Validation Operator
 
