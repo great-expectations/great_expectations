@@ -78,6 +78,8 @@ class ConfigOnlyDataContext(object):
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
+    PROFILING_ERROR_CODE_NO_GENERATOR_FOUND = 4
+    PROFILING_ERROR_CODE_MULTIPLE_GENERATORS_FOUND = 5
     UNCOMMITTED_DIRECTORIES = ["data_docs", "samples", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
@@ -1608,16 +1610,26 @@ class ConfigOnlyDataContext(object):
             # if ambiguous, raise an exception
             for name in datasource_data_asset_names_dict.keys():
                 if generator_name is not None:
-                    raise ge_exceptions.ProfilerError(
-                        "Multiple generators found. Specify generator name")
+                    profiling_results = {
+                        'success': False,
+                        'error': {
+                            'code': DataContext.PROFILING_ERROR_CODE_MULTIPLE_GENERATORS_FOUND
+                        }
+                    }
+                    return profiling_results
 
                 if len(datasource_data_asset_names_dict[name]["names"]) > 0:
                     available_data_asset_name_list = datasource_data_asset_names_dict[name]["names"]
                     generator_name = name
 
             if generator_name is None:
-                raise ge_exceptions.ProfilerError(
-                    "No generator found. Add a generator to the datasource")
+                profiling_results = {
+                    'success': False,
+                    'error': {
+                        'code': DataContext.PROFILING_ERROR_CODE_NO_GENERATOR_FOUND
+                    }
+                }
+                return profiling_results
         else:
             # if the generator name is passed as an arg, get this generator's available data asset names
             try:
