@@ -51,7 +51,7 @@ def test_validate_using_data_context(dataset, data_context):
 
     # Since the handling of evaluation parameters is no longer happening without an action,
     # the context should still be not compiles after validation.
-    assert data_context._compiled is False
+    assert data_context._evaluation_parameter_dependencies_compiled is False
 
     # And, we should have validated the right number of expectations from the context-provided config
     assert res.success is False
