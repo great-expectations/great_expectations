@@ -161,45 +161,15 @@ def test_save_expectation_suite(data_context):
     assert expectation_suite.expectations == expectation_suite_saved.expectations
 
 
-@pytest.mark.xfail
-def test_compile(data_context):
-    data_context._compile()
-    assert data_context._compiled_parameters == {
-        'raw': {
-            'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value',
-            'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value'
-            },
-        'data_assets': {
-            DataAssetIdentifier(
-                datasource='mydatasource',
-                generator='mygenerator',
-                generator_asset='source_diabetes_data'
-            ): {
-                'default': {
-                    'expect_column_unique_value_count_to_be_between': {
-                        'columns': {
-                            'patient_nbr': {
-                                'result': {
-                                    'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value'
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            DataAssetIdentifier(
-                datasource='mydatasource',
-                generator='mygenerator',
-                generator_asset='source_patient_data'
-            ): {
-                'default': {
-                    'expect_table_row_count_to_equal': {
-                        'result': {
-                            'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value'
-                        }
-                    }
-                }
-            }
+def test_compile_evaluation_parameter_dependencies(data_context):
+    assert data_context._evaluation_parameter_dependencies == {}
+    data_context._compile_evaluation_parameter_dependencies()
+    assert data_context._evaluation_parameter_dependencies == {
+        'source_diabetes_data.default': {
+            'expect_column_unique_value_count_to_be_between.result.observed_value': ['column=patient_nbr']
+        },
+        'source_patient_data.default': {
+            'expect_table_row_count_to_equal.result.observed_value': [None]
         }
     }
 
@@ -207,7 +177,6 @@ def test_list_datasources(data_context):
     datasources = data_context.list_datasources()
 
     assert OrderedDict(datasources) == OrderedDict([
-
         {
             'name': 'mydatasource',
             'class_name': 'PandasDatasource'
