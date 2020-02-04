@@ -319,7 +319,6 @@ project_path/
     great_expectations/
         .gitignore
         great_expectations.yml
-        datasources/
         expectations/
             titanic/
                 subdir_reader/
@@ -752,7 +751,6 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(tmp_pat
 great_expectations/
     .gitignore
     great_expectations.yml
-    datasources/
     expectations/
     notebooks/
         pandas/
@@ -780,7 +778,6 @@ def test_data_context_create_does_nothing_if_all_uncommitted_dirs_exist(tmp_path
 great_expectations/
     .gitignore
     great_expectations.yml
-    datasources/
     expectations/
     notebooks/
         pandas/
@@ -871,7 +868,6 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
     DataContext.scaffold_notebooks(empty_directory)
 
     assert set(os.listdir(empty_directory)) == {
-        'datasources',
         'plugins',
         'expectations',
         '.gitignore',
