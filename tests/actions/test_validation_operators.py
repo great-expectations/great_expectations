@@ -127,7 +127,7 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
             {'type': 'section',
              'text': {''
                       'type': 'mrkdwn',
-                      'text': "*Failed Batches:* ['f1.failure-ge_batch_id:82a8de83-e063-11e9-8133-acde48001122']"
+                      'text': "*Failed Batches:* ['f1.failure-ge_batch_id=82a8de83-e063-11e9-8133-acde48001122']"
                       }
              },
             {'type': 'section',
