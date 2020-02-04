@@ -3,7 +3,8 @@ import logging
 # PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 from abc import ABCMeta
 
-from great_expectations.core import DataContextKey, BatchKwargs
+from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.exceptions import InvalidBatchKwargsError, InvalidBatchIdError
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,7 @@
 import datetime
 
 from .renderer import Renderer
-from ...core import BatchKwargs
+from ...core.id_dict import BatchKwargs
 
 
 class SlackRenderer(Renderer):

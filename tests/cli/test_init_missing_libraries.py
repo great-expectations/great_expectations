@@ -63,7 +63,6 @@ of this config file: great_expectations/uncommitted/config_variables.yml"""
 great_expectations/
     .gitignore
     great_expectations.yml
-    datasources/
     expectations/
     notebooks/
         pandas/

@@ -28,7 +28,7 @@ validation_operators:
           target_store_name: validations_store
       - name: store_evaluation_params
         action:
-          class_name: ExtractAndStoreEvaluationParamsAction
+          class_name: StoreEvaluationParametersAction
           target_store_name: evaluation_parameter_store
 
 stores:
