@@ -2,7 +2,7 @@ import logging
 
 from marshmallow import Schema, fields, post_load
 
-from great_expectations.core import DataContextKey
+from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.exceptions import InvalidDataContextKeyError
 
 logger = logging.getLogger(__name__)

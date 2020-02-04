@@ -3,7 +3,7 @@ import logging
 from marshmallow import ValidationError
 from six import string_types
 
-from great_expectations.core import BatchKwargs
+from ...core.id_dict import BatchKwargs
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import num_to_str
 

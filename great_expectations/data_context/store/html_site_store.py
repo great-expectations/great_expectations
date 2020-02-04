@@ -14,7 +14,7 @@ from great_expectations.data_context.util import (
     file_relative_path
 )
 from great_expectations.exceptions import DataContextError
-from great_expectations.core import DataContextKey
+from ...core.data_context_key import DataContextKey
 
 logger = logging.getLogger(__name__)
 

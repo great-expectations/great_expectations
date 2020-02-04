@@ -1,14 +1,14 @@
 import json
 
-from great_expectations.core import ensure_json_serializable, BatchKwargs, MetricKwargs
+from great_expectations.core import ensure_json_serializable
+from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.data_context.store.database_store_backend import DatabaseStoreBackend
 from great_expectations.data_context.store.store import Store
-from great_expectations.data_context.types.metrics import EvaluationParameterIdentifier, BatchMetricIdentifier
 from great_expectations.util import load_class
 
 
 class EvaluationParameterStore(Store):
-    key_class = EvaluationParameterIdentifier
+    _key_class = ValidationMetricIdentifier
 
     def __init__(self, store_backend=None):
         if store_backend is not None:
@@ -22,8 +22,9 @@ class EvaluationParameterStore(Store):
                 store_backend["key_columns"] = store_backend.get(
                     "key_columns", [
                         "run_id",
-                        "batch_identifier",
-                        "metric_identifier",
+                        "expectation_suite_identifier",
+                        "metric_name",
+                        "metric_kwargs_id",
                     ]
                 )
 
@@ -37,27 +38,26 @@ class EvaluationParameterStore(Store):
     def get_bind_params(self, run_id):
         params = {}
         for k in self._store_backend.list_keys((run_id,)):
-            backend_value = json.loads(self._store_backend.get(k))
-            batch_kwargs = backend_value["batch_kwargs"]
-            metric_name = backend_value["metric_name"]
-            metric_kwargs = backend_value["metric_kwargs"]
-            evaluation_parameter_identifier = EvaluationParameterIdentifier(
-                run_id=run_id,
-                batch_metric_identifier=BatchMetricIdentifier(
-                    batch_identifier=BatchKwargs(batch_kwargs).to_id(),
-                    metric_name=metric_name,
-                    metric_kwargs_identifier=MetricKwargs(metric_kwargs).to_id()
-                )
-            )
-            params[evaluation_parameter_identifier.to_urn()] = backend_value["value"]
+            key = self.tuple_to_key(k)
+            params[key.to_evaluation_parameter_urn()] = self.get(key)
+            # backend_value = json.loads(self._store_backend.get(k))
+            # batch_kwargs = backend_value["batch_kwargs"]
+            # metric_name = backend_value["metric_name"]
+            # metric_kwargs = backend_value["metric_kwargs"]
+            # evaluation_parameter_identifier = EvaluationParameterIdentifier(
+            #     run_id=run_id,
+            #     batch_metric_identifier=BatchMetricIdentifier(
+            #         batch_identifier=BatchKwargs(batch_kwargs).to_id(),
+            #         metric_name=metric_name,
+            #         metric_kwargs_identifier=MetricKwargs(metric_kwargs).to_id()
+            #     )
+            # )
+            # params[evaluation_parameter_identifier.to_urn()] = backend_value["value"]
         return params
-    #
-    # def serialize(self, key, value):
-    #     return json.dumps({
-    #         "value": value,
-    #         "batch_kwargs": key.metric_kwargs,
-    #         "metric_kwargs": key.metric_kwargs
-    #     })
-    #
-    # def deserialize(self, key, value):
-    #     return json.loads(value)["value"]
+
+    def serialize(self, key, value):
+        return json.dumps({"value": value})
+
+    def deserialize(self, key, value):
+        if value:
+            return json.loads(value)["value"]
