@@ -504,6 +504,17 @@ def sqlitedb_engine(test_backend):
 
 
 @pytest.fixture
+def postgresql_engine(test_backend):
+    if test_backend == 'postgresql':
+        import sqlalchemy as sa
+        engine = sa.create_engine('postgresql://postgres@localhost/test_ci').connect()
+        yield engine
+        engine.close()
+    else:
+        pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
+
+
+@pytest.fixture
 def empty_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('empty_data_context'))
     context = ge.data_context.DataContext.create(project_path)
