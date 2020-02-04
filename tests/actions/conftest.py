@@ -1,9 +1,10 @@
 import pytest
 
+from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def basic_data_context_config_for_validation_operator():
     return DataContextConfig(
         config_version=1,
@@ -13,23 +14,16 @@ def basic_data_context_config_for_validation_operator():
         datasources={},
         stores={
             "expectations_store": {
-                "class_name": "ExpectationsStore",
-                "store_backend": {
-                    "class_name": "InMemoryStoreBackend"
-                }
+                "class_name": "ExpectationsStore"
             },
             "evaluation_parameter_store": {
-                "class_name": "EvaluationParameterStore",
-                "store_backend": {
-                    "class_name": "InMemoryStoreBackend"
-                }
+                "class_name": "EvaluationParameterStore"
             },
             "validation_result_store": {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "ValidationsStore",
-                "store_backend": {
-                    "class_name": "InMemoryStoreBackend",
-                }
+                "class_name": "ValidationsStore"
+            },
+            "metrics_store": {
+                "class_name": "MetricStore"
             }
         },
         validations_store_name="validation_result_store",
@@ -48,7 +42,7 @@ def basic_data_context_config_for_validation_operator():
                     {
                         "name": "extract_and_store_eval_parameters",
                         "action": {
-                            "class_name": "ExtractAndStoreEvaluationParamsAction",
+                            "class_name": "StoreEvaluationParametersAction",
                             "target_store_name": "evaluation_parameter_store",
                         }
                     }
@@ -67,7 +61,7 @@ def basic_data_context_config_for_validation_operator():
                     {
                         "name": "extract_and_store_eval_parameters",
                         "action": {
-                            "class_name": "ExtractAndStoreEvaluationParamsAction",
+                            "class_name": "StoreEvaluationParametersAction",
                             "target_store_name": "evaluation_parameter_store",
                         }
                     }
@@ -75,3 +69,9 @@ def basic_data_context_config_for_validation_operator():
             }
         }
     )
+
+
+@pytest.fixture(scope="module")
+def basic_in_memory_data_context_for_validation_operator(basic_data_context_config_for_validation_operator):
+    return BaseDataContext(basic_data_context_config_for_validation_operator)
+

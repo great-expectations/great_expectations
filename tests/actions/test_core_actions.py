@@ -1,5 +1,3 @@
-import pytest
-
 from great_expectations.core import ExpectationSuiteValidationResult
 
 try:
@@ -8,43 +6,16 @@ except ImportError:
     import mock
 
 from great_expectations.validation_operators import (
-    BasicValidationAction,
     SlackNotificationAction,
     StoreAction
 )
-# from great_expectations.actions.types import (
-#     ActionInternalConfig,
-#     ActionConfig,
-#     ActionSetConfig,
-# )
 from great_expectations.data_context.store import (
-    # NamespacedInMemoryStore
     ValidationsStore,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
     ExpectationSuiteIdentifier
 )
-
-
-def test_subclass_of_BasicValidationAction():
-    # I dunno. This is kind of a silly test.
-
-    class MyCountingValidationAction(BasicValidationAction):
-        def __init__(self):
-            super(MyCountingValidationAction, self).__init__()
-            self._counter = 0
-
-        def take_action(self, validation_result_suite):
-            self._counter += 1
-
-    fake_validation_result_suite = {}
-
-    my_action = MyCountingValidationAction()
-    assert my_action._counter == 0
-
-    my_action.take_action(fake_validation_result_suite)
-    assert my_action._counter == 1
 
 
 def test_StoreAction():
