@@ -72,7 +72,6 @@ def init(target_directory, view):
             try:
                 context = DataContext(ge_dir)
                 cli_message(PROJECT_IS_COMPLETE)
-                exit(0)
             except (DataContextError, DatasourceInitializationError) as e:
                 cli_message("<red>{}</red>".format(e))
                 sys.exit(1)

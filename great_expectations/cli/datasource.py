@@ -447,11 +447,6 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                                        data_asset_type={
                                            "class_name": "SqlAlchemyDataset"},
                                        credentials="${" + datasource_name + "}",
-                                       generators={
-                                           "default": {
-                                               "class_name": "TableGenerator"
-                                           }
-                                       }
                                        )
                 # TODO this message about continuing may not be accurate
                 cli_message(
