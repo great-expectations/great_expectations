@@ -5,7 +5,7 @@ from sqlalchemy.engine.url import URL
 
 from great_expectations.core import ensure_json_serializable
 from great_expectations.data_context.store.evaluation_parameter_store import EvaluationParameterStore
-from great_expectations.data_context.types.metrics import ExpectationDefinedMetricIdentifier
+from great_expectations.core.metrics import Metric
 from great_expectations.profile.metrics_utils import kwargs_to_tuple, tuple_to_hash
 
 Base = declarative_base()

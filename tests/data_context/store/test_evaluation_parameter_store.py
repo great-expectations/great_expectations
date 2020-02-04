@@ -2,6 +2,7 @@ import pytest
 
 import datetime
 
+from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 
 
@@ -38,18 +39,13 @@ def param_store(request):
         runtime_environment={}
     )
 
-# TO REIMPLEMENT
-@pytest.mark.xfail
+
 def test_evaluation_parameter_store_methods(data_context):
     run_id = "20191125T000000.000000Z"
     source_patient_data_results = ExpectationSuiteValidationResult(
         meta={
-            "data_asset_name": {
-                "datasource": "mydatasource",
-                "generator": "mygenerator",
-                "generator_asset": "source_patient_data"
-            },
-            "expectation_suite_name": "default"
+            "expectation_suite_name": "source_patient_data.default",
+            "run_id": run_id
         },
         results=[
             ExpectationValidationResult(
@@ -75,24 +71,17 @@ def test_evaluation_parameter_store_methods(data_context):
         success=True
     )
 
-    data_context._extract_and_store_parameters_from_validation_results(
-        source_patient_data_results,
-        expectation_suite_name=source_patient_data_results.meta["expectation_suite_name"],
-        run_id=run_id,
-    )
+    data_context.store_validation_result_metrics(source_patient_data_results)
 
     bound_parameters = data_context.evaluation_parameter_store.get_bind_params(run_id)
     assert bound_parameters == {
-        'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:observed_value': 1024
+        'urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result'
+        '.observed_value': 1024
     }
     source_diabetes_data_results = ExpectationSuiteValidationResult(
         meta={
-            "data_asset_name": {
-                "datasource": "mydatasource",
-                "generator": "mygenerator",
-                "generator_asset": "source_diabetes_data"
-            },
-            "expectation_suite_name": "default"
+            "expectation_suite_name": "source_diabetes_data.default",
+            "run_id": run_id
         },
         results=[
             ExpectationValidationResult(
@@ -120,107 +109,68 @@ def test_evaluation_parameter_store_methods(data_context):
         success=True
     )
 
-    data_context._extract_and_store_parameters_from_validation_results(
-        source_diabetes_data_results,
-        expectation_suite_name=source_diabetes_data_results.meta["expectation_suite_name"],
-        run_id=run_id,
-    )
+    data_context.store_validation_result_metrics(source_diabetes_data_results)
     bound_parameters = data_context.evaluation_parameter_store.get_bind_params(run_id)
     assert bound_parameters == {
-        'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:observed_value': 1024,
-        'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:observed_value': 2048
+        'urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result'
+        '.observed_value': 1024,
+        'urn:great_expectations:validations:source_diabetes_data.default'
+        ':expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr': 2048
     }
 
 
-# TO REIMPLEMENT
-@pytest.mark.xfail
 def test_database_evaluation_parameter_store_basics(param_store):
     run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-    assert False  # UPDATE
-    # metric_identifier = ExpectationDefinedMetricIdentifier(
-    #     run_id=run_id,
-    #     data_asset_name=DataAssetIdentifier(
-    #         datasource="mysource",
-    #         generator="mygenerator",
-    #         generator_asset="asset"
-    #     ),
-    #     expectation_suite_name="warning",
-    #     expectation_type="expect_column_values_to_match_regex",
-    #     metric_name="unexpected_percent",
-    #     metric_kwargs={
-    #         "column": "mycol"
-    #     }
-    # )
+    metric_identifier = ValidationMetricIdentifier(
+        run_id=run_id,
+        expectation_suite_identifier="asset.warning",
+        metric_name="expect_column_values_to_match_regex.result.unexpected_percent",
+        metric_kwargs_id="column=mycol"
+    )
     metric_value = 12.3456789
 
     param_store.set(metric_identifier, metric_value)
     value = param_store.get(metric_identifier)
     assert value == metric_value
 
-# TO REIMPLEMENT
-@pytest.mark.xfail
+
 def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
     run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
-    assert False  # UPDATE
-    # metric_identifier = ExpectationDefinedMetricIdentifier(
-    #     run_id=run_id,
-    #     data_asset_name=DataAssetIdentifier(
-    #         datasource="mysource",
-    #         generator="mygenerator",
-    #         generator_asset="asset"
-    #     ),
-    #     expectation_suite_name="warning",
-    #     expectation_type="expect_column_values_to_match_regex",
-    #     metric_name="unexpected_percent",
-    #     metric_kwargs={
-    #         "column": "mycol",
-    #         "regex": r"^[123]+$"
-    #     }
-    # )
+    metric_identifier = ValidationMetricIdentifier(
+        run_id=run_id,
+        expectation_suite_identifier="asset.warning",
+        metric_name="expect_column_values_to_match_regex.result.unexpected_percent",
+        metric_kwargs_id="column=mycol"
+    )
     metric_value = 12.3456789
     param_store.set(metric_identifier, metric_value)
 
-    metric_identifier = ExpectationDefinedMetricIdentifier(
+    metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
-        data_asset_name=DataAssetIdentifier(
-            datasource="mysource",
-            generator="mygenerator",
-            generator_asset="asset"
-        ),
-        expectation_suite_name="warning",
-        expectation_type="expect_table_row_count_to_be_between",
-        metric_name="observed_value",
-        metric_kwargs={}
+        expectation_suite_identifier="asset.warning",
+        metric_name="expect_table_row_count_to_be_between.result.observed_value",
+        metric_kwargs_id=None
     )
     metric_value = 512
     param_store.set(metric_identifier, metric_value)
 
-    metric_identifier = ExpectationDefinedMetricIdentifier(
+    metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
-        data_asset_name=DataAssetIdentifier(
-            datasource="mysource",
-            generator="mygenerator",
-            generator_asset="asset2"
-        ),
-        expectation_suite_name="warning",
-        expectation_type="expect_column_values_to_match_regex",
-        metric_name="unexpected_percent",
-        metric_kwargs={
-            "regex": r"^[123]+$",
-            "column": "mycol"
-        }
+        expectation_suite_identifier="asset2.warning",
+        metric_name="expect_column_values_to_match_regex.result.unexpected_percent",
+        metric_kwargs_id="column=mycol"
     )
     metric_value = 12.3456789
     param_store.set(metric_identifier, metric_value)
 
     params = param_store.get_bind_params(run_id)
     assert params == {
-        'urn:great_expectations:validations:mysource/mygenerator/asset:warning:expectations'
-        ':expect_column_values_to_match_regex:columns:mycol:unexpected_percent': 12.3456789,
-        'urn:great_expectations:validations:mysource/mygenerator/asset:warning:expectations'
-        ':expect_table_row_count_to_be_between:observed_value': 512,
-        'urn:great_expectations:validations:mysource/mygenerator/asset2:warning:expectations'
-        ':expect_column_values_to_match_regex:columns:mycol:unexpected_percent': 12.3456789,
+        'urn:great_expectations:validations:asset.warning:'
+        'expect_column_values_to_match_regex.result.unexpected_percent:column=mycol': 12.3456789,
+        'urn:great_expectations:validations:asset.warning:'
+        'expect_table_row_count_to_be_between.result.observed_value': 512,
+        'urn:great_expectations:validations:asset2.warning:'
+        'expect_column_values_to_match_regex.result.unexpected_percent:column=mycol': 12.3456789,
     }

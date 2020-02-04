@@ -14,11 +14,13 @@ from six import string_types
 import datetime
 import warnings
 
-from great_expectations.core import ExpectationSuite, BatchKwargs
+from great_expectations.core import ExpectationSuite, nested_update
+from ..core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import DataContextConfig, dataContextConfigSchema
 from great_expectations.data_context.util import file_relative_path, substitute_config_variable
 from .types.resource_identifiers import ExpectationSuiteIdentifier, ValidationResultIdentifier
 from .util import safe_mmkdir, substitute_all_config_variables
+from ..core.metric import ValidationMetricIdentifier
 from ..types.base import DotDict
 
 import great_expectations.exceptions as ge_exceptions
@@ -239,14 +241,12 @@ class ConfigOnlyDataContext(object):
             raise
         return True
 
-    def __init__(self, project_config, context_root_dir=None, data_asset_name_delimiter='/'):
+    def __init__(self, project_config, context_root_dir=None):
         """DataContext constructor
 
         Args:
             context_root_dir: location to look for the ``great_expectations.yml`` file. If None, searches for the file \
             based on conventions for project subdirectories.
-            data_asset_name_delimiter: the delimiter character to use when parsing data_asset_name parameters. \
-            Defaults to '/'
 
         Returns:
             None
@@ -281,11 +281,8 @@ class ConfigOnlyDataContext(object):
                 validation_operator_config,
             )
 
-        self._compiled = False
-
-        if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
-            raise ge_exceptions.DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
-        self._data_asset_name_delimiter = data_asset_name_delimiter
+        self._evaluation_parameter_dependencies_compiled = False
+        self._evaluation_parameter_dependencies = {}
 
     def _init_stores(self, store_configs):
         """Initialize all Stores for this DataContext.
@@ -790,26 +787,6 @@ class ConfigOnlyDataContext(object):
         )
         return datasource
 
-    def _get_datasource_class_from_type(self, datasource_type):
-        """NOTE: THIS METHOD OF BUILDING DATASOURCES IS DEPRECATED.
-        Instead, please specify class_name
-        """
-        warnings.warn("Using the 'type' key to instantiate a datasource is deprecated. Please use class_name instead.")
-        if datasource_type == "pandas":
-            return PandasDatasource
-        elif datasource_type == "dbt":
-            return DBTDatasource
-        elif datasource_type == "sqlalchemy":
-            return SqlAlchemyDatasource
-        elif datasource_type == "spark":
-            return SparkDFDatasource
-        else:
-            try:
-                # Update to do dynamic loading based on plugin types
-                return PandasDatasource
-            except ImportError:
-                raise
-
     def get_datasource(self, datasource_name="default"):
         """Get the named datasource
 
@@ -849,18 +826,10 @@ class ConfigOnlyDataContext(object):
         datasources = []
         # NOTE: 20190916 - JPC - Upon deprecation of support for type: configuration, this can be simplified
         for key, value in self._project_config_with_variables_substituted["datasources"].items():
-            if "type" in value:
-                logger.warning("Datasource %s configured using type. Please use class_name instead." % key)
-                datasources.append({
-                    "name": key,
-                    "type": value["type"],
-                    "class_name": self._get_datasource_class_from_type(value["type"]).__name__
-                })
-            else:
-                datasources.append({
-                    "name": key,
-                    "class_name": value["class_name"]
-                })
+            datasources.append({
+                "name": key,
+                "class_name": value["class_name"]
+            })
         return datasources
 
     def create_expectation_suite(self, expectation_suite_name, overwrite_existing=False):
@@ -923,11 +892,44 @@ class ConfigOnlyDataContext(object):
             key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
         self.stores[self.expectations_store_name].set(key, expectation_suite)
-        self._compiled = False
+        self._evaluation_parameter_dependencies_compiled = False
 
     def get_required_metric_keys(self):
         logger.error("get_required_metric_keys IS NOT YET REIMPLEMENTED")
         return []
+
+    def store_validation_result_metrics(self, validation_results):
+        if not self._evaluation_parameter_dependencies_compiled:
+            self._compile_evaluation_parameter_dependencies()
+
+        expectation_suite_name = validation_results.meta["expectation_suite_name"]
+        run_id = validation_results.meta["run_id"]
+
+        for expectation_suite_dependency, metrics_dict in self._evaluation_parameter_dependencies.items():
+            if expectation_suite_dependency != expectation_suite_name:
+                continue
+
+            for metric_name in metrics_dict.keys():
+                for metric_kwargs_id in metrics_dict[metric_name]:
+                    try:
+                        metric_value = validation_results.get_metric(metric_name, metric_kwargs_id)
+                        self.evaluation_parameter_store.set(
+                            ValidationMetricIdentifier(
+                                run_id=run_id,
+                                expectation_suite_identifier=ExpectationSuiteIdentifier(expectation_suite_name),
+                                metric_name=metric_name,
+                                metric_kwargs_id=metric_kwargs_id
+                            ),
+                            metric_value
+                        )
+                    except ge_exceptions.UnavailableMetricError:
+                        # This will happen frequently in larger pipelines
+                        logger.debug("metric {} was requested by another expectation suite but is not available in "
+                                     "this validation result.".format(metric_name))
+
+
+
+
     #
     # def _extract_and_store_parameters_from_validation_results(self, validation_results, data_asset_name, expectation_suite_name, run_id):
     #
@@ -1080,6 +1082,17 @@ class ConfigOnlyDataContext(object):
     #     else:
     #         return {}
     #
+
+    def _compile_evaluation_parameter_dependencies(self):
+        for key in self.stores[self.expectations_store_name].list_keys():
+            expectation_suite = self.stores[self.expectations_store_name].get(key)
+            dependencies = expectation_suite.get_evaluation_parameter_dependencies()
+            if len(dependencies) > 0:
+                nested_update(self._evaluation_parameter_dependencies, dependencies)
+
+        self._evaluation_parameter_dependencies_compiled = True
+
+
     # #NOTE: Abe 2019/08/22 : Can we rename this to _compile_all_evaluation_parameters_from_expectation_suites, or something similar?
     # # A more descriptive name would have helped me grok this faster when I first encountered it
     # def _compile(self):
@@ -1651,8 +1664,7 @@ class DataContext(ConfigOnlyDataContext):
     Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
     """
 
-    # def __init__(self, config, filepath, data_asset_name_delimiter='/'):
-    def __init__(self, context_root_dir=None, active_environment_name='default', data_asset_name_delimiter='/'):
+    def __init__(self, context_root_dir=None):
 
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
@@ -1660,14 +1672,11 @@ class DataContext(ConfigOnlyDataContext):
         context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
         self._context_root_directory = context_root_directory
 
-        self.active_environment_name = active_environment_name
-
         project_config = self._load_project_config()
 
         super(DataContext, self).__init__(
             project_config,
-            context_root_directory,
-            data_asset_name_delimiter,
+            context_root_directory
         )
 
     def _load_project_config(self):

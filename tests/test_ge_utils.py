@@ -2,7 +2,7 @@ import pytest
 import os
 
 import great_expectations as ge
-from great_expectations.util import nested_update
+from great_expectations.core.util import nested_update
 
 
 def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
@@ -116,5 +116,36 @@ def test_nested_update():
         "reader_options": {
             "header": 0,
             "nrows": 1
+        }
+    }
+
+
+def test_nested_update_lists():
+    # nested_update is useful for update nested dictionaries (such as batch_kwargs with reader_options as a dictionary)
+    dependencies = {
+        "suite.warning": {
+            "metric.name": ["column=foo"]
+        },
+        "suite.failure": {
+            "metric.blarg": [""]
+        }
+    }
+
+    new_dependencies = {
+        "suite.warning": {
+            "metric.other_name": ["column=foo"],
+            "metric.name": ["column=bar"]
+        }
+    }
+
+    nested_update(dependencies, new_dependencies)
+
+    assert dependencies == {
+        "suite.warning": {
+            "metric.name": ["column=foo", "column=bar"],
+            "metric.other_name": ["column=foo"]
+        },
+        "suite.failure": {
+            "metric.blarg": [""]
         }
     }

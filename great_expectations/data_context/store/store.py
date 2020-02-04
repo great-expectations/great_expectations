@@ -1,6 +1,6 @@
 import logging
 
-from great_expectations.core import DataContextKey
+from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import DataContextError

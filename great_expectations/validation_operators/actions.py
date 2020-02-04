@@ -1,7 +1,4 @@
 import logging
-import requests
-
-from ..data_context.types.metrics import EvaluationParameterIdentifier
 
 logger = logging.getLogger(__name__)
 
@@ -205,7 +202,9 @@ class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
             raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
                 type(validation_result_suite_identifier)
             ))
-        logger.error("ExtractAndStoreEvaluationParamsAction is not yet implemented")
+
+        self.data_context.store_validation_result_metrics(validation_result_suite)
+        # logger.error("ExtractAndStoreEvaluationParamsAction is not yet implemented")
 
         # requested_metric_keys = self.data_context.get_required_metric_keys()
         # for metric_key in requested_metric_keys:
