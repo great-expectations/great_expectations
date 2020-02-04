@@ -2,12 +2,11 @@ import pytest
 
 import datetime
 
-from great_expectations.core import DataAssetIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 
 
 from great_expectations.core import ExpectationSuiteValidationResult, ExpectationValidationResult, \
-    ExpectationConfiguration, dataAssetIdentifierSchema
+    ExpectationConfiguration
 
 
 @pytest.fixture(params=[
@@ -78,7 +77,6 @@ def test_evaluation_parameter_store_methods(data_context):
 
     data_context._extract_and_store_parameters_from_validation_results(
         source_patient_data_results,
-        data_asset_name=dataAssetIdentifierSchema.load(source_patient_data_results.meta["data_asset_name"]).data,
         expectation_suite_name=source_patient_data_results.meta["expectation_suite_name"],
         run_id=run_id,
     )
@@ -124,7 +122,6 @@ def test_evaluation_parameter_store_methods(data_context):
 
     data_context._extract_and_store_parameters_from_validation_results(
         source_diabetes_data_results,
-        data_asset_name=dataAssetIdentifierSchema.load(source_diabetes_data_results.meta["data_asset_name"]).data,
         expectation_suite_name=source_diabetes_data_results.meta["expectation_suite_name"],
         run_id=run_id,
     )

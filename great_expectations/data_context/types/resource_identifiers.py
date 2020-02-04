@@ -2,7 +2,7 @@ import logging
 
 from marshmallow import Schema, fields, post_load
 
-from great_expectations.core import DataContextKey, DataAssetIdentifierSchema
+from great_expectations.core import DataContextKey
 from great_expectations.exceptions import InvalidDataContextKeyError
 
 logger = logging.getLogger(__name__)
@@ -193,6 +193,5 @@ class SiteSectionIdentifier(DataContextKey):
             )
 
 
-dataAssetIdentifierSchema = DataAssetIdentifierSchema(strict=True)
 expectationSuiteIdentifierSchema = ExpectationSuiteIdentifierSchema(strict=True)
 validationResultIdentifierSchema = ValidationResultIdentifierSchema(strict=True)

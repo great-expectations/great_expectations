@@ -1,18 +1,4 @@
-from great_expectations.core import DataAssetIdentifier
-from great_expectations.types import DictDot
 from great_expectations.render.exceptions import InvalidRenderedContentError
-
-# from great_expectations.types import (
-#     AllowedKeysDotDict,
-#     ListOf,
-# )
-
-# TODO: Rename to this:
-# class RenderedContent(AllowedKeysDotDict):
-    # class RenderedComponentContent(RenderedContent):
-    # class RenderedSectionContent(RenderedContent):
-    # class RenderedDocumentContentContent(RenderedContent):
-    # class RenderedComponentContentWrapper(RenderedContent):
 
 
 class RenderedContent(object):
@@ -282,8 +268,7 @@ class RenderedDocumentContent(RenderedContent):
         d = super(RenderedDocumentContent, self).to_json_dict()
         d["sections"] = RenderedContent.rendered_content_list_to_json(self.sections)
         d["data_asset_name"] = self.data_asset_name
-        d["full_data_asset_identifier"] = self.full_data_asset_identifier.to_path() if isinstance(
-            self.full_data_asset_identifier, DataAssetIdentifier) else self.full_data_asset_identifier
+        d["full_data_asset_identifier"] = self.full_data_asset_identifier
         d["renderer_type"] = self.renderer_type
         d["page_title"] = self.page_title
         d["utm_medium"] = self.utm_medium

@@ -46,7 +46,7 @@ def convert_to_json_serializable(data):
     import decimal
     import sys
 
-    # If it's one of our types, we use our own conversion; this can move to full schema (see DataAssetIdentifier below)
+    # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
     if isinstance(data, (ExpectationConfiguration, ExpectationSuite, ExpectationValidationResult,
                          ExpectationSuiteValidationResult)):
@@ -152,7 +152,7 @@ def ensure_json_serializable(data):
     import datetime
     import decimal
 
-    # If it's one of our types, we use our own conversion; this can move to full schema (see DataAssetIdentifier below)
+    # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
     if isinstance(data, (ExpectationConfiguration, ExpectationSuite, ExpectationValidationResult,
                          ExpectationSuiteValidationResult)):
