@@ -2,6 +2,7 @@ import os
 
 import pytest
 from click.testing import CliRunner
+from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -37,6 +38,7 @@ def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(condition=PY2)
 def _add_datasource_and_credentials_to_context(context, datasource_name, sqlite_engine):
     original_datasources = context.list_datasources()
 
@@ -127,6 +129,7 @@ def test_cli_datasource_profile_answering_no(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(condition=PY2)
 def test_cli_datasource_profile_with_datasource_arg(
     empty_data_context, titanic_sqlite_db, caplog
 ):

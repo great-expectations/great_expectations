@@ -2,6 +2,7 @@ import os
 
 import pytest
 from click.testing import CliRunner
+from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -9,6 +10,7 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
+@pytest.mark.xfail(condition=PY2)
 def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
@@ -113,6 +115,7 @@ def test_cli_datasource_profile_answering_no(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(condition=PY2)
 def test_cli_datasource_profile_with_datasource_arg(
     caplog, empty_data_context, filesystem_csv_2
 ):
@@ -174,6 +177,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(condition=PY2)
 def test_cli_datasource_profile_with_no_datasource_args(
     caplog, empty_data_context, filesystem_csv_2
 ):
@@ -237,6 +241,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(condition=PY2)
 def test_cli_datasource_profile_with_additional_batch_kwargs(
     caplog, empty_data_context, filesystem_csv_2
 ):
