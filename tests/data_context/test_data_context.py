@@ -7,7 +7,6 @@ import pytest
 from ruamel.yaml import YAML
 
 from great_expectations.core import (
-    DataAssetIdentifier,
     ExpectationConfiguration,
     expectationSuiteSchema,
 )
