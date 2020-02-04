@@ -1,5 +1,57 @@
 .. _changelog:
 
+0.9.0
+-----------------
+
+Version 0.9.0 is a major update to Great Expectations! The DataContext has continued to evolve into a powerful tool
+for ensuring that Expectation Suites can properly represent the way users think about their data. The changes fall
+into four broad areas:
+
+1. Expectation Suite Naming and Namespace Changes
+
+The DataContext is much more flexible in allowing you to define expectation suites and access data. The "namespace"
+for expectation suites is now completely independent of datasources, making it possible to name your suites with the
+logical name corresponding to your data, and then more easily share them or validate against different datasources.
+For example, the expectation suite "npi" for National Provider Identifier data can now be shared across teams who
+access the same logical data in local systems using Pandas, on a distributed Spark cluster, or via a relational
+database.
+
+Batch Kwargs, or instructions for a datasource to build a batch of data, are similarly freed from a required
+namespace, and you can more easily integrate Great Expectations into workflows where you do not need to use a
+BatchKwargsGenerator (usually because you have a batch of data ready to validate, such as in a table or a known
+directory).
+
+The most noticable impact of this API change is in the complete removal of the DataAssetIdentifier class. For
+example, the `create_expectation_suite` and `get_batch` methods now no longer require a data_asset_name parameter,
+relying only on the expectation_suite_name and batch_kwargs to do their job. Similarly, there is no more asset name
+normalization required.
+
+1. Onboarding
+
+Release 0.9.0 of Great Expectations makes it much easier to get started with the project; the `init` flow has grown
+to support a much wider array of use cases and to use more natural language rather than introducing Great
+Expectations concepts earlier.
+
+1. Metrics and Evaluation Parameter Stores
+
+Metrics have received much more love in this release of Great Expectations! We've improved the system for declaring
+evaluation parameters that support dependencies between different expectation suites, so you can easily identify a
+particular field in the result of one expectation to use as the input into another. And the MetricsStore is now much
+more flexible, supporting a new ValidationAction that makes it possible to select metrics from a validation result to
+be saved in a database where they can power a dashboard, for example.
+
+1. Internal Type Changes and Improvements
+
+Finally, in this release, we have done a lot of work under the hood to make things more robust, including updating
+all of the internal objects to be more strongly typed. That change, while largely invisible to end users, paves the
+way for some really exciting opportunities for extending Great Expectations as we build a bigger community around the
+project.
+
+
+Additionally, there are several smaller changes and enhancements; please check out the guide on upgrading for more
+detailed descriptions of changes, and as always feel free to join us on Slack for questions you don't see addressed.
+
+
 * INTERNAL TYPES
 * Change data_asset get_data_asset_name and save_data_asset_name to be properties.
 * Removed data_asset_name, replacing it with top-level expectation_suite_name and batch_kwargs; batch_parameters can
