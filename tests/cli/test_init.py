@@ -225,7 +225,6 @@ def test_cli_init_connection_string_non_working_postgres_connection_instructs_us
 great_expectations/
     .gitignore
     great_expectations.yml
-    datasources/
     expectations/
     notebooks/
         pandas/
