@@ -37,7 +37,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     # profiling the Titanic datasource will generate one expectation suite and one validation
     # that is a profiling result
-    datasource_name = context.list_datasources()[0]["name"]
+    datasource_name = 'titanic'
     data_asset_name = "Titanic"
     profiler_name = 'BasicDatasetProfiler'
     generator_name = "subdir_reader"
