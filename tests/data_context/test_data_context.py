@@ -232,8 +232,7 @@ def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(ti
 
 
 def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_error(titanic_data_context):
-    # TODO verify that this behavior is correct - or should it return a profiling dict w/ an error message?
-    with pytest.raises(ProfilerError):
+    with pytest.raises(ValueError):
         _ = titanic_data_context.profile_datasource("fakey_mc_fake")
 
 
