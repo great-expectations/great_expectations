@@ -70,6 +70,41 @@ def _add_datasource_and_credentials_to_context(context, datasource_name, sqlite_
     return context
 
 
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
+def _add_datasource__with_two_generators_and_credentials_to_context(context, datasource_name, sqlite_engine):
+    original_datasources = context.list_datasources()
+
+    credentials = {"url": str(sqlite_engine.url)}
+    context.save_config_variable(datasource_name, credentials)
+    context.add_datasource(
+        datasource_name,
+        initialize=False,
+        module_name="great_expectations.datasource",
+        class_name="SqlAlchemyDatasource",
+        data_asset_type={"class_name": "SqlAlchemyDataset"},
+        credentials="${" + datasource_name + "}",
+        generators={"default": {"class_name": "TableGenerator"},
+                    "second_generator": {
+                        "class_name": "ManualGenerator",
+                        "assets": {
+                            "asset_one": [
+                                {
+                                    "partition_id": 1,
+                                    "query": "select * from main.titanic"
+                                }
+                            ]
+                        }
+                    }},
+    )
+
+    expected_datasources = original_datasources
+    expected_datasources.append(
+        {"name": datasource_name, "class_name": "SqlAlchemyDatasource"}
+    )
+
+    assert context.list_datasources() == expected_datasources
+    return context
+
 def test_cli_datasorce_new_connection_string(
     empty_data_context, empty_sqlite_db, caplog
 ):
@@ -227,6 +262,63 @@ def test_cli_datasource_profile_with_datasource_arg(
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
+
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
+def test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg(
+    empty_data_context, titanic_sqlite_db, caplog
+):
+    """
+    Here we are verifying that when generator_name argument is passed to
+    the methods down the stack.
+
+    We use a datasource with two generators. This way we can check that the
+    name of the expectation suite created by the profiler corresponds to
+    the name of the data asset listed by the generator that we told the profiler
+    to use.
+
+    The logic of processing this argument is testing in tests/profile.
+    """
+    project_root_dir = empty_data_context.root_directory
+    context = DataContext(project_root_dir)
+    datasource_name = "wow_a_datasource"
+    context = _add_datasource__with_two_generators_and_credentials_to_context(
+        context, datasource_name, titanic_sqlite_db
+    )
+
+    second_generator_name = "second_generator"
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "datasource",
+            "profile",
+            datasource_name,
+            "--generator_name",
+            second_generator_name,
+            "-d",
+            project_root_dir,
+            "--no-view",
+        ],
+        input="Y\n",
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+    assert "Profiling '{}'".format(datasource_name) in stdout
+
+    context = DataContext(project_root_dir)
+    assert len(context.list_datasources()) == 1
+
+    expectations_store = context.stores["expectations_store"]
+    suites = expectations_store.list_keys()
+    assert len(suites) == 1
+    assert (
+        suites[0].expectation_suite_name
+        == "wow_a_datasource.second_generator.asset_one.BasicDatasetProfiler"
+    )
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 @pytest.mark.xfail(condition=PY2, reason="a known issue on Py2")
 def test_cli_datasource_profile_with_no_datasource_args(
