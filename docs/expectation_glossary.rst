@@ -1,8 +1,12 @@
 .. _expectation_glossary:
 
 ################################
-Glossary of expectations
+Glossary of Expectations
 ################################
+
+This is a list of all built-in Expectations. Expectations are extendable so you
+can create custom expectations for your data domain! To do so see this article:
+:ref:`custom_expectations_reference`.
 
 *********
 Dataset
@@ -11,8 +15,7 @@ Dataset
 Dataset objects model tabular data and include expectations with row and column semantics. Many Dataset expectations
 are implemented using column_map_expectation and column_aggregate_expectation decorators.
 
-Not all expectations are currently available for each backend. A table describing available implementations per-backend
-is available here: :ref:`implemented_expectations`.
+Not all expectations are currently implemented for each backend. Please see :ref:`implemented_expectations`.
 
 Table shape
 =============================================
