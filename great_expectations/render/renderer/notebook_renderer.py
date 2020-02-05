@@ -1,9 +1,6 @@
 import os
 
-# FIXME : Abe 2020/02/04 : this line is breaking my environment in weird ways.
-# Temporarily suppressing in order to move forward.
-# DO NOT MERGE without reinstating.
-# import autopep8
+import autopep8
 import nbformat
 
 from great_expectations.core import ExpectationSuite
