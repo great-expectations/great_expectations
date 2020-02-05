@@ -125,6 +125,12 @@ def datasource_list(directory):
 
 @datasource.command(name="profile")
 @click.argument('datasource_name', default=None, required=False)
+@click.option(
+    "--generator_name",
+    "-g",
+    default=None,
+    help="The name of the batch kwarg generator configured in the datasource. The generator will list data assets in the datasource"
+)
 @click.option('--data_assets', '-l', default=None,
               help='Comma-separated list of the names of data assets that should be profiled. Requires datasource_name specified.')
 @click.option('--profile_all_data_assets', '-A', is_flag=True, default=False,
@@ -143,7 +149,7 @@ def datasource_list(directory):
 )
 @click.option('--batch_kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
-def datasource_profile(datasource_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
+def datasource_profile(datasource_name, generator_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
     """
     Profile a datasource
 
@@ -177,17 +183,18 @@ def datasource_profile(datasource_name, data_assets, profile_all_data_assets, di
         datasources = [datasource["name"] for datasource in context.list_datasources()]
         if not datasources:
             cli_message(NO_DATASOURCES_FOUND)
-            sys.exit(-1)
+            sys.exit(1)
         elif len(datasources) > 1:
             cli_message(
                 "<red>Error: please specify the datasource to profile. "\
                 "Available datasources: " + ", ".join(datasources) + "</red>"
             )
-            sys.exit(-1)
+            sys.exit(1)
         else:
             profile_datasource(
                 context,
                 datasources[0],
+                generator_name=generator_name,
                 data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 open_docs=view,
@@ -197,6 +204,7 @@ def datasource_profile(datasource_name, data_assets, profile_all_data_assets, di
         profile_datasource(
             context,
             datasource_name,
+            generator_name=generator_name,
             data_assets=data_assets,
             profile_all_data_assets=profile_all_data_assets,
             open_docs=view,
@@ -439,11 +447,6 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                                        data_asset_type={
                                            "class_name": "SqlAlchemyDataset"},
                                        credentials="${" + datasource_name + "}",
-                                       generators={
-                                           "default": {
-                                               "class_name": "TableGenerator"
-                                           }
-                                       }
                                        )
                 # TODO this message about continuing may not be accurate
                 cli_message(
@@ -750,54 +753,24 @@ def get_batch_kwargs(context,
         generator_name = select_generator(context, datasource_name,
                                           available_data_assets_dict=available_data_assets_dict)
 
-
-    # if we have a generator that can list available data asset names, let's list them
-
-    if generator_name is not None and generator_asset is None:
-        # print("Found {} datas".format(len(available_data_assets["names"])))
-        available_data_asset_names = ["{} ({})".format(name[0], name[1]) for name in available_data_assets_dict[datasource_name][generator_name]["names"]]
-
-        data_asset_names_to_display = available_data_asset_names[:5]
-        choices = "\n".join(["    {}. {}".format(i, name) for i, name in enumerate(data_asset_names_to_display, 1)])
-        prompt = msg_prompt_enter_data_asset_name + choices + "\n" + msg_prompt_enter_data_asset_name_suffix.format(len(data_asset_names_to_display))
-
-        selection = click.prompt(prompt, default=None, show_default=False)
-
-        selection = selection.strip()
-        try:
-            data_asset_index = int(selection) - 1
-            try:
-                generator_asset = [name[0] for name in available_data_assets_dict[datasource_name][generator_name]["names"]][data_asset_index]
-            except IndexError:
-                pass
-        except ValueError:
-            generator_asset = selection
-
-
-    # If the data asset name is in the namespace (or we don't have it yet)
-
-    # if generator_asset is None or generator_asset not in [name[0] for name in available_data_assets_dict[datasource_name][generator_name]["names"]]:
-    #     generator_name = None
-    #     for generator_info in data_source.list_generators():
-    #         generator = data_source.get_generator(generator_info["name"])
-    #         if isinstance(generator, MANUAL_GENERATOR_CLASSES):
-    #             generator_name = generator_info["name"]
-    #             break
-    #     if generator_name is None:
-    #         raise ge_exceptions.DataContextError("No manual generators found in datasource {0:s}".format(datasource_name))
+    # if the user provided us with the generator name and the generator asset, we have everything we need -
+    # let's ask the generator to build batch kwargs for this asset - we are done.
+    if generator_name is not None and generator_asset is not None:
+        generator = datasource.get_generator(generator_name)
+        batch_kwargs = generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
+        return batch_kwargs
 
     if isinstance(context.get_datasource(datasource_name), (PandasDatasource, SparkDFDatasource)):
-        generator_asset, batch_kwargs = _load_file_from_filesystem_as_data_asset(
+        generator_asset, batch_kwargs = _get_batch_kwargs_from_generator_or_from_file_path(
             context,
             datasource_name,
             generator_name=generator_name,
-            generator_asset=generator_asset,
         )
 
     elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
         generator_asset, batch_kwargs = _load_query_as_data_asset_from_sqlalchemy_datasource(context,
                                                                                              datasource_name,
-                                                                                             data_asset_name=generator_asset,
+                                                                                             generator_name=generator_name,
                                                                                              additional_batch_kwargs=additional_batch_kwargs)
     else:
         raise ge_exceptions.DataContextError("Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(datasource_name, str(type(context.get_datasource(datasource_name)))))
@@ -913,16 +886,21 @@ Name the new expectation suite"""
 
 
 
-def _load_file_from_filesystem_as_data_asset(context, datasource_name,
-                                             generator_name=None,
-                                             generator_asset=None):
+def _get_batch_kwargs_from_generator_or_from_file_path(context, datasource_name,
+                                                       generator_name=None,
+                                                       additional_batch_kwargs={}):
+    msg_prompt_generator_or_file_path =  """
+Would you like to enter the path of the file or choose from the list of data assets in this datasource? 
+    1. I want a list of data assets in this datasource
+    2. I will enter the path of a data file
+"""
     msg_prompt_file_path = """
 Enter the path (relative or absolute) of a data file
 """
 
-    msg_prompt_data_asset_name = """
-Give your new data asset a short name
-"""
+    msg_prompt_enter_data_asset_name = "\nWhich data would you like to use? (Choose one)\n"
+
+    msg_prompt_enter_data_asset_name_suffix = "    Don't see the name of the data asset in the list above? Just type it\n"
 
     msg_prompt_file_type = """
 We could not determine the format of the file. What is it?
@@ -939,7 +917,46 @@ We could not determine the format of the file. What is it?
         "4": "json",
     }
 
+    generator_asset = None
+
     datasource = context.get_datasource(datasource_name)
+    if generator_name is not None:
+        generator = datasource.get_generator(generator_name)
+
+        option_selection = click.prompt(
+            msg_prompt_generator_or_file_path,
+            type=click.Choice(["1", "2"]),
+            show_choices=False
+        )
+
+        if option_selection == "1":
+
+            available_data_asset_names = generator.get_available_data_asset_names()["names"]
+            available_data_asset_names_str = ["{} ({})".format(name[0], name[1]) for name in
+                                              available_data_asset_names]
+
+            data_asset_names_to_display = available_data_asset_names_str[:50]
+            choices = "\n".join(["    {}. {}".format(i, name) for i, name in enumerate(data_asset_names_to_display, 1)])
+            prompt = msg_prompt_enter_data_asset_name + choices + "\n" + msg_prompt_enter_data_asset_name_suffix.format(
+                len(data_asset_names_to_display))
+
+            generator_asset_selection = click.prompt(prompt, default=None, show_default=False)
+
+            generator_asset_selection = generator_asset_selection.strip()
+            try:
+                data_asset_index = int(generator_asset_selection) - 1
+                try:
+                    generator_asset = \
+                        [name[0] for name in available_data_asset_names][data_asset_index]
+                except IndexError:
+                    pass
+            except ValueError:
+                generator_asset = generator_asset_selection
+
+            batch_kwargs = generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
+            return (generator_asset, batch_kwargs)
+
+    # No generator name was passed or the user chose to enter a file path
 
     # We should allow a directory for Spark, but not for Pandas
     dir_okay = isinstance(datasource, SparkDFDatasource)
@@ -956,14 +973,6 @@ We could not determine the format of the file. What is it?
     )
 
     path = os.path.abspath(path)
-
-    # if generator_asset is None:
-    #     generator_asset = os.path.splitext(os.path.basename(path))[0]
-    #     generator_asset = click.prompt(
-    #         msg_prompt_data_asset_name,
-    #         default=generator_asset,
-    #         show_default=True
-    #     )
 
     batch_kwargs = {
         "path": path,
@@ -1004,7 +1013,7 @@ We could not determine the format of the file. What is it?
 
 
 def _load_query_as_data_asset_from_sqlalchemy_datasource(context, datasource_name,
-                                                         data_asset_name=None,
+                                                         generator_name=None,
                                                          additional_batch_kwargs={}):
     msg_prompt_query = """
 Enter an SQL query
@@ -1015,6 +1024,8 @@ Enter an SQL query
     msg_prompt_enter_data_asset_name = "\nWhich table would you like to use? (Choose one)\n"
 
     msg_prompt_enter_data_asset_name_suffix = "    Don't see the table in the list above? Just type the SQL query\n"
+
+    generator_asset = None
 
     datasource = context.get_datasource(datasource_name)
 
@@ -1065,12 +1076,13 @@ Enter an SQL query
         except Exception as error: # TODO: catch more specific exception
             cli_message("""<red>ERROR: {}</red>""".format(str(error)))
 
-    return (data_asset_name, batch_kwargs)
+    return (generator_asset, batch_kwargs)
 
 
 def profile_datasource(
     context,
     datasource_name,
+    generator_name=None,
     data_assets=None,
     profile_all_data_assets=False,
     max_data_assets=20,
@@ -1095,6 +1107,14 @@ Profiling '{0:s}' will create expectations and documentation.
     msg_too_many_data_assets = """There are {0:d} data assets in {1:s}. Profiling all of them might take too long.    
 """
 
+    msg_error_multiple_generators_found = """<red>More than one batch kwarg generators found in datasource {0:s}.
+Specify the one you want the profiler to use in generator_name argument.</red>      
+"""
+
+    msg_error_no_generators_found = """<red>No batch kwarg generators can list available data assets in datasource {0:s}.
+The datasource might be empty or a generator not configured in the config file.</red>    
+"""
+
     msg_prompt_enter_data_asset_list = """Enter comma-separated list of data asset names (e.g., {0:s})   
 """
 
@@ -1117,6 +1137,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
     # Call the data context's profiling method to check if the arguments are valid
     profiling_results = context.profile_datasource(
         datasource_name,
+        generator_name=generator_name,
         data_assets=data_assets,
         profile_all_data_assets=profile_all_data_assets,
         max_data_assets=max_data_assets,
@@ -1144,6 +1165,14 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 cli_message(msg_some_data_assets_not_found.format("," .join(profiling_results['error']['not_found_data_assets'])))
             elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS:
                 cli_message(msg_too_many_data_assets.format(profiling_results['error']['num_data_assets'], datasource_name))
+            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_MULTIPLE_GENERATORS_FOUND:
+                cli_message(
+                    msg_error_multiple_generators_found.format(datasource_name))
+                sys.exit(1)
+            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_NO_GENERATOR_FOUND:
+                cli_message(
+                    msg_error_no_generators_found.format(datasource_name))
+                sys.exit(1)
             else: # unknown error
                 raise ValueError("Unknown profiling error code: " + profiling_results['error']['code'])
 
@@ -1155,7 +1184,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
 
             if option_selection == "1":
                 data_assets = click.prompt(
-                    msg_prompt_enter_data_asset_list.format(", ".join(profiling_results['error']['data_assets'][:3])),
+                    msg_prompt_enter_data_asset_list.format(", ".join([data_asset[0] for data_asset in profiling_results['error']['data_assets']][:3])),
                     default=None,
                     show_default=False
                 )
@@ -1163,6 +1192,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                     data_assets = [item.strip() for item in data_assets.split(",")]
             elif option_selection == "3":
                 profile_all_data_assets = True
+                data_assets = None
             elif option_selection == "2": # skip
                 cli_message(msg_skipping)
                 return
@@ -1173,6 +1203,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
             # (no dry run this time)
             profiling_results = context.profile_datasource(
                 datasource_name,
+                generator_name=generator_name,
                 data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 max_data_assets=max_data_assets,
