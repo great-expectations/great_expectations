@@ -2519,6 +2519,7 @@ class Dataset(MetaDataset):
         self,
         column,
         quantile_ranges,
+        allow_relative_error=False,
         result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
@@ -2579,6 +2580,8 @@ class Dataset(MetaDataset):
                 The column name.
             quantile_ranges (dictionary): \
                 Quantiles and associated value ranges for the column. See above for details.
+            allow_relative_error (boolean): \
+                Whether to allow relative error in quantile communications on backends that support or require it.
 
         Other Parameters:
             result_format (str or None): \
@@ -2621,7 +2624,7 @@ class Dataset(MetaDataset):
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError("quntile_values and quantiles must have the same number of elements")
 
-        quantile_vals = self.get_column_quantiles(column, tuple(quantiles))
+        quantile_vals = self.get_column_quantiles(column, tuple(quantiles), allow_relative_error=allow_relative_error)
         # We explicitly allow "None" to be interpreted as +/- infinity
         comparison_quantile_ranges = [
             [lower_bound or -np.inf, upper_bound or np.inf]
