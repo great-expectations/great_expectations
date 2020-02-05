@@ -74,3 +74,5 @@ NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please ad
   - running `<green>great_expectations datasource new</green>` or
   - by editing the {} file
 """.format(DataContext.GE_YML)
+
+SETUP_SUCCESS = "\n<cyan>Great Expectations is now set up.</cyan>"
