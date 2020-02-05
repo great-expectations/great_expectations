@@ -929,6 +929,8 @@ class BaseDataContext(object):
             When success = False, the error details are under "error" key
         """
 
+        datasource = self.get_datasource(datasource_name)
+
         if not dry_run:
             logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
 
