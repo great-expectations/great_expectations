@@ -5,7 +5,7 @@ import shutil
 import pandas as pd
 
 from great_expectations.data_context import (
-    ConfigOnlyDataContext,
+    BaseDataContext,
     DataContext,
 )
 from great_expectations.util import (
@@ -15,7 +15,7 @@ from great_expectations.util import (
 
 @pytest.fixture
 def validation_operators_data_context(basic_data_context_config_for_validation_operator, filesystem_csv_4):
-    data_context = ConfigOnlyDataContext(
+    data_context = BaseDataContext(
         basic_data_context_config_for_validation_operator
     )
 

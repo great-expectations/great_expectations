@@ -41,7 +41,7 @@ class ActionListValidationOperator(ValidationOperator):
 
     A user can configure the list of actions to invoke.
 
-    Each action in the list must be an instance of NamespacedValidationAction
+    Each action in the list must be an instance of ValidationAction
     class (or its descendants).
 
     Below is an example of this operator's configuration::
@@ -55,7 +55,7 @@ class ActionListValidationOperator(ValidationOperator):
                   target_store_name: validations_store
               - name: store_evaluation_params
                 action:
-                  class_name: ExtractAndStoreEvaluationParamsAction
+                  class_name: StoreEvaluationParametersAction
                   target_store_name: evaluation_parameter_store
               - name: send_slack_notification_on_validation_result
                 action:
@@ -215,7 +215,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
     The list of these actions is specified in the operator's configuration
 
-    Each action in the list must be an instance of NamespacedValidationAction
+    Each action in the list must be an instance of ValidationAction
     class (or its descendants).
 
     The operator sends a Slack notification (if "slack_webhook" is present in its
@@ -237,7 +237,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                   target_store_name: validations_store
               - name: store_evaluation_params
                 action:
-                  class_name: ExtractAndStoreEvaluationParamsAction
+                  class_name: StoreEvaluationParametersAction
                   target_store_name: evaluation_parameter_store
 
 
