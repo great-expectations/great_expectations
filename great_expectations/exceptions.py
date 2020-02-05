@@ -20,6 +20,14 @@ class DataContextError(GreatExpectationsError):
     pass
 
 
+class UnavailableMetricError(GreatExpectationsError):
+    pass
+
+
+class ParserError(GreatExpectationsError):
+    pass
+
+
 class InvalidConfigurationYamlError(GreatExpectationsError):
     pass
 

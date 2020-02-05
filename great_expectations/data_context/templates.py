@@ -8,11 +8,6 @@ PROJECT_HELP_COMMENT = """
 # is intended to be committed to your repo. For help with configuration please:
 #   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#configuration
 #   - Join our slack channel: http://greatexpectations.io/slack
-#
-# NOTE: GE uses the names of configured `datasources` and `generators` to manage
-# how `expectations` and other artifacts are stored in the `expectations/` and 
-# `datasources/` folders. If you need to rename an existing `datasource` or 
-# `generator`, be sure to also update the relevant directory names.
 
 config_version: 1
 
@@ -28,7 +23,7 @@ CONFIG_VARIABLES_INTRO = """
 # such as staging vs prod.
 #
 # When GE encounters substitution syntax (like `my_key: ${my_value}` or 
-# `my_key: $my_value`) in the config file it will attempt to replace the value
+# `my_key: $my_value`) in the config file, it will attempt to replace the value
 # of `my_key` with the value from an environment variable `my_value` or a
 # corresponding key read from the file specified using
 # `config_variables_file_path`. Environment variables take precedence.
@@ -63,7 +58,7 @@ validation_operators:
           class_name: StoreAction
       - name: store_evaluation_params
         action:
-          class_name: ExtractAndStoreEvaluationParamsAction
+          class_name: StoreEvaluationParametersAction
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction

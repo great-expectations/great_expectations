@@ -11,8 +11,8 @@ from great_expectations.datasource.types import (
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.types import ClassConfig
-from ..core.batch import Batch
-from ..util import nested_update
+from great_expectations.core.batch import Batch
+from great_expectations.core.util import nested_update
 
 logger = logging.getLogger(__name__)
 

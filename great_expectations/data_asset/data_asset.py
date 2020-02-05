@@ -19,7 +19,8 @@ from great_expectations.data_asset.util import (
     parse_result_format,
 )
 from great_expectations.core import ExpectationSuite, ExpectationConfiguration, ExpectationValidationResult, \
-    ExpectationSuiteValidationResult, BatchKwargs, expectationSuiteSchema
+    ExpectationSuiteValidationResult, expectationSuiteSchema
+from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.exceptions import GreatExpectationsError
 
 logger = logging.getLogger(__name__)
