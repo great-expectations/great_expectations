@@ -68,6 +68,7 @@ def suite_edit(suite, directory, jupyter, batch_kwargs):
     suite = _load_suite(context, suite)
 
     if batch_kwargs:
+        print(batch_kwargs)
         batch_kwargs = json.loads(batch_kwargs)
     # elif suite.get_original_batch_kwargs():
     # TODO this functionality doesn't actually exist yet
