@@ -637,11 +637,14 @@ class BaseDataContext(object):
         Args:
             expectation_suite_name: The name of the expectation_suite to create
             overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
-                already exists
+                already exists.
 
         Returns:
             A new (empty) expectation suite.
         """
+        if not isinstance(overwrite_existing, bool):
+            raise ValueError("Parameter overwrite_existing must be of type BOOL")
+
         expectation_suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 

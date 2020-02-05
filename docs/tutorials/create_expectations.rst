@@ -313,7 +313,7 @@ How do I know which types of expectations I can add?
 
 .. code-block:: python
 
-    df.save_expectation_suite()
+    batch.save_expectation_suite()
 
 The ``expectations_store`` attribute in the ``great_expectations.yml`` configuration file controls the location where the DataContext saves the expectation suite.
 
@@ -329,7 +329,7 @@ an additional argument to the ``save_expectation_suite`` method:
 
 .. code-block:: python
 
-    df.save_expectation_suite(discard_failed_expectations=False)
+    batch.save_expectation_suite(discard_failed_expectations=False)
 
 
 8. View the Expectations in Data Docs
@@ -337,7 +337,7 @@ an additional argument to the ``save_expectation_suite`` method:
 
 Data Docs compiles Expectations and Validations into HTML documentation. By default the HTML website is hosted on your local filesystem. When you are working in a team, the website can be hosted in the cloud (e.g., on S3) and serve as the shared source of truth for the team working on the data pipeline.
 
-To view the expectation suite you just created as HTML, rebuild the data docs and open the webstite in the browser:
+To view the expectation suite you just created as HTML, rebuild the data docs and open the website in the browser:
 
 .. code-block:: python
 
