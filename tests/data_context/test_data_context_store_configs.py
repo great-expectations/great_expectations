@@ -10,7 +10,7 @@ import great_expectations as ge
 @pytest.fixture(scope="function")
 def totally_empty_data_context(tmp_path_factory):
     # NOTE: This sets up a DataContext with a real path and a config saved to that path.
-    # Now that ConfigOnlyDataContext exists, it's possible to test most DataContext methods without touching the file system.
+    # Now that BaseDataContext exists, it's possible to test most DataContext methods without touching the file system.
     # However, as of 2019/08/22, most tests still use filesystem-based fixtures.
     # TODO: Where appropriate, switch DataContext tests to the new method.
     project_root_dir = str(tmp_path_factory.mktemp('totally_empty_data_context'))

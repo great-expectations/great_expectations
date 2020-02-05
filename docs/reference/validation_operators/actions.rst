@@ -50,10 +50,10 @@ Configuration
       target_store_name: validations_store
 
 
-ExtractAndStoreEvaluationParamsAction
+StoreEvaluationParametersAction
 -------------------------------------
 
-ExtractAndStoreEvaluationParamsAction is a namespace-aware validation action that
+StoreEvaluationParametersAction is a namespace-aware validation action that
 extracts evaluation parameters from a validation result and stores them in the store
 configured for this action.
 
@@ -67,7 +67,7 @@ Configuration
 
     - name: store_evaluation_params
     action:
-      class_name: ExtractAndStoreEvaluationParamsAction
+      class_name: StoreEvaluationParametersAction
       # name of the store where the action will store the parameters
       # the name must refer to a store that is configured in the great_expectations.yml file
       target_store_name: evaluation_parameter_store

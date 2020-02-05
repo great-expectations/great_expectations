@@ -1,9 +1,9 @@
 from .actions import (
-    BasicValidationAction,
-    NamespacedValidationAction,
+    ValidationAction,
+    ValidationAction,
     NoOpAction,
     StoreAction,
-    ExtractAndStoreEvaluationParamsAction,
+    StoreEvaluationParametersAction,
     SlackNotificationAction,
     UpdateDataDocsAction
 )

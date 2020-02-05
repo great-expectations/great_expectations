@@ -48,7 +48,9 @@ class DatabaseStoreBackend(StoreBackend):
                 *[getattr(self._table.columns, key_col) == val for key_col, val in zip(self.key_columns, key)]
             )
         )
-        return self.engine.execute(sel).fetchone()[0]
+        res = self.engine.execute(sel).fetchone()
+        if res:
+            return self.engine.execute(sel).fetchone()[0]
 
     def _set(self, key, value, **kwargs):
         cols = {k: v for (k, v) in zip(self.key_columns, key)}

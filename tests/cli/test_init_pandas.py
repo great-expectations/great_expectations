@@ -6,6 +6,7 @@ import shutil
 
 import pytest
 from click.testing import CliRunner
+from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -15,6 +16,7 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
+@pytest.mark.xfail(condition=PY2)
 def test_cli_init_on_new_project(caplog, tmp_path_factory):
     basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     os.makedirs(os.path.join(basedir, "data"))

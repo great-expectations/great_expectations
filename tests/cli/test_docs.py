@@ -3,7 +3,9 @@ from __future__ import unicode_literals
 
 import os
 
+import pytest
 from click.testing import CliRunner
+from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -18,6 +20,7 @@ def test_docs_help_output(caplog):
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_docs_build(caplog, site_builder_data_context_with_html_store_titanic_random):
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
 
