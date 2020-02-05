@@ -142,7 +142,8 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
 
 def test_pandas_source_read_csv(data_context, tmp_path_factory):
     if not PY3:
-        pytest.skip(reason="We don't specifically test py2 unicode reading since this test is about our handling of kwargs *to* read_csv")
+        pytest.skip("We don't specifically test py2 unicode reading since this test is about our handling of kwargs *to* read_csv")
+
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
     shutil.copy(file_relative_path(__file__, "../test_sets/unicode.csv"), basedir)
     data_context.add_datasource("mysource",
