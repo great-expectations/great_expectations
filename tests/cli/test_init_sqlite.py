@@ -365,13 +365,12 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
         input="1\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
     )
     stdout = result.stdout
-    print(stdout)
 
     assert result.exit_code == 0
 
     assert "Always know what to expect from your data" in stdout
-    assert "Which data would you like to use?" in stdout
-    assert "Profiling main.titanic" in stdout
+    assert "Which table would you like to use?" in stdout
+    assert "Profiling.." in stdout
     assert "The following Data Docs sites were built" in stdout
     assert "Great Expectations is now set up" in stdout
     assert "A new Expectation suite 'sink_me' was added to your project" in stdout
