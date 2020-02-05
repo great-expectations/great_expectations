@@ -10,8 +10,8 @@ individual batches of data. They add flexibility in how to obtain data such as w
 downsampling, or other techniques appropriate for the datasource.
 
 For example, a generator could produce a SQL query that logically represents "rows in
-the Events table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource
-could use to materialize a SqlAlchemyDataset corresponding to that batch of data and
+the Events table with a timestamp on February 7, 2012," which a SQLAlchemyDatasource
+could use to materialize a SQLAlchemyDataset corresponding to that batch of data and
 ready for validation.
 
 ********

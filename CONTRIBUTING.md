@@ -7,7 +7,7 @@ Once your changes and tests are ready to submit for review:
 
 1. Test your changes
 
-    Run the test suite to make sure that nothing is broken. See the the section on testing below for help running tests. (Hint: `pytest` from the great_expectations root.)
+    Run the test suite to make sure that nothing is broken. See the the section on testing below for help running tests. (Hint: `pytest` from the great_expectations root. Also: `pytest --no-spark --no-sqlalchemy`, if you don't want to configure these backends for local testing.)
     To test for both Python 2 and 3, use `tox` .
 
 2. Update the documentation
@@ -33,6 +33,11 @@ Once your changes and tests are ready to submit for review:
     There will probably be discussion about the pull request. It's normal for a request to require some changes before merging it into the main Great Expectations project. We enjoy working with contributors to get their code accepted. There are many approaches to fixing a problem and it is important to find the best approach before writing too much code.
 
 ## Testing
+
+Depending on which backends you want to exercise, you can add a few flags to your `pytest` invocation.
+- adding `--no-postgresql` will skip postgres tests (handy if you don't have a local postgres installation)
+- adding `--no-spark` will skip spark tests (handy if you don't have spark installed)
+
 We are actively migrating many of our tests to a new format to support testing across different dataset types. Consolidating them is an important next step. That means two things for contributors:
 
 For now, write tests in whatever style suits your fancy. We (the core contributors) will worry about refactoring them later. As long as your thing works and is well-tested, you're good.
