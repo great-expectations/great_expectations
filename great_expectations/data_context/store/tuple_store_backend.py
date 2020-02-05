@@ -214,7 +214,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 # Following try/except is to support py2, since both str and bytes objects pass above condition
                 try:
                     outfile.write(value.encode("utf-8"))
-                except UnicodeDecodeError:
+                except UnicodeDecodeError, TypeError:
                     outfile.write(value)
             else:
                 outfile.write(value)
