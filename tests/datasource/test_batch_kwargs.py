@@ -12,14 +12,14 @@ except ImportError:
 from great_expectations.datasource.types import *
 
 
-def test_batch_kwargs_fingerprint():
+def test_batch_kwargs_id():
     test_batch_kwargs = PathBatchKwargs(
         {
             "path": "/data/test.csv"
         }
     )
     # When there is only a single "important" key used in batch_kwargs, the ID can prominently include it
-    assert test_batch_kwargs.to_id() == "path:/data/test.csv"
+    assert test_batch_kwargs.to_id() == "path=/data/test.csv"
 
 
     test_batch_kwargs = PathBatchKwargs(

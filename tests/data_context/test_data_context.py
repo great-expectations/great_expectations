@@ -7,12 +7,11 @@ import pytest
 from ruamel.yaml import YAML
 
 from great_expectations.core import (
-    DataAssetIdentifier,
     ExpectationConfiguration,
     expectationSuiteSchema,
 )
 from great_expectations.data_context import (
-    ConfigOnlyDataContext,
+    BaseDataContext,
     DataContext,
     ExplorerDataContext,
 )
@@ -162,45 +161,15 @@ def test_save_expectation_suite(data_context):
     assert expectation_suite.expectations == expectation_suite_saved.expectations
 
 
-@pytest.mark.xfail
-def test_compile(data_context):
-    data_context._compile()
-    assert data_context._compiled_parameters == {
-        'raw': {
-            'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value',
-            'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value'
-            },
-        'data_assets': {
-            DataAssetIdentifier(
-                datasource='mydatasource',
-                generator='mygenerator',
-                generator_asset='source_diabetes_data'
-            ): {
-                'default': {
-                    'expect_column_unique_value_count_to_be_between': {
-                        'columns': {
-                            'patient_nbr': {
-                                'result': {
-                                    'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value'
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            DataAssetIdentifier(
-                datasource='mydatasource',
-                generator='mygenerator',
-                generator_asset='source_patient_data'
-            ): {
-                'default': {
-                    'expect_table_row_count_to_equal': {
-                        'result': {
-                            'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value'
-                        }
-                    }
-                }
-            }
+def test_compile_evaluation_parameter_dependencies(data_context):
+    assert data_context._evaluation_parameter_dependencies == {}
+    data_context._compile_evaluation_parameter_dependencies()
+    assert data_context._evaluation_parameter_dependencies == {
+        'source_diabetes_data.default': {
+            'expect_column_unique_value_count_to_be_between.result.observed_value': ['column=patient_nbr']
+        },
+        'source_patient_data.default': {
+            'expect_table_row_count_to_equal.result.observed_value': [None]
         }
     }
 
@@ -208,7 +177,6 @@ def test_list_datasources(data_context):
     datasources = data_context.list_datasources()
 
     assert OrderedDict(datasources) == OrderedDict([
-
         {
             'name': 'mydatasource',
             'class_name': 'PandasDatasource'
@@ -351,7 +319,6 @@ project_path/
     great_expectations/
         .gitignore
         great_expectations.yml
-        datasources/
         expectations/
             titanic/
                 subdir_reader/
@@ -516,7 +483,6 @@ def basic_data_context_config():
         "commented_map": {},
         "config_version": 1,
         "plugins_directory": "plugins/",
-        "config_variables_file_path": None,
         "evaluation_parameter_store_name": "evaluation_parameter_store",
         "validations_store_name": "does_not_have_to_be_real",
         "expectations_store_name": "expectations_store",
@@ -553,7 +519,7 @@ def test_ExplorerDataContext(titanic_data_context):
 
 def test_ConfigOnlyDataContext__initialization(tmp_path_factory, basic_data_context_config):
     config_path = str(tmp_path_factory.mktemp('test_ConfigOnlyDataContext__initialization__dir'))
-    context = ConfigOnlyDataContext(
+    context = BaseDataContext(
         basic_data_context_config,
         config_path,
     )
@@ -564,7 +530,7 @@ def test_ConfigOnlyDataContext__initialization(tmp_path_factory, basic_data_cont
 
 def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_context_config):
     config_path = str(tmp_path_factory.mktemp('test__normalize_absolute_or_relative_path__dir'))
-    context = ConfigOnlyDataContext(
+    context = BaseDataContext(
         basic_data_context_config,
         config_path,
     )
@@ -785,7 +751,6 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(tmp_pat
 great_expectations/
     .gitignore
     great_expectations.yml
-    datasources/
     expectations/
     notebooks/
         pandas/
@@ -813,7 +778,6 @@ def test_data_context_create_does_nothing_if_all_uncommitted_dirs_exist(tmp_path
 great_expectations/
     .gitignore
     great_expectations.yml
-    datasources/
     expectations/
     notebooks/
         pandas/
@@ -904,7 +868,6 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
     DataContext.scaffold_notebooks(empty_directory)
 
     assert set(os.listdir(empty_directory)) == {
-        'datasources',
         'plugins',
         'expectations',
         '.gitignore',
@@ -1038,11 +1001,11 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
     try:
         # We should be able to load different files based on an environment variable
         os.environ["TEST_CONFIG_FILE_ENV"] = "dev"
-        context = ConfigOnlyDataContext(basic_data_context_config, context_root_dir=base_path)
+        context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
         config_vars = context._load_config_variables_file()
         assert config_vars['env'] == 'dev'
         os.environ["TEST_CONFIG_FILE_ENV"] = "prod"
-        context = ConfigOnlyDataContext(basic_data_context_config, context_root_dir=base_path)
+        context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
         config_vars = context._load_config_variables_file()
         assert config_vars['env'] == 'prod'
     except Exception:

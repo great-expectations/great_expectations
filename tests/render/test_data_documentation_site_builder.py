@@ -28,7 +28,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
             }, {
                 "name": "extract_and_store_eval_parameters",
                 "action": {
-                    "class_name": "ExtractAndStoreEvaluationParamsAction",
+                    "class_name": "StoreEvaluationParametersAction",
                     "target_store_name": "evaluation_parameter_store",
                 }
             }]

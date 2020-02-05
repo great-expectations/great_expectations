@@ -17,8 +17,7 @@ from great_expectations.datasource.types.batch_kwargs import (
     PathBatchKwargs,
     BatchMarkers
 )
-from great_expectations.dataset import PandasDataset
-from great_expectations.util import nested_update
+from great_expectations.core.util import nested_update
 
 yaml = YAML()
 

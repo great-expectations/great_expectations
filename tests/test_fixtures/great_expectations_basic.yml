@@ -62,7 +62,7 @@ validation_operators:
       #       class_name: SlackRenderer
       - name: store_evaluation_params
         action:
-          class_name: ExtractAndStoreEvaluationParamsAction
+          class_name: StoreEvaluationParametersAction
           target_store_name: evaluation_parameter_store
 
 

@@ -13,6 +13,7 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
+@pytest.mark.xfail(condition=PY2)
 def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
@@ -44,6 +45,7 @@ def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def _add_datasource_and_credentials_to_context(context, datasource_name, sqlite_engine):
     original_datasources = context.list_datasources()
 
@@ -134,6 +136,7 @@ def test_cli_datasource_profile_answering_no(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_cli_datasource_profile_with_datasource_arg(
     empty_data_context, titanic_sqlite_db, caplog
 ):
@@ -188,6 +191,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(condition=PY2)
 def test_cli_datasource_profile_with_no_datasource_args(
     empty_data_context, titanic_sqlite_db, caplog
 ):
