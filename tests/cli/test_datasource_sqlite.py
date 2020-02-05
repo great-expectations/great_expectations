@@ -13,7 +13,7 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
-@pytest.mark.xfail(condition=PY2)
+@pytest.mark.xfail(condition=PY2, reason="a known issue on Py2")
 def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
@@ -108,10 +108,47 @@ def test_cli_datasorce_new_connection_string(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(reason="# TODO profiling is broken due to generators")
 def test_cli_datasource_profile_answering_no(
+    empty_data_context, titanic_sqlite_db, caplog
+):
+    """
+    When datasource profile command is called without additional arguments,
+    the command must prompt the user with a confirm (y/n) before profiling.
+    We are verifying  that it does that and respects user's "no".
+    """
+    project_root_dir = empty_data_context.root_directory
+    context = DataContext(project_root_dir)
+    datasource_name = "wow_a_datasource"
+    context = _add_datasource_and_credentials_to_context(
+        context, datasource_name, titanic_sqlite_db
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["datasource", "profile", datasource_name, "-d", project_root_dir, "--no-view"],
+        input="n\n",
+    )
+
+    stdout = result.output
+    print(stdout)
+    assert result.exit_code == 0
+
+    assert "Profiling 'wow_a_datasource'" in stdout
+    assert "Skipping profiling for now." in stdout
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_cli_datasource_profile_on_empty_database(
     empty_data_context, empty_sqlite_db, caplog
 ):
+    """
+    We run the datasource profile command against an empty database (no tables).
+    This means that no generator can "see" a list of available data assets.
+    The command must exit with an error message saying that no generator can see
+    any assets.
+    """
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     datasource_name = "wow_a_datasource"
@@ -128,10 +165,10 @@ def test_cli_datasource_profile_answering_no(
 
     stdout = result.output
     print(stdout)
-    assert result.exit_code == 0
+    assert result.exit_code == 1
 
     assert "Profiling 'wow_a_datasource'" in stdout
-    assert "Skipping profiling for now." in stdout
+    assert "No batch kwarg generators can list available data assets" in stdout
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -191,7 +228,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(condition=PY2)
+@pytest.mark.xfail(condition=PY2, reason="a known issue on Py2")
 def test_cli_datasource_profile_with_no_datasource_args(
     empty_data_context, titanic_sqlite_db, caplog
 ):
@@ -239,14 +276,14 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(reason="TODO broken")
-def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_should_raise_helpful_error(
+def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with_limit(
     empty_data_context, titanic_sqlite_db, caplog
 ):
-    assert False
     """
-    Passing additional batch kwargs along with a data asset name to a sql
-    backend is an invalid operation and should display a helpful error message.
+    User can pass additional batch kwargs (e.g., limit) to a sql backend.
+    Here we are verifying that passing "limit" affects the query correctly -
+    the row count in the batch that the profiler uses to profile the data asset
+    must match the limit passed by the user.
     """
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
@@ -266,38 +303,42 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_shou
             "--data_assets",
             "main.titanic",
             "--batch_kwargs",
-            '{"query": "select * from main.titanic"}',
+            '{"limit": 97}',
             "--no-view",
         ],
         input="Y\n",
     )
-    stdout = result.output
-    print(stdout)
-    print(result.exception)
-    assert result.exit_code == 1
 
-    # There should not be a suite created
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "Profiling '{}'".format(datasource_name) in stdout
+    assert "The following Data Docs sites were built:\n- local_site:" in stdout
+
+    context = DataContext(project_root_dir)
+    assert len(context.list_datasources()) == 1
+
     expectations_store = context.stores["expectations_store"]
     suites = expectations_store.list_keys()
-    assert len(suites) == 0
+    assert len(suites) == 1
+    assert suites[0].expectation_suite_name == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
 
-    # There should not be a validation created
     validations_store = context.stores["validations_store"]
     validation_keys = validations_store.list_keys()
-    assert len(validation_keys) == 0
+    assert len(validation_keys) == 1
 
-    # TODO is DataContextError the best error to raise? Should it be a CLI error?
-    assert isinstance(result.exception, DataContextError)
+    validation = validations_store.get(validation_keys[0])
+    assert validation.meta["expectation_suite_name"] == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
+    assert validation.success is False
 
-    # TODO this may not be appropriate for this test...
+    row_count_validation_results = [validation_result for validation_result in validation.results\
+                                   if validation_result.expectation_config.expectation_type == "expect_table_row_count_to_be_between"]
+    assert len(row_count_validation_results) == 1
+    assert row_count_validation_results[0].result["observed_value"] == 97
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
-
-@pytest.mark.xfail
 def test_cli_datasource_profile_with_valid_data_asset_arg(
     empty_data_context, titanic_sqlite_db, caplog
 ):
-    assert False
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     datasource_name = "wow_a_datasource"
@@ -331,25 +372,23 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     expectations_store = context.stores["expectations_store"]
     suites = expectations_store.list_keys()
     assert len(suites) == 1
-    assert suites[0].expectation_suite_name == "BasicDatasetProfiler"
+    assert suites[0].expectation_suite_name == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
 
     validations_store = context.stores["validations_store"]
     validation_keys = validations_store.list_keys()
     assert len(validation_keys) == 1
 
     validation = validations_store.get(validation_keys[0])
-    assert validation.meta["expectation_suite_name"] == "BasicDatasetProfiler"
+    assert validation.meta["expectation_suite_name"] == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
     assert validation.success is False
     assert len(validation.results) == 51
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail
 def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
     empty_data_context, titanic_sqlite_db, caplog
 ):
-    assert False
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     datasource_name = "wow_a_datasource"

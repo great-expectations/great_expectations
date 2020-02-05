@@ -41,6 +41,12 @@ except ImportError:
 
 try:
     import pybigquery.sqlalchemy_bigquery
+    from collections import namedtuple
+    # NOTE: pybigquery does not export its type map, so we are accessing a protected member.
+    # This is potentially error-prone, and should be fixed pending response from pybigquery maintainers
+    # https://github.com/mxmzdlv/pybigquery/issues/46
+    BigQueryTypes = namedtuple('BigQueryTypes', sorted(pybigquery.sqlalchemy_bigquery._type_map))
+    bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
 except ImportError:
     pybigquery = None
 
@@ -667,6 +673,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         except (TypeError, AttributeError):
             pass
 
+        try:
+            # Bigquery
+            if isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+                # NOTE: pybigquery does not export its type map, so we are accessing a protected member.
+                # This is potentially error-prone, and should be fixed pending response from pybigquery maintainers
+                # https://github.com/mxmzdlv/pybigquery/issues/46
+                return bigquery_types_tuple
+        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+            pass
         return self.dialect
 
     @DocInherit

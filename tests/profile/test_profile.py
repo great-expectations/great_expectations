@@ -326,6 +326,41 @@ def test_context_profiler(not_empty_datacontext):
     assert len(profiled_expectations.expectations) == 8
 
 
+def test_context_profiler_with_data_asset_name(not_empty_datacontext):
+    """
+    If a valid data asset name is passed to the profiling method
+    in the data_assets argument, the profiling method profiles only this data asset
+    """
+    context = not_empty_datacontext
+
+    assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
+    assert context.list_expectation_suite_keys() == []
+    profiling_result = context.profile_datasource("rad_datasource", data_assets=["f1"], profiler=BasicDatasetProfiler)
+
+    assert profiling_result['success'] == True
+    assert len(profiling_result['results']) == 1
+    assert profiling_result['results'][0][0].expectation_suite_name == 'rad_datasource.subdir_reader.f1.BasicDatasetProfiler'
+
+def test_context_profiler_with_nonexisting_data_asset_name(not_empty_datacontext):
+    """
+    If a non-existing data asset name is passed to the profiling method
+    in the data_assets argument, the profiling method must return an error
+    code in the result and the names of the unrecognized assets
+    """
+    context = not_empty_datacontext
+
+    assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
+    assert context.list_expectation_suite_keys() == []
+    profiling_result = context.profile_datasource("rad_datasource", data_assets=["this_asset_doesnot_exist"], profiler=BasicDatasetProfiler)
+
+    assert profiling_result == {
+        'success': False,
+        'error': {'code': 3,
+                  'not_found_data_assets': ['this_asset_doesnot_exist'],
+                  'data_assets': [('f1', 'file')]}
+    }
+
+
 def test_snapshot_BasicDatasetProfiler_on_titanic():
     """
     A snapshot regression test for BasicDatasetProfiler.

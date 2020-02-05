@@ -322,12 +322,9 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-# TODO completely broken logic https://app.asana.com/0/1119694864223484/1159681908685729/f")
-@pytest.mark.xfail
 def test_cli_datasource_profile_with_valid_data_asset_arg(
     caplog, empty_data_context, filesystem_csv_2
 ):
-    assert False
     empty_data_context.add_datasource(
         "my_datasource",
         module_name="great_expectations.datasource",
@@ -379,18 +376,15 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert len(validation_keys) == 1
 
     validation = validations_store.get(validation_keys[0])
-    assert validation.meta["expectation_suite_name"] == "BasicDatasetProfiler"
+    assert validation.meta["expectation_suite_name"] == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
     assert validation.success is False
-    assert len(validation.results) == 13
+    assert len(validation.results) == 8
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-# TODO completely broken logic https://app.asana.com/0/1119694864223484/1159681908685729/f")
-@pytest.mark.xfail
 def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
     caplog, empty_data_context, filesystem_csv_2
 ):
-    assert False
     empty_data_context.add_datasource(
         "my_datasource",
         module_name="great_expectations.datasource",
