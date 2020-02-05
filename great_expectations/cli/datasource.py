@@ -272,21 +272,11 @@ What are you processing your files with?
 def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_datasource_name=True):
     if passthrough_generator_only:
         datasource_name = "files_datasource"
-
-        # configuration = PandasDatasource.build_configuration(generators={
-        #     "default": {
-        #         "class_name": "PassthroughGenerator",
-        #     }
-        # }
-        # )
-
-
         configuration = PandasDatasource.build_configuration()
 
     else:
         path = click.prompt(
             msg_prompt_filesys_enter_base_path,
-            # default='/data/',
             type=click.Path(
                 exists=True,
                 file_okay=False,

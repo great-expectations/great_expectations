@@ -35,10 +35,7 @@ def titanic_sqlite_db_file(tmp_path_factory):
     return db_path
 
 
-@pytest.mark.xfail
 def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_file):
-    assert False
-
     basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     ge_dir = os.path.join(basedir, "great_expectations")
 
@@ -53,6 +50,7 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_fil
         input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url),
     )
     stdout = result.output
+    print(stdout)
     assert len(stdout) < 3000, "CLI output is unreasonably long."
 
     assert "Always know what to expect from your data" in stdout
@@ -60,19 +58,15 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_fil
     assert "Which database backend are you using" in stdout
     assert "Give your new data source a short name" in stdout
     assert "What is the url/connection string for the sqlalchemy connection" in stdout
-    assert (
-        "Great Expectations will choose a couple of columns and generate expectations about them"
-        in stdout
-    )
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
-    assert "Which data would you like to use?" in stdout
+    assert "Which table would you like to use?" in stdout
     assert "Name the new expectation suite [warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
         in stdout
     )
-    assert "Profiling main.titanic" in stdout
+    assert "Profiling..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
     assert "A new Expectation suite 'warning' was added to your project" in stdout
@@ -102,27 +96,25 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_fil
 
     # Instead of monkey patching datetime, just regex out the time directories
     date_safe_obs_tree = re.sub(r"\d*T\d*\.\d*Z", "9999.9999", obs_tree)
+    # Instead of monkey patching guids, just regex out the guids
+    guid_safe_obs_tree = re.sub(
+        r"[a-z0-9]{32}(?=\.(json|html))", "foobarbazguid", date_safe_obs_tree
+    )
+    print(guid_safe_obs_tree)
     assert (
-        date_safe_obs_tree
+        guid_safe_obs_tree
         == """\
 great_expectations/
     .gitignore
     great_expectations.yml
-    datasources/
     expectations/
-        titanic/
-            default/
-                main.titanic/
-                    warning.json
+        warning.json
     notebooks/
         pandas/
-            create_expectations.ipynb
             validation_playground.ipynb
         spark/
-            create_expectations.ipynb
             validation_playground.ipynb
         sql/
-            create_expectations.ipynb
             validation_playground.ipynb
     plugins/
         custom_data_docs/
@@ -136,10 +128,7 @@ great_expectations/
             local_site/
                 index.html
                 expectations/
-                    titanic/
-                        default/
-                            main.titanic/
-                                warning.html
+                    warning.html
                 static/
                     fonts/
                         HKGrotesk/
@@ -187,18 +176,14 @@ great_expectations/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
                 validations/
-                    9999.9999/
-                        titanic/
-                            default/
-                                main.titanic/
-                                    warning.html
+                    warning/
+                        9999.9999/
+                            foobarbazguid.html
         samples/
         validations/
-            9999.9999/
-                titanic/
-                    default/
-                        main.titanic/
-                            warning.json
+            warning/
+                9999.9999/
+                    foobarbazguid.json
 """
     )
 
@@ -207,11 +192,9 @@ great_expectations/
     assert result.exit_code == 0
 
 
-@pytest.mark.xfail
-def test_init_on_existing_project_with_no_datasources_should_add_one(
+def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
     caplog, initialized_sqlite_project,
 ):
-    assert False
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
 
@@ -230,8 +213,8 @@ def test_init_on_existing_project_with_no_datasources_should_add_one(
     assert result.exit_code == 0
 
     assert "Error: invalid input" not in stdout
-
     assert "Always know what to expect from your data" in stdout
+    # TODO this behavior is broken and the input may need to be adjusted
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "Great Expectations connected to your database" in stdout
     assert "A new datasource 'sqlite' was added to your project" in stdout
@@ -309,6 +292,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     runner = CliRunner()
     result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n")
     stdout = result.stdout
+    print(stdout)
 
     assert result.exit_code == 0
 
@@ -322,7 +306,6 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(reason="failing")
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs(
     caplog, initialized_sqlite_project,
 ):
@@ -344,7 +327,6 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(reason="failing")
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     caplog, initialized_sqlite_project,
 ):

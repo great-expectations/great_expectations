@@ -1,53 +1,60 @@
 # -*- coding: utf-8 -*-
+import copy
+import datetime
+import errno
 import glob
-import os
 import logging
+import os
 import shutil
+import sys
+import warnings
 import webbrowser
 
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
-import sys
-import copy
-import errno
 from six import string_types
-import datetime
-import warnings
-
-from great_expectations.core import ExpectationSuite
-from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.util import nested_update
-from great_expectations.core.metric import ValidationMetricIdentifier
-from great_expectations.data_context.types.base import DataContextConfig, dataContextConfigSchema
-from great_expectations.data_context.util import file_relative_path, substitute_config_variable
-from .types.resource_identifiers import ExpectationSuiteIdentifier, ValidationResultIdentifier
-from .util import safe_mmkdir, substitute_all_config_variables
-
-from ..types.base import DotDict
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.id_dict import BatchKwargs
+from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.util import nested_update
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    dataContextConfigSchema,
+)
+from great_expectations.data_context.util import (
+    file_relative_path,
+    substitute_config_variable,
+)
+from great_expectations.dataset import Dataset
+from great_expectations.profile.basic_dataset_profiler import (
+    BasicDatasetProfiler,
+)
 
+from ..types.base import DotDict
 # FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers.
 from ..validator.validator import Validator
+from .templates import (
+    CONFIG_VARIABLES_INTRO,
+    CONFIG_VARIABLES_TEMPLATE,
+    PROJECT_TEMPLATE,
+)
+from .types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
+from .util import (
+    instantiate_class_from_config,
+    load_class,
+    safe_mmkdir,
+    substitute_all_config_variables,
+)
 
 try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse
-
-from great_expectations.dataset import Dataset
-from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-
-
-from .templates import (
-    PROJECT_TEMPLATE,
-    CONFIG_VARIABLES_INTRO,
-    CONFIG_VARIABLES_TEMPLATE,
-)
-from .util import (
-    load_class,
-    instantiate_class_from_config
-)
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -1507,12 +1514,31 @@ class DataContext(BaseDataContext):
 
     @classmethod
     def is_project_initialized(cls, ge_dir):
-        """Return True if the project is initialized."""
-        return (
-            cls.does_config_exist_on_disk(ge_dir)
-            and cls.all_uncommitted_directories_exist(ge_dir)
-            and cls.config_variables_yml_exist(ge_dir)
-        )
+        """
+        Return True if the project is initialized.
+
+        To be considered initialized, all of the following must be true:
+        - all project directories exist (including uncommitted directories)
+        - a valid great_expectations.yml is on disk
+        - a config_variables.yml is on disk
+        - the project has at least one datasource
+        """
+        return cls.does_config_exist_on_disk(ge_dir) and cls.all_uncommitted_directories_exist(ge_dir) and cls.config_variables_yml_exist(ge_dir) and cls._is_context_instantiable_and_have_at_least_one_datasource(ge_dir)
+
+    @classmethod
+    def does_project_have_a_datasource_in_config_file(cls, ge_dir):
+        if not cls.does_config_exist_on_disk(ge_dir):
+            return False
+        return cls._is_context_instantiable_and_have_at_least_one_datasource(ge_dir)
+
+    @classmethod
+    def _is_context_instantiable_and_have_at_least_one_datasource(cls, ge_dir):
+        try:
+            context = DataContext(ge_dir)
+            return len(context.list_datasources()) >= 1
+        except (ge_exceptions.DataContextError, ge_exceptions.InvalidDataContextConfigError) as e:
+            logger.warning(e)
+            return False
 
 
 class ExplorerDataContext(DataContext):
