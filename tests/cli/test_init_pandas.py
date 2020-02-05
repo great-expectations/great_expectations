@@ -66,11 +66,9 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory):
     )
     assert (
         guid_safe_obs_tree
-        == """\
-great_expectations/
+        == """great_expectations/
     .gitignore
     great_expectations.yml
-    datasources/
     expectations/
         warning.json
     notebooks/
@@ -149,6 +147,7 @@ great_expectations/
                 9999.9999/
                     foobarbazguid.json
 """
+
     )
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
