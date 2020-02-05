@@ -118,7 +118,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_f
     assert not os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml"))
 
 
-# @pytest.mark.xfail(reason="failing")
 def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     caplog, tmp_path_factory,
 ):
@@ -158,7 +157,6 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-# @pytest.mark.xfail
 def test_cli_init_connection_string_non_working_postgres_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
     caplog, tmp_path_factory,
 ):
@@ -181,7 +179,6 @@ def test_cli_init_connection_string_non_working_postgres_connection_instructs_us
     assert "Give your new data source a short name" in stdout
     assert "Attempting to connect to your database. This may take a moment" in stdout
     assert "Cannot connect to the database" in stdout
-    # assert "Database Error: No module named 'pymssql'" in stdout
 
     assert "Profiling" not in stdout
     assert "Building" not in stdout

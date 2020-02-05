@@ -898,7 +898,7 @@ Would you like to enter the path of the file or choose from the list of data ass
 Enter the path (relative or absolute) of a data file
 """
 
-    msg_prompt_enter_data_asset_name = "\nWhich data asset would you like to use? (Choose one)\n"
+    msg_prompt_enter_data_asset_name = "\nWhich data would you like to use? (Choose one)\n"
 
     msg_prompt_enter_data_asset_name_suffix = "    Don't see the name of the data asset in the list above? Just type it\n"
 
