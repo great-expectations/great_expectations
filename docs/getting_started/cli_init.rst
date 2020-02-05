@@ -24,7 +24,7 @@ Identifier Standard <https://www.cms.gov/Regulations-and-Guidance/Administrative
 .. code-block:: bash
 
     git clone https://github.com/superconductive/ge_example_project.git
-    cd example-dickens-ge_example_project-project
+    cd ge_example_project
 
 By default, everything in the Great Expectations deployment framework will be expressed in a directory structure
 within a ``great_expectations/`` folder within your version control system. To create this folder, navigate to the
