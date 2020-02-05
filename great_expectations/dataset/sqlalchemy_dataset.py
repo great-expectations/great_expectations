@@ -347,7 +347,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def get_row_count(self):
         count_query = sa.select([sa.func.count()]).select_from(
             self._table)
-        return self.engine.execute(count_query).scalar()
+        return int(self.engine.execute(count_query).scalar())
 
     def get_column_count(self):
         return len(self.columns)
@@ -368,8 +368,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ).label('null_count'),
         ]).select_from(self._table)
         count_results = dict(self.engine.execute(count_query).fetchone())
-        element_count = count_results['element_count']
-        null_count = count_results['null_count'] or 0
+        element_count = int(count_results['element_count'])
+        null_count = int(count_results.get('null_count', 0))
         return element_count - null_count
 
     def get_column_sum(self, column):
