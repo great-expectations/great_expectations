@@ -35,7 +35,8 @@ def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
     stdout = result.output.strip()
     if PY2:
         # deal with legacy python dictionary sorting
-        assert "'name': 'wow_a_datasource'" and "'class_name': 'SqlAlchemyDatasource'" in stdout
+        print(stdout)
+        assert "'name': 'wow_a_datasource'" and "'class_name': u'SqlAlchemyDatasource'" in stdout
         assert len(stdout) >= 60 and len(stdout) <= 75
     else:
         assert "[{'name': 'wow_a_datasource', 'class_name': 'SqlAlchemyDatasource'}]" in stdout
