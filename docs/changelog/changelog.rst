@@ -66,9 +66,17 @@ detailed descriptions of changes, and as always feel free to join us on Slack fo
 * Database store tables are not compatible between versions and require a manual migration
 * StoreEvaluationParametersAction
 
-0.8.7__develop
------------------
 
+0.8.8__develop
+-----------------
+* Add support for allow_relative_error to expect_column_quantile_values_to_be_between, allowing Redshift users access
+  to this expectation
+
+0.8.7
+-----------------
+* Add support for expect_column_values_to_be_of_type for BigQuery backend (#940)
+* Add image CDN for community usage stats
+* Documentation improvements and fixes
 
 0.8.6
 -----------------

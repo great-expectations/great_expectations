@@ -1,3 +1,11 @@
+import os
+import shutil
+
+import pytest
+
+from great_expectations.data_context.util import safe_mmkdir
+from great_expectations.datasource import Datasource
+from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
 from great_expectations.datasource.generator import QueryGenerator
 
@@ -24,6 +32,16 @@ def test_basic_operation(basic_sqlalchemy_datasource):
     assert batch_kwargs.query == "SELECT c1, c2 FROM my_table"
 
 
+def test_add_query():
+    generator = QueryGenerator()
+    generator.add_query("my_asset", "select * from my_table where val > $condition")
+
+    batch_kwargs = generator.yield_batch_kwargs("my_asset", query_params={"condition": 5})
+    assert isinstance(batch_kwargs, SqlAlchemyDatasourceQueryBatchKwargs)
+    assert batch_kwargs.query == "select * from my_table where $condition"
+    assert batch_kwargs.query_parameters == {"condition": 5}
+
+
 def test_partition_id(basic_sqlalchemy_datasource):
     generator = QueryGenerator(
         datasource=basic_sqlalchemy_datasource,
@@ -36,3 +54,17 @@ def test_partition_id(basic_sqlalchemy_datasource):
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceQueryBatchKwargs)
     assert batch_kwargs.query == "SELECT * FROM my_table WHERE value = $partition_id"
     assert batch_kwargs.query_parameters == {"partition_id": "foo"}
+
+
+def test_get_available_data_asset_names_for_query_path(empty_data_context):
+
+    # create queries path
+    context_path = empty_data_context.root_directory
+    safe_mmkdir(os.path.join(context_path, "datasources/mydatasource/generators/mygenerator/queries"))
+    shutil.copy("./tests/test_fixtures/dummy.sql", str(os.path.join(context_path, "datasources", "mydatasource",
+                                                                    "generators", "mygenerator", "queries")))
+
+    data_source = Datasource(name="mydatasource", data_context=empty_data_context)
+    generator = QueryGenerator(name="mygenerator", datasource=data_source)
+    sql_list = generator.get_available_data_asset_names()
+    assert "dummy" in sql_list
