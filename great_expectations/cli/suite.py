@@ -79,7 +79,7 @@ def suite_edit(suite, directory, jupyter, batch_kwargs):
 
     notebook_name = "{}.ipynb".format(suite.expectation_suite_name)
 
-    notebook_path = os.path.join(context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
+    notebook_path = os.path.join(".", context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
     NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path)
 
     cli_message(
