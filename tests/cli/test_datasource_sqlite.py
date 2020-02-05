@@ -159,7 +159,7 @@ def test_cli_datasource_profile_on_empty_database(
 
     stdout = result.output
     print(stdout)
-    assert result.exit_code == -1
+    assert result.exit_code == 1
 
     assert "Profiling 'wow_a_datasource'" in stdout
     assert "No batch kwarg generators can list available data assets" in stdout

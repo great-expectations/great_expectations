@@ -183,13 +183,13 @@ def datasource_profile(datasource_name, generator_name, data_assets, profile_all
         datasources = [datasource["name"] for datasource in context.list_datasources()]
         if not datasources:
             cli_message(NO_DATASOURCES_FOUND)
-            sys.exit(-1)
+            sys.exit(1)
         elif len(datasources) > 1:
             cli_message(
                 "<red>Error: please specify the datasource to profile. "\
                 "Available datasources: " + ", ".join(datasources) + "</red>"
             )
-            sys.exit(-1)
+            sys.exit(1)
         else:
             profile_datasource(
                 context,
@@ -1168,11 +1168,11 @@ Great Expectations is building Data Docs from the data you just profiled!"""
             elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_MULTIPLE_GENERATORS_FOUND:
                 cli_message(
                     msg_error_multiple_generators_found.format(datasource_name))
-                sys.exit(-1)
+                sys.exit(1)
             elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_NO_GENERATOR_FOUND:
                 cli_message(
                     msg_error_no_generators_found.format(datasource_name))
-                sys.exit(-1)
+                sys.exit(1)
             else: # unknown error
                 raise ValueError("Unknown profiling error code: " + profiling_results['error']['code'])
 
