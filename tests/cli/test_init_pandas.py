@@ -228,8 +228,7 @@ def initialized_project(tmp_path_factory):
     return basedir
 
 
-# @pytest.mark.skip(reason="failing")
-def x(
+def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     caplog, initialized_project, filesystem_csv_2
 ):
     project_dir = initialized_project
