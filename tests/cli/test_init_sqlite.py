@@ -293,7 +293,6 @@ def initialized_sqlite_project(caplog, tmp_path_factory, titanic_sqlite_db_file)
     return basedir
 
 
-@pytest.mark.xfail(reason="failing")
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     caplog, initialized_sqlite_project, titanic_sqlite_db, empty_sqlite_db
 ):

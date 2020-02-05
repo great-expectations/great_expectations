@@ -239,6 +239,8 @@ class PandasDatasource(Datasource):
             return {"reader_method": "read_excel"}
         elif path.endswith(".json"):
             return {"reader_method": "read_json"}
+        elif path.endswith(".pkl"):
+            return {"reader_method": "read_pickle"}
         elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
             return {"reader_method": "read_csv", "reader_options": {"compression": "gzip"}}
 

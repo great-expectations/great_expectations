@@ -16,6 +16,7 @@ Head over to the :ref:`intro` to learn more, or jump straight to our :ref:`getti
 
    intro
    getting_started
+   expectation_glossary
    tutorials
    features
    reference

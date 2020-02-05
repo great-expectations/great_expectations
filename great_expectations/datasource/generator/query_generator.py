@@ -32,8 +32,9 @@ class QueryGenerator(BatchKwargsGenerator):
             # and an InMemoryStore otherwise
             if datasource and datasource.data_context and datasource.data_context.root_directory:
                 query_store_backend = {
-                    "class_name": "FileSystemTupleStoreBackend",
-                    "base_directory": os.path.join(datasource.data_context.root_directory, "generators", name),
+                    "class_name": "TupleFilesystemStoreBackend",
+                    "base_directory": os.path.join(datasource.data_context.root_directory, "datasources",
+                                                   datasource.name, "generators", name),
                     "filepath_suffix": ".sql"
                 }
                 root_directory = datasource.data_context.root_directory
@@ -80,11 +81,13 @@ class QueryGenerator(BatchKwargsGenerator):
         return iter_
 
     def add_query(self, generator_asset, query):
+        # Backends must have a tuple key; we use only a single-element tuple
         self._store_backend.set(tuple(generator_asset), query)
 
     def get_available_data_asset_names(self):
         defined_queries = self._store_backend.list_keys()
-        return [(query_name, "query") for query_name in defined_queries]
+        # Backends must have a tuple key; we use only a single-element tuple
+        return [(query_key_tuple[0], "query") for query_key_tuple in defined_queries]
 
     def _build_batch_kwargs(self, batch_parameters):
         """Build batch kwargs from a partition id."""
