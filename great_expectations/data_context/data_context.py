@@ -929,6 +929,8 @@ class BaseDataContext(object):
             When success = False, the error details are under "error" key
         """
 
+        # We don't need the datasource object, but this line serves to check if the datasource by the name passed as
+        # an arg exists and raise an error if it does not.
         datasource = self.get_datasource(datasource_name)
 
         if not dry_run:
@@ -940,7 +942,6 @@ class BaseDataContext(object):
 
         data_asset_names_dict = self.get_available_data_asset_names(datasource_name)
 
-        # KeyError will happen if there are no generators
         available_data_asset_name_list = []
         try:
             datasource_data_asset_names_dict = data_asset_names_dict[datasource_name]

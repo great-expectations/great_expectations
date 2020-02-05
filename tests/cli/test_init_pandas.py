@@ -286,7 +286,6 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-# @pytest.mark.skip(reason="failing")
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     caplog, initialized_project,
 ):
