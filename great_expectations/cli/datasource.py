@@ -359,6 +359,12 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
     if not load_library("sqlalchemy"):
         return None
 
+    # TODO remove this nasty python 2 hack
+    try:
+        ModuleNotFoundError
+    except NameError:
+        ModuleNotFoundError = ImportError
+
     db_choices = [str(x) for x in list(range(1, 1 + len(SupportedDatabases)))]
     selected_database = int(
         click.prompt(

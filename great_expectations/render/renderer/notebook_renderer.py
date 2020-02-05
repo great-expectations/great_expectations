@@ -78,7 +78,7 @@ expectation_suite_name = "{}"  # Feel free to change the name of your suite here
 context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
 
 batch_kwargs = {}
-batch = context.get_batch(expectation_suite_name, batch_kwargs)
+batch = context.get_batch(batch_kwargs, expectation_suite_name)
 batch.head()""".format(
                 suite_name, batch_kwargs
             )
