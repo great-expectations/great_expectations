@@ -1522,23 +1522,46 @@ class DataContext(BaseDataContext):
         - a valid great_expectations.yml is on disk
         - a config_variables.yml is on disk
         - the project has at least one datasource
+        - the project has at least one suite
         """
-        return cls.does_config_exist_on_disk(ge_dir) and cls.all_uncommitted_directories_exist(ge_dir) and cls.config_variables_yml_exist(ge_dir) and cls._is_context_instantiable_and_have_at_least_one_datasource(ge_dir)
+        return (
+            cls.does_config_exist_on_disk(ge_dir)
+            and cls.all_uncommitted_directories_exist(ge_dir)
+            and cls.config_variables_yml_exist(ge_dir)
+            and cls._does_context_have_at_least_one_datasource(ge_dir)
+            and cls._does_context_have_at_least_one_suite(ge_dir)
+        )
 
     @classmethod
     def does_project_have_a_datasource_in_config_file(cls, ge_dir):
         if not cls.does_config_exist_on_disk(ge_dir):
             return False
-        return cls._is_context_instantiable_and_have_at_least_one_datasource(ge_dir)
+        return cls._does_context_have_at_least_one_datasource(ge_dir)
 
     @classmethod
-    def _is_context_instantiable_and_have_at_least_one_datasource(cls, ge_dir):
+    def _does_context_have_at_least_one_datasource(cls, ge_dir):
+        context = cls._attempt_context_instantiation(ge_dir)
+        if not isinstance(context, DataContext):
+            return False
+        return len(context.list_datasources()) >= 1
+
+    @classmethod
+    def _does_context_have_at_least_one_suite(cls, ge_dir):
+        context = cls._attempt_context_instantiation(ge_dir)
+        if not isinstance(context, DataContext):
+            return False
+        return len(context.list_expectation_suite_keys()) >= 1
+
+    @classmethod
+    def _attempt_context_instantiation(cls, ge_dir):
         try:
             context = DataContext(ge_dir)
-            return len(context.list_datasources()) >= 1
-        except (ge_exceptions.DataContextError, ge_exceptions.InvalidDataContextConfigError) as e:
+            return context
+        except (
+            ge_exceptions.DataContextError,
+            ge_exceptions.InvalidDataContextConfigError
+        ) as e:
             logger.warning(e)
-            return False
 
 
 class ExplorerDataContext(DataContext):

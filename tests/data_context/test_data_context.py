@@ -700,19 +700,34 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     assert DataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
 
 
-def test_data_context_is_project_initialized_returns_false_when_its_context_has_no_datasource(
+def test_data_context_is_project_initialized_returns_true_when_its_valid_context_has_one_datasource_and_one_suite(
+    empty_context,
+):
+    context = empty_context
+    ge_dir = context.root_directory
+    context.add_datasource("arthur", class_name="PandasDatasource")
+    context.create_expectation_suite("dent")
+    assert len(context.list_expectation_suite_keys()) == 1
+
+    assert DataContext.is_project_initialized(ge_dir) == True
+
+
+def test_data_context_is_project_initialized_returns_true_when_its_valid_context_has_one_datasource_and_no_suites(
+    empty_context,
+):
+    context = empty_context
+    ge_dir = context.root_directory
+    context.add_datasource("arthur", class_name="PandasDatasource")
+    assert len(context.list_expectation_suite_keys()) == 0
+
+    assert DataContext.is_project_initialized(ge_dir) == False
+
+
+def test_data_context_is_project_initialized_returns_false_when_its_valid_context_has_no_datasource(
     empty_context,
 ):
     ge_dir = empty_context.root_directory
     assert DataContext.is_project_initialized(ge_dir) == False
-
-
-def test_data_context_is_project_initialized_returns_true_when_its_context_has_at_least_one_datasource(
-    empty_context,
-):
-    ge_dir = empty_context.root_directory
-    empty_context.add_datasource("arthur", **{"class_name": "PandasDatasource"})
-    assert DataContext.is_project_initialized(ge_dir) == True
 
 
 def test_data_context_is_project_initialized_returns_false_when_config_yml_is_missing(empty_context):

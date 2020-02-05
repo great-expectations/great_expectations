@@ -193,36 +193,48 @@ great_expectations/
 
 
 def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
-    caplog, initialized_sqlite_project,
+    caplog, initialized_sqlite_project, titanic_sqlite_db_file,
 ):
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
 
     _remove_all_datasources(ge_dir)
+    os.remove(os.path.join(ge_dir, "expectations", "warning.json"))
 
     runner = CliRunner()
-    # TODO this behavior is broken and the input may need to be adjusted
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", project_dir],
-        input="2\n5\nsqlite\nsqlite:///data/titanic.db\n",
+        input="2\n5\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
+            titanic_sqlite_db_file
+        ),
     )
     stdout = result.stdout
-    print(stdout)
 
     assert result.exit_code == 0
 
     assert "Error: invalid input" not in stdout
     assert "Always know what to expect from your data" in stdout
-    # TODO this behavior is broken and the input may need to be adjusted
     assert "What data would you like Great Expectations to connect to" in stdout
+    assert (
+        "Next, we will configure database credentials and store them in the `sqlite` section"
+        in stdout
+    )
+    assert "What is the url/connection string for the sqlalchemy connection?" in stdout
+    assert "Which table would you like to use?" in stdout
     assert "Great Expectations connected to your database" in stdout
-    assert "A new datasource 'sqlite' was added to your project" in stdout
-    assert "Would you like to build & view this project's Data Docs" in stdout
+    assert "A new Expectation suite 'my_suite' was added to your project" in stdout
     assert "This looks like an existing project that" not in stdout
 
     config = _load_config_file(os.path.join(ge_dir, DataContext.GE_YML))
     assert "sqlite" in config["datasources"].keys()
+
+    context = DataContext(ge_dir)
+    assert context.list_datasources() == [
+        {"class_name": "SqlAlchemyDatasource", "name": "sqlite"}
+    ]
+    assert context.list_expectation_suite_keys()[0].expectation_suite_name == "my_suite"
+    assert len(context.list_expectation_suite_keys()) == 1
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
