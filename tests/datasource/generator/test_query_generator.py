@@ -3,7 +3,7 @@ import shutil
 
 import pytest
 
-from great_expectations.data_context.util import safe_mmkdir
+from great_expectations.data_context.util import safe_mmkdir, file_relative_path
 from great_expectations.datasource import Datasource
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
@@ -59,9 +59,9 @@ def test_partition_id(basic_sqlalchemy_datasource):
 def test_get_available_data_asset_names_for_query_path(empty_data_context):
     # create queries path
     context_path = empty_data_context.root_directory
-    safe_mmkdir(os.path.join(context_path, "datasources/mydatasource/generators/mygenerator/queries"))
-    shutil.copy("./tests/test_fixtures/dummy.sql", str(os.path.join(context_path, "datasources", "mydatasource",
-                                                                    "generators", "mygenerator")))
+    query_path = os.path.join(context_path, "datasources/mydatasource/generators/mygenerator")
+    safe_mmkdir(query_path)
+    shutil.copy(file_relative_path(__file__, "../../test_fixtures/dummy.sql"), query_path)
 
     data_source = Datasource(name="mydatasource", data_context=empty_data_context)
     generator = QueryGenerator(name="mygenerator", datasource=data_source)
