@@ -180,7 +180,6 @@ def test_cli_init_spark_without_library_installed_instructs_user(
 great_expectations/
     .gitignore
     great_expectations.yml
-    datasources/
     expectations/
     notebooks/
         pandas/
