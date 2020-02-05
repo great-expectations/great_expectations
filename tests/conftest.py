@@ -218,7 +218,23 @@ def non_numeric_low_card_dataset(test_backend):
     the standard json testing framework"""
 
     data = {
-        "lowcardnonnum": ["a", "b", "b", "b", "c", "c", "a"]
+        "lowcardnonnum": [
+            "a", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+        ]
     }
     schemas = {
         "pandas": {
