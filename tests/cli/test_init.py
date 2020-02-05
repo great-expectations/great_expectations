@@ -118,7 +118,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_f
     assert not os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml"))
 
 
-@pytest.mark.xfail(reason="failing")
 def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     caplog, tmp_path_factory,
 ):
@@ -158,11 +157,9 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail
-def test_cli_init_connection_string_non_working_mssql_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
+def test_cli_init_connection_string_non_working_postgres_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
     caplog, tmp_path_factory,
 ):
-    assert False
     basedir = tmp_path_factory.mktemp("mssql_test")
     basedir = str(basedir)
     os.chdir(basedir)
@@ -171,7 +168,7 @@ def test_cli_init_connection_string_non_working_mssql_connection_instructs_user_
     result = runner.invoke(
         cli,
         ["init", "--no-view"],
-        input="Y\n2\n5\nmy_db\nmssql+pymssql://scott:tiger@not_a_real_host:1234/dbname\n",
+        input="Y\n2\n5\nmy_db\npostgresql+psycopg2://scott:tiger@not_a_real_host:1234/dbname\nn\n",
     )
     stdout = result.output
 
@@ -182,7 +179,6 @@ def test_cli_init_connection_string_non_working_mssql_connection_instructs_user_
     assert "Give your new data source a short name" in stdout
     assert "Attempting to connect to your database. This may take a moment" in stdout
     assert "Cannot connect to the database" in stdout
-    assert "Database Error: No module named 'pymssql'" in stdout
 
     assert "Profiling" not in stdout
     assert "Building" not in stdout
@@ -206,10 +202,7 @@ def test_cli_init_connection_string_non_working_mssql_connection_instructs_user_
             },
             "credentials": "${my_db}",
             "class_name": "SqlAlchemyDatasource",
-            "generators": {
-                "default": {"class_name": "TableGenerator"},
-                "passthrough": {"class_name": "PassthroughGenerator"},
-            },
+            "module_name": "great_expectations.datasource"
         }
     }
 
@@ -219,7 +212,7 @@ def test_cli_init_connection_string_non_working_mssql_connection_instructs_user_
     )
     config = yaml.load(open(config_path, "r"))
     assert config["my_db"] == {
-        "connection_string": "mssql+pymssql://scott:tiger@not_a_real_host:1234/dbname"
+        "url": "postgresql+psycopg2://scott:tiger@not_a_real_host:1234/dbname"
     }
 
     obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
@@ -229,7 +222,6 @@ def test_cli_init_connection_string_non_working_mssql_connection_instructs_user_
 great_expectations/
     .gitignore
     great_expectations.yml
-    datasources/
     expectations/
     notebooks/
         pandas/
