@@ -119,9 +119,9 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
         assert error_message in result.output
 
         # suite edit
-        result = runner.invoke(cli, ["suite", "edit", "FAKE", "FAKE", "-d", "./"])
+        result = runner.invoke(cli, ["suite", "edit", "FAKE", "-d", "./"])
         assert error_message in result.output
-        result = runner.invoke(cli, ["suite", "edit", "FAKE", "FAKE"])
+        result = runner.invoke(cli, ["suite", "edit", "FAKE"])
         assert error_message in result.output
     except:
         raise
