@@ -316,7 +316,21 @@ def test_simple_suite(critical_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n# Let\'s make a simple sortable timestamp. Note this could come from your pipeline runner.\nrun_id = datetime.utcnow().isoformat().replace(":", "") + "Z"\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nexpectation_suite_identifier = list(results["details"].keys())[0]\nvalidation_result_identifier = ValidationResultIdentifier(\n    expectation_suite_identifier=expectation_suite_identifier,\n    run_id=run_id\n)\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": """\
+batch.save_expectation_suite(discard_failed_expectations=False)
+
+# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
+run_id = datetime.utcnow().isoformat().replace(":", "") + "Z"
+
+results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
+expectation_suite_identifier = list(results["details"].keys())[0]
+validation_result_identifier = ValidationResultIdentifier(
+    expectation_suite_identifier=expectation_suite_identifier,
+    batch_identifier=batch.batch_kwargs.to_id(),
+    run_id=run_id
+)
+context.build_data_docs()
+context.open_data_docs(validation_result_identifier)""",
                 "outputs": [],
             },
         ],
@@ -644,7 +658,21 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\n# Let\'s make a simple sortable timestamp. Note this could come from your pipeline runner.\nrun_id = datetime.utcnow().isoformat().replace(":", "") + "Z"\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)\nexpectation_suite_identifier = list(results["details"].keys())[0]\nvalidation_result_identifier = ValidationResultIdentifier(\n    expectation_suite_identifier=expectation_suite_identifier,\n    run_id=run_id\n)\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": """\
+batch.save_expectation_suite(discard_failed_expectations=False)
+
+# Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
+run_id = datetime.utcnow().isoformat().replace(":", "") + "Z"
+
+results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
+expectation_suite_identifier = list(results["details"].keys())[0]
+validation_result_identifier = ValidationResultIdentifier(
+    expectation_suite_identifier=expectation_suite_identifier,
+    batch_identifier=batch.batch_kwargs.to_id(),
+    run_id=run_id
+)
+context.build_data_docs()
+context.open_data_docs(validation_result_identifier)""",
                 "outputs": [],
             },
         ],
