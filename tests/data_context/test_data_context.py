@@ -150,14 +150,14 @@ def test_get_new_expectation_suite(data_context):
 
 
 def test_save_expectation_suite(data_context):
-    expectation_suite = data_context.create_expectation_suite('this_data_asset_config_does_not_exist', 'default')
+    expectation_suite = data_context.create_expectation_suite('this_data_asset_config_does_not_exist.default')
     expectation_suite.expectations.append(ExpectationConfiguration(
         expectation_type="expect_table_row_count_to_equal",
         kwargs={
             "value": 10
         }))
     data_context.save_expectation_suite(expectation_suite)
-    expectation_suite_saved = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
+    expectation_suite_saved = data_context.get_expectation_suite('this_data_asset_config_does_not_exist.default')
     assert expectation_suite.expectations == expectation_suite_saved.expectations
 
 
@@ -232,8 +232,7 @@ def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(ti
 
 
 def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_error(titanic_data_context):
-    # TODO verify that this behavior is correct - or should it return a profiling dict w/ an error message?
-    with pytest.raises(ProfilerError):
+    with pytest.raises(ValueError):
         _ = titanic_data_context.profile_datasource("fakey_mc_fake")
 
 

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 import re
 import shutil
@@ -14,7 +16,7 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
-@pytest.mark.xfail(condition=PY2)
+@pytest.mark.xfail(condition=PY2, reason="Py2")
 def test_cli_init_on_new_project(caplog, tmp_path_factory):
     basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     os.makedirs(os.path.join(basedir, "data"))
@@ -66,11 +68,9 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory):
     )
     assert (
         guid_safe_obs_tree
-        == """\
-great_expectations/
+        == """great_expectations/
     .gitignore
     great_expectations.yml
-    datasources/
     expectations/
         warning.json
     notebooks/
@@ -149,6 +149,7 @@ great_expectations/
                 9999.9999/
                     foobarbazguid.json
 """
+
     )
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -229,7 +230,6 @@ def initialized_project(tmp_path_factory):
     return basedir
 
 
-@pytest.mark.skip(reason="failing")
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     caplog, initialized_project, filesystem_csv_2
 ):
@@ -267,7 +267,6 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(reason="failing")
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs(
     caplog, initialized_project,
 ):
@@ -289,7 +288,6 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.skip(reason="failing")
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     caplog, initialized_project,
 ):
