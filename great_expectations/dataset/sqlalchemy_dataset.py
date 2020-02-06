@@ -453,7 +453,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column_median = None
         elif nonnull_count % 2 == 0:
             # An even number of column values: take the average of the two center values
-            column_median = (
+            column_median = float(
                 column_values[0][0] +  # left center value
                 column_values[1][0]    # right center value
             ) / 2.0  # Average center values
