@@ -137,14 +137,14 @@ class SiteBuilder(object):
             site_section_builders = {
                 "expectations": {
                     "class_name": "DefaultSiteSectionBuilder",
-                    "source_store_name": "expectations_store",
+                    "source_store_name":  data_context.expectations_store_name,
                     "renderer": {
                         "class_name": "ExpectationSuitePageRenderer"
                     }
                 },
                 "validations": {
                     "class_name": "DefaultSiteSectionBuilder",
-                    "source_store_name": "validations_store",
+                    "source_store_name": data_context.validations_store_name,
                     "run_id_filter": {
                         "ne": "profiling"
                     },
@@ -155,7 +155,7 @@ class SiteBuilder(object):
                 },
                 "profiling": {
                     "class_name": "DefaultSiteSectionBuilder",
-                    "source_store_name": "validations_store",
+                    "source_store_name":  data_context.validations_store_name,
                     "run_id_filter": {
                         "eq": "profiling"
                     },
