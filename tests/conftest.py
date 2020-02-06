@@ -2,6 +2,7 @@ import json
 import locale
 import os
 import shutil
+import datetime
 
 import numpy as np
 import pandas as pd
@@ -210,6 +211,43 @@ def numeric_high_card_dataset(test_backend, numeric_high_card_dict):
         }
     }
     return get_dataset(test_backend, numeric_high_card_dict, schemas=schemas)
+
+
+@pytest.fixture
+def datetime_dataset(test_backend):
+    data = {
+        "datetime": [
+            str(datetime.datetime(2020, 2, 4, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 5, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 6, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 7, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 8, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 9, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 10, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 11, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 12, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 13, 22, 12, 5, 943152)),
+        ]
+    }
+
+    schemas = {
+        "pandas": {
+            "datetime": "datetime64",
+        },
+        "postgresql": {
+            "datetime": "TIMESTAMP",
+        },
+        "sqlite": {
+            "datetime": "TIMESTAMP",
+        },
+        "mysql": {
+            "datetime": "TIMESTAMP",
+        },
+        "spark": {
+            "datetime": "TimestampType",
+        }
+    }
+    return get_dataset(test_backend, data, schemas=schemas)
 
 
 @pytest.fixture
