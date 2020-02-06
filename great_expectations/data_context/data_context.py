@@ -1013,6 +1013,7 @@ class BaseDataContext(object):
                             datasource_name=datasource_name,
                             generator_name=name[0],
                             data_asset_name=name[1],
+                            profiler=profiler,
                             run_id=run_id,
                             additional_batch_kwargs=additional_batch_kwargs
                         )["results"][0]
