@@ -187,6 +187,7 @@ def test_BasicDatasetProfiler_non_numeric_low_cardinality(non_numeric_low_card_d
             "expect_column_to_exist",
             "expect_column_values_to_be_in_type_list",
             "expect_column_unique_value_count_to_be_between",
+            'expect_column_distinct_values_to_be_in_set',
             "expect_column_proportion_of_unique_values_to_be_between",
             "expect_column_values_to_not_be_null",
             "expect_column_values_to_be_in_set",
