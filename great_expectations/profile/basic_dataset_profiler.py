@@ -452,7 +452,7 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
                 max_value = parse(max_value) + datetime.timedelta(days=365)
 
         if min_value is not None or max_value is not None:
-            dataset.expect_column_values_to_be_between(column, min_value=min_value, max_value=max_value)
+            dataset.expect_column_values_to_be_between(column, min_value, max_value, parse_strings_as_datetimes=True)
 
 
     @classmethod
