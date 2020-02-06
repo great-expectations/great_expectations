@@ -18,9 +18,9 @@ def test_suite_help_output(caplog,):
     assert (
         """\
 Commands:
-  edit  Edit an existing suite with a jupyter notebook.
+  edit  Generate a Jupyter notebook for editing an existing suite.
   new   Create a new expectation suite."""
-        in result.stdout
+          in result.stdout
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -186,5 +186,182 @@ def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
     assert os.path.isfile(expected_index_path)
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
+    assert os.path.isfile(expected_suite_path)
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args(
+    caplog, site_builder_data_context_with_html_store_titanic_random,
+):
+    """
+    Here we verify that the "suite edit" command helps the user to specify the batch
+    kwargs when it is called without the optional arguments that specify the batch.
+
+    First, we call the "suite new" command to create the expectation suite our test
+    will edit - this step is a just a setup.
+
+    We call the "suite edit" command without any optional arguments. This means that
+    the command will help us specify the batch kwargs interactively.
+
+    The data context has two datasources - we choose one of them. It has a generator
+    configured. We choose to use the generator and select a generator asset from the list.
+    """
+    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    os.chdir(root_dir)
+    context = DataContext(root_dir)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
+        input="2\n1\n1\n\n",
+    )
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["suite", "edit", "foo_suite", "-d", root_dir, "--no-jupyter"],
+        input="2\n1\n1\n\n",
+    )
+
+    assert result.exit_code == 0
+    stdout = result.stdout
+    assert "Select data source" in stdout
+    assert "Which data would you like to use" in stdout
+    assert "To continue editing this suite, run" in stdout
+
+
+    expected_notebook_path = os.path.join(
+        root_dir, "uncommitted", "foo_suite.ipynb"
+    )
+    assert os.path.isfile(expected_notebook_path)
+
+    expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
+    assert os.path.isfile(expected_suite_path)
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
+    caplog, site_builder_data_context_with_html_store_titanic_random,
+):
+    """
+    Here we verify that when the "suite edit" command is called with batch_kwargs arg
+    that specifies the batch that will be used as a sample for editing the suite,
+    the command processes the batch_kwargs correctly and skips all the prompts
+    that help users to specify the batch (when called without batch_kwargs).
+
+    First, we call the "suite new" command to create the expectation suite our test
+    will edit - this step is a just a setup.
+
+    We call the "suite edit" command without any optional arguments. This means that
+    the command will help us specify the batch kwargs interactively.
+
+    The data context has two datasources - we choose one of them. It has a generator
+    configured. We choose to use the generator and select a generator asset from the list.
+    """
+    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    os.chdir(root_dir)
+    context = DataContext(root_dir)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
+        input="2\n1\n1\n\n",
+    )
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
+
+    runner = CliRunner()
+
+    import json
+
+    batch_kwargs_arg_str = json.dumps({"datasource": "random", "path": "{0:s}".format(os.path.join(os.path.abspath(os.path.join(root_dir, os.pardir)), "data", "random", "f1.csv"))})
+
+    result = runner.invoke(
+        cli,
+        ["suite", "edit", "foo_suite", "-d", root_dir, "--no-jupyter", "--batch_kwargs", batch_kwargs_arg_str]
+    )
+
+    assert result.exit_code == 0
+    stdout = result.stdout
+    assert "Select data source" not in stdout
+    assert "Which data would you like to use" not in stdout
+    assert "To continue editing this suite, run" in stdout
+
+
+    expected_notebook_path = os.path.join(
+        root_dir, "uncommitted", "foo_suite.ipynb"
+    )
+    assert os.path.isfile(expected_notebook_path)
+
+    expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
+    assert os.path.isfile(expected_suite_path)
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_suite_edit_one_datasources_no_generator_with_no_additional_args(
+    caplog, empty_data_context, filesystem_csv_2
+):
+    """
+    Here we verify that the "suite edit" command helps the user to specify the batch
+    kwargs when it is called without the optional arguments that specify the batch.
+
+    First, we call the "suite new" command to create the expectation suite our test
+    will edit - this step is a just a setup.
+
+    We call the "suite edit" command without any optional arguments. This means that
+    the command will help us specify the batch kwargs interactively.
+
+    The data context has one datasource. The datasource has no generators
+    configured. The command prompts us to enter the file path.
+    """
+    empty_data_context.add_datasource(
+        "my_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+    )
+
+    not_so_empty_data_context = empty_data_context
+    project_root_dir = not_so_empty_data_context.root_directory
+
+    root_dir = project_root_dir
+    os.chdir(root_dir)
+    context = DataContext(root_dir)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--no-view"],
+        input="{0:s}\nmy_new_suite\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["suite", "edit", "my_new_suite", "-d", root_dir, "--no-jupyter"],
+        input="{0:s}\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
+    )
+
+    assert result.exit_code == 0
+    stdout = result.stdout
+    assert "Select data source" not in stdout
+    assert "Which data would you like to use" not in stdout
+    assert "Enter the path" in stdout
+    assert "To continue editing this suite, run" in stdout
+
+
+    expected_notebook_path = os.path.join(
+        root_dir, "uncommitted", "my_new_suite.ipynb"
+    )
+    assert os.path.isfile(expected_notebook_path)
+
+    expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
     assert os.path.isfile(expected_suite_path)
     assert_no_logging_messages_or_tracebacks(caplog, result)
