@@ -875,10 +875,12 @@ Name the new expectation suite"""
                 expectation_suite_name=expectation_suite_name
             )
 
+            batch_id = profiling_results['results'][0][1].meta['batch_kwargs'].to_id()
+
             validation_result_identifier = ValidationResultIdentifier(
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
-                batch_identifier=None
+                batch_identifier=batch_id
             )
             context.open_data_docs(resource_identifier=validation_result_identifier)
 
