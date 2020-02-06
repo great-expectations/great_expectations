@@ -354,7 +354,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         else:
             location = "s3-" + location
         s3_key = self._convert_key_to_filepath(key)
-        return "https://%s.amazonaws.com/%s/%s" % (location, self.bucket, s3_key)
+        return "https://%s.amazonaws.com/%s/%s%s" % (location, self.bucket, self.prefix, s3_key)
 
     def _has_key(self, key):
         all_keys = self.list_keys()
