@@ -23,11 +23,8 @@ from great_expectations.data_context.util import file_relative_path, substitute_
 from .types.resource_identifiers import ExpectationSuiteIdentifier, ValidationResultIdentifier
 from .util import safe_mmkdir, substitute_all_config_variables
 
-from ..types.base import DotDict
-
 import great_expectations.exceptions as ge_exceptions
 
-# FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers.
 from ..validator.validator import Validator
 
 try:
@@ -129,7 +126,7 @@ class BaseDataContext(object):
             self.get_datasource(datasource)
 
         # Init stores
-        self._stores = DotDict()
+        self._stores = dict()
         self._init_stores(self._project_config_with_variables_substituted["stores"])
 
         # Init validation operators
@@ -460,7 +457,7 @@ class BaseDataContext(object):
         batch_parameters are included, they will be available as attributes of the batch.
 
         Args:
-            batch_kwargs: the batch_kwargs to use
+            batch_kwargs: the batch_kwargs to use; must include a datasource key
             expectation_suite_name: the name of the expectation_suite to get
             data_asset_type: the type of data_asset to build, with associated expectation implementations. This can
                 generally be inferred from the datasource.
@@ -468,9 +465,19 @@ class BaseDataContext(object):
                 reflect parameters that would provide the passed BatchKwargs.
 
         Returns:
-            Validator (DataAsset)
+            DataAsset
 
         """
+        if isinstance(batch_kwargs, dict):
+            batch_kwargs = BatchKwargs(batch_kwargs)
+
+        if not isinstance(batch_kwargs, BatchKwargs):
+            raise ge_exceptions.BatchKwargsError("BatchKwargs must be a BatchKwargs object or dictionary.")
+
+        if not isinstance(expectation_suite_name, (ExpectationSuiteIdentifier, string_types)):
+            raise ge_exceptions.DataContextError("expectation_suite_name must be an ExpectationSuiteIdentifier or "
+                                                 "string.")
+
         datasource = self.get_datasource(batch_kwargs.get("datasource"))
         expectation_suite = self.get_expectation_suite(expectation_suite_name)
         batch = datasource.get_batch(batch_kwargs=batch_kwargs, batch_parameters=batch_parameters)
@@ -490,16 +497,21 @@ class BaseDataContext(object):
         Run a validation operator to validate data assets and to perform the business logic around
         validation that the operator implements.
 
-        :param validation_operator_name: name of the operator, as appears in the context's config file
-        :param assets_to_validate: a list that specifies the data assets that the operator will validate.
-                                    The members of the list can be either batches (which means that have
-                                    data asset identifier, batch kwargs and expectation suite identifier)
-                                    or a triple that will allow the operator to fetch the batch:
-                                    (data asset identifier, batch kwargs, expectation suite identifier)
-        :param run_id: run id - this is set by the caller and should correspond to something
-                                meaningful to the user (e.g., pipeline run id or timestamp)
-        :return: A result object that is defined by the class of the operator that is invoked.
+        Args:
+            validation_operator_name: name of the operator, as appears in the context's config file
+            assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
+                the list can be either batches, or a tuple that will allow the operator to fetch the batch:
+                (batch_kwargs, expectation_suite_name)
+            run_id: The run_id for the validation; if None, a default value will be used
+            **kwargs: Additional kwargs to pass to the validation operator
+
+        Returns:
+            ValidationOperatorResult
         """
+        if run_id is None:
+            run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+            logger.info("Setting run_id to: {}".format(run_id))
+
         return self.validation_operators[validation_operator_name].run(
             assets_to_validate=assets_to_validate,
             run_id=run_id,
@@ -509,14 +521,11 @@ class BaseDataContext(object):
     def add_datasource(self, name, initialize=True, **kwargs):
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
-            name (str): the name for the new datasource to add
-            initialize - if False, add the datasource to the config, but do not
-                                initialize it. Example: user needs to debug database connectivity.
+            name: the name for the new datasource to add
+            initialize: if False, add the datasource to the config, but do not
+                initialize it, for example if a user needs to debug database connectivity.
             kwargs (keyword arguments): the configuration for the new datasource
 
-        Note:
-            the type_ parameter is still supported as a way to add a datasource, but support will
-            be removed in a future release. Please update to using class_name instead.
         Returns:
             datasource (Datasource)
         """
@@ -533,11 +542,11 @@ class BaseDataContext(object):
         else:
             config = kwargs
 
+        self._project_config["datasources"][name] = config
+
         # We perform variable substitution in the datasource's config here before using the config
         # to instantiate the datasource object. Variable substitution is a service that the data
         # context provides. Datasources should not see unsubstituted variables in their config.
-        self._project_config["datasources"][name] = config
-
         if initialize:
             datasource = self._build_datasource_from_config(
                 name, self._project_config_with_variables_substituted["datasources"][name])
@@ -622,10 +631,9 @@ class BaseDataContext(object):
         """List currently-configured datasources on this context.
 
         Returns:
-            List(dict): each dictionary includes "name" and "type" keys
+            List(dict): each dictionary includes "name" and "class_name" keys
         """
         datasources = []
-        # NOTE: 20190916 - JPC - Upon deprecation of support for type: configuration, this can be simplified
         for key, value in self._project_config_with_variables_substituted["datasources"].items():
             datasources.append({
                 "name": key,
@@ -1479,9 +1487,11 @@ class DataContext(BaseDataContext):
         return result
 
     @classmethod
-    def find_context_yml_file(cls, search_start_dir=os.getcwd()):
+    def find_context_yml_file(cls, search_start_dir=None):
         """Search for the yml file starting here and moving upward."""
         yml_path = None
+        if search_start_dir is None:
+            search_start_dir = os.getcwd()
 
         for i in range(4):
             logger.debug("Searching for config file {} ({} layer deep)".format(search_start_dir, i))

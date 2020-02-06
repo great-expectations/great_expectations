@@ -26,7 +26,7 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.exceptions import DataContextError, ProfilerError
+from great_expectations.exceptions import DataContextError, ProfilerError, ConfigNotFoundError
 from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import safe_remove
 
@@ -543,24 +543,27 @@ def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_conte
 
 
 def test_load_data_context_from_environment_variables(tmp_path_factory):
+    curdir = os.path.abspath(os.getcwd())
     try:
         project_path = str(tmp_path_factory.mktemp('data_context'))
         context_path = os.path.join(project_path, "great_expectations")
         safe_mmkdir(context_path)
-        shutil.copy(file_relative_path(__file__, "../test_fixtures/great_expectations_basic.yml"),
-                    str(os.path.join(context_path, "great_expectations.yml")))
+        os.chdir(context_path)
         with pytest.raises(DataContextError) as err:
             DataContext.find_context_root_dir()
-            assert "Unable to locate context root directory." in err
+        assert isinstance(err.value, ConfigNotFoundError)
 
+        shutil.copy(file_relative_path(__file__, "../test_fixtures/great_expectations_basic.yml"),
+                    str(os.path.join(context_path, "great_expectations.yml")))
         os.environ["GE_HOME"] = context_path
         assert DataContext.find_context_root_dir() == context_path
     except Exception:
         raise
     finally:
         # Make sure we unset the environment variable we're using
-        del os.environ["GE_HOME"]
-
+        if "GE_HOME" in os.environ:
+            del os.environ["GE_HOME"]
+        os.chdir(curdir)
 
 def test_data_context_updates_expectation_suite_names(data_context):
     # A data context should update the data_asset_name and expectation_suite_name of expectation suites
