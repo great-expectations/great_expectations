@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 import re
 import shutil
@@ -11,7 +13,9 @@ from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
-from tests.cli.test_datasource_sqlite import _add_datasource_and_credentials_to_context
+from tests.cli.test_datasource_sqlite import (
+    _add_datasource_and_credentials_to_context,
+)
 from tests.cli.test_init_pandas import _delete_and_recreate_dir
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
@@ -289,7 +293,6 @@ def initialized_sqlite_project(caplog, tmp_path_factory, titanic_sqlite_db_file)
     return basedir
 
 
-@pytest.mark.xfail(reason="failing")
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     caplog, initialized_sqlite_project, titanic_sqlite_db, empty_sqlite_db
 ):

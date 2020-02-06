@@ -20,7 +20,6 @@ marshmallow>=2.0,<3.0
 sqlalchemy>=1.2
 pyspark>=2.3.2
 psycopg2>=2.7.6,<2.8
-mysqlclient>=1.4.0
 xlrd>=1.1.0
 boto3>=1.9
 pyarrow>=0.12.0

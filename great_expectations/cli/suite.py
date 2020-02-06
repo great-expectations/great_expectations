@@ -34,7 +34,6 @@ def suite():
 
 
 @suite.command(name="edit")
-@click.argument("data_asset")
 @click.argument("suite")
 @click.option(
     "--batch-kwargs",
@@ -54,7 +53,7 @@ the data asset. Must be a valid JSON dictionary",
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-def suite_edit(data_asset, suite, directory, jupyter, batch_kwargs):
+def suite_edit(suite, directory, jupyter, batch_kwargs):
     """Edit an existing suite with a jupyter notebook."""
     try:
         context = DataContext(directory)
@@ -65,53 +64,23 @@ def suite_edit(data_asset, suite, directory, jupyter, batch_kwargs):
         _offer_to_install_new_template(err, context.root_directory)
         return
 
-    try:
-        normalized_data_asset_name = context.normalize_data_asset_name(data_asset)
-    except ge_exceptions.AmbiguousDataAssetNameError as e:
-        cli_message(
-            """<cyan>Your data_asset name of {} was not specific enough.
-Please re-run with one of these selected data assets:
-  - '{}""".format(
-                data_asset, "'\n  - '".join([str(ds) for ds in e.candidates])
-            )
-            + "'</cyan>"
-        )
-        sys.exit(-1)
-    except ge_exceptions.DataContextError as e:
-        # TODO consider increasing precision of other DataContextErrors to improve usability
-        # TODO Add suggestion to user to run `ge list-data-assets`
-        cli_message("<red>{}</red>".format(e.message))
-        sys.exit(-1)
-
     suite = suite.rstrip(".json")
-    suite = _load_suite(context, normalized_data_asset_name, suite)
-
-    data_source = context.get_datasource(normalized_data_asset_name.datasource)
-    generator = data_source.get_generator(normalized_data_asset_name.generator)
+    suite = _load_suite(context, suite)
 
     if batch_kwargs:
         batch_kwargs = json.loads(batch_kwargs)
     # elif suite.get_original_batch_kwargs():
     # TODO this functionality doesn't actually exist yet
     # batch_kwargs = suite.get_original_batch_kwargs()
-    elif isinstance(generator, ManualGenerator):
-        generator_asset = suite.data_asset_name.generator_asset
-        batch_kwargs = generator.yield_batch_kwargs(generator_asset)
     else:
-        batch_kwargs = context.yield_batch_kwargs(suite.data_asset_name)
-
-    if not batch_kwargs:
         cli_message(
-            "<red>Attempting to use a configured generator to build batch_"
-            "kwargs. You may need to review the generator configuration to "
-            "ensure you can get the desired batch.</red>"
+            "<red>Unable to identify a batch of data to use to edit the suite; add batch_kwargs.</red>"
         )
 
-    human_data_asset_name = suite.data_asset_name.generator_asset
-    notebook_name = "{}_{}.ipynb".format(human_data_asset_name, suite.expectation_suite_name)
+    notebook_name = "{}.ipynb".format(suite.expectation_suite_name)
 
-    notebook_path = os.path.join(context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
-    NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path, data_asset)
+    notebook_path = os.path.join(".", context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
+    NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path)
 
     cli_message(
         "To continue editing this suite, run <green>jupyter notebook {}</green>".format(
@@ -123,13 +92,13 @@ Please re-run with one of these selected data assets:
         subprocess.call(["jupyter", "notebook", notebook_path])
 
 
-def _load_suite(context, data_asset_name, suite_name):
+def _load_suite(context, suite_name):
     try:
         suite = context.get_expectation_suite(suite_name)
     except ge_exceptions.DataContextError as e:
         cli_message(
-            "<red>Could not locate a suite named {} for {}</red>".format(
-                suite_name, data_asset_name
+            "<red>Could not locate a suite named {}</red>".format(
+                suite_name
             )
         )
         logger.info(e)

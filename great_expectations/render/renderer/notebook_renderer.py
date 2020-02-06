@@ -47,16 +47,15 @@ class NotebookRenderer(Renderer):
 
         return ", ".join(kwargs)
 
-    def add_header(self, data_asset_name, suite_name, batch_kwargs):
+    def add_header(self, suite_name, batch_kwargs):
         self.add_markdown_cell(
             """# Edit Your Expectation Suite
 Use this notebook to recreate and modify your expectation suite for:
 
-**Data Asset**: `{}`<br>
 **Expectation Suite Name**: `{}`
 
 We'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)""".format(
-                data_asset_name, suite_name
+                suite_name
             )
         )
 
@@ -76,12 +75,12 @@ from great_expectations.data_context.types.resource_identifiers import Validatio
 context = ge.data_context.DataContext()
 
 expectation_suite_name = "{}"  # Feel free to change the name of your suite here. Renaming this will not remove the other one.
-context.create_expectation_suite("{}", expectation_suite_name, overwrite_existing=True)
+context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
 
 batch_kwargs = {}
-batch = context.get_batch("{}", expectation_suite_name, batch_kwargs)
+batch = context.get_batch(batch_kwargs, expectation_suite_name)
 batch.head()""".format(
-                suite_name, data_asset_name, batch_kwargs, data_asset_name
+                suite_name, batch_kwargs
             )
         )
 
@@ -169,7 +168,7 @@ context.open_data_docs(validation_result_identifier)"""
         with open(notebook_file_path, "w") as f:
             nbformat.write(notebook, f)
 
-    def render(self, suite, batch_kwargs, data_asset_name=None):
+    def render(self, suite, batch_kwargs):
         """
         Render a notebook dict from an expectation suite.
         """
@@ -183,7 +182,7 @@ context.open_data_docs(validation_result_identifier)"""
 
         suite_name = suite.expectation_suite_name
 
-        self.add_header(data_asset_name, suite_name, batch_kwargs)
+        self.add_header(suite_name, batch_kwargs)
         self.add_authoring_intro()
         self.add_expectation_cells_from_suite(suite.expectations)
         self.add_footer()
@@ -191,7 +190,7 @@ context.open_data_docs(validation_result_identifier)"""
         return self.notebook
 
     def render_to_disk(
-        self, suite, batch_kwargs, notebook_file_path, data_asset_name=None
+        self, suite, batch_kwargs, notebook_file_path
     ):
         """
         Render a notebook to disk from an expectation suite.
@@ -201,7 +200,7 @@ context.open_data_docs(validation_result_identifier)"""
         :type suite: dict
         :type notebook_file_path: str
         """
-        self.render(suite, batch_kwargs, data_asset_name)
+        self.render(suite, batch_kwargs)
         self._write_notebook_to_disk(self.notebook, notebook_file_path)
 
     def add_authoring_intro(self):

@@ -72,7 +72,6 @@ def init(target_directory, view):
             try:
                 context = DataContext(ge_dir)
                 cli_message(PROJECT_IS_COMPLETE)
-                exit(0)
             except (DataContextError, DatasourceInitializationError) as e:
                 cli_message("<red>{}</red>".format(e))
                 sys.exit(1)
@@ -101,7 +100,7 @@ def init(target_directory, view):
         context = DataContext(ge_dir)
         if context.list_expectation_suite_keys():
             if click.confirm(BUILD_DOCS_PROMPT, default=True):
-                build_docs(context)
+                build_docs(context, view=view)
 
         else:
             datasources = context.list_datasources()

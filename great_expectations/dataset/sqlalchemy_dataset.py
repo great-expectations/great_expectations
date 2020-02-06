@@ -41,6 +41,12 @@ except ImportError:
 
 try:
     import pybigquery.sqlalchemy_bigquery
+    from collections import namedtuple
+    # NOTE: pybigquery does not export its type map, so we are accessing a protected member.
+    # This is potentially error-prone, and should be fixed pending response from pybigquery maintainers
+    # https://github.com/mxmzdlv/pybigquery/issues/46
+    BigQueryTypes = namedtuple('BigQueryTypes', sorted(pybigquery.sqlalchemy_bigquery._type_map))
+    bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
 except ImportError:
     pybigquery = None
 
@@ -347,7 +353,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def get_row_count(self):
         count_query = sa.select([sa.func.count()]).select_from(
             self._table)
-        return self.engine.execute(count_query).scalar()
+        return int(self.engine.execute(count_query).scalar())
 
     def get_column_count(self):
         return len(self.columns)
@@ -368,8 +374,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ).label('null_count'),
         ]).select_from(self._table)
         count_results = dict(self.engine.execute(count_query).fetchone())
-        element_count = count_results['element_count']
-        null_count = count_results['null_count'] or 0
+        element_count = int(count_results.get('element_count') or 0)
+        null_count = int(count_results.get('null_count') or 0)
         return element_count - null_count
 
     def get_column_sum(self, column):
@@ -667,6 +673,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         except (TypeError, AttributeError):
             pass
 
+        try:
+            # Bigquery
+            if isinstance(self.engine.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+                # NOTE: pybigquery does not export its type map, so we are accessing a protected member.
+                # This is potentially error-prone, and should be fixed pending response from pybigquery maintainers
+                # https://github.com/mxmzdlv/pybigquery/issues/46
+                return bigquery_types_tuple
+        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+            pass
         return self.dialect
 
     @DocInherit

@@ -75,6 +75,8 @@ class BaseDataContext(object):
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
+    PROFILING_ERROR_CODE_NO_GENERATOR_FOUND = 4
+    PROFILING_ERROR_CODE_MULTIPLE_GENERATORS_FOUND = 5
     UNCOMMITTED_DIRECTORIES = ["data_docs", "samples", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
@@ -637,11 +639,14 @@ class BaseDataContext(object):
         Args:
             expectation_suite_name: The name of the expectation_suite to create
             overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
-                already exists
+                already exists.
 
         Returns:
             A new (empty) expectation suite.
         """
+        if not isinstance(overwrite_existing, bool):
+            raise ValueError("Parameter overwrite_existing must be of type BOOL")
+
         expectation_suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
@@ -927,76 +932,109 @@ class BaseDataContext(object):
             When success = False, the error details are under "error" key
         """
 
+        # We don't need the datasource object, but this line serves to check if the datasource by the name passed as
+        # an arg exists and raise an error if it does not.
+        datasource = self.get_datasource(datasource_name)
+
         if not dry_run:
             logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
 
         profiling_results = {}
 
-        # Get data_asset_name_list
-        data_asset_names = self.get_available_data_asset_names(datasource_name)
+        # Build the list of available data asset names (each item a tuple of name and type)
 
-        # KeyError will happen if there are no generators
-        data_asset_name_list = []
+        data_asset_names_dict = self.get_available_data_asset_names(datasource_name)
+
+        available_data_asset_name_list = []
         try:
-            datasource = data_asset_names[datasource_name]
+            datasource_data_asset_names_dict = data_asset_names_dict[datasource_name]
         except KeyError:
             # KeyError will happen if there is not datasource
             raise ge_exceptions.ProfilerError(
                 "No datasource {} found.".format(datasource_name))
-        try:
-            for generator_name in datasource.keys():
-                for name in datasource[generator_name]["names"]:
-                    data_asset_name_list.append((generator_name, name[0]))
 
-        except KeyError:
-            data_asset_name_list = []
+        if generator_name is None:
+            # if no generator name is passed as an arg and the datasource has only
+            # one generator with data asset names, use it.
+            # if ambiguous, raise an exception
+            for name in datasource_data_asset_names_dict.keys():
+                if generator_name is not None:
+                    profiling_results = {
+                        'success': False,
+                        'error': {
+                            'code': DataContext.PROFILING_ERROR_CODE_MULTIPLE_GENERATORS_FOUND
+                        }
+                    }
+                    return profiling_results
 
-        if len(data_asset_name_list) == 0:
+                if len(datasource_data_asset_names_dict[name]["names"]) > 0:
+                    available_data_asset_name_list = datasource_data_asset_names_dict[name]["names"]
+                    generator_name = name
+
+            if generator_name is None:
+                profiling_results = {
+                    'success': False,
+                    'error': {
+                        'code': DataContext.PROFILING_ERROR_CODE_NO_GENERATOR_FOUND
+                    }
+                }
+                return profiling_results
+        else:
+            # if the generator name is passed as an arg, get this generator's available data asset names
+            try:
+                available_data_asset_name_list = datasource_data_asset_names_dict[generator_name]["names"]
+            except KeyError:
+                raise ge_exceptions.ProfilerError(
+                    "Generator {} not found. Specify generator name")
+
+        available_data_asset_name_list = sorted(available_data_asset_name_list, key=lambda x: x[0])
+
+        if len(available_data_asset_name_list) == 0:
             raise ge_exceptions.ProfilerError(
-                "No Data Assets found in Datasource {}. Used generators: {}.".format(
+                "No Data Assets found in Datasource {}. Used generator: {}.".format(
                     datasource_name,
-                    list(datasource.keys()))
+                    generator_name)
             )
-        total_data_assets = len(data_asset_name_list)
+        total_data_assets = len(available_data_asset_name_list)
+
+        data_asset_names_to_profiled = None
 
         if isinstance(data_assets, list) and len(data_assets) > 0:
-            not_found_data_assets = [name[1] for name in data_assets if name[1] not in data_asset_name_list]
-            found_data_assets = [(generator_name, name) for (generator_name, name) in data_asset_name_list if name in data_assets]
+            not_found_data_assets = [name for name in data_assets if name not in [da[0] for da in available_data_asset_name_list]]
             if len(not_found_data_assets) > 0:
                 profiling_results = {
                     'success': False,
                     'error': {
                         'code': DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
                         'not_found_data_assets': not_found_data_assets,
-                        'data_assets': data_asset_name_list
+                        'data_assets': available_data_asset_name_list
                     }
                 }
                 return profiling_results
 
-            data_asset_name_list = found_data_assets
-            data_asset_name_list.sort()
-            total_data_assets = len(data_asset_name_list)
+            data_assets.sort()
+            data_asset_names_to_profiled = data_assets
+            total_data_assets = len(available_data_asset_name_list)
             if not dry_run:
-                logger.info("Profiling the white-listed data assets: %s, alphabetically." % (",".join(data_asset_name_list)))
+                logger.info("Profiling the white-listed data assets: %s, alphabetically." % (",".join(data_assets)))
         else:
-            if profile_all_data_assets:
-                data_asset_name_list.sort()
-            else:
+            if not profile_all_data_assets:
                 if total_data_assets > max_data_assets:
                     profiling_results = {
                         'success': False,
                         'error': {
                             'code': DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS,
                             'num_data_assets': total_data_assets,
-                            'data_assets': data_asset_name_list
+                            'data_assets': available_data_asset_name_list
                         }
                     }
                     return profiling_results
 
+            data_asset_names_to_profiled = [name[0] for name in available_data_asset_name_list]
         if not dry_run:
-            logger.info("Profiling all %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
+            logger.info("Profiling all %d data assets from generator %s" % (len(available_data_asset_name_list), generator_name))
         else:
-            logger.info("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
+            logger.info("Found %d data assets from generator %s" % (len(available_data_asset_name_list), generator_name))
 
         profiling_results['success'] = True
 
@@ -1005,14 +1043,14 @@ class BaseDataContext(object):
             total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
             total_start_time = datetime.datetime.now()
 
-            for name in data_asset_name_list:
-                logger.info("\tProfiling '%s'..." % name[1])
+            for name in data_asset_names_to_profiled:
+                logger.info("\tProfiling '%s'..." % name)
                 try:
                     profiling_results['results'].append(
                         self.profile_data_asset(
                             datasource_name=datasource_name,
-                            generator_name=name[0],
-                            data_asset_name=name[1],
+                            generator_name=generator_name,
+                            data_asset_name=name,
                             profiler=profiler,
                             run_id=run_id,
                             additional_batch_kwargs=additional_batch_kwargs
@@ -1034,7 +1072,7 @@ class BaseDataContext(object):
             logger.info("""
     Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
     Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs.""" % (
-                len(data_asset_name_list),
+                len(data_asset_names_to_profiled),
                 total_data_assets,
                 total_rows,
                 total_columns,
