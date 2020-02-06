@@ -88,7 +88,7 @@ class BaseDataContext(object):
     NOTEBOOK_SUBDIRECTORIES = ["pandas", "spark", "sql"]
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
-    GE_EDIT_NOTEBOOK_DIR = os.path.join(GE_DIR, GE_UNCOMMITTED_DIR)
+    GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
 
     @classmethod
     def validate_config(cls, project_config):

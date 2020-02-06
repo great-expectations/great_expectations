@@ -1031,6 +1031,9 @@ Enter an SQL query
 
     msg_prompt_enter_data_asset_name_suffix = "    Don't see the table in the list above? Just type the SQL query\n"
 
+    if additional_batch_kwargs is None:
+        additional_batch_kwargs = {}
+
     generator_asset = None
 
     datasource = context.get_datasource(datasource_name)
