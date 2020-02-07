@@ -885,7 +885,8 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                                                                              "min_value": None,
                                                                              "max_value": None,
                                                                              "result_format": "SUMMARY",
-                                                                             "parse_strings_as_datetimes": None},
+                                                                             "parse_strings_as_datetimes": None,
+                                                                             "condition": None},
                                                                   'styling': {'default': {
                                                                       'classes': ['badge',
                                                                                   'badge-secondary']},
