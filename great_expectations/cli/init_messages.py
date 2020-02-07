@@ -55,8 +55,9 @@ SLACK_SETUP_COMPLETE = """
 OK. <green>Slack is set up.</green> To modify this in the future please see the slack section in the CLI init getting started guide."""
 
 ONBOARDING_COMPLETE = """
-Done. You may see new files in `<yellow>great_expectations/uncommitted</yellow>`.
-  - Now add secrets to <yellow>great_expectations/uncommitted/config_variables.yml</yellow> to finish onboarding.
+Great Expectations added some missing files required to run.
+  - You may see new files in `<yellow>great_expectations/uncommitted</yellow>`.
+  - You may need to add secrets to <yellow>great_expectations/uncommitted/config_variables.yml</yellow> to finish onboarding.
 """
 
 BUILD_DOCS_PROMPT = "Would you like to build & view this project's Data Docs!?"
@@ -74,3 +75,5 @@ NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please ad
   - running `<green>great_expectations datasource new</green>` or
   - by editing the {} file
 """.format(DataContext.GE_YML)
+
+SETUP_SUCCESS = "\n<cyan>Great Expectations is now set up.</cyan>"
