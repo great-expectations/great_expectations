@@ -990,7 +990,7 @@ class BaseDataContext(object):
                 available_data_asset_name_list = datasource_data_asset_names_dict[generator_name]["names"]
             except KeyError:
                 raise ge_exceptions.ProfilerError(
-                    "Generator {} not found. Specify generator name")
+                    "Batch Kwarg Generator {} not found. Specify the name of a generator configured in this datasource".format(generator_name))
 
         available_data_asset_name_list = sorted(available_data_asset_name_list, key=lambda x: x[0])
 
