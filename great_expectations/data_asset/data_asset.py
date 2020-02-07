@@ -384,7 +384,7 @@ class DataAsset(object):
             self._expectation_suite.expectations = [f for f in filter(
                 lambda exp: (exp.expectation_type != expectation_type) or
                             ('column' in exp.kwargs and exp.kwargs['column'] != column) or
-                            ('condition' in expectation_config.kwargs and 'condition' not in exp.kwargs),
+                            ('condition' in exp.kwargs),
                 self._expectation_suite.expectations
             )]
 
