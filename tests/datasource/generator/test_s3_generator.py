@@ -87,7 +87,7 @@ def s3_generator(mock_s3_bucket, basic_sparkdf_datasource):
 def test_s3_generator_basic_operation(s3_generator):
     # S3 Generator sees *only* configured assets
     assets = s3_generator.get_available_data_asset_names()
-    assert set(assets) == {"data", "data_dirs", "other", "delta_files", "other_empty_delimiter"}
+    assert set(assets["names"]) == set([('data', 'file'), ('data_dirs', 'file'), ('other', 'file'), ('delta_files', 'file'), ('other_empty_delimiter', 'file')])
 
     # We should observe that glob, prefix, delimiter all work together
     # They can be defined in the generator or overridden by a particular asset
