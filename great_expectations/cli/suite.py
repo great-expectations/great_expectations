@@ -107,7 +107,8 @@ def suite_edit(suite, datasource_name, generator_name, generator_asset, director
         _offer_to_install_new_template(err, context.root_directory)
         return
 
-    suite = suite.rstrip(".json")
+    if suite.endswith(".json"):
+        suite = suite[:-5]
     suite = _load_suite(context, suite)
 
     if batch_kwargs:
