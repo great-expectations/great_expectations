@@ -108,13 +108,13 @@ class ValidationResultIdentifier(DataContextKey):
         return tuple(
             list(self.expectation_suite_identifier.to_tuple()) + [
                 self.run_id or "__none__",
-                self.batch_identifier
+                self.batch_identifier or "__none__"
             ]
         )
 
     def to_fixed_length_tuple(self):
         return self.expectation_suite_identifier.expectation_suite_name, self.run_id or "__none__", \
-               self.batch_identifier
+               self.batch_identifier or "__none__"
 
     @classmethod
     def from_tuple(cls, tuple_):
