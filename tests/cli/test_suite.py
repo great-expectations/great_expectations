@@ -12,8 +12,8 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
 def test_suite_help_output(caplog,):
-    runner = CliRunner()
-    result = runner.invoke(cli, ["suite"])
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, ["suite"], catch_exceptions=False)
     assert result.exit_code == 0
     assert (
         """\
@@ -23,6 +23,7 @@ Commands:
           in result.stdout
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)
+
 
 def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
     caplog, empty_data_context, filesystem_csv_2
@@ -52,11 +53,14 @@ def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
     root_dir = project_root_dir
     os.chdir(root_dir)
     context = DataContext(root_dir)
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "new", "-d", root_dir, "--no-view"],
-        input="{0:s}\nmy_new_suite\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
+        input="{0:s}\nmy_new_suite\n\n".format(
+            os.path.join(filesystem_csv_2, "f1.csv")
+        ),
+        catch_exceptions=False,
     )
     stdout = result.stdout
 
@@ -104,11 +108,12 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     os.chdir(root_dir)
     context = DataContext(root_dir)
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "new", "-d", root_dir, "--no-view"],
         input="2\n1\n1\nmy_new_suite\n\n",
+        catch_exceptions=False,
     )
     stdout = result.stdout
 
@@ -141,6 +146,7 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
     assert os.path.isfile(expected_suite_path)
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
+
 def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
     caplog, site_builder_data_context_with_html_store_titanic_random,
 ):
@@ -153,11 +159,12 @@ def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     os.chdir(root_dir)
     context = DataContext(root_dir)
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
         input="2\n1\n1\n\n",
+        catch_exceptions=False,
     )
     stdout = result.stdout
 

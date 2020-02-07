@@ -272,21 +272,11 @@ What are you processing your files with?
 def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_datasource_name=True):
     if passthrough_generator_only:
         datasource_name = "files_datasource"
-
-        # configuration = PandasDatasource.build_configuration(generators={
-        #     "default": {
-        #         "class_name": "PassthroughGenerator",
-        #     }
-        # }
-        # )
-
-
         configuration = PandasDatasource.build_configuration()
 
     else:
         path = click.prompt(
             msg_prompt_filesys_enter_base_path,
-            # default='/data/',
             type=click.Path(
                 exists=True,
                 file_okay=False,
@@ -461,7 +451,7 @@ We saved datasource {0:s} in {1:s} and the credentials you entered in {2:s}.
 Since we could not connect to the database, you can complete troubleshooting in the configuration files documented here:
 <blue>https://docs.greatexpectations.io/en/latest/tutorials/add-sqlalchemy-datasource.html?utm_source=cli&utm_medium=init&utm_campaign={3:s}#{4:s}</blue> .
 
-After you connect to the datasource, run great_expectations datasource profile to continue.
+After you connect to the datasource, run great_expectations init to continue.
 
 """.format(datasource_name, DataContext.GE_YML, context.get_config()["config_variables_file_path"], rtd_url_ge_version, selected_database.value.lower()))
                 return None
@@ -871,16 +861,13 @@ Name the new expectation suite"""
     if profiling_results['success']:
         build_docs(context, view=open_docs)
         if open_docs:  # This is mostly to keep tests from spawning windows
-            expectation_suite_identifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
-            )
-
-            validation_result_identifier = ValidationResultIdentifier(
-                expectation_suite_identifier=expectation_suite_identifier,
-                run_id=run_id,
-                batch_identifier=None
-            )
-            context.open_data_docs(resource_identifier=validation_result_identifier)
+            try:
+                # TODO this is really brittle and not covered in tests
+                validation_result = profiling_results["results"][0][1]
+                validation_result_identifier = ValidationResultIdentifier.from_object(validation_result)
+                context.open_data_docs(resource_identifier=validation_result_identifier)
+            except (KeyError, IndexError):
+                context.open_data_docs()
 
         return True, expectation_suite_name
 
@@ -888,8 +875,6 @@ Name the new expectation suite"""
         raise ge_exceptions.DataContextError(msg_some_data_assets_not_found.format(",".join(profiling_results['error']['not_found_data_assets'])))
     if not profiling_results['success']:  # unknown error
         raise ge_exceptions.DataContextError("Unknown profiling error code: " + profiling_results['error']['code'])
-
-
 
 
 def _get_batch_kwargs_from_generator_or_from_file_path(context, datasource_name,
