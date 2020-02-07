@@ -35,9 +35,8 @@ def substitute_none_for_missing(kwargs, kwarg_list):
     return new_kwargs
 
 
-# TODO: test it!
 # NOTE: the method is pretty dirty
-def _parse_condition_string(condition_string):
+def parse_condition_string(condition_string):
     if len(condition_string) == 0:
         condition_string = "True"
 
@@ -154,7 +153,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -203,7 +202,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -245,7 +244,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str += " Values should be parsed as datetimes."
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             params.update(conditional_params)
         
@@ -280,7 +279,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             params.update(conditional_params)
         
@@ -339,7 +338,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             params.update(conditional_params)
         
@@ -410,7 +409,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "Must have more than $min_value rows."
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             params.update(conditional_params)
         
@@ -432,7 +431,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         template_str = "Must have exactly $value rows."
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             params.update(conditional_params)
         
@@ -473,7 +472,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "distinct values must belong to this set: " + values_string + "."
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -507,7 +506,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "values must never be null."
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -538,7 +537,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -569,7 +568,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -615,7 +614,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                 template_str = "value types may be any value, but observed value will be reported"
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
@@ -661,7 +660,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -707,7 +706,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
@@ -745,7 +744,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -785,7 +784,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -825,7 +824,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -873,7 +872,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -908,7 +907,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -943,7 +942,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -980,7 +979,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     template_str = "values must not match this regular expression: $regex."
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -1025,7 +1024,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -1067,7 +1066,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -1102,7 +1101,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -1135,7 +1134,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -1168,7 +1167,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -1203,7 +1202,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -1249,7 +1248,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -1288,7 +1287,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -1322,7 +1321,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -1356,7 +1355,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
     
@@ -1390,7 +1389,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
     
@@ -1427,7 +1426,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
     
@@ -1464,7 +1463,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -1498,7 +1497,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -1537,7 +1536,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
@@ -1645,7 +1644,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             params.update(conditional_params)
 
@@ -1802,7 +1801,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
@@ -1842,7 +1841,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             template_str += "."
 
         if params["condition"] is not None:
-            conditional_template_str, conditional_params = _parse_condition_string(params["condition"])
+            conditional_template_str, conditional_params = parse_condition_string(params["condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
         
