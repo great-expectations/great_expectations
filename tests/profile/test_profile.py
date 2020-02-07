@@ -364,7 +364,7 @@ def test_context_profiler_with_nonexisting_data_asset_name(not_empty_datacontext
 def test_context_profiler_with_non_existing_generator(not_empty_datacontext):
     """
     If a non-existing generator name is passed to the profiling method
-    in the generator_name argument, the profiling method must return raise an exception.
+in the generator_name argument, the profiling method must raise an exception.
     """
     context = not_empty_datacontext
 
