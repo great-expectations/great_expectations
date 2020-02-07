@@ -153,12 +153,12 @@ def _load_suite(context, suite_name):
         suite = context.get_expectation_suite(suite_name)
     except ge_exceptions.DataContextError as e:
         cli_message(
-            "<red>Could not locate a suite named {}</red>".format(
+            "<red>Could not find a suite named `{}`. Please check the name and try again.</red>".format(
                 suite_name
             )
         )
         logger.info(e)
-        sys.exit(-1)
+        sys.exit(1)
     return suite
 
 
