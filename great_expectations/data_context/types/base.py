@@ -98,7 +98,7 @@ class DatasourceConfig(DictDot):
 
     @property
     def module_name(self):
-        return self.module_name
+        return self._module_name
 
 
 class DatasourceConfigSchema(Schema):

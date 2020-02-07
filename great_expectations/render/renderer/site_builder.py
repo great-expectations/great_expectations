@@ -12,7 +12,6 @@ from great_expectations.data_context.types.resource_identifiers import Expectati
     ValidationResultIdentifier
 
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.data_context.util import file_relative_path
 import great_expectations.exceptions as exceptions
 
 logger = logging.getLogger(__name__)
@@ -137,14 +136,14 @@ class SiteBuilder(object):
             site_section_builders = {
                 "expectations": {
                     "class_name": "DefaultSiteSectionBuilder",
-                    "source_store_name": "expectations_store",
+                    "source_store_name":  data_context.expectations_store_name,
                     "renderer": {
                         "class_name": "ExpectationSuitePageRenderer"
                     }
                 },
                 "validations": {
                     "class_name": "DefaultSiteSectionBuilder",
-                    "source_store_name": "validations_store",
+                    "source_store_name": data_context.validations_store_name,
                     "run_id_filter": {
                         "ne": "profiling"
                     },
@@ -155,7 +154,7 @@ class SiteBuilder(object):
                 },
                 "profiling": {
                     "class_name": "DefaultSiteSectionBuilder",
-                    "source_store_name": "validations_store",
+                    "source_store_name":  data_context.validations_store_name,
                     "run_id_filter": {
                         "eq": "profiling"
                     },

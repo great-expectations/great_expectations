@@ -165,6 +165,7 @@ class HtmlSiteStore(object):
         """This third param_store has a special method, which uses a zero-length tuple as a key."""
         return self.store_backends["index_page"].set((), page, content_encoding='utf-8', content_type='text/html; '
                                                                                                       'charset=utf-8')
+
     def copy_static_assets(self, static_assets_source_dir=None):
         """
         Copies static assets, using a special "static_assets" backend store that accepts variable-length tuples as
