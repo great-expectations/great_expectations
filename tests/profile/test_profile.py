@@ -13,7 +13,7 @@ from great_expectations.profile.base import DatasetProfiler
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.profile.columns_exist import ColumnsExistProfiler
 from tests.test_utils import expectationSuiteValidationResultSchema
-
+import great_expectations.exceptions as ge_exceptions
 
 @pytest.fixture()
 def not_empty_datacontext(empty_data_context, filesystem_csv_2):
@@ -187,6 +187,7 @@ def test_BasicDatasetProfiler_non_numeric_low_cardinality(non_numeric_low_card_d
             "expect_column_to_exist",
             "expect_column_values_to_be_in_type_list",
             "expect_column_unique_value_count_to_be_between",
+            'expect_column_distinct_values_to_be_in_set',
             "expect_column_proportion_of_unique_values_to_be_between",
             "expect_column_values_to_not_be_null",
             "expect_column_values_to_be_in_set",
@@ -360,6 +361,49 @@ def test_context_profiler_with_nonexisting_data_asset_name(not_empty_datacontext
                   'data_assets': [('f1', 'file')]}
     }
 
+def test_context_profiler_with_non_existing_generator(not_empty_datacontext):
+    """
+    If a non-existing generator name is passed to the profiling method
+in the generator_name argument, the profiling method must raise an exception.
+    """
+    context = not_empty_datacontext
+
+    assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
+    assert context.list_expectation_suite_keys() == []
+    with pytest.raises(ge_exceptions.ProfilerError):
+        profiling_result = context.profile_datasource("rad_datasource", data_assets=["this_asset_doesnot_exist"], profiler=BasicDatasetProfiler, generator_name="this_gen_does_not_exist")
+
+
+def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple_generators(not_empty_datacontext, filesystem_csv_2):
+    """
+    If a no generator_name is passed to the profiling method and the datasource has more than one
+    generators configured, the profiling method must return an error code in the result
+    """
+    context = not_empty_datacontext
+    context.add_generator("rad_datasource", "second_generator", "SubdirReaderGenerator", **{
+                "base_directory": str(filesystem_csv_2),
+            })
+
+    assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
+    profiling_result = context.profile_datasource("rad_datasource", data_assets=["this_asset_doesnot_exist"], profiler=BasicDatasetProfiler)
+
+    assert profiling_result == {'success': False, 'error': {'code': 5}}
+
+def test_context_profiler_without_generator_name_arg_on_datasource_with_no_generators(not_empty_datacontext):
+    """
+    If a no generator_name is passed to the profiling method and the datasource has no
+    generators configured, the profiling method must return an error code in the result
+    """
+    context = not_empty_datacontext
+    context.add_datasource(
+        "datasource_without_generators",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+    )
+    assert isinstance(context.datasources["datasource_without_generators"], PandasDatasource)
+    profiling_result = context.profile_datasource("datasource_without_generators", profiler=BasicDatasetProfiler)
+
+    assert profiling_result == {'success': False, 'error': {'code': 4}}
 
 def test_snapshot_BasicDatasetProfiler_on_titanic():
     """

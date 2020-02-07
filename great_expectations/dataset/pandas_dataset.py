@@ -883,7 +883,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             if max_value:
                 max_value = parse(max_value)
 
-            temp_column = column.map(parse)
+            try:
+                temp_column = column.map(parse)
+            except TypeError as e:
+                temp_column = column
 
         else:
             temp_column = column

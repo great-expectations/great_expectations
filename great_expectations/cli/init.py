@@ -12,12 +12,12 @@ from great_expectations.cli.datasource import \
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import (
     BUILD_DOCS_PROMPT,
-    COMPLETE_ONBOARDING_PROMPT,
     GREETING,
     LETS_BEGIN_PROMPT,
     ONBOARDING_COMPLETE,
     PROJECT_IS_COMPLETE,
     RUN_INIT_AGAIN,
+    SETUP_SUCCESS,
     SLACK_LATER,
     SLACK_SETUP_COMPLETE,
     SLACK_SETUP_INTRO,
@@ -68,8 +68,8 @@ def init(target_directory, view):
 
     if DataContext.does_config_exist_on_disk(ge_dir):
         if DataContext.is_project_initialized(ge_dir):
-            # Ensure the context can be instantiated
             try:
+                # Ensure the context can be instantiated
                 context = DataContext(ge_dir)
                 cli_message(PROJECT_IS_COMPLETE)
             except (DataContextError, DatasourceInitializationError) as e:
@@ -77,9 +77,11 @@ def init(target_directory, view):
                 sys.exit(1)
         else:
             try:
-                if not _complete_onboarding(target_directory):
-                    # TODO ensure this is covered by a test
-                    exit(0)
+                context = DataContext.create(target_directory)
+                cli_message(ONBOARDING_COMPLETE)
+                # TODO if this is correct, ensure this is covered by a test
+                # cli_message(SETUP_SUCCESS)
+                # exit(0)
             except DataContextError as e:
                 cli_message("<red>{}</red>".format(e))
                 # TODO ensure this is covered by a test
@@ -89,6 +91,7 @@ def init(target_directory, view):
             cli_message(RUN_INIT_AGAIN)
             # TODO ensure this is covered by a test
             exit(0)
+
         try:
             context = DataContext.create(target_directory)
         except DataContextError as e:
@@ -125,8 +128,8 @@ def init(target_directory, view):
                         "A new Expectation suite '{}' was added to your project".format(suite_name)
                     )
 
-                cli_message("\n<cyan>Great Expectations is now set up.</cyan>")
-
+                cli_message(SETUP_SUCCESS)
+                sys.exit(0)
     except (
         DataContextError,
         ge_exceptions.ProfilerError,
@@ -164,10 +167,6 @@ def _get_full_path_to_ge_dir(target_directory):
 
 
 def _complete_onboarding(target_dir):
-    if click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True):
-        DataContext.create(target_dir)
-        cli_message(ONBOARDING_COMPLETE)
-        return True
-    else:
-        cli_message(RUN_INIT_AGAIN)
-        return False
+    DataContext.create(target_dir)
+    cli_message(ONBOARDING_COMPLETE)
+    return True

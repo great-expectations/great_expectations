@@ -37,7 +37,8 @@ try:
         "DATETIME": sqlitetypes.DATETIME(truncate_microseconds=True),
         "DATE": sqlitetypes.DATE,
         "FLOAT": sqlitetypes.FLOAT,
-        "BOOLEAN": sqlitetypes.BOOLEAN
+        "BOOLEAN": sqlitetypes.BOOLEAN,
+        "TIMESTAMP": sqlitetypes.TIMESTAMP
     }
 except ImportError:
     SQLITE_TYPES = {}
@@ -67,6 +68,7 @@ try:
         "INTEGER": mysqltypes.INTEGER,
         "SMALLINT": mysqltypes.SMALLINT,
         "BIGINT": mysqltypes.BIGINT,
+        "DATETIME": mysqltypes.DATETIME,
         "TIMESTAMP": mysqltypes.TIMESTAMP,
         "DATE": mysqltypes.DATE,
         "FLOAT": mysqltypes.FLOAT,
@@ -423,7 +425,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
             # "expect_column_mean_to_be_between",
-            # "expect_column_median_to_be_between",            
+            # "expect_column_median_to_be_between",
             # "expect_column_quantile_values_to_be_between",
             # "expect_column_stdev_to_be_between",
             # "expect_column_unique_value_count_to_be_between",
@@ -561,13 +563,13 @@ def evaluate_json_test(data_asset, expectation_type, test):
                 assert value in result['exception_info']['exception_traceback'], "expected to find " + \
                     value + " in " + \
                     result['exception_info']['exception_traceback']
-            
+
             elif key == "expected_partition":
                 assert np.allclose(result["result"]["details"]["expected_partition"]["bins"], value["bins"])
                 assert np.allclose(result["result"]["details"]["expected_partition"]["weights"], value["weights"])
                 if "tail_weights" in result["result"]["details"]["expected_partition"]:
                     assert np.allclose(result["result"]["details"]["expected_partition"]["tail_weights"], value["tail_weights"])
-     
+
             elif key == "observed_partition":
                 assert np.allclose(result["result"]["details"]["observed_partition"]["bins"], value["bins"])
                 assert np.allclose(result["result"]["details"]["observed_partition"]["weights"], value["weights"])
