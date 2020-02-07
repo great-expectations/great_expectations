@@ -1140,6 +1140,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         if data_assets or profile_all_data_assets or click.confirm(msg_confirm_ok_to_proceed.format(datasource_name), default=True):
             profiling_results = context.profile_datasource(
                 datasource_name,
+                generator_name=generator_name,
                 data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 max_data_assets=max_data_assets,
