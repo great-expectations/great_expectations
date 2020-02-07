@@ -24,11 +24,11 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory):
     fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(fixture_path, data_path)
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", basedir],
-        input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
+        input="Y\n1\n1\n{}\n\n\n\n".format(data_path, catch_exceptions=False),
     )
     stdout = result.output
 
@@ -155,32 +155,57 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory):
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(reason="# TODO this test is failing because the behavior is broken")
-def test_init_on_existing_project_with_no_datasources_should_add_one(
-    caplog, initialized_project,
+def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
+    capsys, caplog, initialized_project,
 ):
     project_dir = initialized_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
 
+    # mangle the project to remove all traces of a suite and validations
     _remove_all_datasources(ge_dir)
+    os.remove(os.path.join(ge_dir, "expectations", "warning.json"))
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+    validations_dir = os.path.join(ge_dir, uncommitted_dir, "validations")
+    shutil.rmtree(validations_dir)
+    os.mkdir(validations_dir)
+    shutil.rmtree(os.path.join(uncommitted_dir, "data_docs", "local_site"))
+    context = DataContext(ge_dir)
+    assert not context.list_expectation_suite_keys()
 
-    runner = CliRunner()
+    csv_path = os.path.join(project_dir, "data", "Titanic.csv")
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["init", "--no-view", "-d", project_dir], input="1\n1\ndata\nmy_data_dir\n"
+        cli,
+        # ["init", "--no-view", "-d", project_dir],
+        ["init", "-d", project_dir],
+        input="1\n1\n{}\nmy_suite\n\n".format(csv_path, catch_exceptions=False),
+        catch_exceptions=False
     )
     stdout = result.stdout
 
     assert result.exit_code == 0
 
     assert "Error: invalid input" not in stdout
-
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
-    assert "A new datasource 'my_data_dir' was added to your project" in stdout
-    assert "Would you like to build & view this project's Data Docs" in stdout
+    assert "Enter the path (relative or absolute) of a data file" in stdout
+    assert "Name the new expectation suite [warning]:" in stdout
+    assert (
+        "Great Expectations will choose a couple of columns and generate expectations"
+        in stdout
+    )
+    assert "A new Expectation suite 'my_suite' was added to your project" in stdout
+    assert "Great Expectations is now set up." in stdout
 
     config = _load_config_file(os.path.join(ge_dir, DataContext.GE_YML))
-    assert "my_data_dir" in config["datasources"].keys()
+    assert "files_datasource" in config["datasources"].keys()
+
+    context = DataContext(ge_dir)
+    assert context.list_datasources() == [
+        {"name": "files_datasource", "class_name": "PandasDatasource"}
+    ]
+    assert context.list_expectation_suite_keys()[0].expectation_suite_name == "my_suite"
+    assert len(context.list_expectation_suite_keys()) == 1
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -217,11 +242,11 @@ def initialized_project(tmp_path_factory):
     data_path = os.path.join(basedir, "data/Titanic.csv")
     fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(fixture_path, data_path)
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     _ = runner.invoke(
         cli,
         ["init", "--no-view", "-d", basedir],
-        input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
+        input="Y\n1\n1\n{}\n\n\n\n".format(data_path, catch_exceptions=False),
     )
 
     context = DataContext(os.path.join(basedir, DataContext.GE_DIR))
@@ -251,8 +276,8 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
 
     assert len(context.list_datasources()) == 2
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n")
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n", catch_exceptions=False)
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -272,8 +297,8 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
 ):
     project_dir = initialized_project
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n")
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n", catch_exceptions=False)
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -307,11 +332,12 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     context = DataContext(ge_dir)
     assert context.list_expectation_suite_keys() == []
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", project_dir],
         input="{}\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
+        catch_exceptions=False
     )
     stdout = result.stdout
     assert result.exit_code == 0

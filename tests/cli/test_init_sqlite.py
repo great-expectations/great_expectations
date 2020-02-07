@@ -43,14 +43,13 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_fil
     shutil.copy(titanic_sqlite_db_file, database_path)
     engine = create_engine("sqlite:///{}".format(database_path))
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", basedir],
-        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url),
+        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url, catch_exceptions=False),
     )
     stdout = result.output
-    print(stdout)
     assert len(stdout) < 3000, "CLI output is unreasonably long."
 
     assert "Always know what to expect from your data" in stdout
@@ -100,7 +99,6 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_fil
     guid_safe_obs_tree = re.sub(
         r"[a-z0-9]{32}(?=\.(json|html))", "foobarbazguid", date_safe_obs_tree
     )
-    print(guid_safe_obs_tree)
     assert (
         guid_safe_obs_tree
         == """\
@@ -200,14 +198,17 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
     _remove_all_datasources(ge_dir)
     os.remove(os.path.join(ge_dir, "expectations", "warning.json"))
+    context = DataContext(ge_dir)
+    assert not context.list_expectation_suite_keys()
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", project_dir],
         input="2\n5\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
             titanic_sqlite_db_file
         ),
+        catch_exceptions=False
     )
     stdout = result.stdout
 
@@ -270,11 +271,12 @@ def initialized_sqlite_project(caplog, tmp_path_factory, titanic_sqlite_db_file)
 
     engine = create_engine("sqlite:///{}".format(titanic_sqlite_db_file))
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", basedir],
         input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url),
+        catch_exceptions=False
     )
     assert result.exit_code == 0
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -301,10 +303,9 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     )
     assert len(context.list_datasources()) == 2
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n")
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n", catch_exceptions=False)
     stdout = result.stdout
-    print(stdout)
 
     assert result.exit_code == 0
 
@@ -323,8 +324,8 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
 ):
     project_dir = initialized_sqlite_project
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n")
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n", catch_exceptions=False)
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -358,11 +359,12 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     context = DataContext(ge_dir)
     assert context.list_expectation_suite_keys() == []
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", project_dir],
         input="1\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
+        catch_exceptions=False
     )
     stdout = result.stdout
 

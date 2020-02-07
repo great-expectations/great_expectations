@@ -25,8 +25,8 @@ def _library_not_loaded_test(
     basedir = str(basedir)
     os.chdir(basedir)
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["init", "--no-view"], input=cli_input)
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, ["init", "--no-view"], input=cli_input, catch_exceptions=False)
     stdout = result.output
 
     assert "Always know what to expect from your data" in stdout
@@ -149,8 +149,8 @@ def test_cli_init_spark_without_library_installed_instructs_user(
     basedir = str(basedir)
     os.chdir(basedir)
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["init", "--no-view"], input="Y\n1\n2\n")
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, ["init", "--no-view"], input="Y\n1\n2\n", catch_exceptions=False)
     stdout = result.output
 
     assert "Always know what to expect from your data" in stdout
