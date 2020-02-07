@@ -61,3 +61,10 @@ def assert_no_logging_messages_or_tracebacks(my_caplog, click_result):
     assert (
         "traceback" not in click_result.stdout.lower()
     ), "Found a traceback in the console output: {}".format(click_result.stdout)
+    try:
+        assert (
+            "traceback" not in click_result.stderr.lower()
+        ), "Found a traceback in the console output: {}".format(click_result.stderr)
+    except ValueError as ve:
+        # sometimes stderr is not captured separately
+        pass

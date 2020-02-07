@@ -13,9 +13,7 @@ from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
-from tests.cli.test_datasource_sqlite import (
-    _add_datasource_and_credentials_to_context,
-)
+from tests.cli.test_datasource_sqlite import _add_datasource_and_credentials_to_context
 from tests.cli.test_init_pandas import _delete_and_recreate_dir
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
@@ -35,10 +33,7 @@ def titanic_sqlite_db_file(tmp_path_factory):
     return db_path
 
 
-@pytest.mark.xfail
 def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_file):
-    assert False
-
     basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     ge_dir = os.path.join(basedir, "great_expectations")
 
@@ -46,11 +41,13 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_fil
     shutil.copy(titanic_sqlite_db_file, database_path)
     engine = create_engine("sqlite:///{}".format(database_path))
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", basedir],
-        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url),
+        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(
+            engine.url, catch_exceptions=False
+        ),
     )
     stdout = result.output
     assert len(stdout) < 3000, "CLI output is unreasonably long."
@@ -60,19 +57,15 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_fil
     assert "Which database backend are you using" in stdout
     assert "Give your new data source a short name" in stdout
     assert "What is the url/connection string for the sqlalchemy connection" in stdout
-    assert (
-        "Great Expectations will choose a couple of columns and generate expectations about them"
-        in stdout
-    )
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
-    assert "Which data would you like to use?" in stdout
+    assert "Which table would you like to use?" in stdout
     assert "Name the new expectation suite [warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
         in stdout
     )
-    assert "Profiling main.titanic" in stdout
+    assert "Profiling..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
     assert "A new Expectation suite 'warning' was added to your project" in stdout
@@ -102,27 +95,24 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_fil
 
     # Instead of monkey patching datetime, just regex out the time directories
     date_safe_obs_tree = re.sub(r"\d*T\d*\.\d*Z", "9999.9999", obs_tree)
+    # Instead of monkey patching guids, just regex out the guids
+    guid_safe_obs_tree = re.sub(
+        r"[a-z0-9]{32}(?=\.(json|html))", "foobarbazguid", date_safe_obs_tree
+    )
     assert (
-        date_safe_obs_tree
+        guid_safe_obs_tree
         == """\
 great_expectations/
     .gitignore
     great_expectations.yml
-    datasources/
     expectations/
-        titanic/
-            default/
-                main.titanic/
-                    warning.json
+        warning.json
     notebooks/
         pandas/
-            create_expectations.ipynb
             validation_playground.ipynb
         spark/
-            create_expectations.ipynb
             validation_playground.ipynb
         sql/
-            create_expectations.ipynb
             validation_playground.ipynb
     plugins/
         custom_data_docs/
@@ -136,10 +126,7 @@ great_expectations/
             local_site/
                 index.html
                 expectations/
-                    titanic/
-                        default/
-                            main.titanic/
-                                warning.html
+                    warning.html
                 static/
                     fonts/
                         HKGrotesk/
@@ -187,18 +174,14 @@ great_expectations/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
                 validations/
-                    9999.9999/
-                        titanic/
-                            default/
-                                main.titanic/
-                                    warning.html
+                    warning/
+                        9999.9999/
+                            foobarbazguid.html
         samples/
         validations/
-            9999.9999/
-                titanic/
-                    default/
-                        main.titanic/
-                            warning.json
+            warning/
+                9999.9999/
+                    foobarbazguid.json
 """
     )
 
@@ -207,39 +190,52 @@ great_expectations/
     assert result.exit_code == 0
 
 
-@pytest.mark.xfail
-def test_init_on_existing_project_with_no_datasources_should_add_one(
-    caplog, initialized_sqlite_project,
+def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
+    caplog, initialized_sqlite_project, titanic_sqlite_db_file,
 ):
-    assert False
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
 
     _remove_all_datasources(ge_dir)
+    os.remove(os.path.join(ge_dir, "expectations", "warning.json"))
+    context = DataContext(ge_dir)
+    assert not context.list_expectation_suite_keys()
 
-    runner = CliRunner()
-    # TODO this behavior is broken and the input may need to be adjusted
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", project_dir],
-        input="2\n5\nsqlite\nsqlite:///data/titanic.db\n",
+        input="2\n5\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
+            titanic_sqlite_db_file
+        ),
+        catch_exceptions=False,
     )
     stdout = result.stdout
-    print(stdout)
 
     assert result.exit_code == 0
 
     assert "Error: invalid input" not in stdout
-
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
+    assert (
+        "Next, we will configure database credentials and store them in the `sqlite` section"
+        in stdout
+    )
+    assert "What is the url/connection string for the sqlalchemy connection?" in stdout
+    assert "Which table would you like to use?" in stdout
     assert "Great Expectations connected to your database" in stdout
-    assert "A new datasource 'sqlite' was added to your project" in stdout
-    assert "Would you like to build & view this project's Data Docs" in stdout
+    assert "A new Expectation suite 'my_suite' was added to your project" in stdout
     assert "This looks like an existing project that" not in stdout
 
     config = _load_config_file(os.path.join(ge_dir, DataContext.GE_YML))
     assert "sqlite" in config["datasources"].keys()
+
+    context = DataContext(ge_dir)
+    assert context.list_datasources() == [
+        {"class_name": "SqlAlchemyDatasource", "name": "sqlite"}
+    ]
+    assert context.list_expectation_suite_keys()[0].expectation_suite_name == "my_suite"
+    assert len(context.list_expectation_suite_keys()) == 1
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -275,11 +271,12 @@ def initialized_sqlite_project(caplog, tmp_path_factory, titanic_sqlite_db_file)
 
     engine = create_engine("sqlite:///{}".format(titanic_sqlite_db_file))
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", basedir],
         input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url),
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -306,8 +303,13 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     )
     assert len(context.list_datasources()) == 2
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n")
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["init", "--no-view", "-d", project_dir],
+        input="n\n",
+        catch_exceptions=False,
+    )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -322,14 +324,18 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(reason="failing")
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs(
     caplog, initialized_sqlite_project,
 ):
     project_dir = initialized_sqlite_project
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n")
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["init", "--no-view", "-d", project_dir],
+        input="n\n",
+        catch_exceptions=False,
+    )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -344,7 +350,6 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(reason="failing")
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     caplog, initialized_sqlite_project,
 ):
@@ -364,20 +369,20 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     context = DataContext(ge_dir)
     assert context.list_expectation_suite_keys() == []
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", project_dir],
         input="1\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
+        catch_exceptions=False,
     )
     stdout = result.stdout
-    print(stdout)
 
     assert result.exit_code == 0
 
     assert "Always know what to expect from your data" in stdout
-    assert "Which data would you like to use?" in stdout
-    assert "Profiling main.titanic" in stdout
+    assert "Which table would you like to use?" in stdout
+    assert "Profiling.." in stdout
     assert "The following Data Docs sites were built" in stdout
     assert "Great Expectations is now set up" in stdout
     assert "A new Expectation suite 'sink_me' was added to your project" in stdout
