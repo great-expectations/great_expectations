@@ -14,8 +14,8 @@ yaml.default_flow_style = False
 
 
 def test_cli_command_entrance(caplog):
-    runner = CliRunner()
-    result = runner.invoke(cli)
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, catch_exceptions=False)
     assert result.exit_code == 0
     assert (
         result.output
@@ -54,11 +54,11 @@ Commands:
 
 
 def test_cli_command_invalid_command(caplog,):
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, ["blarg"])
     assert result.exit_code == 2
     assert (
-        result.output
+        result.stderr
         == """Usage: cli [OPTIONS] COMMAND [ARGS]...
 Try "cli --help" for help.
 
@@ -68,8 +68,8 @@ Error: No such command "blarg".
 
 
 def test_cli_version(caplog,):
-    runner = CliRunner()
-    result = runner.invoke(cli, ["--version"])
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, ["--version"], catch_exceptions=False)
     assert ge_version in str(result.output)
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -79,49 +79,69 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
     curdir = os.path.abspath(os.getcwd())
     try:
         os.chdir(tmp_dir)
-        runner = CliRunner()
+        runner = CliRunner(mix_stderr=False)
         error_message = ConfigNotFoundError().message
 
         # datasource list
-        result = runner.invoke(cli, ["datasource", "list", "-d", "./"])
+        result = runner.invoke(
+            cli, ["datasource", "list", "-d", "./"], catch_exceptions=False
+        )
         assert error_message in result.output
-        result = runner.invoke(cli, ["datasource", "list"])
+        result = runner.invoke(cli, ["datasource", "list"], catch_exceptions=False)
         assert error_message in result.output
 
         # datasource new
-        result = runner.invoke(cli, ["datasource", "new", "-d", "./"])
+        result = runner.invoke(
+            cli, ["datasource", "new", "-d", "./"], catch_exceptions=False
+        )
         assert error_message in result.output
-        result = runner.invoke(cli, ["datasource", "new"])
+        result = runner.invoke(cli, ["datasource", "new"], catch_exceptions=False)
         assert error_message in result.output
 
         # datasource profile
-        result = runner.invoke(cli, ["datasource", "profile", "-d", "./", "--no-view"])
+        result = runner.invoke(
+            cli,
+            ["datasource", "profile", "-d", "./", "--no-view"],
+            catch_exceptions=False,
+        )
         assert error_message in result.output
-        result = runner.invoke(cli, ["datasource", "profile", "--no-view"])
+        result = runner.invoke(
+            cli, ["datasource", "profile", "--no-view"], catch_exceptions=False
+        )
         assert error_message in result.output
 
         # docs build
-        result = runner.invoke(cli, ["docs", "build", "-d", "./", "--no-view"])
+        result = runner.invoke(
+            cli, ["docs", "build", "-d", "./", "--no-view"], catch_exceptions=False
+        )
         assert error_message in result.output
-        result = runner.invoke(cli, ["docs", "build", "--no-view"])
+        result = runner.invoke(
+            cli, ["docs", "build", "--no-view"], catch_exceptions=False
+        )
         assert error_message in result.output
 
         # project check-config
-        result = runner.invoke(cli, ["project", "check-config", "-d", "./"])
+        result = runner.invoke(
+            cli, ["project", "check-config", "-d", "./"], catch_exceptions=False
+        )
         assert error_message in result.output
-        result = runner.invoke(cli, ["project", "check-config"])
+        result = runner.invoke(cli, ["project", "check-config"], catch_exceptions=False)
         assert error_message in result.output
 
         # suite new
-        result = runner.invoke(cli, ["suite", "new", "-d", "./"])
+        result = runner.invoke(
+            cli, ["suite", "new", "-d", "./"], catch_exceptions=False
+        )
         assert error_message in result.output
-        result = runner.invoke(cli, ["suite", "new"])
+        result = runner.invoke(cli, ["suite", "new"], catch_exceptions=False)
         assert error_message in result.output
 
         # suite edit
-        result = runner.invoke(cli, ["suite", "edit", "FAKE", "-d", "./"])
+        result = runner.invoke(
+            cli, ["suite", "edit", "FAKE", "-d", "./"], catch_exceptions=False
+        )
         assert error_message in result.output
-        result = runner.invoke(cli, ["suite", "edit", "FAKE"])
+        result = runner.invoke(cli, ["suite", "edit", "FAKE"], catch_exceptions=False)
         assert error_message in result.output
     except:
         raise
