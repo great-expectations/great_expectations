@@ -197,6 +197,33 @@ def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+def test_suite_edit_without_suite_name_raises_error(caplog):
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, "suite edit", catch_exceptions=False)
+    assert result.exit_code == 2
+    assert 'Error: Missing argument "SUITE".' in result.stderr
+
+
+def test_suite_edit_with_non_existent_suite_name_raises_error(
+    caplog, empty_data_context
+):
+    project_dir = empty_data_context.root_directory
+    assert not empty_data_context.list_expectation_suite_keys()
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite edit not_a_real_suite -d {}".format(project_dir),
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+    assert (
+        "Could not find a suite named `not_a_real_suite`. Please check the name and try again"
+        in result.output
+    )
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
 def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args(
     caplog, site_builder_data_context_with_html_store_titanic_random,
 ):
@@ -238,7 +265,6 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args(
     assert "Select data source" in stdout
     assert "Which data would you like to use" in stdout
     assert "To continue editing this suite, run" in stdout
-
 
     expected_notebook_path = os.path.join(
         root_dir, "uncommitted", "foo_suite.ipynb"
