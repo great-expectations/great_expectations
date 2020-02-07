@@ -19,6 +19,9 @@ from great_expectations.data_context.util import (
     file_relative_path,
     safe_mmkdir,
 )
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier
+)
 from great_expectations.dataset.pandas_dataset import PandasDataset
 
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
@@ -956,3 +959,10 @@ def sqlite_view_engine(test_backends):
         return sqlite_engine
     else:
         pytest.skip("SqlAlchemy tests disabled; not testing views")
+
+
+@pytest.fixture
+def expectation_suite_identifier():
+    return ExpectationSuiteIdentifier(
+        "my.expectation.suite.name"
+    )
