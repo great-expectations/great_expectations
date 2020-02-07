@@ -1,53 +1,60 @@
 # -*- coding: utf-8 -*-
+import copy
+import datetime
+import errno
 import glob
-import os
 import logging
+import os
 import shutil
+import sys
+import warnings
 import webbrowser
 
 from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
-import sys
-import copy
-import errno
 from six import string_types
-import datetime
-import warnings
-
-from great_expectations.core import ExpectationSuite
-from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.util import nested_update
-from great_expectations.core.metric import ValidationMetricIdentifier
-from great_expectations.data_context.types.base import DataContextConfig, dataContextConfigSchema
-from great_expectations.data_context.util import file_relative_path, substitute_config_variable
-from .types.resource_identifiers import ExpectationSuiteIdentifier, ValidationResultIdentifier
-from .util import safe_mmkdir, substitute_all_config_variables
-
-from ..types.base import DotDict
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.id_dict import BatchKwargs
+from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.util import nested_update
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    dataContextConfigSchema,
+)
+from great_expectations.data_context.util import (
+    file_relative_path,
+    substitute_config_variable,
+)
+from great_expectations.dataset import Dataset
+from great_expectations.profile.basic_dataset_profiler import (
+    BasicDatasetProfiler,
+)
 
+from ..types.base import DotDict
 # FIXME : Consolidate all builder files and classes in great_expectations/render/builder, to make it clear that they aren't renderers.
 from ..validator.validator import Validator
+from .templates import (
+    CONFIG_VARIABLES_INTRO,
+    CONFIG_VARIABLES_TEMPLATE,
+    PROJECT_TEMPLATE,
+)
+from .types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
+from .util import (
+    instantiate_class_from_config,
+    load_class,
+    safe_mmkdir,
+    substitute_all_config_variables,
+)
 
 try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse
-
-from great_expectations.dataset import Dataset
-from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-
-
-from .templates import (
-    PROJECT_TEMPLATE,
-    CONFIG_VARIABLES_INTRO,
-    CONFIG_VARIABLES_TEMPLATE,
-)
-from .util import (
-    load_class,
-    instantiate_class_from_config
-)
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -247,11 +254,9 @@ class BaseDataContext(object):
         site_names = None
         sites = self._project_config_with_variables_substituted.get('data_docs_sites', [])
         if sites:
-            logger.debug("Found data_docs_sites. Building sites...")
+            logger.debug("Found data_docs_sites.")
 
             for site_name, site_config in sites.items():
-                logger.debug("Building Data Docs Site %s" % site_name,)
-
                 if (site_names and site_name in site_names) or not site_names:
                     complete_site_config = site_config
                     site_builder = instantiate_class_from_config(
@@ -1507,12 +1512,54 @@ class DataContext(BaseDataContext):
 
     @classmethod
     def is_project_initialized(cls, ge_dir):
-        """Return True if the project is initialized."""
+        """
+        Return True if the project is initialized.
+
+        To be considered initialized, all of the following must be true:
+        - all project directories exist (including uncommitted directories)
+        - a valid great_expectations.yml is on disk
+        - a config_variables.yml is on disk
+        - the project has at least one datasource
+        - the project has at least one suite
+        """
         return (
             cls.does_config_exist_on_disk(ge_dir)
             and cls.all_uncommitted_directories_exist(ge_dir)
             and cls.config_variables_yml_exist(ge_dir)
+            and cls._does_context_have_at_least_one_datasource(ge_dir)
+            and cls._does_context_have_at_least_one_suite(ge_dir)
         )
+
+    @classmethod
+    def does_project_have_a_datasource_in_config_file(cls, ge_dir):
+        if not cls.does_config_exist_on_disk(ge_dir):
+            return False
+        return cls._does_context_have_at_least_one_datasource(ge_dir)
+
+    @classmethod
+    def _does_context_have_at_least_one_datasource(cls, ge_dir):
+        context = cls._attempt_context_instantiation(ge_dir)
+        if not isinstance(context, DataContext):
+            return False
+        return len(context.list_datasources()) >= 1
+
+    @classmethod
+    def _does_context_have_at_least_one_suite(cls, ge_dir):
+        context = cls._attempt_context_instantiation(ge_dir)
+        if not isinstance(context, DataContext):
+            return False
+        return len(context.list_expectation_suite_keys()) >= 1
+
+    @classmethod
+    def _attempt_context_instantiation(cls, ge_dir):
+        try:
+            context = DataContext(ge_dir)
+            return context
+        except (
+            ge_exceptions.DataContextError,
+            ge_exceptions.InvalidDataContextConfigError
+        ) as e:
+            logger.warning(e)
 
 
 class ExplorerDataContext(DataContext):
