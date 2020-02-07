@@ -81,7 +81,8 @@ batch_kwargs = {}
 batch = context.get_batch(batch_kwargs, expectation_suite_name)
 batch.head()""".format(
                 suite_name, batch_kwargs
-            )
+            ),
+            lint=True
         )
 
     def add_footer(self):
