@@ -95,7 +95,7 @@ def test_glob_reader_generator(basic_pandas_datasource, tmp_path_factory):
 
     g2_assets = g2.get_available_data_asset_names()
     # Use set in test to avoid order issues
-    assert set(g2_assets) == {("blargs", "path"), ("fs", "path")}
+    assert set(g2_assets["names"]) == {("blargs", "path"), ("fs", "path")}
 
     blargs_kwargs = [x["path"] for x in g2.get_iterator("blargs")]
     real_blargs = [
@@ -161,7 +161,7 @@ def test_databricks_generator(basic_sparkdf_datasource):
     available_assets = generator.get_available_data_asset_names()
 
     # We have no tables available
-    assert available_assets == []
+    assert available_assets == {"names": []}
 
     databricks_kwargs_iterator = generator.get_iterator("foo")
     kwargs = [batch_kwargs for batch_kwargs in databricks_kwargs_iterator]

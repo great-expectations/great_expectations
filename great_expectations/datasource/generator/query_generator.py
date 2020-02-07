@@ -87,7 +87,7 @@ class QueryGenerator(BatchKwargsGenerator):
     def get_available_data_asset_names(self):
         defined_queries = self._store_backend.list_keys()
         # Backends must have a tuple key; we use only a single-element tuple
-        return [(query_key_tuple[0], "query") for query_key_tuple in defined_queries]
+        return {"names": [(query_key_tuple[0], "query") for query_key_tuple in defined_queries]}
 
     def _build_batch_kwargs(self, batch_parameters):
         """Build batch kwargs from a partition id."""
