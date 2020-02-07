@@ -205,7 +205,7 @@ class S3Generator(BatchKwargsGenerator):
         if directory_assets:
             if "CommonPrefixes" not in asset_options:
                 raise BatchKwargsError(
-                    "Unable to build batch_kwargs. The asset may not be configured correctly. If dictionary assets "
+                    "Unable to build batch_kwargs. The asset may not be configured correctly. If directory assets "
                     "are requested, then common prefixes must be returned.",
                     {
                         "asset_configuration": asset_config,
