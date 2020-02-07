@@ -108,8 +108,6 @@ class HtmlSiteStore(object):
                 not supplied, the method returns the URL of the index page.
         :return: URL (string)
         """
-        from great_expectations.data_context.store import TupleFilesystemStoreBackend
-
         if resource_identifier is None:
             store_backend = self.store_backends["index_page"]
             key = ()

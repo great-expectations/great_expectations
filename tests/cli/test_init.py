@@ -33,11 +33,11 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(fixture_path, data_path)
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", root_dir],
-        input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
+        input="Y\n1\n1\n{}\n\n\n\n".format(data_path, catch_exceptions=False),
     )
     stdout = result.output
     assert result.exit_code == 0
@@ -49,13 +49,14 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     assert not os.path.isdir(uncommitted_dir)
 
     # Test the second invocation of init
-    runner = CliRunner()
-    result = runner.invoke(cli, ["init", "-d", root_dir], input="Y\nn\n")
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, ["init", "-d", root_dir], input="Y\nn\n", catch_exceptions=False)
     stdout = result.stdout
 
     assert result.exit_code == 0
-    assert "To run locally, we need some files that are not in source control" in stdout
-    assert "Done. You may see new files in" in stdout
+    assert "Great Expectations added some missing files required to run." in stdout
+    assert "You may see new files in" in stdout
+
     assert "OK. You must run" not in stdout
     assert "great_expectations init" not in stdout
     assert "to fix the missing files!" not in stdout
@@ -68,56 +69,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
         assert f.read() == CONFIG_VARIABLES_TEMPLATE
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
-
-
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
-def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_to_fixing_them(
-    caplog, tmp_path_factory,
-):
-    """
-    This test walks through the onboarding experience.
-
-    The user just checked an existing project out of source control and does
-    not yet have an uncommitted directory, runs init and answers No to fixing.
-
-    Therefore the disk should not be changed.
-    """
-    root_dir = tmp_path_factory.mktemp("hiya")
-    root_dir = str(root_dir)
-    os.makedirs(os.path.join(root_dir, "data"))
-    data_path = os.path.join(root_dir, "data/Titanic.csv")
-    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
-    shutil.copy(fixture_path, data_path)
-
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        ["init", "--no-view", "-d", root_dir],
-        input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
-    )
-    stdout = result.output
-    assert result.exit_code == 0
-    assert "Great Expectations is now set up." in stdout
-
-    context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
-    uncommitted_dir = os.path.join(context.root_directory, "uncommitted")
-    shutil.rmtree(uncommitted_dir)
-    assert not os.path.isdir(uncommitted_dir)
-
-    # Test the second invocation of init
-    runner = CliRunner()
-    result = runner.invoke(cli, ["init", "-d", root_dir], input="n\nn\n")
-    stdout = result.stdout
-
-    assert result.exit_code == 0
-    assert "To run locally, we need some files that are not in source control" in stdout
-    assert "OK. You must run" in stdout
-    assert "great_expectations init" in stdout
-    assert "to fix the missing files!" in stdout
-
-    # DataContext should not write to disk unless you explicitly tell it to
-    assert not os.path.isdir(uncommitted_dir)
-    assert not os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml"))
 
 
 def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
@@ -136,19 +87,18 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(fixture_path, data_path)
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", root_dir],
-        input="Y\n1\n1\n{}\n\n\n\n".format(data_path),
+        input="Y\n1\n1\n{}\n\n\n\n".format(data_path, catch_exceptions=False),
     )
     stdout = result.output
     assert result.exit_code == 0
 
     # Test the second invocation of init
-    runner = CliRunner()
-    result = runner.invoke(cli, ["init", "--no-view", "-d", root_dir], input="n\n")
-    print(stdout)
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, ["init", "--no-view", "-d", root_dir], input="n\n", catch_exceptions=False)
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -166,11 +116,12 @@ def test_cli_init_connection_string_non_working_postgres_connection_instructs_us
     basedir = str(basedir)
     os.chdir(basedir)
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "--no-view"],
         input="Y\n2\n5\nmy_db\npostgresql+psycopg2://scott:tiger@not_a_real_host:1234/dbname\nn\n",
+        catch_exceptions=False
     )
     stdout = result.output
 

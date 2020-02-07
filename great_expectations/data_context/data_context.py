@@ -254,11 +254,9 @@ class BaseDataContext(object):
         site_names = None
         sites = self._project_config_with_variables_substituted.get('data_docs_sites', [])
         if sites:
-            logger.debug("Found data_docs_sites. Building sites...")
+            logger.debug("Found data_docs_sites.")
 
             for site_name, site_config in sites.items():
-                logger.debug("Building Data Docs Site %s" % site_name,)
-
                 if (site_names and site_name in site_names) or not site_names:
                     complete_site_config = site_config
                     site_builder = instantiate_class_from_config(

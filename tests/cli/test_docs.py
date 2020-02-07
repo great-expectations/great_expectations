@@ -13,8 +13,8 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
 def test_docs_help_output(caplog):
-    runner = CliRunner()
-    result = runner.invoke(cli, ["docs"])
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, ["docs"], catch_exceptions=False)
     assert result.exit_code == 0
     assert "build  Build Data Docs for a project." in result.stdout
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -24,8 +24,8 @@ def test_docs_help_output(caplog):
 def test_docs_build(caplog, site_builder_data_context_with_html_store_titanic_random):
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["docs", "build", "-d", root_dir, "--no-view"])
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, ["docs", "build", "-d", root_dir, "--no-view"], catch_exceptions=False)
     stdout = result.stdout
 
     assert result.exit_code == 0
