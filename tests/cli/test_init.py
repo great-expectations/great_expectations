@@ -50,7 +50,9 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
 
     # Test the second invocation of init
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["init", "-d", root_dir], input="Y\nn\n", catch_exceptions=False)
+    result = runner.invoke(
+        cli, ["init", "-d", root_dir], input="Y\nn\n", catch_exceptions=False
+    )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -98,7 +100,9 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
 
     # Test the second invocation of init
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["init", "--no-view", "-d", root_dir], input="n\n", catch_exceptions=False)
+    result = runner.invoke(
+        cli, ["init", "--no-view", "-d", root_dir], input="n\n", catch_exceptions=False
+    )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -121,7 +125,7 @@ def test_cli_init_connection_string_non_working_postgres_connection_instructs_us
         cli,
         ["init", "--no-view"],
         input="Y\n2\n5\nmy_db\nsqlite:////not_a_real.db\nn\n",
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     stdout = result.output
 
@@ -154,7 +158,7 @@ def test_cli_init_connection_string_non_working_postgres_connection_instructs_us
             },
             "credentials": "${my_db}",
             "class_name": "SqlAlchemyDatasource",
-            "module_name": "great_expectations.datasource"
+            "module_name": "great_expectations.datasource",
         }
     }
 
@@ -162,9 +166,7 @@ def test_cli_init_connection_string_non_working_postgres_connection_instructs_us
         ge_dir, DataContext.GE_UNCOMMITTED_DIR, "config_variables.yml"
     )
     config = yaml.load(open(config_path, "r"))
-    assert config["my_db"] == {
-        "url": "sqlite:////not_a_real.db"
-    }
+    assert config["my_db"] == {"url": "sqlite:////not_a_real.db"}
 
     obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
     assert (

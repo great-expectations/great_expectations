@@ -25,7 +25,9 @@ def test_docs_build(caplog, site_builder_data_context_with_html_store_titanic_ra
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["docs", "build", "-d", root_dir, "--no-view"], catch_exceptions=False)
+    result = runner.invoke(
+        cli, ["docs", "build", "-d", root_dir, "--no-view"], catch_exceptions=False
+    )
     stdout = result.stdout
 
     assert result.exit_code == 0

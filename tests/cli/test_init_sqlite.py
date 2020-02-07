@@ -13,9 +13,7 @@ from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
-from tests.cli.test_datasource_sqlite import (
-    _add_datasource_and_credentials_to_context,
-)
+from tests.cli.test_datasource_sqlite import _add_datasource_and_credentials_to_context
 from tests.cli.test_init_pandas import _delete_and_recreate_dir
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
@@ -47,7 +45,9 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_fil
     result = runner.invoke(
         cli,
         ["init", "--no-view", "-d", basedir],
-        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url, catch_exceptions=False),
+        input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(
+            engine.url, catch_exceptions=False
+        ),
     )
     stdout = result.output
     assert len(stdout) < 3000, "CLI output is unreasonably long."
@@ -208,7 +208,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         input="2\n5\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
             titanic_sqlite_db_file
         ),
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     stdout = result.stdout
 
@@ -276,7 +276,7 @@ def initialized_sqlite_project(caplog, tmp_path_factory, titanic_sqlite_db_file)
         cli,
         ["init", "--no-view", "-d", basedir],
         input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url),
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -304,7 +304,12 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert len(context.list_datasources()) == 2
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n", catch_exceptions=False)
+    result = runner.invoke(
+        cli,
+        ["init", "--no-view", "-d", project_dir],
+        input="n\n",
+        catch_exceptions=False,
+    )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -325,7 +330,12 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     project_dir = initialized_sqlite_project
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["init", "--no-view", "-d", project_dir], input="n\n", catch_exceptions=False)
+    result = runner.invoke(
+        cli,
+        ["init", "--no-view", "-d", project_dir],
+        input="n\n",
+        catch_exceptions=False,
+    )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -364,7 +374,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
         cli,
         ["init", "--no-view", "-d", project_dir],
         input="1\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     stdout = result.stdout
 

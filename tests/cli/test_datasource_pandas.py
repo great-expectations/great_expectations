@@ -19,7 +19,9 @@ def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
     context = DataContext(project_root_dir)
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False)
+    result = runner.invoke(
+        cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
+    )
 
     stdout = result.output.strip()
     assert "[]" in stdout
@@ -42,15 +44,22 @@ def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
     ]
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False)
+    result = runner.invoke(
+        cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
+    )
 
     stdout = result.output.strip()
     if PY2:
         # deal with legacy python dictionary sorting
-        assert "'name': 'wow_a_datasource'" and "'class_name': 'PandasDatasource'" in stdout
+        assert (
+            "'name': 'wow_a_datasource'"
+            and "'class_name': 'PandasDatasource'" in stdout
+        )
         assert len(stdout) >= 60 and len(stdout) <= 70
     else:
-        assert "[{'name': 'wow_a_datasource', 'class_name': 'PandasDatasource'}]" in stdout
+        assert (
+            "[{'name': 'wow_a_datasource', 'class_name': 'PandasDatasource'}]" in stdout
+        )
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
@@ -64,7 +73,7 @@ def test_cli_datasorce_new(caplog, empty_data_context, filesystem_csv_2):
         cli,
         ["datasource", "new", "-d", project_root_dir],
         input="1\n1\n%s\nmynewsource\n" % str(filesystem_csv_2),
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     stdout = result.stdout
 
@@ -114,7 +123,7 @@ def test_cli_datasource_profile_answering_no(
             "--no-view",
         ],
         input="n\n",
-        catch_exceptions=False
+        catch_exceptions=False,
     )
 
     stdout = result.stdout
@@ -155,7 +164,7 @@ def test_cli_datasource_profile_with_datasource_arg(
             "--no-view",
         ],
         input="Y\n",
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
     stdout = result.stdout
@@ -212,7 +221,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
         cli,
         ["datasource", "profile", "-d", project_root_dir, "--no-view"],
         input="Y\n",
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
     stdout = result.stdout
@@ -284,7 +293,7 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
             "--no-view",
         ],
         input="Y\n",
-        catch_exceptions=False
+        catch_exceptions=False,
     )
     stdout = result.output
     assert result.exit_code == 0
@@ -358,7 +367,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
             project_root_dir,
             "--no-view",
         ],
-        catch_exceptions=False
+        catch_exceptions=False,
     )
 
     assert result.exit_code == 0
@@ -382,7 +391,8 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert len(validation_keys) == 1
 
     validation = validations_store.get(validation_keys[0])
-    assert validation.meta["expectation_suite_name"] == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
+    suite_name = validation.meta["expectation_suite_name"]
+    assert suite_name == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
     assert validation.success is False
     assert len(validation.results) == 8
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -421,7 +431,7 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
             "--no-view",
         ],
         input="2\n",
-        catch_exceptions=False
+        catch_exceptions=False,
     )
 
     stdout = result.stdout
