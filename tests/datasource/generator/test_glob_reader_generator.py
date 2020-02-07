@@ -110,7 +110,7 @@ def test_glob_reader_generator_partitioning(basic_pandas_datasource):
         is_dir.return_value = True
         names = glob_generator.get_available_data_asset_names()
         # Use set in test to avoid order issues
-        assert set(names) == {("asset1", "path"), ("asset2", "path"), ("asset3", "path"), ("no_partition_asset1", \
+        assert set(names["names"]) == {("asset1", "path"), ("asset2", "path"), ("asset3", "path"), ("no_partition_asset1", \
                                                                                          "path"),
                               ("no_partition_asset2", "path")}
 
