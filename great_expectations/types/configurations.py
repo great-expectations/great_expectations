@@ -1,14 +1,3 @@
-# from six import string_types
-# from ruamel.yaml import YAML, yaml_object
-#
-#
-# # from great_expectations.types import AllowedKeysDotDict
-#
-# yaml = YAML()
-
-#
-# class Config(AllowedKeysDotDict):
-#     pass
 from marshmallow import Schema, fields
 
 
@@ -30,17 +19,3 @@ class ClassConfig(object):
 class ClassConfigSchema(Schema):
     class_name = fields.Str()
     module_name = fields.Str(allow_none=True)
-
-#
-#     #
-#     # _allowed_keys = {
-#     #     "module_name",
-#     #     "class_name"
-#     # }
-#     # _required_keys = {
-#     #     "class_name"
-#     # }
-#     # _key_types = {
-#     #     "module_name": string_types,
-#     #     "class_name": string_types
-#     # }

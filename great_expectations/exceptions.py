@@ -151,7 +151,7 @@ class ExpectationSuiteNotFoundError(GreatExpectationsError):
 
 
 class BatchKwargsError(DataContextError):
-    def __init__(self, message, batch_kwargs):
+    def __init__(self, message, batch_kwargs=None):
         self.message = message
         self.batch_kwargs = batch_kwargs
 
