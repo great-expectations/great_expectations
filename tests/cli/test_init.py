@@ -112,7 +112,7 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
 def test_cli_init_connection_string_non_working_postgres_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
     caplog, tmp_path_factory,
 ):
-    basedir = tmp_path_factory.mktemp("mssql_test")
+    basedir = tmp_path_factory.mktemp("bad_con_string_test")
     basedir = str(basedir)
     os.chdir(basedir)
 
@@ -120,7 +120,7 @@ def test_cli_init_connection_string_non_working_postgres_connection_instructs_us
     result = runner.invoke(
         cli,
         ["init", "--no-view"],
-        input="Y\n2\n5\nmy_db\npostgresql+psycopg2://scott:tiger@not_a_real_host:1234/dbname\nn\n",
+        input="Y\n2\n5\nmy_db\nsqlite:////not_a_real.db\nn\n",
         catch_exceptions=False
     )
     stdout = result.output
@@ -145,7 +145,6 @@ def test_cli_init_connection_string_non_working_postgres_connection_instructs_us
     config_path = os.path.join(ge_dir, DataContext.GE_YML)
     assert os.path.isfile(config_path)
 
-    # TODO this entry might not be totally right, but one needs to be here.
     config = yaml.load(open(config_path, "r"))
     assert config["datasources"] == {
         "my_db": {
@@ -159,13 +158,12 @@ def test_cli_init_connection_string_non_working_postgres_connection_instructs_us
         }
     }
 
-    # TODO add entry in config_vars this entry might not be totally right, but one needs to be here.
     config_path = os.path.join(
         ge_dir, DataContext.GE_UNCOMMITTED_DIR, "config_variables.yml"
     )
     config = yaml.load(open(config_path, "r"))
     assert config["my_db"] == {
-        "url": "postgresql+psycopg2://scott:tiger@not_a_real_host:1234/dbname"
+        "url": "sqlite:////not_a_real.db"
     }
 
     obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
