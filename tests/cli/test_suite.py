@@ -224,6 +224,30 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+def test_suite_edit_with_non_existent_datasource_name_shows_helpful_error_message(
+    caplog, empty_data_context
+):
+    project_dir = empty_data_context.root_directory
+    context = DataContext(project_dir)
+    context.create_expectation_suite("foo")
+    assert context.list_expectation_suite_keys()[0].expectation_suite_name == "foo"
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite edit foo -d {} --datasource_name not_real".format(project_dir),
+        catch_exceptions=False,
+    )
+    print(result.output)
+    assert result.exit_code == 1
+    # TODO this may not be the most helpful error message, but it is a start
+    assert (
+        "Unable to load datasource not_real -- no configuration found or invalid configuration."
+        in result.output
+    )
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
 def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args(
     caplog, site_builder_data_context_with_html_store_titanic_random,
 ):
