@@ -83,43 +83,63 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
         error_message = ConfigNotFoundError().message
 
         # datasource list
-        result = runner.invoke(cli, ["datasource", "list", "-d", "./"], catch_exceptions=False)
+        result = runner.invoke(
+            cli, ["datasource", "list", "-d", "./"], catch_exceptions=False
+        )
         assert error_message in result.output
         result = runner.invoke(cli, ["datasource", "list"], catch_exceptions=False)
         assert error_message in result.output
 
         # datasource new
-        result = runner.invoke(cli, ["datasource", "new", "-d", "./"], catch_exceptions=False)
+        result = runner.invoke(
+            cli, ["datasource", "new", "-d", "./"], catch_exceptions=False
+        )
         assert error_message in result.output
         result = runner.invoke(cli, ["datasource", "new"], catch_exceptions=False)
         assert error_message in result.output
 
         # datasource profile
-        result = runner.invoke(cli, ["datasource", "profile", "-d", "./", "--no-view"], catch_exceptions=False)
+        result = runner.invoke(
+            cli,
+            ["datasource", "profile", "-d", "./", "--no-view"],
+            catch_exceptions=False,
+        )
         assert error_message in result.output
-        result = runner.invoke(cli, ["datasource", "profile", "--no-view"], catch_exceptions=False)
+        result = runner.invoke(
+            cli, ["datasource", "profile", "--no-view"], catch_exceptions=False
+        )
         assert error_message in result.output
 
         # docs build
-        result = runner.invoke(cli, ["docs", "build", "-d", "./", "--no-view"], catch_exceptions=False)
+        result = runner.invoke(
+            cli, ["docs", "build", "-d", "./", "--no-view"], catch_exceptions=False
+        )
         assert error_message in result.output
-        result = runner.invoke(cli, ["docs", "build", "--no-view"], catch_exceptions=False)
+        result = runner.invoke(
+            cli, ["docs", "build", "--no-view"], catch_exceptions=False
+        )
         assert error_message in result.output
 
         # project check-config
-        result = runner.invoke(cli, ["project", "check-config", "-d", "./"], catch_exceptions=False)
+        result = runner.invoke(
+            cli, ["project", "check-config", "-d", "./"], catch_exceptions=False
+        )
         assert error_message in result.output
         result = runner.invoke(cli, ["project", "check-config"], catch_exceptions=False)
         assert error_message in result.output
 
         # suite new
-        result = runner.invoke(cli, ["suite", "new", "-d", "./"], catch_exceptions=False)
+        result = runner.invoke(
+            cli, ["suite", "new", "-d", "./"], catch_exceptions=False
+        )
         assert error_message in result.output
         result = runner.invoke(cli, ["suite", "new"], catch_exceptions=False)
         assert error_message in result.output
 
         # suite edit
-        result = runner.invoke(cli, ["suite", "edit", "FAKE", "-d", "./"], catch_exceptions=False)
+        result = runner.invoke(
+            cli, ["suite", "edit", "FAKE", "-d", "./"], catch_exceptions=False
+        )
         assert error_message in result.output
         result = runner.invoke(cli, ["suite", "edit", "FAKE"], catch_exceptions=False)
         assert error_message in result.output

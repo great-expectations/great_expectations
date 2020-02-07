@@ -364,7 +364,6 @@ project_path/
 
     data_docs_dir = os.path.join(project_dir, "great_expectations/uncommitted/data_docs")
     observed = gen_directory_tree_str(data_docs_dir)
-    print(observed)
     assert observed == """\
 data_docs/
     local_site/
