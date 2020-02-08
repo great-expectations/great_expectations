@@ -67,10 +67,16 @@ detailed descriptions of changes, and as always feel free to join us on Slack fo
 * StoreEvaluationParametersAction
 
 
-0.8.8__develop
+0.8.9__develop
+-----------------
+
+
+0.8.8
 -----------------
 * Add support for allow_relative_error to expect_column_quantile_values_to_be_between, allowing Redshift users access
   to this expectation
+* Add support for checking backend type information for datetime columns using expect_column_min_to_be_between and
+  expect_column_max_to_be_between
 
 0.8.7
 -----------------
