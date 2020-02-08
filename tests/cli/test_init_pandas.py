@@ -267,7 +267,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
         class_name="PandasDatasource",
         generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
             }
         },

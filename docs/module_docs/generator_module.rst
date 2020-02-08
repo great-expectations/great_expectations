@@ -26,46 +26,46 @@ InMemoryGenerator
     :show-inheritance:
 
 
-QueryGenerator
+QueryBatchKwargsGenerator
 ------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.query_generator.QueryGenerator
+.. autoclass:: great_expectations.datasource.generator.query_generator.QueryBatchKwargsGenerator
     :members:
     :undoc-members:
     :show-inheritance:
 
 
-SubdirReaderGenerator
+SubdirReaderBatchKwargsGenerator
 ----------------------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.subdir_reader_generator.SubdirReaderGenerator
+.. autoclass:: great_expectations.datasource.generator.subdir_reader_generator.SubdirReaderBatchKwargsGenerator
     :members:
     :undoc-members:
     :show-inheritance:
 
 
-GlobReaderGenerator
+GlobReaderBatchKwargsGenerator
 -------------------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.glob_reader_generator.GlobReaderGenerator
+.. autoclass:: great_expectations.datasource.generator.glob_reader_generator.GlobReaderBatchKwargsGenerator
     :members:
     :undoc-members:
     :show-inheritance:
 
 
-S3Generator
+S3GlobReaderBatchKwargsGenerator
 -------------------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.s3_generator.S3Generator
+.. autoclass:: great_expectations.datasource.generator.s3_generator.S3GlobReaderBatchKwargsGenerator
     :members:
     :undoc-members:
     :show-inheritance:
 
 
-DatabricksTableGenerator
+DatabricksTableBatchKwargsGenerator
 ---------------------------------------------------------------------------------------
 
-.. autoclass:: great_expectations.datasource.generator.databricks_generator.DatabricksTableGenerator
+.. autoclass:: great_expectations.datasource.generator.databricks_generator.DatabricksTableBatchKwargsGenerator
     :members:
     :undoc-members:
     :show-inheritance:

@@ -23,7 +23,7 @@ def not_empty_datacontext(empty_data_context, filesystem_csv_2):
         class_name="PandasDatasource",
         generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
             }
         },

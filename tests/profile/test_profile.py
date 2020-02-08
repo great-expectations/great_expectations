@@ -23,7 +23,7 @@ def not_empty_datacontext(empty_data_context, filesystem_csv_2):
         class_name="PandasDatasource",
         generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
             }
         },
@@ -380,7 +380,7 @@ def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple
     generators configured, the profiling method must return an error code in the result
     """
     context = not_empty_datacontext
-    context.add_generator("rad_datasource", "second_generator", "SubdirReaderGenerator", **{
+    context.add_generator("rad_datasource", "second_generator", "SubdirReaderBatchKwargsGenerator", **{
                 "base_directory": str(filesystem_csv_2),
             })
 

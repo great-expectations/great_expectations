@@ -119,7 +119,7 @@ detailed descriptions of changes, and as always feel free to join us on Slack fo
 * Add support to S3 generator for retrieving directories by specifying the `directory_assets` configuration
 * Fix warning regarding implicit class_name during init flow
 * Expose build_generator API publicly on datasources
-* Allow configuration of known extensions and return more informative message when SubdirReaderGenerator cannot find
+* Allow configuration of known extensions and return more informative message when SubdirReaderBatchKwargsGenerator cannot find
   relevant files.
 * Add support for allow_relative_error on internal dataset quantile functions, and add support for
   build_continuous_partition_object in Redshift
@@ -206,8 +206,8 @@ Highlights include:
 
 3. Partitioners: Batch Kwargs are clarified and enhanced to help easily reference well-known chunks of data using a
    partition_id. Batch ID and Batch Fingerprint help round out support for enhanced metadata around data
-   assets that GE validates. See :ref:`batch_identifiers` for more information. The `GlobReaderGenerator`,
-   `QueryGenerator`, `S3Generator`, `SubdirReaderGenerator`, and `TableGenerator` all support partition_id for
+   assets that GE validates. See :ref:`batch_identifiers` for more information. The `GlobReaderBatchKwargsGenerator`,
+   `QueryBatchKwargsGenerator`, `S3GlobReaderBatchKwargsGenerator`, `SubdirReaderBatchKwargsGenerator`, and `TableBatchKwargsGenerator` all support partition_id for
    easily accessing data assets.
 
 4. Other Improvements:
@@ -232,7 +232,7 @@ v0.7.10
 -----------------
 * Fix an issue in generated documentation where the Home button failed to return to the index
 * Add S3 Generator to module docs and improve module docs formatting
-* Add support for views to QueryGenerator
+* Add support for views to QueryBatchKwargsGenerator
 * Add success/failure icons to index page
 * Return to uniform histogram creation during profiling to avoid large partitions for internal performance reasons
 

@@ -23,7 +23,7 @@ def validation_operators_data_context(basic_data_context_config_for_validation_o
                                 class_name="PandasDatasource",
                                 generators={
                                     "subdir_reader": {
-                                        "class_name": "SubdirReaderGenerator",
+                                        "class_name": "SubdirReaderBatchKwargsGenerator",
                                         "base_directory": str(filesystem_csv_4)
                                     }
                                 })

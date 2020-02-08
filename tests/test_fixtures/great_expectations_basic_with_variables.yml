@@ -11,7 +11,7 @@ datasources:
     generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
-        class_name: SubdirReaderGenerator
+        class_name: SubdirReaderBatchKwargsGenerator
         base_directory: ../data
         reader_options:
           sep:

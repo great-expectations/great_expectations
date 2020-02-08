@@ -4,7 +4,7 @@ import os
 
 from great_expectations.data_context.util import safe_mmkdir
 
-from great_expectations.datasource.generator import SubdirReaderGenerator
+from great_expectations.datasource.generator import SubdirReaderBatchKwargsGenerator
 from great_expectations.exceptions import BatchKwargsError
 
 
@@ -21,8 +21,8 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
         safe_mmkdir(os.path.join(base_directory, file.split("/")[0]))
         open(os.path.join(base_directory, file), "w").close()
 
-    subdir_reader_generator = SubdirReaderGenerator("test_generator", datasource=basic_pandas_datasource,
-                                                    base_directory=base_directory)
+    subdir_reader_generator = SubdirReaderBatchKwargsGenerator("test_generator", datasource=basic_pandas_datasource,
+                                                               base_directory=base_directory)
 
     # We should see two assets
     known_assets = subdir_reader_generator.get_available_data_asset_names()["names"]
@@ -51,7 +51,7 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
     }
     partitions = subdir_reader_generator.get_available_partition_ids("asset_1")
 
-    # SubdirReaderGenerator uses filenames from subdirectories to generate partition names
+    # SubdirReaderBatchKwargsGenerator uses filenames from subdirectories to generate partition names
     assert set(partitions) == {
         "20190101__asset_1",
         "20190102__asset_1",
@@ -88,8 +88,8 @@ def test_subdir_reader_file_partitioning(basic_pandas_datasource, tmp_path_facto
         open(os.path.join(base_directory, file), "w").close()
 
     # If we have files, we should see them as individual assets
-    subdir_reader_generator = SubdirReaderGenerator("test_generator",
-                                                    datasource=basic_pandas_datasource, base_directory=base_directory)
+    subdir_reader_generator = SubdirReaderBatchKwargsGenerator("test_generator",
+                                                               datasource=basic_pandas_datasource, base_directory=base_directory)
 
     known_assets = subdir_reader_generator.get_available_data_asset_names()["names"]
     assert set(known_assets) == {
@@ -99,7 +99,7 @@ def test_subdir_reader_file_partitioning(basic_pandas_datasource, tmp_path_facto
         ("asset_2", "directory")
     }
 
-    # SubdirReaderGenerator uses the filename as partition name for root files
+    # SubdirReaderBatchKwargsGenerator uses the filename as partition name for root files
     known_partitions = subdir_reader_generator.get_available_partition_ids("20190101__asset_1")
     assert set(known_partitions) == {"20190101__asset_1"}
 
@@ -128,8 +128,8 @@ def test_subdir_reader_configurable_reader_method(basic_pandas_datasource, tmp_p
         open(os.path.join(base_directory, file), "w").close()
 
     # If we have files, we should see them as individual assets
-    subdir_reader_generator = SubdirReaderGenerator("test_generator", datasource=basic_pandas_datasource,
-                                                    base_directory=base_directory,
-                                                    reader_method='csv', known_extensions=['.dat'])
+    subdir_reader_generator = SubdirReaderBatchKwargsGenerator("test_generator", datasource=basic_pandas_datasource,
+                                                               base_directory=base_directory,
+                                                               reader_method='csv', known_extensions=['.dat'])
     batch_kwargs = next(subdir_reader_generator.get_iterator('asset_2'))
     assert batch_kwargs['reader_method'] == 'csv'
