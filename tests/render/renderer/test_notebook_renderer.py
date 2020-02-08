@@ -268,8 +268,8 @@ def test_simple_suite(critical_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "critical"  # Feel free to change the name of your suite here. Renaming this will not remove the other one.\ncontext.create_expectation_suite(expectation_suite_name, overwrite_existing=True)\n\nbatch_kwargs = {\'path\': \'../../foo/data\'}\nbatch = context.get_batch(batch_kwargs, expectation_suite_name)\nbatch.head()',
-                "outputs": [],
+                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\ncontext.create_expectation_suite(\n    expectation_suite_name,\n    overwrite_existing=True)\n\nbatch_kwargs = {\'path\': \'../../foo/data\'}\nbatch = context.get_batch(batch_kwargs, expectation_suite_name)\nbatch.head()',
+                "outputs": []
             },
             {
                 "cell_type": "markdown",
@@ -390,6 +390,7 @@ def test_batch_kwarg_path_absolute_is_not_modified_and_is_found_in_a_code_cell(
 
     assert found_expected
 
+
 @pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_complex_suite(warning_suite):
     obs = NotebookRenderer().render(warning_suite, {"path": "foo/data"})
@@ -408,7 +409,7 @@ def test_complex_suite(warning_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "warning"  # Feel free to change the name of your suite here. Renaming this will not remove the other one.\ncontext.create_expectation_suite(expectation_suite_name, overwrite_existing=True)\n\nbatch_kwargs = {\'path\': \'../../foo/data\'}\nbatch = context.get_batch(batch_kwargs, expectation_suite_name)\nbatch.head()',
+                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "warning"\ncontext.create_expectation_suite(\n    expectation_suite_name,\n    overwrite_existing=True)\n\nbatch_kwargs = {\'path\': \'../../foo/data\'}\nbatch = context.get_batch(batch_kwargs, expectation_suite_name)\nbatch.head()',
                 "outputs": [],
             },
             {
