@@ -14,7 +14,6 @@ from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
 from six import string_types
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
@@ -627,8 +626,8 @@ class BaseDataContext(object):
         self._datasources[datasource_name] = datasource
         return datasource
 
-    def list_expectation_suite_keys(self):
-        """Return a list of available expectation suite keys."""
+    def list_expectation_suites(self):
+        """Return a list of available expectation suite names."""
         try:
             keys = self.stores[self.expectations_store_name].list_keys()
         except KeyError as e:
@@ -1561,7 +1560,7 @@ class DataContext(BaseDataContext):
         context = cls._attempt_context_instantiation(ge_dir)
         if not isinstance(context, DataContext):
             return False
-        return len(context.list_expectation_suite_keys()) >= 1
+        return len(context.list_expectation_suites()) >= 1
 
     @classmethod
     def _attempt_context_instantiation(cls, ge_dir):

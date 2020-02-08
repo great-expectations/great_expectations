@@ -102,7 +102,7 @@ Use this convenience method to list all data assets and expectation suites in yo
 
 .. code-block:: python
 
-    great_expectations.jupyter_ux.list_available_data_asset_names(context)
+    great_expectations.jupyter_ux.show_available_data_asset_names(context)
 
 The output looks like this:
 

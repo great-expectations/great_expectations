@@ -262,19 +262,21 @@ class Datasource(object):
         raise NotImplementedError
 
     def get_available_data_asset_names(self, generator_names=None):
-        """Returns a dictionary of data_asset_names that the specified generator can provide. Note that some generators,
-        such as the "no-op" in-memory generator may not be capable of describing specific named data assets, and some
+        """Returns a dictionary of data_asset_names that the specified generator can provide. Note that some generators
+        may not be capable of describing specific named data assets, and some
         generators (such as filesystem glob generators) require the user to configure data asset names.
 
         Args:
-            generator_names: the generators for which to fetch available data asset names.
+            generator_names: the generators for which to get available data asset names.
 
         Returns:
             dictionary consisting of sets of generator assets available for the specified generators:
             ::
 
                 {
-                  generator_name: [ data_asset_1, data_asset_2, ... ]
+                  generator_name: {
+                    names: [ (data_asset_1, data_asset_1_type), (data_asset_2, data_asset_2_type) ... ]
+                  }
                   ...
                 }
 

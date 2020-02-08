@@ -310,10 +310,10 @@ def test_context_profiler(not_empty_datacontext):
     context = not_empty_datacontext
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
-    assert context.list_expectation_suite_keys() == []
+    assert context.list_expectation_suites() == []
     context.profile_datasource("rad_datasource", profiler=BasicDatasetProfiler)
 
-    assert len(context.list_expectation_suite_keys()) == 1
+    assert len(context.list_expectation_suites()) == 1
 
     expected_suite_name = "rad_datasource.subdir_reader.f1.BasicDatasetProfiler"
     profiled_expectations = context.get_expectation_suite(expected_suite_name)
@@ -335,7 +335,7 @@ def test_context_profiler_with_data_asset_name(not_empty_datacontext):
     context = not_empty_datacontext
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
-    assert context.list_expectation_suite_keys() == []
+    assert context.list_expectation_suites() == []
     profiling_result = context.profile_datasource("rad_datasource", data_assets=["f1"], profiler=BasicDatasetProfiler)
 
     assert profiling_result['success'] == True
@@ -351,7 +351,7 @@ def test_context_profiler_with_nonexisting_data_asset_name(not_empty_datacontext
     context = not_empty_datacontext
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
-    assert context.list_expectation_suite_keys() == []
+    assert context.list_expectation_suites() == []
     profiling_result = context.profile_datasource("rad_datasource", data_assets=["this_asset_doesnot_exist"], profiler=BasicDatasetProfiler)
 
     assert profiling_result == {
@@ -369,7 +369,7 @@ in the generator_name argument, the profiling method must raise an exception.
     context = not_empty_datacontext
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
-    assert context.list_expectation_suite_keys() == []
+    assert context.list_expectation_suites() == []
     with pytest.raises(ge_exceptions.ProfilerError):
         profiling_result = context.profile_datasource("rad_datasource", data_assets=["this_asset_doesnot_exist"], profiler=BasicDatasetProfiler, generator_name="this_gen_does_not_exist")
 

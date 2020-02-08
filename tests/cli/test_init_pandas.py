@@ -169,7 +169,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     os.mkdir(validations_dir)
     shutil.rmtree(os.path.join(uncommitted_dir, "data_docs", "local_site"))
     context = DataContext(ge_dir)
-    assert not context.list_expectation_suite_keys()
+    assert not context.list_expectation_suites()
 
     csv_path = os.path.join(project_dir, "data", "Titanic.csv")
     runner = CliRunner(mix_stderr=False)
@@ -203,8 +203,8 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert context.list_datasources() == [
         {"name": "files_datasource", "class_name": "PandasDatasource"}
     ]
-    assert context.list_expectation_suite_keys()[0].expectation_suite_name == "my_suite"
-    assert len(context.list_expectation_suite_keys()) == 1
+    assert context.list_expectation_suites()[0].expectation_suite_name == "my_suite"
+    assert len(context.list_expectation_suites()) == 1
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -339,7 +339,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     _delete_and_recreate_dir(validations_dir)
 
     context = DataContext(ge_dir)
-    assert context.list_expectation_suite_keys() == []
+    assert context.list_expectation_suites() == []
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
