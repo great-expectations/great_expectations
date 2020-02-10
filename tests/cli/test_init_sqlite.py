@@ -77,7 +77,7 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_fil
         {"class_name": "SqlAlchemyDatasource", "name": "titanic"}
     ]
 
-    first_suite = context.list_expectation_suite_keys()[0]
+    first_suite = context.list_expectation_suites()[0]
     suite = context.get_expectation_suite(first_suite.expectation_suite_name)
     assert len(suite.expectations) == 13
 
@@ -199,7 +199,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     _remove_all_datasources(ge_dir)
     os.remove(os.path.join(ge_dir, "expectations", "warning.json"))
     context = DataContext(ge_dir)
-    assert not context.list_expectation_suite_keys()
+    assert not context.list_expectation_suites()
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -234,8 +234,8 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert context.list_datasources() == [
         {"class_name": "SqlAlchemyDatasource", "name": "sqlite"}
     ]
-    assert context.list_expectation_suite_keys()[0].expectation_suite_name == "my_suite"
-    assert len(context.list_expectation_suite_keys()) == 1
+    assert context.list_expectation_suites()[0].expectation_suite_name == "my_suite"
+    assert len(context.list_expectation_suites()) == 1
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -367,7 +367,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     _delete_and_recreate_dir(validations_dir)
 
     context = DataContext(ge_dir)
-    assert context.list_expectation_suite_keys() == []
+    assert context.list_expectation_suites() == []
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -393,4 +393,4 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
     context = DataContext(ge_dir)
-    assert len(context.list_expectation_suite_keys()) == 1
+    assert len(context.list_expectation_suites()) == 1

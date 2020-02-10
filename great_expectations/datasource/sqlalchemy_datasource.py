@@ -54,7 +54,7 @@ class SqlAlchemyDatasource(Datasource):
         # As of 0.9.0, we do not require generators be configured
         #     generators = {
         #         "default": {
-        #             "class_name": "TableGenerator"
+        #             "class_name": "TableBatchKwargsGenerator"
         #         },
         #         "passthrough": {
         #             "class_name": "PassthroughGenerator",

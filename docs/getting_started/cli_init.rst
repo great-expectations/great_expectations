@@ -119,7 +119,7 @@ information is stored in this file.
           class_name: PandasDataset
         generators:
           default:
-            class_name: SubdirReaderGenerator
+            class_name: SubdirReaderBatchKwargsGenerator
             base_directory: ../data
             reader_options:
               sep:
@@ -171,7 +171,7 @@ The corresponding config would be:
           class_name: SqlAlchemyDataset
         generators:
           default:
-            class_name: TableGenerator
+            class_name: TableBatchKwargsGenerator
 
 Note: the SQL credentials you entered are stored in the ``uncommitted/config_variables.yml`` file.
 Note that this file goes in the ``uncommitted/`` directory, which should *NOT* be committed to source control.
