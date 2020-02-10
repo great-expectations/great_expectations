@@ -18,7 +18,7 @@ def test_suite_help_output(caplog,):
     assert (
         """\
 Commands:
-  edit  Generate a Jupyter notebook for editing an existing suite.
+  edit  Generate a Jupyter notebook for editing an existing expectation suite.
   new   Create a new expectation suite."""
           in result.stdout
     )
@@ -208,7 +208,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     caplog, empty_data_context
 ):
     project_dir = empty_data_context.root_directory
-    assert not empty_data_context.list_expectation_suite_keys()
+    assert not empty_data_context.list_expectation_suites()
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -230,7 +230,7 @@ def test_suite_edit_with_non_existent_datasource_name_shows_helpful_error_messag
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context.create_expectation_suite("foo")
-    assert context.list_expectation_suite_keys()[0].expectation_suite_name == "foo"
+    assert context.list_expectation_suites()[0].expectation_suite_name == "foo"
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -356,6 +356,75 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
     assert os.path.isfile(expected_suite_path)
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kwargs_without_datasource(
+    caplog
+):
+    # TODO it appears that batch_kwargs are not validated in the CLI.
+    """
+    Given:
+    - the suite foo exists
+    - the a datasource exists
+    - and the users runs this
+    great_expectations suite edit foo --batch_kwargs '{"path": "data/10k.csv"}'
+
+    Then:
+    - The user should see a nice error and the program halts before notebook compilation.
+    '"""
+    assert False
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kwargs_inlcuding_datasource_in_batch_kwargs(
+    caplog
+):
+    """
+    Given:
+    - the suite foo exists
+    - the a datasource bar exists
+    - and the users runs this
+    great_expectations suite edit foo --batch_kwargs '{"path": "data/10k.csv", "datasource": "bar"}'
+
+    Then:
+    - The user gets a working notebook
+    '"""
+    assert False
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_datasource_arg_and_batch_kwargs(
+    caplog
+):
+    """
+    Given:
+    - the suite foo exists
+    - the a datasource bar exists
+    - and the users runs this
+    great_expectations suite edit foo --datasource bar --batch_kwargs '{"path": "data/10k.csv"}'
+
+    Then:
+    - The user gets a working notebook
+    '"""
+    assert False
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_datasource_arg_and_batch_kwargs(
+    caplog
+):
+    """
+    Given:
+    - the suite foo exists
+    - the a datasource bar exists
+    - and the users runs this
+    great_expectations suite edit foo --datasource bar --batch_kwargs '{"path": "data/10k.csv"}'
+
+    Then:
+    - The user gets a working notebook
+    '"""
+    assert False
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 

@@ -39,25 +39,22 @@ def suite():
 @suite.command(name="edit")
 @click.argument("suite")
 @click.option(
-    "--datasource_name",
+    "--datasource",
     "-ds",
     default=None,
-    help="""The name of the datasource. The generator will list data assets in the datasource 
-(for getting a batch of data to be used a sample when editing the suite)"""
+    help="""The name of the datasource. The datasource must contain a single BatchKwargGenerator that can list data assets in the datasource """
 )
 @click.option(
-    "--generator_name",
+    "--batch_kwarg_generator",
     "-g",
     default=None,
-    help="""The name of the batch kwarg generator configured in the datasource. The generator will list data assets in the datasource 
-(for getting a batch of data to be used a sample when editing the suite)"""
+    help="""The name of the BatchKwargGenerator configured in the datasource. The BatchKwargGenerator will list data assets in the datasource """
 )
 @click.option(
-    "--generator_asset",
+    "--data_asset",
     "-a",
     default=None,
-    help="""The name of data asset. Must be a name listed by the generator  
-(for getting a batch of data to be used a sample when editing the suite)"""
+    help="""The name of data asset. Must be a name listed by the BatchKwargGenerator  """
 )
 @click.option(
     "--batch_kwargs",
@@ -78,25 +75,22 @@ Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"s
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-def suite_edit(suite, datasource_name, generator_name, generator_asset, directory, jupyter, batch_kwargs):
+def suite_edit(suite, datasource, batch_kwarg_generator, data_asset, directory, jupyter, batch_kwargs):
     """
-    Generate a Jupyter notebook for editing an existing suite.
+    Generate a Jupyter notebook for editing an existing expectation suite.
 
-    SUITE argument is required. This is the name you gave to the suite
+    The SUITE argument is required. This is the name you gave to the suite
     when you created it.
 
-    A batch of data is required to edit the suite. It is used as a sample.
+    A batch of data is required to edit the suite, which is used as a sample.
 
-    You can specify it by providing
-    * --datasource_name, --generator_name and  --generator_asset arguments
-    or
-    * --batch_kwargs argument.
+    The edit command will help you specify a batch interactively. Or you can
+    specify them manually by providing either the --batch_kwargs argument or
+    these three args:
 
-    If you do not specify the batch using these arguments, the edit command
-    will help you specify a batch.
+        --datasource, --batch_kwarg_generator, and,  --data_asset arguments
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
-
     """
     try:
         context = DataContext(directory)
@@ -120,18 +114,20 @@ A batch of data is required to edit the suite - let's help you to specify it."""
         )
 
         additional_batch_kwargs = None
-        data_source = select_datasource(context, datasource_name=datasource_name)
+        data_source = select_datasource(context, datasource_name=datasource)
         if data_source is None:
             raise ge_exceptions.DataContextError("No datasources found in the context")
 
         datasource_name = data_source.name
 
-        if generator_name is None or generator_asset is None or batch_kwargs is None:
-            datasource_name, generator_name, generator_asset, batch_kwargs = get_batch_kwargs(context,
-                                                                                               datasource_name=datasource_name,
-                                                                                               generator_name=generator_name,
-                                                                                               generator_asset=generator_asset,
-                                                                                               additional_batch_kwargs=additional_batch_kwargs)
+        if batch_kwarg_generator is None or data_asset is None or batch_kwargs is None:
+            datasource_name, batch_kwarg_generator, data_asset, batch_kwargs = get_batch_kwargs(
+                context,
+                datasource_name=datasource_name,
+                generator_name=batch_kwarg_generator,
+                generator_asset=data_asset,
+                additional_batch_kwargs=additional_batch_kwargs
+            )
 
     notebook_name = "{}.ipynb".format(suite.expectation_suite_name)
 
