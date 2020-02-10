@@ -15,7 +15,7 @@ from great_expectations.exceptions import BatchKwargsError
 logger = logging.getLogger(__name__)
 
 
-class S3Generator(BatchKwargsGenerator):
+class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
     """
     S3 Generator provides support for generating batches of data from an S3 bucket. For the S3 generator, assets must
     be individually defined using a prefix and glob, although several additional configuration parameters are available
@@ -28,7 +28,7 @@ class S3Generator(BatchKwargsGenerator):
             ...
             generators:
               my_s3_generator:
-                class_name: S3Generator
+                class_name: S3GlobReaderBatchKwargsGenerator
                 bucket: my_bucket.my_organization.priv
                 reader_method: parquet  # This will be automatically inferred from suffix where possible, but can be explicitly specified as well
                 reader_options:  # Note that reader options can be specified globally or per-asset
@@ -60,7 +60,7 @@ class S3Generator(BatchKwargsGenerator):
                  reader_method=None,
                  boto3_options=None,
                  max_keys=1000):
-        """Initialize a new S3Generator
+        """Initialize a new S3GlobReaderBatchKwargsGenerator
 
         Args:
             name: the name of the generator
@@ -73,7 +73,7 @@ class S3Generator(BatchKwargsGenerator):
             boto3_options: dictionary of key-value pairs to use when creating boto3 client or resource objects
             max_keys: the maximum number of keys to fetch in a single list_objects request to s3
         """
-        super(S3Generator, self).__init__(name, datasource=datasource)
+        super(S3GlobReaderBatchKwargsGenerator, self).__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = {}
 
@@ -116,7 +116,7 @@ class S3Generator(BatchKwargsGenerator):
 
 
     def _get_iterator(self, generator_asset, reader_options=None, limit=None):
-        logger.debug("Beginning S3Generator _get_iterator for generator_asset: %s" % generator_asset)
+        logger.debug("Beginning S3GlobReaderBatchKwargsGenerator _get_iterator for generator_asset: %s" % generator_asset)
 
         if generator_asset not in self._assets:
             batch_kwargs = {

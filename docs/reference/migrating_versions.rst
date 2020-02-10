@@ -45,7 +45,8 @@ BREAKING:
 - data_asset_name is not used as a parameter in the create_expectation_suite, get_expectation_suite, or get_batch
   commands. Instead, batch_kwargs alone now define the batch to be received, and expectation suite names exist in an
   independent namespace.
-
+- "Generator" classes are now more explicitly named "BatchKwargsGenerator" classes; for example, the S3Generator is
+  now the S3GlobReaderBatchKwargsGenerator
 
 *************************
 Upgrading to 0.8.x

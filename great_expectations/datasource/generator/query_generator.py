@@ -19,13 +19,13 @@ except ImportError:
     logger.debug("Unable to import sqlalchemy.")
 
 
-class QueryGenerator(BatchKwargsGenerator):
+class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     """Produce query-style batch_kwargs from sql files stored on disk
     """
     recognized_batch_parameters = {'query_parameters', 'partition_id'}
 
     def __init__(self, name="default", datasource=None, query_store_backend=None, queries=None):
-        super(QueryGenerator, self).__init__(name=name, datasource=datasource)
+        super(QueryBatchKwargsGenerator, self).__init__(name=name, datasource=datasource)
         root_directory = None
         if query_store_backend is None:
             # We will choose a Tuple store if there is a configured DataContext with a root_directory,
@@ -105,4 +105,4 @@ class QueryGenerator(BatchKwargsGenerator):
         return SqlAlchemyDatasourceQueryBatchKwargs(batch_kwargs)
 
     def get_available_partition_ids(self, generator_asset):
-        raise BatchKwargsError("QueryGenerator cannot identify partitions.", {})
+        raise BatchKwargsError("QueryBatchKwargsGenerator cannot identify partitions.", {})

@@ -23,7 +23,7 @@ def not_empty_datacontext(empty_data_context, filesystem_csv_2):
         class_name="PandasDatasource",
         generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
             }
         },
@@ -383,10 +383,10 @@ def test_context_profiler(not_empty_datacontext):
     context = not_empty_datacontext
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
-    assert context.list_expectation_suite_keys() == []
+    assert context.list_expectation_suites() == []
     context.profile_datasource("rad_datasource", profiler=SampleExpectationsDatasetProfiler)
 
-    assert len(context.list_expectation_suite_keys()) == 1
+    assert len(context.list_expectation_suites()) == 1
 
     expected_suite_name = "rad_datasource.subdir_reader.f1.SampleExpectationsDatasetProfiler"
     expectation_suite = context.get_expectation_suite(expected_suite_name)

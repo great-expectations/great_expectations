@@ -17,7 +17,7 @@ from great_expectations.cli.util import (
     _offer_to_install_new_template,
     cli_message,
 )
-from great_expectations.datasource.generator import ManualGenerator
+from great_expectations.datasource.generator import ManualBatchKwargsGenerator
 from great_expectations.render.renderer.notebook_renderer import (
     NotebookRenderer,
 )
