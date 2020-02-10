@@ -208,7 +208,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     caplog, empty_data_context
 ):
     project_dir = empty_data_context.root_directory
-    assert not empty_data_context.list_expectation_suite_keys()
+    assert not empty_data_context.list_expectation_suites()
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -230,7 +230,7 @@ def test_suite_edit_with_non_existent_datasource_name_shows_helpful_error_messag
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context.create_expectation_suite("foo")
-    assert context.list_expectation_suite_keys()[0].expectation_suite_name == "foo"
+    assert context.list_expectation_suites()[0].expectation_suite_name == "foo"
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
