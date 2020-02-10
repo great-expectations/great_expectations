@@ -69,7 +69,7 @@ def test_get_available_data_asset_names_with_one_datasource_including_a_single_g
                            class_name="PandasDatasource",
                            generators={
                              "subdir_reader": {
-                                 "class_name": "SubdirReaderGenerator",
+                                 "class_name": "SubdirReaderBatchKwargsGenerator",
                                  "base_directory": str(filesystem_csv)
                              }
                            }
@@ -103,7 +103,7 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
     context.add_datasource(
         "first",
         class_name="SqlAlchemyDatasource",
-        generators={"foo": {"class_name": "TableGenerator", }},
+        generators={"foo": {"class_name": "TableBatchKwargsGenerator", }},
         **connection_kwargs
     )
     context.add_datasource(
@@ -114,7 +114,7 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
     context.add_datasource(
         "third",
         class_name="SqlAlchemyDatasource",
-        generators={"bar": {"class_name": "TableGenerator", }},
+        generators={"bar": {"class_name": "TableBatchKwargsGenerator", }},
         **connection_kwargs
     )
 
@@ -130,7 +130,7 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
 
 
 def test_list_expectation_suite_keys(data_context):
-    assert data_context.list_expectation_suite_keys() == [
+    assert data_context.list_expectation_suites() == [
         ExpectationSuiteIdentifier(
             expectation_suite_name="my_dag_node.default"
         )
@@ -280,7 +280,7 @@ project_path/
                            class_name="PandasDatasource",
                            generators={
                              "subdir_reader": {
-                                 "class_name": "SubdirReaderGenerator",
+                                 "class_name": "SubdirReaderBatchKwargsGenerator",
                                  "base_directory": os.path.join(project_dir, "data/titanic/")
                              }
                            }
@@ -291,7 +291,7 @@ project_path/
                            class_name="PandasDatasource",
                            generators={
                                "subdir_reader": {
-                                   "class_name": "SubdirReaderGenerator",
+                                   "class_name": "SubdirReaderBatchKwargsGenerator",
                                    "base_directory": os.path.join(project_dir, "data/random/")
                                }
                            }
@@ -568,7 +568,7 @@ def test_data_context_updates_expectation_suite_names(data_context):
     # A data context should update the data_asset_name and expectation_suite_name of expectation suites
     # that it creates when it saves them.
 
-    expectation_suites = data_context.list_expectation_suite_keys()
+    expectation_suites = data_context.list_expectation_suites()
 
     # We should have a single expectation suite defined
     assert len(expectation_suites) == 1
@@ -709,7 +709,7 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     ge_dir = context.root_directory
     context.add_datasource("arthur", class_name="PandasDatasource")
     context.create_expectation_suite("dent")
-    assert len(context.list_expectation_suite_keys()) == 1
+    assert len(context.list_expectation_suites()) == 1
 
     assert DataContext.is_project_initialized(ge_dir) == True
 
@@ -720,7 +720,7 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     context = empty_context
     ge_dir = context.root_directory
     context.add_datasource("arthur", class_name="PandasDatasource")
-    assert len(context.list_expectation_suite_keys()) == 0
+    assert len(context.list_expectation_suites()) == 0
 
     assert DataContext.is_project_initialized(ge_dir) == False
 

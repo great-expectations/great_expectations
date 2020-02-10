@@ -39,7 +39,7 @@ class BatchKwargsGenerator(object):
             # and "data_asset_2" keys. The file_logs asset will be partitioned according to the match group
             # defined in partition_regex
             default:
-              class_name: GlobReaderGenerator
+              class_name: GlobReaderBatchKwargsGenerator
               base_directory: /var/logs
               reader_options:
                 sep: "
@@ -56,7 +56,7 @@ class BatchKwargsGenerator(object):
             # This generator will create one data asset per subdirectory in /data
             # Each asset will have partitions corresponding to the filenames in that subdirectory
             default:
-              class_name: SubdirReaderGenerator
+              class_name: SubdirReaderBatchKwargsGenerator
               reader_options:
                 sep: "
               base_directory: /data
@@ -67,7 +67,7 @@ class BatchKwargsGenerator(object):
             # This generator will search for a file named with the name of the requested generator asset and the
             # .sql suffix to open with a query to use to generate data
              default:
-                class_name: QueryGenerator
+                class_name: QueryBatchKwargsGenerator
 
 
     """

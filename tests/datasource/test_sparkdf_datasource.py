@@ -51,7 +51,7 @@ def test_sparkdf_datasource_custom_data_asset(data_context, test_folder_connecti
                                 data_asset_type=data_asset_type_config,
                                 generators={
     "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
+        "class_name": "SubdirReaderBatchKwargsGenerator",
         "base_directory": test_folder_connection_path
     }
 }
@@ -94,7 +94,7 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory):
     data_context.add_datasource(name, class_name=class_name,
                                 generators={
                                     "default": {
-                                        "class_name": "SubdirReaderGenerator",
+                                        "class_name": "SubdirReaderBatchKwargsGenerator",
                                         "base_directory": str(base_dir)
                                     }
                                 }
@@ -112,7 +112,7 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory):
                                 class_name=class_name,
                                 generators={
                                     "default": {
-                                        "class_name": "SubdirReaderGenerator",
+                                        "class_name": "SubdirReaderBatchKwargsGenerator",
                                         "reader_options":
                                             {
                                                 "sep": "|",
@@ -138,7 +138,7 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
     assert spark_session  # Ensure a sparksession exists
     datasource = SparkDFDatasource('SparkParquet', generators={
     "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
+        "class_name": "SubdirReaderBatchKwargsGenerator",
         "base_directory": test_parquet_folder_connection_path
     }
 }
@@ -171,7 +171,7 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path):
     pyspark_skip = pytest.importorskip("pyspark")
     datasource = SparkDFDatasource('SparkParquet',
                                    generators={"subdir_reader": {
-                                        "class_name": "SubdirReaderGenerator",
+                                        "class_name": "SubdirReaderBatchKwargsGenerator",
                                         "base_directory": test_folder_connection_path
                                         }
                                     }
@@ -225,7 +225,7 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_sparkdf_datasource"))
     datasource = SparkDFDatasource('mysparksource', generators={
         "subdir_reader": {
-            "class_name": "SubdirReaderGenerator",
+            "class_name": "SubdirReaderBatchKwargsGenerator",
             "base_directory": basepath
         }
         }

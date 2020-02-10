@@ -23,7 +23,7 @@ datasources:
       class_name: SqlAlchemyDataset
     generators:
       default:
-        class_name: TableGenerator
+        class_name: TableBatchKwargsGenerator
 
 # This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes

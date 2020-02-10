@@ -24,7 +24,7 @@ from great_expectations.datasource import (
     SqlAlchemyDatasource,
 )
 from great_expectations.datasource.generator import (
-    ManualGenerator,
+    ManualBatchKwargsGenerator,
 )
 from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.profile.basic_dataset_profiler import (
@@ -33,7 +33,7 @@ from great_expectations.profile.basic_dataset_profiler import (
 
 from great_expectations.validator.validator import Validator
 from great_expectations.core import ExpectationSuite
-from great_expectations.datasource.generator.table_generator import TableGenerator
+from great_expectations.datasource.generator.table_generator import TableBatchKwargsGenerator
 from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ DATASOURCE_TYPE_BY_DATASOURCE_CLASS = {
     "SqlAlchemyDatasource": DatasourceTypes.SQL,
 }
 
-MANUAL_GENERATOR_CLASSES = (ManualGenerator)
+MANUAL_GENERATOR_CLASSES = (ManualBatchKwargsGenerator)
 
 
 class SupportedDatabases(enum.Enum):
@@ -303,7 +303,7 @@ def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_
 
         configuration = PandasDatasource.build_configuration(generators={
     "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
+        "class_name": "SubdirReaderBatchKwargsGenerator",
         "base_directory": os.path.join("..", path)
     }
 }
@@ -632,7 +632,7 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
 
         configuration = SparkDFDatasource.build_configuration(generators={
     "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
+        "class_name": "SubdirReaderBatchKwargsGenerator",
         "base_directory": os.path.join("..", path)
     }
 }
@@ -1023,7 +1023,7 @@ Enter an SQL query
 
     datasource = context.get_datasource(datasource_name)
 
-    temp_generator = TableGenerator(name="temp", datasource=datasource)
+    temp_generator = TableBatchKwargsGenerator(name="temp", datasource=datasource)
 
     available_data_asset_names = temp_generator.get_available_data_asset_names()["names"]
     available_data_asset_names_str = ["{} ({})".format(name[0], name[1]) for name in

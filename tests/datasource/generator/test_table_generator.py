@@ -3,11 +3,11 @@ import pytest
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
-from great_expectations.datasource.generator import TableGenerator
+from great_expectations.datasource.generator import TableBatchKwargsGenerator
 
 
 def test_basic_operation(basic_sqlalchemy_datasource):
-    table_generator = TableGenerator(
+    table_generator = TableBatchKwargsGenerator(
         datasource=basic_sqlalchemy_datasource,
         assets={
             "my_asset": {
@@ -56,7 +56,7 @@ def test_basic_operation(basic_sqlalchemy_datasource):
 
 
 def test_db_introspection(postgresql_sqlalchemy_datasource, caplog):
-    table_generator = TableGenerator(datasource=postgresql_sqlalchemy_datasource)
+    table_generator = TableBatchKwargsGenerator(datasource=postgresql_sqlalchemy_datasource)
 
     # Get a list of tables visible inside the defined database
     assets = table_generator.get_available_data_asset_names()
@@ -89,7 +89,7 @@ def test_db_introspection(postgresql_sqlalchemy_datasource, caplog):
 def test_query_generator_view(sqlite_view_engine):
     datasource = SqlAlchemyDatasource(engine=sqlite_view_engine, generators={
         "table": {
-            "class_name": "TableGenerator"
+            "class_name": "TableBatchKwargsGenerator"
         }
     })  # Build a datasource with a queries generator to introspect our database with a view
     names = set(datasource.get_available_data_asset_names()["table"]["names"])

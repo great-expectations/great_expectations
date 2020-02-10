@@ -35,7 +35,7 @@ def test_folder_connection_path(tmp_path_factory):
 def test_standalone_pandas_datasource(test_folder_connection_path):
     datasource = PandasDatasource('PandasCSV', generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": test_folder_connection_path
             }
         }
@@ -78,7 +78,7 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
     # data_context.add_datasource(name, type_, base_directory=str(basedir))
     data_context.add_datasource(name, class_name=class_name, generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(basedir)
             }
         }
@@ -99,7 +99,7 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
 
     # We should have added a default generator built from the default config
     assert data_context_file_config["datasources"][name]["generators"]["subdir_reader"]["class_name"] == \
-        "SubdirReaderGenerator"
+        "SubdirReaderBatchKwargsGenerator"
 
 
 def test_pandas_datasource_custom_data_asset(data_context, test_folder_connection_path):
@@ -115,7 +115,7 @@ def test_pandas_datasource_custom_data_asset(data_context, test_folder_connectio
                                 data_asset_type=data_asset_type_config,
                                 generators={
                                     "subdir_reader": {
-                                        "class_name": "SubdirReaderGenerator",
+                                        "class_name": "SubdirReaderBatchKwargsGenerator",
                                         "base_directory": str(test_folder_connection_path)
                                     }
                                 }
@@ -149,7 +149,7 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
                                 reader_options={"encoding": "utf-8"},
                                 generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(basedir)
             }
         }
@@ -166,7 +166,7 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
                                 class_name="PandasDatasource",
                                 generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(basedir)
             }
         }
@@ -181,7 +181,7 @@ def test_pandas_source_read_csv(data_context, tmp_path_factory):
                                 class_name="PandasDatasource",
                                 generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(basedir),
                 "reader_options": {"encoding": "utf-16"},
             }
@@ -215,7 +215,7 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_pandas_datasource"))
     datasource = PandasDatasource('mypandassource', generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": basepath
             }
         }
@@ -251,7 +251,7 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
 def test_read_limit(test_folder_connection_path):
     datasource = PandasDatasource('PandasCSV', generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": test_folder_connection_path
             }
         }

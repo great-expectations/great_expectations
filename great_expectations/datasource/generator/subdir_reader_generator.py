@@ -10,17 +10,17 @@ logger = logging.getLogger(__name__)
 KNOWN_EXTENSIONS = ['.csv', '.tsv', '.parquet', '.xls', '.xlsx', '.json', '.csv.gz', '.tsv.gz']
 
 
-class SubdirReaderGenerator(BatchKwargsGenerator):
-    """The SubdirReaderGenerator inspects a filesystem and produces path-based batch_kwargs.
+class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
+    """The SubdirReaderBatchKwargsGenerator inspects a filesystem and produces path-based batch_kwargs.
 
-    SubdirReaderGenerator recognizes generator_assets using two criteria:
+    SubdirReaderBatchKwargsGenerator recognizes generator_assets using two criteria:
       - for files directly in 'base_directory' with recognized extensions (.csv, .tsv, .parquet, .xls, .xlsx, .json),
         it uses the name of the file without the extension
       - for other files or directories in 'base_directory', is uses the file or directory name
 
-    SubdirReaderGenerator sees all files inside a directory of base_directory as batches of one datasource.
+    SubdirReaderBatchKwargsGenerator sees all files inside a directory of base_directory as batches of one datasource.
 
-    SubdirReaderGenerator can also include configured reader_options which will be added to batch_kwargs generated
+    SubdirReaderBatchKwargsGenerator can also include configured reader_options which will be added to batch_kwargs generated
     by this generator.
     """
     _default_reader_options = {}
@@ -32,7 +32,7 @@ class SubdirReaderGenerator(BatchKwargsGenerator):
                  reader_options=None,
                  known_extensions=None,
                  reader_method=None):
-        super(SubdirReaderGenerator, self).__init__(name, datasource=datasource)
+        super(SubdirReaderBatchKwargsGenerator, self).__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = self._default_reader_options
 
@@ -149,7 +149,7 @@ class SubdirReaderGenerator(BatchKwargsGenerator):
         return valid_options
 
     def _get_iterator(self, generator_asset, reader_options=None, limit=None):
-        logger.debug("Beginning SubdirReaderGenerator _get_iterator for generator_asset: %s" % generator_asset)
+        logger.debug("Beginning SubdirReaderBatchKwargsGenerator _get_iterator for generator_asset: %s" % generator_asset)
         # If the generator_asset is a file, then return the path.
         # Otherwise, use files in a subdir as batches
         if os.path.isdir(os.path.join(self.base_directory, generator_asset)):

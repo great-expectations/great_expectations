@@ -56,7 +56,7 @@ class SparkDFDatasource(Datasource):
         #     reader_options = kwargs.pop("reader_options", {})
         #     generators = {
         #         "default": {
-        #             "class_name": "SubdirReaderGenerator",
+        #             "class_name": "SubdirReaderBatchKwargsGenerator",
         #             "base_directory": base_directory,
         #             "reader_options": reader_options
         #         },
