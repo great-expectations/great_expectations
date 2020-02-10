@@ -18,7 +18,7 @@ def test_suite_help_output(caplog,):
     assert (
         """\
 Commands:
-  edit  Generate a Jupyter notebook for editing an existing suite.
+  edit  Generate a Jupyter notebook for editing an existing expectation suite.
   new   Create a new expectation suite."""
           in result.stdout
     )
