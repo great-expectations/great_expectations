@@ -368,10 +368,61 @@ def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kw
     - the suite foo exists
     - the a datasource exists
     - and the users runs this
-    great_expectations suite edit foo --batch_kwargs '{"path": "/Users/taylor/Desktop/data/10k.csv"}
+    great_expectations suite edit foo --batch_kwargs '{"path": "data/10k.csv"}'
 
     Then:
-    - The user should see an error before notebook compilation.
+    - The user should see a nice error and the program halts before notebook compilation.
+    '"""
+    assert False
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kwargs_inlcuding_datasource_in_batch_kwargs(
+    caplog
+):
+    """
+    Given:
+    - the suite foo exists
+    - the a datasource bar exists
+    - and the users runs this
+    great_expectations suite edit foo --batch_kwargs '{"path": "data/10k.csv", "datasource": "bar"}'
+
+    Then:
+    - The user gets a working notebook
+    '"""
+    assert False
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_datasource_arg_and_batch_kwargs(
+    caplog
+):
+    """
+    Given:
+    - the suite foo exists
+    - the a datasource bar exists
+    - and the users runs this
+    great_expectations suite edit foo --datasource bar --batch_kwargs '{"path": "data/10k.csv"}'
+
+    Then:
+    - The user gets a working notebook
+    '"""
+    assert False
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_datasource_arg_and_batch_kwargs(
+    caplog
+):
+    """
+    Given:
+    - the suite foo exists
+    - the a datasource bar exists
+    - and the users runs this
+    great_expectations suite edit foo --datasource bar --batch_kwargs '{"path": "data/10k.csv"}'
+
+    Then:
+    - The user gets a working notebook
     '"""
     assert False
     assert_no_logging_messages_or_tracebacks(caplog, result)
