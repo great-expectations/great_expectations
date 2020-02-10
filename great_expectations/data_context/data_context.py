@@ -149,6 +149,19 @@ class BaseDataContext(object):
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
 
+    def _build_store(self, store_name, store_config):
+        new_store = instantiate_class_from_config(
+            config=store_config,
+            runtime_environment={
+                "root_directory": self.root_directory,
+            },
+            config_defaults={
+                "module_name": "great_expectations.data_context.store"
+            }
+        )
+        self._stores[store_name] = new_store
+        return new_store
+
     def _init_stores(self, store_configs):
         """Initialize all Stores for this DataContext.
 
@@ -168,10 +181,7 @@ class BaseDataContext(object):
         """
 
         for store_name, store_config in store_configs.items():
-            self.add_store(
-                store_name,
-                store_config
-            )
+            self._build_store(store_name, store_config)
 
     def add_store(self, store_name, store_config):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
@@ -185,17 +195,7 @@ class BaseDataContext(object):
         """
 
         self._project_config["stores"][store_name] = store_config
-        new_store = instantiate_class_from_config(
-            config=self._project_config_with_variables_substituted["stores"][store_name],
-            runtime_environment={
-                "root_directory": self.root_directory,
-            },
-            config_defaults={
-                "module_name": "great_expectations.data_context.store"
-            }
-        )
-        self._stores[store_name] = new_store
-        return new_store
+        return self._build_store(store_name, store_config)
 
     def add_validation_operator(self, validation_operator_name, validation_operator_config):
         """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
