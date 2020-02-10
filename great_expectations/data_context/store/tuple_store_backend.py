@@ -1,6 +1,7 @@
 import os
 import random
 import re
+import logging
 # PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 from abc import ABCMeta
 
@@ -8,6 +9,8 @@ from six import string_types
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.util import safe_mmkdir
+
+logger = logging.getLogger(__name__)
 
 
 class TupleStoreBackend(StoreBackend):
@@ -329,7 +332,17 @@ class TupleS3StoreBackend(TupleStoreBackend):
         import boto3
         s3 = boto3.client('s3')
 
-        for s3_object_info in s3.list_objects(Bucket=self.bucket, Prefix=self.prefix)['Contents']:
+        s3_objects = s3.list_objects(Bucket=self.bucket, Prefix=self.prefix)
+        if "Contents" in s3_objects:
+            objects = s3_objects["Contents"]
+        elif "CommonPrefixes" in s3_objects:
+            logger.warning("TupleS3StoreBackend returned CommonPrefixes, but delimiter should not have been set.")
+            objects = []
+        else:
+            # No objects found in store
+            objects = []
+
+        for s3_object_info in objects:
             s3_object_key = s3_object_info['Key']
             s3_object_key = os.path.relpath(
                 s3_object_key,
