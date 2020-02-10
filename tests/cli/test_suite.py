@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
 import os
 
 import pytest
@@ -236,7 +237,7 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
     context.add_datasource("source", class_name="PandasDatasource")
 
     runner = CliRunner(mix_stderr=False)
-    batch_kwargs = '{\"path\": \"fake.csv\", \"datasource\": \"source\"}'
+    batch_kwargs = '{\"table\": \"fake\", \"datasource\": \"source\"}'
     result = runner.invoke(
         cli,
         ["suite", "edit", "foo", "-d", project_dir, "--batch_kwargs", batch_kwargs],
@@ -269,7 +270,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_suite_edit_with_non_existent_datasource_name_shows_helpful_error_message(
+def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     caplog, empty_data_context
 ):
     project_dir = empty_data_context.root_directory
@@ -280,12 +281,10 @@ def test_suite_edit_with_non_existent_datasource_name_shows_helpful_error_messag
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite edit foo -d {} --datasource_name not_real".format(project_dir),
+        "suite edit foo -d {} --datasource not_real".format(project_dir),
         catch_exceptions=False,
     )
-    print(result.output)
     assert result.exit_code == 1
-    # TODO this may not be the most helpful error message, but it is a start
     assert (
         "Unable to load datasource not_real -- no configuration found or invalid configuration."
         in result.output
@@ -311,22 +310,23 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args(
     """
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     os.chdir(root_dir)
-    context = DataContext(root_dir)
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
         input="2\n1\n1\n\n",
+        catch_exceptions=False
     )
     stdout = result.stdout
     assert result.exit_code == 0
     assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "edit", "foo_suite", "-d", root_dir, "--no-jupyter"],
         input="2\n1\n1\n\n",
+        catch_exceptions=False
     )
 
     assert result.exit_code == 0
@@ -364,35 +364,32 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     configured. We choose to use the generator and select a generator asset from the list.
     """
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
-    os.chdir(root_dir)
-    context = DataContext(root_dir)
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
         input="2\n1\n1\n\n",
+        catch_exceptions=False
     )
     stdout = result.stdout
     assert result.exit_code == 0
     assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
 
-    runner = CliRunner()
+    batch_kwargs = {"datasource": "random", "path": str(os.path.join(os.path.abspath(os.path.join(root_dir, os.pardir)), "data", "random", "f1.csv"))}
+    batch_kwargs_arg_str = json.dumps(batch_kwargs)
 
-    import json
-
-    batch_kwargs_arg_str = json.dumps({"datasource": "random", "path": "{0:s}".format(os.path.join(os.path.abspath(os.path.join(root_dir, os.pardir)), "data", "random", "f1.csv"))})
-
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "edit", "foo_suite", "-d", root_dir, "--no-jupyter", "--batch_kwargs", batch_kwargs_arg_str]
+        ["suite", "edit", "foo_suite", "-d", root_dir, "--no-jupyter", "--batch_kwargs", batch_kwargs_arg_str],
+        catch_exceptions=False
     )
+    stdout = result.stdout
 
     assert result.exit_code == 0
-    stdout = result.stdout
     assert "Select data source" not in stdout
     assert "Which data would you like to use" not in stdout
     assert "To continue editing this suite, run" in stdout
-
 
     expected_notebook_path = os.path.join(
         root_dir, "uncommitted", "foo_suite.ipynb"
@@ -404,11 +401,10 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(reason="not implemented")
+@pytest.mark.skip(reason="not implemented")
 def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kwargs_without_datasource(
     caplog
 ):
-    # TODO it appears that batch_kwargs are not validated in the CLI.
     """
     Given:
     - the suite foo exists
@@ -422,7 +418,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kw
     assert False
 
 
-@pytest.mark.xfail(reason="not implemented")
+@pytest.mark.skip(reason="not implemented")
 def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kwargs_inlcuding_datasource_in_batch_kwargs(
     caplog
 ):
@@ -439,7 +435,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kw
     assert False
 
 
-@pytest.mark.xfail(reason="not implemented")
+@pytest.mark.skip(reason="not implemented")
 def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_datasource_arg_and_batch_kwargs(
     caplog
 ):
@@ -501,11 +497,12 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args(
     root_dir = project_root_dir
     os.chdir(root_dir)
     context = DataContext(root_dir)
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "new", "-d", root_dir, "--no-view"],
         input="{0:s}\nmy_new_suite\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
+        catch_exceptions=False
     )
     stdout = result.stdout
 
@@ -513,11 +510,12 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args(
     assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
 
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "edit", "my_new_suite", "-d", root_dir, "--no-jupyter"],
         input="{0:s}\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
+        catch_exceptions=False
     )
 
     assert result.exit_code == 0
