@@ -44,7 +44,7 @@ def test_preserve_comments_in_yml_after_adding_datasource(data_context):
         class_name="PandasDatasource",
         generators={
     "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
+        "class_name": "SubdirReaderBatchKwargsGenerator",
         "base_directory": "../data",
     }
 }
@@ -66,7 +66,7 @@ datasources:
     generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
-        class_name: SubdirReaderGenerator
+        class_name: SubdirReaderBatchKwargsGenerator
         base_directory: ../data
         reader_options:
           sep:
@@ -78,7 +78,7 @@ datasources:
       class_name: PandasDataset
     generators:
       default:
-        class_name: SubdirReaderGenerator
+        class_name: SubdirReaderBatchKwargsGenerator
         base_directory: ../data
         reader_options:
           sep:

@@ -47,10 +47,10 @@ class AssetConfiguration(object):
 assetConfigurationSchema = AssetConfigurationSchema()
 
 
-class TableGenerator(BatchKwargsGenerator):
+class TableBatchKwargsGenerator(BatchKwargsGenerator):
     """Provide access to already materialized tables or views in a database.
 
-    TableGenerator can be used to define specific data asset names that take and substitute parameters,
+    TableBatchKwargsGenerator can be used to define specific data asset names that take and substitute parameters,
     for example to support referring to the same data asset but with different schemas depending on provided
     batch_kwargs.
 
@@ -58,7 +58,7 @@ class TableGenerator(BatchKwargsGenerator):
     following configurations::
 
         my_generator:
-          class_name: TableGenerator
+          class_name: TableBatchKwargsGenerator
           assets:
             my_table:
               schema: $schema
@@ -72,7 +72,7 @@ class TableGenerator(BatchKwargsGenerator):
     recognized_batch_parameters = {'name', 'limit', 'offset', 'query_parameters'}
 
     def __init__(self, name="default", datasource=None, assets=None):
-        super(TableGenerator, self).__init__(name=name, datasource=datasource)
+        super(TableBatchKwargsGenerator, self).__init__(name=name, datasource=datasource)
         if not assets:
             assets = {}
         try:
@@ -81,7 +81,7 @@ class TableGenerator(BatchKwargsGenerator):
                 (asset_name, asset_config) in assets.items()
             }
         except ValidationError as err:
-            raise GreatExpectationsError("Unable to load asset configuration in TableGenerator '%s': "
+            raise GreatExpectationsError("Unable to load asset configuration in TableBatchKwargsGenerator '%s': "
                                          "validation error: %s." % (name, str(err)))
 
         if datasource is not None:
@@ -203,6 +203,6 @@ class TableGenerator(BatchKwargsGenerator):
         )
 
     def get_available_partition_ids(self, generator_asset):
-        raise BatchKwargsError("TableGenerator cannot identify partitions, however any existing table may"
+        raise BatchKwargsError("TableBatchKwargsGenerator cannot identify partitions, however any existing table may"
                                "already be referenced by accessing a generator_asset with the name of the "
                                "table or of the form SCHEMA.TABLE", {})

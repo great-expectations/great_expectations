@@ -3,9 +3,7 @@ import glob
 import re
 import datetime
 import logging
-import warnings
 
-from six import string_types
 
 from great_expectations.datasource.generator.batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.datasource.types import PathBatchKwargs
@@ -14,8 +12,8 @@ from great_expectations.exceptions import BatchKwargsError
 logger = logging.getLogger(__name__)
 
 
-class GlobReaderGenerator(BatchKwargsGenerator):
-    r"""GlobReaderGenerator processes files in a directory according to glob patterns to produce batches of data.
+class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
+    r"""GlobReaderBatchKwargsGenerator processes files in a directory according to glob patterns to produce batches of data.
 
     A more interesting asset_glob might look like the following::
 
@@ -29,13 +27,13 @@ class GlobReaderGenerator(BatchKwargsGenerator):
     forward slash, period, or null separated) will be identified by a partition_id equal to just the date portion of
     their name.
 
-    A fully configured GlobReaderGenerator in yml might look like the following::
+    A fully configured GlobReaderBatchKwargsGenerator in yml might look like the following::
 
         my_datasource:
           class_name: PandasDatasource
           generators:
             my_generator:
-              class_name: GlobReaderGenerator
+              class_name: GlobReaderBatchKwargsGenerator
               base_directory: /var/log
               reader_options:
                 sep: %
@@ -55,8 +53,8 @@ class GlobReaderGenerator(BatchKwargsGenerator):
                  reader_options=None,
                  asset_globs=None,
                  reader_method=None):
-        logger.debug("Constructing GlobReaderGenerator {!r}".format(name))
-        super(GlobReaderGenerator, self).__init__(name, datasource=datasource)
+        logger.debug("Constructing GlobReaderBatchKwargsGenerator {!r}".format(name))
+        super(GlobReaderBatchKwargsGenerator, self).__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = {}
 

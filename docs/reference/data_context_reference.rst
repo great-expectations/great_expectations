@@ -50,7 +50,7 @@ represent two public datasets available from the resource.
       class_name: PandasDatasource
       generators:
         s3:
-          class_name: S3Generator
+          class_name: S3GlobReaderBatchKwargsGenerator
           bucket: nyc-tlc
           delimiter: '/'
           reader_options:
@@ -78,7 +78,7 @@ Here is an example for a SQL based pipeline:
           class_name: SqlAlchemyDataset
         generators:
           default:
-            class_name: TableGenerator
+            class_name: TableBatchKwargsGenerator
 
 Note the ``credentials`` key references a corresponding key in the
 ``config_variables.yml`` file which is not in source control that would look
@@ -283,7 +283,7 @@ new directory or use this template:
           class_name: SqlAlchemyDataset
         generators:
           default:
-            class_name: TableGenerator
+            class_name: TableBatchKwargsGenerator
 
     # This config file supports variable substitution which enables: 1) keeping
     # secrets out of source control & 2) environment-based configuration changes

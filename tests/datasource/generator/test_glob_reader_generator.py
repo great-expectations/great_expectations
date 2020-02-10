@@ -5,7 +5,7 @@ try:
 except ImportError:
     import mock
 
-from great_expectations.datasource.generator import GlobReaderGenerator
+from great_expectations.datasource.generator import GlobReaderBatchKwargsGenerator
 from great_expectations.datasource.types import (
     PathBatchKwargs,
     PandasDatasourceBatchKwargs,
@@ -23,8 +23,8 @@ def mocked_glob_kwargs(basic_pandas_datasource):
             "match_group_id": 1
         }
     }
-    glob_generator = GlobReaderGenerator("test_generator",
-                                         datasource=basic_pandas_datasource, asset_globs=test_asset_globs)
+    glob_generator = GlobReaderBatchKwargsGenerator("test_generator",
+                                                    datasource=basic_pandas_datasource, asset_globs=test_asset_globs)
 
     with mock.patch("glob.glob") as mock_glob:
         mock_glob_match = [
@@ -51,14 +51,14 @@ def test_glob_reader_generator_returns_typed_kwargs(mocked_glob_kwargs):
 
 def test_glob_reader_path_partitioning(mocked_glob_kwargs):
     kwargs = mocked_glob_kwargs
-    # GlobReaderGenerator uses partition_regex to extract partitions from filenames
+    # GlobReaderBatchKwargsGenerator uses partition_regex to extract partitions from filenames
     assert len(kwargs) == 5
     assert kwargs[0]["path"] == "20190101__my_data.csv"
     assert len(kwargs[0].keys()) == 2
 
 
 def test_glob_reader_generator_partitioning(basic_pandas_datasource):
-    glob_generator = GlobReaderGenerator(
+    glob_generator = GlobReaderBatchKwargsGenerator(
         "test_generator",
         datasource=basic_pandas_datasource,
         base_directory="/data/project/",
@@ -202,7 +202,7 @@ def test_glob_reader_generator_customize_partitioning(basic_pandas_datasource):
     from dateutil.parser import parse as parse
 
     # We can subclass the generator to change the way that it builds partitions
-    class DateutilPartitioningGlobReaderGenerator(GlobReaderGenerator):
+    class DateutilPartitioningGlobReaderGenerator(GlobReaderBatchKwargsGenerator):
         def _partitioner(self, path, glob_):
             return parse(path, fuzzy=True).strftime("%Y-%m-%d")
 

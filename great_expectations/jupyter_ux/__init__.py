@@ -119,7 +119,7 @@ def setup_notebook_logging(logger=None):
     # warnings.filterwarnings('ignore')
 
 
-def list_available_data_asset_names(context, data_source_name=None):
+def show_available_data_asset_names(context, data_source_name=None):
     """ List asset names found in the current context. """
     # TODO: Needs tests.
     styles = """
@@ -138,7 +138,7 @@ def list_available_data_asset_names(context, data_source_name=None):
     """
 
     print("Inspecting your data sources. This may take a moment...")
-    expectation_suite_keys = context.list_expectation_suite_keys()
+    expectation_suite_keys = context.list_expectation_suites()
     datasources = context.list_datasources()
     html = ""
     for datasource in datasources:
