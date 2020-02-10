@@ -1,6 +1,6 @@
 from .actions import (
     ValidationAction,
-    ValidationAction,
+    StoreMetricsAction,
     NoOpAction,
     StoreAction,
     StoreEvaluationParametersAction,
