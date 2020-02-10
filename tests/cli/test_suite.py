@@ -204,6 +204,26 @@ def test_suite_edit_without_suite_name_raises_error(caplog):
     assert 'Error: Missing argument "SUITE".' in result.stderr
 
 
+def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
+    caplog,
+    empty_data_context
+):
+    project_dir = empty_data_context.root_directory
+    context = DataContext(project_dir)
+    context.create_expectation_suite("foo")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["suite", "edit", "foo", "-d", project_dir, "--batch_kwargs", "'{foobar}'"],
+        catch_exceptions=False
+    )
+    stdout = result.output
+    assert result.exit_code == 1
+    assert 'Please check that your batch_kwargs are valid JSON.'
+    assert 'Expecting value' in stdout
+
+
 def test_suite_edit_with_non_existent_suite_name_raises_error(
     caplog, empty_data_context
 ):
@@ -359,6 +379,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(reason="not implemented")
 def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kwargs_without_datasource(
     caplog
 ):
@@ -374,9 +395,9 @@ def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kw
     - The user should see a nice error and the program halts before notebook compilation.
     '"""
     assert False
-    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(reason="not implemented")
 def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kwargs_inlcuding_datasource_in_batch_kwargs(
     caplog
 ):
@@ -391,9 +412,9 @@ def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kw
     - The user gets a working notebook
     '"""
     assert False
-    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(reason="not implemented")
 def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_datasource_arg_and_batch_kwargs(
     caplog
 ):
@@ -408,9 +429,9 @@ def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_datasour
     - The user gets a working notebook
     '"""
     assert False
-    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(reason="not implemented")
 def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_datasource_arg_and_batch_kwargs(
     caplog
 ):
@@ -425,7 +446,6 @@ def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_datasour
     - The user gets a working notebook
     '"""
     assert False
-    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_suite_edit_one_datasources_no_generator_with_no_additional_args(
