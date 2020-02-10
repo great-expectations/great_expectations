@@ -17,7 +17,7 @@ from great_expectations.cli.util import (
     _offer_to_install_new_template,
     cli_message,
 )
-from great_expectations.datasource.generator import ManualBatchKwargsGenerator
+from great_expectations.data_asset import DataAsset
 from great_expectations.render.renderer.notebook_renderer import (
     NotebookRenderer,
 )
@@ -91,12 +91,16 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
     if batch_kwargs:
         try:
             batch_kwargs = json.loads(batch_kwargs)
+            _batch = context.get_batch(batch_kwargs, suite)
+            assert isinstance(_batch, DataAsset)
         except json.decoder.JSONDecodeError as je:
             cli_message("<red>Please check that your batch_kwargs are valid JSON.\n{}</red>".format(je))
             exit(1)
+        except ge_exceptions.DataContextError:
+            cli_message("<red>Please check that your batch_kwargs are able to load a batch.</red>")
+            exit(1)
     else:
-        cli_message(
-            """
+        cli_message("""
 A batch of data is required to edit the suite - let's help you to specify it."""
         )
 
