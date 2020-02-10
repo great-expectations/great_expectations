@@ -142,6 +142,10 @@ def test_TupleS3StoreBackend():
         prefix=prefix,
     )
 
+    # We should be able to list keys, even when empty
+    keys = my_store.list_keys()
+    assert len(keys) == 0
+
     my_store.set(("AAA",), "aaa", content_type='text/html; charset=utf-8')
     assert my_store.get(("AAA",)) == 'aaa'
 
@@ -152,7 +156,6 @@ def test_TupleS3StoreBackend():
     my_store.set(("BBB",), "bbb")
     assert my_store.get(("BBB",)) == 'bbb'
 
-    print(my_store.list_keys())
     assert set(my_store.list_keys()) == {("AAA",), ("BBB",)}
     assert set(
         [s3_object_info['Key'] for s3_object_info in
