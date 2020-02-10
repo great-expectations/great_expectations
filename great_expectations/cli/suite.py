@@ -45,18 +45,6 @@ def suite():
     help="""The name of the datasource. The datasource must contain a single BatchKwargGenerator that can list data assets in the datasource """
 )
 @click.option(
-    "--batch_kwarg_generator",
-    "-g",
-    default=None,
-    help="""The name of the BatchKwargGenerator configured in the datasource. The BatchKwargGenerator will list data assets in the datasource """
-)
-@click.option(
-    "--data_asset",
-    "-a",
-    default=None,
-    help="""The name of data asset. Must be a name listed by the BatchKwargGenerator  """
-)
-@click.option(
     "--batch_kwargs",
     default=None,
     help="""Batch_kwargs that specify the batch of data to be used a sample when editing the suite. Must be a valid JSON dictionary.
@@ -75,7 +63,7 @@ Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"s
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-def suite_edit(suite, datasource, batch_kwarg_generator, data_asset, directory, jupyter, batch_kwargs):
+def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
     """
     Generate a Jupyter notebook for editing an existing expectation suite.
 
@@ -85,10 +73,7 @@ def suite_edit(suite, datasource, batch_kwarg_generator, data_asset, directory, 
     A batch of data is required to edit the suite, which is used as a sample.
 
     The edit command will help you specify a batch interactively. Or you can
-    specify them manually by providing either the --batch_kwargs argument or
-    these three args:
-
-        --datasource, --batch_kwarg_generator, and,  --data_asset arguments
+    specify them manually by providing --batch_kwargs in valid JSON format.
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
     """
@@ -101,12 +86,14 @@ def suite_edit(suite, datasource, batch_kwarg_generator, data_asset, directory, 
         _offer_to_install_new_template(err, context.root_directory)
         return
 
-    if suite.endswith(".json"):
-        suite = suite[:-5]
     suite = _load_suite(context, suite)
 
     if batch_kwargs:
-        batch_kwargs = json.loads(batch_kwargs)
+        try:
+            batch_kwargs = json.loads(batch_kwargs)
+        except json.decoder.JSONDecodeError as je:
+            cli_message("<red>Please check that your batch_kwargs are valid JSON.\n{}</red>".format(je))
+            exit(1)
     else:
         cli_message(
             """
@@ -120,12 +107,12 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
         datasource_name = data_source.name
 
-        if batch_kwarg_generator is None or data_asset is None or batch_kwargs is None:
+        if batch_kwargs is None:
             datasource_name, batch_kwarg_generator, data_asset, batch_kwargs = get_batch_kwargs(
                 context,
                 datasource_name=datasource_name,
-                generator_name=batch_kwarg_generator,
-                generator_asset=data_asset,
+                generator_name=None,
+                generator_asset=None,
                 additional_batch_kwargs=additional_batch_kwargs
             )
 
@@ -145,6 +132,8 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
 
 def _load_suite(context, suite_name):
+    if suite_name.endswith(".json"):
+        suite_name = suite_name[:-5]
     try:
         suite = context.get_expectation_suite(suite_name)
     except ge_exceptions.DataContextError as e:
