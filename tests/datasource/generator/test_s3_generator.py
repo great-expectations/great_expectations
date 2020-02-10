@@ -5,7 +5,7 @@ import logging
 import pandas as pd
 import boto3
 
-from great_expectations.datasource.generator.s3_generator import S3Generator
+from great_expectations.datasource.generator.s3_generator import S3GlobReaderBatchKwargsGenerator
 from great_expectations.exceptions import BatchKwargsError
 
 
@@ -42,13 +42,13 @@ def mock_s3_bucket():
 def s3_generator(mock_s3_bucket, basic_sparkdf_datasource):
     # We configure a generator that will fetch from (mocked) my_bucket
     # and will use glob patterns to match returned assets into batches of the same asset
-    generator = S3Generator("my_generator",
-                            datasource=basic_sparkdf_datasource,
-                            bucket=mock_s3_bucket,
-                            reader_options={
+    generator = S3GlobReaderBatchKwargsGenerator("my_generator",
+                                                 datasource=basic_sparkdf_datasource,
+                                                 bucket=mock_s3_bucket,
+                                                 reader_options={
                                 "sep": ","
                             },
-                            assets={
+                                                 assets={
                                 "data": {
                                     "prefix": "data/",
                                     "delimiter": "",
@@ -80,7 +80,7 @@ def s3_generator(mock_s3_bucket, basic_sparkdf_datasource):
                                     "max_keys": 1
                                 }
                             }
-                            )
+                                                 )
     yield generator
 
 

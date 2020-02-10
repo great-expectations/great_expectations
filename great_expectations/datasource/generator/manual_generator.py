@@ -1,31 +1,23 @@
-import os
-import glob
-import re
-import datetime
 import logging
-import warnings
 from copy import deepcopy
 
-from six import string_types
-
 from great_expectations.datasource.generator.batch_kwargs_generator import BatchKwargsGenerator
-from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, InvalidBatchKwargsError
 
 logger = logging.getLogger(__name__)
 
 
-class ManualGenerator(BatchKwargsGenerator):
-    """ManualGenerator returns manually-configured batch_kwargs for named data assets. It provides a convenient way to
+class ManualBatchKwargsGenerator(BatchKwargsGenerator):
+    """ManualBatchKwargsGenerator returns manually-configured batch_kwargs for named data assets. It provides a convenient way to
     capture complete batch definitions without requiring the configuration of a more fully-featured generator.
 
-    A fully configured ManualGenerator in yml might look like the following::
+    A fully configured ManualBatchKwargsGenerator in yml might look like the following::
 
         my_datasource:
           class_name: PandasDatasource
           generators:
             my_generator:
-              class_name: ManualGenerator
+              class_name: ManualBatchKwargsGenerator
               assets:
                 asset1:
                   - partition_id: 1
@@ -44,8 +36,8 @@ class ManualGenerator(BatchKwargsGenerator):
     def __init__(self, name="default",
                  datasource=None,
                  assets=None):
-        logger.debug("Constructing ManualGenerator {!r}".format(name))
-        super(ManualGenerator, self).__init__(name, datasource=datasource)
+        logger.debug("Constructing ManualBatchKwargsGenerator {!r}".format(name))
+        super(ManualBatchKwargsGenerator, self).__init__(name, datasource=datasource)
 
         if assets is None:
             assets = {}

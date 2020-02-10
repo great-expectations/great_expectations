@@ -101,7 +101,7 @@ def init(target_directory, view):
     try:
         # if expectations exist, offer to build docs
         context = DataContext(ge_dir)
-        if context.list_expectation_suite_keys():
+        if context.list_expectation_suites():
             if click.confirm(BUILD_DOCS_PROMPT, default=True):
                 build_docs(context, view=view)
 

@@ -47,7 +47,7 @@ def test_errors_warnings_validation_operator_run_slack_query(basic_data_context_
                                 class_name="PandasDatasource",
                                 generators={
                                     "subdir_reader": {
-                                        "class_name": "SubdirReaderGenerator",
+                                        "class_name": "SubdirReaderBatchKwargsGenerator",
                                         "base_directory": str(filesystem_csv_4)
                                     }
                                 }

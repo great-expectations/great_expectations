@@ -387,7 +387,7 @@ CustomPandasDataset in a DataContext. Note the use of standard python dot notati
           class_name: CustomPandasDataset
         generators:
           default:
-            class_name: SubdirReaderGenerator
+            class_name: SubdirReaderBatchKwargsGenerator
             base_directory: /data
             reader_options:
               sep: \t
