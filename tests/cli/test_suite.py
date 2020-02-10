@@ -359,6 +359,24 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kwargs_without_datasource(
+    caplog
+):
+    # TODO it appears that batch_kwargs are not validated in the CLI.
+    """
+    Given:
+    - the suite foo exists
+    - the a datasource exists
+    - and the users runs this
+    great_expectations suite edit foo --batch_kwargs '{"path": "/Users/taylor/Desktop/data/10k.csv"}
+
+    Then:
+    - The user should see an error before notebook compilation.
+    '"""
+    assert False
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
 def test_suite_edit_one_datasources_no_generator_with_no_additional_args(
     caplog, empty_data_context, filesystem_csv_2
 ):
