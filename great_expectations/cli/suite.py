@@ -91,30 +91,34 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
     if batch_kwargs:
         try:
             batch_kwargs = json.loads(batch_kwargs)
-            _batch = context.get_batch(batch_kwargs, suite)
+            _batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
             assert isinstance(_batch, DataAsset)
         except json.decoder.JSONDecodeError as je:
             cli_message("<red>Please check that your batch_kwargs are valid JSON.\n{}</red>".format(je))
-            exit(1)
+            sys.exit(1)
         except ge_exceptions.DataContextError:
             cli_message("<red>Please check that your batch_kwargs are able to load a batch.</red>")
-            exit(1)
+            sys.exit(1)
     else:
         cli_message("""
 A batch of data is required to edit the suite - let's help you to specify it."""
         )
 
         additional_batch_kwargs = None
-        data_source = select_datasource(context, datasource_name=datasource)
-        if data_source is None:
-            raise ge_exceptions.DataContextError("No datasources found in the context")
+        try:
+            data_source = select_datasource(context, datasource_name=datasource)
+        except ValueError as ve:
+            cli_message("<red>{}</red>".format(ve))
+            sys.exit(1)
 
-        datasource_name = data_source.name
+        if not data_source:
+            cli_message("<red>No datasources found in the context.</red>")
+            sys.exit(1)
 
         if batch_kwargs is None:
             datasource_name, batch_kwarg_generator, data_asset, batch_kwargs = get_batch_kwargs(
                 context,
-                datasource_name=datasource_name,
+                datasource_name=data_source.name,
                 generator_name=None,
                 generator_asset=None,
                 additional_batch_kwargs=additional_batch_kwargs
@@ -140,6 +144,7 @@ def _load_suite(context, suite_name):
         suite_name = suite_name[:-5]
     try:
         suite = context.get_expectation_suite(suite_name)
+        return suite
     except ge_exceptions.DataContextError as e:
         cli_message(
             "<red>Could not find a suite named `{}`. Please check the name and try again.</red>".format(
@@ -148,7 +153,6 @@ def _load_suite(context, suite_name):
         )
         logger.info(e)
         sys.exit(1)
-    return suite
 
 
 @suite.command(name="new")
