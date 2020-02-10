@@ -11,14 +11,14 @@ except ImportError:
     logger.debug("Unable to load spark context; install optional spark dependency for support.")
 
 
-class DatabricksTableGenerator(BatchKwargsGenerator):
+class DatabricksTableBatchKwargsGenerator(BatchKwargsGenerator):
     """Meant to be used in a Databricks notebook
     """
 
     def __init__(self, name="default",
                  datasource=None,
                  database="default"):
-        super(DatabricksTableGenerator, self).__init__(name, datasource=datasource)
+        super(DatabricksTableBatchKwargsGenerator, self).__init__(name, datasource=datasource)
         self.database = database
         try:
             self.spark = SparkSession.builder.getOrCreate()

@@ -115,7 +115,7 @@ Great Expectations' ``jupyter_ux`` module has a convenience method that lists al
 
 .. code-block:: python
 
-    great_expectations.jupyter_ux.list_available_data_asset_names(context)
+    great_expectations.jupyter_ux.show_available_data_asset_names(context)
 
 Here is the output of this method when executed in our example project:
 

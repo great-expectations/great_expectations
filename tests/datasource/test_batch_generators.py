@@ -8,7 +8,7 @@ except ImportError:
     import mock
 
 from great_expectations.exceptions import DataContextError
-from great_expectations.datasource.generator import SubdirReaderGenerator, GlobReaderGenerator, DatabricksTableGenerator
+from great_expectations.datasource.generator import SubdirReaderBatchKwargsGenerator, GlobReaderBatchKwargsGenerator, DatabricksTableBatchKwargsGenerator
 
 
 def test_file_kwargs_generator(data_context, filesystem_csv):
@@ -19,7 +19,7 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
                                         class_name="PandasDatasource",
                                         generators={
     "subdir_reader": {
-        "class_name": "SubdirReaderGenerator",
+        "class_name": "SubdirReaderBatchKwargsGenerator",
         "base_directory": str(base_dir),
     }
 }
@@ -84,7 +84,7 @@ def test_glob_reader_generator(basic_pandas_datasource, tmp_path_factory):
     with open(os.path.join(basedir, "f0.json"), "w") as outfile:
         outfile.write("\n\n\n")
 
-    g2 = GlobReaderGenerator(base_directory=basedir, datasource=basic_pandas_datasource, asset_globs={
+    g2 = GlobReaderBatchKwargsGenerator(base_directory=basedir, datasource=basic_pandas_datasource, asset_globs={
         "blargs": {
             "glob": "*.blarg"
         },
@@ -149,7 +149,7 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     with open(os.path.join(basedir, "f0.json"), "w") as outfile:
         outfile.write("\n\n\n")
 
-    g1 = SubdirReaderGenerator(datasource="foo", base_directory=basedir)
+    g1 = SubdirReaderBatchKwargsGenerator(datasource="foo", base_directory=basedir)
 
     g1_assets = g1.get_available_data_asset_names()
     # Use set in test to avoid order issues
@@ -157,7 +157,7 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
 
 
 def test_databricks_generator(basic_sparkdf_datasource):
-    generator = DatabricksTableGenerator(datasource=basic_sparkdf_datasource)
+    generator = DatabricksTableBatchKwargsGenerator(datasource=basic_sparkdf_datasource)
     available_assets = generator.get_available_data_asset_names()
 
     # We have no tables available

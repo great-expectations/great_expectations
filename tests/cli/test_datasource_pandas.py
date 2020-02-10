@@ -33,7 +33,7 @@ def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
         class_name="PandasDatasource",
         generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
             }
         },
@@ -102,7 +102,7 @@ def test_cli_datasource_profile_answering_no(
         class_name="PandasDatasource",
         generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
             }
         },
@@ -143,7 +143,7 @@ def test_cli_datasource_profile_with_datasource_arg(
         class_name="PandasDatasource",
         generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
             }
         },
@@ -206,7 +206,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
         class_name="PandasDatasource",
         generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
             }
         },
@@ -270,7 +270,7 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
         class_name="PandasDatasource",
         generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
             }
         },
@@ -345,7 +345,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
         class_name="PandasDatasource",
         generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
             }
         },
@@ -407,7 +407,7 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
         class_name="PandasDatasource",
         generators={
             "subdir_reader": {
-                "class_name": "SubdirReaderGenerator",
+                "class_name": "SubdirReaderBatchKwargsGenerator",
                 "base_directory": str(filesystem_csv_2),
             }
         },

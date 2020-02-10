@@ -65,7 +65,7 @@ class PandasDatasource(Datasource):
             # })
             # generators = {
             #     # "default": {
-            #     #     "class_name": "SubdirReaderGenerator",
+            #     #     "class_name": "SubdirReaderBatchKwargsGenerator",
             #     #     "base_directory": base_directory,
             #     #     "reader_options": reader_options
             #     # },
