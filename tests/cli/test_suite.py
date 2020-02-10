@@ -220,8 +220,33 @@ def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
     )
     stdout = result.output
     assert result.exit_code == 1
-    assert 'Please check that your batch_kwargs are valid JSON.'
+    assert 'Please check that your batch_kwargs are valid JSON.' in stdout
     assert 'Expecting value' in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_error(
+    caplog,
+    empty_data_context
+):
+    project_dir = empty_data_context.root_directory
+
+    context = DataContext(project_dir)
+    context.create_expectation_suite("foo")
+    context.add_datasource("source", class_name="PandasDatasource")
+
+    runner = CliRunner(mix_stderr=False)
+    batch_kwargs = '{\"path\": \"fake.csv\", \"datasource\": \"source\"}'
+    result = runner.invoke(
+        cli,
+        ["suite", "edit", "foo", "-d", project_dir, "--batch_kwargs", batch_kwargs],
+        catch_exceptions=False
+    )
+    stdout = result.output
+    assert result.exit_code == 1
+    assert 'To continue editing this suite' not in stdout
+    assert 'Please check that your batch_kwargs are able to load a batch.' in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_suite_edit_with_non_existent_suite_name_raises_error(
