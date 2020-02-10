@@ -27,7 +27,8 @@ try:
         when,
         year,
         count,
-        countDistinct
+        countDistinct,
+        monotonically_increasing_id
     )
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
@@ -170,6 +171,144 @@ class MetaSparkDFDataset(Dataset):
                     pass
 
             col_df.unpersist()
+
+            return return_obj
+
+        inner_wrapper.__name__ = func.__name__
+        inner_wrapper.__doc__ = func.__doc__
+
+        return inner_wrapper
+
+    @classmethod
+    def column_pair_map_expectation(cls, func):
+        """
+        The column_pair_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
+        truthiness of some condition on a per row basis across a pair of columns.
+        """
+        if PY3:
+            argspec = inspect.getfullargspec(func)[0][1:]
+        else:
+            argspec = inspect.getargspec(func)[0][1:]
+
+        @cls.expectation(argspec)
+        @wraps(func)
+        def inner_wrapper(self, column_A, column_B, mostly=None, ignore_row_if="both_values_are_missing", result_format=None, *args, **kwargs):
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
+
+            result_format = parse_result_format(result_format)
+
+            # this is a little dangerous: expectations that specify "COMPLETE" result format and have a very
+            # large number of unexpected results could hang for a long time. we should either call this out in docs
+            # or put a limit on it
+            if result_format['result_format'] == 'COMPLETE':
+                unexpected_count_limit = None
+            else:
+                unexpected_count_limit = result_format['partial_unexpected_count']
+
+            cols_df = self.spark_df.select(column_A, column_B).withColumn("__row", monotonically_increasing_id())  # pyspark.sql.DataFrame
+
+            # a couple of tests indicate that caching here helps performance
+            cols_df.cache()
+            element_count = self.get_row_count()
+
+            if ignore_row_if == "both_values_are_missing":
+                boolean_mapped_null_values = cols_df.selectExpr("`__row`",
+                                                                "`{0}` AS `A_{0}`".format(column_A),
+                                                                "`{0}` AS `B_{0}`".format(column_B),
+                                                                "ISNULL(`{0}`) AND ISNULL(`{1}`) AS `__null_val`".format(column_A, column_B)
+                                                                )
+            elif ignore_row_if == "either_value_is_missing":
+                boolean_mapped_null_values = cols_df.selectExpr("`__row`",
+                                                                "`{0}` AS `A_{0}`".format(column_A),
+                                                                "`{0}` AS `B_{0}`".format(column_B),
+                                                                "ISNULL(`{0}`) OR ISNULL(`{1}`) AS `__null_val`".format(column_A, column_B))
+            elif ignore_row_if == "never":
+                boolean_mapped_null_values = cols_df.selectExpr("`__row`",
+                                                                "`{0}` AS `A_{0}`".format(column_A),
+                                                                "`{0}` AS `B_{0}`".format(column_B),
+                                                                lit(False).alias("__null_val"))
+            else:
+                raise ValueError(
+                    "Unknown value of ignore_row_if: %s", (ignore_row_if,))
+
+            # since pyspark guaranteed each columns selected has the same number of rows, no need to do assert as in pandas
+            # assert series_A.count() == (
+            #     series_B.count()), "Series A and B must be the same length"
+
+            nonnull_df = boolean_mapped_null_values.filter("__null_val = False")
+            nonnull_count = nonnull_df.count()
+
+            col_A_df = nonnull_df.select("__row", "`A_{0}`".format(column_A))
+            col_B_df = nonnull_df.select("__row", "`B_{0}`".format(column_B))
+
+            success_df = func(
+                self, col_A_df, col_B_df, *args, **kwargs)
+            success_count = success_df.filter("__success = True").count()
+
+            unexpected_count = nonnull_count - success_count
+            if unexpected_count == 0:
+                # save some computation time if no unexpected items
+                maybe_limited_unexpected_list = []
+            else:
+                # here's an example of a place where we could do optimizations if we knew result format: see
+                # comment block below
+                unexpected_df = success_df.filter('__success = False')
+                if unexpected_count_limit:
+                    unexpected_df = unexpected_df.limit(unexpected_count_limit)
+                maybe_limited_unexpected_list = [
+                    (row["A_{0}".format(column_A)], row["B_{0}".format(column_B)])
+                    for row
+                    in unexpected_df.collect()
+                ]
+
+                if "output_strftime_format" in kwargs:
+                    output_strftime_format = kwargs["output_strftime_format"]
+                    parsed_maybe_limited_unexpected_list = []
+                    for val in maybe_limited_unexpected_list:
+                        if val is None or (val[0] is None or val[1] is None):
+                            parsed_maybe_limited_unexpected_list.append(val)
+                        else:
+                            if isinstance(val[0], string_types) and isinstance(val[1], string_types):
+                                val = (parse(val[0]), parse(val[1]))
+                            parsed_maybe_limited_unexpected_list.append((datetime.strftime(val[0], output_strftime_format), datetime.strftime(val[1], output_strftime_format)))
+                    maybe_limited_unexpected_list = parsed_maybe_limited_unexpected_list
+
+            success, percent_success = self._calc_map_expectation_success(
+                success_count, nonnull_count, mostly)
+
+            # Currently the abstraction of "result_format" that _format_column_map_output provides
+            # limits some possible optimizations within the column-map decorator. It seems that either
+            # this logic should be completely rolled into the processing done in the column_map decorator, or that the decorator
+            # should do a minimal amount of computation agnostic of result_format, and then delegate the rest to this method.
+            # In the first approach, it could make sense to put all of this decorator logic in Dataset, and then implement
+            # properties that require dataset-type-dependent implementations (as is done with SparkDFDataset.row_count currently).
+            # Then a new dataset type could just implement these properties/hooks and Dataset could deal with caching these and
+            # with the optimizations based on result_format. A side benefit would be implementing an interface for the user
+            # to get basic info about a dataset in a standardized way, e.g. my_dataset.row_count, my_dataset.columns (only for
+            # tablular datasets maybe). However, unclear if this is worth it or if it would conflict with optimizations being done
+            # in other dataset implementations.
+            return_obj = self._format_map_output(
+                result_format,
+                success,
+                element_count,
+                nonnull_count,
+                unexpected_count,
+                maybe_limited_unexpected_list,
+                unexpected_index_list=None,
+            )
+
+            # # FIXME Temp fix for result format
+            # if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+            #     del return_obj['result']['unexpected_percent_nonmissing']
+            #     del return_obj['result']['missing_count']
+            #     del return_obj['result']['missing_percent']
+            #     try:
+            #         del return_obj['result']['partial_unexpected_counts']
+            #     except KeyError:
+            #         pass
+
+            cols_df.unpersist()
 
             return return_obj
 
@@ -707,3 +846,21 @@ class SparkDFDataset(MetaSparkDFDataset):
         meta=None,
     ):
         return column.withColumn('__success', ~column[0].rlike(regex))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_pair_map_expectation
+    def expect_column_pair_values_to_be_equal(
+        self,
+        column_A,
+        column_B,
+        ignore_row_if="both_values_are_missing",
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None
+    ):
+        column_A_name = column_A.schema.names[1]
+        column_B_name = column_B.schema.names[1]
+        join_df = column_A.join(column_B, column_A["__row"] == column_B["__row"], how="inner")
+        return join_df.withColumn('__success',
+                                  when(col(column_A_name) == col(column_B_name), True).otherwise(False))
