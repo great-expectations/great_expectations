@@ -15,8 +15,8 @@ value that should be used during the initial evaluation of the expectation.
 .. code-block:: python
 
     >> my_df.expect_table_row_count_to_equal(
-        value: {"$PARAMETER": "upstream_row_count",
-                "$PARAMETER.upstream_row_count": 10}
+        value={"$PARAMETER": "upstream_row_count",
+                "$PARAMETER.upstream_row_count": 10},
         result_format={'result_format': 'BOOLEAN_ONLY'}
     )
     {
@@ -62,7 +62,7 @@ DataContext Evaluation Parameter Store
 ***************************************
 
 When a DataContext has a configured evaluation parameter store, it can automatically identify and store evaluation
-parameters that are referenced in other expectation suites. The evaluation parameter store uses a URN schema for 
+parameters that are referenced in other expectation suites. The evaluation parameter store uses a URN schema for
 identifying dependencies between expectation suites.
 
 The DataContext-recognized URN must begin with the string ``urn:great_expectations:validations``. Valid URNs must have

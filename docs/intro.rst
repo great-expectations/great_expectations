@@ -55,11 +55,11 @@ Key features
 
 **Automated data profiling**
 
-    Writing pipeline test from scratch can be tedious and counterintuitive. Great Expectations jump starts the process by providing powerful tools for automated data profiling. This provides the double benefit of helping you explore data faster, and capturing knowledge for future documentation and testing.
+    Writing pipeline tests from scratch can be tedious and counterintuitive. Great Expectations jump starts the process by providing powerful tools for automated data profiling. This provides the double benefit of helping you explore data faster, and capturing knowledge for future documentation and testing.
 
 **DataContexts and DataSources**
 
-    ...allow you to configure connections your data stores, using names you’re already familiar with: “the ml_training_results bucket in S3,” “the Users table in Redshift.” Great Expectations provides convenience libraries to introspect most common data stores (Ex: SQL databases, data directories and S3 buckets.) We are also working to integrate with pipeline execution frameworks (Ex: airflow, dbt, dagster, prefect.io). The Great Expectations framework lets you fetch, validate, profile, and document your data in a way that’s meaningful within your existing infrastructure and work environment.
+    ...allow you to configure connections your data stores, using names you’re already familiar with: “the ml_training_results bucket in S3,” “the Users table in Redshift.” Great Expectations provides convenience libraries to introspect most common data stores (Ex: SQL databases, data directories and S3 buckets.) We are also working to integrate with pipeline execution frameworks (Ex: Airflow, dbt, Dagster, Prefect). The Great Expectations framework lets you fetch, validate, profile, and document your data in a way that’s meaningful within your existing infrastructure and work environment.
 
 **Tooling for validation**
 
@@ -99,15 +99,15 @@ What does Great Expectations NOT do?
 
 **Great Expectations is NOT a pipeline execution framework.**
 
-    We aim to integrate seamlessly with DAG execution tools like `Spark <https://spark.apache.org/>`__, `Airflow <https://airflow.apache.org/>`__, `dbt <https://www.getdbt.com/>`__, `prefect <https://www.prefect.io/>`__, `dagster <https://github.com/dagster-io/dagster>`__, `Kedro <https://github.com/quantumblacklabs/kedro>`__, etc. We DON'T execute your pipelines for you.
+    We aim to integrate seamlessly with DAG execution tools like `Spark <https://spark.apache.org/>`__, `Airflow <https://airflow.apache.org/>`__, `dbt <https://www.getdbt.com/>`__, `Prefect <https://www.prefect.io/>`__, `Dagster <https://github.com/dagster-io/dagster>`__, `Kedro <https://github.com/quantumblacklabs/kedro>`__, etc. We DON'T execute your pipelines for you.
 
 **Great Expectations is NOT a data versioning tool.**
-	
+
    Great Expectations does not store data itself. Instead, it deals in metadata about data: Expectations, validation results, etc. If you want to bring your data itself under version control, check out tools like: `DVC <https://dvc.org/>`__ and `Quilt <https://github.com/quiltdata/quilt>`__.
 
-**Great Expectations currently works best in a python/bash environment.** 
+**Great Expectations currently works best in a Python/Bash environment.**
 
-   Great Expectations is python-based. You can invoke it from the command line without using a python programming environment, but if you're working in another ecosystem, other tools might be a better choice. If you're running in a pure R environment, you might consider `assertR <https://github.com/ropensci/assertr>`__ as an alternative. Within the Tensorflow ecosystem, `TFDV <https://www.tensorflow.org/tfx/guide/tfdv>`__ fulfills a similar function as Great Expectations.
+   Great Expectations is Python-based. You can invoke it from the command line without using a Python programming environment, but if you're working in another ecosystem, other tools might be a better choice. If you're running in a pure R environment, you might consider `assertR <https://github.com/ropensci/assertr>`__ as an alternative. Within the Tensorflow ecosystem, `TFDV <https://www.tensorflow.org/tfx/guide/tfdv>`__ fulfills a similar function as Great Expectations.
 
 ***********************************
 Who maintains Great Expectations?
@@ -115,7 +115,7 @@ Who maintains Great Expectations?
 
 Great Expectations is under active development by James Campbell, Abe Gong, Eugene Mandel and Rob Lim, with help from many others.
 
-If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public Slack channel:https://greatexpectations.io/slack
+If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public Slack channel: https://greatexpectations.io/slack
 
 If you'd like to contribute to Great Expectations, please head to the :ref:`community` section.
 
