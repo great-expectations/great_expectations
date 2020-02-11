@@ -102,7 +102,7 @@ Datasource like so:
     : data
 
     Give your new data source a short name.
-    [data__dir]: 
+    [data__dir]:
 
 
 
@@ -153,10 +153,10 @@ For a SQL data source, configuration would look like this instead:
 
     What is the driver for the sqlalchemy connection? [postgres]: postgres
     What is the host for the sqlalchemy connection? [localhost]: my_db_host.internal.priv
-    What is the port for the sqlalchemy connection? [5432]:  
+    What is the port for the sqlalchemy connection? [5432]:
     What is the username for the sqlalchemy connection? [postgres]: user
-    What is the password for the sqlalchemy connection?: 
-    What is the database name for the sqlalchemy connection? [postgres]: 
+    What is the password for the sqlalchemy connection?:
+    What is the database name for the sqlalchemy connection? [postgres]:
 
 
 The corresponding config would be:

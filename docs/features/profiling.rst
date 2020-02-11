@@ -36,8 +36,8 @@ Expectations and Profiling
 In order to characterize a data asset, profiling creates an expectation suite. Unlike the expectations that are
 typically used for data validation, these expectations do not necessarily apply any constraints; they can simply
 identify statistics or other data characteristics that should be evaluated and made available in GE. For example, when
-the ``BasicDatasetProfiler`` it encounters a numeric column, it will add an ``expect_column_mean_to_be_between``
-expectation but choose the min_value and max_value to both be None: essentially saying only that it expects the mean
+the ``BasicDatasetProfiler`` encounters a numeric column, it will add an ``expect_column_mean_to_be_between``
+expectation but choose the min_value and max_value to both be None: essentially only saying that it expects a mean
 to exist.
 
 .. code-block:: json
