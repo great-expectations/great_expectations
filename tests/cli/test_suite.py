@@ -4,7 +4,9 @@ from __future__ import unicode_literals
 import json
 import os
 
+import pytest
 from click.testing import CliRunner
+from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -413,6 +415,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(condition=PY2, reason="different error messages in py2")
 def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error(
     caplog, titanic_data_context,
 ):
