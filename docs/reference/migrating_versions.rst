@@ -7,7 +7,7 @@ Migrating Between Versions
 While we are committed to keeping Great Expectations as stable as possible,
 sometimes breaking changes are necessary to maintain our trajectory. This is
 especially true as the library has evolved from just a data quality tool to a
-slightly more opinionated framework.
+more capable framework including data docs and profiling in addition to validation.
 
 Great Expectations provides a warning when the currently-installed version is
 different from the version stored in the expectation suite.
@@ -37,16 +37,49 @@ in your source control system already, right? ;-)
 Upgrading to 0.9.x
 *************************
 
-In the 0.9.0 release, there are several additional changes to the DataContext API.
+In the 0.9.0 release, there are several changes to the DataContext API.
 
-BREAKING:
-- FixedLengthTupleXXXX stores are renamed to TupleXXXX stores; they no longer allow or require a key_length to be
-  specified.
-- data_asset_name is not used as a parameter in the create_expectation_suite, get_expectation_suite, or get_batch
-  commands. Instead, batch_kwargs alone now define the batch to be received, and expectation suite names exist in an
-  independent namespace.
-- "Generator" classes are now more explicitly named "BatchKwargsGenerator" classes; for example, the S3Generator is
-  now the S3GlobReaderBatchKwargsGenerator
+CONFIGURATION CHANGES:
+- FixedLengthTupleXXXX stores are renamed to TupleXXXX stores; they no longer allow or require (or allow) a key_length
+  to be specified, but they do allow `filepath_prefix` and/or `filepath_suffix` to be configured as an alternative to
+  an the `filepath_template`.
+- ExtractAndStoreEvaluationParamsAction is renamed to StoreEvaluationParametersAction; a new StoreMetricsAction is
+  available as well to allow DataContext-configured metrics to be saved.
+- The InMemoryEvaluationParameterStore is replaced with the EvaluationParameterStore; EvaluationParameterStore and
+  MetricsStore can both be configured to use DatabaseStoreBackend instead of the InMemoryStoreBackend.
+- The `type` key can no longer be used in place of class_name in configuration. Use `class_name` instead.
+- BatchKwargsGenerators are more explicitly named; we avoid use of the term "Generator" because it is ambiguous. All
+  existing BatchKwargsGenerators have been renamed by substituting "BatchKwargsGenerator" for "Generator"; for example
+  GlobReaderGenerator is now GlobReaderBatchKwargsGenerator.
+- ReaderMethod is no longer an enum; it is a string of the actual method to be invoked (e.g. `read_csv` for pandas).
+  That change makes it easy to specify arbitrary reader_methods via batch_kwargs (including read_pickle), BUT
+  existing configurations using enum-based reader_method in batch_kwargs will need to update their code. For
+  example, a pandas datasource would use `reader_method: read_csv`` instead of `reader_method: csv`
+
+CODE CHANGES:
+- DataAssetName and name normalization have been completely eliminated, which causes several
+  related changes to code using the DataContext.
+  - data_asset_name is **no longer** a parameter in the create_expectation_suite, get_expectation_suite, or get_batch
+    commands; expectation suite names exist in an independent namespace.
+  - batch_kwargs alone now define the batch to be received, and the datasource name **must** be included in
+    batch_kwargs as the "datasource" key.
+  - **A generator name is therefore no longer required to get data or define an expectation suite.**
+  - The BatchKwargsGenerators API has been simplified; `build_batch_kwargs` should be the entrypoint for all cases of
+    using a generator to get batch_kwargs, including when explicitly specifying a partition, limiting the number of
+    returned rows, accessing saved kwargs, or using any other BatchKwargsGenerator feature. BatchKwargsGenerators
+    *must* be attached to a specific datasource to be instantiated.
+- **Database store tables are not compatible** between versions and require a manual migration; the new default table
+  names are: `ge_validations_store`, `ge_expectations_store`, `ge_metrics`, and `ge_evaluation_parameters`. The
+  Validations Store uses a three-part compound primary key consisting of run_id, expectation_suite_name, and
+  batch_identifier; Expectations Store uses the expectation_suite_name as its only key. Both Metrics and Evaluation
+  Parameters stores use `run_id`, `expectation_suite_name`, `metric_id`, and `metric_kwargs_id` to form a compound
+  primary key.
+- The term "batch_fingerprint" is no longer used, and has been replaced with "batch_markers". It is a dictionary
+  that, like batch_kwargs, can be used to construct an ID.
+- `get_data_asset_name` and `save_data_asset_name` are removed.
+- There are numerous under-the-scenes changes to the internal types used in GreatExpectations. These should be
+  transparent to users.
+
 
 *************************
 Upgrading to 0.8.x
