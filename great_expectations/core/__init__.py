@@ -627,7 +627,8 @@ class ExpectationValidationResult(object):
                             raise UnavailableMetricError("Configured metric_kwargs differ from requested.")
                         return self.result.get(metric_name_parts[2])
                     elif metric_name_parts[2] == "details":
-                        if metric_kwargs_id != get_metric_kwargs_id(metric_name, self.expectation_config.kwargs):
+                        if metric_kwargs_id is not None and \
+                                metric_kwargs_id != get_metric_kwargs_id(metric_name, self.expectation_config.kwargs):
                             raise UnavailableMetricError("Configured metric_kwargs differ from requested.")
                         return self.result["details"].get(metric_name_parts[3])
                 except KeyError:
