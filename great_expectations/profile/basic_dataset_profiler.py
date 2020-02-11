@@ -341,9 +341,13 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
             result_format="SUMMARY",
             catch_exceptions=True
         )
-        if result.exception_info:
+        if result.exception_info and (
+                result.exception_info["exception_traceback"]
+                or result.exception_info["exception_message"]
+        ):
             # TODO quantiles are not implemented correctly on sqlite, and likely other sql dialects
             logger.warning(result.exception_info["exception_traceback"])
+            logger.warning(result.exception_info["exception_message"])
         else:
             dataset.set_config_value('interactive_evaluation', False)
             dataset.expect_column_quantile_values_to_be_between(
