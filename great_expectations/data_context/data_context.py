@@ -760,7 +760,7 @@ class ConfigOnlyDataContext(object):
                                     The members of the list can be either batches (which means that have
                                     data asset identifier, batch kwargs and expectation suite identifier)
                                     or a triple that will allow the operator to fetch the batch:
-                                    (data asset identifier, batch kwargs, expectation suite identifier)
+                                    (data asset identifier, expectation suite identifier, batch kwargs)
         :param run_id: run id - this is set by the caller and should correspond to something
                                 meaningful to the user (e.g., pipeline run id or timestamp)
         :return: A result object that is defined by the class of the operator that is invoked.
