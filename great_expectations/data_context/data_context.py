@@ -721,9 +721,19 @@ class BaseDataContext(object):
             if (expectation_suite_dependency != "*") and (expectation_suite_dependency != expectation_suite_name):
                 continue
 
+            # Allow two shorthand notations: providing a single kwargs-less metric
+            # or a list of kwargs-less metrics (e.g. statistics.evaluated_expectations and
+            # statistics.successful_expectations)
+            if isinstance(metrics_dict, str):
+                metrics_dict = {
+                    metrics_dict: [None]
+                }
+            elif isinstance(metrics_dict, list):
+                metrics_dict = {k: [None] for k in metrics_dict}
+
             for metric_name in metrics_dict.keys():
                 metric_kwargs_ids = metrics_dict[metric_name]
-                if len(metric_kwargs_ids) == 0:
+                if metric_kwargs_ids is None or len(metric_kwargs_ids) == 0:
                     metric_kwargs_ids = [None]
                 for metric_kwargs_id in metric_kwargs_ids:
                     try:
