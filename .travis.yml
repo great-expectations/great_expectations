@@ -3,6 +3,7 @@ branches:
   - master
   - develop
   - /^\d.*/
+  - aylr//*
 # dist: xenial
 language: python
 cache: pip
