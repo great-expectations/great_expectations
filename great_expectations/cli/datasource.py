@@ -645,7 +645,7 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
 
 def select_datasource(context, datasource_name=None):
     msg_prompt_select_data_source = "Select data source"
-    msg_no_datasources_configured = "No datasources"
+    msg_no_datasources_configured = "<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
 
     data_source = None
 
@@ -664,7 +664,8 @@ def select_datasource(context, datasource_name=None):
             )
             datasource_name = data_sources[int(option_selection)-1]["name"]
 
-    data_source = context.get_datasource(datasource_name)
+    if datasource_name is not None:
+        data_source = context.get_datasource(datasource_name)
 
     return data_source
 
@@ -821,14 +822,27 @@ Name the new expectation suite"""
     msg_data_doc_intro = """
 <cyan>========== Data Docs ==========</cyan>"""
 
+    msg_suite_already_exists = "<red>An expectation suite named `{}` already exists. If you intend to edit the suite please use `great_expectations suite edit foo`.</red>"
+
     if show_intro_message:
         cli_message(msg_intro)
 
     data_source = select_datasource(context, datasource_name=datasource_name)
     if data_source is None:
-        raise ge_exceptions.DataContextError("No datasources found in the context")
+        # select_datasource takes care of displaying an error message, so all is left here is to exit.
+        sys.exit(1)
 
     datasource_name = data_source.name
+
+    existing_suite_names = [expectation_suite_id.expectation_suite_name for expectation_suite_id in context.list_expectation_suites()]
+
+    if expectation_suite_name in existing_suite_names:
+        cli_message(
+            msg_suite_already_exists.format(
+                expectation_suite_name
+            )
+        )
+        sys.exit(1)
 
     if generator_name is None or generator_asset is None or batch_kwargs is None:
         datasource_name, generator_name, generator_asset, batch_kwargs = get_batch_kwargs(context,
@@ -838,7 +852,16 @@ Name the new expectation suite"""
                                                                                            additional_batch_kwargs=additional_batch_kwargs)
 
     if expectation_suite_name is None:
-        expectation_suite_name = click.prompt(msg_prompt_expectation_suite_name, default="warning", show_default=True)
+        while True:
+            expectation_suite_name = click.prompt(msg_prompt_expectation_suite_name, default="warning", show_default=True)
+            if expectation_suite_name in existing_suite_names:
+                cli_message(
+                    msg_suite_already_exists.format(
+                        expectation_suite_name
+                    )
+                )
+            else:
+                break
 
     profiler = SampleExpectationsDatasetProfiler
 
