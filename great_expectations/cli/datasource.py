@@ -26,9 +26,8 @@ from great_expectations.datasource.generator import (
     ManualBatchKwargsGenerator,
 )
 from great_expectations.exceptions import DatasourceInitializationError
-from great_expectations.profile.basic_dataset_profiler import (
-    SampleExpectationsDatasetProfiler,
-)
+from great_expectations.profile.sample_expectations_dataset_profiler import \
+    SampleExpectationsDatasetProfiler
 
 from great_expectations.validator.validator import Validator
 from great_expectations.core import ExpectationSuite
