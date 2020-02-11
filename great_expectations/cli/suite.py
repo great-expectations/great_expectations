@@ -23,6 +23,11 @@ from great_expectations.render.renderer.notebook_renderer import (
 )
 
 try:
+    json_parse_exception = json.decoder.JSONDecodeError
+except AttributeError:  # Python 2
+    json_parse_exception = ValueError
+
+try:
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
@@ -95,7 +100,7 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
                 batch_kwargs["datasource"] = datasource
             _batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
             assert isinstance(_batch, DataAsset)
-        except json.decoder.JSONDecodeError as je:
+        except json_parse_exception as je:
             cli_message("<red>Please check that your batch_kwargs are valid JSON.\n{}</red>".format(je))
             sys.exit(1)
         except ge_exceptions.DataContextError:
