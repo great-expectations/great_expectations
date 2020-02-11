@@ -17,7 +17,7 @@ from great_expectations.cli.util import (
     _offer_to_install_new_template,
     cli_message,
 )
-from great_expectations.datasource.generator import ManualBatchKwargsGenerator
+from great_expectations.data_asset import DataAsset
 from great_expectations.render.renderer.notebook_renderer import (
     NotebookRenderer,
 )
@@ -39,25 +39,10 @@ def suite():
 @suite.command(name="edit")
 @click.argument("suite")
 @click.option(
-    "--datasource_name",
+    "--datasource",
     "-ds",
     default=None,
-    help="""The name of the datasource. The generator will list data assets in the datasource 
-(for getting a batch of data to be used a sample when editing the suite)"""
-)
-@click.option(
-    "--generator_name",
-    "-g",
-    default=None,
-    help="""The name of the batch kwarg generator configured in the datasource. The generator will list data assets in the datasource 
-(for getting a batch of data to be used a sample when editing the suite)"""
-)
-@click.option(
-    "--generator_asset",
-    "-a",
-    default=None,
-    help="""The name of data asset. Must be a name listed by the generator  
-(for getting a batch of data to be used a sample when editing the suite)"""
+    help="""The name of the datasource. The datasource must contain a single BatchKwargGenerator that can list data assets in the datasource """
 )
 @click.option(
     "--batch_kwargs",
@@ -78,25 +63,19 @@ Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"s
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-def suite_edit(suite, datasource_name, generator_name, generator_asset, directory, jupyter, batch_kwargs):
+def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
     """
-    Generate a Jupyter notebook for editing an existing suite.
+    Generate a Jupyter notebook for editing an existing expectation suite.
 
-    SUITE argument is required. This is the name you gave to the suite
+    The SUITE argument is required. This is the name you gave to the suite
     when you created it.
 
-    A batch of data is required to edit the suite. It is used as a sample.
+    A batch of data is required to edit the suite, which is used as a sample.
 
-    You can specify it by providing
-    * --datasource_name, --generator_name and  --generator_asset arguments
-    or
-    * --batch_kwargs argument.
-
-    If you do not specify the batch using these arguments, the edit command
-    will help you specify a batch.
+    The edit command will help you specify a batch interactively. Or you can
+    specify them manually by providing --batch_kwargs in valid JSON format.
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
-
     """
     try:
         context = DataContext(directory)
@@ -107,31 +86,48 @@ def suite_edit(suite, datasource_name, generator_name, generator_asset, director
         _offer_to_install_new_template(err, context.root_directory)
         return
 
-    if suite.endswith(".json"):
-        suite = suite[:-5]
     suite = _load_suite(context, suite)
 
     if batch_kwargs:
-        batch_kwargs = json.loads(batch_kwargs)
+        try:
+            batch_kwargs = json.loads(batch_kwargs)
+            if datasource:
+                batch_kwargs["datasource"] = datasource
+            _batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+            assert isinstance(_batch, DataAsset)
+        except json.decoder.JSONDecodeError as je:
+            cli_message("<red>Please check that your batch_kwargs are valid JSON.\n{}</red>".format(je))
+            sys.exit(1)
+        except ge_exceptions.DataContextError:
+            cli_message("<red>Please check that your batch_kwargs are able to load a batch.</red>")
+            sys.exit(1)
+        except ValueError as ve:
+            cli_message("<red>Please check that your batch_kwargs are able to load a batch.\n{}</red>".format(ve))
+            sys.exit(1)
     else:
-        cli_message(
-            """
+        cli_message("""
 A batch of data is required to edit the suite - let's help you to specify it."""
         )
 
         additional_batch_kwargs = None
-        data_source = select_datasource(context, datasource_name=datasource_name)
-        if data_source is None:
-            raise ge_exceptions.DataContextError("No datasources found in the context")
+        try:
+            data_source = select_datasource(context, datasource_name=datasource)
+        except ValueError as ve:
+            cli_message("<red>{}</red>".format(ve))
+            sys.exit(1)
 
-        datasource_name = data_source.name
+        if not data_source:
+            cli_message("<red>No datasources found in the context.</red>")
+            sys.exit(1)
 
-        if generator_name is None or generator_asset is None or batch_kwargs is None:
-            datasource_name, generator_name, generator_asset, batch_kwargs = get_batch_kwargs(context,
-                                                                                               datasource_name=datasource_name,
-                                                                                               generator_name=generator_name,
-                                                                                               generator_asset=generator_asset,
-                                                                                               additional_batch_kwargs=additional_batch_kwargs)
+        if batch_kwargs is None:
+            datasource_name, batch_kwarg_generator, data_asset, batch_kwargs = get_batch_kwargs(
+                context,
+                datasource_name=data_source.name,
+                generator_name=None,
+                generator_asset=None,
+                additional_batch_kwargs=additional_batch_kwargs
+            )
 
     notebook_name = "{}.ipynb".format(suite.expectation_suite_name)
 
@@ -149,8 +145,11 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
 
 def _load_suite(context, suite_name):
+    if suite_name.endswith(".json"):
+        suite_name = suite_name[:-5]
     try:
         suite = context.get_expectation_suite(suite_name)
+        return suite
     except ge_exceptions.DataContextError as e:
         cli_message(
             "<red>Could not find a suite named `{}`. Please check the name and try again.</red>".format(
@@ -159,7 +158,6 @@ def _load_suite(context, suite_name):
         )
         logger.info(e)
         sys.exit(1)
-    return suite
 
 
 @suite.command(name="new")
