@@ -67,14 +67,13 @@ def init(target_directory, view):
     cli_message(GREETING)
 
     if DataContext.does_config_exist_on_disk(ge_dir):
-        if DataContext.is_project_initialized(ge_dir):
-            try:
+        try:
+            if DataContext.is_project_initialized(ge_dir):
                 # Ensure the context can be instantiated
-                context = DataContext(ge_dir)
                 cli_message(PROJECT_IS_COMPLETE)
-            except (DataContextError, DatasourceInitializationError) as e:
-                cli_message("<red>{}</red>".format(e))
-                sys.exit(1)
+        except (DataContextError, DatasourceInitializationError) as e:
+            cli_message("<red>{}</red>".format(e.message))
+            sys.exit(1)
         else:
             try:
                 context = DataContext.create(target_directory)
@@ -83,7 +82,7 @@ def init(target_directory, view):
                 # cli_message(SETUP_SUCCESS)
                 # exit(0)
             except DataContextError as e:
-                cli_message("<red>{}</red>".format(e))
+                cli_message("<red>{}</red>".format(e.message))
                 # TODO ensure this is covered by a test
                 exit(5)
     else:

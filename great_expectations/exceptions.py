@@ -126,22 +126,54 @@ Error: No module named `{}` could be found in your plugins directory.
         )
 
 
-class PluginClassNotFoundError(GreatExpectationsError, AttributeError):
+class PluginClassNotFoundError(DataContextError, AttributeError):
     """A module import failed."""
     def __init__(self, module_name, class_name):
-        template = """Error: The module: `{}` does not contain the class: `{}`.
-    - Please verify this class name `{}`.
-"""
-        self.message = template.format(module_name, class_name, class_name)
+        class_name_changes = {
+            "FixedLengthTupleFilesystemStoreBackend": "TupleFilesystemStoreBackend",
+            "FixedLengthTupleS3StoreBackend": "TupleS3StoreBackend",
+            "FixedLengthTupleGCSStoreBackend": "TupleGCSStoreBackend",
+            "InMemoryEvaluationParameterStore": "EvaluationParameterStore",
+            "DatabricksTableGenerator": "DatabricksTableBatchKwargsGenerator",
+            "GlobReaderGenerator": "GlobReaderBatchKwargsGenerator",
+            "SubdirReaderGenerator": "SubdirReaderBatchKwargsGenerator",
+            "QueryGenerator": "QueryBatchKwargsGenerator",
+            "TableGenerator": "TableBatchKwargsGenerator",
+            "S3Generator": "S3GlobReaderBatchKwargsGenerator",
+            "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction"
+        }
+
+        if class_name_changes.get(class_name):
+            template = """Error: The module: `{}` does not contain the class: `{}`.
+            The class name `{}` has changed to `{}`."""
+            self.message = template.format(
+                module_name,
+                class_name,
+                class_name,
+                class_name_changes.get(class_name)
+            )
+        else:
+            template = """Error: The module: `{}` does not contain the class: `{}`.
+        - Please verify this class name `{}`."""
+            self.message = template.format(module_name, class_name, class_name)
 
         colored_template = "<red>" + template + "</red>"
         module_snippet = "</red><yellow>" + module_name + "</yellow><red>"
         class_snippet = "</red><yellow>" + class_name + "</yellow><red>"
-        self.cli_colored_message = colored_template.format(
-            module_snippet,
-            class_snippet,
-            class_snippet,
-        )
+        if class_name_changes.get(class_name):
+            new_class_snippet = "</red><yellow>" + class_name_changes.get(class_name) + "</yellow><red>"
+            self.cli_colored_message = colored_template.format(
+                module_snippet,
+                class_snippet,
+                class_snippet,
+                new_class_snippet
+            )
+        else:
+            self.cli_colored_message = colored_template.format(
+                module_snippet,
+                class_snippet,
+                class_snippet,
+            )
 
 
 class ExpectationSuiteNotFoundError(GreatExpectationsError):
