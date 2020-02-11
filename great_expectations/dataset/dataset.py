@@ -138,8 +138,7 @@ class MetaDataset(DataAsset):
             if result_format['result_format'] in ["SUMMARY", "COMPLETE"]:
                 return return_obj
 
-            raise ValueError("Unknown result_format %s." %
-                                (result_format['result_format'],))
+            raise ValueError("Unknown result_format %s." % result_format['result_format'])
 
         return inner_wrapper
 

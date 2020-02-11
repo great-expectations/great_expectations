@@ -1,29 +1,15 @@
 import logging
-import requests
+
+from great_expectations.data_context.util import instantiate_class_from_config
+from ..data_context.store.metric_store import MetricStore
+from ..data_context.types.resource_identifiers import ValidationResultIdentifier
+from .util import send_slack_notification
+from ..exceptions import InvalidDataContextConfigError, DataContextError
+
 logger = logging.getLogger(__name__)
 
 
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-)
-
-from ..data_context.types import (
-    ValidationResultIdentifier
-)
-
-from .util import send_slack_notification
-
-class BasicValidationAction(object):
-    """
-    The base class of all actions that act on validation results.
-
-    It defines the signature of the public run method that take a validation result suite
-    """
-
-    def run(self, validation_result_suite):
-        return NotImplementedError
-
-class NamespacedValidationAction(BasicValidationAction):
+class ValidationAction(object):
     """
     This is the base class for all actions that act on validation results
     and are aware of a data context namespace structure.
@@ -45,12 +31,11 @@ class NamespacedValidationAction(BasicValidationAction):
         """
         return self._run(validation_result_suite, validation_result_suite_identifier, data_asset, **kwargs)
 
-
     def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
         return NotImplementedError
 
 
-class NoOpAction(NamespacedValidationAction):
+class NoOpAction(ValidationAction):
 
     def __init__(self, data_context,):
         super(NoOpAction, self).__init__(data_context)
@@ -59,9 +44,9 @@ class NoOpAction(NamespacedValidationAction):
         print("Happily doing nothing")
 
 
-class SlackNotificationAction(NamespacedValidationAction):
+class SlackNotificationAction(ValidationAction):
     """
-    SlackNotificationAction is a namespeace-aware validation action that sends a Slack notification to a given webhook.
+    SlackNotificationAction sends a Slack notification to a given webhook.
     
     Example config:
     {
@@ -73,7 +58,6 @@ class SlackNotificationAction(NamespacedValidationAction):
         "notify_on": "all"
     }
     """
-    
     def __init__(
             self,
             data_context,
@@ -81,21 +65,22 @@ class SlackNotificationAction(NamespacedValidationAction):
             slack_webhook,
             notify_on="all",
     ):
-        """
-        :param data_context: data context
-        :param renderer: dictionary specifying the renderer used to generate a query consumable by Slack API
-            e.g.:
+        """Construct a SlackNotificationAction
+
+        Args:
+            data_context:
+            renderer: dictionary specifying the renderer used to generate a query consumable by Slack API, for example:
                 {
                    "module_name": "great_expectations.render.renderer.slack_renderer",
                    "class_name": "SlackRenderer",
                }
-        :param slack_webhook: string - incoming Slack webhook to send notification to
-        :param notify_on: string - "all", "failure", "success" - specifies validation status that will trigger notification
+            slack_webhook: incoming Slack webhook to which to send notification
+            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
         """
-        self.data_context = data_context
+        super(SlackNotificationAction, self).__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
-            runtime_config={},
+            runtime_environment={},
             config_defaults={},
         )
         self.slack_webhook = slack_webhook
@@ -113,7 +98,7 @@ class SlackNotificationAction(NamespacedValidationAction):
                 type(validation_result_suite_identifier)
             ))
 
-        validation_success = validation_result_suite["success"]
+        validation_success = validation_result_suite.success
         
         if self.notify_on == "all" or \
                 self.notify_on == "success" and validation_success or \
@@ -124,10 +109,9 @@ class SlackNotificationAction(NamespacedValidationAction):
             return
 
 
-class StoreAction(NamespacedValidationAction):
+class StoreAction(ValidationAction):
     """
-    StoreAction is a namespeace-aware validation action that stores a validation result
-    in the store.
+    StoreAction stores a validation result in the ValidationsStore.
     """
 
     def __init__(self,
@@ -137,14 +121,11 @@ class StoreAction(NamespacedValidationAction):
         """
 
         :param data_context: data context
-        :param target_store_name: the name of the store in the data context which
-                should be used to store the validation result
+        :param target_store_name: the name of the param_store in the data context which
+                should be used to param_store the validation result
         """
 
         super(StoreAction, self).__init__(data_context)
-
-        # NOTE: Eventually, we probably need a check to verify that this store is compatible with validation_result_suite_identifiers.
-        # Unless ALL stores are compatible...
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
         else:
@@ -161,39 +142,36 @@ class StoreAction(NamespacedValidationAction):
                 type(validation_result_suite_identifier)
             ))
 
-
         self.target_store.set(validation_result_suite_identifier, validation_result_suite)
 
 
-class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
+class StoreEvaluationParametersAction(ValidationAction):
     """
-    ExtractAndStoreEvaluationParamsAction is a namespeace-aware validation action that
-    extracts evaluation parameters from a validation result and stores them in the store
+    StoreEvaluationParametersAction is a namespeace-aware validation action that
+    extracts evaluation parameters from a validation result and stores them in the param_store
     configured for this action.
 
     Evaluation parameters allow expectations to refer to statistics/metrics computed
     in the process of validating other prior expectations.
     """
 
-    def __init__(self,
-                 data_context,
-                 target_store_name=None,
-                 ):
+    def __init__(self, data_context, target_store_name=None):
         """
 
-        :param data_context: data context
-        :param target_store_name: the name of the store in the data context which
-                should be used to store the validation result
+        Args:
+            data_context: data context
+            target_store_name: the name of the store in the data context which
+                should be used to store the evaluation parameters
         """
-        super(ExtractAndStoreEvaluationParamsAction, self).__init__(data_context)
+        super(StoreEvaluationParametersAction, self).__init__(data_context)
 
         if target_store_name is None:
-            self.target_store = data_context.stores[data_context.evaluation_parameter_store_name]
+            self.target_store = data_context.evaluation_parameter_store
         else:
             self.target_store = data_context.stores[target_store_name]
 
     def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
-        logger.debug("ExtractAndStoreEvaluationParamsAction.run")
+        logger.debug("StoreEvaluationParametersAction.run")
 
         if validation_result_suite is None:
             return
@@ -203,15 +181,55 @@ class ExtractAndStoreEvaluationParamsAction(NamespacedValidationAction):
                 type(validation_result_suite_identifier)
             ))
 
+        self.data_context.store_evaluation_parameters(validation_result_suite)
 
-        self.data_context._extract_and_store_parameters_from_validation_results(
+
+class StoreMetricsAction(ValidationAction):
+    def __init__(self, data_context, requested_metrics, target_store_name="metrics_store"):
+        """
+
+        Args:
+            data_context: data context
+            requested_metrics: dictionary of metrics to store. Dictionary should have the following structure:
+
+                expectation_suite_name:
+                    metric_name:
+                        - metric_kwargs_id
+
+                You may use "*" to denote that any expectation suite should match.
+            target_store_name: the name of the store in the data context which
+                should be used to store the metrics
+        """
+        super(StoreMetricsAction, self).__init__(data_context)
+        self._requested_metrics = requested_metrics
+        self._target_store_name = target_store_name
+        try:
+            store = data_context.stores[target_store_name]
+        except KeyError:
+            raise InvalidDataContextConfigError("Unable to find store {} in your DataContext configuration.".format(
+                target_store_name))
+        if not isinstance(store, MetricStore):
+            raise DataContextError("StoreMetricsAction must have a valid MetricsStore for its target store.")
+
+    def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
+        logger.debug("StoreMetricsAction.run")
+
+        if validation_result_suite is None:
+            return
+
+        if not isinstance(validation_result_suite_identifier, ValidationResultIdentifier):
+            raise TypeError("validation_result_id must be of type ValidationResultIdentifier, not {0}".format(
+                type(validation_result_suite_identifier)
+            ))
+
+        self.data_context.store_validation_result_metrics(
+            self._requested_metrics,
             validation_result_suite,
-            validation_result_suite_identifier.expectation_suite_identifier.data_asset_name,
-            validation_result_suite_identifier.expectation_suite_identifier.expectation_suite_name,
-            validation_result_suite_identifier.run_id,
+            self._target_store_name
         )
 
-class UpdateDataDocsAction(NamespacedValidationAction):
+
+class UpdateDataDocsAction(ValidationAction):
     """
     UpdateDataDocsAction is a namespace-aware validation action that
     notifies the site builders of all the data docs sites of the data context
@@ -223,7 +241,6 @@ class UpdateDataDocsAction(NamespacedValidationAction):
         :param data_context: data context
         """
         super(UpdateDataDocsAction, self).__init__(data_context)
-
 
     def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
         logger.debug("UpdateDataDocsAction.run")

@@ -51,6 +51,42 @@ except ImportError:
     pybigquery = None
 
 
+class SqlAlchemyBatchReference(object):
+
+    def __init__(self, engine, table_name=None, schema=None, query=None):
+        self._engine = engine
+        if table_name is None and query is None:
+            raise ValueError("Table_name or query must be specified")
+
+        self._table_name = table_name
+        self._schema = schema
+        self._query = query
+
+    def get_init_kwargs(self):
+        if self._table_name and self._query:
+            # This is allowed in BigQuery where a temporary table name must be provided *with* the
+            # custom sql to execute.
+            kwargs = {
+                "engine": self._engine,
+                "table_name": self._table_name,
+                "custom_sql": self._query
+            }
+        elif self._table_name:
+            kwargs = {
+                "engine": self._engine,
+                "table_name": self._table_name
+            }
+        else:
+            kwargs = {
+                "engine": self._engine,
+                "custom_sql": self._query
+            }
+        if self._schema:
+            kwargs["schema"] = self._schema
+
+        return kwargs
+
+
 class MetaSqlAlchemyDataset(Dataset):
 
     def __init__(self, *args, **kwargs):
@@ -209,6 +245,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                  custom_sql=None, schema=None, *args, **kwargs):
 
         if custom_sql and not table_name:
+            #NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
+            #was used for a temp table and raising an error
+            schema = None
             # dashes are special characters in most databases so use underscores
             table_name = "ge_tmp_" + str(uuid.uuid4()).replace("-", "_")
             generated_table_name = table_name
@@ -236,6 +275,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if self.engine.dialect.name.lower() in ["postgresql", "mysql", "sqlite", "oracle", "mssql", "oracle"]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_module("sqlalchemy.dialects." + self.engine.dialect.name)
+
+            if engine and engine.dialect.name.lower() == "sqlite":
+                # sqlite temp tables only persist within a connection so override the engine
+                self.engine = engine.connect()
         elif self.engine.dialect.name.lower() == "snowflake":
             self.dialect = import_module("snowflake.sqlalchemy.snowdialect")
         elif self.engine.dialect.name.lower() == "redshift":
@@ -310,7 +353,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def get_row_count(self):
         count_query = sa.select([sa.func.count()]).select_from(
             self._table)
-        return self.engine.execute(count_query).scalar()
+        return int(self.engine.execute(count_query).scalar())
 
     def get_column_count(self):
         return len(self.columns)
@@ -331,8 +374,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ).label('null_count'),
         ]).select_from(self._table)
         count_results = dict(self.engine.execute(count_query).fetchone())
-        element_count = count_results['element_count']
-        null_count = count_results['null_count'] or 0
+        element_count = int(count_results.get('element_count') or 0)
+        null_count = int(count_results.get('null_count') or 0)
         return element_count - null_count
 
     def get_column_sum(self, column):
@@ -416,7 +459,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column_median = None
         elif nonnull_count % 2 == 0:
             # An even number of column values: take the average of the two center values
-            column_median = (
+            column_median = float(
                 column_values[0][0] +  # left center value
                 column_values[1][0]    # right center value
             ) / 2.0  # Average center values

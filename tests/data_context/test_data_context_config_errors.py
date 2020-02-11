@@ -1,7 +1,7 @@
 import pytest
 import os
 from great_expectations.data_context import DataContext
-from great_expectations.util import file_relative_path
+from great_expectations.data_context.util import file_relative_path
 import great_expectations.exceptions as ge_exceptions
 
 BASE_DIR = "fixtures"
@@ -43,29 +43,35 @@ def test_DataContext_raises_error_on_invalid_top_level_type():
     local_dir = file_relative_path(
         __file__, os.path.join(BASE_DIR, "invalid_top_level_value_type")
     )
-    with pytest.raises(ge_exceptions.InvalidConfigValueTypeError):
+    with pytest.raises(ge_exceptions.InvalidDataContextConfigError) as exc:
         DataContext(local_dir)
+
+    assert 'data_docs_sites' in exc.value.messages
 
 
 def test_DataContext_raises_error_on_invalid_config_version():
     local_dir = file_relative_path(
         __file__, os.path.join(BASE_DIR, "invalid_config_version")
     )
-    with pytest.raises(ge_exceptions.InvalidConfigVersionError):
+    with pytest.raises(ge_exceptions.InvalidDataContextConfigError) as exc:
         DataContext(local_dir)
+
+    assert 'config_version' in exc.value.messages
 
 
 def test_DataContext_raises_error_on_old_config_version():
     local_dir = file_relative_path(
         __file__, os.path.join(BASE_DIR, "old_config_version")
     )
-    with pytest.raises(ge_exceptions.UnsupportedConfigVersionError):
+    with pytest.raises(ge_exceptions.InvalidDataContextConfigError) as exc:
         DataContext(local_dir)
+
+    assert 'Error while processing DataContextConfig' in exc.value.message
 
 
 def test_DataContext_raises_error_on_missing_config_version_aka_version_zero():
     local_dir = file_relative_path(
         __file__, os.path.join(BASE_DIR, "version_zero")
     )
-    with pytest.raises(ge_exceptions.ZeroDotSevenConfigVersionError):
+    with pytest.raises(ge_exceptions.InvalidDataContextConfigError):
         DataContext(local_dir)

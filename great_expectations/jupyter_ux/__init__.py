@@ -4,11 +4,15 @@
 import logging
 import sys
 
-import great_expectations.render as render
 from datetime import datetime
 
 import tzlocal
 from IPython.core.display import display, HTML
+
+from great_expectations.render.renderer import ProfilingResultsColumnSectionRenderer, \
+    ExpectationSuiteColumnSectionRenderer
+from great_expectations.render.types import RenderedSectionContent
+from great_expectations.render.view import DefaultJinjaSectionView
 
 
 def set_data_source(context, data_source_type=None):
@@ -115,7 +119,7 @@ def setup_notebook_logging(logger=None):
     # warnings.filterwarnings('ignore')
 
 
-def list_available_data_asset_names(context, data_source_name=None):
+def show_available_data_asset_names(context, data_source_name=None):
     """ List asset names found in the current context. """
     # TODO: Needs tests.
     styles = """
@@ -134,7 +138,7 @@ def list_available_data_asset_names(context, data_source_name=None):
     """
 
     print("Inspecting your data sources. This may take a moment...")
-    expectation_suite_keys = context.list_expectation_suite_keys()
+    expectation_suite_keys = context.list_expectation_suites()
     datasources = context.list_datasources()
     html = ""
     for datasource in datasources:
@@ -146,7 +150,14 @@ def list_available_data_asset_names(context, data_source_name=None):
         for generator_info in generators:
             html += "generator: {0:s} ({1:s})".format(generator_info['name'], generator_info['class_name'])
             generator = ds.get_generator(generator_info['name'])
-            data_asset_names = sorted(generator.get_available_data_asset_names())
+
+            # TODO hacks to deal w/ inconsistent return types. Remove urgently
+            mystery_object = generator.get_available_data_asset_names()
+            if isinstance(mystery_object, dict) and "names" in mystery_object.keys():
+                data_asset_names = sorted([name[0] for name in mystery_object["names"]])
+            elif isinstance(mystery_object, list):
+                data_asset_names = sorted(mystery_object)
+
             if len(data_asset_names) > 0:
                 html += "<h3 style='margin: 0.2em 0'>Data Assets Found:</h3>"
                 html += styles
@@ -243,17 +254,12 @@ def display_column_expectations_as_section(
     """
 
     #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
-    column_expectation_list = [ e for e in expectation_suite["expectations"] if "column" in e["kwargs"] and e["kwargs"]["column"] == column ]
+    column_expectation_list = [ e for e in expectation_suite.expectations if "column" in e.kwargs and e.kwargs["column"] == column ]
 
     #TODO: Handle the case where zero evrs match the column name
 
-    document = render.renderer.ExpectationSuiteColumnSectionRenderer().render(column_expectation_list)
-    view = render.view.DefaultJinjaSectionView().render(
-        render.types.RenderedComponentContentWrapper(**{
-            "section": document,
-            "section_loop": {"index": 1},
-        })
-    )
+    document = ExpectationSuiteColumnSectionRenderer().render(column_expectation_list).to_json_dict()
+    view = DefaultJinjaSectionView().render({"section": document, "section_loop": 1})
 
     if include_styling:
         html_to_display = bootstrap_link_element+cooltip_style_element+view
@@ -266,43 +272,43 @@ def display_column_expectations_as_section(
         display(HTML(html_to_display))
 
 
-def display_column_evrs_as_section(
-    evrs,
-    column,
-    include_styling=True,
-    return_without_displaying=False,
-):
-    """This is a utility function to render all of the EVRs in an ExpectationSuite with the same column name as an HTML block.
-
-    By default, the HTML block is rendered using ExpectationSuiteColumnSectionRenderer and the view is rendered using DefaultJinjaSectionView.
-    Therefore, it should look exactly the same as the default renderer for build_docs. 
-
-    Example usage:
-    display_column_evrs_as_section(exp, "my_column")
-    """
-
-    #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
-    column_evr_list = [ e for e in evrs["results"] if "column" in e["expectation_config"]["kwargs"] and e["expectation_config"]["kwargs"]["column"] == column ]
-
-    #TODO: Handle the case where zero evrs match the column name
-
-    document = render.renderer.ProfilingResultsColumnSectionRenderer().render(column_evr_list)
-    view = render.view.DefaultJinjaSectionView().render(
-        render.types.RenderedComponentContentWrapper(**{
-            "section": document,
-            "section_loop": {"index": 1},
-        })
-    )
-
-    if include_styling:
-        html_to_display = bootstrap_link_element+cooltip_style_element+view
-    else:
-        html_to_display = view
-
-    if return_without_displaying:
-        return html_to_display
-    else:
-        display(HTML(html_to_display))
+# def display_column_evrs_as_section(
+#     evrs,
+#     column,
+#     include_styling=True,
+#     return_without_displaying=False,
+# ):
+#     """This is a utility function to render all of the EVRs in an ExpectationSuite with the same column name as an HTML block.
+#
+#     By default, the HTML block is rendered using ExpectationSuiteColumnSectionRenderer and the view is rendered using DefaultJinjaSectionView.
+#     Therefore, it should look exactly the same as the default renderer for build_docs.
+#
+#     Example usage:
+#     display_column_evrs_as_section(exp, "my_column")
+#     """
+#
+#     #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
+#     column_evr_list = [ e for e in evrs.results if "column" in e.expectation_config.kwargs and e.expectation_config.kwargs["column"] == column ]
+#
+#     #TODO: Handle the case where zero evrs match the column name
+#
+#     document = ProfilingResultsColumnSectionRenderer().render(column_evr_list)
+#     view = DefaultJinjaSectionView().render(
+#         {
+#             "section": document,
+#             "section_loop": {"index": 1},
+#         }
+#     )
+#
+#     if include_styling:
+#         html_to_display = bootstrap_link_element+cooltip_style_element+view
+#     else:
+#         html_to_display = view
+#
+#     if return_without_displaying:
+#         return html_to_display
+#     else:
+#         display(HTML(html_to_display))
 
 
 # When importing the jupyter_ux module, we set up a preferred logging configuration

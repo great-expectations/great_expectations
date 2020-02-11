@@ -28,7 +28,7 @@ The default Data Docs site configuration looks like this:
     local_site:
       class_name: SiteBuilder
       store_backend:
-        class_name: FixedLengthTupleFilesystemStoreBackend
+        class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
 
 Here is an example of a site configuration from great_expectations.yml with defaults defined explicitly:
@@ -37,11 +37,10 @@ Here is an example of a site configuration from great_expectations.yml with defa
 
   data_docs_sites:
     local_site: # site name
-      datasource_whitelist: '*' # used to restrict the Datasources
       module_name: great_expectations.render.renderer.site_builder
       class_name: SiteBuilder
       store_backend:
-        class_name: FixedLengthTupleFilesystemStoreBackend
+        class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
       site_index_builder:
         class_name: DefaultSiteIndexBuilder
@@ -77,6 +76,25 @@ attribute allows to include (``eq`` for exact match) or exclude (``ne``) validat
 
 .. _customizing_data_docs_store_backend:
 
+Limiting Validation Results
+============================
+
+If you would like to limit rendered Validation Results to the n most-recent, you may
+do so by setting the `validation_results_limit` key in your Data Docs configuration:
+
+.. code-block:: yaml
+
+  data_docs_sites:
+    local_site:
+      class_name: SiteBuilder
+      store_backend:
+        class_name: TupleFilesystemStoreBackend
+        base_directory: uncommitted/data_docs/local_site/
+      site_index_builder:
+        class_name: DefaultSiteIndexBuilder
+        show_cta_footer: true
+        validation_results_limit: 5
+
 Automatically Publishing Data Docs
 =====================================
 
@@ -88,7 +106,7 @@ will automatically save the resulting site to that bucket.
 .. code-block:: yaml
 
   store_backend:
-    class_name: FixedLengthTupleS3StoreBackend
+    class_name: TupleS3StoreBackend
     bucket: data-docs.my_org.org
     prefix:
 
@@ -112,7 +130,7 @@ the validations renderer, and no profiling results are rendered at all.
       local_site:
         class_name: SiteBuilder
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
         site_section_builders:
           expectations:
@@ -162,7 +180,7 @@ suites available to the configured context and validations available in the
 
 .. code-block:: bash
 
-    great_expectations build-docs
+    great_expectations docs build
 
 
 When called without additional arguments, this command will render all the Data
@@ -175,7 +193,7 @@ To disable the web browser opening behavior use `--no-view` option.
 
 To render just one site, use `--site_name SITE_NAME` option.
 
-Here is when the `build-docs` command should be called:
+Here is when the ``docs build`` command should be called:
 
 * when you want to fully rebuild a Data Docs site
 * after a new expectation suite is added or an existing one is edited
@@ -348,7 +366,7 @@ Before modifying your project configuration, the relevant section looks like thi
     local_site:
       class_name: SiteBuilder
       store_backend:
-        class_name: FixedLengthTupleFilesystemStoreBackend
+        class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
 
 This is what it looks like after your changes are added:
@@ -359,7 +377,7 @@ This is what it looks like after your changes are added:
       local_site:
         class_name: SiteBuilder
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
         site_section_builders:
           expectations:
@@ -389,7 +407,7 @@ Note that if your ``data_docs_sites`` configuration contains a ``site_section_bu
 defaults for anything you would like rendered. By omitting the ``profiling`` key within ``site_section_builders``, your third goal
 is achieved and Data Docs will no longer render Profiling Results pages.
 
-Lastly, to compile your newly-customized Data Docs local site, you run ``great_expectations build-docs`` from the command line.
+Lastly, to compile your newly-customized Data Docs local site, you run ``great_expectations docs build`` from the command line.
 
 ``site_section_builders`` defaults:
 

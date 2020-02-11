@@ -1,13 +1,13 @@
 from .content_block import ContentBlockRenderer
 
 from great_expectations.render.types import (
-    RenderedComponentContent,
-)
+    RenderedBulletListContent, RenderedStringTemplateContent)
 
 
 class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     """Render a bullet list of exception messages raised for provided EVRs"""
 
+    _rendered_component_type = RenderedBulletListContent
     _content_block_type = "bullet_list"
 
     _default_header = 'Failed expectations <span class="mr-3 triangle"></span>'
@@ -53,25 +53,23 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     @classmethod
     def _missing_content_block_fn(cls, evr, styling=None, include_column_name=True):
         # Only render EVR objects for which an exception was raised
-        if ("expectation_config" in evr and
-                "exception_info" in evr and
-                evr["exception_info"]["raised_exception"] is True):
+        if evr.exception_info["raised_exception"] is True:
             template_str = "$expectation_type raised an exception: $exception_message"
             if include_column_name:
                 template_str = "$column: " + template_str
 
             try:
-                column = evr["expectation_config"]["kwargs"]["column"]
+                column = evr.expectation_config.kwargs["column"]
             except KeyError:
                 column = None
-            return [RenderedComponentContent(**{
+            return [RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": template_str,
                     "params": {
                         "column": column,
-                        "expectation_type": evr["expectation_config"]["expectation_type"],
-                        "exception_message": evr["exception_info"]["exception_message"]
+                        "expectation_type": evr.expectation_config.expectation_type,
+                        "exception_message": evr.exception_info["exception_message"]
                     },
                     "styling": styling,
                 }

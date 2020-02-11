@@ -1,22 +1,26 @@
 import altair as alt
 import pandas as pd
 
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
     RenderedDocumentContent,
     RenderedSectionContent,
     RenderedComponentContent,
-)
-from great_expectations.render.renderer import Renderer
+    RenderedHeaderContent, RenderedBulletListContent, RenderedTableContent, RenderedStringTemplateContent,
+    RenderedGraphContent, ValueListContent)
 
 
 class CustomPageRenderer(Renderer):
     @classmethod
     def _get_header_content_block(cls, header="", subheader="", highlight=True):
-        return RenderedComponentContent(**{
+        return RenderedHeaderContent(**{
             "content_block_type": "header",
-            "header": {
-                "template": header
-            },
+            "header": RenderedStringTemplateContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": header,
+                }
+            }),
             "subheader": subheader,
             "styling": {
                 "classes": ["col-12"],
@@ -28,7 +32,7 @@ class CustomPageRenderer(Renderer):
     
     @classmethod
     def _get_bullet_list_content_block(cls, header="", subheader="", col=12):
-        return RenderedComponentContent(**{
+        return RenderedBulletListContent(**{
             "content_block_type": "bullet_list",
             "header": header,
             "subheader": subheader,
@@ -48,7 +52,7 @@ class CustomPageRenderer(Renderer):
     
     @classmethod
     def _get_table_content_block(cls, header="", subheader="", col=12):
-        return RenderedComponentContent(**{
+        return RenderedTableContent(**{
             "content_block_type": "table",
             "header": header,
             "subheader": subheader,
@@ -84,7 +88,7 @@ class CustomPageRenderer(Renderer):
         ).properties(height=200, width=200, autosize="fit")
         chart = bars.to_json()
         
-        return RenderedComponentContent(**{
+        return RenderedGraphContent(**{
             "content_block_type": "graph",
             "header": header,
             "subheader": subheader,
@@ -99,7 +103,7 @@ class CustomPageRenderer(Renderer):
     
     @classmethod
     def _get_tooltip_string_template_content_block(cls):
-        return RenderedComponentContent(**{
+        return RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": "This is a string template with tooltip, using a top-level custom tag.",
@@ -118,7 +122,7 @@ class CustomPageRenderer(Renderer):
     
     @classmethod
     def _get_string_template_content_block(cls):
-        return RenderedComponentContent(**{
+        return RenderedStringTemplateContent(**{
             "content_block_type": "string_template",
             "string_template": {
                 "template": "$icon This is a Font Awesome Icon, using a param-level custom tag\n$red_text\n$bold_serif",
@@ -156,7 +160,7 @@ class CustomPageRenderer(Renderer):
     
     @classmethod
     def _get_value_list_content_block(cls, header="", subheader="", col=12):
-        return RenderedComponentContent(**{
+        return ValueListContent(**{
             "content_block_type": "value_list",
             "header": header,
             "subheader": subheader,

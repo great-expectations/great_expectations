@@ -119,7 +119,7 @@ information is stored in this file.
           class_name: PandasDataset
         generators:
           default:
-            class_name: SubdirReaderGenerator
+            class_name: SubdirReaderBatchKwargsGenerator
             base_directory: ../data
             reader_options:
               sep:
@@ -171,32 +171,13 @@ The corresponding config would be:
           class_name: SqlAlchemyDataset
         generators:
           default:
-            class_name: TableGenerator
+            class_name: TableBatchKwargsGenerator
 
 Note: the SQL credentials you entered are stored in the ``uncommitted/config_variables.yml`` file.
 Note that this file goes in the ``uncommitted/`` directory, which should *NOT* be committed to source control.
 The ${my_db} variable is substituted with the credentials at runtime.
 
 
-Configuring Slack Notifications
-----------------------------------------
-
-Great Expectations can post messages to a Slack channel each time a dataset is validated. This helps teams to monitor
-data quality in their pipeline in real time. Here is what these messages look like:
-
-.. image:: ../images/validation_result_slack_message_example.png
-    :width: 400px
-
-The ``great_expectations init`` command prompts you to enter a Slack webhook URL to enable this functionality.
-
-Obtaining this URL is easy. This article walks you through the steps:
-`Incoming Webhooks For Slack <https://slack.com/help/articles/115005265063-incoming-webhooks-for-slack>`_
-
-Since Slack webhook URLs are security credentials, we store them in the ``uncommitted/config_variables.yml`` file that
-will not be checked in into your source control. The config property name is `validation_notification_slack_webhook`
-
-If you don't have a Slack webhook URL right now, you can decline the ``init`` command's prompt and configure this
-feature later.
 
 Profiling data
 ----------------------------------------

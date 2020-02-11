@@ -17,6 +17,7 @@ Once Great Expectations is installed, follow this tutorial for a quick start.
    :maxdepth: 1
 
    /getting_started/cli_init
+   /getting_started/typical_workflow
 
 (We recommend deploying within a virtual environment. If you're not familiar with pip, virtual environments, notebooks,
 or git, you may want to check out the :ref:`supporting_resources` section before continuing.)

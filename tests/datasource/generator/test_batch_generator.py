@@ -1,8 +1,8 @@
-from great_expectations.datasource.generator import GlobReaderGenerator
+from great_expectations.datasource.generator import GlobReaderBatchKwargsGenerator
 
 
-def test_batch_generator_class_name():
-    generator = GlobReaderGenerator()
+def test_batch_generator_class_name(basic_pandas_datasource):
+    generator = GlobReaderBatchKwargsGenerator(datasource=basic_pandas_datasource)
     generator_config = generator.get_config()
 
-    assert generator_config["class_name"] == "GlobReaderGenerator"
+    assert generator_config["class_name"] == "GlobReaderBatchKwargsGenerator"

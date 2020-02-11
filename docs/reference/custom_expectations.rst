@@ -355,7 +355,7 @@ A similar approach works for the command-line tool.
 
 .. code-block:: bash
 
-    >> great_expectations validate \
+    >> great_expectations validation csv \
         my_data_file.csv \
         my_expectations.json \
         dataset_class=custom_dataset.CustomPandasDataset
@@ -387,7 +387,7 @@ CustomPandasDataset in a DataContext. Note the use of standard python dot notati
           class_name: CustomPandasDataset
         generators:
           default:
-            class_name: SubdirReaderGenerator
+            class_name: SubdirReaderBatchKwargsGenerator
             base_directory: /data
             reader_options:
               sep: \t

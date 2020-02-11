@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .data_context import (
-    ConfigOnlyDataContext, 
+    BaseDataContext,
     DataContext,
     ExplorerDataContext,
 )

@@ -1,5 +1,41 @@
 .. _changelog:
 
+0.9.0
+-----------------
+
+Version 0.9.0 is a major update to Great Expectations! The DataContext has continued to evolve into a powerful tool for ensuring that Expectation Suites can properly represent the way users think about their data, and upgrading will make it much easier to store and share expectation suites, and to build data docs that support your whole team. You’ll get awesome new features including improvements to data docs look and the ability to choose and store metrics for building flexible data quality dashboards.
+
+The changes for version 0.9.0 fall into several broad areas:
+
+1. Onboarding
+
+Release 0.9.0 of Great Expectations makes it much easier to get started with the project. The `init` flow has grown to support a much wider array of use cases and to use more natural language rather than introducing GreatExpectations concepts earlier. You can more easily configure different backends and datasources, take advantage of guided walkthroughs to find and profile data, and share project configurations with colleagues.
+
+If you have already completed the `init` flow using a previous version of Great Expectations, you do not need to rerun the command. However, **there are some small changes to your configuration that will be required**. See :ref:`migrating_versions` for details.
+
+1. CLI Command Improvements
+
+With this release we have introduced a consistent naming pattern for accessing subcommands based on the noun (a Great Expectations object like `suite` or `docs`) and verb (an action like `edit` or `new`). The new user experience will allow us to more naturally organize access to CLI tools as new functionality is added.
+
+1. Expectation Suite Naming and Namespace Changes
+
+Defining shared expectation suites and validating data from different sources is much easier in this release. The DataContext, which manages storage and configuration of expectations, validations, profiling, and data docs, no longer requires that expectation suites live in a datasource-specific “namespace.” Instead, you should name suites with the logical name corresponding to your data, making it easy to share them or validate against different data sources. For example, the expectation suite "npi" for National Provider Identifier data can now be shared across teams who access the same logical data in local systems using Pandas, on a distributed Spark cluster, or via a relational database.
+
+Batch Kwargs, or instructions for a datasource to build a batch of data, are similarly freed from a required namespace, and you can more easily integrate Great Expectations into workflows where you do not need to use a BatchKwargsGenerator (usually because you have a batch of data ready to validate, such as in a table or a known directory).
+
+The most noticeable impact of this API change is in the complete removal of the DataAssetIdentifier class. For example, the `create_expectation_suite` and `get_batch` methods now no longer require a data_asset_name parameter, relying only on the expectation_suite_name and batch_kwargs to do their job. Similarly, there is no more asset name normalization required. See the upgrade guide for more information.
+
+1. Metrics and Evaluation Parameter Stores
+
+Metrics have received much more love in this release of Great Expectations! We've improved the system for declaring evaluation parameters that support dependencies between different expectation suites, so you can easily identify a particular field in the result of one expectation to use as the input into another. And the MetricsStore is now much more flexible, supporting a new ValidationAction that makes it possible to select metrics from a validation result to be saved in a database where they can power a dashboard.
+
+1. Internal Type Changes and Improvements
+
+Finally, in this release, we have done a lot of work under the hood to make things more robust, including updating all of the internal objects to be more strongly typed. That change, while largely invisible to end users, paves the way for some really exciting opportunities for extending Great Expectations as we build a bigger community around the project.
+
+
+We are really excited about this release, and encourage you to upgrade right away to take advantage of the more flexible naming and simpler API for creating, accessing, and sharing your expectations. As always feel free to join us on Slack for questions you don't see addressed!
+
 
 0.8.9__develop
 -----------------
@@ -53,7 +89,7 @@
 * Add support to S3 generator for retrieving directories by specifying the `directory_assets` configuration
 * Fix warning regarding implicit class_name during init flow
 * Expose build_generator API publicly on datasources
-* Allow configuration of known extensions and return more informative message when SubdirReaderGenerator cannot find
+* Allow configuration of known extensions and return more informative message when SubdirReaderBatchKwargsGenerator cannot find
   relevant files.
 * Add support for allow_relative_error on internal dataset quantile functions, and add support for
   build_continuous_partition_object in Redshift
@@ -140,8 +176,8 @@ Highlights include:
 
 3. Partitioners: Batch Kwargs are clarified and enhanced to help easily reference well-known chunks of data using a
    partition_id. Batch ID and Batch Fingerprint help round out support for enhanced metadata around data
-   assets that GE validates. See :ref:`batch_identifiers` for more information. The `GlobReaderGenerator`,
-   `QueryGenerator`, `S3Generator`, `SubdirReaderGenerator`, and `TableGenerator` all support partition_id for
+   assets that GE validates. See :ref:`batch_identifiers` for more information. The `GlobReaderBatchKwargsGenerator`,
+   `QueryBatchKwargsGenerator`, `S3GlobReaderBatchKwargsGenerator`, `SubdirReaderBatchKwargsGenerator`, and `TableBatchKwargsGenerator` all support partition_id for
    easily accessing data assets.
 
 4. Other Improvements:
@@ -166,7 +202,7 @@ v0.7.10
 -----------------
 * Fix an issue in generated documentation where the Home button failed to return to the index
 * Add S3 Generator to module docs and improve module docs formatting
-* Add support for views to QueryGenerator
+* Add support for views to QueryBatchKwargsGenerator
 * Add success/failure icons to index page
 * Return to uniform histogram creation during profiling to avoid large partitions for internal performance reasons
 

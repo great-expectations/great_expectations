@@ -5,7 +5,7 @@ import logging
 import pandas as pd
 import boto3
 
-from great_expectations.datasource.generator.s3_generator import S3Generator
+from great_expectations.datasource.generator.s3_generator import S3GlobReaderBatchKwargsGenerator
 from great_expectations.exceptions import BatchKwargsError
 
 
@@ -39,16 +39,16 @@ def mock_s3_bucket():
 
 
 @pytest.fixture
-def s3_generator(mock_s3_bucket):
+def s3_generator(mock_s3_bucket, basic_sparkdf_datasource):
     # We configure a generator that will fetch from (mocked) my_bucket
     # and will use glob patterns to match returned assets into batches of the same asset
-    generator = S3Generator("my_generator",
-                            datasource=None,
-                            bucket=mock_s3_bucket,
-                            reader_options={
+    generator = S3GlobReaderBatchKwargsGenerator("my_generator",
+                                                 datasource=basic_sparkdf_datasource,
+                                                 bucket=mock_s3_bucket,
+                                                 reader_options={
                                 "sep": ","
                             },
-                            assets={
+                                                 assets={
                                 "data": {
                                     "prefix": "data/",
                                     "delimiter": "",
@@ -80,14 +80,14 @@ def s3_generator(mock_s3_bucket):
                                     "max_keys": 1
                                 }
                             }
-                            )
+                                                 )
     yield generator
 
 
 def test_s3_generator_basic_operation(s3_generator):
     # S3 Generator sees *only* configured assets
     assets = s3_generator.get_available_data_asset_names()
-    assert set(assets) == {"data", "data_dirs", "other", "delta_files", "other_empty_delimiter"}
+    assert set(assets["names"]) == set([('data', 'file'), ('data_dirs', 'file'), ('other', 'file'), ('delta_files', 'file'), ('other_empty_delimiter', 'file')])
 
     # We should observe that glob, prefix, delimiter all work together
     # They can be defined in the generator or overridden by a particular asset
@@ -101,7 +101,7 @@ def test_s3_generator_basic_operation(s3_generator):
     with pytest.raises(BatchKwargsError) as err:
         batch_kwargs = [kwargs for kwargs in s3_generator.get_iterator("other")]
         # The error should show the common prefixes
-        assert "CommonPrefixes" in err.value.batch_kwargs
+    assert "common_prefixes" in err.value.batch_kwargs
 
 
 def test_s3_generator_incremental_fetch(s3_generator, caplog):
