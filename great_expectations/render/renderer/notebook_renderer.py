@@ -81,7 +81,8 @@ batch_kwargs = {}
 batch = context.get_batch(batch_kwargs, expectation_suite_name)
 batch.head()""".format(
                 suite_name, batch_kwargs
-            )
+            ),
+            lint=True
         )
 
     def add_footer(self):
@@ -107,6 +108,7 @@ results = context.run_validation_operator("action_list_operator", assets_to_vali
 expectation_suite_identifier = list(results["details"].keys())[0]
 validation_result_identifier = ValidationResultIdentifier(
     expectation_suite_identifier=expectation_suite_identifier,
+    batch_identifier=batch.batch_kwargs.to_id(),
     run_id=run_id
 )
 context.build_data_docs()
