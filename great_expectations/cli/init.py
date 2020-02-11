@@ -40,7 +40,7 @@ except ImportError:
 
 @click.command()
 @click.option(
-    "--target_directory",
+    "--target-directory",
     "-d",
     default="./",
     help="The root of the project directory where you want to initialize Great Expectations.",
