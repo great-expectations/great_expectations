@@ -91,6 +91,8 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
     if batch_kwargs:
         try:
             batch_kwargs = json.loads(batch_kwargs)
+            if datasource:
+                batch_kwargs["datasource"] = datasource
             _batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
             assert isinstance(_batch, DataAsset)
         except json.decoder.JSONDecodeError as je:
@@ -98,6 +100,9 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
             sys.exit(1)
         except ge_exceptions.DataContextError:
             cli_message("<red>Please check that your batch_kwargs are able to load a batch.</red>")
+            sys.exit(1)
+        except ValueError as ve:
+            cli_message("<red>Please check that your batch_kwargs are able to load a batch.\n{}</red>".format(ve))
             sys.exit(1)
     else:
         cli_message("""

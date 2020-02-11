@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 import json
 import os
 
-import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -286,7 +285,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     )
     assert result.exit_code == 1
     assert (
-        "Unable to load datasource not_real -- no configuration found or invalid configuration."
+        "Unable to load datasource `not_real` -- no configuration found or invalid configuration."
         in result.output
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -401,9 +400,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.skip(reason="not implemented")
-def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kwargs_without_datasource(
-    caplog
+def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error(
+    caplog,
+    titanic_data_context,
 ):
     """
     Given:
@@ -415,46 +414,27 @@ def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kw
     Then:
     - The user should see a nice error and the program halts before notebook compilation.
     '"""
-    assert False
+    project_dir = titanic_data_context.root_directory
+    context = DataContext(project_dir)
+    context.create_expectation_suite("foo")
+
+    runner = CliRunner(mix_stderr=False)
+    batch_kwargs = {"path": "../data/Titanic.csv"}
+    result = runner.invoke(
+        cli,
+        ["suite", "edit", "foo", "-d", project_dir, "--batch_kwargs", json.dumps(batch_kwargs)],
+        catch_exceptions=False
+    )
+    stdout = result.output
+    assert result.exit_code == 1
+    assert 'Please check that your batch_kwargs are able to load a batch.' in stdout
+    assert 'Unable to load datasource `None`' in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.skip(reason="not implemented")
-def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_batch_kwargs_inlcuding_datasource_in_batch_kwargs(
-    caplog
-):
-    """
-    Given:
-    - the suite foo exists
-    - the a datasource bar exists
-    - and the users runs this
-    great_expectations suite edit foo --batch_kwargs '{"path": "data/10k.csv", "datasource": "bar"}'
-
-    Then:
-    - The user gets a working notebook
-    '"""
-    assert False
-
-
-@pytest.mark.skip(reason="not implemented")
-def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_datasource_arg_and_batch_kwargs(
-    caplog
-):
-    """
-    Given:
-    - the suite foo exists
-    - the a datasource bar exists
-    - and the users runs this
-    great_expectations suite edit foo --datasource bar --batch_kwargs '{"path": "data/10k.csv"}'
-
-    Then:
-    - The user gets a working notebook
-    '"""
-    assert False
-
-
-@pytest.mark.xfail(reason="not implemented")
-def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_datasource_arg_and_batch_kwargs(
-    caplog
+def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_batch_kwargs(
+    caplog,
+    titanic_data_context,
 ):
     """
     Given:
@@ -465,8 +445,34 @@ def test_suite_edit_on_exsiting_suite_one_datasources_no_generator_with_datasour
 
     Then:
     - The user gets a working notebook
-    '"""
-    assert False
+    """
+    project_dir = titanic_data_context.root_directory
+    context = DataContext(project_dir)
+    context.create_expectation_suite("foo")
+
+    runner = CliRunner(mix_stderr=False)
+    batch_kwargs = {"path": os.path.join(project_dir, "../", "data", "Titanic.csv")}
+    result = runner.invoke(
+        cli,
+        ["suite", "edit", "foo", "-d", project_dir, "--batch_kwargs",
+         json.dumps(batch_kwargs),
+         "--datasource",
+         "mydatasource",
+         "--no-jupyter"
+         ],
+        catch_exceptions=False
+    )
+    stdout = result.output
+    assert result.exit_code == 0
+    assert 'To continue editing this suite, run' in stdout
+
+    expected_notebook_path = os.path.join(
+        project_dir, "uncommitted", "foo.ipynb"
+    )
+    assert os.path.isfile(expected_notebook_path)
+    expected_suite_path = os.path.join(project_dir, "expectations", "foo.json")
+    assert os.path.isfile(expected_suite_path)
+    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_suite_edit_one_datasources_no_generator_with_no_additional_args(
@@ -496,7 +502,6 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args(
 
     root_dir = project_root_dir
     os.chdir(root_dir)
-    context = DataContext(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
@@ -508,7 +513,6 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args(
 
     assert result.exit_code == 0
     assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
-
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -524,7 +528,6 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args(
     assert "Which data would you like to use" not in stdout
     assert "Enter the path" in stdout
     assert "To continue editing this suite, run" in stdout
-
 
     expected_notebook_path = os.path.join(
         root_dir, "uncommitted", "my_new_suite.ipynb"
