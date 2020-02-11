@@ -42,8 +42,14 @@ def test_preserve_comments_in_yml_after_adding_datasource(data_context):
         "test_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
-        base_directory="../data",
-    )
+        generators={
+    "subdir_reader": {
+        "class_name": "SubdirReaderBatchKwargsGenerator",
+        "base_directory": "../data",
+    }
+}
+)
+
 
     # TODO The comments on lines 1,2 & 4 of the fixture exposes the bug.
     expected = """# This is a basic configuration for testing.
@@ -60,7 +66,7 @@ datasources:
     generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
-        class_name: SubdirReaderGenerator
+        class_name: SubdirReaderBatchKwargsGenerator
         base_directory: ../data
         reader_options:
           sep:
@@ -72,7 +78,7 @@ datasources:
       class_name: PandasDataset
     generators:
       default:
-        class_name: SubdirReaderGenerator
+        class_name: SubdirReaderBatchKwargsGenerator
         base_directory: ../data
         reader_options:
           sep:
@@ -94,14 +100,14 @@ stores:
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
-    class_name: InMemoryEvaluationParameterStore
+    class_name: EvaluationParameterStore
 
   validations_store:
-    class_name: BasicInMemoryStore
+    class_name: ValidationsStore
     
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
@@ -123,7 +129,7 @@ validation_operators:
       #       class_name: SlackRenderer
       - name: store_evaluation_params
         action:
-          class_name: ExtractAndStoreEvaluationParamsAction
+          class_name: StoreEvaluationParametersAction
           target_store_name: evaluation_parameter_store
 
 

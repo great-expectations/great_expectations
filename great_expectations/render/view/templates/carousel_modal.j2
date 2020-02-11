@@ -1,0 +1,259 @@
+{% if expectation_suite_name %}
+  {% set expectation_suite_name_dot_count = expectation_suite_name.count(".") -%}
+{% endif %}
+
+{% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
+  {% set static_images_dir = ((expectation_suite_name_dot_count + 3) * "../") + "static/images/" -%}
+{% elif utm_medium == "expectation-suite-page" %}
+  {% set static_images_dir = ((expectation_suite_name_dot_count + 1) * "../") + "static/images/" -%}
+{% elif utm_medium == "index-page" %}
+  {% set static_images_dir = "./static/images/" -%}
+{% endif %}
+<style type="text/css">
+div.walkthrough-card img {
+   padding: 0 40px;
+ }
+</style>
+
+<div class="modal fade ge-walkthrough-modal" tabindex="-1" role="dialog" aria-labelledby="ge-walkthrough-modal-title"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="ge-walkthrough-modal-title">Great Expectations Walkthrough</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="card walkthrough-card bg-dark text-white walkthrough-1">
+        <div class="card-header">How to work with Great Expectations</div>
+        <img src="{{ static_images_dir + "iterative-dev-loop.png" }}" class="card-img-top" alt="...">
+
+            <div class="card-body">
+{#                  <h5 class="card-title">How to work with Great Expectations</h5>#}
+                  <p>Welcome! The best way to work with Great Expectations is in this iterative dev loop.</p>
+            </div>
+            <div class="card-footer walkthrough-links">
+              <div class="container">
+                <div class="row">
+                  <div class="col-sm">
+                    &nbsp;
+                  </div>
+                  <div class="col-6 text-center text-secondary">
+                    1 of 7
+                    <div class="progress" style="height: 2px">
+                      <div class="progress-bar bg-info" role="progressbar" style="width: 16%" aria-valuenow="16" aria-valuemin="0" aria-valuemax="16"></div>
+                    </div>
+                  </div>
+                  <div class="col-sm">
+                    <a href="#" class="next-link btn btn-primary float-right" onclick="go_to_slide(2)">Next</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+
+
+                <div class="card walkthrough-card bg-dark text-white walkthrough-2">
+                <div class="card-header">What are Expectations?</div>
+                <img src="{{ static_images_dir + "values_not_null_html_en.jpg" }}" class="card-img-top" alt="...">
+                <!--<img src="../static/images/values_not_null_html_en.jpg" }}" class="card-img-top" alt="...">-->
+                <div class="card-body">
+{#                  <h5 class="card-title">What are Expectations?</h5>#}
+                  <p>An expectation is a falsifiable, verifiable statement about data.</p>
+                  <p>Expectations provide a language to talk about data characteristics and data quality - humans to humans, humans to machines and machines to machines.</p>
+                  <p>Expectations are both data tests and docs!</p>
+                </div>
+                <div class="card-footer walkthrough-links">
+                  <div class="container">
+                    <div class="row">
+                      <div class="col-sm">
+                        <a href="#" class="next-link btn btn-secondary float-left" onclick="go_to_slide(1)">Back</a>
+                      </div>
+                      <div class="col-6 text-center text-secondary">
+                        2 of 7
+                        <div class="progress" style="height: 2px">
+                          <div class="progress-bar bg-info" role="progressbar" style="width: 32%" aria-valuenow="32" aria-valuemin="0" aria-valuemax="32"></div>
+                        </div>
+                      </div>
+                      <div class="col-sm">
+                        <a href="#" class="next-link btn btn-primary float-right" onclick="go_to_slide(3)">Next</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </div>
+
+
+                <div class="card walkthrough-card bg-dark text-white walkthrough-3">
+                <div class="card-header">An expectation can be presented in a machine-friendly JSON</div>
+                <img src="{{ static_images_dir + "values_not_null_json.jpg" }}" class="card-img-top" alt="...">
+                <!--<img src="../static/images/values_not_null_json.jpg" }}" class="card-img-top" alt="...">-->
+                <div class="card-body">
+{#                  <h5 class="card-title">An expectation can be presented in a machine-friendly JSON</h5>#}
+                  <p>A machine can test if a dataset conforms to the expectation.</p>
+                </div>
+                <div class="card-footer walkthrough-links">
+                  <div class="container">
+                    <div class="row">
+                      <div class="col-sm">
+                        <a href="#" class="next-link btn btn-secondary float-left" onclick="go_to_slide(2)">Back</a>
+                      </div>
+                      <div class="col-6 text-center text-secondary">
+                        3 of 7
+                        <div class="progress" style="height: 2px">
+                          <div class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="50"></div>
+                        </div>
+                      </div>
+                      <div class="col-sm">
+                        <a href="#" class="next-link btn btn-primary float-right" onclick="go_to_slide(4)">Next</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </div>
+
+                <div class="card walkthrough-card bg-dark text-white walkthrough-4">
+                <div class="card-header">Validation produces a validation result object</div>
+                <img src="{{ static_images_dir + "values_not_null_validation_result_json.jpg" }}" class="card-img-top" alt="...">
+                <!--<img src="../static/images/values_not_null_validation_result_json.jpg" }}" class="card-img-top" alt="...">-->
+                <div class="card-body">
+{#                  <h5 class="card-title">Validation produces a validation result object</h5>#}
+                  <p>Here's an example JSON (not from your data). This object has rich context about the test failure.</p>
+                </div>
+                <div class="card-footer walkthrough-links">
+                  <div class="container">
+                    <div class="row">
+                      <div class="col-sm">
+                        <a href="#" class="next-link btn btn-secondary float-left" onclick="go_to_slide(3)">Back</a>
+                      </div>
+                      <div class="col-6 text-center text-secondary">
+                        4 of 7
+                        <div class="progress" style="height: 2px">
+                          <div class="progress-bar bg-info" role="progressbar" style="width: 68%" aria-valuenow="68" aria-valuemin="0" aria-valuemax="68"></div>
+                        </div>
+                      </div>
+                      <div class="col-sm">
+                        <a href="#" class="next-link btn btn-primary float-right" onclick="go_to_slide(5)">Next</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </div>
+
+                <div class="card walkthrough-card bg-dark text-white walkthrough-5">
+                <div class="card-header">Validation results save you time.</div>
+                <img src="{{ static_images_dir + "validation_failed_unexpected_values.gif" }}" class="card-img-top" alt="...">
+                <!--<img src="../static/images/validation_failed_unexpected_values.gif" }}" class="card-img-top" alt="...">-->
+                <div class="card-body">
+{#                  <h5 class="card-title">Validation results save you time.</h5>#}
+                  <p>This is an example of what a single failed Expectation looks like in Data Docs. Note the failure includes unexpected values from your data. This helps you debug pipeines faster.</p>
+                </div>
+                <div class="card-footer walkthrough-links">
+                  <div class="container">
+                    <div class="row">
+                      <div class="col-sm">
+                        <a href="#" class="next-link btn btn-secondary float-left" onclick="go_to_slide(4)">Back</a>
+                      </div>
+                      <div class="col-6 text-center text-secondary">
+                        5 of 7
+                        <div class="progress" style="height: 2px">
+                          <div class="progress-bar bg-info" role="progressbar" style="width: 84%" aria-valuenow="84" aria-valuemin="0" aria-valuemax="84"></div>
+                        </div>
+                      </div>
+                      <div class="col-sm">
+                        <a href="#" class="next-link btn btn-primary float-right" onclick="go_to_slide(6)">Next</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </div>
+
+                <div class="card walkthrough-card bg-dark text-white walkthrough-6">
+                <div class="card-header">Great Expectations provides a large library of expectations.</div>
+                <img src="{{ static_images_dir + "glossary_scroller.gif" }}" class="card-img-top" alt="...">
+                <div class="card-body">
+{#                  <h5 class="card-title">Great Expectations provides a large library of expectations.</h5>#}
+                  <p><a href="http://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html">Built in expectations</a> allow you to express how you understand your data, and you can add custom
+                  expectations if you need a new one.
+                  </p>
+                </div>
+                <div class="card-footer walkthrough-links">
+                  <div class="container">
+                    <div class="row">
+                      <div class="col-sm">
+                        <a href="#" class="next-link btn btn-secondary float-left" onclick="go_to_slide(5)">Back</a>
+                      </div>
+                      <div class="col-6 text-center text-secondary">
+                        6 of 7
+                        <div class="progress" style="height: 2px">
+                          <div class="progress-bar bg-info" role="progressbar" style="width: 84%" aria-valuenow="84" aria-valuemin="0" aria-valuemax="84"></div>
+                        </div>
+                      </div>
+                      <div class="col-sm">
+                        <a href="#" class="next-link btn btn-primary float-right" onclick="go_to_slide(7)">Next</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </div>
+
+                <div class="card walkthrough-card bg-dark text-white walkthrough-7">
+                <div class="card-header">Now explore and edit the sample suite!</div>
+                <div class="card-body">
+{#                  <h5 class="card-title">Now explore the sample suite!</h5>#}
+                  <p>This sample suite shows you a few examples of expectations.</p>
+                  <p>Note this is not a production suite and was autogenerated using only a small snippet of your data.</p>
+                  <p>When you are ready, press the <strong>How to Edit</strong> button to kick off the iterative dev loop.</p>
+                </div>
+                <div class="card-footer walkthrough-links">
+                  <div class="container">
+                    <div class="row">
+                      <div class="col-sm">
+                        <a href="#" class="next-link btn btn-secondary float-left" onclick="go_to_slide(6)">Back</a>
+                      </div>
+                      <div class="col-6 text-center text-secondary">
+                        7 of 7
+                        <div class="progress" style="height: 2px">
+                          <div class="progress-bar bg-info" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                      </div>
+                      <div class="col-sm">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">Done</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/JavaScript">
+  $(".ge-walkthrough-modal").on('hide.bs.modal', function (e) {
+    try {
+      localStorage.setItem('ge-walkthrough-modal-dismissed', 'true');
+    }
+    catch (e) {
+      console.log(e);
+    }
+    go_to_slide(1);
+  })
+</script>
+
+
+<script type="text/JavaScript">
+  function go_to_slide(slide_number) {
+    hide_cards();
+    $('.walkthrough-' + slide_number).show();
+  }
+  function hide_cards() {
+    $('.walkthrough-card').hide();
+  }
+  hide_cards();
+  go_to_slide(1);
+</script>

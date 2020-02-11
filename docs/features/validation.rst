@@ -122,7 +122,7 @@ This is especially powerful when combined with great_expectations's command line
 
 .. code-block:: bash
 
-    $ great_expectations validate tests/examples/titanic.csv \
+    $ great_expectations validation csv tests/examples/titanic.csv \
         tests/examples/titanic_expectations.json
     {
       "results" : [

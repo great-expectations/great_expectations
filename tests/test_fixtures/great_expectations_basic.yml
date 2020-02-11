@@ -12,7 +12,7 @@ datasources:
     generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
-        class_name: SubdirReaderGenerator
+        class_name: SubdirReaderBatchKwargsGenerator
         base_directory: ../data
         reader_options:
           sep:
@@ -27,20 +27,20 @@ evaluation_parameter_store_name: evaluation_parameter_store
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 
-data_docs_sites:
+data_docs_sites: {}
 
 stores:
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
-    class_name: InMemoryEvaluationParameterStore
+    class_name: EvaluationParameterStore
 
   validations_store:
-    class_name: BasicInMemoryStore
+    class_name: ValidationsStore
 
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
@@ -62,7 +62,7 @@ validation_operators:
       #       class_name: SlackRenderer
       - name: store_evaluation_params
         action:
-          class_name: ExtractAndStoreEvaluationParamsAction
+          class_name: StoreEvaluationParametersAction
           target_store_name: evaluation_parameter_store
 
 

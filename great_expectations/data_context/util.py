@@ -5,8 +5,10 @@ import six
 import importlib
 import copy
 import re
+import inspect
 from collections import OrderedDict
 
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import (
     PluginModuleNotFoundError,
     PluginClassNotFoundError,
@@ -32,20 +34,6 @@ def safe_mmkdir(directory, exist_ok=True):
             raise
 
 
-# TODO : Consider moving this into types.resource_identifiers.DataContextKey.
-# NOTE : We **don't** want to encourage stringification of keys, other than in tests, etc.
-# TODO : Rename to parse_string_to_data_context_key
-def parse_string_to_data_context_resource_identifier(string, separator="."):
-    string_elements = string.split(separator)
-
-    loaded_module = importlib.import_module("great_expectations.data_context.types.resource_identifiers")
-    class_ = getattr(loaded_module, string_elements[0])
-
-    class_instance = class_(*(string_elements[1:]))
-
-    return class_instance
-
-
 def load_class(class_name, module_name):
     """Dynamically load a class from strings or raise a helpful error."""
 
@@ -68,10 +56,9 @@ def load_class(class_name, module_name):
     return class_
 
 
-# TODO: Rename runtime_config to runtime_environment and pass it through as a typed object, rather than unpacking it.
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
 # TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.
-def instantiate_class_from_config(config, runtime_config, config_defaults=None):
+def instantiate_class_from_config(config, runtime_environment, config_defaults=None):
     """Build a GE class from configuration dictionaries."""
 
     if config_defaults is None:
@@ -109,7 +96,21 @@ def instantiate_class_from_config(config, runtime_config, config_defaults=None):
 
     config_with_defaults = copy.deepcopy(config_defaults)
     config_with_defaults.update(config)
-    config_with_defaults.update(runtime_config)
+    if runtime_environment is not None:
+        # If there are additional kwargs available in the runtime_environment requested by a
+        # class to be instantiated, provide them
+        if six.PY3:
+            argspec = inspect.getfullargspec(class_.__init__)[0][1:]
+        else:
+            argspec = inspect.getargspec(class_.__init__)[0][1:]
+        missing_args = set(argspec) - set(config_with_defaults.keys())
+        config_with_defaults.update(
+            {missing_arg: runtime_environment[missing_arg] for missing_arg in missing_args
+             if missing_arg in runtime_environment}
+        )
+        # Add the entire runtime_environment as well if it's requested
+        if "runtime_environment" in missing_args:
+            config_with_defaults.update({"runtime_environment": runtime_environment})
 
     try:
         class_instance = class_(**config_with_defaults)
@@ -164,7 +165,7 @@ def substitute_config_variable(template_str, config_variables_dict):
             else:
                 return template_str[:match.start()] + config_variable_value + template_str[match.end():]
 
-        raise InvalidConfigError("Unable to find match for config variable {:s}".format(match.group(1)))
+        raise InvalidConfigError("Unable to find match for config variable {:s}. See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets".format(match.group(1)))
 
     return template_str
 
@@ -180,9 +181,27 @@ def substitute_all_config_variables(data, replace_variables_dict):
     :param replace_variables_dict:
     :return: a dictionary with all the variables replaced with their values
     """
+    if isinstance(data, DataContextConfig):
+        data = data.as_dict()
+
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {k: substitute_all_config_variables(v, replace_variables_dict) for
                 k, v in data.items()}
     elif isinstance(data, list):
         return [substitute_all_config_variables(v, replace_variables_dict) for v in data]
     return substitute_config_variable(data, replace_variables_dict)
+
+
+def file_relative_path(dunderfile, relative_path):
+    """
+    This function is useful when one needs to load a file that is
+    relative to the position of the current file. (Such as when
+    you encode a configuration file path in source file and want
+    in runnable in any current working directory)
+
+    It is meant to be used like the following:
+    file_relative_path(__file__, 'path/relative/to/file')
+
+    H/T https://github.com/dagster-io/dagster/blob/8a250e9619a49e8bff8e9aa7435df89c2d2ea039/python_modules/dagster/dagster/utils/__init__.py#L34
+    """
+    return os.path.join(os.path.dirname(dunderfile), relative_path)

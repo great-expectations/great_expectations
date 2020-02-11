@@ -1,24 +1,33 @@
-import json
 import os
 import random
+import re
 import unittest
 from datetime import datetime
+
+import pandas as pd
+import pytest
+from six import PY2
+
+import great_expectations as ge
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+    expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
+)
+from great_expectations.data_asset.data_asset import (
+    ValidationStatistics,
+    _calc_validation_statistics,
+)
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.dataset import MetaPandasDataset, PandasDataset
+
 try:
     from unittest import mock
 except ImportError:
     import mock
-
-from six import PY2
-import pandas as pd
-import re
-
-import great_expectations as ge
-from great_expectations.dataset import PandasDataset, MetaPandasDataset
-from great_expectations.data_asset.data_asset import (
-    _calc_validation_statistics,
-    ValidationStatistics,
-)
-from .test_utils import assertDeepAlmostEqual
 
 
 def isprime(n):
@@ -91,310 +100,256 @@ class CustomPandasDataset(PandasDataset):
             }
 
 
-class TestCustomClass(unittest.TestCase):
+def test_custom_class():
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    df = ge.read_csv(
+        script_path+'/test_sets/Titanic.csv',
+        dataset_class=CustomPandasDataset
+    )
+    df.set_default_expectation_argument("result_format", "COMPLETE")
+    assert df.expect_column_values_to_be_prime(
+            'Age').result['unexpected_list'] == \
+        [30.0, 25.0, 0.92000000000000004, 63.0, 39.0, 58.0, 50.0, 24.0, 36.0, 26.0, 25.0, 25.0, 28.0, 45.0, 39.0,
+         30.0, 58.0, 45.0, 22.0, 48.0, 44.0, 60.0, 45.0, 58.0, 36.0, 33.0, 36.0, 36.0, 14.0, 49.0, 36.0, 46.0, 27.0,
+         27.0, 26.0, 64.0, 39.0, 55.0, 70.0, 69.0, 36.0, 39.0, 38.0, 27.0, 27.0, 4.0, 27.0, 50.0, 48.0, 49.0, 48.0,
+         39.0, 36.0, 30.0, 24.0, 28.0, 64.0, 60.0, 49.0, 44.0, 22.0, 60.0, 48.0, 35.0, 22.0, 45.0, 49.0, 54.0, 38.0,
+         58.0, 45.0, 46.0, 25.0, 21.0, 48.0, 49.0, 45.0, 36.0, 55.0, 52.0, 24.0, 16.0, 44.0, 51.0, 42.0, 35.0, 35.0,
+         38.0, 35.0, 50.0, 49.0, 46.0, 58.0, 42.0, 40.0, 42.0, 55.0, 50.0, 16.0, 21.0, 30.0, 15.0, 30.0, 46.0, 54.0,
+         36.0, 28.0, 65.0, 33.0, 44.0, 55.0, 36.0, 58.0, 64.0, 64.0, 22.0, 28.0, 22.0, 18.0, 52.0, 46.0, 56.0, 33.0,
+         27.0, 55.0, 54.0, 48.0, 18.0, 21.0, 34.0, 40.0, 36.0, 50.0, 39.0, 56.0, 28.0, 56.0, 56.0, 24.0, 18.0, 24.0,
+         45.0, 40.0, 6.0, 57.0, 32.0, 62.0, 54.0, 52.0, 62.0, 63.0, 46.0, 52.0, 39.0, 18.0, 48.0, 49.0, 39.0, 46.0,
+         64.0, 60.0, 60.0, 55.0, 54.0, 21.0, 57.0, 45.0, 50.0, 50.0, 27.0, 20.0, 51.0, 21.0, 36.0, 40.0, 32.0, 33.0,
+         30.0, 28.0, 18.0, 34.0, 32.0, 57.0, 18.0, 36.0, 28.0, 51.0, 32.0, 28.0, 36.0, 4.0, 1.0, 12.0, 34.0, 26.0,
+         27.0, 15.0, 45.0, 40.0, 20.0, 25.0, 36.0, 25.0, 42.0, 26.0, 26.0, 0.82999999999999996, 54.0, 44.0, 52.0,
+         30.0, 30.0, 27.0, 24.0, 35.0, 8.0, 22.0, 30.0, 20.0, 21.0, 49.0, 8.0, 28.0, 18.0, 28.0, 22.0, 25.0, 18.0,
+         32.0, 18.0, 42.0, 34.0, 8.0, 21.0, 38.0, 38.0, 35.0, 35.0, 38.0, 24.0, 16.0, 26.0, 45.0, 24.0, 21.0, 22.0,
+         34.0, 30.0, 50.0, 30.0, 1.0, 44.0, 28.0, 6.0, 30.0, 45.0, 24.0, 24.0, 49.0, 48.0, 34.0, 32.0, 21.0, 18.0,
+         21.0, 52.0, 42.0, 36.0, 21.0, 33.0, 34.0, 22.0, 45.0, 30.0, 26.0, 34.0, 26.0, 22.0, 1.0, 25.0, 48.0, 57.0,
+         27.0, 30.0, 20.0, 45.0, 46.0, 30.0, 48.0, 54.0, 64.0, 32.0, 18.0, 32.0, 26.0, 20.0, 39.0, 22.0, 24.0, 28.0,
+         50.0, 20.0, 40.0, 42.0, 21.0, 32.0, 34.0, 33.0, 8.0, 36.0, 34.0, 30.0, 28.0, 0.80000000000000004, 25.0,
+         50.0, 21.0, 25.0, 18.0, 20.0, 30.0, 30.0, 35.0, 22.0, 25.0, 25.0, 14.0, 50.0, 22.0, 27.0, 27.0, 30.0, 22.0,
+         35.0, 30.0, 28.0, 12.0, 40.0, 36.0, 28.0, 32.0, 4.0, 36.0, 33.0, 32.0, 26.0, 30.0, 24.0, 18.0, 42.0, 16.0,
+         35.0, 16.0, 25.0, 18.0, 20.0, 30.0, 26.0, 40.0, 24.0, 18.0, 0.82999999999999996, 20.0, 25.0, 35.0, 32.0,
+         20.0, 39.0, 39.0, 6.0, 38.0, 9.0, 26.0, 4.0, 20.0, 26.0, 25.0, 18.0, 24.0, 35.0, 40.0, 38.0, 9.0, 45.0,
+         27.0, 20.0, 32.0, 33.0, 18.0, 40.0, 26.0, 15.0, 45.0, 18.0, 27.0, 22.0, 26.0, 22.0, 20.0, 32.0, 21.0, 18.0,
+         26.0, 6.0, 9.0, 40.0, 32.0, 26.0, 18.0, 20.0, 22.0, 22.0, 35.0, 21.0, 20.0, 18.0, 18.0, 38.0, 30.0, 21.0,
+         21.0, 21.0, 24.0, 33.0, 33.0, 28.0, 16.0, 28.0, 24.0, 21.0, 32.0, 26.0, 18.0, 20.0, 24.0, 24.0, 36.0, 30.0,
+         22.0, 35.0, 27.0, 30.0, 36.0, 9.0, 44.0, 45.0, 22.0, 30.0, 34.0, 28.0, 0.33000000000000002, 27.0, 25.0,
+         24.0, 22.0, 21.0, 26.0, 33.0, 1.0, 0.17000000000000001, 25.0, 36.0, 36.0, 30.0, 26.0, 65.0, 42.0, 32.0,
+         30.0, 24.0, 24.0, 24.0, 22.0, 18.0, 16.0, 45.0, 21.0, 18.0, 9.0, 48.0, 16.0, 25.0, 38.0, 22.0, 16.0, 33.0,
+         9.0, 38.0, 40.0, 14.0, 16.0, 9.0, 10.0, 6.0, 40.0, 32.0, 20.0, 28.0, 24.0, 28.0, 24.0, 20.0, 45.0, 26.0,
+         21.0, 27.0, 18.0, 26.0, 22.0, 28.0, 22.0, 27.0, 42.0, 27.0, 25.0, 27.0, 20.0, 48.0, 34.0, 22.0, 33.0, 32.0,
+         26.0, 49.0, 1.0, 33.0, 4.0, 24.0, 32.0, 27.0, 21.0, 32.0, 20.0, 21.0, 30.0, 21.0, 22.0, 4.0, 39.0, 20.0,
+         21.0, 44.0, 42.0, 21.0, 24.0, 25.0, 22.0, 22.0, 39.0, 26.0, 4.0, 22.0, 26.0, 1.5, 36.0, 18.0, 25.0, 22.0,
+         20.0, 26.0, 22.0, 32.0, 21.0, 21.0, 36.0, 39.0, 25.0, 45.0, 36.0, 30.0, 20.0, 21.0, 1.5, 25.0, 18.0, 63.0,
+         18.0, 15.0, 28.0, 36.0, 28.0, 10.0, 36.0, 30.0, 22.0, 14.0, 22.0, 51.0, 18.0, 45.0, 28.0, 21.0, 27.0, 36.0,
+         27.0, 15.0, 27.0, 26.0, 22.0, 24.0]
 
-    def test_custom_class(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_csv(
-            script_path+'/test_sets/Titanic.csv',
-            dataset_class=CustomPandasDataset
-        )
-        df.set_default_expectation_argument("result_format", "COMPLETE")
-        self.assertEqual(
-            df.expect_column_values_to_be_prime(
-                'Age')['result']['unexpected_list'],
-            [30.0, 25.0, 0.92000000000000004, 63.0, 39.0, 58.0, 50.0, 24.0, 36.0, 26.0, 25.0, 25.0, 28.0, 45.0, 39.0,
-             30.0, 58.0, 45.0, 22.0, 48.0, 44.0, 60.0, 45.0, 58.0, 36.0, 33.0, 36.0, 36.0, 14.0, 49.0, 36.0, 46.0, 27.0,
-             27.0, 26.0, 64.0, 39.0, 55.0, 70.0, 69.0, 36.0, 39.0, 38.0, 27.0, 27.0, 4.0, 27.0, 50.0, 48.0, 49.0, 48.0,
-             39.0, 36.0, 30.0, 24.0, 28.0, 64.0, 60.0, 49.0, 44.0, 22.0, 60.0, 48.0, 35.0, 22.0, 45.0, 49.0, 54.0, 38.0,
-             58.0, 45.0, 46.0, 25.0, 21.0, 48.0, 49.0, 45.0, 36.0, 55.0, 52.0, 24.0, 16.0, 44.0, 51.0, 42.0, 35.0, 35.0,
-             38.0, 35.0, 50.0, 49.0, 46.0, 58.0, 42.0, 40.0, 42.0, 55.0, 50.0, 16.0, 21.0, 30.0, 15.0, 30.0, 46.0, 54.0,
-             36.0, 28.0, 65.0, 33.0, 44.0, 55.0, 36.0, 58.0, 64.0, 64.0, 22.0, 28.0, 22.0, 18.0, 52.0, 46.0, 56.0, 33.0,
-             27.0, 55.0, 54.0, 48.0, 18.0, 21.0, 34.0, 40.0, 36.0, 50.0, 39.0, 56.0, 28.0, 56.0, 56.0, 24.0, 18.0, 24.0,
-             45.0, 40.0, 6.0, 57.0, 32.0, 62.0, 54.0, 52.0, 62.0, 63.0, 46.0, 52.0, 39.0, 18.0, 48.0, 49.0, 39.0, 46.0,
-             64.0, 60.0, 60.0, 55.0, 54.0, 21.0, 57.0, 45.0, 50.0, 50.0, 27.0, 20.0, 51.0, 21.0, 36.0, 40.0, 32.0, 33.0,
-             30.0, 28.0, 18.0, 34.0, 32.0, 57.0, 18.0, 36.0, 28.0, 51.0, 32.0, 28.0, 36.0, 4.0, 1.0, 12.0, 34.0, 26.0,
-             27.0, 15.0, 45.0, 40.0, 20.0, 25.0, 36.0, 25.0, 42.0, 26.0, 26.0, 0.82999999999999996, 54.0, 44.0, 52.0,
-             30.0, 30.0, 27.0, 24.0, 35.0, 8.0, 22.0, 30.0, 20.0, 21.0, 49.0, 8.0, 28.0, 18.0, 28.0, 22.0, 25.0, 18.0,
-             32.0, 18.0, 42.0, 34.0, 8.0, 21.0, 38.0, 38.0, 35.0, 35.0, 38.0, 24.0, 16.0, 26.0, 45.0, 24.0, 21.0, 22.0,
-             34.0, 30.0, 50.0, 30.0, 1.0, 44.0, 28.0, 6.0, 30.0, 45.0, 24.0, 24.0, 49.0, 48.0, 34.0, 32.0, 21.0, 18.0,
-             21.0, 52.0, 42.0, 36.0, 21.0, 33.0, 34.0, 22.0, 45.0, 30.0, 26.0, 34.0, 26.0, 22.0, 1.0, 25.0, 48.0, 57.0,
-             27.0, 30.0, 20.0, 45.0, 46.0, 30.0, 48.0, 54.0, 64.0, 32.0, 18.0, 32.0, 26.0, 20.0, 39.0, 22.0, 24.0, 28.0,
-             50.0, 20.0, 40.0, 42.0, 21.0, 32.0, 34.0, 33.0, 8.0, 36.0, 34.0, 30.0, 28.0, 0.80000000000000004, 25.0,
-             50.0, 21.0, 25.0, 18.0, 20.0, 30.0, 30.0, 35.0, 22.0, 25.0, 25.0, 14.0, 50.0, 22.0, 27.0, 27.0, 30.0, 22.0,
-             35.0, 30.0, 28.0, 12.0, 40.0, 36.0, 28.0, 32.0, 4.0, 36.0, 33.0, 32.0, 26.0, 30.0, 24.0, 18.0, 42.0, 16.0,
-             35.0, 16.0, 25.0, 18.0, 20.0, 30.0, 26.0, 40.0, 24.0, 18.0, 0.82999999999999996, 20.0, 25.0, 35.0, 32.0,
-             20.0, 39.0, 39.0, 6.0, 38.0, 9.0, 26.0, 4.0, 20.0, 26.0, 25.0, 18.0, 24.0, 35.0, 40.0, 38.0, 9.0, 45.0,
-             27.0, 20.0, 32.0, 33.0, 18.0, 40.0, 26.0, 15.0, 45.0, 18.0, 27.0, 22.0, 26.0, 22.0, 20.0, 32.0, 21.0, 18.0,
-             26.0, 6.0, 9.0, 40.0, 32.0, 26.0, 18.0, 20.0, 22.0, 22.0, 35.0, 21.0, 20.0, 18.0, 18.0, 38.0, 30.0, 21.0,
-             21.0, 21.0, 24.0, 33.0, 33.0, 28.0, 16.0, 28.0, 24.0, 21.0, 32.0, 26.0, 18.0, 20.0, 24.0, 24.0, 36.0, 30.0,
-             22.0, 35.0, 27.0, 30.0, 36.0, 9.0, 44.0, 45.0, 22.0, 30.0, 34.0, 28.0, 0.33000000000000002, 27.0, 25.0,
-             24.0, 22.0, 21.0, 26.0, 33.0, 1.0, 0.17000000000000001, 25.0, 36.0, 36.0, 30.0, 26.0, 65.0, 42.0, 32.0,
-             30.0, 24.0, 24.0, 24.0, 22.0, 18.0, 16.0, 45.0, 21.0, 18.0, 9.0, 48.0, 16.0, 25.0, 38.0, 22.0, 16.0, 33.0,
-             9.0, 38.0, 40.0, 14.0, 16.0, 9.0, 10.0, 6.0, 40.0, 32.0, 20.0, 28.0, 24.0, 28.0, 24.0, 20.0, 45.0, 26.0,
-             21.0, 27.0, 18.0, 26.0, 22.0, 28.0, 22.0, 27.0, 42.0, 27.0, 25.0, 27.0, 20.0, 48.0, 34.0, 22.0, 33.0, 32.0,
-             26.0, 49.0, 1.0, 33.0, 4.0, 24.0, 32.0, 27.0, 21.0, 32.0, 20.0, 21.0, 30.0, 21.0, 22.0, 4.0, 39.0, 20.0,
-             21.0, 44.0, 42.0, 21.0, 24.0, 25.0, 22.0, 22.0, 39.0, 26.0, 4.0, 22.0, 26.0, 1.5, 36.0, 18.0, 25.0, 22.0,
-             20.0, 26.0, 22.0, 32.0, 21.0, 21.0, 36.0, 39.0, 25.0, 45.0, 36.0, 30.0, 20.0, 21.0, 1.5, 25.0, 18.0, 63.0,
-             18.0, 15.0, 28.0, 36.0, 28.0, 10.0, 36.0, 30.0, 22.0, 14.0, 22.0, 51.0, 18.0, 45.0, 28.0, 21.0, 27.0, 36.0,
-             27.0, 15.0, 27.0, 26.0, 22.0, 24.0]
-        )
-
-        primes = [3, 5, 7, 11, 13, 17, 23, 31]
-        df["primes"] = df.Age.map(lambda x: random.choice(primes))
-        self.assertEqual(
-            df.expect_column_values_to_be_prime(
-                "primes")['result']['unexpected_list'],
-            []
-        )
-
-    def test_custom_expectation(self):
-        df = CustomPandasDataset({'x': [1, 1, 1, 1, 2]})
-        df.set_default_expectation_argument("result_format", "COMPLETE")
-
-        out = df.expect_column_values_to_be_prime('x')
-        t = {'out': {'unexpected_list': [1, 1, 1, 1], 'unexpected_index_list': [
-            0, 1, 2, 3], 'success': False}}
-        self.assertEqual(t['out']['success'], out['success'])
-        if 'unexpected_index_list' in t['out']:
-            self.assertEqual(t['out']['unexpected_index_list'],
-                             out['result']['unexpected_index_list'])
-        if 'unexpected_list' in t['out']:
-            self.assertEqual(t['out']['unexpected_list'],
-                             out['result']['unexpected_list'])
-
-        out = df.expect_column_values_to_equal_1('x', mostly=.8)
-        print(out)
-        t = {'out': {'unexpected_list': [
-            2], 'unexpected_index_list': [4], 'success': True}}
-        self.assertEqual(t['out']['success'], out['success'])
-        if 'unexpected_index_list' in t['out']:
-            self.assertEqual(t['out']['unexpected_index_list'],
-                             out['result']['unexpected_index_list'])
-        if 'unexpected_list' in t['out']:
-            self.assertEqual(t['out']['unexpected_list'],
-                             out['result']['unexpected_list'])
-
-   # Ensure that Custom Data Set classes can properly call non-overridden methods from their parent class
-    def test_base_class_expectation(self):
-        df = CustomPandasDataset({
-            "aaa": [1, 2, 3, 4, 5],
-            "bbb": [10, 20, 30, 40, 50],
-            "ccc": [9, 10, 11, 12, 13],
-        })
-
-        self.assertEqual(
-            df.expect_column_values_to_be_between(
-                "aaa", min_value=1, max_value=5)['success'],
-            True
-        )
+    primes = [3, 5, 7, 11, 13, 17, 23, 31]
+    df["primes"] = df.Age.map(lambda x: random.choice(primes))
+    assert df.expect_column_values_to_be_prime("primes").result['unexpected_list'] == []
 
 
-class TestValidation(unittest.TestCase):
-    def test_validate(self):
+def test_custom_expectation():
+    df = CustomPandasDataset({'x': [1, 1, 1, 1, 2]})
+    df.set_default_expectation_argument("result_format", "COMPLETE")
+    result = df.expect_column_values_to_be_prime('x')
 
-        with open("./tests/test_sets/titanic_expectations.json") as f:
-            my_expectation_suite = json.load(f)
+    assert result.success is False
+    assert result.result['unexpected_index_list'] == [0, 1, 2, 3]
+    assert result.result['unexpected_list'] == [1, 1, 1, 1]
 
+    result = df.expect_column_values_to_equal_1('x', mostly=.8)
+    assert result.success is True
+    assert result.result['unexpected_index_list'] == [4]
+    assert result.result['unexpected_list'] == [2]
+
+
+# Ensure that Custom Data Set classes can properly call non-overridden methods from their parent class
+def test_base_class_expectation():
+    df = CustomPandasDataset({
+        "aaa": [1, 2, 3, 4, 5],
+        "bbb": [10, 20, 30, 40, 50],
+        "ccc": [9, 10, 11, 12, 13],
+    })
+
+    assert df.expect_column_values_to_be_between("aaa", min_value=1, max_value=5).success is True
+
+
+@pytest.mark.xfail(condition=PY2, reason="legacy python")
+def test_validate():
+
+    with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
+        my_expectation_suite = expectationSuiteSchema.loads(f.read()).data
+
+    with mock.patch("uuid.uuid1") as uuid:
+        uuid.return_value = "1234"
         my_df = ge.read_csv(
-            "./tests/test_sets/Titanic.csv",
+            file_relative_path(__file__, "./test_sets/Titanic.csv"),
             expectation_suite=my_expectation_suite
         )
-        my_df.set_default_expectation_argument("result_format", "COMPLETE")
+    my_df.set_default_expectation_argument("result_format", "COMPLETE")
 
-        with mock.patch("datetime.datetime") as mock_datetime:
-            mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
-            results = my_df.validate(catch_exceptions=False)
+    with mock.patch("datetime.datetime") as mock_datetime:
+        mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
+        results = my_df.validate(catch_exceptions=False)
 
-        with open('./tests/test_sets/titanic_expected_data_asset_validate_results.json') as f:
-            expected_results = json.load(f)
+    with open(file_relative_path(__file__, './test_sets/titanic_expected_data_asset_validate_results.json')) as f:
+        expected_results = expectationSuiteValidationResultSchema.loads(f.read()).data
 
-        del results["meta"]["great_expectations.__version__"]
-        self.maxDiff = None
+    del results.meta["great_expectations.__version__"]
 
-        # order is not guaranteed (or important in this case) but sorting is possible in PY2
-        if PY2:
-            results["results"] = sorted(results["results"])
-            expected_results["results"] = sorted(expected_results["results"])
+    assert expected_results == results
 
-        assertDeepAlmostEqual(
-            results,
-            expected_results
-        )
+    # Now, change the results and ensure they are no longer equal
+    results.results[0] = ExpectationValidationResult()
+    assert expected_results != results
 
-        # Now, change the results and ensure they are no longer equal
-        results[0] = {}
-        self.assertNotEqual(results,
-                            expected_results
-                            )
+    # Finally, confirm that only_return_failures works
+    # and does not affect the "statistics" field.
+    with mock.patch("datetime.datetime") as mock_datetime:
+        mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
+        validation_results = my_df.validate(only_return_failures=True)
+        del validation_results.meta["great_expectations.__version__"]
 
-        # Finally, confirm that only_return_failures works
-        # and does not affect the "statistics" field.
-        with mock.patch("datetime.datetime") as mock_datetime:
-            mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
-            validation_results = my_df.validate(only_return_failures=True)
-            del validation_results["meta"]["great_expectations.__version__"]
-        assertDeepAlmostEqual(
-            validation_results,
-            {
-                "meta": {
-                    "data_asset_name": None,
-                    "expectation_suite_name": "default",
-                    "run_id": "1955-11-05T000000Z"
-                },
-                "results": [
-                {"expectation_config": {
-                    "expectation_type": "expect_column_values_to_be_in_set",
-                    "kwargs": {"column": "PClass", "value_set": ["1st", "2nd", "3rd"]}
-                },
-                    "success": False,
-                    "exception_info": {"exception_message": None,
-                                       "exception_traceback": None,
-                                       "raised_exception": False},
-                    "result": {"partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
-                               "unexpected_percent": 0.07616146230007616, "element_count": 1313,
-                               "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],
-                               "partial_unexpected_list": ["*"],
-                               "unexpected_percent_nonmissing": 0.07616146230007616, "missing_count": 0,
-                               "unexpected_index_list": [456]}}
-            ],
-                "success": expected_results["success"],  # unaffected
-                "statistics": expected_results["statistics"],  # unaffected
+    expected_results = ExpectationSuiteValidationResult(
+        meta={
+            "expectation_suite_name": "titanic",
+            "run_id": "19551105T000000.000000Z",
+            "batch_kwargs": {"ge_batch_id": "1234"},
+            "batch_markers": {},
+            "batch_parameters": {}
+        },
+        results=[ExpectationValidationResult(
+            expectation_config=ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_in_set",
+                kwargs={"column": "PClass", "value_set": ["1st", "2nd", "3rd"]}
+            ),
+            success=False,
+            exception_info={
+                "exception_message": None,
+                "exception_traceback": None,
+                "raised_exception": False
+            },
+            result={
+                "partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
+                "unexpected_percent": 0.07616146230007616, "element_count": 1313,
+                "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],
+                "partial_unexpected_list": ["*"],
+                "unexpected_percent_nonmissing": 0.07616146230007616, "missing_count": 0,
+                "unexpected_index_list": [456]
+            })
+        ],
+        success=expected_results.success,  # unaffected
+        statistics=expected_results["statistics"]  # unaffected
+    )
+    assert expected_results == validation_results
+
+
+def test_validate_catch_non_existent_expectation():
+    df = ge.dataset.PandasDataset({
+        "x": [1, 2, 3, 4, 5]
+    })
+
+    validation_config_non_existent_expectation = ExpectationSuite(
+        expectation_suite_name="default",
+        meta={
+            "great_expectations.__version__": ge.__version__
+        },
+        expectations=[ExpectationConfiguration(
+            expectation_type="non_existent_expectation",
+            kwargs={
+                "column": "x"
             }
-        )
+        )]
+    )
+    results = df.validate(expectation_suite=validation_config_non_existent_expectation)
 
-    def test_validate_catch_non_existent_expectation(self):
-        df = ge.dataset.PandasDataset({
-            "x": [1, 2, 3, 4, 5]
-        })
-
-        validation_config_non_existent_expectation = {
-            "data_asset_name": None,
-            "expectation_suite_name": "default",
-            "meta": {
-                "great_expectations.__version__": ge.__version__
-            },
-            "expectations": [{
-                "expectation_type": "non_existent_expectation",
-                "kwargs": {
-                    "column": "x"
-                }
-            }]
-        }
-        results = df.validate(
-            expectation_suite=validation_config_non_existent_expectation)['results']
-
-        self.assertIn(
-            "object has no attribute 'non_existent_expectation'",
-            results[0]['exception_info']['exception_message']
-        )
-
-    def test_validate_catch_invalid_parameter(self):
-        df = ge.dataset.PandasDataset({
-            "x": [1, 2, 3, 4, 5]
-        })
-
-        validation_config_invalid_parameter = {
-            "data_asset_name": None,
-            "expectation_suite_name": "default",
-            "meta": {
-                "great_expectations.__version__": ge.__version__
-            },
-            "expectations": [{
-                "expectation_type": "expect_column_values_to_be_between",
-                "kwargs": {
-                    "column": "x",
-                    "min_value": 6,
-                    "max_value": 5
-                }
-            }]
-        }
-
-        results = df.validate(expectation_suite=validation_config_invalid_parameter)[
-            'results']
-        print(results[0]['exception_info'])
-        self.assertIn(
-            "min_value cannot be greater than max_value",
-            results[0]['exception_info']['exception_message']
-        )
-
-class TestValidationStatisticsCalculation(unittest.TestCase):
-    def test_no_expectations(self):
-        expectation_results = []
-        actual = _calc_validation_statistics(expectation_results)
-
-        # pay attention to these two
-        self.assertEqual(actual.success_percent, None)
-        self.assertEqual(actual.success, True)
-        # the rest is boring
-        self.assertEqual(actual.successful_expectations, 0)
-        self.assertEqual(actual.evaluated_expectations, 0)
-        self.assertEqual(actual.unsuccessful_expectations, 0)
-
-    def test_no_succesful_expectations(self):
-        expectation_results = [
-            {"success": False},
-        ]
-        actual = _calc_validation_statistics(expectation_results)
-        expected = ValidationStatistics(1, 0, 1, 0., False)
-        assertDeepAlmostEqual(actual, expected)
-
-        expectation_results = [
-            {"success": False},
-            {"success": False},
-            {"success": False},
-        ]
-        actual = _calc_validation_statistics(expectation_results)
-        expected = ValidationStatistics(3, 0, 3, 0., False)
-        assertDeepAlmostEqual(actual, expected)
-
-    def test_all_succesful_expectations(self):
-        expectation_results = [
-            {"success": True},
-        ]
-        actual = _calc_validation_statistics(expectation_results)
-        expected = ValidationStatistics(1, 1, 0, 100.0, True)
-        assertDeepAlmostEqual(actual, expected)
-
-        expectation_results = [
-            {"success": True},
-            {"success": True},
-            {"success": True},
-        ]
-        actual = _calc_validation_statistics(expectation_results)
-        expected = ValidationStatistics(3, 3, 0, 100.0, True)
-        assertDeepAlmostEqual(actual, expected)
-
-    def test_mixed_expectations(self):
-        expectation_results = [
-            {"success": False},
-            {"success": True},
-        ]
-        actual = _calc_validation_statistics(expectation_results)
-        expected = ValidationStatistics(2, 1, 1, 50.0, False)
-        assertDeepAlmostEqual(actual, expected)
+    assert "object has no attribute 'non_existent_expectation'" in \
+        results.results[0].exception_info['exception_message']
 
 
-class TestRepeatedAppendExpectation(unittest.TestCase):
-    def test_validate(self):
+def test_validate_catch_invalid_parameter():
+    df = ge.dataset.PandasDataset({
+        "x": [1, 2, 3, 4, 5]
+    })
 
-        with open("./tests/test_sets/titanic_expectations.json") as f:
-            my_expectation_suite = json.load(f)
+    validation_config_invalid_parameter = ExpectationSuite(
+        expectation_suite_name="default",
+        meta={
+            "great_expectations.__version__": ge.__version__
+        },
+        expectations=[ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_between",
+            kwargs={
+                "column": "x",
+                "min_value": 6,
+                "max_value": 5
+            }
+        )]
+    )
 
-        my_df = ge.read_csv("./tests/test_sets/Titanic.csv",
-                            profiler=ge.profile.ColumnsExistProfiler)
+    result = df.validate(expectation_suite=validation_config_invalid_parameter)
+    assert "min_value cannot be greater than max_value" in result.results[0].exception_info['exception_message']
 
-        self.assertEqual(
-            len(my_df.get_expectation_suite()['expectations']),
-            7
-        )
 
-        # For column_expectations, _append_expectation should only replace expectations where the expetation_type AND the column match
-        my_df.expect_column_to_exist("PClass")
-        self.assertEqual(
-            len(my_df.get_expectation_suite()['expectations']),
-            7
-        )
+def test_stats_no_expectations():
+    expectation_results = []
+    actual = _calc_validation_statistics(expectation_results)
+
+    # pay attention to these two
+    assert None is actual.success_percent
+    assert True is actual.success
+    # the rest is boring
+    assert 0 == actual.successful_expectations
+    assert 0 == actual.evaluated_expectations
+    assert 0 == actual.unsuccessful_expectations
+
+
+def test_stats_no_successful_expectations():
+    expectation_results = [
+        ExpectationValidationResult(success=False)
+    ]
+    actual = _calc_validation_statistics(expectation_results)
+    expected = ValidationStatistics(1, 0, 1, 0., False)
+    assert expected == actual
+
+    expectation_results = [
+        ExpectationValidationResult(success=False),
+        ExpectationValidationResult(success=False),
+        ExpectationValidationResult(success=False)
+    ]
+    actual = _calc_validation_statistics(expectation_results)
+    expected = ValidationStatistics(3, 0, 3, 0., False)
+    assert expected == actual
+
+
+def test_stats_all_successful_expectations():
+    expectation_results = [
+        ExpectationValidationResult(success=True),
+    ]
+    actual = _calc_validation_statistics(expectation_results)
+    expected = ValidationStatistics(1, 1, 0, 100.0, True)
+    assert expected == actual
+
+    expectation_results = [
+        ExpectationValidationResult(success=True),
+        ExpectationValidationResult(success=True),
+        ExpectationValidationResult(success=True)
+    ]
+    actual = _calc_validation_statistics(expectation_results)
+    expected = ValidationStatistics(3, 3, 0, 100.0, True)
+    assert expected == actual
+
+
+def test_stats_mixed_expectations():
+    expectation_results = [
+        ExpectationValidationResult(success=False),
+        ExpectationValidationResult(success=True),
+    ]
+    actual = _calc_validation_statistics(expectation_results)
+    expected = ValidationStatistics(2, 1, 1, 50.0, False)
+    assert expected == actual
 
 
 class TestIO(unittest.TestCase):
@@ -464,14 +419,14 @@ class TestIO(unittest.TestCase):
         """
 
         # Pass this test if the available version of pandas is less than 0.21.0, because prior
-        # versions of pandas did not include the read_parquet function and the test doesn't apply
-        pandas_version = re.match('(.+)\.(.+)\..+', pd.__version__)
+        # versions of pandas did not include the read_parquet function.
+        pandas_version = re.match('(\d+)\.(\d+)\..+', pd.__version__)
         if pandas_version is None:
             raise ValueError("Unrecognized pandas version!")
         else:
-            pandas_version_major = int(pandas_version.group(1))
-            pandas_version_minor = int(pandas_version.group(2))
-            if (pandas_version_major == 0) and (pandas_version_minor < 21):
+            pandas_major_version = int(pandas_version.group(1))
+            pandas_minor_version = int(pandas_version.group(2))
+            if pandas_major_version == 0 and pandas_minor_version < 21:
                 return
 
         script_path = os.path.dirname(os.path.realpath(__file__))

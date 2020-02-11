@@ -115,7 +115,7 @@ Great Expectations' ``jupyter_ux`` module has a convenience method that lists al
 
 .. code-block:: python
 
-    great_expectations.jupyter_ux.list_available_data_asset_names(context)
+    great_expectations.jupyter_ux.show_available_data_asset_names(context)
 
 Here is the output of this method when executed in our example project:
 
@@ -353,7 +353,7 @@ Below is the operator's configuration snippet in the ``great_expectations.yml`` 
           class_name: StoreAction
       - name: store_evaluation_params
         action:
-          class_name: ExtractAndStoreEvaluationParamsAction
+          class_name: StoreEvaluationParametersAction
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
@@ -383,7 +383,7 @@ as ``s3`` or ``gcs``, edit stores section of the DataContext configuration objec
       validations_store:
         class_name: ValidationsStore
         store_backend:
-          class_name: FixedLengthTupleS3Backend
+          class_name: TupleS3Backend
           bucket: my_bucket
           prefix: my_prefix
 

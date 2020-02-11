@@ -30,6 +30,14 @@
           "SMALLINT",
           "int"
         ]
+      },
+      "meta": {
+        "notes": {
+          "format": "markdown",
+          "content": [
+            "#### These are expectation notes \n - you can use markdown \n - or just strings"
+          ]
+        }
       }
     },
     {
@@ -38,6 +46,18 @@
         "column": "Unnamed: 0",
         "min_value": null,
         "max_value": null
+      },
+      "meta": {
+        "notes": {
+          "format": "string",
+          "content": [
+            "This is a",
+            "string list,",
+            "assigned to the 'content' key of a notes dict.",
+            "Cool",
+            "huh?"
+          ]
+        }
       }
     },
     {
@@ -46,6 +66,12 @@
         "column": "Unnamed: 0",
         "min_value": null,
         "max_value": null
+      },
+      "meta": {
+        "notes": {
+          "format": "string",
+          "content": "This is just a single string, assigned to the 'content' key of a notes dict."
+        }
       }
     },
     {
@@ -53,12 +79,18 @@
       "kwargs": {
         "column": "Unnamed: 0",
         "mostly": 0.5
+      },
+      "meta": {
+        "notes": ["This is a list", "of strings", "assigned to the notes", "key."]
       }
     },
     {
       "expectation_type": "expect_column_values_to_be_unique",
       "kwargs": {
         "column": "Unnamed: 0"
+      },
+      "meta": {
+        "notes": "This is a single string assigned to the 'notes' key."
       }
     },
     {
