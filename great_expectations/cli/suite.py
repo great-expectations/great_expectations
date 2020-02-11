@@ -8,16 +8,24 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_logging import logger
-from great_expectations.cli.datasource import \
-    create_expectation_suite as create_expectation_suite_impl
+from great_expectations.cli.datasource import (
+    create_expectation_suite as create_expectation_suite_impl,
+    select_datasource,
+    get_batch_kwargs
+)
 from great_expectations.cli.util import (
     _offer_to_install_new_template,
     cli_message,
 )
-from great_expectations.datasource.generator import ManualBatchKwargsGenerator
+from great_expectations.data_asset import DataAsset
 from great_expectations.render.renderer.notebook_renderer import (
     NotebookRenderer,
 )
+
+try:
+    json_parse_exception = json.decoder.JSONDecodeError
+except AttributeError:  # Python 2
+    json_parse_exception = ValueError
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -36,10 +44,17 @@ def suite():
 @suite.command(name="edit")
 @click.argument("suite")
 @click.option(
-    "--batch-kwargs",
+    "--datasource",
+    "-ds",
     default=None,
-    help="Additional keyword arguments to be provided to get_batch when loading \
-the data asset. Must be a valid JSON dictionary",
+    help="""The name of the datasource. The datasource must contain a single BatchKwargGenerator that can list data assets in the datasource """
+)
+@click.option(
+    "--batch_kwargs",
+    default=None,
+    help="""Batch_kwargs that specify the batch of data to be used a sample when editing the suite. Must be a valid JSON dictionary.
+Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"select * from my_table\"}"    
+""",
 )
 @click.option(
     "--directory",
@@ -53,8 +68,20 @@ the data asset. Must be a valid JSON dictionary",
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-def suite_edit(suite, directory, jupyter, batch_kwargs):
-    """Edit an existing suite with a jupyter notebook."""
+def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
+    """
+    Generate a Jupyter notebook for editing an existing expectation suite.
+
+    The SUITE argument is required. This is the name you gave to the suite
+    when you created it.
+
+    A batch of data is required to edit the suite, which is used as a sample.
+
+    The edit command will help you specify a batch interactively. Or you can
+    specify them manually by providing --batch_kwargs in valid JSON format.
+
+    Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
+    """
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
@@ -64,23 +91,52 @@ def suite_edit(suite, directory, jupyter, batch_kwargs):
         _offer_to_install_new_template(err, context.root_directory)
         return
 
-    if suite.endswith(".json"):
-        suite = suite[:-5]
     suite = _load_suite(context, suite)
 
     if batch_kwargs:
-        batch_kwargs = json.loads(batch_kwargs)
-    # elif suite.get_original_batch_kwargs():
-    # TODO this functionality doesn't actually exist yet
-    # batch_kwargs = suite.get_original_batch_kwargs()
+        try:
+            batch_kwargs = json.loads(batch_kwargs)
+            if datasource:
+                batch_kwargs["datasource"] = datasource
+            _batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+            assert isinstance(_batch, DataAsset)
+        except json_parse_exception as je:
+            cli_message("<red>Please check that your batch_kwargs are valid JSON.\n{}</red>".format(je))
+            sys.exit(1)
+        except ge_exceptions.DataContextError:
+            cli_message("<red>Please check that your batch_kwargs are able to load a batch.</red>")
+            sys.exit(1)
+        except ValueError as ve:
+            cli_message("<red>Please check that your batch_kwargs are able to load a batch.\n{}</red>".format(ve))
+            sys.exit(1)
     else:
-        cli_message(
-            "<red>Unable to identify a batch of data to use to edit the suite; add batch_kwargs.</red>"
+        cli_message("""
+A batch of data is required to edit the suite - let's help you to specify it."""
         )
+
+        additional_batch_kwargs = None
+        try:
+            data_source = select_datasource(context, datasource_name=datasource)
+        except ValueError as ve:
+            cli_message("<red>{}</red>".format(ve))
+            sys.exit(1)
+
+        if not data_source:
+            cli_message("<red>No datasources found in the context.</red>")
+            sys.exit(1)
+
+        if batch_kwargs is None:
+            datasource_name, batch_kwarg_generator, data_asset, batch_kwargs = get_batch_kwargs(
+                context,
+                datasource_name=data_source.name,
+                generator_name=None,
+                generator_asset=None,
+                additional_batch_kwargs=additional_batch_kwargs
+            )
 
     notebook_name = "{}.ipynb".format(suite.expectation_suite_name)
 
-    notebook_path = os.path.join(".", context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
+    notebook_path = os.path.join(context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
     NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path)
 
     cli_message(
@@ -94,26 +150,22 @@ def suite_edit(suite, directory, jupyter, batch_kwargs):
 
 
 def _load_suite(context, suite_name):
+    if suite_name.endswith(".json"):
+        suite_name = suite_name[:-5]
     try:
         suite = context.get_expectation_suite(suite_name)
+        return suite
     except ge_exceptions.DataContextError as e:
         cli_message(
-            "<red>Could not locate a suite named {}</red>".format(
+            "<red>Could not find a suite named `{}`. Please check the name and try again.</red>".format(
                 suite_name
             )
         )
         logger.info(e)
-        sys.exit(-1)
-    return suite
+        sys.exit(1)
 
 
 @suite.command(name="new")
-@click.option(
-    "--data_asset",
-    "-da",
-    default=None,
-    help="Fully qualified data asset name (datasource/generator/generator_asset)",
-)
 @click.option("--suite", "-es", default=None, help="Expectation suite name.")
 @click.option(
     "--directory",
@@ -131,7 +183,7 @@ def _load_suite(context, suite_name):
     default=None,
     help="Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary",
 )
-def suite_new(data_asset, suite, directory, view, batch_kwargs):
+def suite_new(suite, directory, view, batch_kwargs):
     """
     Create a new expectation suite.
 
@@ -153,21 +205,6 @@ def suite_new(data_asset, suite, directory, view, batch_kwargs):
     datasource_name = None
     generator_name = None
     generator_asset = None
-    if data_asset is not None:
-        try:
-            data_asset_id = context.normalize_data_asset_name(data_asset)
-            datasource_name = data_asset_id.datasource
-            generator_name = data_asset_id.generator
-            generator_asset = data_asset_id.generator_asset
-        except ge_exceptions.AmbiguousDataAssetNameError as e:
-            cli_message(
-                """<cyan>Your data_asset name of {} was not specific enough.
-    No worries - we will help you to specify the data asset name
-      - '{}""".format(
-                    data_asset
-                )
-                + "'</cyan>"
-            )
 
     try:
         success, suite_name = create_expectation_suite_impl(

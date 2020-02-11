@@ -94,7 +94,7 @@ class BaseDataContext(object):
     NOTEBOOK_SUBDIRECTORIES = ["pandas", "spark", "sql"]
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
-    GE_EDIT_NOTEBOOK_DIR = os.path.join(GE_DIR, GE_UNCOMMITTED_DIR)
+    GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
 
     @classmethod
     def validate_config(cls, project_config):
@@ -620,7 +620,7 @@ class BaseDataContext(object):
                 self._project_config_with_variables_substituted["datasources"][datasource_name])
         else:
             raise ValueError(
-                "Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name
+                "Unable to load datasource `%s` -- no configuration found or invalid configuration." % datasource_name
             )
         datasource = self._build_datasource_from_config(datasource_name, datasource_config)
         self._datasources[datasource_name] = datasource
