@@ -3,68 +3,38 @@
 0.9.0
 -----------------
 
-Version 0.9.0 is a major update to Great Expectations! The DataContext has continued to evolve into a powerful tool
-for ensuring that Expectation Suites can properly represent the way users think about their data. The changes fall
-into four broad areas:
+Version 0.9.0 is a major update to Great Expectations! The DataContext has continued to evolve into a powerful tool for ensuring that Expectation Suites can properly represent the way users think about their data, and upgrading will make it much easier to store and share expectation suites, and to build data docs that support your whole team. You’ll get awesome new features including improvements to data docs look and the ability to choose and store metrics for building flexible data quality dashboards.
 
-1. Expectation Suite Naming and Namespace Changes
-
-The DataContext is much more flexible in allowing you to define expectation suites and access data. The "namespace"
-for expectation suites is now completely independent of datasources, making it possible to name your suites with the
-logical name corresponding to your data, and then more easily share them or validate against different datasources.
-For example, the expectation suite "npi" for National Provider Identifier data can now be shared across teams who
-access the same logical data in local systems using Pandas, on a distributed Spark cluster, or via a relational
-database.
-
-Batch Kwargs, or instructions for a datasource to build a batch of data, are similarly freed from a required
-namespace, and you can more easily integrate Great Expectations into workflows where you do not need to use a
-BatchKwargsGenerator (usually because you have a batch of data ready to validate, such as in a table or a known
-directory).
-
-The most noticable impact of this API change is in the complete removal of the DataAssetIdentifier class. For
-example, the `create_expectation_suite` and `get_batch` methods now no longer require a data_asset_name parameter,
-relying only on the expectation_suite_name and batch_kwargs to do their job. Similarly, there is no more asset name
-normalization required.
+The changes for version 0.9.0 fall into several broad areas:
 
 1. Onboarding
 
-Release 0.9.0 of Great Expectations makes it much easier to get started with the project; the `init` flow has grown
-to support a much wider array of use cases and to use more natural language rather than introducing Great
-Expectations concepts earlier.
+Release 0.9.0 of Great Expectations makes it much easier to get started with the project. The `init` flow has grown to support a much wider array of use cases and to use more natural language rather than introducing GreatExpectations concepts earlier. You can more easily configure different backends and datasources, take advantage of guided walkthroughs to find and profile data, and share project configurations with colleagues.
+
+If you have already completed the `init` flow using a previous version of Great Expectations, you do not need to rerun the command. However, **there are some small changes to your configuration that will be required**. See :ref:`migrating_versions` for details.
+
+1. CLI Command Improvements
+
+With this release we have introduced a consistent naming pattern for accessing subcommands based on the noun (a Great Expectations object like `suite` or `docs`) and verb (an action like `edit` or `new`). The new user experience will allow us to more naturally organize access to CLI tools as new functionality is added.
+
+1. Expectation Suite Naming and Namespace Changes
+
+Defining shared expectation suites and validating data from different sources is much easier in this release. The DataContext, which manages storage and configuration of expectations, validations, profiling, and data docs, no longer requires that expectation suites live in a datasource-specific “namespace.” Instead, you should name suites with the logical name corresponding to your data, making it easy to share them or validate against different data sources. For example, the expectation suite "npi" for National Provider Identifier data can now be shared across teams who access the same logical data in local systems using Pandas, on a distributed Spark cluster, or via a relational database.
+
+Batch Kwargs, or instructions for a datasource to build a batch of data, are similarly freed from a required namespace, and you can more easily integrate Great Expectations into workflows where you do not need to use a BatchKwargsGenerator (usually because you have a batch of data ready to validate, such as in a table or a known directory).
+
+The most noticeable impact of this API change is in the complete removal of the DataAssetIdentifier class. For example, the `create_expectation_suite` and `get_batch` methods now no longer require a data_asset_name parameter, relying only on the expectation_suite_name and batch_kwargs to do their job. Similarly, there is no more asset name normalization required. See the upgrade guide for more information.
 
 1. Metrics and Evaluation Parameter Stores
 
-Metrics have received much more love in this release of Great Expectations! We've improved the system for declaring
-evaluation parameters that support dependencies between different expectation suites, so you can easily identify a
-particular field in the result of one expectation to use as the input into another. And the MetricsStore is now much
-more flexible, supporting a new ValidationAction that makes it possible to select metrics from a validation result to
-be saved in a database where they can power a dashboard, for example.
+Metrics have received much more love in this release of Great Expectations! We've improved the system for declaring evaluation parameters that support dependencies between different expectation suites, so you can easily identify a particular field in the result of one expectation to use as the input into another. And the MetricsStore is now much more flexible, supporting a new ValidationAction that makes it possible to select metrics from a validation result to be saved in a database where they can power a dashboard.
 
 1. Internal Type Changes and Improvements
 
-Finally, in this release, we have done a lot of work under the hood to make things more robust, including updating
-all of the internal objects to be more strongly typed. That change, while largely invisible to end users, paves the
-way for some really exciting opportunities for extending Great Expectations as we build a bigger community around the
-project.
+Finally, in this release, we have done a lot of work under the hood to make things more robust, including updating all of the internal objects to be more strongly typed. That change, while largely invisible to end users, paves the way for some really exciting opportunities for extending Great Expectations as we build a bigger community around the project.
 
 
-Additionally, there are several smaller changes and enhancements; please check out the guide on upgrading for more
-detailed descriptions of changes, and as always feel free to join us on Slack for questions you don't see addressed.
-
-
-* INTERNAL TYPES
-* Change data_asset get_data_asset_name and save_data_asset_name to be properties.
-* Removed data_asset_name, replacing it with top-level expectation_suite_name and batch_kwargs; batch_parameters can
-  be used to specify how to slice data_assets defined in generators. Read more in our blog.
-* Removed reader_methods enum; reader_method is now directly used as a batch_kwarg by relevant datasources (pandas
-  and spark). This allows you to specify arbitrary reader_methods via batch_kwargs (including read_pickle).
-  BREAKING: existing configurations using enum-based reader_method in batch_kwargs will need to update their code. For
-  example, a pandas datasource would use reader_method: read_csv instead of reader_method: csv
-* Changed batch_id to batch_markers to clarify that it can include multiple key-value pairs.
-* Removed support for type as a configuration key of datasource and generator objects
-* generators *require* a Datasource to function
-* Database store tables are not compatible between versions and require a manual migration
-* StoreEvaluationParametersAction
+We are really excited about this release, and encourage you to upgrade right away to take advantage of the more flexible naming and simpler API for creating, accessing, and sharing your expectations. As always feel free to join us on Slack for questions you don't see addressed!
 
 
 0.8.9__develop
