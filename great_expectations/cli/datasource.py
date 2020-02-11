@@ -16,8 +16,7 @@ from great_expectations.cli.util import (
     _offer_to_install_new_template,
     cli_message,
 )
-from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
-    ExpectationSuiteIdentifier
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
@@ -177,7 +176,9 @@ def datasource_profile(datasource, generator_name, data_assets, profile_all_data
         return
 
     if batch_kwargs is not None:
+        # TODO refactor out json load check in suite edit and add here
         batch_kwargs = json.loads(batch_kwargs)
+        # TODO refactor batch load check in suite edit and add here
 
     if datasource is None:
         datasources = [_datasource["name"] for _datasource in context.list_datasources()]
@@ -1107,6 +1108,11 @@ def profile_datasource(
     open_docs=False,
 ):
     """"Profile a named datasource using the specified context"""
+    # Note we are explicitly not using a logger in all CLI output to have
+    # more control over console UI.
+    logging.getLogger(
+        "great_expectations.profile.basic_dataset_profiler"
+    ).setLevel(logging.INFO)
     msg_intro = """
 <cyan>========== Profiling ==========</cyan>
 
