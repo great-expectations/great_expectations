@@ -527,40 +527,48 @@ class DefaultSiteIndexBuilder(object):
             )
 
         for profiling_result_key in profiling_result_keys:
-            validation = self.data_context.get_validation_result(
-                batch_identifier=profiling_result_key.batch_identifier,
-                expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
-                run_id=profiling_result_key.run_id
-            )
+            try:
+                validation = self.data_context.get_validation_result(
+                    batch_identifier=profiling_result_key.batch_identifier,
+                    expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
+                    run_id=profiling_result_key.run_id
+                )
 
-            validation_success = validation.success
+                validation_success = validation.success
 
-            self.add_resource_info_to_index_links_dict(
-                index_links_dict=index_links_dict,
-                expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
-                section_name="profiling",
-                batch_identifier=profiling_result_key.batch_identifier,
-                run_id=profiling_result_key.run_id,
-                validation_success=validation_success
-            )
+                self.add_resource_info_to_index_links_dict(
+                    index_links_dict=index_links_dict,
+                    expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
+                    section_name="profiling",
+                    batch_identifier=profiling_result_key.batch_identifier,
+                    run_id=profiling_result_key.run_id,
+                    validation_success=validation_success
+                )
+            except Exception as e:
+                error_msg = "Profiling result not found: {0:s} - skipping".format(str(profiling_result_key.to_tuple()))
+                logger.warning(error_msg)
 
         for validation_result_key in validation_result_keys:
-            validation = self.data_context.get_validation_result(
-                batch_identifier=validation_result_key.batch_identifier,
-                expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
-                run_id=validation_result_key.run_id
-            )
+            try:
+                validation = self.data_context.get_validation_result(
+                    batch_identifier=validation_result_key.batch_identifier,
+                    expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
+                    run_id=validation_result_key.run_id
+                )
 
-            validation_success = validation.success
+                validation_success = validation.success
 
-            self.add_resource_info_to_index_links_dict(
-                index_links_dict=index_links_dict,
-                expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
-                section_name="validations",
-                batch_identifier=validation_result_key.batch_identifier,
-                run_id=validation_result_key.run_id,
-                validation_success=validation_success
-            )
+                self.add_resource_info_to_index_links_dict(
+                    index_links_dict=index_links_dict,
+                    expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
+                    section_name="validations",
+                    batch_identifier=validation_result_key.batch_identifier,
+                    run_id=validation_result_key.run_id,
+                    validation_success=validation_success
+                )
+            except Exception as e:
+                error_msg = "Validation result not found: {0:s} - skipping".format(str(validation_result_key.to_tuple()))
+                logger.warning(error_msg)
 
         try:
             rendered_content = self.renderer_class.render(index_links_dict)
