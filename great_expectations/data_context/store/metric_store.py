@@ -18,7 +18,7 @@ class MetricStore(Store):
 
             if issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
-                store_backend["table_name"] = store_backend.get("table_name", "ge_expectation_defined_metrics")
+                store_backend["table_name"] = store_backend.get("table_name", "ge_metrics")
                 store_backend["key_columns"] = store_backend.get(
                     "key_columns", [
                         "run_id",
@@ -44,6 +44,17 @@ class MetricStore(Store):
 
 
 class EvaluationParameterStore(MetricStore):
+
+    def __init__(self, store_backend=None):
+        if store_backend is not None:
+            store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
+            store_backend_class_name = store_backend.get("class_name", "InMemoryStoreBackend")
+            store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
+
+            if issubclass(store_backend_class, DatabaseStoreBackend):
+                # Provide defaults for this common case
+                store_backend["table_name"] = store_backend.get("table_name", "ge_evaluation_parameters")
+        super(EvaluationParameterStore, self).__init__(store_backend=store_backend)
 
     def get_bind_params(self, run_id):
         params = {}
