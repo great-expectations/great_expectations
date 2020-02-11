@@ -27,6 +27,114 @@ Commands:
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+def test_suite_new_on_context_with_no_datasources(
+    caplog, empty_data_context
+):
+    """
+    We call the "suite new" command on a data context that has no datasources
+    configured.
+
+    The command should exit with a clear error message
+    """
+
+    not_so_empty_data_context = empty_data_context
+    project_root_dir = not_so_empty_data_context.root_directory
+
+    root_dir = project_root_dir
+    os.chdir(root_dir)
+    context = DataContext(root_dir)
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--no-view"],
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 1
+    assert "No datasources found in the context" in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+def test_suite_new_enter_existing_suite_name_as_arg(
+    caplog, data_context
+):
+    """
+    We call the "suite new" command with the name of an existing expectation suite in the --suite argument
+
+    The command should exit with a clear error message
+    """
+
+    not_so_empty_data_context = data_context
+    project_root_dir = not_so_empty_data_context.root_directory
+
+    root_dir = project_root_dir
+    os.chdir(root_dir)
+    context = DataContext(root_dir)
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--suite", "my_dag_node.default", "--no-view"],
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 1
+    assert "already exists. If you intend to edit the suite" in stdout
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+def test_suite_new_answer_suite_name_prompts_with_name_of_existing_suite(
+    caplog, data_context, filesystem_csv_2
+):
+    """
+    We call the "suite new" command without the suite name argument
+
+    The command should prompt us to enter the name of the expectation suite that will be
+    created.
+
+    We answer the prompt with the name of an existing expectation suite.
+
+    The command should display an error message and let us retry until we answer
+    with a name that is not "taken".
+
+    """
+
+    not_so_empty_data_context = data_context
+    project_root_dir = not_so_empty_data_context.root_directory
+
+    root_dir = project_root_dir
+    os.chdir(root_dir)
+    context = DataContext(root_dir)
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--no-view"],
+        input="{0:s}\nmy_dag_node.default\nmy_new_suite\n\n".format(
+            os.path.join(filesystem_csv_2, "f1.csv")
+        ),
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+    assert "already exists. If you intend to edit the suite" in stdout
+    assert "Enter the path" in stdout
+    assert "Name the new expectation suite [warning]" in stdout
+    assert (
+        "Great Expectations will choose a couple of columns and generate expectations"
+        in stdout
+    )
+    assert "Profiling" in stdout
+    assert "Building" in stdout
+    assert "The following Data Docs sites were built" in stdout
+    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+
+    # this context fixture does not have Data Docs sites configures, so we are not checking
+    # the HTML files - the other test cases do it.
+
+    expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
+    assert os.path.isfile(expected_suite_path)
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
 def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
     caplog, empty_data_context, filesystem_csv_2
 ):
