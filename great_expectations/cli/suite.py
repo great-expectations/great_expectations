@@ -50,7 +50,7 @@ def suite():
     help="""The name of the datasource. The datasource must contain a single BatchKwargGenerator that can list data assets in the datasource """
 )
 @click.option(
-    "--batch_kwargs",
+    "--batch-kwargs",
     default=None,
     help="""Batch_kwargs that specify the batch of data to be used a sample when editing the suite. Must be a valid JSON dictionary.
 Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"select * from my_table\"}"    
@@ -78,7 +78,7 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
     A batch of data is required to edit the suite, which is used as a sample.
 
     The edit command will help you specify a batch interactively. Or you can
-    specify them manually by providing --batch_kwargs in valid JSON format.
+    specify them manually by providing --batch-kwargs in valid JSON format.
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
     """
@@ -179,7 +179,7 @@ def _load_suite(context, suite_name):
     default=True
 )
 @click.option(
-    "--batch_kwargs",
+    "--batch-kwargs",
     default=None,
     help="Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary",
 )

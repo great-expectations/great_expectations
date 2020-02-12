@@ -124,15 +124,15 @@ def datasource_list(directory):
 
 
 @datasource.command(name="profile")
-@click.argument('datasource_name', default=None, required=False)
+@click.argument('datasource', default=None, required=False)
 @click.option(
-    "--generator_name",
+    "--generator-name",
     "-g",
     default=None,
     help="The name of the batch kwarg generator configured in the datasource. The generator will list data assets in the datasource"
 )
-@click.option('--data_assets', '-l', default=None,
-              help='Comma-separated list of the names of data assets that should be profiled. Requires datasource_name specified.')
+@click.option('--data-assets', '-l', default=None,
+              help='Comma-separated list of the names of data assets that should be profiled. Requires datasource specified.')
 @click.option('--profile_all_data_assets', '-A', is_flag=True, default=False,
               help='Profile ALL data assets within the target data source. '
                    'If True, this will override --max_data_assets.')
@@ -147,9 +147,9 @@ def datasource_list(directory):
     help="By default open in browser unless you specify the --no-view flag",
     default=True
 )
-@click.option('--batch_kwargs', default=None,
+@click.option('--batch-kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
-def datasource_profile(datasource_name, generator_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
+def datasource_profile(datasource, generator_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
     """
     Profile a datasource
 
@@ -158,7 +158,7 @@ def datasource_profile(datasource_name, generator_name, data_assets, profile_all
     prompt the user to either specify the list of data assets to profile or to profile all.
     If the limit is not exceeded, the profiler will profile all data assets in the datasource.
 
-    :param datasource_name: name of the datasource to profile
+    :param datasource: name of the datasource to profile
     :param data_assets: if this comma-separated list of data asset names is provided, only the specified data assets will be profiled
     :param profile_all_data_assets: if provided, all data assets will be profiled
     :param directory:
@@ -179,8 +179,8 @@ def datasource_profile(datasource_name, generator_name, data_assets, profile_all
     if batch_kwargs is not None:
         batch_kwargs = json.loads(batch_kwargs)
 
-    if datasource_name is None:
-        datasources = [datasource["name"] for datasource in context.list_datasources()]
+    if datasource is None:
+        datasources = [_datasource["name"] for _datasource in context.list_datasources()]
         if not datasources:
             cli_message(NO_DATASOURCES_FOUND)
             sys.exit(1)
@@ -203,7 +203,7 @@ def datasource_profile(datasource_name, generator_name, data_assets, profile_all
     else:
         profile_datasource(
             context,
-            datasource_name,
+            datasource,
             generator_name=generator_name,
             data_assets=data_assets,
             profile_all_data_assets=profile_all_data_assets,
