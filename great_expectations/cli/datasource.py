@@ -813,7 +813,7 @@ def create_expectation_suite(
 Great Expectations will choose a couple of columns and generate expectations about them
 to demonstrate some examples of assertions you can make about your data. 
     
-Press Enter to continue...
+Press Enter to continue
 """
 
     msg_prompt_expectation_suite_name = """
@@ -822,7 +822,7 @@ Name the new expectation suite"""
     msg_data_doc_intro = """
 <cyan>========== Data Docs ==========</cyan>"""
 
-    msg_suite_already_exists = "<red>An expectation suite named `{}` already exists. If you intend to edit the suite please use `great_expectations suite edit foo`.</red>"
+    msg_suite_already_exists = "<red>An expectation suite named `{}` already exists. If you intend to edit the suite please use `great_expectations suite edit {}`.</red>"
 
     if show_intro_message:
         cli_message(msg_intro)
@@ -839,6 +839,7 @@ Name the new expectation suite"""
     if expectation_suite_name in existing_suite_names:
         cli_message(
             msg_suite_already_exists.format(
+                expectation_suite_name,
                 expectation_suite_name
             )
         )
@@ -857,6 +858,7 @@ Name the new expectation suite"""
             if expectation_suite_name in existing_suite_names:
                 cli_message(
                     msg_suite_already_exists.format(
+                        expectation_suite_name,
                         expectation_suite_name
                     )
                 )
@@ -865,9 +867,9 @@ Name the new expectation suite"""
 
     profiler = SampleExpectationsDatasetProfiler
 
-    click.prompt(msg_prompt_what_will_profiler_do, default="Enter", hide_input=True)
+    click.prompt(msg_prompt_what_will_profiler_do, default=True, show_default=False)
 
-    cli_message("\nProfiling...")
+    cli_message("\nGenerating example Expectation Suite...")
     run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
 
     profiling_results = context.profile_data_asset(
