@@ -324,7 +324,7 @@ def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "edit", "foo", "-d", project_dir, "--batch_kwargs", "'{foobar}'"],
+        ["suite", "edit", "foo", "-d", project_dir, "--batch-kwargs", "'{foobar}'"],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -347,7 +347,7 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
     batch_kwargs = '{"table": "fake", "datasource": "source"}'
     result = runner.invoke(
         cli,
-        ["suite", "edit", "foo", "-d", project_dir, "--batch_kwargs", batch_kwargs],
+        ["suite", "edit", "foo", "-d", project_dir, "--batch-kwargs", batch_kwargs],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -503,7 +503,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
             "-d",
             root_dir,
             "--no-jupyter",
-            "--batch_kwargs",
+            "--batch-kwargs",
             batch_kwargs_arg_str,
         ],
         catch_exceptions=False,
@@ -532,7 +532,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
     - the suite foo exists
     - the a datasource exists
     - and the users runs this
-    great_expectations suite edit foo --batch_kwargs '{"path": "data/10k.csv"}'
+    great_expectations suite edit foo --batch-kwargs '{"path": "data/10k.csv"}'
 
     Then:
     - The user should see a nice error and the program halts before notebook compilation.
@@ -551,7 +551,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
             "foo",
             "-d",
             project_dir,
-            "--batch_kwargs",
+            "--batch-kwargs",
             json.dumps(batch_kwargs),
         ],
         catch_exceptions=False,
@@ -571,7 +571,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     - the suite foo exists
     - the a datasource bar exists
     - and the users runs this
-    great_expectations suite edit foo --datasource bar --batch_kwargs '{"path": "data/10k.csv"}'
+    great_expectations suite edit foo --datasource bar --batch-kwargs '{"path": "data/10k.csv"}'
 
     Then:
     - The user gets a working notebook
@@ -590,7 +590,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
             "foo",
             "-d",
             project_dir,
-            "--batch_kwargs",
+            "--batch-kwargs",
             json.dumps(batch_kwargs),
             "--datasource",
             "mydatasource",
