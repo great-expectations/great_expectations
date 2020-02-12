@@ -193,7 +193,7 @@ The command will print out the locations of index.html file for each site.
 
 To disable the web browser opening behavior use `--no-view` option.
 
-To render just one site, use `--site_name SITE_NAME` option.
+To render just one site, use `--site-name SITE_NAME` option.
 
 Here is when the ``docs build`` command should be called:
 
