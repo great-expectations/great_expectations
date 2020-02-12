@@ -4,13 +4,12 @@
 Evaluation Parameters
 ######################
 
-Often, the specific parameters associated with an expectation will be derived from upstream steps in a processing \
-pipeline. For example, we may want to `expect_table_row_count_to_equal` a value stored in a previous step, but we \
-may still want to ensure that we can use the same expectation configuration object.
+Often, the specific parameters associated with an expectation will be derived from upstream steps in a processing
+pipeline. For example, we may want to `expect_table_row_count_to_equal` a value stored in a previous step.
 
-Great Expectations makes working with parameters of that kind easy! When declaring an expectation, you can specify that \
-a particular argument is an evaluation parameter that should be substituted at evaluation time, and provide a temporary \
-value that should be used during the initial evaluation of the expectation.
+Great Expectations makes it possible to use "Evaluation Parameters" to accomplish that goal. We declare Expectations
+using parameters that need to be provided at validation time; during interactive development, we can even provide a
+temporary value that should be used during the initial evaluation of the expectation.
 
 .. code-block:: python
 
