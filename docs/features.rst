@@ -18,7 +18,7 @@ and our `blog <https://greatexpectations.io/blog>`__ for more information on how
    /features/custom_expectations
    /features/data_context
    /features/validation_operators_and_actions
-   /features/profiler
+   /features/profilers
    /features/datasource
    /features/batch_kwargs_generator
    /features/ge_on_teams

@@ -8,12 +8,12 @@ Profiling is a way of Rendering Validation Results to produce a summary of obser
 Results are rendered as Profiling data, they create a new section in :ref:`data_docs`. By computing the **observed**
 properties of data, Profiling helps to understand and reason about the data's **expected** properties.
 
-To produce a useful data overview, Great Expectations uses a :ref:`profiler` to build a special Expectation Suite.
-Unlike the Expectations that are typically used for data validation, expectations for Profiling do not necessarily
-apply any constraints. They can simply identify statistics or other data characteristics that should be evaluated and
-made available in Great Expectations. For example, when the included ``BasicDatasetProfiler`` encounters a numeric
-column, it will add an ``expect_column_mean_to_be_between`` expectation but choose the min_value and max_value to
-both be None: essentially only saying that it expects a mean to exist.
+To produce a useful data overview, Great Expectations uses a :ref:`profiler <profilers>` to build a special Expectation
+Suite. Unlike the Expectations that are typically used for data validation, expectations for Profiling do not
+necessarily apply any constraints. They can simply identify statistics or other data characteristics that should be
+evaluated and made available in Great Expectations. For example, when the included ``BasicDatasetProfiler``
+encounters a numeric column, it will add an ``expect_column_mean_to_be_between`` expectation but choose the min_value
+and max_value to both be None: essentially only saying that it expects a mean to exist.
 
 The default BasicDatasetProfiler will thus produce a page for each table or DataFrame including an overview section:
 
