@@ -10,7 +10,7 @@ logging.getLogger(
     "great_expectations.dataset.sqlalchemy_dataset"
 ).setLevel(logging.CRITICAL)
 logging.getLogger(
-    "great_expectations.profile.basic_dataset_profiler"
+    "great_expectations.profile.sample_expectations_dataset_profiler"
 ).setLevel(logging.CRITICAL)
 
 # Take over the entire GE module logging namespace when running CLI
