@@ -255,11 +255,11 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def _get_quantile_values_observed_value(cls, evr):
-        if evr.result is None:
+        if evr.result is None or evr.result.get("observed_value") is None:
             return "--"
 
-        quantiles = evr.result["observed_value"]["quantiles"]
-        value_ranges = evr.result["observed_value"]["values"]
+        quantiles = evr.result.get("observed_value", {}).get("quantiles", [])
+        value_ranges = evr.result.get("observed_value", {}).get("values", [])
 
         table_header_row = ["Quantile", "Value"]
         table_rows = []
