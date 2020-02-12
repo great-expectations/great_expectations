@@ -21,3 +21,5 @@ Once Great Expectations is installed, follow this tutorial for a quick start.
 
 (We recommend deploying within a virtual environment. If you're not familiar with pip, virtual environments, notebooks,
 or git, you may want to check out the :ref:`supporting_resources` section before continuing.)
+
+*last updated*: |lastupdate|

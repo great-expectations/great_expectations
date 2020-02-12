@@ -14,4 +14,4 @@ This is a collection of tutorials that walk you through a variety of useful Grea
    /tutorials/validate_data
    /tutorials/publishing_data_docs_to_s3
 
-
+*last updated*: |lastupdate|

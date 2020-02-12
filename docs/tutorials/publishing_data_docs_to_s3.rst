@@ -105,3 +105,5 @@ For more information on static site hosting in AWS, see the following:
  - `AWS Website Hosting <https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html>`_
  - `AWS Static Site Access Permissions <https://docs.aws.amazon.com/en_pv/AmazonS3/latest/dev/WebsiteAccessPermissionsReqd.html>`_
  - `AWS Website configuration <https://docs.aws.amazon.com/AmazonS3/latest/dev/HowDoIWebsiteConfiguration.html>`_
+
+*last updated*: |lastupdate|

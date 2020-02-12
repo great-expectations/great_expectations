@@ -29,3 +29,5 @@ specific batch of data, GE can store snapshots of batches or store metadata from
 external data version control system.
 
 See more detailed documentation on the :ref:`generator_module`.
+
+*last updated*: |lastupdate|
