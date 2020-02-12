@@ -26,19 +26,37 @@ def assert_no_logging_messages_or_tracebacks(my_caplog, click_result):
     :param my_caplog: the caplog pytest fixutre
     :param click_result: the Result object returned from click runner.invoke()
     """
+    assert_no_logging_messages(my_caplog)
+    assert_no_tracebacks(click_result)
+
+
+def assert_no_logging_messages(my_caplog):
+    """
+    Assert no logging output messages.
+
+    :param my_caplog: the caplog pytest fixutre
+    """
     assert isinstance(
         my_caplog, LogCaptureFixture
     ), "Please pass in the caplog object from your test."
-    assert isinstance(
-        click_result, Result
-    ), "Please pass in the click runner invoke result object from your test."
-
     messages = my_caplog.messages
     assert isinstance(messages, list)
     if messages:
-        print(messages)
+        print("Found logging messages:\n")
+        print("\n".join([m for m in messages]))
     assert not messages
 
+
+def assert_no_tracebacks(click_result):
+    """
+    Assert no tracebacks.
+
+    :param click_result: the Result object returned from click runner.invoke()
+    """
+
+    assert isinstance(
+        click_result, Result
+    ), "Please pass in the click runner invoke result object from your test."
     if click_result.exc_info:
         # introspect the call stack to make sure no exceptions found there way through
         # https://docs.python.org/2/library/sys.html#sys.exc_info
@@ -54,7 +72,6 @@ def assert_no_logging_messages_or_tracebacks(my_caplog, click_result):
         assert not click_result.exception, "Found exception {}".format(
             click_result.exception
         )
-
     assert (
         "traceback" not in click_result.output.lower()
     ), "Found a traceback in the console output: {}".format(click_result.output)
