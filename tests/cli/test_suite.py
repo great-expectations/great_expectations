@@ -82,6 +82,7 @@ def test_suite_new_enter_existing_suite_name_as_arg(
     assert "already exists. If you intend to edit the suite" in stdout
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
+
 def test_suite_new_answer_suite_name_prompts_with_name_of_existing_suite(
     caplog, data_context, filesystem_csv_2
 ):
@@ -123,7 +124,7 @@ def test_suite_new_answer_suite_name_prompts_with_name_of_existing_suite(
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
     )
-    assert "Profiling" in stdout
+    assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "The following Data Docs sites were built" in stdout
     assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
@@ -181,7 +182,7 @@ def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
     )
-    assert "Profiling" in stdout
+    assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "The following Data Docs sites were built" in stdout
     assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
@@ -235,7 +236,7 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
     )
-    assert "Profiling" in stdout
+    assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "The following Data Docs sites were built" in stdout
     assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
@@ -285,7 +286,7 @@ def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
     )
-    assert "Profiling" in stdout
+    assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "The following Data Docs sites were built" in stdout
     assert "A new Expectation suite 'foo_suite' was added to your project" in stdout

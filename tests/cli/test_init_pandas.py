@@ -42,7 +42,7 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory):
         "Great Expectations will choose a couple of columns and generate expectations about them"
         in stdout
     )
-    assert "Profiling..." in stdout
+    assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
     assert "A new Expectation suite 'warning' was added to your project" in stdout
@@ -332,7 +332,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert "Error: invalid input" not in stdout
     assert "Always know what to expect from your data" in stdout
     assert "Enter the path (relative or absolute) of a data file" in stdout
-    assert "Profiling..." in stdout
+    assert "Generating example Expectation Suite..." in stdout
     assert "The following Data Docs sites were built" in stdout
     assert "Great Expectations is now set up" in stdout
     assert "A new Expectation suite 'sink_me' was added to your project" in stdout
