@@ -229,7 +229,7 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
     stdout = result.stdout
 
     assert result.exit_code == 0
-    assert "Select data source" in stdout
+    assert "Select a datasource" in stdout
     assert "Which data would you like to use" in stdout
     assert "Name the new expectation suite [warning]" in stdout
     assert (
@@ -280,7 +280,7 @@ def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
     stdout = result.stdout
 
     assert result.exit_code == 0
-    assert "Select data source" in stdout
+    assert "Select a datasource" in stdout
     assert "Which data would you like to use" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
@@ -439,7 +439,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args(
 
     assert result.exit_code == 0
     stdout = result.stdout
-    assert "Select data source" in stdout
+    assert "Select a datasource" in stdout
     assert "Which data would you like to use" in stdout
     assert "To continue editing this suite, run" in stdout
 
@@ -512,7 +512,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     stdout = result.stdout
 
     assert result.exit_code == 0
-    assert "Select data source" not in stdout
+    assert "Select a datasource" not in stdout
     assert "Which data would you like to use" not in stdout
     assert "To continue editing this suite, run" in stdout
 
@@ -661,7 +661,7 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args(
 
     assert result.exit_code == 0
     stdout = result.stdout
-    assert "Select data source" not in stdout
+    assert "Select a datasource" not in stdout
     assert "Which data would you like to use" not in stdout
     assert "Enter the path" in stdout
     assert "To continue editing this suite, run" in stdout

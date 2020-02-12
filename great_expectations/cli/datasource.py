@@ -644,7 +644,7 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
 
 
 def select_datasource(context, datasource_name=None):
-    msg_prompt_select_data_source = "Select data source"
+    msg_prompt_select_data_source = "Select a datasource"
     msg_no_datasources_configured = "<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
 
     data_source = None
@@ -731,15 +731,6 @@ def get_batch_kwargs(context,
                 have changed after this method's execution. If the returned batch_kwargs is None, it means
                 that the generator will know to yield batch_kwargs when called.
     """
-
-    msg_prompt_enter_data_asset_name = "\nWhich data would you like to use? (Choose one)\n"
-
-    msg_prompt_enter_data_asset_name_suffix = "    Don't see the data asset in the list above? Just type the name.\n"
-
-    data_source = select_datasource(context, datasource_name=datasource_name)
-
-    batch_kwargs = None
-
     try:
         available_data_assets_dict = context.get_available_data_asset_names(datasource_names=datasource_name)
     except ValueError:
@@ -906,15 +897,15 @@ def _get_batch_kwargs_from_generator_or_from_file_path(context, datasource_name,
                                                        generator_name=None,
                                                        additional_batch_kwargs={}):
     msg_prompt_generator_or_file_path =  """
-Would you like to enter the path of the file or choose from the list of data assets in this datasource? 
-    1. I want a list of data assets in this datasource
-    2. I will enter the path of a data file
+Would you like to: 
+    1. choose from a list of data assets in this datasource
+    2. enter the path of a data file
 """
     msg_prompt_file_path = """
 Enter the path (relative or absolute) of a data file
 """
 
-    msg_prompt_enter_data_asset_name = "\nWhich data would you like to use? (Choose one)\n"
+    msg_prompt_enter_data_asset_name = "\nWhich data would you like to use?\n"
 
     msg_prompt_enter_data_asset_name_suffix = "    Don't see the name of the data asset in the list above? Just type it\n"
 
