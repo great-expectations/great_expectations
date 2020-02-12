@@ -589,3 +589,5 @@ v.0.2
 * API and examples for custom expectations are available
 * New output formats are available for all expectations
 * Significant improvements to test suite and compatibility
+
+:Lastupdate: |lastupdate|
