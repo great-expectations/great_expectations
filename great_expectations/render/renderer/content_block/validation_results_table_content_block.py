@@ -10,7 +10,7 @@ from great_expectations.render.types import (
     RenderedContentBlockContainer,
     RenderedStringTemplateContent,
     RenderedTableContent,
-)
+    CollapseContent)
 from great_expectations.render.util import num_to_str
 
 logger = logging.getLogger(__name__)
@@ -152,12 +152,12 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         result = evr.result
 
         if evr.exception_info["raised_exception"]:
-            template_str = "\n\n$expectation_type raised an exception:\n$exception_message"
+            exception_message_template_str = "\n\n$expectation_type raised an exception:\n$exception_message"
 
-            return RenderedStringTemplateContent(**{
+            exception_message = RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": template_str,
+                    "template": exception_message_template_str,
                     "params": {
                         "expectation_type": evr.expectation_config.expectation_type,
                         "exception_message": evr.exception_info["exception_message"]
@@ -177,8 +177,23 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 },
             })
 
+            exception_traceback_collapse = CollapseContent(**{
+                "collapse_toggle_link": "Show exception traceback...",
+                "collapse": [
+                    RenderedStringTemplateContent(**{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": evr.exception_info["exception_traceback"],
+                            "tag": "code"
+                        }
+                    })
+                ]
+            })
+
+            return [exception_message, exception_traceback_collapse]
+
         if success or not result.get("unexpected_count"):
-            return None
+            return []
         else:
             unexpected_count = num_to_str(result["unexpected_count"], use_locale=True, precision=20)
             unexpected_percent = num_to_str(result["unexpected_percent"], precision=4) + "%"
@@ -187,7 +202,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             template_str = "\n\n$unexpected_count unexpected values found. " \
                            "$unexpected_percent of $element_count total rows."
 
-            return RenderedStringTemplateContent(**{
+            return [
+                RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": template_str,
@@ -200,8 +216,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "styling": {
                         "classes": ["text-danger"]
                     }
-                }
-            })
+                }})
+            ]
 
     @classmethod
     def _get_kl_divergence_observed_value(cls, evr):
@@ -333,7 +349,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             expectation_string_cell = expectation_string_fn(expectation, styling, include_column_name)
 
             status_cell = [cls._get_status_icon(evr)]
-            unexpected_statement = None
+            unexpected_statement = []
             unexpected_table = None
             observed_value = ["--"]
 
@@ -351,8 +367,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
 
             # If the expectation has some unexpected values...:
-            if unexpected_statement or unexpected_table:
-                expectation_string_cell.append(unexpected_statement)
+            if unexpected_statement:
+                expectation_string_cell += unexpected_statement
+            if unexpected_table:
                 expectation_string_cell.append(unexpected_table)
 
             if len(expectation_string_cell) > 1:
