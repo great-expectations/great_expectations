@@ -154,7 +154,7 @@ class FileDataAsset(MetaFileDataAsset):
                                                          mostly=None,
                                                          null_lines_regex=r"^\s*$",
                                                          result_format=None,
-                                                         include_config=False,
+                                                         include_config=True,
                                                          catch_exceptions=None,
                                                          meta=None,
                                                          _lines=None):
@@ -264,7 +264,7 @@ class FileDataAsset(MetaFileDataAsset):
                                                     mostly=None, 
                                                     nonnull_lines_regex=r"^\s*$",
                                                     result_format=None,
-                                                    include_config=False,
+                                                    include_config=True,
                                                     catch_exceptions=None,
                                                     meta=None,
                                                     _lines=None):
@@ -336,7 +336,7 @@ class FileDataAsset(MetaFileDataAsset):
 
     @DataAsset.expectation(["value"])
     def expect_file_hash_to_equal(self, value, hash_alg='md5', result_format=None,
-                                  include_config=False, catch_exceptions=None,
+                                  include_config=True, catch_exceptions=None,
                                   meta=None):
 
         """
@@ -390,7 +390,7 @@ class FileDataAsset(MetaFileDataAsset):
 
     @DataAsset.expectation(["minsize", "maxsize"])
     def expect_file_size_to_be_between(self, minsize=0, maxsize=None, result_format=None,
-                                       include_config=False, catch_exceptions=None,
+                                       include_config=True, catch_exceptions=None,
                                        meta=None):
 
         """
@@ -466,7 +466,7 @@ class FileDataAsset(MetaFileDataAsset):
         }
     
     @DataAsset.expectation(["filepath"])
-    def expect_file_to_exist(self, filepath=None, result_format=None, include_config=False,
+    def expect_file_to_exist(self, filepath=None, result_format=None, include_config=True,
                              catch_exceptions=None, meta=None):
 
         """
@@ -515,7 +515,7 @@ class FileDataAsset(MetaFileDataAsset):
     @DataAsset.expectation([])
     def expect_file_to_have_valid_table_header(self, regex, skip=None,
                                                result_format=None,
-                                               include_config=False,
+                                               include_config=True,
                                                catch_exceptions=None, meta=None):
         """
         Checks to see if a file has a line with unique delimited values,
@@ -587,7 +587,7 @@ class FileDataAsset(MetaFileDataAsset):
     
     @DataAsset.expectation([])
     def expect_file_to_be_valid_json(self, schema=None, result_format=None,
-                                     include_config=False, catch_exceptions=None,
+                                     include_config=True, catch_exceptions=None,
                                      meta=None):
 
         """

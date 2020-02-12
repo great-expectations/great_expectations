@@ -208,7 +208,7 @@ def test_test_column_map_expectation_function():
         'y': [1, 2, None, 7, 9],
     })
 
-    def is_odd(self, column, mostly=None, result_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def is_odd(self, column, mostly=None, result_format=None, include_config=True, catch_exceptions=None, meta=None):
         return column % 2 == 1
 
     assert asset.test_column_map_expectation_function(is_odd, column='x') == ExpectationValidationResult(
@@ -233,7 +233,7 @@ def test_test_column_aggregate_expectation_function():
     })
 
     def expect_second_value_to_be(self, column, value,
-                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                  result_format=None, include_config=True, catch_exceptions=None, meta=None):
         return {
             "success": self[column].iloc[1] == value,
             "result": {
