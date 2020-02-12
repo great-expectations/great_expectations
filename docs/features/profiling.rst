@@ -23,7 +23,6 @@ And then detailed statistics for each column:
 
 .. image:: ../images/movie_db_profiling_screenshot_1.jpg
 
-
 Profiling is still a beta feature in Great Expectations. Over time, we plan to extend and improve the
 ``BasicDatasetProfiler`` and also add additional profilers.
 
