@@ -445,3 +445,4 @@ Now you you know how to validate a batch of data.
 
 What is next? This is a collection of tutorials that walk you through a variety of useful Great Expectations workflows: :ref:`tutorials`.
 
+*last updated*: |lastupdate|

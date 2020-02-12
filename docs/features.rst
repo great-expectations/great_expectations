@@ -21,3 +21,5 @@ and our `blog <https://greatexpectations.io/blog>`__ for more information on how
    /features/datasource
    /features/batch_generator
    /features/ge_on_teams
+
+*last updated*: |lastupdate|

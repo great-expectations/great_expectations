@@ -77,3 +77,5 @@ Running a profiler on a data asset can also be useful to produce a large number 
 and potentially transfer to a new expectation suite used for validation in a pipeline.
 
 See the :ref:`profiling_reference` for more information.
+
+*last updated*: |lastupdate|

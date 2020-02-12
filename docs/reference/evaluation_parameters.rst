@@ -80,3 +80,5 @@ Replace names in ``<>`` with the desired name. For example:
 ::
 
   urn:great_expectations:validations:my_source/default/notable_works_by_charles_dickens:my_suite:expectations:expect_column_proportion_of_unique_values_to_be_between:columns:Title:result:observed_value
+
+*last updated*: |lastupdate|

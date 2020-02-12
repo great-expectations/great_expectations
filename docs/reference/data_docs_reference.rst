@@ -474,3 +474,4 @@ Dependencies
 * Vega-Lite 3.2.1
 * Vega-Embed 4.0.0
 
+*last updated*: |lastupdate|
