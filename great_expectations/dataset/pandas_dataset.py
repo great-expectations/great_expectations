@@ -369,7 +369,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             )
         counts = self[column].value_counts()
         if sort == "value":
-            counts.sort_index(inplace=True)
+            try:
+                counts.sort_index(inplace=True)
+            except TypeError:
+                # Having values of multiple types in a object dtype column (e.g., strings and floats)
+                # raises a TypeError when the sorting method performs comparisons.
+                if self[column].dtype == object:
+                    counts.index = counts.index.astype(str)
+                    counts.sort_index(inplace=True)
         elif sort == "counts":
             counts.sort_values(inplace=True)
         counts.name = "count"
