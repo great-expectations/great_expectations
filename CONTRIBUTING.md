@@ -1,65 +1,120 @@
+# How to contribute
+We're excited for contributions to Great Expectations. If you see places where the code or documentation could be improved, please get involved! If you encounter any issues or have questions about how to contribute, please hop into the [Great Expectations Slack channel](https://greatexpectations.io/slack) and our team or other friendly community members will be able to help!
 
-## How to contribute
-We're excited for contributions to Great Expectations. If you see places where the code or documentation could be improved, please get involved!
+# Pre-requisites
 
-Submitting your changes
-Once your changes and tests are ready to submit for review:
+In order to contribute to Great Expectations, you will need the following:
 
-1. Test your changes
+* A GitHub account - this is sufficient if you only want to contribute to the documentation.
+* If you want to contribute code, you will also need a working version of Git on your computer. Please refer to the [Git setup instructions](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) for your environment.
+* We also recommend going through the [SSH key setup process on GitHub](https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) for easier authentication.
 
-    Run the test suite to make sure that nothing is broken. See the the section on testing below for help running tests. (Hint: `pytest` from the great_expectations root. Also: `pytest --no-spark --no-sqlalchemy`, if you don't want to configure these backends for local testing.)
-    To test for both Python 2 and 3, use `tox` .
+# How to modify the documentation
 
-2. Update the documentation
-    
-    Ensure any new features or behavioral differences introduced by your changes are documented in the docs, and ensure you have docstrings on your contributions. We use the Sphinx's Napoleon extension to build documentation from Google-style docstrings (see http://www.sphinx-doc.org/en/master/ext/napoleon.html).
+We suggest simply editing the docs using the GitHub markdown editor, which means you don’t have to fork the repo at all. Here’s how you do this:
 
-3. Sign the Contributor License Agreement
+* Go to the [Great Expectations (GE) docs](http://docs.greatexpectations.io/en/latest/).
+* On each page, you’ll see an "Edit on GitHub" button in the top right - click this to go to the source file in the GE GitHub repo.
+    * Or if you’re already on GitHub, the docs are located in great_expecations > docs. You can directly navigate to the respective page you want to edit (but getting there from the docs is a little easier).
+* In the top right of the grey header bar of the actual file, click the pencil icon to get into edit mode on GitHub.
+* Make your edits and use the Preview tab to preview changes.
+* When you’re done, add a meaningful commit message at the bottom. Use a short title and a meaningful explanation of what you changed and why.
+* Click the "Propose File Change" button at the bottom of the page.
+* Click the "Create Pull Request" button.
+    * Optionally: Add comment to explain your change, if it’s not already in the commit message.
+* Click the next "Create Pull Request" button to create the actual PR.
+* You will see a comment from the "CLA Bot" that asks you to complete the Contributor Licence Agreement form.
+    * Please complete the form and comment on the PR to say that you’ve signed the form.
+* Wait for the other Continuous Integration (CI) checks to go green and watch out for a comment from the automated linter that checks for syntax and formatting issues.
+    * Fix any issues that are flagged.
+* Once all checks pass, a GE team member will approve your PR and merge it. 
+    * GitHub will notify you of comments or a successful merge according to your notification settings.
+    * If there are any issues, please address them promptly.
+* Congratulations! You’ve just contributed to Great Expectations!
 
-    **When you contribute code, you affirm that the contribution is your original work and that you license the work to the project under the project’s open source license. Whether or not you state this explicitly, by submitting any copyrighted material via pull request, email, or other means you agree to license the material under the project’s open source license and warrant that you have the legal authority to do so.**
+# How to contribute to Great Expectations code
 
-    Please make sure you have signed our Contributor License Agreement (either [Individual Contributor License Agreement v1.0](https://docs.google.com/forms/d/e/1FAIpQLSdA-aWKQ15yBzp8wKcFPpuxIyGwohGU1Hx-6Pa4hfaEbbb3fg/viewform?usp=sf_link) or [Software Grant and Corporate Contributor License Agreement ("Agreement") v1.0](https://docs.google.com/forms/d/e/1FAIpQLSf3RZ_ZRWOdymT8OnTxRh5FeIadfANLWUrhaSHadg_E20zBAQ/viewform?usp=sf_link)). We are not asking you to assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign the CLA once.
-    
-4. Rebase your changes
+The following instructions provide a step-by-step overview of how to contribute code to Great Expectations.
 
-    Update your local repository with the most recent code from the main Great Expectations repository, and rebase your branch on top of the latest `develop` branch. We prefer small, incremental commits, because it makes the thought process behind changes easier to review.
+* Fork the Great Expectations repo:
+    * Go to the [Great Expectations repo on GitHub](https://github.com/great-expectations/great_expectations).
+    * Click the "Fork" button in the top right. This will make a copy of the repo in your own GitHub account.
+    * GitHub will take you to your forked version of the repository.
+* Clone your fork: Click the green "Clone" button and choose the SSH or HTTPS URL depending on your setup. 
+    * Copy the URL and run `git clone <url>` in your local terminal.
+    * Note: This will clone the `develop` branch of the great_expectations repo by default, not `master`.
+* Add the upstream remote:
+    * On your local machine, cd into the great_expectations repo you cloned in the previous step.
+    * Run: `git remote add upstream git@github.com:great_expectations/gret_expectations.git`
+    * This sets up a remote called `upstream` to track changes to the main branch.
+* Install all relevant libraries:
+    * Make a new virtual environment (e.g. using virtualenv or conda), name it "great_expectations_dev" or similar.
+    * Install dependencies from requirements-dev.txt to make sure you have the right libraries, then install great_expectations from the version you just forked:
+        * `pip install -r requirements-dev.txt`
+        * `pip install .`
+    * Make sure you have GCC and Java installed and working on your machine.
+* Create a feature branch to start working on your changes.
+    * Make sure to check out the *Conventions* sections below to stick with the project conventions.
+* When you’re done with the work:
+    *  Update your local repository with the most recent code from the main Great Expectations repository, and rebase your branch on top of the latest `develop` branch. We prefer small, incremental commits, because it makes the thought process behind changes easier to review. [Here's some more info on how to keep your forks up-to-date](https://www.atlassian.com/git/tutorials/git-forks-and-upstreams).
+    * Fix any merge conflicts that arise from the rebase.
+    * Run the tests -- refer to the section below on *Testing* for details
+    * Make sure to add and commit all your changes in this step.
+* Create a PR:
+    * Push to the remote fork of your repo
+    * Follow [these instructions](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork) to create a PR from your commit.
+    *  In the PR, choose a short title which sums up the changes that you have made, and in the body provide more details about what your changes do. Also mention the number of the issue where discussion has taken place, e.g. "Closes #123".
+* You will see a comment from the "CLA Bot" that asks you to complete the Contributor Licence Agreement form. See details in the section below if you want to learn more.
+    * Please complete the form and comment on the PR to say that you’ve signed the form.
+* Wait for the other Continuous Integration (CI) checks to go green and watch out for a comment from the automated linter that checks for syntax and formatting issues.
+    * Fix any issues that are flagged.
+* Once all checks pass, a GE team member will approve your PR and merge it. 
+    * GitHub will notify you of comments or a successful merge according to your notification settings.
+    * There will probably be discussion about the pull request. It's normal for a request to require some changes before merging it into the main Great Expectations project. We enjoy working with contributors to help them get their code accepted. There are many approaches to fixing a problem and it is important to find the best approach before writing too much code!
+* Congratulations! You’ve just contributed to Great Expectations!
 
-5. Submit a pull request
+## About the Contributor License Agreement
 
-    Push your local changes to your forked copy of the repository and submit a pull request. In the pull request, choose a title which sums up the changes that you have made, and in the body provide more details about what your changes do. Also mention the number of the issue where discussion has taken place, eg "Closes #123".
+*When you contribute code, you affirm that the contribution is your original work and that you license the work to the project under the project’s open source license. Whether or not you state this explicitly, by submitting any copyrighted material via pull request, email, or other means you agree to license the material under the project’s open source license and warrant that you have the legal authority to do so.*
 
-6. Participate in review
-
-    There will probably be discussion about the pull request. It's normal for a request to require some changes before merging it into the main Great Expectations project. We enjoy working with contributors to get their code accepted. There are many approaches to fixing a problem and it is important to find the best approach before writing too much code.
+Please make sure you have signed our Contributor License Agreement (either [Individual Contributor License Agreement v1.0](https://docs.google.com/forms/d/e/1FAIpQLSdA-aWKQ15yBzp8wKcFPpuxIyGwohGU1Hx-6Pa4hfaEbbb3fg/viewform?usp=sf_link) or [Software Grant and Corporate Contributor License Agreement ("Agreement") v1.0](https://docs.google.com/forms/d/e/1FAIpQLSf3RZ_ZRWOdymT8OnTxRh5FeIadfANLWUrhaSHadg_E20zBAQ/viewform?usp=sf_link)). We are not asking you to assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign the CLA once.
 
 ## Testing
 
-Depending on which backends you want to exercise, you can add a few flags to your `pytest` invocation.
-- adding `--no-postgresql` will skip postgres tests (handy if you don't have a local postgres installation)
-- adding `--no-spark` will skip spark tests (handy if you don't have spark installed)
+### Running tests
+In general, you can run all tests by simply running `pytest` in the great_expectations directory root. Before submitting any PR, please ensure there are no tests that fail with an error, and review any warnings.
 
+If you would like to run the tests without the need for local backend setups, adding the following flags will skip the respective backends:
+- `--no-postgresql` will skip postgres tests
+- `--no-spark` will skip spark tests 
+- `--no-sqlalchemy` will skip sqlalchemy tests
+
+For example, you can run
+
+`pytest --no-spark --no-sqlalchemy --no-postgresql` 
+
+to skip all backend tests. Please note that these tests will still be run by the CI as soon as you open a PR, so some tests might fail there if your code changes affected them.
+
+### Writing tests
 We are actively migrating many of our tests to a new format to support testing across different dataset types. Consolidating them is an important next step. That means two things for contributors:
 
-For now, write tests in whatever style suits your fancy. We (the core contributors) will worry about refactoring them later. As long as your thing works and is well-tested, you're good.
-
-(This is **not** an excuse to avoid writing tests. All contributions must be under test. We're just not dogmatic about the style of those tests today.)
-
-Second, if you have opinions on the testing framework, we'd love to hear them! Feedback based on your perspective and experience is very welcome.
+* For now, write tests in whatever style suits your fancy. We (the core contributors) will worry about refactoring them later. As long as your thing works and is well-tested, you're good. (This is **not** an excuse to avoid writing tests. All contributions must be under test. We're just not dogmatic about the style of those tests today.)
+* Second, if you have opinions on the testing framework, we'd love to hear them! Feedback based on your perspective and experience is very welcome.
 
 Most of the discussion to date is encapsulated here: https://github.com/great-expectations/great_expectations/issues/167. The `refactor_tests` branch is intended as a pilot implementation.
 
-## Conventions and Style
+## Conventions and style
 
-* Avoid abbreviations (`column_idx` < `column_index`)
-* Use unambiguous expectation names, even if they're a bit longer. (`expect_columns_to_be` < `expect_columns_to_match_ordered_list`)
+Ensure any new features or behavioral differences introduced by your changes are documented in the docs, and ensure you have docstrings on your contributions. We use the Sphinx's Napoleon extension to build documentation from Google-style docstrings (see http://www.sphinx-doc.org/en/master/ext/napoleon.html).
 
 Expectations aren't just tests---they're also a kind of data documentation. Because we want expectations to be easy to interpret, we're avoiding abbreviations almost everywhere. We're not entirely consistent about this yet, but there's pretty strong consensus among early team and users that we should be heading in that direction.
 
+* Avoid abbreviations, e.g. use `column_index` instead of `column_idx`.
+* Use unambiguous expectation names, even if they're a bit longer, e.g. use `expect_columns_to_match_ordered_list` instead of `expect_columns_to_be`.
+* Expectation names should reflect their decorators:
+    * `expect_table_...` for methods decorated directly with `@expectation`
+    * `expect_column_values_...` for `@column_map_expectation`
+    * `expect_column_...` for `@column_aggregate_expectation`
+    * `expect_column_pair_values...` for `@column_pair_map_expectation`
+
 These guidelines should be followed consistently for methods and variables exposed in the API. They aren't intended to be strict rules for every internal line of code in every function.
-
-* Expectation names should reflect their decorators.
-
-`expect_table_...` for methods decorated directly with `@expectation`
-`expect_column_values_...` for `@column_map_expectation`
-`expect_column_...` for `@column_aggregate_expectation`
-`expect_column_pair_values...` for `@column_pair_map_expectation`
