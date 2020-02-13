@@ -44,6 +44,13 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     stdout = result.output
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
+            root_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
+
     assert "Great Expectations is now set up." in stdout
 
     context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
@@ -101,6 +108,12 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     )
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
+            root_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -121,9 +134,9 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
 def test_cli_init_connection_string_non_working_db_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
     mock_webbrowser, caplog, tmp_path_factory,
 ):
-    basedir = tmp_path_factory.mktemp("bad_con_string_test")
-    basedir = str(basedir)
-    os.chdir(basedir)
+    root_dir = tmp_path_factory.mktemp("bad_con_string_test")
+    root_dir = str(root_dir)
+    os.chdir(root_dir)
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -150,7 +163,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
 
     assert result.exit_code == 1
 
-    ge_dir = os.path.join(basedir, DataContext.GE_DIR)
+    ge_dir = os.path.join(root_dir, DataContext.GE_DIR)
     assert os.path.isdir(ge_dir)
     config_path = os.path.join(ge_dir, DataContext.GE_YML)
     assert os.path.isfile(config_path)
@@ -174,7 +187,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
     config = yaml.load(open(config_path, "r"))
     assert config["my_db"] == {"url": "sqlite:////not_a_real.db"}
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(os.path.join(root_dir, "great_expectations"))
     assert (
         obs_tree
         == """\
