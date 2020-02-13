@@ -49,7 +49,7 @@ def pytest_addoption(parser):
         "--no-spark", action='store_true', help="If set, suppress tests against the spark test suite"
     )
     parser.addoption(
-        "--no-sqlalchemy", action="store_true", help="If set, suppress tests using sqlalchemy; run sqlite tests"
+        "--no-sqlalchemy", action="store_true", help="If set, suppress all tests using sqlalchemy"
     )
     parser.addoption(
         "--no-postgresql", action="store_true", help="If set, suppress tests against postgresql"
@@ -71,8 +71,6 @@ def build_test_backends_list(metafunc):
         import sqlalchemy as sa
         no_postgresql = metafunc.config.getoption("--no-postgresql")
         if not no_postgresql:
-            if no_sqlalchemy:
-                raise ValueError("sqlalchemy tests must be enabled to test with postgresql")
             ###
             # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
             # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
