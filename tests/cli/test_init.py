@@ -29,7 +29,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     root_dir = tmp_path_factory.mktemp("hiya")
     root_dir = str(root_dir)
     os.makedirs(os.path.join(root_dir, "data"))
-    data_path = os.path.join(root_dir, "data/Titanic.csv")
+    data_path = os.path.join(root_dir, "data", "Titanic.csv")
     fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(fixture_path, data_path)
 

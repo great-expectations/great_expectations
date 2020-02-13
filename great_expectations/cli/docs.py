@@ -26,7 +26,7 @@ def docs():
     help="The project's great_expectations directory.",
 )
 @click.option(
-    "--site_name",
+    "--site-name",
     "-s",
     help="The site for which to generate documentation. See data_docs section in great_expectations.yml",
 )

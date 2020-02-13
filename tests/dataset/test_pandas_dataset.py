@@ -577,3 +577,17 @@ def test_pandas_deepcopy():
     assert df2.expect_column_to_exist("a").success == True
     assert list(df["a"]) == [2, 3, 4]
     assert list(df2["a"]) == [1, 2, 3]
+
+def test_ge_value_count_of_object_dtype_column_with_mixed_types():
+    """
+    Having mixed type values in a object dtype column (e.g., strings and floats)
+    used to raise a TypeError when sorting value_counts. This test verifies
+    that the issue is fixed.
+    """
+    df = ge.dataset.PandasDataset({
+        'A': [1.5, 0.009, 0.5, "I am a string in an otherwise float column"],
+    })
+
+    value_counts = df.get_column_value_counts("A")
+    assert value_counts["I am a string in an otherwise float column"] == 1
+

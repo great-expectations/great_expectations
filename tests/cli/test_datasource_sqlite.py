@@ -8,9 +8,11 @@ from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from great_expectations.exceptions import DataContextError
 from tests.cli.test_cli import yaml
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from tests.cli.utils import (
+    assert_no_logging_messages_or_tracebacks,
+    assert_no_tracebacks,
+)
 
 
 @pytest.mark.xfail(condition=PY2, reason="a known issue on Py2")
@@ -271,7 +273,9 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert validation.success is False
     assert len(validation.results) == 51
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert "Preparing column 1 of 7" in caplog.messages[0]
+    assert len(caplog.messages) == 7
+    assert_no_tracebacks(result)
 
 
 @pytest.mark.xfail(condition=PY2, reason="legacy python")
@@ -305,7 +309,7 @@ def test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg(
             "datasource",
             "profile",
             datasource_name,
-            "--generator_name",
+            "--generator-name",
             second_generator_name,
             "-d",
             project_root_dir,
@@ -329,7 +333,10 @@ def test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg(
         == "wow_a_datasource.second_generator.asset_one.BasicDatasetProfiler"
     )
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert "Preparing column 1 of 7" in caplog.messages[0]
+    assert len(caplog.messages) == 7
+    assert_no_tracebacks(result)
+
 
 @pytest.mark.xfail(condition=PY2, reason="a known issue on Py2")
 def test_cli_datasource_profile_with_no_datasource_args(
@@ -377,7 +384,9 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert validation.success is False
     assert len(validation.results) == 51
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert "Preparing column 1 of 7" in caplog.messages[0]
+    assert len(caplog.messages) == 7
+    assert_no_tracebacks(result)
 
 
 def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with_limit(
@@ -404,9 +413,9 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
             "profile",
             "-d",
             project_root_dir,
-            "--data_assets",
+            "--data-assets",
             "main.titanic",
-            "--batch_kwargs",
+            "--batch-kwargs",
             '{"limit": 97}',
             "--no-view",
         ],
@@ -449,7 +458,10 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     ]
     assert len(row_count_validation_results) == 1
     assert row_count_validation_results[0].result["observed_value"] == 97
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+    assert "Preparing column 1 of 7" in caplog.messages[0]
+    assert len(caplog.messages) == 7
+    assert_no_tracebacks(result)
 
 
 def test_cli_datasource_profile_with_valid_data_asset_arg(
@@ -469,7 +481,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
             "datasource",
             "profile",
             datasource_name,
-            "--data_assets",
+            "--data-assets",
             "main.titanic",
             "-d",
             project_root_dir,
@@ -506,7 +518,9 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert validation.success is False
     assert len(validation.results) == 51
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert "Preparing column 1 of 7" in caplog.messages[0]
+    assert len(caplog.messages) == 7
+    assert_no_tracebacks(result)
 
 
 def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
@@ -526,7 +540,7 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
             "datasource",
             "profile",
             datasource_name,
-            "--data_assets",
+            "--data-assets",
             "bad-bad-asset",
             "-d",
             project_root_dir,

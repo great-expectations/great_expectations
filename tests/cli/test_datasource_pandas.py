@@ -9,7 +9,10 @@ from six import PY2
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from tests.cli.test_cli import yaml
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from tests.cli.utils import (
+    assert_no_logging_messages_or_tracebacks,
+    assert_no_tracebacks,
+)
 
 
 @pytest.mark.xfail(condition=PY2, reason="legacy python")
@@ -193,7 +196,9 @@ def test_cli_datasource_profile_with_datasource_arg(
     )
     assert validation.success is False
     assert len(validation.results) == 8
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+    assert "Preparing column 1 of 1" in caplog.messages[0]
+    assert_no_tracebacks(result)
 
 
 @pytest.mark.xfail(condition=PY2, reason="legacy python")
@@ -258,7 +263,10 @@ def test_cli_datasource_profile_with_no_datasource_args(
     )
     assert validation.success is False
     assert len(validation.results) == 8
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+    assert "Preparing column 1 of 1" in caplog.messages[0]
+    assert len(caplog.messages) == 1
+    assert_no_tracebacks(result)
 
 
 @pytest.mark.xfail(condition=PY2, reason="legacy python")
@@ -288,7 +296,7 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
             "profile",
             "-d",
             project_root_dir,
-            "--batch_kwargs",
+            "--batch-kwargs",
             '{"reader_options": {"sep": ",", "parse_dates": [0]}}',
             "--no-view",
         ],
@@ -333,7 +341,10 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
     reader_options = evr.meta["batch_kwargs"]["reader_options"]
     assert reader_options["parse_dates"] == [0]
     assert reader_options["sep"] == ","
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+    assert "Preparing column 1 of 1" in caplog.messages[0]
+    assert len(caplog.messages) == 1
+    assert_no_tracebacks(result)
 
 
 def test_cli_datasource_profile_with_valid_data_asset_arg(
@@ -361,7 +372,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
             "datasource",
             "profile",
             "my_datasource",
-            "--data_assets",
+            "--data-assets",
             "f1",
             "-d",
             project_root_dir,
@@ -395,7 +406,10 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert suite_name == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
     assert validation.success is False
     assert len(validation.results) == 8
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+    assert "Preparing column 1 of 1" in caplog.messages[0]
+    assert len(caplog.messages) == 1
+    assert_no_tracebacks(result)
 
 
 def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
@@ -424,7 +438,7 @@ def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
             "datasource",
             "profile",
             "my_datasource",
-            "--data_assets",
+            "--data-assets",
             "bad-bad-asset",
             "-d",
             project_root_dir,
