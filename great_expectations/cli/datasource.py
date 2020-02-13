@@ -696,6 +696,8 @@ def select_generator(context, datasource_name, available_data_assets_dict=None):
 
         return generator_name
 
+
+# TODO this method needs testing
 def get_batch_kwargs(context,
                      datasource_name=None,
                      generator_name=None,
@@ -736,6 +738,9 @@ def get_batch_kwargs(context,
     except ValueError:
         # the datasource has no generators
         available_data_assets_dict = {datasource_name: {}}
+
+    data_source = select_datasource(context, datasource_name=datasource_name)
+    datasource_name = data_source.name
 
     if generator_name is None:
         generator_name = select_generator(context, datasource_name,
