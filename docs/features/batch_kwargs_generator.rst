@@ -1,10 +1,11 @@
 .. _batch_generator:
 
-##################
-Batch Generators
-##################
+#######################
+Batch Kwargs Generators
+#######################
 
-A generator builds instructions for GE datasources by inspecting data and helping to identify useful elements such as
+A BatchKwargsGenerator builds instructions for GE datasources by inspecting data and helping to identify useful
+elements such as
 batches. Batch generators produce identifying information, called "batch_kwargs" that datasources can use to get
 individual batches of data. They add flexibility in how to obtain data such as with time-based partitioning,
 downsampling, or other techniques appropriate for the datasource.
@@ -28,3 +29,5 @@ specific batch of data, GE can store snapshots of batches or store metadata from
 external data version control system.
 
 See more detailed documentation on the :ref:`generator_module`.
+
+*last updated*: |lastupdate|

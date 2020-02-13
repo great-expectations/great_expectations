@@ -43,6 +43,7 @@ class ValidationResultsPageRenderer(Renderer):
         run_id = validation_results.meta['run_id']
         batch_id = BatchKwargs(validation_results.meta['batch_kwargs']).to_id()
         expectation_suite_name = validation_results.meta['expectation_suite_name']
+        batch_kwargs = validation_results.meta.get("batch_kwargs")
 
         # Group EVRs by column
         columns = {}
@@ -125,6 +126,7 @@ class ValidationResultsPageRenderer(Renderer):
         return RenderedDocumentContent(**{
             "renderer_type": "ValidationResultsPageRenderer",
             "page_title": expectation_suite_name + " / " + run_id + " / " + batch_id,
+            "batch_kwargs": batch_kwargs,
             "expectation_suite_name": expectation_suite_name,
             "sections": sections,
             "utm_medium": "validation-results-page",
@@ -613,6 +615,7 @@ class ProfilingResultsPageRenderer(Renderer):
     def render(self, validation_results):
         run_id = validation_results.meta['run_id']
         expectation_suite_name = validation_results.meta['expectation_suite_name']
+        batch_kwargs = validation_results.meta.get("batch_kwargs")
 
         # Group EVRs by column
         #TODO: When we implement a ValidationResultSuite class, this method will move there.
@@ -626,6 +629,7 @@ class ProfilingResultsPageRenderer(Renderer):
             "page_title": run_id + "-" + expectation_suite_name + "-ProfilingResults",
             "expectation_suite_name": expectation_suite_name,
             "utm_medium": "profiling-results-page",
+            "batch_kwargs": batch_kwargs,
             "sections":
                 [
                     self._overview_section_renderer.render(
