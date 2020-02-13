@@ -16,9 +16,9 @@ Since expectation semantics are usually consistent across versions, there is
 little change required when upgrading great expectations, with some exceptions
 noted here.
 
-*********************************
+***************************************
 Using the project check-config Command
-*********************************
+***************************************
 
 To facilitate this substantial config format change, starting with version 0.8.0
 we introduced ``project check-config`` to sanity check your config files. From your

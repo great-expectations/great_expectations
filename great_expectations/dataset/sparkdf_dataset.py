@@ -555,7 +555,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             mostly=None,
             parse_strings_as_datetimes=None,
             result_format=None,
-            include_config=False,
+            include_config=True,
             catch_exceptions=None,
             meta=None,
     ):
@@ -581,7 +581,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             value_set,  # List[Any]
             mostly=None,
             result_format=None,
-            include_config=False,
+            include_config=True,
             catch_exceptions=None,
             meta=None,
     ):
@@ -601,7 +601,7 @@ class SparkDFDataset(MetaSparkDFDataset):
                                            output_strftime_format=None,
                                            allow_cross_type_comparisons=None,
                                            mostly=None,
-                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                           result_format=None, include_config=True, catch_exceptions=None, meta=None
                                            ):
         # NOTE: This function is implemented using native functions instead of UDFs, which is a faster
         # implementation. Please ensure new spark implementations migrate to the new style where possible
@@ -640,7 +640,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     @MetaSparkDFDataset.column_map_expectation
     def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None,
                                                   mostly=None,
-                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                  result_format=None, include_config=True, catch_exceptions=None, meta=None):
         if min_value is None and max_value is None:
             return column.withColumn('__success', lit(True))
         elif min_value is None:
@@ -662,7 +662,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         column,
         mostly=None,
         result_format=None,
-        include_config=False,
+        include_config=True,
         catch_exceptions=None,
         meta=None,
     ):
@@ -676,7 +676,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         value, # int
         mostly=None,
         result_format=None,
-        include_config=False,
+        include_config=True,
         catch_exceptions=None,
         meta=None,
     ):
@@ -690,7 +690,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         strftime_format, # str
         mostly=None,
         result_format=None,
-        include_config=False,
+        include_config=True,
         catch_exceptions=None,
         meta=None,
     ):
@@ -722,7 +722,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         column,
         mostly=None,
         result_format=None,
-        include_config=False,
+        include_config=True,
         catch_exceptions=None,
         meta=None,
     ):
@@ -735,7 +735,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         column,
         mostly=None,
         result_format=None,
-        include_config=False,
+        include_config=True,
         catch_exceptions=None,
         meta=None,
     ):
@@ -748,7 +748,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             column,
             type_,
             mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
+            result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         if mostly is not None:
             raise ValueError("SparkDFDataset does not support column map semantics for column types")
@@ -785,7 +785,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             column,
             type_list,
             mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
+            result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         if mostly is not None:
             raise ValueError("SparkDFDataset does not support column map semantics for column types")
@@ -827,7 +827,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         regex,
         mostly=None,
         result_format=None,
-        include_config=False,
+        include_config=True,
         catch_exceptions=None,
         meta=None,
     ):
@@ -841,7 +841,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         regex,
         mostly=None,
         result_format=None,
-        include_config=False,
+        include_config=True,
         catch_exceptions=None,
         meta=None,
     ):
@@ -855,7 +855,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         column_B,
         ignore_row_if="both_values_are_missing",
         result_format=None,
-        include_config=False,
+        include_config=True,
         catch_exceptions=None,
         meta=None
     ):

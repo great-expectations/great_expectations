@@ -647,7 +647,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def expect_column_values_to_be_null(self,
                                         column,
                                         mostly=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                        result_format=None, include_config=True, catch_exceptions=None, meta=None
                                         ):
 
         return sa.column(column) == None
@@ -657,7 +657,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def expect_column_values_to_not_be_null(self,
                                             column,
                                             mostly=None,
-                                            result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                            result_format=None, include_config=True, catch_exceptions=None, meta=None
                                             ):
 
         return sa.column(column) != None
@@ -691,7 +691,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         column,
         type_,
         mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
+        result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         if mostly is not None:
             raise ValueError("SqlAlchemyDataset does not support column map semantics for column types")
@@ -738,7 +738,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         column,
         type_list,
         mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
+        result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         if mostly is not None:
             raise ValueError("SqlAlchemyDataset does not support column map semantics for column types")
@@ -791,7 +791,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                           value_set,
                                           mostly=None,
                                           parse_strings_as_datetimes=None,
-                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                          result_format=None, include_config=True, catch_exceptions=None, meta=None
                                           ):
         if value_set is None:
             # vacuously true
@@ -810,7 +810,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                               value_set,
                                               mostly=None,
                                               parse_strings_as_datetimes=None,
-                                              result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                              result_format=None, include_config=True, catch_exceptions=None, meta=None
                                               ):
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
@@ -830,7 +830,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                            parse_strings_as_datetimes=None,
                                            output_strftime_format=None,
                                            mostly=None,
-                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                           result_format=None, include_config=True, catch_exceptions=None, meta=None
                                            ):
         if parse_strings_as_datetimes:
             if min_value:
@@ -885,7 +885,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                              column,
                                              value,
                                              mostly=None,
-                                             result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                             result_format=None, include_config=True, catch_exceptions=None, meta=None
                                              ):
         return sa.func.length(sa.column(column)) == value
 
@@ -896,7 +896,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                                   min_value=None,
                                                   max_value=None,
                                                   mostly=None,
-                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                  result_format=None, include_config=True, catch_exceptions=None, meta=None
                                                   ):
 
         if min_value is None and max_value is None:
@@ -925,7 +925,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_unique(self, column, mostly=None,
-                                          result_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                          result_format=None, include_config=True, catch_exceptions=None, meta=None):
         # Duplicates are found by filtering a group by query
         dup_query = sa.select([sa.column(column)]).\
             select_from(self._table).\
@@ -975,7 +975,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column,
             regex,
             mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
+            result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
 
         regex_fn = self._get_dialect_regex_fn(positive=True)
@@ -991,7 +991,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column,
             regex,
             mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
+            result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         regex_fn = self._get_dialect_regex_fn(positive=False)
         if regex_fn is None:
@@ -1006,7 +1006,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                                  regex_list,
                                                  match_on="any",
                                                  mostly=None,
-                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                 result_format=None, include_config=True, catch_exceptions=None, meta=None
                                                  ):
 
         if match_on not in ["any", "all"]:
@@ -1032,7 +1032,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_not_match_regex_list(self, column, regex_list,
                                                      mostly=None,
-                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                     result_format=None, include_config=True, catch_exceptions=None, meta=None):
 
         regex_fn = self._get_dialect_regex_fn(positive=False)
         if regex_fn is None:
