@@ -38,17 +38,17 @@ def titanic_sqlite_db_file(tmp_path_factory):
 def test_cli_init_on_new_project(
     mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file
 ):
-    basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
-    ge_dir = os.path.join(basedir, "great_expectations")
+    project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
+    ge_dir = os.path.join(project_dir, "great_expectations")
 
-    database_path = os.path.join(basedir, "titanic.db")
+    database_path = os.path.join(project_dir, "titanic.db")
     shutil.copy(titanic_sqlite_db_file, database_path)
     engine = create_engine("sqlite:///{}".format(database_path))
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "-d", basedir],
+        ["init", "-d", project_dir],
         input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(
             engine.url, catch_exceptions=False
         ),
@@ -86,7 +86,7 @@ def test_cli_init_on_new_project(
     assert len(suite.expectations) == 13
 
     assert os.path.isdir(ge_dir)
-    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
+    config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
     config = yaml.load(open(config_path, "r"))
@@ -171,6 +171,8 @@ great_expectations/
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
+
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
@@ -198,6 +200,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/my_suite/".format(project_dir) in mock_webbrowser.call_args[0][0]
 
     assert "Error: invalid input" not in stdout
     assert "Always know what to expect from your data" in stdout
@@ -255,29 +258,30 @@ def initialized_sqlite_project(
     mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file
 ):
     """This is an initialized project through the CLI."""
-    basedir = str(tmp_path_factory.mktemp("my_rad_project"))
+    project_dir = str(tmp_path_factory.mktemp("my_rad_project"))
 
     engine = create_engine("sqlite:///{}".format(titanic_sqlite_db_file))
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "-d", basedir],
+        ["init", "-d", project_dir],
         input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url),
         catch_exceptions=False,
     )
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
-    context = DataContext(os.path.join(basedir, DataContext.GE_DIR))
+    context = DataContext(os.path.join(project_dir, DataContext.GE_DIR))
     assert isinstance(context, DataContext)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
         {"class_name": "SqlAlchemyDatasource", "name": "titanic"}
     ]
-    return basedir
+    return project_dir
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
@@ -356,6 +360,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/index.html".format(project_dir) in mock_webbrowser.call_args[0][0]
 
     assert "Error: invalid input" not in stdout
 
@@ -398,6 +403,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/sink_me/".format(project_dir) in mock_webbrowser.call_args[0][0]
 
     assert "Always know what to expect from your data" in stdout
     assert "Which table would you like to use?" in stdout

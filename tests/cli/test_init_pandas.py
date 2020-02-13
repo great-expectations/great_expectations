@@ -18,20 +18,23 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
 @pytest.mark.xfail(condition=PY2, reason="Py2")
-def test_cli_init_on_new_project(caplog, tmp_path_factory):
-    basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
-    os.makedirs(os.path.join(basedir, "data"))
-    data_path = os.path.join(basedir, "data", "Titanic.csv")
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
+    project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
+    os.makedirs(os.path.join(project_dir, "data"))
+    data_path = os.path.join(project_dir, "data", "Titanic.csv")
     fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(fixture_path, data_path)
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "--no-view", "-d", basedir],
+        ["init", "-d", project_dir],
         input="Y\n1\n1\n{}\n\n\n\n".format(data_path, catch_exceptions=False),
     )
     stdout = result.output
+    assert mock_webbrowser.call_count == 1
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
 
     assert len(stdout) < 3000, "CLI output is unreasonably long."
     assert "Always know what to expect from your data" in stdout
@@ -49,8 +52,8 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory):
     assert "A new Expectation suite 'warning' was added to your project" in stdout
     assert "Great Expectations is now set up" in stdout
 
-    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
+    assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
+    config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
     config = yaml.load(open(config_path, "r"))
@@ -59,7 +62,7 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory):
     ]
     assert data_source_class == "PandasDataset"
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(os.path.join(project_dir, "great_expectations"))
 
     # Instead of monkey patching datetime, just regex out the time directories
     date_safe_obs_tree = re.sub(r"\d*T\d*\.\d*Z", "9999.9999", obs_tree)
@@ -160,6 +163,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         catch_exceptions=False,
     )
     assert mock_webbrowser.call_count == 1
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/my_suite/".format(project_dir) in mock_webbrowser.call_args[0][0]
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -217,23 +221,24 @@ def _load_config_file(config_path):
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def initialized_project(mock_webbrowser, tmp_path_factory):
     """This is an initialized project through the CLI."""
-    basedir = str(tmp_path_factory.mktemp("my_rad_project"))
-    os.makedirs(os.path.join(basedir, "data"))
-    data_path = os.path.join(basedir, "data/Titanic.csv")
+    project_dir = str(tmp_path_factory.mktemp("my_rad_project"))
+    os.makedirs(os.path.join(project_dir, "data"))
+    data_path = os.path.join(project_dir, "data/Titanic.csv")
     fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(fixture_path, data_path)
     runner = CliRunner(mix_stderr=False)
     _ = runner.invoke(
         cli,
-        ["init", "--no-view", "-d", basedir],
+        ["init", "-d", project_dir],
         input="Y\n1\n1\n{}\n\n\n\n".format(data_path, catch_exceptions=False),
     )
-    assert mock_webbrowser.call_count == 0
+    assert mock_webbrowser.call_count == 1
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
 
-    context = DataContext(os.path.join(basedir, DataContext.GE_DIR))
+    context = DataContext(os.path.join(project_dir, DataContext.GE_DIR))
     assert isinstance(context, DataContext)
     assert len(context.list_datasources()) == 1
-    return basedir
+    return project_dir
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
@@ -309,6 +314,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
 
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/index.html".format(project_dir) in mock_webbrowser.call_args[0][0]
 
     assert "Error: invalid input" not in stdout
 
