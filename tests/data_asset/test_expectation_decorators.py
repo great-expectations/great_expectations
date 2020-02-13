@@ -10,17 +10,17 @@ from great_expectations.dataset import PandasDataset, MetaPandasDataset
 class ExpectationOnlyDataAsset(DataAsset):
 
     @DataAsset.expectation([])
-    def no_op_expectation(self, result_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def no_op_expectation(self, result_format=None, include_config=True, catch_exceptions=None, meta=None):
         return {"success": True}
 
     @DataAsset.expectation(['value'])
     def no_op_value_expectation(self, value=None,
-                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                result_format=None, include_config=True, catch_exceptions=None, meta=None):
         return {"success": True}
 
     @DataAsset.expectation([])
     def exception_expectation(self,
-                              result_format=None, include_config=False, catch_exceptions=None, meta=None):
+                              result_format=None, include_config=True, catch_exceptions=None, meta=None):
         raise ValueError("Gotcha!")
 
 
@@ -304,7 +304,7 @@ def test_column_pair_map_expectation_decorator():
                                                       column_A,
                                                       column_B,
                                                       keep_missing="either",
-                                                      output_format=None, include_config=False, catch_exceptions=None
+                                                      output_format=None, include_config=True, catch_exceptions=None
                                                       ):
             return column_A != column_B
 

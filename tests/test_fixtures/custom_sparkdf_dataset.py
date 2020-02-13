@@ -15,7 +15,7 @@ class CustomSparkDFDataset(SparkDFDataset):
         column,
         quantile_ranges,
         tolerance=0.2,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None,
     ):
         quantiles = quantile_ranges["quantiles"]
