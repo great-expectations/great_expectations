@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import os
 import re
 import shutil
+from unittest import mock
 
 import pytest
 from click.testing import CliRunner
@@ -33,7 +34,10 @@ def titanic_sqlite_db_file(tmp_path_factory):
     return db_path
 
 
-def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_file):
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_cli_init_on_new_project(
+    mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file
+):
     basedir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     ge_dir = os.path.join(basedir, "great_expectations")
 
@@ -44,7 +48,7 @@ def test_cli_init_on_new_project(caplog, tmp_path_factory, titanic_sqlite_db_fil
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "--no-view", "-d", basedir],
+        ["init", "-d", basedir],
         input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(
             engine.url, catch_exceptions=False
         ),
@@ -166,10 +170,12 @@ great_expectations/
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
     assert result.exit_code == 0
+    assert mock_webbrowser.call_count == 1
 
 
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
-    caplog, initialized_sqlite_project, titanic_sqlite_db_file,
+    mock_webbrowser, caplog, initialized_sqlite_project, titanic_sqlite_db_file,
 ):
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
@@ -182,7 +188,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "--no-view", "-d", project_dir],
+        ["init", "-d", project_dir],
         input="2\n5\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
             titanic_sqlite_db_file
         ),
@@ -191,6 +197,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     stdout = result.stdout
 
     assert result.exit_code == 0
+    assert mock_webbrowser.call_count == 1
 
     assert "Error: invalid input" not in stdout
     assert "Always know what to expect from your data" in stdout
@@ -243,7 +250,10 @@ def _load_config_file(config_path):
 
 
 @pytest.fixture
-def initialized_sqlite_project(caplog, tmp_path_factory, titanic_sqlite_db_file):
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def initialized_sqlite_project(
+    mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file
+):
     """This is an initialized project through the CLI."""
     basedir = str(tmp_path_factory.mktemp("my_rad_project"))
 
@@ -252,11 +262,13 @@ def initialized_sqlite_project(caplog, tmp_path_factory, titanic_sqlite_db_file)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "--no-view", "-d", basedir],
+        ["init", "-d", basedir],
         input="Y\n2\n5\ntitanic\n{}\n1\nwarning\n\n".format(engine.url),
         catch_exceptions=False,
     )
     assert result.exit_code == 0
+    assert mock_webbrowser.call_count == 1
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
     context = DataContext(os.path.join(basedir, DataContext.GE_DIR))
@@ -268,8 +280,13 @@ def initialized_sqlite_project(caplog, tmp_path_factory, titanic_sqlite_db_file)
     return basedir
 
 
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
-    caplog, initialized_sqlite_project, titanic_sqlite_db, empty_sqlite_db
+    mock_webbrowser,
+    caplog,
+    initialized_sqlite_project,
+    titanic_sqlite_db,
+    empty_sqlite_db,
 ):
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
@@ -283,14 +300,12 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli,
-        ["init", "--no-view", "-d", project_dir],
-        input="n\n",
-        catch_exceptions=False,
+        cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert result.exit_code == 0
+    assert mock_webbrowser.call_count == 0
 
     assert "Error: invalid input" not in stdout
 
@@ -302,21 +317,20 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs(
-    caplog, initialized_sqlite_project,
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no(
+    mock_webbrowser, caplog, initialized_sqlite_project,
 ):
     project_dir = initialized_sqlite_project
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli,
-        ["init", "--no-view", "-d", project_dir],
-        input="n\n",
-        catch_exceptions=False,
+        cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert result.exit_code == 0
+    assert mock_webbrowser.call_count == 0
 
     assert "Error: invalid input" not in stdout
 
@@ -328,8 +342,34 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes(
+    mock_webbrowser, caplog, initialized_sqlite_project,
+):
+    project_dir = initialized_sqlite_project
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli, ["init", "-d", project_dir], input="Y\n", catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+    assert mock_webbrowser.call_count == 1
+
+    assert "Error: invalid input" not in stdout
+
+    assert "Always know what to expect from your data" in stdout
+    assert "This looks like an existing project that" in stdout
+    assert "appears complete" in stdout
+    assert "Would you like to build & view this project's Data Docs" in stdout
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
-    caplog, initialized_sqlite_project,
+    mock_webbrowser, caplog, initialized_sqlite_project,
 ):
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
@@ -350,13 +390,14 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "--no-view", "-d", project_dir],
+        ["init", "-d", project_dir],
         input="1\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
         catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert result.exit_code == 0
+    assert mock_webbrowser.call_count == 1
 
     assert "Always know what to expect from your data" in stdout
     assert "Which table would you like to use?" in stdout
