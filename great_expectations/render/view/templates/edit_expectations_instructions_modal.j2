@@ -2,6 +2,13 @@
   {% set expectation_suite_name_dot_count = expectation_suite_name.count(".") -%}
 {% endif %}
 
+{% if batch_kwargs %}
+  {% set batch_kwargs = batch_kwargs | get_html_escaped_json_string_from_dict %}
+  {% set edit_suite_command = "great_expectations suite edit " + expectation_suite_name + " --batch_kwargs " + "&quot;" + batch_kwargs + "&quot;" %}
+{% else %}
+  {% set edit_suite_command = "great_expectations suite edit " + expectation_suite_name  %}
+{% endif %}
+
 {% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
   {% set static_images_dir = ((expectation_suite_name_dot_count + 3) * "../") + "static/images/" -%}
 {% elif utm_medium == "expectation-suite-page" %}
@@ -34,7 +41,11 @@ $(function() {
         <p>Expectations are best <strong>edited interactively in Jupyter notebooks</strong>.</p>
         <p>To automatically generate a notebook that does this run:</p>
         <div class="input-group mb-3">
-            <input type="text" class="form-control edit-command" readonly value="great_expectations suite edit {{ expectation_suite_name }}">
+          {% if batch_kwargs %}
+            <textarea class="form-control edit-command" readonly>{{ edit_suite_command | safe }}</textarea>
+          {% else %}
+            <input type="text" class="form-control edit-command" readonly value="{{ edit_suite_command | safe }}">
+          {% endif %}
             <div class="input-group-append">
                 <button class="btn btn-primary copy-edit-command" type="button"><i class="far fa-clipboard"></i> Copy</button>
             </div>
