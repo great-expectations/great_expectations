@@ -47,12 +47,34 @@ For continuous data:
 
 Example continuous partition object:
 
-.. code-block:: python
+.. invisible-code-block: python
 
-  {
-    "bins": [ 0, 1, 2, 10],
-    "weights": [0.3, 0.3, 0.4]
-  }
+  remember_me = 'see how namespaces work?'
+  import json
+
+>>> print(remember_me)
+see how namespaces work?
+
+.. code-block:: python
+    partition = {
+        "bins": [0, 1, 2, 10],
+        "weights": [0.3, 0.3, 0.4]
+    }
+
+>>> json.dumps(partition, indent=2)
+{
+  "bins": [
+    0,
+    1,
+    2,
+    10
+  ],
+  "weights": [
+    0.3,
+    0.3,
+    0.4
+  ]
+}
 
 For discrete/categorical data:
 
