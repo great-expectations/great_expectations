@@ -1,20 +1,21 @@
-# import pytest
-#
-# import numpy
-# import great_expectations
-#
-#
-# @pytest.fixture
-# def pandas_npi_dataset():
-#     npi = great_expectations.dataset.PandasDataset({"provider_id": [1,2,3]})
-#     return npi
-#
-#
-# @pytest.fixture(autouse=True)
-# def add_standard_imports(doctest_namespace, pandas_npi_dataset):
-#     doctest_namespace["np"] = numpy
-#     doctest_namespace["ge"] = great_expectations
-#     doctest_namespace["npi"] = pandas_npi_dataset
+import pytest
+
+import numpy
+import great_expectations
+
+
+@pytest.fixture
+def pandas_npi_dataset():
+    npi = great_expectations.dataset.PandasDataset({"provider_id": [1,2,3]})
+    return npi
+
+
+@pytest.fixture(autouse=True)
+def add_standard_imports(doctest_namespace, pandas_npi_dataset):
+    doctest_namespace["np"] = numpy
+    doctest_namespace["ge"] = great_expectations
+    doctest_namespace["npi"] = pandas_npi_dataset
+    doctest_namespace["ExpectationValidationResult"] = great_expectations.core.ExpectationValidationResult
 
 
 from os import chdir, getcwd
