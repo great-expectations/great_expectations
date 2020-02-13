@@ -859,7 +859,7 @@ Name the new expectation suite"""
     )
 
     if profiling_results['success']:
-        build_docs(context, view=open_docs)
+        build_docs(context, view=False)
         if open_docs:  # This is mostly to keep tests from spawning windows
             try:
                 # TODO this is really brittle and not covered in tests
