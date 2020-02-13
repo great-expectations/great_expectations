@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
-from great_expectations import rtd_url_ge_version
 
 PROJECT_HELP_COMMENT = """
 # Welcome to Great Expectations! Always know what to expect from your data.
 # 
-# Here you can define datasources, generators, integrations and more. This file
-# is intended to be committed to your repo. For help with configuration please:
+# Here you can define datasources, batch kwarg generators, integrations and
+# more. This file is intended to be committed to your repo. For help with
+# configuration please:
 #   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#configuration
 #   - Join our slack channel: http://greatexpectations.io/slack
 
 config_version: 1
 
 # Datasources tell Great Expectations where your data lives and how to get it.
-# You can use the CLI command `great_expectations add-datasource` to help you
+# You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/features/datasource.html
 datasources: {}
 """
