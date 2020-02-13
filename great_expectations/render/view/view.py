@@ -100,6 +100,7 @@ class DefaultJinjaView(object):
         env.filters['render_styling'] = self.render_styling
         env.filters['render_content_block'] = self.render_content_block
         env.filters['render_markdown'] = self.render_markdown
+        env.filters['get_html_escaped_json_string_from_dict'] = self.get_html_escaped_json_string_from_dict
         env.filters['generate_html_element_uuid'] = self.generate_html_element_uuid
         env.globals['ge_version'] = ge_version
 
@@ -132,6 +133,9 @@ class DefaultJinjaView(object):
             return template.render(context, content_block=content_block, index=index, content_block_id=content_block_id)
         else:
             return template.render(context, content_block=content_block, index=index)
+
+    def get_html_escaped_json_string_from_dict(self, source_dict):
+        return json.dumps(source_dict).replace('"', '\\"').replace('"', '&quot;')
 
     def render_styling(self, styling):
 

@@ -81,3 +81,4 @@ util
     :undoc-members:
     :show-inheritance:
 
+*last updated*: |lastupdate|

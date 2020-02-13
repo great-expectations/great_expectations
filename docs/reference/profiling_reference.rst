@@ -5,6 +5,55 @@
 Profiling Reference
 ##############################
 
+Profiling produces a special kind of :ref:`data_docs` that are purely descriptive.
+
+****************************
+Expectations and Profiling
+****************************
+
+In order to characterize a data asset, Profiling uses an Expectation Suite. Unlike the Expectations that are
+typically used for data validation, these expectations do not necessarily apply any constraints; they can simply
+identify statistics or other data characteristics that should be evaluated and made available in GE. For example, when
+the ``BasicDatasetProfiler`` encounters a numeric column, it will add an ``expect_column_mean_to_be_between``
+expectation but choose the min_value and max_value to both be None: essentially only saying that it expects a mean
+to exist.
+
+.. code-block:: json
+
+    {
+      "expectation_type": "expect_column_mean_to_be_between",
+      "kwargs": {
+        "column": "rating",
+        "min_value": null,
+        "max_value": null
+      }
+    }
+
+To "profile" a datasource, therefore, the :class:`~great_expectations.profile.basic_dataset_profiler.\
+BasicDatasetProfiler` included in GE will generate a large number of very loosely-specified expectations. Effectively
+it is asserting that the given statistic is relevant for evaluating batches of that data asset, but it is not yet sure
+what the statistic's value should be.
+
+In addition to creating an expectation suite, profiling data tests the suite against data.
+The validation_result contains the output of that expectation suite when validated against the same batch of data.
+For a loosely specified expectation like in our example above, getting the observed value was the sole purpose of
+the expectation.
+
+.. code-block:: json
+
+    {
+      "success": true,
+      "result": {
+        "observed_value": 4.05,
+        "element_count": 10000,
+        "missing_count": 0,
+        "missing_percent": 0
+      }
+    }
+
+Running a profiler on a data asset can also be useful to produce a large number of expectations to review
+and potentially transfer to a new expectation suite used for validation in a pipeline.
+
 **********************
 How to Run Profiling
 **********************
@@ -66,7 +115,7 @@ Custom Profilers
 *******************
 
 Like most things in Great Expectations, Profilers are designed to be extensibile. You can develop your own profiler
-by subclassing ``DataetProfiler``, or from the parent ``DataAssetProfiler`` class itself. For help, advice, and ideas
+by subclassing ``DatasetProfiler``, or from the parent ``DataAssetProfiler`` class itself. For help, advice, and ideas
 on developing custom profilers, please get in touch on `the Great Expectations slack channel\
 <https://greatexpectations.io/slack>`_.
 
@@ -88,3 +137,5 @@ Data Samples
 
 Since profiling and expectations are so tightly linked, getting samples of *expected* data requires a slightly
 different approach than the normal path for profiling. Stay tuned for more in this area!
+
+*last updated*: |lastupdate|

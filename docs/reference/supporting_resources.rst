@@ -53,3 +53,4 @@ useful-with-pip-install>`__ flag.
     $ git clone https://github.com/great-expectations/great_expectations.git
     $ pip install -e great_expectations/
 
+*last updated*: |lastupdate|

@@ -31,3 +31,5 @@ Batch Id
 ******************
 Batch Fingerprint
 ******************
+
+*last updated*: |lastupdate|
