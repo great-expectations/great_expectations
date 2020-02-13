@@ -16,8 +16,7 @@ from great_expectations.cli.util import (
     _offer_to_install_new_template,
     cli_message,
 )
-from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
-    ExpectationSuiteIdentifier
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
@@ -27,9 +26,8 @@ from great_expectations.datasource.generator import (
     ManualBatchKwargsGenerator,
 )
 from great_expectations.exceptions import DatasourceInitializationError
-from great_expectations.profile.basic_dataset_profiler import (
-    SampleExpectationsDatasetProfiler,
-)
+from great_expectations.profile.sample_expectations_dataset_profiler import \
+    SampleExpectationsDatasetProfiler
 
 from great_expectations.validator.validator import Validator
 from great_expectations.core import ExpectationSuite
@@ -124,15 +122,15 @@ def datasource_list(directory):
 
 
 @datasource.command(name="profile")
-@click.argument('datasource_name', default=None, required=False)
+@click.argument('datasource', default=None, required=False)
 @click.option(
-    "--generator_name",
+    "--generator-name",
     "-g",
     default=None,
     help="The name of the batch kwarg generator configured in the datasource. The generator will list data assets in the datasource"
 )
-@click.option('--data_assets', '-l', default=None,
-              help='Comma-separated list of the names of data assets that should be profiled. Requires datasource_name specified.')
+@click.option('--data-assets', '-l', default=None,
+              help='Comma-separated list of the names of data assets that should be profiled. Requires datasource specified.')
 @click.option('--profile_all_data_assets', '-A', is_flag=True, default=False,
               help='Profile ALL data assets within the target data source. '
                    'If True, this will override --max_data_assets.')
@@ -147,9 +145,9 @@ def datasource_list(directory):
     help="By default open in browser unless you specify the --no-view flag",
     default=True
 )
-@click.option('--batch_kwargs', default=None,
+@click.option('--batch-kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
-def datasource_profile(datasource_name, generator_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
+def datasource_profile(datasource, generator_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
     """
     Profile a datasource
 
@@ -158,7 +156,7 @@ def datasource_profile(datasource_name, generator_name, data_assets, profile_all
     prompt the user to either specify the list of data assets to profile or to profile all.
     If the limit is not exceeded, the profiler will profile all data assets in the datasource.
 
-    :param datasource_name: name of the datasource to profile
+    :param datasource: name of the datasource to profile
     :param data_assets: if this comma-separated list of data asset names is provided, only the specified data assets will be profiled
     :param profile_all_data_assets: if provided, all data assets will be profiled
     :param directory:
@@ -177,10 +175,12 @@ def datasource_profile(datasource_name, generator_name, data_assets, profile_all
         return
 
     if batch_kwargs is not None:
+        # TODO refactor out json load check in suite edit and add here
         batch_kwargs = json.loads(batch_kwargs)
+        # TODO refactor batch load check in suite edit and add here
 
-    if datasource_name is None:
-        datasources = [datasource["name"] for datasource in context.list_datasources()]
+    if datasource is None:
+        datasources = [_datasource["name"] for _datasource in context.list_datasources()]
         if not datasources:
             cli_message(NO_DATASOURCES_FOUND)
             sys.exit(1)
@@ -203,7 +203,7 @@ def datasource_profile(datasource_name, generator_name, data_assets, profile_all
     else:
         profile_datasource(
             context,
-            datasource_name,
+            datasource,
             generator_name=generator_name,
             data_assets=data_assets,
             profile_all_data_assets=profile_all_data_assets,
@@ -645,7 +645,7 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
 
 def select_datasource(context, datasource_name=None):
     msg_prompt_select_data_source = "Select data source"
-    msg_no_datasources_configured = "No datasources"
+    msg_no_datasources_configured = "<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
 
     data_source = None
 
@@ -664,7 +664,8 @@ def select_datasource(context, datasource_name=None):
             )
             datasource_name = data_sources[int(option_selection)-1]["name"]
 
-    data_source = context.get_datasource(datasource_name)
+    if datasource_name is not None:
+        data_source = context.get_datasource(datasource_name)
 
     return data_source
 
@@ -821,14 +822,27 @@ Name the new expectation suite"""
     msg_data_doc_intro = """
 <cyan>========== Data Docs ==========</cyan>"""
 
+    msg_suite_already_exists = "<red>An expectation suite named `{}` already exists. If you intend to edit the suite please use `great_expectations suite edit foo`.</red>"
+
     if show_intro_message:
         cli_message(msg_intro)
 
     data_source = select_datasource(context, datasource_name=datasource_name)
     if data_source is None:
-        raise ge_exceptions.DataContextError("No datasources found in the context")
+        # select_datasource takes care of displaying an error message, so all is left here is to exit.
+        sys.exit(1)
 
     datasource_name = data_source.name
+
+    existing_suite_names = [expectation_suite_id.expectation_suite_name for expectation_suite_id in context.list_expectation_suites()]
+
+    if expectation_suite_name in existing_suite_names:
+        cli_message(
+            msg_suite_already_exists.format(
+                expectation_suite_name
+            )
+        )
+        sys.exit(1)
 
     if generator_name is None or generator_asset is None or batch_kwargs is None:
         datasource_name, generator_name, generator_asset, batch_kwargs = get_batch_kwargs(context,
@@ -838,7 +852,16 @@ Name the new expectation suite"""
                                                                                            additional_batch_kwargs=additional_batch_kwargs)
 
     if expectation_suite_name is None:
-        expectation_suite_name = click.prompt(msg_prompt_expectation_suite_name, default="warning", show_default=True)
+        while True:
+            expectation_suite_name = click.prompt(msg_prompt_expectation_suite_name, default="warning", show_default=True)
+            if expectation_suite_name in existing_suite_names:
+                cli_message(
+                    msg_suite_already_exists.format(
+                        expectation_suite_name
+                    )
+                )
+            else:
+                break
 
     profiler = SampleExpectationsDatasetProfiler
 
@@ -1084,6 +1107,11 @@ def profile_datasource(
     open_docs=False,
 ):
     """"Profile a named datasource using the specified context"""
+    # Note we are explicitly not using a logger in all CLI output to have
+    # more control over console UI.
+    logging.getLogger(
+        "great_expectations.profile.basic_dataset_profiler"
+    ).setLevel(logging.INFO)
     msg_intro = """
 <cyan>========== Profiling ==========</cyan>
 

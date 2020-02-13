@@ -7,11 +7,9 @@ from six import PY2
 
 import great_expectations as ge
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import PandasDatasource
-from great_expectations.profile.base import DatasetProfiler
-from great_expectations.profile.basic_dataset_profiler import SampleExpectationsDatasetProfiler
-from great_expectations.profile.columns_exist import ColumnsExistProfiler
+from great_expectations.profile.sample_expectations_dataset_profiler import \
+    SampleExpectationsDatasetProfiler
 from tests.test_utils import expectationSuiteValidationResultSchema
 
 
@@ -440,10 +438,9 @@ def test_snapshot_SampleExpectationsDatasetProfiler_on_titanic():
     evrs = df.validate(result_format="SUMMARY")
 
     # THIS IS NOT DEAD CODE. UNCOMMENT TO SAVE A SNAPSHOT WHEN UPDATING THIS TEST
-    # with open('tests/test_sets/expected_evrs_SampleExpectationsDatasetProfiler_on_titanic.json', 'w+') as file:
+    # with open(file_relative_path(__file__, '../test_sets/expected_evrs_SampleExpectationsDatasetProfiler_on_titanic.json'), 'w+') as file:
     #     json.dump(expectationSuiteValidationResultSchema.dump(evrs).data, file, indent=2)
-    #
-    # with open('tests/render/fixtures/SampleExpectationsDatasetProfiler_evrs.json', 'w+') as file:
+    # with open(file_relative_path(__file__, '../render/fixtures/SampleExpectationsDatasetProfiler_evrs.json'), 'w+') as file:
     #     json.dump(expectationSuiteValidationResultSchema.dump(evrs).data, file, indent=2)
 
     with open(
