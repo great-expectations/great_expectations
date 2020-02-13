@@ -84,31 +84,24 @@ Please make sure you have signed our Contributor License Agreement (either [Indi
 ### Running tests
 In general, you can run all tests by simply running `pytest` in the great_expectations directory root. Before submitting any PR, please ensure there are no tests that fail with an error, and review any warnings.
 
-If you would like to run the tests without the need for local backend setups, adding the following flags will skip the respective backends:
+If you would like to run the tests without the need for local backend setups (e.g. setting up a local postgres database), adding the following flags will skip the respective backends:
 - `--no-postgresql` will skip postgres tests
 - `--no-spark` will skip spark tests 
-- `--no-sqlalchemy` will skip sqlalchemy tests
+- `--no-sqlalchemy` will skip all tests using sqlalchemy (i.e. all database backends)
 
 For example, you can run
 
-`pytest --no-spark --no-sqlalchemy --no-postgresql` 
+`pytest --no-spark --no-sqlalchemy` 
 
-to skip all backend tests. Please note that these tests will still be run by the CI as soon as you open a PR, so some tests might fail there if your code changes affected them.
+to skip all local backend tests (with the exception of the pandas backend). Please note that these tests will still be run by the CI as soon as you open a PR, so some tests might fail there if your code changes affected them.
 
 ### Writing tests
-We are actively migrating many of our tests to a new format to support testing across different dataset types. Consolidating them is an important next step. That means two things for contributors:
 
-* For now, write tests in whatever style suits your fancy. We (the core contributors) will worry about refactoring them later. As long as your thing works and is well-tested, you're good. (This is **not** an excuse to avoid writing tests. All contributions must be under test. We're just not dogmatic about the style of those tests today.)
-* Second, if you have opinions on the testing framework, we'd love to hear them! Feedback based on your perspective and experience is very welcome.
-
-Most of the discussion to date is encapsulated here: https://github.com/great-expectations/great_expectations/issues/167. The `refactor_tests` branch is intended as a pilot implementation.
+In addition to running existing tests to make sure your code change works, please also write relevant tests for any change that you're making. Our tests live in the `tests` subdirectory of the great_expectations repo.
 
 ## Conventions and style
 
-Ensure any new features or behavioral differences introduced by your changes are documented in the docs, and ensure you have docstrings on your contributions. We use the Sphinx's Napoleon extension to build documentation from Google-style docstrings (see http://www.sphinx-doc.org/en/master/ext/napoleon.html).
-
-Expectations aren't just tests---they're also a kind of data documentation. Because we want expectations to be easy to interpret, we're avoiding abbreviations almost everywhere. We're not entirely consistent about this yet, but there's pretty strong consensus among early team and users that we should be heading in that direction.
-
+* Ensure any new features or behavioral differences introduced by your changes are documented in the docs, and ensure you have docstrings on your contributions. We use the Sphinx's Napoleon extension to build documentation from Google-style docstrings (see http://www.sphinx-doc.org/en/master/ext/napoleon.html).
 * Avoid abbreviations, e.g. use `column_index` instead of `column_idx`.
 * Use unambiguous expectation names, even if they're a bit longer, e.g. use `expect_columns_to_match_ordered_list` instead of `expect_columns_to_be`.
 * Expectation names should reflect their decorators:
