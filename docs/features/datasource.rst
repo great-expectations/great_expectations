@@ -29,3 +29,4 @@ See :ref:`batch_generator` for more detail about how batch generators interact w
 
 See datasource module docs :ref:`datasource_module` for more detail about available datasources.
 
+*last updated*: |lastupdate|

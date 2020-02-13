@@ -87,3 +87,5 @@ Supporting Resources
    :maxdepth: 2
 
    /reference/supporting_resources
+
+*last updated*: |lastupdate|

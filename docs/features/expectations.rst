@@ -160,3 +160,5 @@ else relevant for understanding it:
             "source": "max@company.com"
             }
        )
+
+*last updated*: |lastupdate|

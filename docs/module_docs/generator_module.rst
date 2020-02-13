@@ -69,3 +69,5 @@ DatabricksTableBatchKwargsGenerator
     :members:
     :undoc-members:
     :show-inheritance:
+
+*last updated*: |lastupdate|

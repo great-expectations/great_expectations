@@ -116,3 +116,5 @@ View Module
     :members:
     :undoc-members:
     :show-inheritance:
+
+*last updated*: |lastupdate|
