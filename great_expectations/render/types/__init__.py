@@ -250,7 +250,7 @@ class CollapseContent(RenderedComponentContent):
 class RenderedDocumentContent(RenderedContent):
     # NOTE: JPC 20191028 - review these keys to consolidate and group
     def __init__(self, sections, data_asset_name=None, full_data_asset_identifier=None, renderer_type=None,
-                 page_title=None, utm_medium=None, cta_footer=None, expectation_suite_name=None):
+                 page_title=None, utm_medium=None, cta_footer=None, expectation_suite_name=None, batch_kwargs=None):
         if not isinstance(sections, list) and all([isinstance(section, RenderedSectionContent) for section in
                                                    sections]):
             raise InvalidRenderedContentError("RenderedDocumentContent requires a list of RenderedSectionContent for "
@@ -263,6 +263,7 @@ class RenderedDocumentContent(RenderedContent):
         self.utm_medium = utm_medium
         self.cta_footer = cta_footer
         self.expectation_suite_name = expectation_suite_name
+        self.batch_kwargs = batch_kwargs
 
     def to_json_dict(self):
         d = super(RenderedDocumentContent, self).to_json_dict()
@@ -274,6 +275,7 @@ class RenderedDocumentContent(RenderedContent):
         d["utm_medium"] = self.utm_medium
         d["cta_footer"] = self.cta_footer
         d["expectation_suite_name"] = self.expectation_suite_name
+        d["batch_kwargs"] = self.batch_kwargs
         return d
 
 
