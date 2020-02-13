@@ -24,7 +24,9 @@ To facilitate this substantial config format change, starting with version 0.8.0
 we introduced ``project check-config`` to sanity check your config files. From your
 project directory, run:
 
->>> great_expectations project check-config
+.. code-block:: bash
+
+    great_expectations project check-config
 
 This can be used at any time and will grow more robust and helpful as our
 internal config typing system improves.
