@@ -433,3 +433,5 @@ Next Steps
 
 Once you have opened datadocs, a prompt will suggest possible next steps, such as to :ref:`tutorial_create_expectations` or
 :ref:`tutorial_validate_data`.
+
+*last updated*: |lastupdate|
