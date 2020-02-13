@@ -141,23 +141,6 @@ great_expectations/
                             HKGrotesk-SemiBold.otf
                             HKGrotesk-SemiBoldItalic.otf
                     images/
-                        0_values_not_null_html_en.jpg
-                        10_suite_toc.jpeg
-                        11_home_validation_results_failed.jpeg
-                        12_validation_overview.png
-                        13_validation_passed.jpeg
-                        14_validation_failed.jpeg
-                        15_validation_failed_unexpected_values.jpeg
-                        16_validation_failed_unexpected_values (1).gif
-                        1_values_not_null_html_de.jpg
-                        2_values_not_null_json.jpg
-                        3_values_not_null_validation_result_json.jpg
-                        4_values_not_null_validation_result_html_en.jpg
-                        5_home.png
-                        6_home_tables.jpeg
-                        7_home_suites.jpeg
-                        8_home_validation_results_succeeded.jpeg
-                        9_suite_overview.png
                         favicon.ico
                         glossary_scroller.gif
                         iterative-dev-loop.png
@@ -165,11 +148,6 @@ great_expectations/
                         logo-long.png
                         short-logo-vector.svg
                         short-logo.png
-                        validation_failed_unexpected_values.gif
-                        values_not_null_html_en.jpg
-                        values_not_null_json.jpg
-                        values_not_null_validation_result_html_en.jpg
-                        values_not_null_validation_result_json.jpg
                     styles/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
