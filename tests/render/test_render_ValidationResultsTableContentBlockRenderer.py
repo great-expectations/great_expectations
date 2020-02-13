@@ -15,24 +15,63 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
     result = ValidationResultsTableContentBlockRenderer.render([evr_failed_with_exception]).to_json_dict()
     print(result)
     expected_result = {
-        'content_block_type': 'table',
-        'styling': {'body': {'classes': ['table']}, 'classes': ['ml-2', 'mr-2', 'mt-0', 'mb-0', 'table-responsive']},
-        'table': [[{'content_block_type': 'string_template',
-                    'string_template': {'template': '$icon', 'params': {'icon': ''}, 'styling': {'params': {
-                        'icon': {'classes': ['fas', 'fa-exclamation-triangle', 'text-warning'], 'tag': 'i'}}}}}, [
-                       {'content_block_type': 'string_template',
-                        'string_template': {'template': '$column can match any distribution.',
-                                            'params': {"column": "live", "partition_object": None, "threshold": None,
-                                                       "result_format": "SUMMARY"}}},
-                       {'content_block_type': 'string_template', 'string_template': {
-                           'template': '\n\n$expectation_type raised an exception:\n$exception_message',
-                           'params': {'expectation_type': 'expect_column_kl_divergence_to_be_less_than',
-                                      'exception_message': 'Invalid partition object.'}, 'tag': 'strong',
-                           'styling': {'classes': ['text-danger'], 'params': {'exception_message': {'tag': 'code'},
-                                                                              'expectation_type': {
-                                                                                  'classes': ['badge', 'badge-danger',
-                                                                                              'mb-2']}}}}}, None],
-                   '--']], 'header_row': ['Status', 'Expectation', 'Observed Value']}
+        'content_block_type': 'table', 'styling': {
+            'body': {'classes': ['table']},
+            'classes': ['ml-2', 'mr-2', 'mt-0', 'mb-0',
+                        'table-responsive']}, 'table': [[{
+            'content_block_type': 'string_template',
+            'string_template': {
+                'template': '$icon',
+                'params': {
+                    'icon': ''},
+                'styling': {
+                    'params': {
+                        'icon': {
+                            'classes': [
+                                'fas',
+                                'fa-exclamation-triangle',
+                                'text-warning'],
+                            'tag': 'i'}}}}},
+            [{
+                'content_block_type': 'string_template',
+                'string_template': {
+                    'template': '$column can match any distribution.',
+                    'params': {
+                        "column": "live",
+                        "partition_object": None,
+                        "threshold": None,
+                        "result_format": "SUMMARY"}}},
+                {
+                    'content_block_type': 'string_template',
+                    'string_template': {
+                        'template': '\n\n$expectation_type raised an exception:\n$exception_message',
+                        'params': {
+                            'expectation_type': 'expect_column_kl_divergence_to_be_less_than',
+                            'exception_message': 'Invalid partition object.'},
+                        'tag': 'strong',
+                        'styling': {
+                            'classes': [
+                                'text-danger'],
+                            'params': {
+                                'exception_message': {
+                                    'tag': 'code'},
+                                'expectation_type': {
+                                    'classes': [
+                                        'badge',
+                                        'badge-danger',
+                                        'mb-2']}}}}},
+                {
+                    'content_block_type': 'collapse',
+                    'collapse_toggle_link': 'Show exception traceback...',
+                    'collapse': [
+                        {
+                            'content_block_type': 'string_template',
+                            'string_template': {
+                                'template': 'Traceback (most recent call last):\n  File "/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n',
+                                'tag': 'code'}}],
+                    'inline_link': False}],
+            '--']],
+        'header_row': ['Status', 'Expectation', 'Observed Value']}
     assert result == expected_result
 
 
@@ -247,11 +286,11 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
 
     # test for succeeded evr
     output_1 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_success)
-    assert output_1 is None
+    assert output_1 == []
 
     # test for failed evr
     output_2 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed)
-    assert output_2 == RenderedStringTemplateContent(**{
+    assert output_2 == [RenderedStringTemplateContent(**{
       "content_block_type": "string_template",
       "string_template": {
         "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",
@@ -267,17 +306,17 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
           ]
         }
       }
-    })
+    })]
 
     # test for evr with no "result" key
     output_3 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_no_result)
     print(json.dumps(output_3, indent=2))
-    assert output_3 is None
+    assert output_3 == []
 
     # test for evr with no unexpected count
     output_4 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed_no_unexpected_count)
     print(output_4)
-    assert output_4 is None
+    assert output_4 == []
 
     # test for evr with exception
     evr_failed_exception = ExpectationValidationResult(
@@ -298,25 +337,18 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr
 )
 
     output_5 = ValidationResultsTableContentBlockRenderer._get_unexpected_statement(evr_failed_exception)
-    assert output_5 == RenderedStringTemplateContent(**{
-        'content_block_type': 'string_template',
-        'string_template': {
-            'template': '\n\n$expectation_type raised an exception:\n$exception_message',
-            'params': {
-                'expectation_type': 'expect_column_values_to_not_match_regex',
-                'exception_message': 'Unrecognized column: not_a_real_column'},
-            'tag': 'strong',
-            'styling': {
-                'classes': ['text-danger'],
-                'params': {
-                    'exception_message': {'tag': 'code'},
-                    'expectation_type': {
-                        'classes': ['badge', 'badge-danger', 'mb-2']
-                    }
-                }
-            }
-        }
-    })
+    output_5 = [content.to_json_dict() for content in output_5]
+    expected_output_5 = [{'content_block_type': 'string_template', 'string_template': {
+        'template': '\n\n$expectation_type raised an exception:\n$exception_message',
+        'params': {'expectation_type': 'expect_column_values_to_not_match_regex',
+                   'exception_message': 'Unrecognized column: not_a_real_column'}, 'tag': 'strong',
+        'styling': {'classes': ['text-danger'], 'params': {'exception_message': {'tag': 'code'}, 'expectation_type': {
+            'classes': ['badge', 'badge-danger', 'mb-2']}}}}},
+                         {'content_block_type': 'collapse', 'collapse_toggle_link': 'Show exception traceback...',
+                          'collapse': [{'content_block_type': 'string_template', 'string_template': {
+                              'template': 'Traceback (most recent call last):\n...more_traceback...', 'tag': 'code'}}],
+                          'inline_link': False}]
+    assert output_5 == expected_output_5
 
 
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_success):
