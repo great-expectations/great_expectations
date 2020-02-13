@@ -3,7 +3,7 @@
 {% endif %}
 
 {% if batch_kwargs %}
-  {% set batch_kwargs = batch_kwargs | get_json_string_from_dict %}
+  {% set batch_kwargs = batch_kwargs | get_html_escaped_json_string_from_dict %}
   {% set edit_suite_command = "great_expectations suite edit " + expectation_suite_name + " --batch_kwargs " + "&quot;" + batch_kwargs + "&quot;" %}
 {% else %}
   {% set edit_suite_command = "great_expectations suite edit " + expectation_suite_name  %}
