@@ -230,7 +230,7 @@ class DataAsset(object):
                         if catch_exceptions:
                             raised_exception = True
                             exception_traceback = traceback.format_exc()
-                            exception_message = str(err)
+                            exception_message = "{}: {}".format(type(err).__name__, str(err))
 
                             return_obj = ExpectationValidationResult(success=False)
 
@@ -837,12 +837,12 @@ class DataAsset(object):
             raise ValueError("Unable to save config: filepath or data_context must be available.")
 
     def validate(self,
-                 expectation_suite=None, 
+                 expectation_suite=None,
                  run_id=None,
                  data_context=None,
                  evaluation_parameters=None,
-                 catch_exceptions=True, 
-                 result_format=None, 
+                 catch_exceptions=True,
+                 result_format=None,
                  only_return_failures=False):
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
