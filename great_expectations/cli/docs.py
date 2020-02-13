@@ -58,7 +58,7 @@ def build_docs(context, site_name=None, view=True):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 
-    cli_message("Building <green>Data Docs</green>...")
+    cli_message("Building Data Docs...")
 
     if site_name is not None:
         site_names = [site_name]
