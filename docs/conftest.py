@@ -25,6 +25,7 @@ import pytest
 from sybil import Sybil
 from sybil.parsers.codeblock import CodeBlockParser
 from sybil.parsers.doctest import DocTestParser
+from sybil.parsers.skip import skip
 
 @pytest.fixture(scope="module")
 def tempdir():
@@ -41,7 +42,8 @@ def tempdir():
 pytest_collect_file = Sybil(
     parsers=[
         DocTestParser(),
-        CodeBlockParser(future_imports=['print_function']),
+        CodeBlockParser(),
+        skip
     ],
     pattern='*.rst',
     fixtures=['tempdir']
