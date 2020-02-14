@@ -28,6 +28,20 @@ div.image-sizer {
 }
 .code-snippet {
     margin: 0 40px 1em 40px;
+    padding: 1em 40px;
+}
+.json-key {
+    color: #333333;
+    font-weight: bold;
+}
+.json-str {
+    color: darkgreen;
+}
+.json-bool {
+    color: darkorange;
+}
+.json-number {
+    color: darkblue;
 }
 </style>
 
@@ -48,7 +62,16 @@ div.image-sizer {
               <div class="image-sizer">
                   <img src="{{ static_images_dir + "iterative-dev-loop.png" }}" class="img-fluid rounded-sm">
               </div>
-                  <p>Welcome! The best way to work with Great Expectations is in this iterative dev loop.</p>
+                  <p>
+                      Welcome! Now that you have initialized your project, the best way to work with Great Expectations is in this iterative dev loop:
+                  </p>
+                <ol>
+                    <li>Let Great Expectations create a (terrible) first draft suite, by running <code>great_expectations suite new</code>.</li>
+                    <li>View the suite here in Data Docs.</li>
+                    <li>Edit the suite in a Jupyter notebook by running <code>great_expectations suite edit</code></li>
+                    <li>Repeat Steps 2-3 until you are happy with your suite.</li>
+                    <li>Commit this suite to your source control repository.</li>
+                </ol>
             </div>
             <div class="card-footer walkthrough-links">
               <div class="container">
@@ -74,17 +97,17 @@ div.image-sizer {
                 <div class="card walkthrough-card bg-dark text-white walkthrough-2">
                 <div class="card-header"><h3>What are Expectations?</h3></div>
                 <div class="card-body">
-                    <pre class="code-snippet bg-light rounded-sm"><code>
-        expect_column_to_exist
-        expect_table_row_count_to_be_between
-        expect_column_values_to_be_unique
-        expect_column_values_to_not_be_null
-        expect_column_values_to_be_between
-        expect_column_values_to_match_regex
-        expect_column_mean_to_be_between
-        expect_column_kl_divergence_to_be_less_than
-        ... and many more
-                    </code></pre>
+                    <p class="code-snippet bg-light text-muted rounded-sm">
+expect_column_to_exist
+expect_table_row_count_to_be_between
+expect_column_values_to_be_unique
+expect_column_values_to_not_be_null
+expect_column_values_to_be_between
+expect_column_values_to_match_regex
+expect_column_mean_to_be_between
+expect_column_kl_divergence_to_be_less_than
+... and many more
+                    </p>
                   <p>An expectation is a falsifiable, verifiable statement about data.</p>
                   <p>Expectations provide a language to talk about data characteristics and data quality - humans to humans, humans to machines and machines to machines.</p>
                   <p>Expectations are both data tests and docs!</p>
@@ -113,14 +136,14 @@ div.image-sizer {
                 <div class="card walkthrough-card bg-dark text-white walkthrough-3">
                 <div class="card-header"><h3>An expectation can be presented in a machine-friendly JSON</h3></div>
                 <div class="card-body">
-                    <pre class="code-snippet bg-light rounded-sm"><code>
-    {
-      "expectation_type": "expect_column_values_to_not_be_null",
-      "kwargs": {
-        "column": "user_id"
-      }
-    }
-                    </code></pre>
+                    <p class="code-snippet bg-light text-muted rounded-sm">
+{<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"expectation_type"</span>: <span class="json-str">"expect_column_values_to_not_be_null",</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"kwargs"</span>: {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"column"</span>: <span class="json-str">"user_id"</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;}<br />
+}<br />
+                    </p>
                   <p>A machine can test if a dataset conforms to the expectation.</p>
                 </div>
                 <div class="card-footer walkthrough-links">
@@ -146,21 +169,21 @@ div.image-sizer {
                 <div class="card walkthrough-card bg-dark text-white walkthrough-4">
                 <div class="card-header"><h3>Validation produces a validation result object</h3></div>
                 <div class="card-body">
-                     <pre class="code-snippet bg-light rounded-sm"><code>
-    {
-      "success": false,
-      "result": {
-        "element_count": 253405,
-        "unexpected_count": 7602,
-        "unexpected_percent": 2.999
-      },
-      "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_be_null",
-        "kwargs": {
-          "column": "user_id"
-        }
-    }
-                    </code></pre>
+                     <p class="code-snippet bg-light text-muted rounded-sm">
+{<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"success"</span>: <span class="json-bool">false</span>,<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"result":</span> {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"element_count"</span>: <span class="json-number">253405,</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"unexpected_count"</span>: <span class="json-number">7602,</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"unexpected_percent"</span>: <span class="json-number">2.999</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;},<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"expectation_config"</span>: {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"expectation_type"</span>: <span class="json-str">"expect_column_values_to_not_be_null"</span>,<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"kwargs"</span>: {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"column"</span>: <span class="json-str">"user_id"</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br />
+}<br />
+                    </p>
                   <p>Here's an example Validation Result (not from your data) in JSON format. This object has rich context about the test failure.</p>
                 </div>
                 <div class="card-footer walkthrough-links">
