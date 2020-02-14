@@ -79,7 +79,7 @@ For example, imagine tht we have a movie ratings table in the database. This exp
 When Great Expectations evaluates this expectation against a dataset that has a column named "rating", it returns a validation result saying whether the data meets the expectation.
 
 
-A :ref:`Data Datasource<datasource>` is an object Great Expectations uses to connect to a compute environment (e.g., a Postgres database on a particular host).
+A :ref:`Data Datasource<datasource>` a connection to a compute environment (a backend such as Pandas, Spark, or a SQL-compatible database) and one or more storage environments.
 
 Each You can have multiple Datasources in a project (Data Context). This is useful if the team's pipeline consists of, for example, both a Spark cluster and a Redshift database.
 
@@ -300,7 +300,6 @@ In data testing, if data does not meet expectations, the response to a failing t
 * The data is fine and you need to update our expectations from it.
 * The data is "broken", but can be recovered. An example would be the users table we mentioned in the previous sections has the dates in the wrong format. You update the pipeline code to deal with this brokenness and fix it on the fly.
 * The data is "broken beyond repair". You go upstream to the team (or an external partner) who produced the data and address it with them.
-
 
 
 
