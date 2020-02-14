@@ -415,7 +415,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
             project_root_dir,
             "--data-assets",
             "main.titanic",
-            "--batch-kwargs",
+            "--additional-batch-kwargs",
             '{"limit": 97}',
             "--no-view",
         ],
