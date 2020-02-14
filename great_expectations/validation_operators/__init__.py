@@ -2,7 +2,7 @@ from .actions import (
     ValidationAction,
     StoreMetricsAction,
     NoOpAction,
-    StoreAction,
+    StoreValidationResultAction,
     StoreEvaluationParametersAction,
     SlackNotificationAction,
     UpdateDataDocsAction
