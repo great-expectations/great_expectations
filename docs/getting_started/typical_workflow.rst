@@ -15,7 +15,7 @@ The article focuses on the "What" and the "Why" of each step in this workflow, a
 Setting up a project
 ----------------------------------------
 
-To use Great Expectations in a new data project, a Data Context must be initialized. You will see references to Data Context throughout the documentation. Data Context simply represents a Great Expectations project.
+To use Great Expectations in a new data project, a :ref:`Data Context<data_context>` must be initialized. You will see references to Data Context throughout the documentation. Data Context simply represents a Great Expectations project.
 
 The command line interface (CLI) command ``init`` does the initialization. Run this command in the terminal in the root of your project's repo:
 
@@ -74,7 +74,7 @@ When Great Expectations evaluates this expectation against a dataset that has a 
 
 This operation can be executed in one of the following compute environments (engines): Pandas, PySpark and an SQL database. This means that the evaluated dataset (or batch of data) can be a Pandas DataFrame, a PySpark DataFrame or a query result set.
 
-A Datasource is an object Great Expectations uses to connect to a compute environment (e.g., a Postgres database on a particular host).
+A :ref:`Data Datasource<datasource>` is an object Great Expectations uses to connect to a compute environment (e.g., a Postgres database on a particular host).
 
 Each You can have multiple Datasources in a project (Data Context). This is useful if the team's pipeline consists of, for example, both a Spark cluster and a Redshift database.
 
@@ -120,7 +120,7 @@ This means that that when another team member checks out the updated configurati
 Setting up Data Docs
 ----------------------------------------------------------
 
-Data Docs is a feature of Great Expectations that creates data documentation by compiling expectations and validation results into HTML.
+:ref:`Data Docs<data_docs>` is a feature of Great Expectations that creates data documentation by compiling expectations and validation results into HTML.
 
 Data Docs produces a visual description of what you expect from your data, and how the observed properties of your data differ from your expectations. It helps to keep your entire team on the same page as data evolves.
 
@@ -202,29 +202,102 @@ The generated Jupyter notebook can be discarded, since it is auto-generated.
 
 
 
-Deploying validation into a pipeline
+Deploying automated testing into a pipeline
+-------------------------------------------
+
+So far, your team and you used Great Expectations to capture and document your expectations from the data.
+
+It is time to benefit from Great Expectations' automated testing that systematically surfaces errors. You will add GE :ref:`Validation Operators<validation_operators_and_actions>` to your data pipeline and configure them. The operators will evaluate the new batches of data that arrive in the pipeline against the expectations the team defined in the previous sections.
+
+Data pipelines can be implemented with various technologies, but at their core that are DAGs (directed acyclic graph) of computations over data.
+
+This drawing shows an example of a node in a pipeline that loads data from a CSV file into a database table.
+
+Two expectation suites are deployed to monitor data quality at this node.
+
+One suite validates the node's input - the CSV file - before the node executes.
+
+The other suite validates the node's output - the data loaded into the table.
+
+.. image:: ../images/pipeline_diagram_two_nodes.png
+
+
+To implement this validation logic, you insert a Python code snippet into your pipeline - before and after the node. The code snippet prepares the data for the GE Validation Operator and calls the operator to perform the validation.
+
+The exact mechanism of deploying this code snippet depends on the technology used for your pipeline.
+
+If Airflow drives your pipeline, you will add a new node in your Airflow DAG. This node will run a PythonOperator that executes this snippet. If the data is invalid, the Airflow PythonOperator will raise an error which will stop the rest of the execution.
+
+If the pipeline uses something other than Airflow for orchestration, as long as it is possible to add a Python code snippet before and/or after a node, this will work.
+
+Below is an example of this code snippet, with comments that explain what each line does.
+
+.. code-block:: python
+
+    # Data Context is a GE object that represents your project.
+    # Your project's great_expectations.yml contains all the config
+    # options for the project's GE Data Context.
+    context = ge.data_context.DataContext()
+
+    datasource = "my_production_postgres" # a datasource configured in your great_expectations.yml
+
+    # Tell GE how to fetch the batch of data that should be validated...
+
+    # ... from the result set of a SQL query:
+    batch_kwargs = {"query": "your SQL query", "datasource": datasource_name}
+
+    # ... or from a database table:
+    # batch_kwargs = {"table": "name of your db table", "datasource": datasource_name}
+
+    # ... or from a file:
+    # batch_kwargs = {"path": "path to your data file", "datasource": datasource_name}
+
+    # ... or from a Pandas or PySpark DataFrame
+    # batch_kwargs = {"dataset": "your Pandas or PySpark DataFrame", "datasource": datasource_name}
+
+    # Get the batch of data you want to validate.
+    # Specify the name of the expectation suite that holds the expectations.
+    expectation_suite_name = "movieratings.table.expectations" # this is an example of
+                                                        # a suite that you created
+    batch = context.get_batch(batch_kwargs, expectation_suite_name)
+
+    # Call a validation operator to validate the batch.
+    # The operator will evaluate the data against the expectations
+    # and perform a list of actions, such as saving the validation
+    # result, updating Data Docs, and firing a notification (e.g., Slack).
+    results = context.run_validation_operator(
+        "action_list_operator",
+        assets_to_validate=[batch],
+        run_id=run_id) # e.g., Airflow run id or some run identifier that your pipeline uses.
+
+    if not results["success"]:
+        # Decide what your pipeline should do in case the data does not
+        # meet your expectations.
+
+
+Responding to validation results
 ----------------------------------------
 
-You end up creating one or multiple expectation suites for various data assets in your pipeline - a file, a Pandas or Spark dataframe, a result of a SQL query. Depending on the technolog ... your pipeline uses Airflow, a custom script, a cron job...
-you will
+You deployed a Validation Operator at a particular point in your data pipeline.
 
-Test this batch of data against this expectation suite. If the data meets the expectations in the suite, great. If some expectations are not met, you want to save the validation result for review, maybe stop the pipeline from continuing its run and notify 
+A new batch of data arrives and the operator validates it against an expectation suite (see the previous step).
 
-Reacting to validation results
-----------------------------------------
+The actions of the operator store the validation result, add an HTML view of the result to the Data Docs website, and fire a configurable notification (by default, Slack).
 
-TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
-TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
+If the data meets all the expectations in the suite, no action is required. This is the beauty of automated testing. No team members have to be interrupted.
+
+In case the data violates some expectations, team members must get involved.
+
+In the world of software testing, if a program does not pass a test, it usually means that the program is wrong and must be fixed.
+
+In data testing, if data does not meet expectations, the response to a failing test is usually triaged into 3 categories:
+
+* The data is fine and you need to update our expectations from it.
+* The data is "broken", but can be recovered. An example would be the users table we mentioned in the previous sections has the dates in the wrong format. You update the pipeline code to deal with this brokenness and fix it on the fly.
+* The data is "broken beyond repair". You go upstream to the team (or an external partner) who produced the data and address it with them.
 
 
 
 
 
-1. Checkout the master branch.
-2. Create a branch with a representative name. This will be used to create a Pull Request (PR) back into the master branch.
-3. Edit the suite using the command `great_expectations edit-suite`. **Note** in a near term release (0.9.0) this command will be renamed to `great_expectations suite edit`.
-    - This command compiles a jupyter notebook from the JSON Expectation suite.
-    - Because this notebook is compiled fromt the source-of-truth JSON, it can be treated as discardable.
-4. In the jupyter notebook, run all the expectation cells you wish to retain in the suite.
-5. You can adjust or add additional expectations in this notebook.
-6. Be sure to run the last cells in the notebook which save the modifed suite to disk as JSON.
+
