@@ -3,13 +3,19 @@
 Typical Workflow
 ===============================================
 
-This article describes a typical Great Expectations workflow when used by a data team.
+This article describes how data teams typically use Great Expectations.
 
-Its objective is to gain control and confidence in your data delivery workflows and to address the challenges of validating and monitoring the quality and accuracy of your data.
+The objective of this workflow is to gain control and confidence in your data pipeline and to address the challenges of validating and monitoring the quality and accuracy of your data.
 
-Data team members capture and document their shared understanding of their data as expectations. As new data arrives in the pipeline, it is evaluated against these expectations. If the observed properties of the data are found to be different from the expected ones, the team responds by rejecting (or fixing) the data, updating the expectations, or both.
+Once the setup is complete, the workflow looks like a loop over the following steps:
+
+1. Data team members capture and document their shared understanding of their data as expectations.
+2. As new data arrives in the pipeline, Great Expectations evaluates it against these expectations.
+3. If the observed properties of the data are found to be different from the expected ones, the team responds by rejecting (or fixing) the data, updating the expectations, or both.
 
 The article focuses on the "What" and the "Why" of each step in this workflow, and touches on the "How" only briefly. The exact details of configuring and executing these steps are intentionally left out - they can be found in the tutorials and reference linked from each section.
+
+If you have not installed Great Expectations and executed the CLI init command, as described in this :ref:`tutorial<tutorial_init>`, we recommend you do so before reading the rest of the article. This will make a lot of concepts mentioned below more familiar to you.
 
 
 Setting up a project
@@ -139,9 +145,9 @@ To set up Data Docs for a project, a “data documentation site” (a static HTM
 
 Multiple sites can be configured inside a project, each suitable for a particular data documentation use case. For example, some data teams use one site that has expectations and validation results from all the runs of their data pipeline for monitoring the pipeline's health, and another site that has only the expectations for communicating with their client (similar to API documentation in software development).
 
-By default Data Docs sites' files are published to the local filesystem in `great_expectations/uncommitted/data_docs/` directory. To make the site available to the team, a team member can be configure it to publish to a shared location, such as a S3 or GCS.
+By default Data Docs sites' files are published to the local filesystem in `great_expectations/uncommitted/data_docs/` directory. To make the site available to the team, a team member can be configure it to publish to a shared location, such as a :ref:`S3<publishing_data_docs_to_s3>` or GCS.
 
-All the Data Docs sites that your project has are defined in the ``great_expectations/great_expectations.yml`` configuration file. The site's configuration defines what they should display and where they are hosted. Data Docs is very customizable, but the details are beyond this article's scope.
+All the Data Docs sites that your project has are defined in the ``great_expectations/great_expectations.yml`` configuration file. The site's configuration defines what they should display and where they are hosted. Data Docs is very customizable, but the details are beyond this article's scope. See this article for details: :ref:`Data Docs Reference<data_docs_reference>`.
 
 
 Authoring expectation suites
