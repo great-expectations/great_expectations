@@ -2,7 +2,10 @@ from __future__ import unicode_literals
 
 import os
 import shutil
-from unittest import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 import pytest
 from click.testing import CliRunner
