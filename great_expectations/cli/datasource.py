@@ -16,23 +16,27 @@ from great_expectations.cli.util import (
     _offer_to_install_new_template,
     cli_message,
 )
-from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
+from great_expectations.core import ExpectationSuite
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationResultIdentifier,
+)
 from great_expectations.datasource import (
     PandasDatasource,
     SparkDFDatasource,
     SqlAlchemyDatasource,
 )
-from great_expectations.datasource.generator import (
-    ManualBatchKwargsGenerator,
+from great_expectations.datasource.generator import ManualBatchKwargsGenerator
+from great_expectations.datasource.generator.table_generator import (
+    TableBatchKwargsGenerator,
 )
-from great_expectations.exceptions import DatasourceInitializationError
-from great_expectations.profile.sample_expectations_dataset_profiler import \
-    SampleExpectationsDatasetProfiler
-
+from great_expectations.exceptions import (
+    BatchKwargsError,
+    DatasourceInitializationError,
+)
+from great_expectations.profile.sample_expectations_dataset_profiler import (
+    SampleExpectationsDatasetProfiler,
+)
 from great_expectations.validator.validator import Validator
-from great_expectations.core import ExpectationSuite
-from great_expectations.datasource.generator.table_generator import TableBatchKwargsGenerator
-from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
 
@@ -145,9 +149,9 @@ def datasource_list(directory):
     help="By default open in browser unless you specify the --no-view flag",
     default=True
 )
-@click.option('--batch-kwargs', default=None,
+@click.option('--additional-batch-kwargs', default=None,
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
-def datasource_profile(datasource, generator_name, data_assets, profile_all_data_assets, directory, view, batch_kwargs):
+def datasource_profile(datasource, generator_name, data_assets, profile_all_data_assets, directory, view, additional_batch_kwargs):
     """
     Profile a datasource
 
@@ -161,7 +165,7 @@ def datasource_profile(datasource, generator_name, data_assets, profile_all_data
     :param profile_all_data_assets: if provided, all data assets will be profiled
     :param directory:
     :param view: Open the docs in a browser
-    :param batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
+    :param additional_batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
     :return:
     """
 
@@ -174,9 +178,9 @@ def datasource_profile(datasource, generator_name, data_assets, profile_all_data
         _offer_to_install_new_template(err, context.root_directory)
         return
 
-    if batch_kwargs is not None:
+    if additional_batch_kwargs is not None:
         # TODO refactor out json load check in suite edit and add here
-        batch_kwargs = json.loads(batch_kwargs)
+        additional_batch_kwargs = json.loads(additional_batch_kwargs)
         # TODO refactor batch load check in suite edit and add here
 
     if datasource is None:
@@ -198,7 +202,7 @@ def datasource_profile(datasource, generator_name, data_assets, profile_all_data
                 data_assets=data_assets,
                 profile_all_data_assets=profile_all_data_assets,
                 open_docs=view,
-                additional_batch_kwargs=batch_kwargs
+                additional_batch_kwargs=additional_batch_kwargs
             )
     else:
         profile_datasource(
@@ -208,7 +212,7 @@ def datasource_profile(datasource, generator_name, data_assets, profile_all_data
             data_assets=data_assets,
             profile_all_data_assets=profile_all_data_assets,
             open_docs=view,
-            additional_batch_kwargs=batch_kwargs
+            additional_batch_kwargs=additional_batch_kwargs
         )
 
 
@@ -301,13 +305,14 @@ def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_
                 show_default=True
             )
 
-        configuration = PandasDatasource.build_configuration(generators={
-    "subdir_reader": {
-        "class_name": "SubdirReaderBatchKwargsGenerator",
-        "base_directory": os.path.join("..", path)
-    }
-}
-)
+        configuration = PandasDatasource.build_configuration(
+            generators={
+                "subdir_reader": {
+                    "class_name": "SubdirReaderBatchKwargsGenerator",
+                    "base_directory": os.path.join("..", path),
+                }
+            }
+        )
 
 
     context.add_datasource(name=datasource_name, class_name='PandasDatasource', **configuration)
