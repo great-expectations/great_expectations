@@ -32,6 +32,12 @@ div.image-sizer {
     margin: 0 40px 1em 40px;
     padding: 1em 40px;
 }
+code.inline-code {
+    padding: 2px 5px;
+}
+img.dev-loop {
+    max-height: 250px;
+}
 .json-key {
     color: #333333;
     font-weight: bold;
@@ -61,16 +67,16 @@ div.image-sizer {
         <div class="card walkthrough-card bg-dark text-white walkthrough-1">
         <div class="card-header"><h3>How to work with Great Expectations</h3></div>
             <div class="card-body">
-              <div class="image-sizer">
-                  <img src="{{ static_images_dir + "iterative-dev-loop.png" }}" class="img-fluid rounded-sm">
+              <div class="image-sizer text-center">
+                  <img src="{{ static_images_dir + "iterative-dev-loop.png" }}" class="img-fluid rounded-sm mx-auto dev-loop">
               </div>
                   <p>
                       Welcome! Now that you have initialized your project, the best way to work with Great Expectations is in this iterative dev loop:
                   </p>
                 <ol>
-                    <li>Let Great Expectations create a (terrible) first draft suite, by running <code>great_expectations suite new</code>.</li>
+                    <li>Let Great Expectations create a (terrible) first draft suite, by running <code class="inline-code bg-light">great_expectations suite new</code>.</li>
                     <li>View the suite here in Data Docs.</li>
-                    <li>Edit the suite in a Jupyter notebook by running <code>great_expectations suite edit</code></li>
+                    <li>Edit the suite in a Jupyter notebook by running <code class="inline-code bg-light">great_expectations suite edit</code></li>
                     <li>Repeat Steps 2-3 until you are happy with your suite.</li>
                     <li>Commit this suite to your source control repository.</li>
                 </ol>
@@ -136,7 +142,7 @@ div.image-sizer {
 
 
                 <div class="card walkthrough-card bg-dark text-white walkthrough-3">
-                <div class="card-header"><h3>An expectation can be presented in a machine-friendly JSON</h3></div>
+                <div class="card-header"><h3>Expectations can be presented in a machine-friendly JSON</h3></div>
                 <div class="card-body">
                     <p class="code-snippet bg-light text-muted rounded-sm">
 {<br />
@@ -211,8 +217,8 @@ div.image-sizer {
                 <div class="card walkthrough-card bg-dark text-white walkthrough-5">
                 <div class="card-header"><h3>Validation results save you time.</h3></div>
                 <div class="card-body">
-                  <div class="image-sizer">
-                      <img src="{{ static_images_dir + "validation_failed_unexpected_values.gif" }}" class="img-fluid rounded-sm">
+                  <div class="image-sizer text-center">
+                      <img src="{{ static_images_dir + "validation_failed_unexpected_values.gif" }}" class="img-fluid rounded-sm mx-auto">
                   </div>
                   <p>This is an example of what a single failed Expectation looks like in Data Docs. Note the failure includes unexpected values from your data. This helps you debug pipeines faster.</p>
                 </div>
@@ -239,8 +245,8 @@ div.image-sizer {
                 <div class="card walkthrough-card bg-dark text-white walkthrough-6">
                 <div class="card-header"><h3>Great Expectations provides a large library of expectations.</h3></div>
                 <div class="card-body">
-                  <div class="image-sizer">
-                      <img src="{{ static_images_dir + "glossary_scroller.gif" }}" class="img-fluid rounded-sm">
+                  <div class="image-sizer text-center">
+                      <img src="{{ static_images_dir + "glossary_scroller.gif" }}" class="img-fluid rounded-sm mx-auto">
                   </div>
                   <p><a href="{{ glossary_url }}">Nearly 50 built in expectations</a> allow you to express how you understand your data, and you can add custom
                   expectations if you need a new one.
