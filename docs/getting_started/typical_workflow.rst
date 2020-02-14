@@ -21,7 +21,7 @@ If you have not installed Great Expectations and executed the CLI init command, 
 Setting up a project
 ----------------------------------------
 
-To use Great Expectations in a new data project, a :ref:`Data Context<data_context>` must be initialized. You will see references to Data Context throughout the documentation. Data Context simply represents a Great Expectations project.
+To use Great Expectations in a new data project, a :ref:`Data Context<data_context>` should be initialized. You will see references to the Data Context throughout the documentation. A Data Context provides the core services used in a Great Expectations project.
 
 The command line interface (CLI) command ``init`` does the initialization. Run this command in the terminal in the root of your project's repo:
 
@@ -301,7 +301,6 @@ In data testing, if data does not meet expectations, the response to a failing t
 * The data is fine and you need to update our expectations from it.
 * The data is "broken", but can be recovered. An example would be the users table we mentioned in the previous sections has the dates in the wrong format. You update the pipeline code to deal with this brokenness and fix it on the fly.
 * The data is "broken beyond repair". You go upstream to the team (or an external partner) who produced the data and address it with them.
-
 
 
 
