@@ -613,8 +613,9 @@ class ExpectationValidationResult(object):
             myself['exception_info'] = convert_to_json_serializable(myself['exception_info'])
         return myself
 
-    def get_metric(self, metric_name, metric_kwargs_id):
+    def get_metric(self, metric_name, **kwargs):
         metric_name_parts = metric_name.split(".")
+        metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
 
         if metric_name_parts[0] == self.expectation_config.expectation_type:
             if len(metric_name_parts) < 2:
@@ -722,8 +723,9 @@ class ExpectationSuiteValidationResult(DictDot):
         myself = expectationSuiteValidationResultSchema.dump(myself).data
         return myself
 
-    def get_metric(self, metric_name, metric_kwargs_id):
+    def get_metric(self, metric_name, **kwargs):
         metric_name_parts = metric_name.split(".")
+        metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
 
         metric_value = None
         # Expose overall statistics
@@ -742,7 +744,7 @@ class ExpectationSuiteValidationResult(DictDot):
                 for result in self.results:
                     try:
                         if metric_name_parts[0] == result.expectation_config.expectation_type:
-                            metric_value = result.get_metric(metric_name, metric_kwargs_id)
+                            metric_value = result.get_metric(metric_name, **kwargs)
                             break
                     except UnavailableMetricError:
                         pass
