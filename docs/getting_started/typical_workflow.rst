@@ -144,7 +144,7 @@ To set up Data Docs for a project, a “data documentation site” (a static HTM
 
 Multiple sites can be configured inside a project, each suitable for a particular data documentation use case. For example, some data teams use one site that has expectations and validation results from all the runs of their data pipeline for monitoring the pipeline's health, and another site that has only the expectations for communicating with their client (similar to API documentation in software development).
 
-By default Data Docs sites' files are published to the local filesystem in `great_expectations/uncommitted/data_docs/` directory. To make the site available to the team, a team member can be configure it to publish to a shared location, such as a :ref:`S3<publishing_data_docs_to_s3>` or GCS.
+By default Data Docs sites' files are published to the local filesystem in the `great_expectations/uncommitted/data_docs/` directory. To make a site available more broadly, a team member could configure Great Expectations to publish the site to a shared location, such as a :ref:`S3<publishing_data_docs_to_s3>` or GCS.
 
 All the Data Docs sites that your project has are defined in the ``great_expectations/great_expectations.yml`` configuration file. The site's configuration defines what they should display and where they are hosted. Data Docs is very customizable, but the details are beyond this article's scope. See this article for details: :ref:`Data Docs Reference<data_docs_reference>`.
 
@@ -300,6 +300,5 @@ In data testing, if data does not meet expectations, the response to a failing t
 * The data is fine and you need to update our expectations from it.
 * The data is "broken", but can be recovered. An example would be the users table we mentioned in the previous sections has the dates in the wrong format. You update the pipeline code to deal with this brokenness and fix it on the fly.
 * The data is "broken beyond repair". You go upstream to the team (or an external partner) who produced the data and address it with them.
-
 
 
