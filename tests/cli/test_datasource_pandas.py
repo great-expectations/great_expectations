@@ -296,7 +296,7 @@ def test_cli_datasource_profile_with_additional_batch_kwargs(
             "profile",
             "-d",
             project_root_dir,
-            "--batch-kwargs",
+            "--additional-batch-kwargs",
             '{"reader_options": {"sep": ",", "parse_dates": [0]}}',
             "--no-view",
         ],

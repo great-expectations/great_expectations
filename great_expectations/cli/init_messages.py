@@ -10,7 +10,7 @@ GREETING = """<cyan>\
              ~ Always know what to expect from your data ~             
 </cyan>"""
 
-LETS_BEGIN_PROMPT = """In just a couple of minutes you will see Great Expectations in action on your data.
+LETS_BEGIN_PROMPT = """In a few minutes you will see Great Expectations in action on your data!
 
 First, Great Expectations will create a new directory:
 

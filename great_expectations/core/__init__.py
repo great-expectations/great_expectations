@@ -570,6 +570,13 @@ class ExpectationValidationResult(object):
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
+        # NOTE: JPC - 20200213 - need to spend some time thinking about whether we want to
+        # consistently allow dict as a comparison alternative in situations like these...
+        # if isinstance(other, dict):
+        #     try:
+        #         other = ExpectationValidationResult(**other)
+        #     except ValueError:
+        #         return NotImplemented
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented

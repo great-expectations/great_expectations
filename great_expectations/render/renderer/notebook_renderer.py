@@ -159,11 +159,25 @@ context.open_data_docs(validation_result_identifier)"""
 
             for exp in expectations:
                 kwargs_string = self._build_kwargs_string(exp)
-                meta_args = ", meta={}".format(exp.meta) if exp.meta else ""
+                meta_args = self._build_meta_arguments(exp.meta)
                 code = "batch.{}({}{})".format(
                     exp["expectation_type"], kwargs_string, meta_args
                 )
                 self.add_code_cell(code, lint=True)
+
+    @staticmethod
+    def _build_meta_arguments(meta):
+        if not meta:
+            return ""
+
+        profiler = "SampleExpectationsDatasetProfiler"
+        if profiler in meta.keys():
+            meta.pop(profiler)
+
+        if meta.keys():
+            return ", meta={}".format(meta)
+
+        return ""
 
     @classmethod
     def _write_notebook_to_disk(cls, notebook, notebook_file_path):

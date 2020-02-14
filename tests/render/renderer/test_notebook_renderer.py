@@ -8,6 +8,10 @@ from great_expectations.render.renderer.notebook_renderer import NotebookRendere
 
 @pytest.fixture
 def critical_suite():
+    """
+    This hand made fixture has a wide range of expectations, and has a mix of
+    metadata including an SampleExpectationsDatasetProfiler entry.
+    """
     schema = ExpectationSuiteSchema(strict=True)
     critical_suite = {
         "expectation_suite_name": "critical",
@@ -19,6 +23,9 @@ def critical_suite():
                 "meta": {
                     "question": True,
                     "Notes": "There are empty strings that should probably be nulls",
+                    'SampleExpectationsDatasetProfiler': {
+                        'confidence': 'very low'
+                    }
                 },
             },
             {
@@ -33,6 +40,10 @@ def critical_suite():
 
 @pytest.fixture
 def warning_suite():
+    """
+    This hand made fixture has a wide range of expectations, and has a mix of
+    metadata including SampleExpectationsDatasetProfiler entries.
+    """
     schema = ExpectationSuiteSchema(strict=True)
     warning_suite = {
         "expectation_suite_name": "warning",
@@ -49,10 +60,20 @@ def warning_suite():
             {
                 "expectation_type": "expect_column_values_to_not_be_null",
                 "kwargs": {"column": "npi"},
+                "meta": {
+                    'SampleExpectationsDatasetProfiler': {
+                        'confidence': 'very low'
+                    }
+                }
             },
             {
                 "expectation_type": "expect_column_values_to_not_be_null",
                 "kwargs": {"column": "provider_type"},
+                "meta": {
+                    'SampleExpectationsDatasetProfiler': {
+                        'confidence': 'very low'
+                    }
+                }
             },
             {
                 "expectation_type": "expect_column_values_to_not_be_null",
