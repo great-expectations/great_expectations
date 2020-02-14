@@ -121,6 +121,7 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
                         logo-long.png
                         short-logo-vector.svg
                         short-logo.png
+                        validation_failed_unexpected_values.gif
                     styles/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
