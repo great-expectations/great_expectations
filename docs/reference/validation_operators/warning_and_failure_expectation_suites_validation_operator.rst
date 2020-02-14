@@ -51,7 +51,7 @@ Below is an example of this operator's configuration:
         action_list:
           - name: store_validation_result
             action:
-              class_name: StoreAction
+              class_name: StoreValidationResultAction
               target_store_name: validations_store
           - name: store_evaluation_params
             action:
