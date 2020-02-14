@@ -2,6 +2,8 @@
   {% set expectation_suite_name_dot_count = expectation_suite_name.count(".") -%}
 {% endif %}
 
+{% set glossary_url = "http://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=walkthrough&utm_medium=glossary" %}
+
 {% if utm_medium == "validation-results-page" or utm_medium == "profiling-results-page" %}
   {% set static_images_dir = ((expectation_suite_name_dot_count + 3) * "../") + "static/images/" -%}
 {% elif utm_medium == "expectation-suite-page" %}
@@ -97,17 +99,17 @@ div.image-sizer {
                 <div class="card walkthrough-card bg-dark text-white walkthrough-2">
                 <div class="card-header"><h3>What are Expectations?</h3></div>
                 <div class="card-body">
-                    <p class="code-snippet bg-light text-muted rounded-sm">
-expect_column_to_exist
-expect_table_row_count_to_be_between
-expect_column_values_to_be_unique
-expect_column_values_to_not_be_null
-expect_column_values_to_be_between
-expect_column_values_to_match_regex
-expect_column_mean_to_be_between
-expect_column_kl_divergence_to_be_less_than
-... and many more
-                    </p>
+                    <ul class="code-snippet bg-light text-muted rounded-sm">
+                        <li>expect_column_to_exist</li>
+                        <li>expect_table_row_count_to_be_between</li>
+                        <li>expect_column_values_to_be_unique</li>
+                        <li>expect_column_values_to_not_be_null</li>
+                        <li>expect_column_values_to_be_between</li>
+                        <li>expect_column_values_to_match_regex</li>
+                        <li>expect_column_mean_to_be_between</li>
+                        <li>expect_column_kl_divergence_to_be_less_than</li>
+                        <li>... <a href="{{ glossary_url }}">and many more</a></li>
+                    </ul>
                   <p>An expectation is a falsifiable, verifiable statement about data.</p>
                   <p>Expectations provide a language to talk about data characteristics and data quality - humans to humans, humans to machines and machines to machines.</p>
                   <p>Expectations are both data tests and docs!</p>
@@ -240,7 +242,7 @@ expect_column_kl_divergence_to_be_less_than
                   <div class="image-sizer">
                       <img src="{{ static_images_dir + "glossary_scroller.gif" }}" class="img-fluid rounded-sm">
                   </div>
-                  <p><a href="http://docs.greatexpectations.io/en/latest/reference/expectation_glossary.html">Nearly 50 built in expectations</a> allow you to express how you understand your data, and you can add custom
+                  <p><a href="{{ glossary_url }}">Nearly 50 built in expectations</a> allow you to express how you understand your data, and you can add custom
                   expectations if you need a new one.
                   </p>
                 </div>
