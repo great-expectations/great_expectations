@@ -154,7 +154,7 @@ Authoring expectation suites
 
 Earlier in this article we said that capturing and documenting the team's shared understanding of its data as expectations is the core part of this typical workflow.
 
-Expectation Suites combine multiple expectations into an overall description of a dataset. For example, a team can group all the expectations about its ``rating`` table in the movie ratings database from our previous example into an Expectation Suite and call it "movie_ratings_database.rating.expectations".
+Expectation Suites combine multiple expectations into an overall description of a dataset. For example, a team can group all the expectations about its ``rating`` table in the movie ratings database from our previous example into an Expectation Suite and call it "movieratings.table.expectations".
 
 Each Expectation Suite is saved as a JSON file in the ``great_expectations/expectations`` subdirectory of the Data Context. Users check these files into the version control each time they are updated, same way they treat their source files.
 
@@ -210,11 +210,11 @@ The generated Jupyter notebook can be discarded, since it is auto-generated.
 Deploying automated testing into a pipeline
 -------------------------------------------
 
-So far, your team and you used Great Expectations to capture and document your expectations from the data.
+So far, the team members used Great Expectations to capture and document their expectations from the data.
 
-It is time to benefit from Great Expectations' automated testing that systematically surfaces errors. You will add GE :ref:`Validation Operators<validation_operators_and_actions>` to your data pipeline and configure them. The operators will evaluate the new batches of data that arrive in the pipeline against the expectations the team defined in the previous sections.
+It is time for the team to benefit from Great Expectations' automated testing that systematically surfaces errors. A data engineer adds GE :ref:`Validation Operators<validation_operators_and_actions>` to the data pipeline and configures them. The operators will evaluate the new batches of data that arrive in the pipeline against the expectations the team defined in the previous sections.
 
-Data pipelines can be implemented with various technologies, but at their core that are DAGs (directed acyclic graph) of computations over data.
+Data pipelines can be implemented with various technologies, but at their core that are DAGs (directed acyclic graphs) of computations over data.
 
 This drawing shows an example of a node in a pipeline that loads data from a CSV file into a database table.
 
@@ -227,11 +227,11 @@ The other suite validates the node's output - the data loaded into the table.
 .. image:: ../images/pipeline_diagram_two_nodes.png
 
 
-To implement this validation logic, you insert a Python code snippet into your pipeline - before and after the node. The code snippet prepares the data for the GE Validation Operator and calls the operator to perform the validation.
+To implement this validation logic, a data engineer inserts a Python code snippet into the pipeline - before and after the node. The code snippet prepares the data for the GE Validation Operator and calls the operator to perform the validation.
 
-The exact mechanism of deploying this code snippet depends on the technology used for your pipeline.
+The exact mechanism of deploying this code snippet depends on the technology used for the pipeline.
 
-If Airflow drives your pipeline, you will add a new node in your Airflow DAG. This node will run a PythonOperator that executes this snippet. If the data is invalid, the Airflow PythonOperator will raise an error which will stop the rest of the execution.
+If Airflow drives the pipeline, the engineer adds a new node in the Airflow DAG. This node will run a PythonOperator that executes this snippet. If the data is invalid, the Airflow PythonOperator will raise an error which will stop the rest of the execution.
 
 If the pipeline uses something other than Airflow for orchestration, as long as it is possible to add a Python code snippet before and/or after a node, this will work.
 
@@ -283,11 +283,11 @@ Below is an example of this code snippet, with comments that explain what each l
 Responding to validation results
 ----------------------------------------
 
-You deployed a Validation Operator at a particular point in your data pipeline.
+A :ref:`Validation Operator<validation_operators_and_actions>` is deployed at a particular point in your data pipeline.
 
 A new batch of data arrives and the operator validates it against an expectation suite (see the previous step).
 
-The actions of the operator store the validation result, add an HTML view of the result to the Data Docs website, and fire a configurable notification (by default, Slack).
+The :ref:`actions<actions>` of the operator store the validation result, add an HTML view of the result to the Data Docs website, and fire a configurable notification (by default, Slack).
 
 If the data meets all the expectations in the suite, no action is required. This is the beauty of automated testing. No team members have to be interrupted.
 
@@ -295,9 +295,9 @@ In case the data violates some expectations, team members must get involved.
 
 In the world of software testing, if a program does not pass a test, it usually means that the program is wrong and must be fixed.
 
-In data testing, if data does not meet expectations, the response to a failing test is usually triaged into 3 categories:
+In data testing, if data does not meet expectations, the response to a failing test is triaged into 3 categories:
 
-* The data is fine and you need to update our expectations from it.
-* The data is "broken", but can be recovered. An example would be the users table we mentioned in the previous sections has the dates in the wrong format. You update the pipeline code to deal with this brokenness and fix it on the fly.
-* The data is "broken beyond repair". You go upstream to the team (or an external partner) who produced the data and address it with them.
+* The data is fine, but the validation result revealed a characteristic that the team was not aware of. The team's data scientists update the expectations to reflect this new information. The user interface for this process is as described in the `Authoring expectation suites` section above: review the validation result in DataDocs, run the CLI `suite edit` command to generate a Jupyter notebook for editing the expectation suite, and then use the generated notebook to update the expectations while testing them against the data batch that did not pass the validation.
+* The data is "broken", but can be recovered. An example would be the users table we mentioned in the previous sections has the dates in the wrong format. Data engineers update the pipeline code to deal with this brokenness and fix it on the fly.
+* The data is "broken beyond repair". The owners of the pipeline go "upstream" to the team (or an external partner) who produced the data and address it with them. The validation result in Data Docs makes it easy to communicate what exactly is broken, since it shows the expectation that was not met and examples of non-conforming data.
 
