@@ -2,6 +2,10 @@ from __future__ import unicode_literals
 
 import os
 import shutil
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 import pytest
 from click.testing import CliRunner
@@ -17,8 +21,9 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
 @pytest.mark.xfail(condition=PY2, reason="legacy python")
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them(
-    caplog, tmp_path_factory,
+    mock_webbrowser, caplog, tmp_path_factory,
 ):
     """
     This test walks through the onboarding experience.
@@ -36,11 +41,19 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "--no-view", "-d", root_dir],
+        ["init", "-d", root_dir],
         input="Y\n1\n1\n{}\n\n\n\n".format(data_path, catch_exceptions=False),
     )
     stdout = result.output
     assert result.exit_code == 0
+    assert mock_webbrowser.call_count == 1
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
+            root_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
+
     assert "Great Expectations is now set up." in stdout
 
     context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
@@ -73,8 +86,9 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
-    caplog, tmp_path_factory,
+    mock_webbrowser, caplog, tmp_path_factory,
 ):
     """
     This test walks through the onboarding experience.
@@ -92,18 +106,24 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "--no-view", "-d", root_dir],
+        ["init", "-d", root_dir],
         input="Y\n1\n1\n{}\n\n\n\n".format(data_path, catch_exceptions=False),
     )
-    stdout = result.output
     assert result.exit_code == 0
+    assert mock_webbrowser.call_count == 1
+    assert (
+        "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
+            root_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+    )
 
-    # Test the second invocation of init
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["init", "--no-view", "-d", root_dir], input="n\n", catch_exceptions=False
+        cli, ["init", "-d", root_dir], input="n\n", catch_exceptions=False
     )
     stdout = result.stdout
+    assert mock_webbrowser.call_count == 1
 
     assert result.exit_code == 0
     assert "This looks like an existing project that" in stdout
@@ -113,21 +133,23 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_cli_init_connection_string_non_working_postgres_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
-    caplog, tmp_path_factory,
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_cli_init_connection_string_non_working_db_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
+    mock_webbrowser, caplog, tmp_path_factory,
 ):
-    basedir = tmp_path_factory.mktemp("bad_con_string_test")
-    basedir = str(basedir)
-    os.chdir(basedir)
+    root_dir = tmp_path_factory.mktemp("bad_con_string_test")
+    root_dir = str(root_dir)
+    os.chdir(root_dir)
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "--no-view"],
+        ["init"],
         input="Y\n2\n5\nmy_db\nsqlite:////not_a_real.db\nn\n",
         catch_exceptions=False,
     )
     stdout = result.output
+    assert mock_webbrowser.call_count == 0
 
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
@@ -144,7 +166,7 @@ def test_cli_init_connection_string_non_working_postgres_connection_instructs_us
 
     assert result.exit_code == 1
 
-    ge_dir = os.path.join(basedir, DataContext.GE_DIR)
+    ge_dir = os.path.join(root_dir, DataContext.GE_DIR)
     assert os.path.isdir(ge_dir)
     config_path = os.path.join(ge_dir, DataContext.GE_YML)
     assert os.path.isfile(config_path)
@@ -168,7 +190,7 @@ def test_cli_init_connection_string_non_working_postgres_connection_instructs_us
     config = yaml.load(open(config_path, "r"))
     assert config["my_db"] == {"url": "sqlite:////not_a_real.db"}
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(os.path.join(root_dir, "great_expectations"))
     assert (
         obs_tree
         == """\
