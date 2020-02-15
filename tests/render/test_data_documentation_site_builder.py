@@ -22,7 +22,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
             "action_list": [{
                 "name": "store_validation_result",
                 "action": {
-                    "class_name": "StoreAction",
+                    "class_name": "StoreValidationResultAction",
                     "target_store_name": "validations_store",
                 }
             }, {
@@ -154,7 +154,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
     # let's create another validation result and run the site builder to add it
     # to the data docs
-    # the operator does not have an StoreAction action configured, so the site
+    # the operator does not have an StoreValidationResultAction action configured, so the site
     # will not be updated without our call to site builder
 
     expectation_suite_path_component = expectation_suite_name.replace('.', '/')

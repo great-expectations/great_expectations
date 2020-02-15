@@ -232,7 +232,7 @@ Below is the operator's configuration snippet in the ``great_expectations.yml`` 
     action_list:
       - name: store_validation_result
         action:
-          class_name: StoreAction
+          class_name: StoreValidationResultAction
       - name: store_evaluation_params
         action:
           class_name: StoreEvaluationParametersAction
