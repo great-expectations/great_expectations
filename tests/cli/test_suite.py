@@ -231,7 +231,7 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
     assert result.exit_code == 0
     assert "Select a datasource" in stdout
     assert "Which data would you like to use" in stdout
-    assert "Name the new expectation suite [warning]" in stdout
+    assert "Name the new expectation suite [f2.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
