@@ -105,6 +105,7 @@ def test_expectation_decorator_summary_mode():
         'x': [1, 2, 3, 4, 5, 6, 7, 7, None, None],
     })
     df.set_default_expectation_argument("result_format", "COMPLETE")
+    df.set_default_expectation_argument("include_config", False)
 
     # print '&'*80
     # print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY"), indent=2)
@@ -152,6 +153,7 @@ def test_result_format_argument_in_decorators():
         'z': [None, 'a', 'b', 'c', 'abc']
     })
     df.set_default_expectation_argument('result_format', 'COMPLETE')
+    df.set_default_expectation_argument("include_config", False)
 
     # Test explicit Nones in result_format
     exp_output = expectationValidationResultSchema.load({'success': True, 'result': {'observed_value': 5,

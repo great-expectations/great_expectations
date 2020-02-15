@@ -7,7 +7,7 @@ except ImportError:
 
 from great_expectations.validation_operators import (
     SlackNotificationAction,
-    StoreAction
+    StoreValidationResultAction
 )
 from great_expectations.data_context.store import (
     ValidationsStore,
@@ -34,7 +34,7 @@ def test_StoreAction():
     data_context = Object()
     data_context.stores = stores
 
-    action = StoreAction(
+    action = StoreValidationResultAction(
         data_context=data_context,
         target_store_name="fake_in_memory_store",
     )
@@ -126,7 +126,7 @@ def test_SlackNotificationAction(data_context):
 #     data_context = Object()
 #     data_context.stores = stores
 #
-#     action = StoreAction(
+#     action = StoreValidationResultAction(
 #         data_context = data_context,
 #         target_store_name = "fake_in_memory_store",
 #     )

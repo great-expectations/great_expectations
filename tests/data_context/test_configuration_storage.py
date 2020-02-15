@@ -116,7 +116,7 @@ validation_operators:
     action_list:
       - name: store_validation_result
         action:
-          class_name: StoreAction
+          class_name: StoreValidationResultAction
           target_store_name: validations_store
       # Uncomment the notify_slack action below to send notifications during evaluation
       # - name: notify_slack
