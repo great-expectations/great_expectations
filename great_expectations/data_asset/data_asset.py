@@ -325,7 +325,7 @@ class DataAsset(object):
 
         self._expectation_suite.data_asset_type = self._data_asset_type
         self.default_expectation_args = {
-            "include_config": False,
+            "include_config": True,
             "catch_exceptions": False,
             "result_format": 'BASIC',
         }
@@ -649,7 +649,7 @@ class DataAsset(object):
             Ex::
 
                 {
-                    "include_config" : False,
+                    "include_config" : True,
                     "catch_exceptions" : False,
                     "result_format" : 'BASIC'
                 }
