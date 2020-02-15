@@ -31,7 +31,7 @@ An instance of ActionListValidationOperator is included in the default configura
     action_list:
       - name: store_validation_result
         action:
-          class_name: StoreAction
+          class_name: StoreValidationResultAction
           target_store_name: validations_store
       - name: send_slack_notification_on_validation_result
         action:
