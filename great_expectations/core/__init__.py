@@ -40,6 +40,8 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
     # WARNING
     #
     ###
+    if "metric_kwargs_id" in metric_kwargs:
+        return metric_kwargs["metric_kwargs_id"]
     if "column" in metric_kwargs:
         return "column=" + metric_kwargs.get("column")
     return None
@@ -293,7 +295,9 @@ class ExpectationKwargs(dict):
 
     def isEquivalentTo(self, other):
         try:
-            return len(self) == len(other) and all([
+            n_self_keys = len([k for k in self.keys() if k not in self.ignored_keys])
+            n_other_keys = len([k for k in other.keys() if k not in self.ignored_keys])
+            return n_self_keys == n_other_keys and all([
                 self[k] == other[k] for k in self.keys() if k not in self.ignored_keys
             ])
         except KeyError:
@@ -392,9 +396,26 @@ class ExpectationConfiguration(DictDot):
                     except ParserError:
                         logger.warning("Unable to parse great_expectations urn {}".format(value["$PARAMETER"]))
                         continue
-                    nested_update(dependencies, {evaluation_parameter_id.expectation_suite_name: {
-                        evaluation_parameter_id.metric_name: [evaluation_parameter_id.metric_kwargs_id]
-                    }})
+
+                    if evaluation_parameter_id.metric_kwargs_id is None:
+                        nested_update(dependencies, {
+                            evaluation_parameter_id.expectation_suite_name: [evaluation_parameter_id.metric_name]
+                        })
+                    else:
+                        nested_update(dependencies, {
+                            evaluation_parameter_id.expectation_suite_name: [{
+                                "metric_kwargs_id": {
+                                    evaluation_parameter_id.metric_kwargs_id: [evaluation_parameter_id.metric_name]
+                                }
+                            }]
+                        })
+                    # if evaluation_parameter_id.expectation_suite_name not in dependencies:
+                    #     dependencies[evaluation_parameter_id.expectation_suite_name] = {"metric_kwargs_id": {}}
+                    #
+                    # if evaluation_parameter_id.metric_kwargs_id not in dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"]:
+                    #     dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"][evaluation_parameter_id.metric_kwargs_id] = []
+                    # dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"][
+                    #     evaluation_parameter_id.metric_kwargs_id].append(evaluation_parameter_id.metric_name)
 
         return dependencies
 
@@ -583,7 +604,9 @@ class ExpectationValidationResult(object):
         try:
             return all((
                 self.success == other.success,
-                self.expectation_config == other.expectation_config,
+                (self.expectation_config is None and other.expectation_config is None) or
+                (self.expectation_config is not None and self.expectation_config.isEquivalentTo(
+                    other.expectation_config)),
                 # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
                 # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparision is
                 # handled appropriately.

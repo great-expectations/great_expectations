@@ -794,6 +794,7 @@ class BaseDataContext(object):
         return self.stores[self.validations_store_name]
 
     def _compile_evaluation_parameter_dependencies(self):
+        self._evaluation_parameter_dependencies = {}
         for key in self.stores[self.expectations_store_name].list_keys():
             expectation_suite = self.stores[self.expectations_store_name].get(key)
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
@@ -1629,6 +1630,7 @@ class ExplorerDataContext(DataContext):
         else:
             return return_obj
 
+
 def _get_metric_configuration_tuples(metric_configuration, base_kwargs=None):
     if base_kwargs is None:
         base_kwargs = {}
@@ -1641,13 +1643,24 @@ def _get_metric_configuration_tuples(metric_configuration, base_kwargs=None):
         if not isinstance(metric_configuration[kwarg_name], dict):
             raise ge_exceptions.DataContextError("Invalid metric_configuration: each key must contain a "
                                                  "dictionary.")
-        for kwarg_value in metric_configuration[kwarg_name].keys():
-            base_kwargs.update({kwarg_name: kwarg_value})
-            if not isinstance(metric_configuration[kwarg_name][kwarg_value], list):
-                raise ge_exceptions.DataContextError("Invalid metric_configuration: each value must contain a "
-                                                     "list.")
-            for nested_configuration in metric_configuration[kwarg_name][kwarg_value]:
-                metric_configurations_list += _get_metric_configuration_tuples(nested_configuration,
-                                                                                    base_kwargs=base_kwargs)
+        if kwarg_name == "metric_kwargs_id":  # this special case allows a hash of multiple kwargs
+            for metric_kwargs_id in metric_configuration[kwarg_name].keys():
+                if base_kwargs != {}:
+                    raise ge_exceptions.DataContextError("Invalid metric_configuration: when specifying "
+                                                         "metric_kwargs_id, no other keys or values may be defined.")
+                if not isinstance(metric_configuration[kwarg_name][metric_kwargs_id], list):
+                    raise ge_exceptions.DataContextError("Invalid metric_configuration: each value must contain a "
+                                                         "list.")
+                metric_configurations_list += [(metric_name, {"metric_kwargs_id": metric_kwargs_id}) for metric_name
+                                               in metric_configuration[kwarg_name][metric_kwargs_id]]
+        else:
+            for kwarg_value in metric_configuration[kwarg_name].keys():
+                base_kwargs.update({kwarg_name: kwarg_value})
+                if not isinstance(metric_configuration[kwarg_name][kwarg_value], list):
+                    raise ge_exceptions.DataContextError("Invalid metric_configuration: each value must contain a "
+                                                         "list.")
+                for nested_configuration in metric_configuration[kwarg_name][kwarg_value]:
+                    metric_configurations_list += _get_metric_configuration_tuples(nested_configuration,
+                                                                                   base_kwargs=base_kwargs)
 
     return metric_configurations_list
