@@ -189,7 +189,7 @@ def test_set_default_expectation_argument():
         'z': ['hello', 'jello', 'mello'],
     })
 
-    assert {"include_config": False,
+    assert {"include_config": True,
             "catch_exceptions": False,
             "result_format": 'BASIC'} == df.get_default_expectation_arguments()
 
@@ -211,18 +211,18 @@ def test_test_column_map_expectation_function():
     def is_odd(self, column, mostly=None, result_format=None, include_config=True, catch_exceptions=None, meta=None):
         return column % 2 == 1
 
-    assert asset.test_column_map_expectation_function(is_odd, column='x') == ExpectationValidationResult(
+    assert asset.test_column_map_expectation_function(is_odd, column='x', include_config=False) == ExpectationValidationResult(
         result={'element_count': 5, 'missing_count': 0, 'missing_percent': 0, 'unexpected_percent': 0.0,
                 'partial_unexpected_list': [], 'unexpected_percent_nonmissing': 0.0, 'unexpected_count': 0},
         success=True)
 
-    assert asset.test_column_map_expectation_function(is_odd, 'x', result_format="BOOLEAN_ONLY") == \
+    assert asset.test_column_map_expectation_function(is_odd, 'x', result_format="BOOLEAN_ONLY", include_config=False) == \
         ExpectationValidationResult(success=True)
 
-    assert asset.test_column_map_expectation_function(is_odd, column='y', result_format="BOOLEAN_ONLY") == \
+    assert asset.test_column_map_expectation_function(is_odd, column='y', result_format="BOOLEAN_ONLY", include_config=False) == \
         ExpectationValidationResult(success=False)
 
-    assert asset.test_column_map_expectation_function(is_odd, column='y', result_format="BOOLEAN_ONLY", mostly=.7) == \
+    assert asset.test_column_map_expectation_function(is_odd, column='y', result_format="BOOLEAN_ONLY", mostly=.7, include_config=False) == \
         ExpectationValidationResult(success=True)
 
 
@@ -241,24 +241,25 @@ def test_test_column_aggregate_expectation_function():
             }
         }
 
-    assert asset.test_column_aggregate_expectation_function(expect_second_value_to_be, 'x', 2) == \
+    assert asset.test_column_aggregate_expectation_function(expect_second_value_to_be, 'x', 2, include_config=False) \
+           == \
         ExpectationValidationResult(
             result={'observed_value': 3, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0},
             success=False
         )
 
-    assert asset.test_column_aggregate_expectation_function(expect_second_value_to_be, column='x', value=3) == \
+    assert asset.test_column_aggregate_expectation_function(expect_second_value_to_be, column='x', value=3, include_config=False) == \
         ExpectationValidationResult(
             result={'observed_value': 3.0, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0},
             success=True
         )
 
     assert asset.test_column_aggregate_expectation_function(
-        expect_second_value_to_be, 'y', value=3, result_format="BOOLEAN_ONLY") == \
+        expect_second_value_to_be, 'y', value=3, result_format="BOOLEAN_ONLY", include_config=False) == \
         ExpectationValidationResult(success=False)
 
     assert asset.test_column_aggregate_expectation_function(
-        expect_second_value_to_be, 'y', 2, result_format="BOOLEAN_ONLY") == ExpectationValidationResult(success=True)
+        expect_second_value_to_be, 'y', 2, result_format="BOOLEAN_ONLY", include_config=False) == ExpectationValidationResult(success=True)
 
 
 def test_meta_version_warning():
@@ -985,6 +986,6 @@ def test_test_expectation_function():
             "success": bool((self == 7).sum().sum() > 0)
         }
 
-    assert asset.test_expectation_function(expect_dataframe_to_contain_7) == ExpectationValidationResult(success=True)
-    assert asset_2.test_expectation_function(expect_dataframe_to_contain_7) == ExpectationValidationResult(
+    assert asset.test_expectation_function(expect_dataframe_to_contain_7, include_config=False) == ExpectationValidationResult(success=True)
+    assert asset_2.test_expectation_function(expect_dataframe_to_contain_7, include_config=False) == ExpectationValidationResult(
         success=False)

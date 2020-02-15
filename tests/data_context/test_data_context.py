@@ -166,10 +166,14 @@ def test_compile_evaluation_parameter_dependencies(data_context):
     data_context._compile_evaluation_parameter_dependencies()
     assert data_context._evaluation_parameter_dependencies == {
         'source_diabetes_data.default': {
-            'expect_column_unique_value_count_to_be_between.result.observed_value': ['column=patient_nbr']
+            "metric_kwargs_id": {
+                "column=patient_nbr": ["expect_column_unique_value_count_to_be_between.result.observed_value"]
+            }
         },
         'source_patient_data.default': {
-            'expect_table_row_count_to_equal.result.observed_value': [None]
+            "metric_kwargs_id": {
+                None: ["expect_table_row_count_to_equal.result.observed_value"]
+            }
         }
     }
 
