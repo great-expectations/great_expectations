@@ -4,8 +4,9 @@
 Saving Metrics
 ###############
 
-Saving metrics during Validation makes it easy to construct a dashboard create a new data series based on observed
-dataset characteristics computed by Great Expectations.
+Saving metrics during Validation makes it easy to construct a new data series based on observed
+dataset characteristics computed by Great Expectations. That data series can serve as the source for a dashboard or
+overall data quality metrics, for example.
 
 Storing metrics is still a **beta** feature of Great Expectations, and we expect configuration and
 capability to evolve rapidly.

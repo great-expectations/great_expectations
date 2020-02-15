@@ -11,8 +11,8 @@ providing the `metric_name` and `metric_kwargs` or `metric_kwargs_id`.
 A metric name is a dot-delimited string that identifies the value, such as `expect_column_values_to_be_unique
 .success` or `expect_column_values_to_be_between.result.unexpected_percent`.
 
-Metric Kwargs are key-value pairs that identify the within the context of the validation, such as "column": "Age".
-Different metrics may require different Kwargs.
+Metric Kwargs are key-value pairs that identify the metric within the context of the validation, such as "column":
+"Age". Different metrics may require different Kwargs.
 
 A metric_kwargs_id is a string representation of the Metric Kwargs that can be used as a database key. For simple
 cases, it could be easily readable, such as `column=Age`, but when there are multiple keys and values or complex
