@@ -41,7 +41,7 @@ options.
 Configuring a Validation Action
 *********************************
 
-Once a MetricStore is available, it is possible to configure a a new `StoreMetricsAction` to save metrics during
+Once a MetricStore is available, it is possible to configure a new `StoreMetricsAction` to save metrics during
 validation.
 
 Add the following yaml block to your DataContext validation operators configuration:
