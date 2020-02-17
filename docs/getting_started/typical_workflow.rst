@@ -64,7 +64,7 @@ Adding Datasources
 
 Evaluating an expectation against a batch of data is the fundamental operation in Great Expectations.
 
-For example, imagine tht we have a movie ratings table in the database. This expectation says that we expect that column "rating" takes only 1, 2, 3, 4 and 5:
+For example, imagine that we have a movie ratings table in the database. This expectation says that we expect that column "rating" takes only 1, 2, 3, 4 and 5:
 
 .. code-block:: json
 
@@ -79,11 +79,11 @@ For example, imagine tht we have a movie ratings table in the database. This exp
 When Great Expectations evaluates this expectation against a dataset that has a column named "rating", it returns a validation result saying whether the data meets the expectation.
 
 
-A :ref:`Data Datasource<datasource>` a connection to a compute environment (a backend such as Pandas, Spark, or a SQL-compatible database) and one or more storage environments.
+A :ref:`Datasource<datasource>` is a connection to a compute environment (a backend such as Pandas, Spark, or a SQL-compatible database) and one or more storage environments.
 
-Each You can have multiple Datasources in a project (Data Context). This is useful if the team's pipeline consists of, for example, both a Spark cluster and a Redshift database.
+You can have multiple Datasources in a project (Data Context). For example, this is useful if the team’s pipeline consists of both a Spark cluster and a Redshift database.
 
-All the Datasources that your project uses are configured in the ``great_expectations/great_expectations.yml`` configuration file of the Data Context:
+All the Datasources that your project uses are configured in the project's configuration file ``great_expectations/great_expectations.yml``:
 
 
 .. code-block::
@@ -104,30 +104,34 @@ All the Datasources that your project uses are configured in the ``great_expecta
 
 
 
-You can add Datasources by editing the configuration file, but the preferred way is to use the CLI convenience command:
+The easiest way to add a datasource to the project is to use the CLI convenience command:
 
 .. code-block:: bash
 
     great_expectations datasource new
 
+This command asks for the required connection attributes and tests the connection to the new Datasource.
 
-The command prompts for the required connection attributes and tests the connection to the new Datasource.
+The intrepid can add Datasources by editing the configuration file, however there are less guardrails around this approach.
 
-A Datasource object knows how to load data into the computation environment. For example, you can call a PySpark Datasource object to load data into a DataFrame from a directory on S3. This is beyond the scope of this section, but will be useful a but later.
-
+A Datasource knows how to load data into the computation environment.
+For example, you can use a PySpark Datasource object to load data into a DataFrame from a directory on AWS S3.
+This is beyond the scope of this article.
 
 After a team member adds a new Datasource to the Data Context, they commit the updated configuration file into the version control in order to make the change available to the rest of the team.
 
-Since ``great_expectations/great_expectations.yml`` is committed into the version control, the CLI command makes sure not to store the credentials (database user and password in the file). Instead it saves them in a separate filedatasources can take their credentials - ``uncommitted/config_variables.yml`` - that is not committed into the version control.
+Because ``great_expectations/great_expectations.yml`` is committed into version control, the CLI command **does not store the credentials in this file**.
+Instead it saves them in a separate file: ``uncommitted/config_variables.yml`` which is not committed into version control.
 
-This means that that when another team member checks out the updated configuration file with the newly added Datasource, they must set the credentials in their ``uncommitted/config_variables.yml`` or in environment variables.
+This means that that when another team member checks out the updated configuration file with the newly added Datasource, they must add their own credentials to their ``uncommitted/config_variables.yml`` or in environment variables.
 
 Setting up Data Docs
 ----------------------------------------------------------
 
 :ref:`Data Docs<data_docs>` is a feature of Great Expectations that creates data documentation by compiling expectations and validation results into HTML.
 
-Data Docs produces a visual description of what you expect from your data, and how the observed properties of your data differ from your expectations. It helps to keep your entire team on the same page as data evolves.
+Data Docs produces a visual data quality report of what you expect from your data, and how the observed properties of your data differ from your expectations.
+It helps to keep your entire team on the same page as data evolves.
 
 Here is what the ``expect_column_distinct_values_to_be_in_set`` expectation about the `rating` column of the movie ratings table from the earlier example looks like in Data Docs:
 
@@ -135,19 +139,32 @@ Here is what the ``expect_column_distinct_values_to_be_in_set`` expectation abou
 
 This approach to data documentation has two significant advantages.
 
-First, for engineers, Data Docs makes it possible to automatically keep your data documentation in sync with your tests. This prevents documentation rot and can save a huge amount of time on otherwise unrewarding document maintenance.
+1. **Your docs are your tests** and **your tests are your docs.**
+For engineers, Data Docs makes it possible to **automatically keep your data documentation in sync with your tests**.
+This prevents documentation rot and can save a huge amount of time and pain maintaining documentation.
 
-Second, the ability to translate expectations back and forth between human- and machine-readable formats opens up
+2. The ability to translate expectations back and forth between human and machine-readable formats opens up
 many opportunities for domain experts and stakeholders who aren't engineers to collaborate more closely with
 engineers on data applications.
 
-To set up Data Docs for a project, a “data documentation site” (a static HTML website) must be defined in the Data Context's configuration file.
+Multiple sites can be configured inside a project, each suitable for a particular use case.
+For example, some data teams use one site that has expectations and validation results from all the runs of their data pipeline for monitoring the pipeline's health,
+and another site that has only the expectations for communicating with their client.
+This is analogous to API documentation in software development.
 
-Multiple sites can be configured inside a project, each suitable for a particular data documentation use case. For example, some data teams use one site that has expectations and validation results from all the runs of their data pipeline for monitoring the pipeline's health, and another site that has only the expectations for communicating with their client (similar to API documentation in software development).
+To set up Data Docs for a project, an entry ``data_docs_sites`` must be defined in the project's configuration file.
+By default Data Docs site files are published to the local filesystem here: ``great_expectations/uncommitted/data_docs/``.
+You can see this by running:
 
-By default Data Docs sites' files are published to the local filesystem in the `great_expectations/uncommitted/data_docs/` directory. To make a site available more broadly, a team member could configure Great Expectations to publish the site to a shared location, such as a :ref:`S3<publishing_data_docs_to_s3>` or GCS.
+.. code-block:: bash
 
-All of your project's Data Docs sites are defined in the ``great_expectations/great_expectations.yml`` configuration file. The site's configuration defines what to compile and where to store results. Data Docs is very customizable;.see the :ref:`Data Docs Reference<data_docs_reference>` for more information.
+    great_expectations docs build
+
+To make a site available more broadly, a team member could configure Great Expectations to publish the site to a shared location,
+such as a :ref:`AWS S3<publishing_data_docs_to_s3>`, GCS.
+
+The site's configuration defines what to compile and where to store results.
+Data Docs is very customizable - see the :ref:`Data Docs Reference<data_docs_reference>` for more information.
 
 
 Authoring expectation suites
