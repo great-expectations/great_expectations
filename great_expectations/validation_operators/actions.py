@@ -109,9 +109,9 @@ class SlackNotificationAction(ValidationAction):
             return
 
 
-class StoreAction(ValidationAction):
+class StoreValidationResultAction(ValidationAction):
     """
-    StoreAction stores a validation result in the ValidationsStore.
+    StoreValidationResultAction stores a validation result in the ValidationsStore.
     """
 
     def __init__(self,
@@ -125,14 +125,14 @@ class StoreAction(ValidationAction):
                 should be used to param_store the validation result
         """
 
-        super(StoreAction, self).__init__(data_context)
+        super(StoreValidationResultAction, self).__init__(data_context)
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
         else:
             self.target_store = data_context.stores[target_store_name]
 
     def _run(self, validation_result_suite, validation_result_suite_identifier, data_asset):
-        logger.debug("StoreAction.run")
+        logger.debug("StoreValidationResultAction.run")
 
         if validation_result_suite is None:
             return
