@@ -139,7 +139,7 @@ Select a sample batch of the dataset the suite will describe.
             batch_kwargs = {'path': "PATH_OF_THE_FILE_YOU_WANT_TO_LOAD"}
 
         To instruct ``get_batch`` to read CSV files with specific options (e.g., not to interpret the first line as the
-        header or to use a specific separator), add them to the the ``batch_kwargs`` under the "reader_options" key.
+        header or to use a specific separator), add them to the ``batch_kwargs`` under the "reader_options" key.
 
         See the complete list of options for `Pandas read_csv <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html>`__.
 
