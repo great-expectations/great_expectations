@@ -474,4 +474,6 @@ Dependencies
 * Vega-Lite 3.2.1
 * Vega-Embed 4.0.0
 
+Data Docs is implemented in the :py:mod:`great_expectations.render` module.
+
 *last updated*: |lastupdate|
