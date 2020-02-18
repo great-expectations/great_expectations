@@ -11,6 +11,10 @@ It's easy! Just use pip install:
 
     $ pip install great_expectations
 
+(We recommend deploying within a virtual environment. If you're not familiar with pip, virtual environments, notebooks,
+or git, you may want to check out the :ref:`supporting_resources` section before continuing.)
+
+
 Once Great Expectations is installed, follow this tutorial for a quick start.
 
 .. toctree::
@@ -19,7 +23,5 @@ Once Great Expectations is installed, follow this tutorial for a quick start.
    /getting_started/cli_init
    /getting_started/typical_workflow
 
-(We recommend deploying within a virtual environment. If you're not familiar with pip, virtual environments, notebooks,
-or git, you may want to check out the :ref:`supporting_resources` section before continuing.)
 
 *last updated*: |lastupdate|
