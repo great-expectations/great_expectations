@@ -341,7 +341,7 @@ def test_simple_suite(critical_suite):
 batch.save_expectation_suite(discard_failed_expectations=False)
 
 # Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().isoformat().replace(":", "") + "Z"
+run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
 
 results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
 expectation_suite_identifier = list(results["details"].keys())[0]
@@ -684,7 +684,7 @@ def test_complex_suite(warning_suite):
 batch.save_expectation_suite(discard_failed_expectations=False)
 
 # Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.utcnow().isoformat().replace(":", "") + "Z"
+run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
 
 results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
 expectation_suite_identifier = list(results["details"].keys())[0]
