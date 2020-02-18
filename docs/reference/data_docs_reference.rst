@@ -221,18 +221,16 @@ for how to profile a single batch of data and build documentation from the valid
   from great_expectations.data_context.util import safe_mmkdir
   from great_expectations.render.view import DefaultJinjaPageView
 
-  profiling_html_filepath = '/path/into/which/to/save/results'
+  profiling_html_filepath = '/path/into/which/to/save/results.html'
 
   # obtain the DataContext object
   context = ge.data_context.DataContext()
 
-  # load a batch from the data asset
-  data_asset_name = context.normalize_data_asset_name('ratings')
-  context.create_expectation_suite(data_asset_name, 'default'),
+  # load a batch to profile
+  context.create_expectation_suite('default')
   batch = context.get_batch(
-    data_asset_name=data_asset_name,
+    batch_kwargs=context.build_batch_kwargs("my_datasource", "my_batch_kwargs_generator", "my_asset")
     expectation_suite_name='default',
-    batch_kwargs=context.yield_batch_kwargs(data_asset_name)
   )
 
   # run the profiler on the batch - this returns an expectation suite and validation results for this suite
@@ -473,5 +471,7 @@ Dependencies
 * Vega 5.3.5
 * Vega-Lite 3.2.1
 * Vega-Embed 4.0.0
+
+Data Docs is implemented in the :py:mod:`great_expectations.render` module.
 
 *last updated*: |lastupdate|

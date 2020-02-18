@@ -41,24 +41,18 @@ Expectations come to your data
 Great Expectations's connect-and-expect API makes it easy to declare Expectations within the tools you already use for
 data exploration: jupyter notebooks, the ipython console, scratch scripts, etc.
 
-.. code-block:: bash
-
-    >> import great_expectations as ge
-    >> my_df = ge.read_csv("./tests/examples/titanic.csv")
-
-    >> my_df.expect_column_values_to_be_in_set(
-        "Sex",
-        ["male", "female"]
-    )
-    {
-        'success': True,
-        'summary_obj': {
-            'unexpected_count': 0,
-            'unexpected_percent': 0.0,
-            'unexpected_percent_nonmissing': 0.0,
-            'partial_unexpected_list': []
-        }
+>>> import great_expectations as ge
+>>> my_df = ge.read_csv("./tests/examples/titanic.csv")
+>>> my_df.expect_column_values_to_be_in_set("Sex", ["male", "female"])
+{
+    'success': True,
+    'summary_obj': {
+        'unexpected_count': 0,
+        'unexpected_percent': 0.0,
+        'unexpected_percent_nonmissing': 0.0,
+        'partial_unexpected_list': []
     }
+}
 
 
 
