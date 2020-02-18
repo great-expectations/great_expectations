@@ -637,16 +637,23 @@ class ExpectationValidationResult(object):
         return myself
 
     def get_metric(self, metric_name, **kwargs):
+        if not self.expectation_config:
+            raise UnavailableMetricError("No ExpectationConfig found in this ExpectationValidationResult. Unable to "
+                                         "return a metric.")
+
         metric_name_parts = metric_name.split(".")
         metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
 
         if metric_name_parts[0] == self.expectation_config.expectation_type:
+            curr_metric_kwargs = get_metric_kwargs_id(metric_name, self.expectation_config.kwargs)
+            if metric_kwargs_id != curr_metric_kwargs:
+                raise UnavailableMetricError("Requested metric_kwargs_id (%s) does not match the configuration of this "
+                                             "ExpectationValidationResult (%s)." % (metric_kwargs_id or "None",
+                                                                                    curr_metric_kwargs or "None"))
             if len(metric_name_parts) < 2:
                 raise UnavailableMetricError("Expectation-defined metrics must include a requested metric.")
             elif len(metric_name_parts) == 2:
                 if metric_name_parts[1] == "success":
-                    if metric_kwargs_id != get_metric_kwargs_id(metric_name, self.expectation_config.kwargs):
-                        raise UnavailableMetricError("Configured metric_kwargs differ from requested.")
                     return self.success
                 else:
                     raise UnavailableMetricError("Metric name must have more than two parts for keys other than "
@@ -654,19 +661,13 @@ class ExpectationValidationResult(object):
             elif metric_name_parts[1] == "result":
                 try:
                     if len(metric_name_parts) == 3:
-                        if metric_kwargs_id != get_metric_kwargs_id(metric_name, self.expectation_config.kwargs):
-                            raise UnavailableMetricError("Configured metric_kwargs differ from requested.")
                         return self.result.get(metric_name_parts[2])
                     elif metric_name_parts[2] == "details":
-                        if metric_kwargs_id is not None and \
-                                metric_kwargs_id != get_metric_kwargs_id(metric_name, self.expectation_config.kwargs):
-                            raise UnavailableMetricError("Configured metric_kwargs differ from requested.")
                         return self.result["details"].get(metric_name_parts[3])
                 except KeyError:
                     raise UnavailableMetricError("Unable to get metric {} -- KeyError in "
                                                  "ExpectationValidationResult.".format(metric_name))
-            else:
-                raise UnavailableMetricError("Unrecognized metric name {}".format(metric_name))
+        raise UnavailableMetricError("Unrecognized metric name {}".format(metric_name))
 
 
 class ExpectationValidationResultSchema(Schema):
