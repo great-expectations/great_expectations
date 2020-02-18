@@ -1081,7 +1081,6 @@ Enter an SQL query
             else:
                 query = click.prompt(msg_prompt_query, default=None, show_default=False)
 
-
             if query is None:
                 batch_kwargs = temp_generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
             else:
@@ -1093,10 +1092,12 @@ Enter an SQL query
                 Validator(batch=datasource.get_batch(batch_kwargs), expectation_suite=ExpectationSuite("throwaway")).get_dataset()
 
             break
-        except Exception as error: # TODO: catch more specific exception
+        except ge_exceptions.GreatExpectationsError as error:
+            cli_message("""<red>ERROR: {}</red>""".format(str(error)))
+        except KeyError as error:
             cli_message("""<red>ERROR: {}</red>""".format(str(error)))
 
-    return (generator_asset, batch_kwargs)
+    return generator_asset, batch_kwargs
 
 
 def profile_datasource(
