@@ -67,7 +67,7 @@ def test_cli_init_on_new_project(
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
     assert "Which table would you like to use?" in stdout
-    assert "Name the new expectation suite [warning]" in stdout
+    assert "Name the new expectation suite [main.titanic.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
         in stdout
