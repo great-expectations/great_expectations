@@ -954,7 +954,7 @@ We could not determine the format of the file. What is it?
 
         if option_selection == "1":
 
-            available_data_asset_names = generator.get_available_data_asset_names()["names"]
+            available_data_asset_names = sorted(generator.get_available_data_asset_names()["names"], key=lambda x: x[0])
             available_data_asset_names_str = ["{} ({})".format(name[0], name[1]) for name in
                                               available_data_asset_names]
 
