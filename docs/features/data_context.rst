@@ -11,42 +11,14 @@ expectation suites, datasources, notification settings, and data fixtures.
 The DataContext is configured via a yml file stored in a directory called great_expectations; the configuration file
 as well as managed expectation suites should be stored in version control.
 
-DataContexts use data sources you're already familiar with. Generators help introspect data stores and data execution
-frameworks (such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
-enables fetching, validation, profiling, and documentation of your data in a way that is meaningful within your
+DataContexts manage connections to your data and compute resources, and support integration with execution
+frameworks (such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. Those
+features enable fetching, validation, profiling, and documentation of your data in a way that is meaningful within your
 existing infrastructure and work environment.
 
-DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
-normalized *data_asset_name*, consisting of *datasource/generator/generator_asset*.
-
-- The datasource actually connects to a source of data and returns Great Expectations DataAssets \
-  connected to a compute environment and ready for validation.
-
-- The Generator knows how to introspect datasources and produce identifying "batch_kwargs" that define \
-  particular slices of data.
-
-- The generator_asset is a specific name -- often a table name or other name familiar to users -- that \
-  generators can slice into batches.
-
-An expectation suite is a collection of expectations ready to be applied to a batch of data. Since
-in many projects it is useful to have different expectations evaluate in different contexts--profiling
-vs. testing; warning vs. error; high vs. low compute; ML model or dashboard--suites provide a namespace
-option for selecting which expectations a DataContext returns.
-
-
-A Great Expectations DataContext describes data assets using a three-part namespace consisting of
-**datasource_name**, **generator_name**, and **generator_asset**.
-
-To run validation for a data_asset, we need two additional elements:
-
-* a **batch** to validate; in our case it is a file loaded into a Pandas DataFrame
-* an **expectation_suite** to validate against
-
-.. image:: ../images/data_asset_namespace.png
-
-
-In many simple projects, the datasource or generator name may be omitted and the DataContext will infer
-the correct name when there is no ambiguity.
+DataContexts also manage Expectation Suites. Expectation Suites combine multiple Expectation Configurations into an
+overall description of a dataset. Expectation Suites should have names corresponding to the kind of data they
+define, like “NPI” for National Provider Identifier data or “company.users” for a users table.
 
 The DataContext also provides other services, such as storing and substituting evaluation parameters during validation.
 See :ref:`data_context_evaluation_parameter_store` for more information.

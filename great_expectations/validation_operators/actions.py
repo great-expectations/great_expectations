@@ -4,7 +4,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from ..data_context.store.metric_store import MetricStore
 from ..data_context.types.resource_identifiers import ValidationResultIdentifier
 from .util import send_slack_notification
-from ..exceptions import InvalidDataContextConfigError, DataContextError
+from ..exceptions import DataContextError
 
 logger = logging.getLogger(__name__)
 
@@ -206,7 +206,7 @@ class StoreMetricsAction(ValidationAction):
         try:
             store = data_context.stores[target_store_name]
         except KeyError:
-            raise InvalidDataContextConfigError("Unable to find store {} in your DataContext configuration.".format(
+            raise DataContextError("Unable to find store {} in your DataContext configuration.".format(
                 target_store_name))
         if not isinstance(store, MetricStore):
             raise DataContextError("StoreMetricsAction must have a valid MetricsStore for its target store.")
