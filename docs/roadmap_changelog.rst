@@ -22,3 +22,5 @@ Changelog
    :maxdepth: 2
 
    /changelog/changelog
+
+*last updated*: |lastupdate|

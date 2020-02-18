@@ -23,7 +23,7 @@ Datasources
 
 Datasources tell Great Expectations where your data lives and how to get it.
 
-Using the CLI command `great_expectations add-datasource` is the easiest way to
+Using the CLI command ``great_expectations datasource new`` is the easiest way to
 add a new datasource.
 
 The `datasources` section declares which :ref:`datasource` objects should be available in the DataContext.
@@ -50,7 +50,7 @@ represent two public datasets available from the resource.
       class_name: PandasDatasource
       generators:
         s3:
-          class_name: S3Generator
+          class_name: S3GlobReaderBatchKwargsGenerator
           bucket: nyc-tlc
           delimiter: '/'
           reader_options:
@@ -78,7 +78,7 @@ Here is an example for a SQL based pipeline:
           class_name: SqlAlchemyDataset
         generators:
           default:
-            class_name: TableGenerator
+            class_name: TableBatchKwargsGenerator
 
 Note the ``credentials`` key references a corresponding key in the
 ``config_variables.yml`` file which is not in source control that would look
@@ -139,15 +139,15 @@ would include the following:
       expectations_store:
         class_name: ExpectationsStore
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: expectations/
       validations_store:
         class_name: ValidationsStore
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/validations/
       evaluation_parameter_store:
-        class_name: InMemoryEvaluationParameterStore
+        class_name: EvaluationParameterStore
 
 The `expectations_store` provides access to expectations_suite objects, using the DataContext's namespace; the
 `validations_store` does the same for validations. See :ref:`evaluation_parameters` for more information on the
@@ -168,18 +168,18 @@ providing the bucket/prefix combination:
       expectations_store:
         class_name: ExpectationsStore
         store_backend:
-          class_name: FixedLengthTupleS3StoreBackend
+          class_name: TupleS3StoreBackend
           base_directory: expectations/
           bucket: ge.my_org.com
           prefix:
       validations_store:
         class_name: ValidationsStore
         store_backend:
-          class_name: FixedLengthTupleS3StoreBackend
+          class_name: TupleS3StoreBackend
           bucket: ge.my_org.com
           prefix: common_validations
       evaluation_parameter_store:
-        class_name: InMemoryEvaluationParameterStore
+        class_name: EvaluationParameterStore
 
 GE uses `boto3 <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_ to access AWS, so credentials
 simply need to be available in any standard place searched by that library. You may also specify keyword arguments
@@ -260,20 +260,16 @@ new directory or use this template:
 
     # Welcome to Great Expectations! Always know what to expect from your data.
     #
-    # Here you can define datasources, generators, integrations and more. This file
-    # is intended to be committed to your repo. For help with configuration please:
+    # Here you can define datasources, batch kwarg generators, integrations and
+    # more. This file is intended to be committed to your repo. For help with
+    # configuration please:
     #   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#configuration
     #   - Join our slack channel: http://greatexpectations.io/slack
-    #
-    # NOTE: GE uses the names of configured `datasources` and `generators` to manage
-    # how `expectations` and other artifacts are stored in the `expectations/` and
-    # `datasources/` folders. If you need to rename an existing `datasource` or
-    # `generator`, be sure to also update the relevant directory names.
 
     config_version: 1
 
     # Datasources tell Great Expectations where your data lives and how to get it.
-    # You can use the CLI command `great_expectations add-datasource` to help you
+    # You can use the CLI command `great_expectations datasource new` to help you
     # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/features/datasource.html
     datasources: {}
       edw:
@@ -283,7 +279,7 @@ new directory or use this template:
           class_name: SqlAlchemyDataset
         generators:
           default:
-            class_name: TableGenerator
+            class_name: TableBatchKwargsGenerator
 
     # This config file supports variable substitution which enables: 1) keeping
     # secrets out of source control & 2) environment-based configuration changes
@@ -317,10 +313,10 @@ new directory or use this template:
         action_list:
           - name: store_validation_result
             action:
-              class_name: StoreAction
+              class_name: StoreValidationResultAction
           - name: store_evaluation_params
             action:
-              class_name: ExtractAndStoreEvaluationParamsAction
+              class_name: StoreEvaluationParametersAction
           - name: update_data_docs
             action:
               class_name: UpdateDataDocsAction
@@ -343,17 +339,17 @@ new directory or use this template:
       expectations_store:
         class_name: ExpectationsStore
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: expectations/
       validations_store:
         class_name: ValidationsStore
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/validations/
       evaluation_parameter_store:
         # Evaluation Parameters enable dynamic expectations. Read more here:
         # https://docs.greatexpectations.io/en/latest/reference/evaluation_parameters.html
-        class_name: InMemoryEvaluationParameterStore
+        class_name: EvaluationParameterStore
     expectations_store_name: expectations_store
     validations_store_name: validations_store
     evaluation_parameter_store_name: evaluation_parameter_store
@@ -366,7 +362,7 @@ new directory or use this template:
       local_site:
         class_name: SiteBuilder
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
 
-
+*last updated*: |lastupdate|

@@ -1,18 +1,30 @@
-import pytest
-import locale
-
-import shutil
-import os
 import json
+import locale
+import os
+import shutil
+import datetime
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 
 import great_expectations as ge
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    ExpectationValidationResult,
+    expectationSuiteSchema,
+)
+from great_expectations.data_context.util import (
+    file_relative_path,
+    safe_mmkdir,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier
+)
 from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.data_context.util import safe_mmkdir
 
-from .test_utils import get_dataset
+from .test_utils import expectationSuiteValidationResultSchema, get_dataset
 
 ###
 #
@@ -37,7 +49,7 @@ def pytest_addoption(parser):
         "--no-spark", action='store_true', help="If set, suppress tests against the spark test suite"
     )
     parser.addoption(
-        "--no-sqlalchemy", action="store_true", help="If set, suppress tests using sqlalchemy; run sqlite tests"
+        "--no-sqlalchemy", action="store_true", help="If set, suppress all tests using sqlalchemy"
     )
     parser.addoption(
         "--no-postgresql", action="store_true", help="If set, suppress tests against postgresql"
@@ -59,8 +71,6 @@ def build_test_backends_list(metafunc):
         import sqlalchemy as sa
         no_postgresql = metafunc.config.getoption("--no-postgresql")
         if not no_postgresql:
-            if no_sqlalchemy:
-                raise ValueError("sqlalchemy tests must be enabled to test with postgresql")
             ###
             # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
             # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
@@ -130,39 +140,36 @@ def empty_expectation_suite():
 
 @pytest.fixture
 def basic_expectation_suite():
-    expectation_suite = {
-        'data_asset_name': "basic_suite_fixture",
-        'expectation_suite_name': "default",
-        'meta': {},
-        'expectations': [
-            # Removing this from list of expectations, since mysql doesn't support infinities and we want generic fixtures
-            # TODO: mysql cannot handle columns with infinities....re-handle this case
-            {
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
+    expectation_suite = ExpectationSuite(
+        expectation_suite_name="default",
+        meta={},
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={
                     "column": "infinities"
                 }
-            },
-            {
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={
                     "column": "nulls"
                 }
-            },
-            {
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={
                     "column": "naturals"
                 }
-            },
-            {
-                "expectation_type": "expect_column_values_to_be_unique",
-                "kwargs": {
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_unique",
+                kwargs={
                     "column": "naturals"
                 }
-            }
+            )
         ]
-    }
+    )
     return expectation_suite
 
 
@@ -208,12 +215,65 @@ def numeric_high_card_dataset(test_backend, numeric_high_card_dict):
 
 
 @pytest.fixture
+def datetime_dataset(test_backend):
+    data = {
+        "datetime": [
+            str(datetime.datetime(2020, 2, 4, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 5, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 6, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 7, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 8, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 9, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 10, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 11, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 12, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 13, 22, 12, 5, 943152)),
+        ]
+    }
+
+    schemas = {
+        "pandas": {
+            "datetime": "datetime64",
+        },
+        "postgresql": {
+            "datetime": "TIMESTAMP",
+        },
+        "sqlite": {
+            "datetime": "TIMESTAMP",
+        },
+        "mysql": {
+            "datetime": "TIMESTAMP",
+        },
+        "spark": {
+            "datetime": "TimestampType",
+        }
+    }
+    return get_dataset(test_backend, data, schemas=schemas)
+
+
+@pytest.fixture
 def non_numeric_low_card_dataset(test_backend):
     """Provide dataset fixtures that have special values and/or are otherwise useful outside
     the standard json testing framework"""
 
     data = {
-        "lowcardnonnum": ["a", "b", "b", "b", "c", "c", "a"]
+        "lowcardnonnum": [
+            "a", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b",
+        ]
     }
     schemas = {
         "pandas": {
@@ -499,12 +559,22 @@ def sqlitedb_engine(test_backend):
 
 
 @pytest.fixture
+def postgresql_engine(test_backend):
+    if test_backend == 'postgresql':
+        import sqlalchemy as sa
+        engine = sa.create_engine('postgresql://postgres@localhost/test_ci').connect()
+        yield engine
+        engine.close()
+    else:
+        pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
+
+
+@pytest.fixture
 def empty_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('empty_data_context'))
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(
-        context_path, "expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
     safe_mmkdir(asset_config_path, exist_ok=True)
     return context
 
@@ -516,11 +586,32 @@ def titanic_data_context(tmp_path_factory):
     safe_mmkdir(os.path.join(context_path, "expectations"), exist_ok=True)
     data_path = os.path.join(context_path, "../data")
     safe_mmkdir(os.path.join(data_path), exist_ok=True)
-    shutil.copy("./tests/test_fixtures/great_expectations_titanic.yml",
-                str(os.path.join(context_path, "great_expectations.yml")))
-    shutil.copy("./tests/test_sets/Titanic.csv",
-                str(os.path.join(context_path, "../data/Titanic.csv")))
+    titanic_yml_path = file_relative_path(__file__, "./test_fixtures/great_expectations_titanic.yml")
+    shutil.copy(titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml")))
+    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
+    shutil.copy(titanic_csv_path, str(os.path.join(context_path, "../data/Titanic.csv")))
     return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def titanic_sqlite_db():
+    from sqlalchemy import create_engine
+    titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
+    engine = create_engine('sqlite:///{}'.format(titanic_db_path))
+    assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+    return engine
+
+
+@pytest.fixture
+def empty_sqlite_db():
+    """An empty in-memory sqlite db that always gets run."""
+    try:
+        from sqlalchemy import create_engine
+        engine = create_engine('sqlite://')
+        assert engine.execute("select 1").fetchall()[0] == (1,)
+        return engine
+    except ImportError:
+        raise ValueError("sqlite tests require sqlalchemy to be installed")
 
 
 @pytest.fixture
@@ -531,14 +622,12 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
 
     os.makedirs(os.path.join(project_dir, "data"))
     os.makedirs(os.path.join(project_dir, "data/titanic"))
-    curdir = os.path.abspath(os.getcwd())
     shutil.copy(
-        "./tests/test_sets/Titanic.csv",
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
         str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
     )
 
     os.makedirs(os.path.join(project_dir, "data/random"))
-    curdir = os.path.abspath(os.getcwd())
     shutil.copy(
         os.path.join(filesystem_csv_3, "f1.csv"),
         str(os.path.join(project_dir, "data/random/f1.csv"))
@@ -548,28 +637,33 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
         str(os.path.join(project_dir, "data/random/f2.csv"))
     )
 
-    ge_directory = os.path.join(project_dir, "great_expectations")
-    shutil.copy("./tests/test_fixtures/great_expectations_site_builder.yml",
+    shutil.copy(file_relative_path(__file__, "./test_fixtures/great_expectations_site_builder.yml"),
                 str(os.path.join(project_dir, "great_expectations.yml")))
     context = ge.data_context.DataContext.create(project_dir)
 
     context.add_datasource(
         "titanic",
-        type="pandas",
-        base_directory=os.path.join(project_dir, "data/titanic/")
+        class_name="PandasDatasource",
+        generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": os.path.join(project_dir, "data/titanic/")
+            }
+        }
     )
     context.add_datasource(
         "random",
-        type="pandas",
-        base_directory=os.path.join(project_dir, "data/random/")
+        class_name="PandasDatasource",
+        generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": os.path.join(project_dir, "data/random/")
+            }
+        }
     )
 
     context.profile_datasource("titanic")
-    # print(gen_directory_tree_str(project_dir))
-
     context.profile_datasource("random")
-    # print(gen_directory_tree_str(project_dir))
-
     context.profile_datasource(context.list_datasources()[0]["name"])
 
     return context
@@ -588,35 +682,55 @@ def titanic_multibatch_data_context(tmp_path_factory):
     safe_mmkdir(os.path.join(context_path, "expectations"), exist_ok=True)
     data_path = os.path.join(context_path, "../data/titanic")
     safe_mmkdir(os.path.join(data_path), exist_ok=True)
-    shutil.copy("./tests/test_fixtures/great_expectations_titanic.yml",
+    shutil.copy(file_relative_path(__file__, "./test_fixtures/great_expectations_titanic.yml"),
                 str(os.path.join(context_path, "great_expectations.yml")))
-    shutil.copy("./tests/test_sets/Titanic.csv",
+    shutil.copy(file_relative_path(__file__, "./test_sets/Titanic.csv"),
                 str(os.path.join(context_path, "../data/titanic/Titanic_1911.csv")))
-    shutil.copy("./tests/test_sets/Titanic.csv",
+    shutil.copy(file_relative_path(__file__, "./test_sets/Titanic.csv"),
                 str(os.path.join(context_path, "../data/titanic/Titanic_1912.csv")))
     return ge.data_context.DataContext(context_path)
 
 
 @pytest.fixture
 def data_context(tmp_path_factory):
-    # This data_context is *manually* created to have the config we want, vs created with DataContext.create
-    project_path = str(tmp_path_factory.mktemp('data_context'))
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
-    safe_mmkdir(os.path.join(asset_config_path,
-                             "mydatasource/mygenerator/my_dag_node"), exist_ok=True)
-    shutil.copy("./tests/test_fixtures/great_expectations_basic.yml",
-                str(os.path.join(context_path, "great_expectations.yml")))
-    shutil.copy("./tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
-                os.path.join(asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"))
-
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    safe_mmkdir(
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_basic.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(
+            asset_config_path, "my_dag_node/default.json"
+        ),
+    )
     safe_mmkdir(os.path.join(context_path, "plugins"))
-    shutil.copy("./tests/test_fixtures/custom_pandas_dataset.py",
-                str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")))
-    shutil.copy("./tests/test_fixtures/custom_sqlalchemy_dataset.py",
-                str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")))
-    shutil.copy("./tests/test_fixtures/custom_sparkdf_dataset.py",
-                str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")))
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_pandas_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+    )
     return ge.data_context.DataContext(context_path)
 
 
@@ -683,7 +797,8 @@ def filesystem_csv_4(tmp_path_factory):
 
 @pytest.fixture
 def titanic_profiled_evrs_1():
-    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
+    with open(file_relative_path(__file__, './render/fixtures/BasicDatasetProfiler_evrs.json'), 'r') as infile:
+        return expectationSuiteValidationResultSchema.loads(infile.read()).data
 
 
 @pytest.fixture
@@ -695,50 +810,46 @@ def titanic_profiled_name_column_evrs():
         Renderer,
     )
 
-    titanic_profiled_evrs_1 =  json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
-    evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
-    print(evrs_by_column.keys())
+    with open(file_relative_path(__file__, "./render/fixtures/BasicDatasetProfiler_evrs.json"), "r") as infile:
+        titanic_profiled_evrs_1 = expectationSuiteValidationResultSchema.load(json.load(infile)).data
 
+    evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
     name_column_evrs = evrs_by_column["Name"]
-    print(json.dumps(name_column_evrs, indent=2))
 
     return name_column_evrs
 
 
 @pytest.fixture
 def titanic_profiled_expectations_1():
-    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json"))
+    with open(file_relative_path(__file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"), 'r') as infile:
+        return expectationSuiteSchema.load(json.load(infile)).data
 
 
 @pytest.fixture
 def titanic_profiled_name_column_expectations():
-    from great_expectations.render.renderer.renderer import (
-        Renderer,
-    )
+    from great_expectations.render.renderer.renderer import Renderer
 
-    titanic_profiled_expectations =  json.load(open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json"))
+    with open(file_relative_path(__file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"), 'r') as infile:
+        titanic_profiled_expectations = expectationSuiteSchema.load(json.load(infile)).data
+
     columns, ordered_columns = Renderer()._group_and_order_expectations_by_column(titanic_profiled_expectations)
-    print(columns)
-    print(ordered_columns)
-
     name_column_expectations = columns["Name"]
-    print(json.dumps(name_column_expectations, indent=2))
 
     return name_column_expectations
 
 
 @pytest.fixture
 def titanic_validation_results():
-    with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
-        return json.load(infile)
+    with open(file_relative_path(__file__, "./test_sets/expected_cli_results_default.json"), "r") as infile:
+        return expectationSuiteValidationResultSchema.load(json.load(infile)).data
 
 
 # various types of evr
 @pytest.fixture
 def evr_failed():
-    return {
-      "success": False,
-      "result": {
+    return ExpectationValidationResult(
+      success=False,
+      result={
         "element_count": 1313,
         "missing_count": 0,
         "missing_percent": 0.0,
@@ -770,12 +881,12 @@ def evr_failed():
           }
         ]
       },
-      "exception_info": {
+      exception_info={
         "raised_exception": False,
         "exception_message": None,
         "exception_traceback": None
       },
-      "expectation_config": {
+      expectation_config={
         "expectation_type": "expect_column_values_to_not_match_regex",
         "kwargs": {
           "column": "Name",
@@ -783,54 +894,54 @@ def evr_failed():
           "result_format": "SUMMARY"
         }
       }
-    }
+    )
 
 
 @pytest.fixture
 def evr_failed_with_exception():
-    return {
-        'success': False,
-        'exception_info': {
+    return ExpectationValidationResult(
+        success=False,
+        exception_info={
             'raised_exception': True,
             'exception_message': 'Invalid partition object.',
             'exception_traceback': 'Traceback (most recent call last):\n  File "/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n'
         },
-        'expectation_config': {
-            'expectation_type': 'expect_column_kl_divergence_to_be_less_than',
-            'kwargs': {
+        expectation_config=ExpectationConfiguration(
+            expectation_type='expect_column_kl_divergence_to_be_less_than',
+            kwargs={
                 'column': 'live',
                 'partition_object': None,
                 'threshold': None,
                 'result_format': 'SUMMARY'
             },
-            'meta': {
+            meta={
                 'BasicDatasetProfiler': {'confidence': 'very low'}
             }
-        }
-    }
+        )
+    )
 
 
 @pytest.fixture
 def evr_success():
-    return {
-      "success": True,
-      "result": {
+    return ExpectationValidationResult(
+      success=True,
+      result={
         "observed_value": 1313
       },
-      "exception_info": {
+      exception_info={
         "raised_exception": False,
         "exception_message": None,
         "exception_traceback": None
       },
-      "expectation_config": {
-        "expectation_type": "expect_table_row_count_to_be_between",
-        "kwargs": {
+      expectation_config=ExpectationConfiguration(
+        expectation_type="expect_table_row_count_to_be_between",
+        kwargs={
           "min_value": 0,
           "max_value": None,
           "result_format": "SUMMARY"
         }
-      }
-    }
+      )
+    )
 
 
 @pytest.fixture
@@ -846,3 +957,10 @@ def sqlite_view_engine(test_backends):
         return sqlite_engine
     else:
         pytest.skip("SqlAlchemy tests disabled; not testing views")
+
+
+@pytest.fixture
+def expectation_suite_identifier():
+    return ExpectationSuiteIdentifier(
+        "my.expectation.suite.name"
+    )

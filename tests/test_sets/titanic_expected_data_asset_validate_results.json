@@ -1,8 +1,10 @@
 {
   "meta": {
-    "data_asset_name": null,
-    "expectation_suite_name": "default",
-    "run_id": "1955-11-05T000000Z"
+    "expectation_suite_name": "titanic",
+    "run_id": "19551105T000000.000000Z",
+    "batch_kwargs": {"ge_batch_id": "1234"},
+    "batch_markers": {},
+    "batch_parameters": {}
   },
   "results": [
     {
@@ -139,7 +141,7 @@
         "observed_value": 30.397989417989418,
         "element_count": 1313,
         "missing_count": 557,
-        "missing_percent": 42.42193450114242
+        "missing_percent": 42.421934501142424
       }
     },
     {
@@ -158,7 +160,7 @@
         "unexpected_list": [],
         "unexpected_percent": 0.0,
         "element_count": 1313,
-        "missing_percent": 42.42193450114242,
+        "missing_percent": 42.421934501142424,
         "partial_unexpected_counts": [],
         "partial_unexpected_list": [],
         "unexpected_percent_nonmissing": 0.0,

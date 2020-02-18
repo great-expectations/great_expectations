@@ -39,7 +39,9 @@ extensions = [
     'sphinx.ext.coverage',
     # 'sphinx.ext.mathjax'
     'sphinx.ext.napoleon',
-    'sphinxcontrib.contentui'
+    'sphinxcontrib.contentui',
+    'sphinxcontrib.lastupdate',
+    'sphinx.ext.autosectionlabel'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

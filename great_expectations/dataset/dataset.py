@@ -138,8 +138,7 @@ class MetaDataset(DataAsset):
             if result_format['result_format'] in ["SUMMARY", "COMPLETE"]:
                 return return_obj
 
-            raise ValueError("Unknown result_format %s." %
-                                (result_format['result_format'],))
+            raise ValueError("Unknown result_format %s." % result_format['result_format'])
 
         return inner_wrapper
 
@@ -382,7 +381,7 @@ class Dataset(MetaDataset):
     def expect_column_to_exist(
         self,
         column, column_index=None,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None
     ):
         """Expect the specified column to exist.
@@ -434,7 +433,7 @@ class Dataset(MetaDataset):
         self,
         column_list,
         result_format=None,
-        include_config=False,
+        include_config=True,
         catch_exceptions=None,
         meta=None,
     ):
@@ -504,7 +503,7 @@ class Dataset(MetaDataset):
     def expect_table_column_count_to_be_between(
         self,
         min_value=None, max_value=None,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None,
     ):
         """Expect the number of columns to be between two values.
@@ -590,7 +589,7 @@ class Dataset(MetaDataset):
     def expect_table_column_count_to_equal(
             self,
             value,
-            result_format=None, include_config=False, catch_exceptions=None,
+            result_format=None, include_config=True, catch_exceptions=None,
             meta=None
     ):
         """Expect the number of columns to equal a value.
@@ -647,7 +646,7 @@ class Dataset(MetaDataset):
     def expect_table_row_count_to_be_between(
         self,
         min_value=None, max_value=None,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None,
     ):
         """Expect the number of rows to be between two values.
@@ -733,7 +732,7 @@ class Dataset(MetaDataset):
     def expect_table_row_count_to_equal(
             self,
             value,
-            result_format=None, include_config=False, catch_exceptions=None,
+            result_format=None, include_config=True, catch_exceptions=None,
             meta=None
     ):
         """Expect the number of rows to equal a value.
@@ -793,7 +792,7 @@ class Dataset(MetaDataset):
     def expect_column_values_to_be_unique(self,
                                           column,
                                           mostly=None,
-                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                          result_format=None, include_config=True, catch_exceptions=None, meta=None
                                           ):
         """Expect each column value to be unique.
 
@@ -839,7 +838,7 @@ class Dataset(MetaDataset):
     def expect_column_values_to_not_be_null(self,
                                             column,
                                             mostly=None,
-                                            result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                            result_format=None, include_config=True, catch_exceptions=None, meta=None
                                             ):
         """Expect column values to not be null.
 
@@ -888,7 +887,7 @@ class Dataset(MetaDataset):
     def expect_column_values_to_be_null(self,
                                         column,
                                         mostly=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                        result_format=None, include_config=True, catch_exceptions=None, meta=None
                                         ):
         """Expect column values to be null.
 
@@ -936,7 +935,7 @@ class Dataset(MetaDataset):
         column,
         type_,
         mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
+        result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         """Expect a column to contain values of a specified data type.
 
@@ -998,7 +997,7 @@ class Dataset(MetaDataset):
         column,
         type_list,
         mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
+        result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         """Expect a column to contain values from a specified type list.
 
@@ -1063,7 +1062,7 @@ class Dataset(MetaDataset):
                                           value_set,
                                           mostly=None,
                                           parse_strings_as_datetimes=None,
-                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                          result_format=None, include_config=True, catch_exceptions=None, meta=None
                                           ):
         # noinspection PyUnresolvedReferences
         """Expect each column value to be in a given set.
@@ -1136,7 +1135,7 @@ class Dataset(MetaDataset):
                                               value_set,
                                               mostly=None,
                                               parse_strings_as_datetimes=None,
-                                              result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                              result_format=None, include_config=True, catch_exceptions=None, meta=None
                                               ):
         # noinspection PyUnresolvedReferences
         """Expect column entries to not be in the set.
@@ -1213,7 +1212,7 @@ class Dataset(MetaDataset):
                                            parse_strings_as_datetimes=False,
                                            output_strftime_format=None,
                                            mostly=None,
-                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                           result_format=None, include_config=True, catch_exceptions=None, meta=None
                                            ):
         """Expect column entries to be between a minimum value and a maximum value (inclusive).
 
@@ -1279,7 +1278,7 @@ class Dataset(MetaDataset):
                                               strictly=None,
                                               parse_strings_as_datetimes=False,
                                               mostly=None,
-                                              result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                              result_format=None, include_config=True, catch_exceptions=None, meta=None
                                               ):
         """Expect column values to be increasing.
 
@@ -1337,7 +1336,7 @@ class Dataset(MetaDataset):
                                               strictly=None,
                                               parse_strings_as_datetimes=False,
                                               mostly=None,
-                                              result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                              result_format=None, include_config=True, catch_exceptions=None, meta=None
                                               ):
         """Expect column values to be decreasing.
 
@@ -1402,7 +1401,7 @@ class Dataset(MetaDataset):
             min_value=None,
             max_value=None,
             mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
+            result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         """Expect column entries to be strings with length between a minimum value and a maximum value (inclusive).
 
@@ -1462,7 +1461,7 @@ class Dataset(MetaDataset):
                                              column,
                                              value,
                                              mostly=None,
-                                             result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                             result_format=None, include_config=True, catch_exceptions=None, meta=None
                                              ):
         """Expect column entries to be strings with length equal to the provided value.
 
@@ -1513,7 +1512,7 @@ class Dataset(MetaDataset):
                                             column,
                                             regex,
                                             mostly=None,
-                                            result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                            result_format=None, include_config=True, catch_exceptions=None, meta=None
                                             ):
         """Expect column entries to be strings that match a given regular expression. Valid matches can be found \
         anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
@@ -1568,7 +1567,7 @@ class Dataset(MetaDataset):
             column,
             regex,
             mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
+            result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         """Expect column entries to be strings that do NOT match a given regular expression. The regex must not match \
         any portion of the provided string. For example, "[at]+" would identify the following strings as expected: \
@@ -1622,7 +1621,7 @@ class Dataset(MetaDataset):
             self,
             column, regex_list, match_on="any",
             mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
+            result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         """Expect the column entries to be strings that can be matched to either any of or all of a list of regular
         expressions. Matches can be anywhere in the string.
@@ -1679,7 +1678,7 @@ class Dataset(MetaDataset):
             self,
             column, regex_list,
             mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None,
+            result_format=None, include_config=True, catch_exceptions=None,
             meta=None):
         """Expect the column entries to be strings that do not match any of a list of regular expressions. Matches can
         be anywhere in the string.
@@ -1736,7 +1735,7 @@ class Dataset(MetaDataset):
             column,
             strftime_format,
             mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
+            result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         """Expect column entries to be strings representing a date or time with a given format.
 
@@ -1781,7 +1780,7 @@ class Dataset(MetaDataset):
             self,
             column,
             mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
+            result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         """Expect column entries to be parsable using dateutil.
 
@@ -1824,7 +1823,7 @@ class Dataset(MetaDataset):
             self,
             column,
             mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
+            result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         """Expect column entries to be data written in JavaScript Object Notation.
 
@@ -1872,7 +1871,7 @@ class Dataset(MetaDataset):
             column,
             json_schema,
             mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
+            result_format=None, include_config=True, catch_exceptions=None, meta=None
     ):
         """Expect column entries to be JSON objects matching a given JSON schema.
 
@@ -1927,7 +1926,7 @@ class Dataset(MetaDataset):
             self,
             column,
             distribution, p_value=0.05, params=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None):
+            result_format=None, include_config=True, catch_exceptions=None, meta=None):
         """
         Expect the column values to be distributed similarly to a scipy distribution. \
 
@@ -2008,7 +2007,7 @@ class Dataset(MetaDataset):
             column,
             value_set,
             parse_strings_as_datetimes=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None):
+            result_format=None, include_config=True, catch_exceptions=None, meta=None):
         # noinspection PyUnresolvedReferences
         """Expect the set of distinct column values to be contained by a given set.
 
@@ -2119,7 +2118,7 @@ class Dataset(MetaDataset):
             column,
             value_set,
             parse_strings_as_datetimes=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None):
+            result_format=None, include_config=True, catch_exceptions=None, meta=None):
         # noinspection PyUnresolvedReferences
         """Expect the set of distinct column values to equal a given set.
 
@@ -2207,7 +2206,7 @@ class Dataset(MetaDataset):
             column,
             value_set,
             parse_strings_as_datetimes=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None):
+            result_format=None, include_config=True, catch_exceptions=None, meta=None):
         # noinspection PyUnresolvedReferences
         """Expect the set of distinct column values to contain a given set.
 
@@ -2295,7 +2294,7 @@ class Dataset(MetaDataset):
         column,
         min_value=None, max_value=None,
         strict_min=False, strict_max=False,  # tolerance=1e-9,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None,
+        result_format=None, include_config=True, catch_exceptions=None, meta=None,
     ):
         """Expect the column mean to be between a minimum value and a maximum value (inclusive).
 
@@ -2411,7 +2410,7 @@ class Dataset(MetaDataset):
         column,
         min_value=None, max_value=None,
         strict_min=False, strict_max=False,  # tolerance=1e-9,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None,
     ):
         """Expect the column median to be between a minimum value and a maximum value.
@@ -2521,7 +2520,7 @@ class Dataset(MetaDataset):
         column,
         quantile_ranges,
         allow_relative_error=False,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None,
     ):
         # noinspection PyUnresolvedReferences
@@ -2657,7 +2656,7 @@ class Dataset(MetaDataset):
             column,
             min_value=None, max_value=None,
             strict_min=False, strict_max=False,  # tolerance=1e-9,
-            result_format=None, include_config=False, catch_exceptions=None,
+            result_format=None, include_config=True, catch_exceptions=None,
             meta=None
     ):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
@@ -2758,7 +2757,7 @@ class Dataset(MetaDataset):
         self,
         column,
         min_value=None, max_value=None,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None,
     ):
         """Expect the number of unique values to be between a minimum value and a maximum value.
@@ -2848,7 +2847,7 @@ class Dataset(MetaDataset):
         column,
         min_value=0, max_value=1,
         strict_min=False, strict_max=False,  # tolerance=1e-9,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None,
     ):
         """Expect the proportion of unique values to be between a minimum value and a maximum value.
@@ -2962,7 +2961,7 @@ class Dataset(MetaDataset):
         column,
         value_set,
         ties_okay=None,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None,
     ):
         """Expect the most common value to be within the designated value set
@@ -3037,7 +3036,7 @@ class Dataset(MetaDataset):
         column,
         min_value=None, max_value=None,
         strict_min=False, strict_max=False,  # tolerance=1e-9,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None
     ):
         """Expect the column to sum to be between an min and max value
@@ -3144,7 +3143,7 @@ class Dataset(MetaDataset):
         strict_min=False, strict_max=False,  # tolerance=1e-9,
         parse_strings_as_datetimes=False,
         output_strftime_format=None,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None
     ):
         """Expect the column to sum to be between an min and max value
@@ -3284,7 +3283,7 @@ class Dataset(MetaDataset):
         # tolerance=1e-9,
         parse_strings_as_datetimes=False,
         output_strftime_format=None,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None
     ):
         """Expect the column max to be between an min and max value
@@ -3422,7 +3421,7 @@ class Dataset(MetaDataset):
         partition_object=None,
         p=0.05,
         tail_weight_holdout=0,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None,
     ):
         """Expect column values to be distributed similarly to the provided categorical partition. \
@@ -3541,7 +3540,7 @@ class Dataset(MetaDataset):
             column,
             partition_object=None, p=0.05,
             bootstrap_samples=None, bootstrap_sample_size=None,
-            result_format=None, include_config=False, catch_exceptions=None,
+            result_format=None, include_config=True, catch_exceptions=None,
             meta=None
     ):
         """Expect column values to be distributed similarly to the provided continuous partition. This expectation \
@@ -3633,7 +3632,7 @@ class Dataset(MetaDataset):
         tail_weight_holdout=0,
         internal_weight_holdout=0,
         bucketize_data=True,
-        result_format=None, include_config=False, catch_exceptions=None,
+        result_format=None, include_config=True, catch_exceptions=None,
         meta=None
     ):
         """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the \
@@ -4027,7 +4026,7 @@ class Dataset(MetaDataset):
             self,
             column_A, column_B,
             ignore_row_if="both_values_are_missing",
-            result_format=None, include_config=False, catch_exceptions=None,
+            result_format=None, include_config=True, catch_exceptions=None,
             meta=None
     ):
         """
@@ -4071,7 +4070,7 @@ class Dataset(MetaDataset):
             parse_strings_as_datetimes=False,
             allow_cross_type_comparisons=None,
             ignore_row_if="both_values_are_missing",
-            result_format=None, include_config=False, catch_exceptions=None,
+            result_format=None, include_config=True, catch_exceptions=None,
             meta=None
     ):
         """
@@ -4118,7 +4117,7 @@ class Dataset(MetaDataset):
             column_B,
             value_pairs_set,
             ignore_row_if="both_values_are_missing",
-            result_format=None, include_config=False, catch_exceptions=None,
+            result_format=None, include_config=True, catch_exceptions=None,
             meta=None
     ):
         """
@@ -4165,7 +4164,7 @@ class Dataset(MetaDataset):
             self,
             column_list,
             ignore_row_if="all_values_are_missing",
-            result_format=None, include_config=False, catch_exceptions=None,
+            result_format=None, include_config=True, catch_exceptions=None,
             meta=None
     ):
         """

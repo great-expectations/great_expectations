@@ -1,15 +1,24 @@
+import logging
+from copy import deepcopy
+
 from six import integer_types
 
-from great_expectations.render.renderer.content_block.expectation_string import ExpectationStringRenderer
-from great_expectations.render.types import RenderedComponentContent
+from great_expectations.render.renderer.content_block.expectation_string import (
+    ExpectationStringRenderer,
+)
+from great_expectations.render.types import (
+    RenderedContentBlockContainer,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+    CollapseContent)
 from great_expectations.render.util import num_to_str
 
-import pandas as pd
-import altair as alt
+logger = logging.getLogger(__name__)
 
 
 class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     _content_block_type = "table"
+    _rendered_component_type = RenderedTableContent
 
     _default_element_styling = {
         "default": {
@@ -21,18 +30,18 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             }
         }
     }
-    
+
     _default_content_block_styling = {
         "body": {
             "classes": ["table"],
         },
-        "classes": ["m-3", "table-responsive"],
+        "classes": ["ml-2", "mr-2", "mt-0", "mb-0", "table-responsive"],
     }
 
     @classmethod
     def _get_status_icon(cls, evr):
-        if evr["exception_info"]["raised_exception"]:
-            return RenderedComponentContent(**{
+        if evr.exception_info["raised_exception"]:
+            return RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "$icon",
@@ -48,8 +57,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 }
             })
 
-        if evr["success"]:
-            return RenderedComponentContent(**{
+        if evr.success:
+            return RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "$icon",
@@ -70,7 +79,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 }
             })
         else:
-            return RenderedComponentContent(**{
+            return RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "$icon",
@@ -89,15 +98,18 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     @classmethod
     def _get_unexpected_table(cls, evr):
         try:
-            result = evr["result"]
+            result = evr.result
         except KeyError:
+            return None
+
+        if result is None:
             return None
 
         if not result.get("partial_unexpected_list") and not result.get("partial_unexpected_counts"):
             return None
-        
+
         table_rows = []
-        
+
         if result.get("partial_unexpected_counts"):
             header_row = ["Unexpected Value", "Count"]
             for unexpected_count in result.get("partial_unexpected_counts"):
@@ -105,6 +117,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     table_rows.append([unexpected_count.get("value"), unexpected_count.get("count")])
                 elif unexpected_count.get("value") == "":
                     table_rows.append(["EMPTY", unexpected_count.get("count")])
+                elif unexpected_count.get("value") is not None:
+                    table_rows.append([unexpected_count.get("value"), unexpected_count.get("count")])
                 else:
                     table_rows.append(["null", unexpected_count.get("count")])
         else:
@@ -114,10 +128,12 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     table_rows.append([unexpected_value])
                 elif unexpected_value == "":
                     table_rows.append(["EMPTY"])
+                elif unexpected_value is not None:
+                    table_rows.append([unexpected_value])
                 else:
                     table_rows.append(["null"])
-                    
-        unexpected_table_content_block = RenderedComponentContent(**{
+
+        unexpected_table_content_block = RenderedTableContent(**{
             "content_block_type": "table",
             "table": table_rows,
             "header_row": header_row,
@@ -127,26 +143,24 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 }
             }
         })
-        
+
         return unexpected_table_content_block
 
     @classmethod
     def _get_unexpected_statement(cls, evr):
-        success = evr["success"]
-        result = evr.get("result", {})
+        success = evr.success
+        result = evr.result
 
-        if ("expectation_config" in evr and
-                "exception_info" in evr and
-                evr["exception_info"]["raised_exception"] is True):
-            template_str = "\n\n$expectation_type raised an exception:\n$exception_message"
+        if evr.exception_info["raised_exception"]:
+            exception_message_template_str = "\n\n$expectation_type raised an exception:\n$exception_message"
 
-            return RenderedComponentContent(**{
+            exception_message = RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": template_str,
+                    "template": exception_message_template_str,
                     "params": {
-                        "expectation_type": evr["expectation_config"]["expectation_type"],
-                        "exception_message": evr["exception_info"]["exception_message"]
+                        "expectation_type": evr.expectation_config.expectation_type,
+                        "exception_message": evr.exception_info["exception_message"]
                     },
                     "tag": "strong",
                     "styling": {
@@ -163,17 +177,33 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 },
             })
 
+            exception_traceback_collapse = CollapseContent(**{
+                "collapse_toggle_link": "Show exception traceback...",
+                "collapse": [
+                    RenderedStringTemplateContent(**{
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": evr.exception_info["exception_traceback"],
+                            "tag": "code"
+                        }
+                    })
+                ]
+            })
+
+            return [exception_message, exception_traceback_collapse]
+
         if success or not result.get("unexpected_count"):
-            return None
+            return []
         else:
             unexpected_count = num_to_str(result["unexpected_count"], use_locale=True, precision=20)
             unexpected_percent = num_to_str(result["unexpected_percent"], precision=4) + "%"
             element_count = num_to_str(result["element_count"], use_locale=True, precision=20)
-            
+
             template_str = "\n\n$unexpected_count unexpected values found. " \
                            "$unexpected_percent of $element_count total rows."
 
-            return RenderedComponentContent(**{
+            return [
+                RenderedStringTemplateContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": template_str,
@@ -186,96 +216,52 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "styling": {
                         "classes": ["text-danger"]
                     }
-                }
-            })
+                }})
+            ]
 
     @classmethod
     def _get_kl_divergence_observed_value(cls, evr):
-        if not evr["result"].get("details"):
+        if not evr.result.get("details"):
             return "--"
 
-        weights = evr["result"]["details"]["observed_partition"]["weights"]
-        if len(weights) <= 10:
-            height = 200
-            width = 200
-            col_width = 4
-        else:
-            height = 300
-            width = 300
-            col_width = 6
+        observed_partition_object = evr.result["details"]["observed_partition"]
+        observed_distribution = super(
+            ValidationResultsTableContentBlockRenderer, cls)._get_kl_divergence_chart(observed_partition_object)
 
-        if evr["result"]["details"]["observed_partition"].get("bins"):
-            bins = evr["result"]["details"]["observed_partition"]["bins"]
-            bins_x1 = [round(value, 1) for value in bins[:-1]]
-            bins_x2 = [round(value, 1) for value in bins[1:]]
+        observed_value = num_to_str(evr.result.get("observed_value")) if evr.result.get("observed_value") \
+            else evr.result.get("observed_value")
 
-            df = pd.DataFrame({
-                "bin_min": bins_x1,
-                "bin_max": bins_x2,
-                "fraction": weights,
-            })
-
-            bars = alt.Chart(df).mark_bar().encode(
-                x='bin_min:O',
-                x2='bin_max:O',
-                y="fraction:Q"
-            ).properties(width=width, height=height, autosize="fit")
-            chart = bars.to_json()
-        elif evr["result"]["details"]["observed_partition"].get("values"):
-            values = evr["result"]["details"]["observed_partition"]["values"]
-
-            df = pd.DataFrame({
-                "values": values,
-                "fraction": weights
-            })
-
-            bars = alt.Chart(df).mark_bar().encode(
-                x='values:N',
-                y="fraction:Q"
-            ).properties(width=width, height=height, autosize="fit")
-            chart = bars.to_json()
-
-        observed_value = evr["result"].get("observed_value")
-
-        observed_value_content_block = {
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "KL Divergence: $observed_value",
-                    "params": {
-                        "observed_value": str(
-                            observed_value) if observed_value else "None (-infinity, infinity, or NaN)",
-                    },
+        observed_value_content_block = RenderedStringTemplateContent(**{
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "KL Divergence: $observed_value",
+                "params": {
+                    "observed_value": str(
+                        observed_value) if observed_value else "None (-infinity, infinity, or NaN)",
+                },
+                "styling": {
+                    "classes": ["mb-2"]
                 }
-        }
+            },
+        })
 
-        graph_content_block = {
-            "content_block_type": "graph",
-            "graph": chart,
-            "styling": {
-                "classes": ["col-" + str(col_width)],
-                "styles": {
-                    "margin-top": "20px",
-                }
-            }
-        }
-    
-        return {
+        return RenderedContentBlockContainer(**{
             "content_block_type": "content_block_container",
             "content_blocks": [
                 observed_value_content_block,
-                graph_content_block
+                observed_distribution
             ]
-        }
+        })
 
     @classmethod
     def _get_quantile_values_observed_value(cls, evr):
-        if "result" not in evr:
+        if evr.result is None or evr.result.get("observed_value") is None:
             return "--"
 
-        quantiles = evr["result"]["observed_value"]["quantiles"]
-        value_ranges = evr["result"]["observed_value"]["values"]
+        quantiles = evr.result.get("observed_value", {}).get("quantiles", [])
+        value_ranges = evr.result.get("observed_value", {}).get("values", [])
 
-        table_header_row = ["Value"]
+        table_header_row = ["Quantile", "Value"]
         table_rows = []
 
         quantile_strings = {
@@ -291,7 +277,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 str(value_ranges[idx])
             ])
 
-        return {
+        return RenderedTableContent(**{
             "content_block_type": "table",
             "header_row": table_header_row,
             "table": table_rows,
@@ -300,16 +286,15 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "classes": ["table", "table-sm", "table-unbordered", "col-4"],
                 }
             }
-        }
+        })
 
     @classmethod
     def _get_observed_value(cls, evr):
-        try:
-            result = evr["result"]
-        except KeyError:
+        result = evr.result
+        if result is None:
             return "--"
-            
-        expectation_type = evr["expectation_config"]["expectation_type"]
+
+        expectation_type = evr.expectation_config["expectation_type"]
 
         if expectation_type == "expect_column_kl_divergence_to_be_less_than":
             return cls._get_kl_divergence_observed_value(evr)
@@ -339,11 +324,18 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return "--"
 
     @classmethod
-    def _process_content_block(cls, content_block):
-        super(ValidationResultsTableContentBlockRenderer, cls)._process_content_block(content_block)
-        content_block.update({
-            "header_row": ["Status", "Expectation", "Observed Value"]
-        })
+    def _process_content_block(cls, content_block, has_failed_evr):
+        super(ValidationResultsTableContentBlockRenderer, cls)._process_content_block(content_block, has_failed_evr)
+        content_block.header_row = ["Status", "Expectation", "Observed Value"]
+
+        if has_failed_evr is False:
+            styling = deepcopy(content_block.styling) if content_block.styling else {}
+            if styling.get("classes"):
+                styling["classes"].append("hide-succeeded-validations-column-section-target-child")
+            else:
+                styling["classes"] = ["hide-succeeded-validations-column-section-target-child"]
+
+            content_block.styling = styling
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
@@ -353,22 +345,36 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
         #This function wraps expect_* methods from ExpectationStringRenderer to generate table classes
         def row_generator_fn(evr, styling=None, include_column_name=True):
-            expectation = evr["expectation_config"]
+            expectation = evr.expectation_config
             expectation_string_cell = expectation_string_fn(expectation, styling, include_column_name)
 
             status_cell = [cls._get_status_icon(evr)]
-            unexpected_statement = cls._get_unexpected_statement(evr)
-            unexpected_table = cls._get_unexpected_table(evr)
-            observed_value = [cls._get_observed_value(evr)]
+            unexpected_statement = []
+            unexpected_table = None
+            observed_value = ["--"]
 
-            #If the expectation has some unexpected values...:
-            if unexpected_statement or unexpected_table:
-                expectation_string_cell.append(unexpected_statement)
+            try:
+                unexpected_statement = cls._get_unexpected_statement(evr)
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+            try:
+                unexpected_table = cls._get_unexpected_table(evr)
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+            try:
+                observed_value = [cls._get_observed_value(evr)]
+            except Exception as e:
+                logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
+
+            # If the expectation has some unexpected values...:
+            if unexpected_statement:
+                expectation_string_cell += unexpected_statement
+            if unexpected_table:
                 expectation_string_cell.append(unexpected_table)
-            
+
             if len(expectation_string_cell) > 1:
                 return [status_cell + [expectation_string_cell] + observed_value]
             else:
                 return [status_cell + expectation_string_cell + observed_value]
-        
+
         return row_generator_fn

@@ -31,10 +31,10 @@ Configuration
         class_name: SlackRenderer
 
 
-StoreAction
+StoreValidationResultAction
 -----------
 
-StoreAction is a namespace-aware validation action that stores a validation result
+StoreValidationResultAction is a namespace-aware validation action that stores a validation result
 in the store.
 
 Configuration
@@ -44,16 +44,16 @@ Configuration
 
     - name: store_validation_result
     action:
-      class_name: StoreAction
+      class_name: StoreValidationResultAction
       # name of the store where the actions will store validation results
       # the name must refer to a store that is configured in the great_expectations.yml file
       target_store_name: validations_store
 
 
-ExtractAndStoreEvaluationParamsAction
+StoreEvaluationParametersAction
 -------------------------------------
 
-ExtractAndStoreEvaluationParamsAction is a namespace-aware validation action that
+StoreEvaluationParametersAction is a namespace-aware validation action that
 extracts evaluation parameters from a validation result and stores them in the store
 configured for this action.
 
@@ -67,7 +67,7 @@ Configuration
 
     - name: store_evaluation_params
     action:
-      class_name: ExtractAndStoreEvaluationParamsAction
+      class_name: StoreEvaluationParametersAction
       # name of the store where the action will store the parameters
       # the name must refer to a store that is configured in the great_expectations.yml file
       target_store_name: evaluation_parameter_store
@@ -93,5 +93,7 @@ Configuration
 Dependencies
 ~~~~~~~~~~~~
 
-When configured inside action_list of an operator, StoreAction action has to be configured before this action,
+When configured inside action_list of an operator, StoreValidationResultAction action has to be configured before this action,
 since the building of data docs fetches validation results from the store.
+
+*last updated*: |lastupdate|

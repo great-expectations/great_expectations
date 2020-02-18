@@ -6,7 +6,7 @@ BigQuery
 
 To add a BigQuery datasource do this:
 
-1. Run ``great_expectations add-datasource``
+1. Run ``great_expectations datasource new``
 2. Choose the *SQL* option from the menu.
 3. When asked which sqlalchemy driver to use enter ``bigquery``.
 4. Consult the `PyBigQuery <https://github.com/mxmzdlv/pybigquery`_ docs
@@ -58,3 +58,7 @@ Follow the `Google Cloud library guide <https://googleapis.dev/python/google-api
 for authentication.
 
 Install the pybigquery package for the BigQuery sqlalchemy dialect (``pip install pybigquery``)
+
+*Last updated*: |lastupdate|
+
+*last updated*: |lastupdate|

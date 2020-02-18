@@ -1,5 +1,73 @@
 .. _changelog:
 
+0.9.0
+-----------------
+
+Version 0.9.0 is a major update to Great Expectations! The DataContext has continued to evolve into a powerful tool
+for ensuring that Expectation Suites can properly represent the way users think about their data, and upgrading will
+make it much easier to store and share expectation suites, and to build data docs that support your whole team.
+You’ll get awesome new features including improvements to data docs look and the ability to choose and store metrics
+for building flexible data quality dashboards.
+
+The changes for version 0.9.0 fall into several broad areas:
+
+1. Onboarding
+
+Release 0.9.0 of Great Expectations makes it much easier to get started with the project. The `init` flow has grown
+to support a much wider array of use cases and to use more natural language rather than introducing
+GreatExpectations concepts earlier. You can more easily configure different backends and datasources, take advantage
+of guided walkthroughs to find and profile data, and share project configurations with colleagues.
+
+If you have already completed the `init` flow using a previous version of Great Expectations, you do not need to
+rerun the command. However, **there are some small changes to your configuration that will be required**. See
+:ref:`migrating_versions` for details.
+
+2. CLI Command Improvements
+
+With this release we have introduced a consistent naming pattern for accessing subcommands based on the noun (a
+Great Expectations object like `suite` or `docs`) and verb (an action like `edit` or `new`). The new user experience
+will allow us to more naturally organize access to CLI tools as new functionality is added.
+
+3. Expectation Suite Naming and Namespace Changes
+
+Defining shared expectation suites and validating data from different sources is much easier in this release. The
+DataContext, which manages storage and configuration of expectations, validations, profiling, and data docs, no
+longer requires that expectation suites live in a datasource-specific “namespace.” Instead, you should name suites
+with the logical name corresponding to your data, making it easy to share them or validate against different data
+sources. For example, the expectation suite "npi" for National Provider Identifier data can now be shared across
+teams who access the same logical data in local systems using Pandas, on a distributed Spark cluster, or via a
+relational database.
+
+Batch Kwargs, or instructions for a datasource to build a batch of data, are similarly freed from a required
+namespace, and you can more easily integrate Great Expectations into workflows where you do not need to use a
+BatchKwargsGenerator (usually because you have a batch of data ready to validate, such as in a table or a known
+directory).
+
+The most noticeable impact of this API change is in the complete removal of the DataAssetIdentifier class. For
+example, the `create_expectation_suite` and `get_batch` methods now no longer require a data_asset_name parameter,
+relying only on the expectation_suite_name and batch_kwargs to do their job. Similarly, there is no more asset name
+normalization required. See the upgrade guide for more information.
+
+4. Metrics and Evaluation Parameter Stores
+
+Metrics have received much more love in this release of Great Expectations! We've improved the system for declaring
+evaluation parameters that support dependencies between different expectation suites, so you can easily identify a
+particular field in the result of one expectation to use as the input into another. And the MetricsStore is now much
+more flexible, supporting a new ValidationAction that makes it possible to select metrics from a validation result
+to be saved in a database where they can power a dashboard.
+
+5. Internal Type Changes and Improvements
+
+Finally, in this release, we have done a lot of work under the hood to make things more robust, including updating
+all of the internal objects to be more strongly typed. That change, while largely invisible to end users, paves the
+way for some really exciting opportunities for extending Great Expectations as we build a bigger community around
+the project.
+
+
+We are really excited about this release, and encourage you to upgrade right away to take advantage of the more
+flexible naming and simpler API for creating, accessing, and sharing your expectations. As always feel free to join
+us on Slack for questions you don't see addressed!
+
 
 0.8.9__develop
 -----------------
@@ -53,7 +121,7 @@
 * Add support to S3 generator for retrieving directories by specifying the `directory_assets` configuration
 * Fix warning regarding implicit class_name during init flow
 * Expose build_generator API publicly on datasources
-* Allow configuration of known extensions and return more informative message when SubdirReaderGenerator cannot find
+* Allow configuration of known extensions and return more informative message when SubdirReaderBatchKwargsGenerator cannot find
   relevant files.
 * Add support for allow_relative_error on internal dataset quantile functions, and add support for
   build_continuous_partition_object in Redshift
@@ -140,8 +208,8 @@ Highlights include:
 
 3. Partitioners: Batch Kwargs are clarified and enhanced to help easily reference well-known chunks of data using a
    partition_id. Batch ID and Batch Fingerprint help round out support for enhanced metadata around data
-   assets that GE validates. See :ref:`batch_identifiers` for more information. The `GlobReaderGenerator`,
-   `QueryGenerator`, `S3Generator`, `SubdirReaderGenerator`, and `TableGenerator` all support partition_id for
+   assets that GE validates. See :ref:`batch_identifiers` for more information. The `GlobReaderBatchKwargsGenerator`,
+   `QueryBatchKwargsGenerator`, `S3GlobReaderBatchKwargsGenerator`, `SubdirReaderBatchKwargsGenerator`, and `TableBatchKwargsGenerator` all support partition_id for
    easily accessing data assets.
 
 4. Other Improvements:
@@ -166,7 +234,7 @@ v0.7.10
 -----------------
 * Fix an issue in generated documentation where the Home button failed to return to the index
 * Add S3 Generator to module docs and improve module docs formatting
-* Add support for views to QueryGenerator
+* Add support for views to QueryBatchKwargsGenerator
 * Add success/failure icons to index page
 * Return to uniform histogram creation during profiling to avoid large partitions for internal performance reasons
 
@@ -200,7 +268,7 @@ v0.7.8
   - PY2 failure on encountering unicode (#676)
 
 
-v.0.7.7
+0.7.7
 -----------------
 * Standardize the way that plugin module loading works. DataContext will begin to use the new-style class and plugin
   identification moving forward; yml configs should specify class_name and module_name (with module_name optional for
@@ -226,7 +294,7 @@ v.0.7.7
   - Add run_id to path for validation files
 
 
-v.0.7.6
+0.7.6
 -----------------
 * New Validation Renderer! Supports turning validation results into HTML and displays differences between the expected
   and the observed attributes of a dataset.
@@ -239,11 +307,11 @@ v.0.7.6
 * Bug fixes: improved internal logic of rendering data documentation, slack notification, and CLI profile command when
   datasource argument was not provided.
 
-v.0.7.5
+0.7.5
 -----------------
 * Fix missing requirement for pypandoc brought in from markdown support for notes rendering.
 
-v.0.7.4
+0.7.4
 -----------------
 * Fix numerous rendering bugs and formatting issues for rendering documentation.
 * Add support for pandas extension dtypes in pandas backend of expect_column_values_to_be_of_type and
@@ -254,7 +322,7 @@ v.0.7.4
 * Add support for rendering expectation_suite and expectation_level notes from meta in docs.
 * Fix minor formatting issue in readthedocs documentation.
 
-v.0.7.3
+0.7.3
 -----------------
 * BREAKING: Harmonize expect_column_values_to_be_of_type and expect_column_values_to_be_in_type_list semantics in
   Pandas with other backends, including support for None type and type_list parameters to support profiling.
@@ -270,7 +338,7 @@ v.0.7.3
 * Allow user to specify data_assets to profile via CLI
 * Support CLI rendering of expectation_suite and EVR-based documentation
 
-v.0.7.2
+0.7.2
 -----------------
 * Improved error detection and handling in CLI "add datasource" feature
 * Fixes in rendering of profiling results (descriptive renderer of validation results)
@@ -278,7 +346,7 @@ v.0.7.2
 * Added convenience methods to display HTML renderers of sections in Jupyter notebooks
 * Implemented prescriptive rendering of expectations for most expectation types
 
-v.0.7.1
+0.7.1
 ------------
 
 * Added documentation/tutorials/videos for onboarding and new profiling and documentation features
@@ -297,7 +365,7 @@ v.0.7.1
 * Other internal improvements and bug fixes
 
 
-v.0.7.0
+0.7.0
 ------------
 
 Version 0.7 of Great Expectations is HUGE. It introduces several major new features
@@ -372,13 +440,13 @@ to top-level names.
    * Documentation reorganization and improvements
    * Introduce custom exceptions for more detailed error logs
 
-v.0.6.1
+0.6.1
 ------------
 * Re-add testing (and support) for py2
 * NOTE: Support for SqlAlchemyDataset and SparkDFDataset is enabled via optional install \
   (e.g. ``pip install great_expectations[sqlalchemy]`` or ``pip install great_expectations[spark]``)
 
-v.0.6.0
+0.6.0
 ------------
 * Add support for SparkDFDataset and caching (HUGE work from @cselig)
 * Migrate distributional expectations to new testing framework
@@ -389,13 +457,13 @@ v.0.6.0
   We anticipate this will become the future default behavior.
 * BREAKING CHANGE: Drop official support pandas < 0.22
 
-v.0.5.1
+0.5.1
 ---------------
 * **Fix** issue where no result_format available for expect_column_values_to_be_null caused error
 * Use vectorized computation in pandas (#443, #445; thanks @RoyalTS)
 
 
-v.0.5.0
+0.5.0
 ----------------
 * Restructured class hierarchy to have a more generic DataAsset parent that maintains expectation logic separate \
   from the tabular organization of Dataset expectations
@@ -412,7 +480,7 @@ v.0.5.0
 * Minor documentation, warning, and testing improvements (thanks @zdog).
 
 
-v.0.4.5
+0.4.5
 ----------------
 * Add a new autoinspect API and remove default expectations.
 * Improve details for expect_table_columns_to_match_ordered_list (#379, thanks @rlshuhart)
@@ -434,14 +502,14 @@ v.0.4.5
 * Improve internal testing suite (thanks @anhollis and @ccnobbli)
 * Consistently use value_set instead of mixing value_set and values_set (thanks @njsmith8)
 
-v.0.4.4
+0.4.4
 ----------------
 * Improve CLI help and set CLI return value to the number of unmet expectations
 * Add error handling for empty columns to SqlAlchemyDataset, and associated tests
 * **Fix** broken support for older pandas versions (#346)
 * **Fix** pandas deepcopy issue (#342)
 
-v.0.4.3
+0.4.3
 -------
 * Improve type lists in expect_column_type_to_be[_in_list] (thanks @smontanaro and @ccnobbli)
 * Update cli to use entry_points for conda compatibility, and add version option to cli
@@ -454,7 +522,7 @@ v.0.4.3
 * Implement expect_column_value_lenghts_to_[be_between|equal] for SQAlchemy (thanks @ccnobbli)
 * **Fix** PandasDataset subclasses to inherit child class
 
-v.0.4.2
+0.4.2
 -------
 * **Fix** bugs in expect_column_values_to_[not]_be_null: computing unexpected value percentages and handling all-null (thanks @ccnobbli)
 * Support mysql use of Decimal type (thanks @bouke-nederstigt)
@@ -465,11 +533,11 @@ v.0.4.2
 
 * **Fix** documentation errors and other small errors (thanks @roblim, @ccnobbli)
 
-v.0.4.1
+0.4.1
 -------
 * Correct inclusion of new data_context module in source distribution
 
-v.0.4.0
+0.4.0
 -------
 * Initial implementation of data context API and SqlAlchemyDataset including implementations of the following \
   expectations:
@@ -505,19 +573,21 @@ v.0.4.0
 * Behind-the-scenes improvements to testing framework to ensure parity across data contexts.
 * Documentation improvements, bug-fixes, and internal api improvements
 
-v.0.3.2
+0.3.2
 -------
 * Include requirements file in source dist to support conda
 
-v.0.3.1
+0.3.1
 --------
 * **Fix** infinite recursion error when building custom expectations
 * Catch dateutil parsing overflow errors
 
-v.0.2
+0.2
 -----
 * Distributional expectations and associated helpers are improved and renamed to be more clear regarding the tests they apply
 * Expectation decorators have been refactored significantly to streamline implementing expectations and support custom expectations
 * API and examples for custom expectations are available
 * New output formats are available for all expectations
 * Significant improvements to test suite and compatibility
+
+*Last updated*: |lastupdate|

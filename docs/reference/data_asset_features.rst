@@ -23,11 +23,11 @@ At initialization
 
 .. code-block:: python
 
-    >> import great_expectations as ge
-    >> import pandas as pd
-    >> df = pd.read_csv("./tests/examples/titanic.csv")
-    >> ge_df = ge.dataset.PandasDataset(df, interactive_evaluation=False)
-    >> ge_df.expect_column_values_to_be_in_set('Sex', ["male", "female"])
+    import great_expectations as ge
+    import pandas as pd
+    df = pd.read_csv("../tests/examples/titanic.csv")
+    ge_df = ge.dataset.PandasDataset(df, interactive_evaluation=False)
+    ge_df.expect_column_values_to_be_in_set('Sex', ["male", "female"])
 
     {
         'stored_configuration': {
@@ -82,3 +82,4 @@ Dynamically adjusting interactive evaluation
       }
     }
 
+*last updated*: |lastupdate|

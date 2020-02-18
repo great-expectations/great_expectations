@@ -1,17 +1,17 @@
-import pytest
 import glob
 import json
-from string import Template as pTemplate
 
+import pytest
+from six import PY2
 
+from great_expectations.core import ExpectationConfiguration
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer.content_block import (
     ExpectationSuiteBulletListContentBlockRenderer,
 )
 from great_expectations.render.renderer.content_block.expectation_string import (
     substitute_none_for_missing,
 )
-
-from six import PY2
 
 
 def test_substitute_none_for_missing():
@@ -53,22 +53,22 @@ def test_all_expectations_using_test_definitions():
             for test in dataset["tests"]:
                 # Construct an expectation from the test.
                 if type(test["in"]) == dict:
-                    fake_expectation = {
-                        "expectation_type": test_definitions["expectation_type"],
-                        "kwargs": test["in"],
-                    }
+                    fake_expectation = ExpectationConfiguration(
+                        expectation_type=test_definitions["expectation_type"],
+                        kwargs=test["in"],
+                    )
                 else:
                     # This would be a good place to put a kwarg-to-arg converter
                     continue
 
                 # Attempt to render it
                 render_result = ExpectationSuiteBulletListContentBlockRenderer.render(
-                    [fake_expectation])
+                    [fake_expectation]).to_json_dict()
    
                 assert isinstance(render_result, dict)
                 assert "content_block_type" in render_result
                 assert render_result["content_block_type"] in render_result
-                assert isinstance(render_result[render_result["content_block_type"]], list )
+                assert isinstance(render_result[render_result["content_block_type"]], list)
 
                 # TODO: Assert that the template is renderable, with all the right arguments, etc.
                 # rendered_template = pTemplate(el["template"]).substitute(el["params"])
@@ -84,5 +84,5 @@ def test_all_expectations_using_test_definitions():
     if PY2: 
         return
     
-    with open('./tests/render/output/test_render_bullet_list_content_block.json', 'w') as f:
+    with open(file_relative_path(__file__, './output/test_render_bullet_list_content_block.json'), 'w') as f:
        json.dump(test_results, f, indent=2)
