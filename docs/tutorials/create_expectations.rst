@@ -251,7 +251,9 @@ This is most likely sufficient for the purpose of this tutorial.
                     batch_kwargs = {'query': 'SELECT YOUR_ROWS FROM YOUR_TABLE'}
 
 
-        The examples of ``batch_kwargs`` above can also be the outputs of "generators" used by Great Expectations. You can read about the default Generators' behavior and how to implement additional generators in this article: :ref:`batch_generator`.
+        The examples of ``batch_kwargs`` above can also be the outputs of "generators" used by Great Expectations.
+You can read about the default Generators' behavior and how to implement additional generators in this article:
+:ref:`batch_kwargs_generator`.
 
 
 |

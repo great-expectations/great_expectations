@@ -47,14 +47,6 @@ For continuous data:
 
 Example continuous partition object:
 
-.. invisible-code-block: python
-
-  remember_me = 'see how namespaces work?'
-  import json
-
->>> print(remember_me)
-see how namespaces work?
-
 .. code-block:: python
     partition = {
         "bins": [0, 1, 2, 10],
