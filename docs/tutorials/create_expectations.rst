@@ -159,7 +159,7 @@ Select a sample batch of the dataset the suite will describe.
 
         .. code-block:: python
 
-            batch_kwargs = {'dataset': "YOUR_PANDAS_DF"}
+            batch_kwargs = {'dataset': df}
 
     .. tab-container:: tab1
         :title: pyspark
