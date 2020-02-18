@@ -22,13 +22,13 @@ If you have already completed the `init` flow using a previous version of Great 
 rerun the command. However, **there are some small changes to your configuration that will be required**. See
 :ref:`migrating_versions` for details.
 
-1. CLI Command Improvements
+2. CLI Command Improvements
 
 With this release we have introduced a consistent naming pattern for accessing subcommands based on the noun (a
 Great Expectations object like `suite` or `docs`) and verb (an action like `edit` or `new`). The new user experience
 will allow us to more naturally organize access to CLI tools as new functionality is added.
 
-1. Expectation Suite Naming and Namespace Changes
+3. Expectation Suite Naming and Namespace Changes
 
 Defining shared expectation suites and validating data from different sources is much easier in this release. The
 DataContext, which manages storage and configuration of expectations, validations, profiling, and data docs, no
@@ -48,7 +48,7 @@ example, the `create_expectation_suite` and `get_batch` methods now no longer re
 relying only on the expectation_suite_name and batch_kwargs to do their job. Similarly, there is no more asset name
 normalization required. See the upgrade guide for more information.
 
-1. Metrics and Evaluation Parameter Stores
+4. Metrics and Evaluation Parameter Stores
 
 Metrics have received much more love in this release of Great Expectations! We've improved the system for declaring
 evaluation parameters that support dependencies between different expectation suites, so you can easily identify a
@@ -56,7 +56,7 @@ particular field in the result of one expectation to use as the input into anoth
 more flexible, supporting a new ValidationAction that makes it possible to select metrics from a validation result
 to be saved in a database where they can power a dashboard.
 
-1. Internal Type Changes and Improvements
+5. Internal Type Changes and Improvements
 
 Finally, in this release, we have done a lot of work under the hood to make things more robust, including updating
 all of the internal objects to be more strongly typed. That change, while largely invisible to end users, paves the

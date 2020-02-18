@@ -12,7 +12,7 @@ Generator Module
     :show-inheritance:
     :exclude-members: BatchKwargsGenerator
 
-    .. autoclass:: great_expectations.datasource.generator.batch_generator.BatchKwargsGenerator
+    .. autoclass:: great_expectations.datasource.generator.batch_kwargs_generator.BatchKwargsGenerator
         :members:
         :undoc-members:
 
