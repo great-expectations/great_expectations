@@ -223,15 +223,19 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
     result = runner.invoke(
         cli,
         ["suite", "new", "-d", root_dir, "--no-view"],
-        input="2\n1\n1\nmy_new_suite\n\n",
+        input="1\n1\n1\nmy_new_suite\n\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert result.exit_code == 0
-    assert "Select a datasource" in stdout
-    assert "Which data would you like to use" in stdout
-    assert "Name the new expectation suite [f2.warning]" in stdout
+    assert """Select a datasource
+    1. random
+    2. titanic""" in stdout
+    assert """Which data would you like to use?
+    1. f1 (file)
+    2. f2 (file)""" in stdout
+    assert "Name the new expectation suite [f1.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
