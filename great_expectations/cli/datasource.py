@@ -654,7 +654,7 @@ def select_datasource(context, datasource_name=None):
     data_source = None
 
     if datasource_name is None:
-        data_sources = context.list_datasources()
+        data_sources = sorted(context.list_datasources(), key=lambda x: x["name"])
         if len(data_sources) == 0:
             cli_message(msg_no_datasources_configured)
         elif len(data_sources) ==1:
