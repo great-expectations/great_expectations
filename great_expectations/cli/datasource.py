@@ -519,11 +519,10 @@ def _collect_snowflake_credentials(default_credentials={}):
 
     credentials["query"] = {}
     credentials["query"]["warehouse"] = click.prompt("What is warehouse name for the snowflake connection?",
-                        default=default_credentials.get("warehouse", ""),
-                        show_default=True)
+                                                     default=default_credentials.get("warehouse", ""),
+                                                     show_default=True)
     credentials["query"]["role"] = click.prompt("What is role name for the snowflake connection?",
-                        default=default_credentials.get("role", ""),
-                        show_default=True)
+                                                default=default_credentials.get("role", ""), show_default=True)
 
     return credentials
 
