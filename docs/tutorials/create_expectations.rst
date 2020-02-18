@@ -155,7 +155,7 @@ Select a sample batch of the dataset the suite will describe.
             }
 
         |
-        If you already loaded the data into a Pandas DataFrame, here is how you construct ``batch_kwargs`` that instruct the datasource to use your dataframe as a batch:
+        If you already loaded the data into a Pandas DataFrame called `df`, you could use following ``batch_kwargs`` to instruct the datasource to use your DataFrame as a batch:
 
         .. code-block:: python
 
