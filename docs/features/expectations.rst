@@ -8,7 +8,7 @@ Expectations are the workhorse abstraction in Great Expectations. Like assertion
 Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests,
 Great Expectations applies Expectations to data instead of code.
 
-Expectations *enhance communication* about your data and and *amplify quality* in data applications. Using expectations
+Expectations *enhance communication* about your data and *amplify quality* in data applications. Using expectations
 helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."
 
 **************************
@@ -29,8 +29,8 @@ There are several paths to generating expectations:
    expectations. Interviewing experts and encoding their tacit knowledge of common distributions, values, or failure
    conditions can be can excellent way to generate expectations.
 
-3. Exploratory Analysis. Using GE in an exploratory analysis workflow such as enabled by the ``create_expectations``
-   notebook is an important way to develop experience with both raw and derived datasets and generate useful and
+3. Exploratory Analysis. Using GE in an exploratory analysis workflow (e.g. within Jupyter notebooks) is an important \
+   way to develop experience with both raw and derived datasets and generate useful and
    testable expectations about characteristics that may be important for the data's eventual purpose, whether
    reporting or feeding another downstream model or data system.
 
@@ -41,24 +41,18 @@ Expectations come to your data
 Great Expectations's connect-and-expect API makes it easy to declare Expectations within the tools you already use for
 data exploration: jupyter notebooks, the ipython console, scratch scripts, etc.
 
-.. code-block:: bash
-
-    >> import great_expectations as ge
-    >> my_df = ge.read_csv("./tests/examples/titanic.csv")
-
-    >> my_df.expect_column_values_to_be_in_set(
-        "Sex",
-        ["male", "female"]
-    )
-    {
-        'success': True,
-        'summary_obj': {
-            'unexpected_count': 0,
-            'unexpected_percent': 0.0,
-            'unexpected_percent_nonmissing': 0.0,
-            'partial_unexpected_list': []
-        }
+>>> import great_expectations as ge
+>>> my_df = ge.read_csv("./tests/examples/titanic.csv")
+>>> my_df.expect_column_values_to_be_in_set("Sex", ["male", "female"])
+{
+    'success': True,
+    'summary_obj': {
+        'unexpected_count': 0,
+        'unexpected_percent': 0.0,
+        'unexpected_percent_nonmissing': 0.0,
+        'partial_unexpected_list': []
     }
+}
 
 
 
@@ -144,7 +138,7 @@ practical use cases:
 * Form validation and regex pattern-matching for names, URLs, dates, addresses, etc.
 * Checks for missing data
 * Crosstabs
-* Distributions for statistical modeling. 
+* Distributions for statistical modeling.
 * etc.
 
 You can also add notes or even structured metadata to expectations to describe the intent of an expectation or anything
@@ -160,3 +154,5 @@ else relevant for understanding it:
             "source": "max@company.com"
             }
        )
+
+*last updated*: |lastupdate|

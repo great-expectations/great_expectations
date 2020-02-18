@@ -103,8 +103,8 @@ class ExpectationExplorer(object):
 
     def update_result(self, data_asset_name, new_result, column=None):
         new_success_value = new_result.get('success')
-        expectation_type = new_result['expectation_config'].get('expectation_type')
-        new_result_widgets = self.generate_expectation_result_detail_widgets(result=new_result.get('result', {}))
+        expectation_type = new_result.expectation_config.expectation_type
+        new_result_widgets = self.generate_expectation_result_detail_widgets(result=new_result.result)
         new_border_color = 'green' if new_success_value else 'red'
         data_asset_expectations = self.state['data_assets'][data_asset_name]['expectations']
 
@@ -143,7 +143,7 @@ class ExpectationExplorer(object):
             return non_column_expectations.get(expectation_type)
 
     def initialize_data_asset_state(self, data_asset):
-        data_asset_name = data_asset.get_data_asset_name()
+        data_asset_name = data_asset.data_asset_name
 
         self.state['data_assets'][data_asset_name] = {
             "data_asset": data_asset,
@@ -151,7 +151,7 @@ class ExpectationExplorer(object):
         }
 
     def set_expectation_state(self, data_asset, expectation_state, column=None):
-        data_asset_name = data_asset.get_data_asset_name()
+        data_asset_name = data_asset.data_asset_name
         expectation_type = expectation_state.get('expectation_type')
         data_asset_state = self.state['data_assets'].get(data_asset_name)
 
@@ -231,7 +231,7 @@ class ExpectationExplorer(object):
     def update_expectation_state(self, existing_expectation_state, expectation_validation_result, validation_time):
         expectation_editor_widget = existing_expectation_state.get(
             'editor_widget')
-        new_ge_expectation_kwargs = expectation_validation_result['expectation_config']['kwargs']
+        new_ge_expectation_kwargs = expectation_validation_result.expectation_config['kwargs']
         current_expectation_kwarg_dict = existing_expectation_state['kwargs']
         column = current_expectation_kwarg_dict.get('column')
         data_asset_name = existing_expectation_state.get('data_asset_name')
@@ -1349,10 +1349,10 @@ class ExpectationExplorer(object):
             collapsed=False
     ):
         validation_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
-        data_asset_name = data_asset.get_data_asset_name()
+        data_asset_name = data_asset.data_asset_name
         data_asset_state = self.state['data_assets'].get(data_asset_name)
-        expectation_type = expectation_validation_result['expectation_config']['expectation_type']
-        expectation_kwargs = expectation_validation_result['expectation_config']['kwargs']
+        expectation_type = expectation_validation_result.expectation_config.expectation_type
+        expectation_kwargs = expectation_validation_result.expectation_config['kwargs']
         column = expectation_kwargs.get('column')
 
         if data_asset_state:
@@ -1367,13 +1367,13 @@ class ExpectationExplorer(object):
             self.initialize_data_asset_state(data_asset)
 
         # success_widget
-        success = expectation_validation_result['success']
+        success = expectation_validation_result.success
         success_widget = widgets.HTML(
             value="<span><strong>Success: </strong>{success}</span>".format(success=str(success)))
 
         # widget with result details
         result_detail_widget = widgets.VBox(children=self.generate_expectation_result_detail_widgets(
-            result=expectation_validation_result.get("result", {})
+            result=expectation_validation_result.result
         ))
 
         # accordion container for result_detail_widget
@@ -1500,7 +1500,7 @@ class ExpectationExplorer(object):
         return list(set(expectation_types))
 
     def generate_expectation_suite_editor_widgets(self, data_asset, expectation_suite):
-        data_asset_name = data_asset.get_data_asset_name()
+        data_asset_name = data_asset.data_asset_name
         column_names = self.get_column_names(data_asset_name)
         column_accordions = []
         data_asset_state = self.state['data_assets'].get(data_asset_name, {})
@@ -1557,7 +1557,7 @@ class ExpectationExplorer(object):
         return [summary_widget] + column_accordions
 
     def edit_expectation_suite(self, data_asset):
-        data_asset_name = data_asset.get_data_asset_name()
+        data_asset_name = data_asset.data_asset_name
         expectation_suite = data_asset.get_expectation_suite(
             discard_failed_expectations=False)
         expectations = expectation_suite.get('expectations')

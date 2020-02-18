@@ -12,7 +12,7 @@ The "failure" expectation suite contains expectations that are considered import
 WarningAndFailureExpectationSuitesValidationOperator retrieves the two expectation suites ("failure" and "warning") for every data asset in the `assets_to_validate` argument of its `run` method. It does not require both suites to be present.
 
 The operator invokes a list of actions on every validation result. The list is configured for the operator.
-Each action in the list must be an instance of NamespacedValidationAction
+Each action in the list must be an instance of ValidationAction
 class (or its descendants). Read more about actions here: :ref:`actions`.
 
 After completing all the validations, it sends a Slack notification with the success status.
@@ -51,11 +51,11 @@ Below is an example of this operator's configuration:
         action_list:
           - name: store_validation_result
             action:
-              class_name: StoreAction
+              class_name: StoreValidationResultAction
               target_store_name: validations_store
           - name: store_evaluation_params
             action:
-              class_name: ExtractAndStoreEvaluationParamsAction
+              class_name: StoreEvaluationParametersAction
               target_store_name: evaluation_parameter_store
 
 
@@ -72,7 +72,7 @@ This is an example of invoking an instance of a Validation Operator from Python:
         validation_operator_name="operator_instance_name",
     )
 
-* `assets_to_validate` - an iterable that specifies the data assets that the operator will validate. The members of the list can be either batches or triples that will allow the operator to fetch the batch: (data_asset_name, expectation_suite_name, batch_kwargs) using this method: :py:meth:`~great_expectations.data_context.ConfigOnlyDataContext.get_batch`
+* `assets_to_validate` - an iterable that specifies the data assets that the operator will validate. The members of the list can be either batches or triples that will allow the operator to fetch the batch: (data_asset_name, expectation_suite_name, batch_kwargs) using this method: :py:meth:`~great_expectations.data_context.BaseDataContext.get_batch`
 * run_id - pipeline run id, a timestamp or any other string that is meaningful to you and will help you refer to the result of this operation later
 * validation_operator_name you can instances of a class that implements a Validation Operator
 
@@ -98,3 +98,5 @@ The value of "success" is True if no critical expectation suites ("failure") fai
             }
         }
     }
+
+*last updated*: |lastupdate|

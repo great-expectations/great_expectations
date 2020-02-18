@@ -1,10 +1,10 @@
 import os
 import logging
-from string import Template
 
-from .batch_generator import BatchGenerator
+from .batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
+from ...data_context.util import instantiate_class_from_config
 
 logger = logging.getLogger(__name__)
 
@@ -19,119 +19,90 @@ except ImportError:
     logger.debug("Unable to import sqlalchemy.")
 
 
-class QueryGenerator(BatchGenerator):
+class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     """Produce query-style batch_kwargs from sql files stored on disk
     """
+    recognized_batch_parameters = {'query_parameters', 'partition_id'}
 
-    # FIXME: This needs to be updated to use a store so that the query generator does not have to manage storage itself
-    # FIXME: New tests should then be added
-    def __init__(self, name="default", datasource=None, queries=None):
-        super(QueryGenerator, self).__init__(name=name, datasource=datasource)
-        if (
-                datasource is not None and
-                datasource.data_context is not None and
-                os.path.isdir(os.path.join(self._datasource.data_context.root_directory,
-                                           "datasources",
-                                           self._datasource.name,
-                                           "generators",
-                                           self._name,
-                                           "queries")
-                              )
-        ):
-            self._queries_path = os.path.join(self._datasource.data_context.root_directory,
-                                              "datasources",
-                                              self._datasource.name,
-                                              "generators",
-                                              self._name,
-                                              "queries")
-        else:
-            self._queries_path = None
+    def __init__(self, name="default", datasource=None, query_store_backend=None, queries=None):
+        super(QueryBatchKwargsGenerator, self).__init__(name=name, datasource=datasource)
+        root_directory = None
+        if query_store_backend is None:
+            # We will choose a Tuple store if there is a configured DataContext with a root_directory,
+            # and an InMemoryStore otherwise
+            if datasource and datasource.data_context and datasource.data_context.root_directory:
+                query_store_backend = {
+                    "class_name": "TupleFilesystemStoreBackend",
+                    "base_directory": os.path.join(datasource.data_context.root_directory, "datasources",
+                                                   datasource.name, "generators", name),
+                    "filepath_suffix": ".sql"
+                }
+                root_directory = datasource.data_context.root_directory
+            else:
+                query_store_backend = {
+                    "class_name": "InMemoryStoreBackend"
+                }
+        self._store_backend = instantiate_class_from_config(
+            config=query_store_backend,
+            runtime_environment={
+                "root_directory": root_directory
+            },
+            config_defaults={
+                "module_name": "great_expectations.data_context.store"
+            }
 
-        if queries is None:
-            queries = {}
-
-        self._queries = queries
+        )
+        if queries is not None:
+            for query_name, query in queries.items():
+                self.add_query(query_name, query)
 
     def _get_raw_query(self, generator_asset):
-        raw_query = None
-        if self._queries_path:
-            if generator_asset in [path[:-4] for path in os.listdir(self._queries_path) if str(path).endswith(".sql")]:
-                with open(os.path.join(self._queries_path, generator_asset) + ".sql", "r") as data:
-                    raw_query = data.read()
-        elif self._queries:
-            if generator_asset in self._queries:
-                raw_query = self._queries[generator_asset]
+        return self._store_backend.get(tuple(generator_asset))
 
-        return raw_query
-
-    def _get_iterator(self, generator_asset, query_params=None):
+    def _get_iterator(self, generator_asset, query_parameters=None):
         raw_query = self._get_raw_query(generator_asset)
         if raw_query is None:
             logger.warning("No query defined for generator asset: %s" % generator_asset)
             # There is no valid query path or temp query storage defined with the generator_asset
             return None
 
-        if query_params is None:
-            query_params = {}
-        try:
-            substituted_query = Template(raw_query).substitute(query_params)
-        except KeyError:
-            raise BatchKwargsError(
-                "Unable to generate batch kwargs for asset '" + generator_asset + "': "
-                "missing template key",
-                {
-                    "generator_asset": generator_asset,
-                    "query_template": raw_query
-                }
-            )
-        return iter([
-            SqlAlchemyDatasourceQueryBatchKwargs(
-                query=substituted_query,
-                raw_query=raw_query,
-                query_params=query_params
-            )])
+        if query_parameters is None:
+            iter_ = iter([
+                SqlAlchemyDatasourceQueryBatchKwargs(
+                    query=raw_query
+                )])
+        else:
+            iter_= iter([
+                SqlAlchemyDatasourceQueryBatchKwargs(
+                    query=raw_query,
+                    query_parameters=query_parameters
+                )])
+
+        return iter_
 
     def add_query(self, generator_asset, query):
-        if self._queries_path:
-            with open(os.path.join(self._queries_path, generator_asset + ".sql"), "w") as queryfile:
-                queryfile.write(query)
-        else:
-            logger.info("Adding query to temporary storage only.")
-            self._queries[generator_asset] = query
+        # Backends must have a tuple key; we use only a single-element tuple
+        self._store_backend.set(tuple(generator_asset), query)
 
     def get_available_data_asset_names(self):
-        if self._queries_path:
-            defined_queries = [path[:-4] for path in os.listdir(self._queries_path) if str(path).endswith(".sql")]
-        else:
-            defined_queries = list(self._queries.keys())
+        defined_queries = self._store_backend.list_keys()
+        # Backends must have a tuple key; we use only a single-element tuple
+        return {"names": [(query_key_tuple[0], "query") for query_key_tuple in defined_queries]}
 
-        return defined_queries
-
-    def build_batch_kwargs_from_partition_id(self, generator_asset, partition_id=None, query_params=None):
+    def _build_batch_kwargs(self, batch_parameters):
         """Build batch kwargs from a partition id."""
+        generator_asset = batch_parameters.pop("name")
         raw_query = self._get_raw_query(generator_asset)
-        if "$partition_id" not in raw_query and "${partition_id}" not in raw_query:
-            raise BatchKwargsError("No partition_id parameter found in the requested query.", {})
-        try:
-            if query_params is None:
-                query_params = {}
-            query_params.update({'partition_id': partition_id})
-            substituted_query = Template(raw_query).substitute(query_params)
-        except KeyError:
-            raise BatchKwargsError(
-                "Unable to generate batch kwargs for asset '" + generator_asset + "': "
-                                                                                  "missing template key",
-                {
-                    "generator_asset": generator_asset,
-                    "query_template": raw_query
-                }
-            )
-        return SqlAlchemyDatasourceQueryBatchKwargs(
-            query=substituted_query,
-            raw_query=raw_query,
-            query_params=query_params
-        )
+        partition_id = batch_parameters.pop("partition_id", None)
+        batch_kwargs = self._datasource.process_batch_parameters(**batch_parameters)
+        batch_kwargs["query"] = raw_query
+
+        if partition_id:
+            if not batch_kwargs["query_parameters"]:
+                batch_kwargs["query_parameters"] = {}
+            batch_kwargs["query_parameters"]["partition_id"] = partition_id
+
+        return SqlAlchemyDatasourceQueryBatchKwargs(batch_kwargs)
 
     def get_available_partition_ids(self, generator_asset):
-        raise BatchKwargsError("QueryGenerator cannot identify partitions, however any asset defined with"
-                               "a single parameter can be accessed using that parameter as a partition_id.", {})
+        raise BatchKwargsError("QueryBatchKwargsGenerator cannot identify partitions.", {})

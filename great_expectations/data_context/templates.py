@@ -1,23 +1,18 @@
 # -*- coding: utf-8 -*-
-from great_expectations import rtd_url_ge_version
 
 PROJECT_HELP_COMMENT = """
 # Welcome to Great Expectations! Always know what to expect from your data.
 # 
-# Here you can define datasources, generators, integrations and more. This file
-# is intended to be committed to your repo. For help with configuration please:
+# Here you can define datasources, batch kwarg generators, integrations and
+# more. This file is intended to be committed to your repo. For help with
+# configuration please:
 #   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#configuration
 #   - Join our slack channel: http://greatexpectations.io/slack
-#
-# NOTE: GE uses the names of configured `datasources` and `generators` to manage
-# how `expectations` and other artifacts are stored in the `expectations/` and 
-# `datasources/` folders. If you need to rename an existing `datasource` or 
-# `generator`, be sure to also update the relevant directory names.
 
 config_version: 1
 
 # Datasources tell Great Expectations where your data lives and how to get it.
-# You can use the CLI command `great_expectations add-datasource` to help you
+# You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/features/datasource.html
 datasources: {}
 """
@@ -28,7 +23,7 @@ CONFIG_VARIABLES_INTRO = """
 # such as staging vs prod.
 #
 # When GE encounters substitution syntax (like `my_key: ${my_value}` or 
-# `my_key: $my_value`) in the config file it will attempt to replace the value
+# `my_key: $my_value`) in the config file, it will attempt to replace the value
 # of `my_key` with the value from an environment variable `my_value` or a
 # corresponding key read from the file specified using
 # `config_variables_file_path`. Environment variables take precedence.
@@ -60,10 +55,10 @@ validation_operators:
     action_list:
       - name: store_validation_result
         action:
-          class_name: StoreAction
+          class_name: StoreValidationResultAction
       - name: store_evaluation_params
         action:
-          class_name: ExtractAndStoreEvaluationParamsAction
+          class_name: StoreEvaluationParametersAction
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
@@ -88,19 +83,19 @@ stores:
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
 
   validations_store:
     class_name: ValidationsStore
     store_backend:
-      class_name: FixedLengthTupleFilesystemStoreBackend
+      class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/en/latest/reference/evaluation_parameters.html
-    class_name: InMemoryEvaluationParameterStore
+    class_name: EvaluationParameterStore
 
 expectations_store_name: expectations_store
 validations_store_name: validations_store
@@ -114,7 +109,7 @@ data_docs_sites:
   local_site:
     class_name: SiteBuilder
     store_backend:
-        class_name: FixedLengthTupleFilesystemStoreBackend
+        class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
         class_name: DefaultSiteIndexBuilder

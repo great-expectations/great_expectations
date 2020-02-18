@@ -1,7 +1,9 @@
-import pytest
 import os
-from great_expectations.exceptions import InvalidConfigError
+
+import pytest
+
 from great_expectations.data_context.util import substitute_config_variable
+from great_expectations.exceptions import InvalidConfigError
 
 
 def test_config_variables_on_context_without_config_variables_filepath_configured(data_context_without_config_variables_filepath_configured):
@@ -15,7 +17,7 @@ def test_config_variables_on_context_without_config_variables_filepath_configure
 
     with pytest.raises(InvalidConfigError) as exc:
         context.save_config_variable("var_name_1", {"n1": "v1"})
-        assert "'config_variables_file_path' property is not found in config" in exc.message
+    assert "'config_variables_file_path' property is not found in config" in exc.value.message
 
 
 def test_setting_config_variables_is_visible_immediately(data_context_with_variables_in_config):
@@ -29,9 +31,9 @@ def test_setting_config_variables_is_visible_immediately(data_context_with_varia
     assert os.path.isfile(os.path.join(context._context_root_directory, config_variables_file_path))
 
     # the context's config has two config variables - one using the ${} syntax and the other - $.
-    assert context.get_project_config()["datasources"]["mydatasource"]["generators"]["mygenerator"][
+    assert context.get_config()["datasources"]["mydatasource"]["generators"]["mygenerator"][
                "reader_options"]["test_variable_sub1"] == "${replace_me}"
-    assert context.get_project_config()["datasources"]["mydatasource"]["generators"]["mygenerator"][
+    assert context.get_config()["datasources"]["mydatasource"]["generators"]["mygenerator"][
                "reader_options"]["test_variable_sub2"] == "$replace_me"
 
     config_variables = context._load_config_variables_file()
@@ -82,5 +84,5 @@ def test_substitute_config_variable():
     assert substitute_config_variable("hhhhhhh", config_variables_dict) == "hhhhhhh"
     with pytest.raises(InvalidConfigError) as exc:
         substitute_config_variable("abc${arg1}", config_variables_dict)  # does NOT equal "abc${arg1}"
-    assert exc.value.message == "Unable to find match for config variable arg1"
+    assert exc.value.message.startswith("Unable to find match for config variable arg1")
     assert substitute_config_variable("${arg2}", config_variables_dict) == config_variables_dict["arg2"]

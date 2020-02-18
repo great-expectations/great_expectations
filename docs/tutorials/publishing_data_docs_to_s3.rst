@@ -24,7 +24,7 @@ Configuring data docs requires three simple steps:
 
 Configure your bucket policy to enable appropriate access. **IMPORTANT**: your policy should provide access only
 to appropriate users; data-docs can include critical information about raw data and should generally **not** be
-publicly accessible. The example policy below **enforces IP-based access** access.
+publicly accessible. The example policy below **enforces IP-based access**.
 
 **Modify the bucket name and IP addresses below for your situation.**
 
@@ -70,12 +70,12 @@ Modify the policy above and save it to a file called `ip-policy.json` in your lo
       local_site:
         class_name: SiteBuilder
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
       s3_site:
         class_name: SiteBuilder
         store_backend:
-          class_name: FixedLengthTupleS3StoreBackend
+          class_name: TupleS3StoreBackend
           bucket: data-docs.my_org  # UPDATE the bucket name here to match the bucket you configured above.
     # ... additional configuration below
 
@@ -84,7 +84,7 @@ Modify the policy above and save it to a file called `ip-policy.json` in your lo
 
 .. code-block:: bash
 
-    > great_expectations build-docs
+    > great_expectations docs build
     Building...
 
 You're now ready to visit the site! Your site will be available at the following URL:
@@ -105,3 +105,5 @@ For more information on static site hosting in AWS, see the following:
  - `AWS Website Hosting <https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html>`_
  - `AWS Static Site Access Permissions <https://docs.aws.amazon.com/en_pv/AmazonS3/latest/dev/WebsiteAccessPermissionsReqd.html>`_
  - `AWS Website configuration <https://docs.aws.amazon.com/AmazonS3/latest/dev/HowDoIWebsiteConfiguration.html>`_
+
+*last updated*: |lastupdate|

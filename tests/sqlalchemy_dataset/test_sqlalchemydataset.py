@@ -68,12 +68,12 @@ def test_custom_sqlalchemydataset(custom_dataset):
         "result_format", {"result_format": "COMPLETE"})
 
     result = custom_dataset.expect_column_values_to_equal_2('c1')
-    assert result['success'] == False
-    assert result['result']['unexpected_list'] == [0]
+    assert result.success is False
+    assert result.result['unexpected_list'] == [0]
 
     result = custom_dataset.expect_column_mode_to_equal_0('c2')
-    assert result['success'] == False
-    assert result['result']['observed_value'] == 4
+    assert result.success is False
+    assert result.result['observed_value'] == 4
 
 
 def test_broken_decorator_errors(custom_dataset):
@@ -83,19 +83,17 @@ def test_broken_decorator_errors(custom_dataset):
 
     with pytest.raises(ValueError) as err:
         custom_dataset.broken_aggregate_expectation('c1')
-        assert "Column aggregate expectation failed to return required information: success" in str(
-            err)
+    assert "Column aggregate expectation failed to return required information: success" in str(err.value)
 
     with pytest.raises(ValueError) as err:
         custom_dataset.another_broken_aggregate_expectation('c1')
-        assert "Column aggregate expectation failed to return required information: observed_value" in str(
-            err)
+    assert "Column aggregate expectation failed to return required information: observed_value" in str(err.value)
 
 
 def test_missing_engine_error(sa):
     with pytest.raises(ValueError) as err:
         SqlAlchemyDataset('test_engine', schema='example')
-        assert "Engine or connection_string must be provided." in str(err)
+    assert "Engine or connection_string must be provided." in str(err.value)
 
 
 def test_only_connection_string(sa):
@@ -108,7 +106,7 @@ def test_schema_custom_sql_error(sa):
     with pytest.raises(ValueError) as err:
         SqlAlchemyDataset('test_schema_custom', schema='example', engine=engine,
                           custom_sql='SELECT * FROM example.fake')
-        assert "Cannot specify both schema and custom_sql." in str(err)
+        assert "Cannot specify both schema and custom_sql." in str(err.value)
 
 
 def test_sqlalchemydataset_raises_error_on_missing_table_name(sa):
@@ -146,10 +144,10 @@ def test_sqlalchemydataset_with_custom_sql(sa):
 
     result = custom_sql_dataset.expect_column_values_to_be_in_set(
         "pet", ["fish", "cat", "python"])
-    assert result['success'] == True
+    assert result.success is True
 
     result = custom_sql_dataset.expect_column_to_exist("age")
-    assert result['success'] == False
+    assert result.success is False
 
 
 def test_column_fallback(sa):
@@ -188,12 +186,12 @@ def test_sqlalchemy_dataset_view(sqlite_view_engine):
     # This test demonstrates that a view can be used as a SqlAlchemyDataset table for purposes of validation
     dataset = SqlAlchemyDataset("test_view", engine=sqlite_view_engine)
     res = dataset.expect_table_row_count_to_equal(1)
-    assert res["success"] is True
+    assert res.success is True
 
     # A temp view can also be used, though generators will not see it
     dataset = SqlAlchemyDataset("test_temp_view", engine=sqlite_view_engine)
     res = dataset.expect_table_row_count_to_equal(3)
-    assert res["success"] is True
+    assert res.success is True
 
 
 def test_sqlalchemy_dataset_unexpected_count_calculations(sa, unexpected_count_df):
@@ -201,19 +199,19 @@ def test_sqlalchemy_dataset_unexpected_count_calculations(sa, unexpected_count_d
     res1 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "BASIC", "partial_unexpected_count": 2})
     res2 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "BASIC", "partial_unexpected_count": 10})
 
-    assert res1["result"]["unexpected_count"] == 5
-    assert res2["result"]["unexpected_count"] == 5
+    assert res1.result["unexpected_count"] == 5
+    assert res2.result["unexpected_count"] == 5
     # Note difference here
-    assert len(res1["result"]["partial_unexpected_list"]) == 2
-    assert len(res2["result"]["partial_unexpected_list"]) == 5
+    assert len(res1.result["partial_unexpected_list"]) == 2
+    assert len(res2.result["partial_unexpected_list"]) == 5
 
 
     # However, the "COMPLETE" result format ignores the limit.
     res1 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "COMPLETE", "partial_unexpected_count": 2})
     res2 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "COMPLETE", "partial_unexpected_count": 10})
 
-    assert res1["result"]["unexpected_count"] == 5
-    assert res2["result"]["unexpected_count"] == 5
+    assert res1.result["unexpected_count"] == 5
+    assert res2.result["unexpected_count"] == 5
 
 
 def test_result_format_warning(sa, unexpected_count_df):

@@ -1,25 +1,13 @@
-from .store_backend import (
-    StoreBackend,
-    InMemoryStoreBackend,
-    # FilesystemStoreBackend,
-    FixedLengthTupleFilesystemStoreBackend,
-    FixedLengthTupleS3StoreBackend,
-    FixedLengthTupleGCSStoreBackend
-)
+from .store import Store
+from .validations_store import ValidationsStore
+from .expectations_store import ExpectationsStore
+from .html_site_store import HtmlSiteStore
+from .metric_store import MetricStore, EvaluationParameterStore
 
-from .store import (
-    WriteOnlyStore,
-    ReadWriteStore,
-    BasicInMemoryStore,
+from .store_backend import StoreBackend, InMemoryStoreBackend
+from .tuple_store_backend import (
+    TupleFilesystemStoreBackend,
+    TupleS3StoreBackend,
+    TupleGCSStoreBackend
 )
-
-from .namespaced_read_write_store import (
-    NamespacedReadWriteStore,
-    ValidationsStore,
-    ExpectationsStore,
-    HtmlSiteStore,
-)
-
-from .evaluation_parameter_store import (
-    InMemoryEvaluationParameterStore,
-)
+from .database_store_backend import DatabaseStoreBackend

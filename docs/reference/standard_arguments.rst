@@ -69,7 +69,10 @@ All Expectations accept a boolean `catch_exceptions` parameter. If true, executi
 `meta`
 ------------------------------------------------------------------------------
 
-All Expectations accept an optional `meta` parameter. If `meta` is a valid JSON-serializable dictionary, it will be passed through to the `expectation_result` object without modification.
+All Expectations accept an optional `meta` parameter. If `meta` is a valid JSON-serializable dictionary, it will be \
+passed through to the `expectation_result` object without modification. The `meta` parameter can be used to add \
+helpful markdown annotations to Expectations (shown below). These Expectation "notes" are rendered within \
+Expectation Suite pages in Data Docs.
 
 .. code-block:: bash
 
@@ -77,15 +80,23 @@ All Expectations accept an optional `meta` parameter. If `meta` is a valid JSON-
         "my_column",
         ["a", "b", "c"],
         meta={
-            "foo": "bar",
-            "baz": [1,2,3,4]
+          "notes": {
+            "format": "markdown",
+            "content": [
+              "#### These are expectation notes \n - you can use markdown \n - or just strings"
+            ]
+          }
         }
     )
     {
         "success": False,
         "meta": {
-            "foo": "bar",
-            "baz": [1,2,3,4]
+          "notes": {
+            "format": "markdown",
+            "content": [
+              "#### These are expectation notes \n - you can use markdown \n - or just strings"
+            ]
+          }
         }
     }
 
@@ -165,5 +176,6 @@ In validation mode, they can be overridden using flags:
 
 .. code-block:: bash
 
-    great_expectations my_dataset.csv my_expectations.json --result_format=BOOLEAN_ONLY --catch_exceptions=False --include_config=True
+    great_expectations validation csv my_dataset.csv my_expectations.json --result_format=BOOLEAN_ONLY --catch_exceptions=False --include_config=True
 
+*last updated*: |lastupdate|

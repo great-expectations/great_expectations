@@ -48,11 +48,25 @@ For continuous data:
 Example continuous partition object:
 
 .. code-block:: python
+    partition = {
+        "bins": [0, 1, 2, 10],
+        "weights": [0.3, 0.3, 0.4]
+    }
 
-  {
-    "bins": [ 0, 1, 2, 10],
-    "weights": [0.3, 0.3, 0.4]
-  }
+>>> json.dumps(partition, indent=2)
+{
+  "bins": [
+    0,
+    1,
+    2,
+    10
+  ],
+  "weights": [
+    0.3,
+    0.3,
+    0.4
+  ]
+}
 
 For discrete/categorical data:
 
@@ -106,3 +120,5 @@ For categorical data, the expect_column_chisquare_test_p_value_to_be_greater_tha
 Distributional Expectations Alternatives
 --------------------------------------------------------------------------------
 The core partition density object used in current expectations focuses on a particular (partition-based) method of "compressing" the data into a testable form, however it may be desireable to use alternative nonparametric approaches (e.g. Fourier transform/wavelets) to describe expected data.
+
+*last updated*: |lastupdate|

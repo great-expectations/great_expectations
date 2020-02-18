@@ -16,6 +16,8 @@ add a new site to the configuration is to copy the "local_site" configuration
 block in great_expectations.yml, give the copy a new name and modify the details
 as needed.
 
+.. _data_docs_site_configuration:
+
 ***************************************
 Data Docs Site Configuration
 ***************************************
@@ -28,7 +30,7 @@ The default Data Docs site configuration looks like this:
     local_site:
       class_name: SiteBuilder
       store_backend:
-        class_name: FixedLengthTupleFilesystemStoreBackend
+        class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
 
 Here is an example of a site configuration from great_expectations.yml with defaults defined explicitly:
@@ -37,11 +39,10 @@ Here is an example of a site configuration from great_expectations.yml with defa
 
   data_docs_sites:
     local_site: # site name
-      datasource_whitelist: '*' # used to restrict the Datasources
       module_name: great_expectations.render.renderer.site_builder
       class_name: SiteBuilder
       store_backend:
-        class_name: FixedLengthTupleFilesystemStoreBackend
+        class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
       site_index_builder:
         class_name: DefaultSiteIndexBuilder
@@ -77,6 +78,25 @@ attribute allows to include (``eq`` for exact match) or exclude (``ne``) validat
 
 .. _customizing_data_docs_store_backend:
 
+Limiting Validation Results
+============================
+
+If you would like to limit rendered Validation Results to the n most-recent, you may
+do so by setting the `validation_results_limit` key in your Data Docs configuration:
+
+.. code-block:: yaml
+
+  data_docs_sites:
+    local_site:
+      class_name: SiteBuilder
+      store_backend:
+        class_name: TupleFilesystemStoreBackend
+        base_directory: uncommitted/data_docs/local_site/
+      site_index_builder:
+        class_name: DefaultSiteIndexBuilder
+        show_cta_footer: true
+        validation_results_limit: 5
+
 Automatically Publishing Data Docs
 =====================================
 
@@ -88,7 +108,7 @@ will automatically save the resulting site to that bucket.
 .. code-block:: yaml
 
   store_backend:
-    class_name: FixedLengthTupleS3StoreBackend
+    class_name: TupleS3StoreBackend
     bucket: data-docs.my_org.org
     prefix:
 
@@ -112,7 +132,7 @@ the validations renderer, and no profiling results are rendered at all.
       local_site:
         class_name: SiteBuilder
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
         site_section_builders:
           expectations:
@@ -162,7 +182,7 @@ suites available to the configured context and validations available in the
 
 .. code-block:: bash
 
-    great_expectations build-docs
+    great_expectations docs build
 
 
 When called without additional arguments, this command will render all the Data
@@ -173,9 +193,9 @@ The command will print out the locations of index.html file for each site.
 
 To disable the web browser opening behavior use `--no-view` option.
 
-To render just one site, use `--site_name SITE_NAME` option.
+To render just one site, use `--site-name SITE_NAME` option.
 
-Here is when the `build-docs` command should be called:
+Here is when the ``docs build`` command should be called:
 
 * when you want to fully rebuild a Data Docs site
 * after a new expectation suite is added or an existing one is edited
@@ -201,18 +221,16 @@ for how to profile a single batch of data and build documentation from the valid
   from great_expectations.data_context.util import safe_mmkdir
   from great_expectations.render.view import DefaultJinjaPageView
 
-  profiling_html_filepath = '/path/into/which/to/save/results'
+  profiling_html_filepath = '/path/into/which/to/save/results.html'
 
   # obtain the DataContext object
   context = ge.data_context.DataContext()
 
-  # load a batch from the data asset
-  data_asset_name = context.normalize_data_asset_name('ratings')
-  context.create_expectation_suite(data_asset_name, 'default'),
+  # load a batch to profile
+  context.create_expectation_suite('default')
   batch = context.get_batch(
-    data_asset_name=data_asset_name,
+    batch_kwargs=context.build_batch_kwargs("my_datasource", "my_batch_kwargs_generator", "my_asset")
     expectation_suite_name='default',
-    batch_kwargs=context.yield_batch_kwargs(data_asset_name)
   )
 
   # run the profiler on the batch - this returns an expectation suite and validation results for this suite
@@ -348,7 +366,7 @@ Before modifying your project configuration, the relevant section looks like thi
     local_site:
       class_name: SiteBuilder
       store_backend:
-        class_name: FixedLengthTupleFilesystemStoreBackend
+        class_name: TupleFilesystemStoreBackend
         base_directory: uncommitted/data_docs/local_site/
 
 This is what it looks like after your changes are added:
@@ -359,7 +377,7 @@ This is what it looks like after your changes are added:
       local_site:
         class_name: SiteBuilder
         store_backend:
-          class_name: FixedLengthTupleFilesystemStoreBackend
+          class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
         site_section_builders:
           expectations:
@@ -389,7 +407,7 @@ Note that if your ``data_docs_sites`` configuration contains a ``site_section_bu
 defaults for anything you would like rendered. By omitting the ``profiling`` key within ``site_section_builders``, your third goal
 is achieved and Data Docs will no longer render Profiling Results pages.
 
-Lastly, to compile your newly-customized Data Docs local site, you run ``great_expectations build-docs`` from the command line.
+Lastly, to compile your newly-customized Data Docs local site, you run ``great_expectations docs build`` from the command line.
 
 ``site_section_builders`` defaults:
 
@@ -454,3 +472,6 @@ Dependencies
 * Vega-Lite 3.2.1
 * Vega-Embed 4.0.0
 
+Data Docs is implemented in the :py:mod:`great_expectations.render` module.
+
+*last updated*: |lastupdate|
