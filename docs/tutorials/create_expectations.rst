@@ -21,7 +21,7 @@ For a broader understanding of the typical workflow read this article: :ref:`typ
 
 Expectations are grouped into Expectations Suites. An Expectation Suite combines multiple expectations into an overall description of a dataset. For example, a team can group all the expectations about the ``rating`` table in the movie ratings database into an Expectation Suite and call it "movieratings.table.expectations".
 
-Each Expectation Suite is saved as a JSON file in the ``great_expectations/expectations`` subdirectory of the Data Context. Users check these files into the version control each time they are updated, same way they treat their source files.
+Each Expectation Suite is saved as a JSON file in the ``great_expectations/expectations`` subdirectory of the Data Context. Users check these files into version control each time they are updated, in the same way they treat their source files.
 
 The lifecycle of an Expectation Suite starts with creating it. Then it goes through a loop of Review and Edit as the team's understanding of the data described by the suite evolves.
 
