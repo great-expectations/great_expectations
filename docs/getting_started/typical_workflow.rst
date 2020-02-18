@@ -1,4 +1,3 @@
-.. _typical_workflow:
 
 Typical Workflow
 ===============================================
@@ -21,7 +20,9 @@ If you have not installed Great Expectations and executed the CLI init command, 
 Setting up a project
 ----------------------------------------
 
-To use Great Expectations in a new data project, a :ref:`Data Context<data_context>` should be initialized. You will see references to the Data Context throughout the documentation. A Data Context provides the core services used in a Great Expectations project.
+To use Great Expectations in a new data project, a :ref:`Data Context<data_context>` needs to be initialized.
+You will see references to the Data Context throughout the documentation.
+A Data Context provides the core services used in a Great Expectations project.
 
 The command line interface (CLI) command ``init`` does the initialization. Run this command in the terminal in the root of your project's repo:
 
@@ -56,7 +57,6 @@ The command creates ``great_expectations`` subdirectory in the current directory
   * They contain sensitive information. For example, to allow the ``great_expectations/great_expectations.yml`` configuration file, it must not contain any database credentials and other secrets. These secrets are stored in the ``uncommitted/config_variables.yml`` that is not checked in.
 
   * They are not a "primary source of truth" and can be regenerated. For example, ``uncommitted/documentation`` contains generated data documentation (this article will cover data documentation in a later section).
-
 
 
 Adding Datasources
@@ -149,7 +149,7 @@ engineers on data applications.
 
 Multiple sites can be configured inside a project, each suitable for a particular use case.
 For example, some data teams use one site that has expectations and validation results from all the runs of their data pipeline for monitoring the pipeline's health,
-and another site that has only the expectations for communicating with their client.
+and another site that has only the expectations for communicating with their downstream clients.
 This is analogous to API documentation in software development.
 
 To set up Data Docs for a project, an entry ``data_docs_sites`` must be defined in the project's configuration file.
@@ -172,19 +172,18 @@ Authoring expectation suites
 
 Earlier in this article we said that capturing and documenting the team's shared understanding of its data as expectations is the core part of this typical workflow.
 
-Expectation Suites combine multiple expectations into an overall description of a dataset. For example, a team can group all the expectations about its ``rating`` table in the movie ratings database from our previous example into an Expectation Suite and call it "movieratings.table.expectations".
+Expectation Suites combine multiple expectations into an overall description of a dataset. For example, a team can group all the expectations about its ``rating`` table in the movie ratings database from our previous example into an Expectation Suite and call it ``movieratings.ratings``. Note these names are completely flexible and the only constraint on the name of a suite is that it must be unique to a given project.
 
-Each Expectation Suite is saved as a JSON file in the ``great_expectations/expectations`` subdirectory of the Data Context. Users check these files into the version control each time they are updated, same way they treat their source files.
+Each Expectation Suite is saved as a JSON file in the ``great_expectations/expectations`` subdirectory of the Data Context. Users check these files into the version control each time they are updated, same way they treat their source files. This discipline allows data quality to be an integral part of versioned pipeline releases.
 
-The lifecycle of an Expectation Suite starts with creating it. Then it goes through a loop of Review and Edit as the team's understanding of the data described by the suite evolves.
-
-We will describe the Create, Review and Edit steps in brief:
+The lifecycle of an Expectation Suite starts with creating it. Then it goes through an iterative loop of Review and Edit as the team's understanding of the data described by the suite evolves.
 
 Create
 ********************************************
 
 
-Expectation Suites are saved as JSON files, so you can create a new suite by writing a file directly. However, just like with other features the preferred way is to let CLI save you time and typos. Run this command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory:
+While you could hand-author an Expectation Suite by writing a JSON file, just like with other features it is easier to let CLI save you time and typos.
+Run this command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory:
 
 
 .. code-block:: bash
@@ -192,58 +191,77 @@ Expectation Suites are saved as JSON files, so you can create a new suite by wri
     great_expectations suite new
 
 
-This command prompts you to name your new Expectation Suite and to select a sample batch of the dataset the suite will describe. Then it profiles the selected sample and adds some initial expectations to the suite. The purpose of these is expectations is to provide examples of what properties of data can be described using Great Expectations. They are only a starting point that the user builds on.
+This command prompts you to name your new Expectation Suite and to select a sample batch of data the suite will describe.
+Then it uses a sample of the selected data to add some initial expectations to the suite.
+The purpose of these is expectations is to provide examples of data assertions, and not to be meaningful.
+They are intended only a starting point for you to build upon.
 
-The command concludes by saving the newly generated Expectation Suite as a JSON file and rendering the expectation suite into an HTML page in the Data Docs website of the Data Context.
+The command concludes by saving the newly generated Expectation Suite as a JSON file and rendering the expectation suite into an HTML page in Data Docs.
 
 
 Review
 ********************************************
 
-Reviewing expectations is best done in Data Docs:
+Reviewing expectations is best done visually in Data Docs. Here's an example of what that might look like:
 
 .. image:: ../images/sample_e_s_view.png
+
+Note that many of these expectations might have meaningless ranges.
+Also note that all expectations will have passed, since this is an example suite only.
+When you interactively edit your suite you will likely see failures as you iterate.
+
 
 Edit
 ********************************************
 
-The best interface for editing an Expectation Suite is a Jupyter notebook.
+Editing an Expectation Suite means adding, removing, and modifying the arguments of existing expectations.
 
-Editing an Expectation Suite means adding expectations, removing expectations, and modifying the arguments of existing expectations.
+
+Similar to writing SQL queries, Expectations are best edited interactively against your data.
+The best interface for this is in a Jupyter notebook where you can get instant feedback as you iterate.
 
 For every expectation type there is a Python method that sets its arguments, evaluates this expectation against a sample batch of data and adds it to the Expectation Suite.
 
-Take a look at the screenshot below. It shows the HTML view and the Python method for the same expectation (``expect_column_distinct_values_to_be_in_set``) side by side:
+The screenshot below shows the Python method and the Data Docs view for the same expectation (``expect_column_distinct_values_to_be_in_set``):
 
-.. image:: ../images/exp_html_python_side_by_side .png
+.. image:: ../images/exp_html_python_side_by_side.png
 
-The CLI provides a command that, given an Expectation Suite, generates a Jupyter notebook to edit it. It takes care of generating a cell for every expectation in the suite and of getting a sample batch of data. The HTML page for each Expectation Suite has the CLI command syntax in order to make it easier for users.
+The Great Expectations CLI command ``suite edit`` generates a Jupyter notebook to edit a suite.
+This command saves you time by generating boilerplate that loads a batch of data and builds a cell for every expectation in the suite.
+This makes editing suites a breeze.
+
+For example, to edit a suite called ``movieratings.ratings`` you would run:
+
+.. code-block:: bash
+
+    great_expectations suite edit movieratings.ratings
+
+These generated Jupyter notebooks can be discarded and should not be kept in source control since they are auto-generated at will, and may contain snippets of actual data.
+
+To make this easier still, the Data Docs page for each Expectation Suite has the CLI command syntax for you.
+Simply press the "How to Edit This Suite" button, and copy/paste the CLI command into your terminal.
 
 .. image:: ../images/edit_e_s_popup.png
-
-The generated Jupyter notebook can be discarded, since it is auto-generated.
-
 
 
 Deploying automated testing into a pipeline
 -------------------------------------------
 
-So far, the team members used Great Expectations to capture and document their expectations from the data.
+So far, your team members used Great Expectations to capture and document their expectations about your data.
 
-It is time for the team to benefit from Great Expectations' automated testing that systematically surfaces errors. A data engineer adds GE :ref:`Validation Operators<validation_operators_and_actions>` to the data pipeline and configures them. The operators will evaluate the new batches of data that arrive in the pipeline against the expectations the team defined in the previous sections.
+It is time for your team to benefit from Great Expectations' automated testing that systematically surfaces errors, discrepancies and surprises lurking in your data.
+A data engineer can add a :ref:`Validation Operators<validation_operators_and_actions>` to your pipeline and configure it.
+These Validation Operators evaluate the new batches of data that flow through your pipeline against the expectations your team defined in the previous sections.
 
-Data pipelines can be implemented with various technologies, but at their core that are DAGs (directed acyclic graphs) of computations over data.
+While data pipelines can be implemented with various technologies, at their core they are all DAGs (directed acyclic graphs) of computations and transformations over data.
 
 This drawing shows an example of a node in a pipeline that loads data from a CSV file into a database table.
 
-Two expectation suites are deployed to monitor data quality at this node.
-
-One suite validates the node's input - the CSV file - before the node executes.
-
-The other suite validates the node's output - the data loaded into the table.
+- Two expectation suites are deployed to monitor data quality in this pipeline.
+- The first suite validates the pipeline's input - the CSV file - before the pipeline executes.
+- The second suite validates the pipeline's output - the data loaded into the table.
 
 .. image:: ../images/pipeline_diagram_two_nodes.png
-
 
 To implement this validation logic, a data engineer inserts a Python code snippet into the pipeline - before and after the node. The code snippet prepares the data for the GE Validation Operator and calls the operator to perform the validation.
 
@@ -280,7 +298,7 @@ Below is an example of this code snippet, with comments that explain what each l
 
     # Get the batch of data you want to validate.
     # Specify the name of the expectation suite that holds the expectations.
-    expectation_suite_name = "movieratings.table.expectations" # this is an example of
+    expectation_suite_name = "movieratings.ratings" # this is an example of
                                                         # a suite that you created
     batch = context.get_batch(batch_kwargs, expectation_suite_name)
 
@@ -313,9 +331,15 @@ In case the data violates some expectations, team members must get involved.
 
 In the world of software testing, if a program does not pass a test, it usually means that the program is wrong and must be fixed.
 
-In data testing, if data does not meet expectations, the response to a failing test is triaged into 3 categories:
+In pipeline and data testing, if data does not meet expectations, the response to a failing test is triaged into 3 categories:
 
-* The data is fine, but the validation result revealed a characteristic that the team was not aware of. The team's data scientists update the expectations to reflect this new information. The user interface for this process is as described in the `Authoring expectation suites` section above: review the validation result in DataDocs, run the CLI `suite edit` command to generate a Jupyter notebook for editing the expectation suite, and then use the generated notebook to update the expectations while testing them against the data batch that did not pass the validation.
-* The data is "broken", but can be recovered. An example would be the users table we mentioned in the previous sections has the dates in the wrong format. Data engineers update the pipeline code to deal with this brokenness and fix it on the fly.
-* The data is "broken beyond repair". The owners of the pipeline go "upstream" to the team (or an external partner) who produced the data and address it with them. The validation result in Data Docs makes it easy to communicate what exactly is broken, since it shows the expectation that was not met and examples of non-conforming data.
-
+1. **The data is fine, and the validation result revealed a characteristic that the team was not aware of.**
+  The team's data scientists or domain experts update the expectations to reflect this new discovery.
+  They use the process described above in the Review and Edit sections to update the expectations while testing them against the data batch that failed validation.
+2. **The data is "broken"**, and **can be recovered.**
+  For example, the users table could have dates in an incorrect format.
+  Data engineers update the pipeline code to deal with this brokenness and fix it on the fly.
+3. **The data is "broken beyond repair".**
+  The owners of the pipeline go upstream to the team (or external partner) who produced the data and address it with them.
+  For example, columns in the users table could be missing entirely.
+  The validation results in Data Docs makes it easy to communicate exactly what is broken, since it shows the expectation that was not met and observed examples of non-conforming data.
