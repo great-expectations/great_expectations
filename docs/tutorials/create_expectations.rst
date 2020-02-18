@@ -81,7 +81,6 @@ The generated Jupyter notebook can be discarded, since it is auto-generated.
 To understand this auto-generated notebook in more depth, jump to this section: :ref:`Jupyter Notebook for Creating and Editing Expectation Suites`.
 
 
-If you cannot use the CLI in your environment (e.g., in a Databricks cluster), you can create and edit an Expectation Suite in a notebook. Jump to this section for details: :ref:`Jupyter Notebook for Creating and Editing Expectation Suites`.
 
 
 
