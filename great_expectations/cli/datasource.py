@@ -846,11 +846,14 @@ Name the new expectation suite"""
         sys.exit(1)
 
     if generator_name is None or generator_asset is None or batch_kwargs is None:
-        datasource_name, generator_name, generator_asset, batch_kwargs = get_batch_kwargs(context,
-                                                                                           datasource_name=datasource_name,
-                                                                                           generator_name=generator_name,
-                                                                                           generator_asset=generator_asset,
-                                                                                           additional_batch_kwargs=additional_batch_kwargs)
+        datasource_name, generator_name, generator_asset, batch_kwargs = get_batch_kwargs(
+            context,
+            datasource_name=datasource_name,
+            generator_name=generator_name,
+            generator_asset=generator_asset,
+            additional_batch_kwargs=additional_batch_kwargs)
+        # In this case, we have "consumed" the additional_batch_kwargs
+        additional_batch_kwargs = {}
 
     if expectation_suite_name is None:
         if generator_asset:
@@ -1036,7 +1039,7 @@ We could not determine the format of the file. What is it?
 
 def _load_query_as_data_asset_from_sqlalchemy_datasource(context, datasource_name,
                                                          generator_name=None,
-                                                         additional_batch_kwargs={}):
+                                                         additional_batch_kwargs=None):
     msg_prompt_query = """
 Enter an SQL query
 """
