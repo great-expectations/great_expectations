@@ -654,7 +654,7 @@ def select_datasource(context, datasource_name=None):
     data_source = None
 
     if datasource_name is None:
-        data_sources = context.list_datasources()
+        data_sources = sorted(context.list_datasources(), key=lambda x: x["name"])
         if len(data_sources) == 0:
             cli_message(msg_no_datasources_configured)
         elif len(data_sources) ==1:
@@ -856,8 +856,14 @@ Name the new expectation suite"""
         additional_batch_kwargs = {}
 
     if expectation_suite_name is None:
+        if generator_asset:
+            default_expectation_suite_name = "{}.warning".format(generator_asset)
+        elif "query" in batch_kwargs:
+            default_expectation_suite_name = "query.warning"
+        else:
+            default_expectation_suite_name = "warning"
         while True:
-            expectation_suite_name = click.prompt(msg_prompt_expectation_suite_name, default="warning", show_default=True)
+            expectation_suite_name = click.prompt(msg_prompt_expectation_suite_name, default=default_expectation_suite_name, show_default=True)
             if expectation_suite_name in existing_suite_names:
                 cli_message(
                     msg_suite_already_exists.format(
@@ -950,7 +956,7 @@ We could not determine the format of the file. What is it?
 
         if option_selection == "1":
 
-            available_data_asset_names = generator.get_available_data_asset_names()["names"]
+            available_data_asset_names = sorted(generator.get_available_data_asset_names()["names"], key=lambda x: x[0])
             available_data_asset_names_str = ["{} ({})".format(name[0], name[1]) for name in
                                               available_data_asset_names]
 
