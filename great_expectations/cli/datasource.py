@@ -518,12 +518,11 @@ def _collect_snowflake_credentials(default_credentials={}):
     #                     show_default=True)
 
     credentials["query"] = {}
-    credentials["query"]["warehouse_name"] = click.prompt("What is warehouse name for the snowflake connection?",
-                        default=default_credentials.get("warehouse_name", ""),
-                        show_default=True)
-    credentials["query"]["role_name"] = click.prompt("What is role name for the snowflake connection?",
-                        default=default_credentials.get("role_name", ""),
-                        show_default=True)
+    credentials["query"]["warehouse"] = click.prompt("What is warehouse name for the snowflake connection?",
+                                                     default=default_credentials.get("warehouse", ""),
+                                                     show_default=True)
+    credentials["query"]["role"] = click.prompt("What is role name for the snowflake connection?",
+                                                default=default_credentials.get("role", ""), show_default=True)
 
     return credentials
 
@@ -1081,7 +1080,6 @@ Enter an SQL query
             else:
                 query = click.prompt(msg_prompt_query, default=None, show_default=False)
 
-
             if query is None:
                 batch_kwargs = temp_generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
             else:
@@ -1093,10 +1091,12 @@ Enter an SQL query
                 Validator(batch=datasource.get_batch(batch_kwargs), expectation_suite=ExpectationSuite("throwaway")).get_dataset()
 
             break
-        except Exception as error: # TODO: catch more specific exception
+        except ge_exceptions.GreatExpectationsError as error:
+            cli_message("""<red>ERROR: {}</red>""".format(str(error)))
+        except KeyError as error:
             cli_message("""<red>ERROR: {}</red>""".format(str(error)))
 
-    return (generator_asset, batch_kwargs)
+    return generator_asset, batch_kwargs
 
 
 def profile_datasource(

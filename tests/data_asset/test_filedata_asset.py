@@ -105,7 +105,8 @@ def test_file_format_map_output():
     expectation = incomplete_file_dat.expect_file_line_regex_match_count_to_equal(regex=r',\S',
                                                                                   expected_count=3,
                                                                                   skip=1,
-                                                                                  result_format="BOOLEAN_ONLY")
+                                                                                  result_format="BOOLEAN_ONLY",
+                                                                                  include_config=False)
     expected_result = ExpectationValidationResult(success=False)
     assert expected_result == expectation
 
@@ -113,7 +114,8 @@ def test_file_format_map_output():
     expectation = null_file_dat.expect_file_line_regex_match_count_to_equal(regex=r',\S',
                                                                             expected_count=3,
                                                                             skip=1,
-                                                                            result_format="BASIC")
+                                                                            result_format="BASIC",
+                                                                            include_config=False)
     expected_result = ExpectationValidationResult(
         success=None,
         result={
@@ -127,7 +129,8 @@ def test_file_format_map_output():
     # White Space File
     expectation = white_space_dat.expect_file_line_regex_match_count_to_equal(regex=r',\S',
                                                                               expected_count=3,
-                                                                              result_format="BASIC")
+                                                                              result_format="BASIC",
+                                                                              include_config=False)
     expected_result = ExpectationValidationResult(
         success=None,
         result={
@@ -142,7 +145,8 @@ def test_file_format_map_output():
     expectation = incomplete_file_dat.expect_file_line_regex_match_count_to_equal(regex=r',\S',
                                                                                   expected_count=3,
                                                                                   skip=1,
-                                                                                  result_format="COMPLETE")
+                                                                                  result_format="COMPLETE",
+                                                                                  include_config=False)
 
     expected_result = ExpectationValidationResult(
         success=False,
@@ -167,4 +171,5 @@ def test_file_format_map_output():
         expectation = incomplete_file_dat.expect_file_line_regex_match_count_to_equal(regex=r',\S',
                                                                                       expected_count=3,
                                                                                       skip=1,
-                                                                                      result_format="JOKE")
+                                                                                      result_format="JOKE",
+                                                                                      include_config=False)

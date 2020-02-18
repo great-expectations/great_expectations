@@ -471,6 +471,7 @@ def evaluate_json_test(data_asset, expectation_type, test):
     """
 
     data_asset.set_default_expectation_argument('result_format', 'COMPLETE')
+    data_asset.set_default_expectation_argument('include_config', False)
 
     if 'title' not in test:
         raise ValueError(
