@@ -113,7 +113,6 @@ If you do not use the CLI, create a new notebook in the``great_expectations/note
     expectation_suite_name = "ratings.table.warning" # this is just an example
     context.create_expectation_suite(
         expectation_suite_name,
-        overwrite_existing=True)
 
 
 If an expectation suite with this name already exists for this data_asset, you will get an error. If you would like to overwrite this expectation suite, set ``overwrite_existing=True``.
