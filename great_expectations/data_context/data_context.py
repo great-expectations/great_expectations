@@ -14,7 +14,7 @@ from marshmallow import ValidationError
 from ruamel.yaml import YAML, YAMLError
 from six import string_types
 
-from great_expectations.core import ExpectationSuite
+from great_expectations.core import ExpectationSuite, get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.util import nested_update
@@ -714,36 +714,49 @@ class BaseDataContext(object):
         self._evaluation_parameter_dependencies_compiled = False
 
     def _store_metrics(self, requested_metrics, validation_results, target_store_name):
+        """
+        requested_metrics is a dictionary like this:
+
+              requested_metrics:
+                *:  # The asterisk here matches *any* expectation suite name
+                  # use the 'kwargs' key to request metrics that are defined by kwargs,
+                  # for example because they are defined only for a particular column
+                  # - column:
+                  #     Age:
+                  #        - expect_column_min_to_be_between.result.observed_value
+                    - statistics.evaluated_expectations
+                    - statistics.successful_expectations
+
+        Args:
+            requested_metrics:
+            validation_results:
+            target_store_name:
+
+        Returns:
+
+        """
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         run_id = validation_results.meta["run_id"]
 
-        for expectation_suite_dependency, metrics_dict in requested_metrics.items():
+        for expectation_suite_dependency, metrics_list in requested_metrics.items():
             if (expectation_suite_dependency != "*") and (expectation_suite_dependency != expectation_suite_name):
                 continue
 
-            # Allow two shorthand notations: providing a single kwargs-less metric
-            # or a list of kwargs-less metrics (e.g. statistics.evaluated_expectations and
-            # statistics.successful_expectations)
-            if isinstance(metrics_dict, str):
-                metrics_dict = {
-                    metrics_dict: [None]
-                }
-            elif isinstance(metrics_dict, list):
-                metrics_dict = {k: [None] for k in metrics_dict}
+            if not isinstance(metrics_list, list):
+                raise ge_exceptions.DataContextError("Invalid requested_metrics configuration: metrics requested for "
+                                                     "each expectation suite must be a list.")
 
-            for metric_name in metrics_dict.keys():
-                metric_kwargs_ids = metrics_dict[metric_name]
-                if metric_kwargs_ids is None or len(metric_kwargs_ids) == 0:
-                    metric_kwargs_ids = [None]
-                for metric_kwargs_id in metric_kwargs_ids:
+            for metric_configuration in metrics_list:
+                metric_configurations = _get_metric_configuration_tuples(metric_configuration)
+                for metric_name, metric_kwargs in metric_configurations:
                     try:
-                        metric_value = validation_results.get_metric(metric_name, metric_kwargs_id)
+                        metric_value = validation_results.get_metric(metric_name, **metric_kwargs)
                         self.stores[target_store_name].set(
                             ValidationMetricIdentifier(
                                 run_id=run_id,
                                 expectation_suite_identifier=ExpectationSuiteIdentifier(expectation_suite_name),
                                 metric_name=metric_name,
-                                metric_kwargs_id=metric_kwargs_id
+                                metric_kwargs_id=get_metric_kwargs_id(metric_name, metric_kwargs)
                             ),
                             metric_value
                         )
@@ -781,6 +794,7 @@ class BaseDataContext(object):
         return self.stores[self.validations_store_name]
 
     def _compile_evaluation_parameter_dependencies(self):
+        self._evaluation_parameter_dependencies = {}
         for key in self.stores[self.expectations_store_name].list_keys():
             expectation_suite = self.stores[self.expectations_store_name].get(key)
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
@@ -1615,3 +1629,38 @@ class ExplorerDataContext(DataContext):
             return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
         else:
             return return_obj
+
+
+def _get_metric_configuration_tuples(metric_configuration, base_kwargs=None):
+    if base_kwargs is None:
+        base_kwargs = {}
+
+    if isinstance(metric_configuration, string_types):
+        return [(metric_configuration, base_kwargs)]
+
+    metric_configurations_list = []
+    for kwarg_name in metric_configuration.keys():
+        if not isinstance(metric_configuration[kwarg_name], dict):
+            raise ge_exceptions.DataContextError("Invalid metric_configuration: each key must contain a "
+                                                 "dictionary.")
+        if kwarg_name == "metric_kwargs_id":  # this special case allows a hash of multiple kwargs
+            for metric_kwargs_id in metric_configuration[kwarg_name].keys():
+                if base_kwargs != {}:
+                    raise ge_exceptions.DataContextError("Invalid metric_configuration: when specifying "
+                                                         "metric_kwargs_id, no other keys or values may be defined.")
+                if not isinstance(metric_configuration[kwarg_name][metric_kwargs_id], list):
+                    raise ge_exceptions.DataContextError("Invalid metric_configuration: each value must contain a "
+                                                         "list.")
+                metric_configurations_list += [(metric_name, {"metric_kwargs_id": metric_kwargs_id}) for metric_name
+                                               in metric_configuration[kwarg_name][metric_kwargs_id]]
+        else:
+            for kwarg_value in metric_configuration[kwarg_name].keys():
+                base_kwargs.update({kwarg_name: kwarg_value})
+                if not isinstance(metric_configuration[kwarg_name][kwarg_value], list):
+                    raise ge_exceptions.DataContextError("Invalid metric_configuration: each value must contain a "
+                                                         "list.")
+                for nested_configuration in metric_configuration[kwarg_name][kwarg_value]:
+                    metric_configurations_list += _get_metric_configuration_tuples(nested_configuration,
+                                                                                   base_kwargs=base_kwargs)
+
+    return metric_configurations_list

@@ -40,6 +40,8 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
     # WARNING
     #
     ###
+    if "metric_kwargs_id" in metric_kwargs:
+        return metric_kwargs["metric_kwargs_id"]
     if "column" in metric_kwargs:
         return "column=" + metric_kwargs.get("column")
     return None
@@ -293,7 +295,9 @@ class ExpectationKwargs(dict):
 
     def isEquivalentTo(self, other):
         try:
-            return len(self) == len(other) and all([
+            n_self_keys = len([k for k in self.keys() if k not in self.ignored_keys])
+            n_other_keys = len([k for k in other.keys() if k not in self.ignored_keys])
+            return n_self_keys == n_other_keys and all([
                 self[k] == other[k] for k in self.keys() if k not in self.ignored_keys
             ])
         except KeyError:
@@ -392,9 +396,26 @@ class ExpectationConfiguration(DictDot):
                     except ParserError:
                         logger.warning("Unable to parse great_expectations urn {}".format(value["$PARAMETER"]))
                         continue
-                    nested_update(dependencies, {evaluation_parameter_id.expectation_suite_name: {
-                        evaluation_parameter_id.metric_name: [evaluation_parameter_id.metric_kwargs_id]
-                    }})
+
+                    if evaluation_parameter_id.metric_kwargs_id is None:
+                        nested_update(dependencies, {
+                            evaluation_parameter_id.expectation_suite_name: [evaluation_parameter_id.metric_name]
+                        })
+                    else:
+                        nested_update(dependencies, {
+                            evaluation_parameter_id.expectation_suite_name: [{
+                                "metric_kwargs_id": {
+                                    evaluation_parameter_id.metric_kwargs_id: [evaluation_parameter_id.metric_name]
+                                }
+                            }]
+                        })
+                    # if evaluation_parameter_id.expectation_suite_name not in dependencies:
+                    #     dependencies[evaluation_parameter_id.expectation_suite_name] = {"metric_kwargs_id": {}}
+                    #
+                    # if evaluation_parameter_id.metric_kwargs_id not in dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"]:
+                    #     dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"][evaluation_parameter_id.metric_kwargs_id] = []
+                    # dependencies[evaluation_parameter_id.expectation_suite_name]["metric_kwargs_id"][
+                    #     evaluation_parameter_id.metric_kwargs_id].append(evaluation_parameter_id.metric_name)
 
         return dependencies
 
@@ -583,7 +604,9 @@ class ExpectationValidationResult(object):
         try:
             return all((
                 self.success == other.success,
-                self.expectation_config == other.expectation_config,
+                (self.expectation_config is None and other.expectation_config is None) or
+                (self.expectation_config is not None and self.expectation_config.isEquivalentTo(
+                    other.expectation_config)),
                 # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
                 # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparision is
                 # handled appropriately.
@@ -613,16 +636,24 @@ class ExpectationValidationResult(object):
             myself['exception_info'] = convert_to_json_serializable(myself['exception_info'])
         return myself
 
-    def get_metric(self, metric_name, metric_kwargs_id):
+    def get_metric(self, metric_name, **kwargs):
+        if not self.expectation_config:
+            raise UnavailableMetricError("No ExpectationConfig found in this ExpectationValidationResult. Unable to "
+                                         "return a metric.")
+
         metric_name_parts = metric_name.split(".")
+        metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
 
         if metric_name_parts[0] == self.expectation_config.expectation_type:
+            curr_metric_kwargs = get_metric_kwargs_id(metric_name, self.expectation_config.kwargs)
+            if metric_kwargs_id != curr_metric_kwargs:
+                raise UnavailableMetricError("Requested metric_kwargs_id (%s) does not match the configuration of this "
+                                             "ExpectationValidationResult (%s)." % (metric_kwargs_id or "None",
+                                                                                    curr_metric_kwargs or "None"))
             if len(metric_name_parts) < 2:
                 raise UnavailableMetricError("Expectation-defined metrics must include a requested metric.")
             elif len(metric_name_parts) == 2:
                 if metric_name_parts[1] == "success":
-                    if metric_kwargs_id != get_metric_kwargs_id(metric_name, self.expectation_config.kwargs):
-                        raise UnavailableMetricError("Configured metric_kwargs differ from requested.")
                     return self.success
                 else:
                     raise UnavailableMetricError("Metric name must have more than two parts for keys other than "
@@ -630,19 +661,13 @@ class ExpectationValidationResult(object):
             elif metric_name_parts[1] == "result":
                 try:
                     if len(metric_name_parts) == 3:
-                        if metric_kwargs_id != get_metric_kwargs_id(metric_name, self.expectation_config.kwargs):
-                            raise UnavailableMetricError("Configured metric_kwargs differ from requested.")
                         return self.result.get(metric_name_parts[2])
                     elif metric_name_parts[2] == "details":
-                        if metric_kwargs_id is not None and \
-                                metric_kwargs_id != get_metric_kwargs_id(metric_name, self.expectation_config.kwargs):
-                            raise UnavailableMetricError("Configured metric_kwargs differ from requested.")
                         return self.result["details"].get(metric_name_parts[3])
                 except KeyError:
                     raise UnavailableMetricError("Unable to get metric {} -- KeyError in "
                                                  "ExpectationValidationResult.".format(metric_name))
-            else:
-                raise UnavailableMetricError("Unrecognized metric name {}".format(metric_name))
+        raise UnavailableMetricError("Unrecognized metric name {}".format(metric_name))
 
 
 class ExpectationValidationResultSchema(Schema):
@@ -722,8 +747,9 @@ class ExpectationSuiteValidationResult(DictDot):
         myself = expectationSuiteValidationResultSchema.dump(myself).data
         return myself
 
-    def get_metric(self, metric_name, metric_kwargs_id):
+    def get_metric(self, metric_name, **kwargs):
         metric_name_parts = metric_name.split(".")
+        metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
 
         metric_value = None
         # Expose overall statistics
@@ -742,7 +768,7 @@ class ExpectationSuiteValidationResult(DictDot):
                 for result in self.results:
                     try:
                         if metric_name_parts[0] == result.expectation_config.expectation_type:
-                            metric_value = result.get_metric(metric_name, metric_kwargs_id)
+                            metric_value = result.get_metric(metric_name, **kwargs)
                             break
                     except UnavailableMetricError:
                         pass

@@ -48,11 +48,25 @@ For continuous data:
 Example continuous partition object:
 
 .. code-block:: python
+    partition = {
+        "bins": [0, 1, 2, 10],
+        "weights": [0.3, 0.3, 0.4]
+    }
 
-  {
-    "bins": [ 0, 1, 2, 10],
-    "weights": [0.3, 0.3, 0.4]
-  }
+>>> json.dumps(partition, indent=2)
+{
+  "bins": [
+    0,
+    1,
+    2,
+    10
+  ],
+  "weights": [
+    0.3,
+    0.3,
+    0.4
+  ]
+}
 
 For discrete/categorical data:
 
