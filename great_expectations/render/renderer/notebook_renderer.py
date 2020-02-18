@@ -102,7 +102,7 @@ Let's now rebuild your Data Docs, which helps you communicate about your data wi
 batch.save_expectation_suite(discard_failed_expectations=False)
 
 # Let's make a simple sortable timestamp. Note this could come from your pipeline runner.
-run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
+run_id = datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
 
 results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch], run_id=run_id)
 expectation_suite_identifier = list(results["details"].keys())[0]
