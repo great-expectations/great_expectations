@@ -87,7 +87,7 @@ To understand this auto-generated notebook in more depth, jump to this section: 
 Jupyter Notebook for Creating and Editing Expectation Suites
 ------------------------------------------------------------
 
-If you used CLI `suite new` command to create this Expectation Suite and then `suite edit` to edit it, CLI generated this notebook in the ``great_expectations/uncommitted/`` folder in your project. There is no need to check this notebook in. Next time you decide to
+If you used the CLI `suite new` command to create an Expectation Suite and then the `suite edit` command to edit it, then the CLI generated a notebook in the ``great_expectations/uncommitted/`` folder for you. There is no need to check this notebook in to version control. Next time you decide to
 edit this Expectation Suite, you will call CLI to generate a new notebook that will reflect the expectations in this suite at that time.
 
 If you do not use CLI, create a new notebook in the``great_expectations/notebooks/`` folder in your project.
