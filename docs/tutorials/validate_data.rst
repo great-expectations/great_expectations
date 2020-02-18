@@ -176,7 +176,9 @@ dictionary will vary depending on the type of Datasource and how it generates Ba
             batch = context.get_batch(batch_kwargs, expectation_suite_name)
             batch.head()
 
-    The examples of ``batch_kwargs`` above can also be the outputs of "Generators" used by Great Expectations. You can read about the default Generators' behavior and how to implement additional Generators in this article: :ref:`batch_generator`.
+    The examples of ``batch_kwargs`` above can also be the outputs of "Generators" used by Great Expectations. You
+can read about the default Generators' behavior and how to implement additional Generators in this article:
+:ref:`batch_kwargs_generator`.
 
 4. Validate the batch
 -----------------------
