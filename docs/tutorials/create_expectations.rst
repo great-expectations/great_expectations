@@ -171,7 +171,7 @@ Select a sample batch of the dataset the suite will describe.
             batch_kwargs = {'path': "PATH_OF_THE_FILE_YOU_WANT_TO_LOAD"}
 
         To instruct ``get_batch`` to read CSV files with specific options (e.g., not to interpret the first line as the
-        header or to use a specific separator), add them to the the ``batch_kwargs``.
+        header or to use a specific separator), add them to the ``batch_kwargs`` under the "reader_options" key.
 
         See the complete list of options for `Spark DataFrameReader <https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader>`__
 
