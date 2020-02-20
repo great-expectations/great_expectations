@@ -3,7 +3,7 @@
 {% endif %}
 
 {# TODO move this logic into a testable method on DefaultJinjaView #}
-{% if batch_kwargs %}
+{% if batch_kwargs and 'datasource' in batch_kwargs %}
   {% set batch_kwargs = batch_kwargs | get_html_escaped_json_string_from_dict %}
   {% set edit_suite_command = "great_expectations suite edit " + expectation_suite_name + " --batch-kwargs " + "&quot;" + batch_kwargs + "&quot;" %}
 {% else %}
