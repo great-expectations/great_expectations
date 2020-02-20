@@ -3,7 +3,6 @@ branches:
   - master
   - develop
   - "/^\\d.*/"
-  - feature/automatic_deployment
 language: python
 cache: pip
 os:
@@ -20,7 +19,6 @@ jobs:
   - stage: test
     dist: trusty
     python: 2.7
-    env: PANDAS=latest
   - stage: test
     dist: trusty
     python: 3.6
@@ -53,7 +51,7 @@ services:
 - postgresql
 install:
 - pip install --only-binary=numpy,scipy numpy scipy
-- if [ -z "$PANDAS"]; then pip install pandas; else pip install pandas==$PANDAS; fi
+- if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
 - pip install -r requirements-dev.txt
 - pip install pytest-slack
 before_script:
