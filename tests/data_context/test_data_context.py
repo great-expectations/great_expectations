@@ -1058,3 +1058,24 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
     finally:
         # Make sure we unset the environment variable we're using
         del os.environ["TEST_CONFIG_FILE_ENV"]
+
+def test_list_expectation_suite_with_no_suites(titanic_data_context):
+    observed = titanic_data_context.list_expectation_suite_names()
+    assert isinstance(observed, list)
+    assert observed == []
+
+def test_list_expectation_suite_with_one_suite(titanic_data_context):
+    titanic_data_context.create_expectation_suite('warning')
+    observed = titanic_data_context.list_expectation_suite_names()
+    assert isinstance(observed, list)
+    assert observed == ['warning']
+
+def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
+    titanic_data_context.create_expectation_suite('a_warning')
+    titanic_data_context.create_expectation_suite('b_warning')
+    titanic_data_context.create_expectation_suite('c_warning')
+
+    observed = titanic_data_context.list_expectation_suite_names()
+    assert isinstance(observed, list)
+    assert observed == ['a_warning', 'b_warning','c_warning']
+    assert len(observed) == 3
