@@ -49,7 +49,7 @@ addons:
 services:
 - postgresql
 install:
-- pip install --only-binary=numpy,scipy numpy>=1.18.1 scipy
+#- pip install --only-binary=numpy,scipy numpy>=1.18.1 scipy
 - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
 - pip install -r requirements-dev.txt
 - pip install pytest-slack
