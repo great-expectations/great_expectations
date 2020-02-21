@@ -1432,6 +1432,12 @@ class DataContext(BaseDataContext):
                 destination_path = os.path.join(subdir_path, notebook_name)
                 shutil.copyfile(notebook, destination_path)
 
+    def list_expectation_suite_names(self):
+        """Lists the available expectation suite names"""
+        sorted_expectation_suite_names = [i.expectation_suite_name for i in self.list_expectation_suites()]
+        sorted_expectation_suite_names.sort()
+        return sorted_expectation_suite_names
+
     def __init__(self, context_root_dir=None):
 
         # Determine the "context root directory" - this is the parent of "great_expectations" dir

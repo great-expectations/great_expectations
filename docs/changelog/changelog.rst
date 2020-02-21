@@ -1,5 +1,9 @@
 .. _changelog:
 
+0.9.2
+-----------------
+* Added a `list_expectation_suites` function to `data_context`, and a corresponding CLI function - `suite list`.
+
 0.9.1
 ------
 * Bugfix for dynamic "How to Edit This Expectation Suite" command in DataDocs
