@@ -27,6 +27,9 @@ jobs:
     dist: xenial
     env: PANDAS=0.25.3
     python: 3.7
+  - stage: test
+    dist: bionic
+    python: 3.8
   - stage: deploy
     python: 3.6
     script:
