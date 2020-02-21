@@ -256,7 +256,7 @@ def suite_list(directory):
         cli_message("1 expectation suite available:")
 
     if len(suite_names) > 1:
-        cli_message(f"{len(suite_names)} expectation suites available:")
+        cli_message("{} expectation suites available:".format(len(suite_names)))
 
     for name in suite_names:
-        cli_message(f"\t{name}")
+        cli_message("\t{}".format(name))

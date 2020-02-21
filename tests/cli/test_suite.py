@@ -701,7 +701,7 @@ def test_suite_list_with_one_suite(
 ):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
-    context.create_expectation_suite("a_warning")
+    context.create_expectation_suite("a.warning")
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
@@ -711,7 +711,7 @@ def test_suite_list_with_one_suite(
     )
     assert result.exit_code == 0
     assert ("1 expectation suite available" in result.output)
-    assert ("\ta_warning" in result.output)
+    assert ("\ta.warning" in result.output)
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
@@ -720,9 +720,9 @@ def test_suite_list_with_multiple_suites(
 ):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
-    context.create_expectation_suite("a_warning")
-    context.create_expectation_suite("b_warning")
-    context.create_expectation_suite("c_warning")
+    context.create_expectation_suite("a.warning")
+    context.create_expectation_suite("b.warning")
+    context.create_expectation_suite("c.warning")
 
 
     runner = CliRunner(mix_stderr=False)
@@ -736,9 +736,9 @@ def test_suite_list_with_multiple_suites(
     print(output)
     assert result.exit_code == 0
     assert "3 expectation suites available:" in output
-    assert "\ta_warning" in output
-    assert "\tb_warning" in output
-    assert "\tc_warning" in output
+    assert "\ta.warning" in output
+    assert "\tb.warning" in output
+    assert "\tc.warning" in output
 
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
