@@ -1,4 +1,5 @@
 .. _changelog:
+
 0.9.2
 -----------------
 * Added a `list_expectation_suites` function to `data_context`, and a corresponding CLI function - `suite list`.
