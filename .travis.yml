@@ -14,13 +14,6 @@ jobs:
   include:
   - stage: test
     dist: trusty
-    python: 2.7
-    env: PANDAS=0.22.0
-  - stage: test
-    dist: trusty
-    python: 2.7
-  - stage: test
-    dist: trusty
     python: 3.6
     env: PANDAS=0.22.0
   - stage: test
@@ -30,6 +23,10 @@ jobs:
   - stage: test
     dist: trusty
     python: 3.6
+  - stage: test
+    dist: xenial
+    env: PANDAS=0.25.3
+    python: 3.7
   - stage: deploy
     python: 3.6
     script:
