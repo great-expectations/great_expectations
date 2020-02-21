@@ -4,6 +4,7 @@ import inspect
 import json
 from datetime import datetime, timedelta
 import logging
+import collections
 from datetime import datetime
 from functools import wraps
 import jsonschema
@@ -63,26 +64,18 @@ class MetaPandasDataset(Dataset):
 
             result_format = parse_result_format(result_format)
 
-            # FIXME temporary fix for missing/ignored value
-            ignore_values = [None, np.nan]
+            series = self[column]
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
-                ignore_values = []
                 # Counting the number of unexpected values can be expensive when there is a large
                 # number of np.nan values.
                 # This only happens on expect_column_values_to_not_be_null expectations.
                 # Since there is no reason to look for most common unexpected values in this case,
                 # we will instruct the result formatting method to skip this step.
+                # FIXME rename to mapped_ignore_values?
+                boolean_mapped_null_values = np.full(series.shape, False)
                 result_format['partial_unexpected_count'] = 0
-
-            series = self[column]
-
-            # FIXME rename to mapped_ignore_values?
-            if len(ignore_values) == 0:
-                boolean_mapped_null_values = np.array(
-                    [False for value in series])
             else:
-                boolean_mapped_null_values = np.array([True if (value in ignore_values) or (pd.isnull(value)) else False
-                                                       for value in series])
+                boolean_mapped_null_values = series.isnull().values
 
             element_count = int(len(series))
 
@@ -612,6 +605,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             return complex,
         elif type_.lower() == "str":
             return str,
+        elif type_.lower() == "list":
+            return list,
+        elif type_.lower() == "dict":
+            return dict,
         elif type_.lower() == "unicode":
             if PY2:
                 return unicode

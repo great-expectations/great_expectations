@@ -1,5 +1,9 @@
 .. _changelog:
 
+0.9.1
+------
+* Bugfix for dynamic "How to Edit This Expectation Suite" command in DataDocs
+
 0.9.0
 -----------------
 

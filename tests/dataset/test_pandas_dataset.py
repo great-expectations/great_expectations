@@ -580,6 +580,7 @@ def test_pandas_deepcopy():
     assert list(df["a"]) == [2, 3, 4]
     assert list(df2["a"]) == [1, 2, 3]
 
+
 def test_ge_value_count_of_object_dtype_column_with_mixed_types():
     """
     Having mixed type values in a object dtype column (e.g., strings and floats)
@@ -593,3 +594,15 @@ def test_ge_value_count_of_object_dtype_column_with_mixed_types():
     value_counts = df.get_column_value_counts("A")
     assert value_counts["I am a string in an otherwise float column"] == 1
 
+
+def test_expect_values_to_be_of_type_list():
+    """
+    Having lists in a Pandas column used to raise a ValueError when parsing to
+    see if any rows had missing values. This test verifies that the issue is fixed.
+    """
+    df = ge.dataset.PandasDataset({
+        'A': [[1, 2], None, [4, 5], 6],
+    })
+
+    validation = df.expect_column_values_to_be_of_type("A", "list")
+    assert not validation.success
