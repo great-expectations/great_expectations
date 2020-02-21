@@ -59,6 +59,7 @@ The following instructions provide a step-by-step overview of how to contribute 
     *  Update your local repository with the most recent code from the main Great Expectations repository, and rebase your branch on top of the latest `develop` branch. We prefer small, incremental commits, because it makes the thought process behind changes easier to review. [Here's some more info on how to keep your forks up-to-date](https://www.atlassian.com/git/tutorials/git-forks-and-upstreams).
     * Fix any merge conflicts that arise from the rebase.
     * Run the tests -- refer to the section below on *Testing* for details
+    * Please add a bullet on your changes to the [changelog](https://github.com/great-expectations/great_expectations/blob/develop/docs/changelog/changelog.rst) under the **Develop** heading.
     * Make sure to add and commit all your changes in this step.
 * Create a PR:
     * Push to the remote fork of your repo
