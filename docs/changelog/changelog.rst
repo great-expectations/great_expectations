@@ -2,7 +2,9 @@
 
 0.9.2
 -----------------
+* Fixes #1095
 * Added a `list_expectation_suites` function to `data_context`, and a corresponding CLI function - `suite list`.
+* CI no longer enforces legacy python tests.
 
 0.9.1
 ------
