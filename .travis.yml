@@ -36,7 +36,6 @@ jobs:
       - git tag --annotate 0.9.1 -m 0.9.1
     deploy:
       provider: pypi
-      server: https://test.pypi.org/legacy/
       edge: true
       on:
         branch: master
