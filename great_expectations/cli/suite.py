@@ -228,3 +228,35 @@ def suite_new(suite, directory, view, batch_kwargs):
     ) as e:
         cli_message("<red>{}</red>".format(e))
         sys.exit(1)
+
+@suite.command(name="list")
+@click.option(
+    "--directory",
+    "-d",
+    default=None,
+    help="The project's great_expectations directory.",
+)
+def suite_list(directory):
+    """Lists available expectation suites."""
+    try:
+        context = DataContext(directory)
+    except ge_exceptions.ConfigNotFoundError as err:
+        cli_message("<red>{}</red>".format(err.message))
+        return
+    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
+        _offer_to_install_new_template(err, context.root_directory)
+        return
+
+    suite_names = context.list_expectation_suite_names()
+    if len(suite_names) == 0:
+        cli_message("No expectation suites available")
+        return
+
+    if len(suite_names) == 1:
+        cli_message("1 expectation suite available:")
+
+    if len(suite_names) > 1:
+        cli_message("{} expectation suites available:".format(len(suite_names)))
+
+    for name in suite_names:
+        cli_message("\t{}".format(name))
