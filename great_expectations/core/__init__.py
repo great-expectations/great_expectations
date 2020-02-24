@@ -668,6 +668,27 @@ class ExpectationValidationResult(object):
             # if invalid comparisons are attempted, the objects are not equal.
             return False
 
+    def __ne__(self, other):
+        # Negated implementation of '__eq__'. TODO the method should be deleted when it will coincide with __eq__.
+        # return not self == other
+        if not isinstance(other, self.__class__):
+            # Delegate comparison to the other instance's __ne__.
+            return NotImplemented
+        try:
+            return any((
+                self.success != other.success,
+                (self.expectation_config is None and other.expectation_config is not None) or
+                (self.expectation_config is not None and not self.expectation_config.isEquivalentTo(
+                    other.expectation_config)),
+                # TODO should it be wrapped in all()/any()? Since it is the only difference to __eq__:
+                (self.result is None and other.result is not None) or (self.result != other.result),
+                self.meta != other.meta,
+                self.exception_info != other.exception_info
+            ))
+        except (ValueError, TypeError):
+            # if invalid comparisons are attempted, the objects are not equal.
+            return True
+
     def __repr__(self):
         if in_jupyter_notebook():
             json_dict = self.to_json_dict()

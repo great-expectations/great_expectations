@@ -16,6 +16,7 @@ from dateutil.parser import parse
 from great_expectations.core import (
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
+    ExpectationConfigurationSchema,
 )
 from great_expectations.dataset import (
     PandasDataset,
@@ -26,6 +27,7 @@ from great_expectations.profile import ColumnsExistProfiler
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
+expectationConfigurationSchema = ExpectationConfigurationSchema()
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
