@@ -15,7 +15,246 @@ def critical_suite():
     schema = ExpectationSuiteSchema(strict=True)
     critical_suite = {
         "expectation_suite_name": "critical",
-        "meta": {"great_expectations.__version__": "0.7.10"},
+        "meta": {
+            "great_expectations.__version__": "0.9.1+9.gf17eff1f.dirty",
+            "columns": {
+              "npi": {
+                "description": ""
+              },
+              "nppes_provider_last_org_name": {
+                "description": ""
+              },
+              "nppes_provider_first_name": {
+                "description": ""
+              },
+              "nppes_provider_mi": {
+                "description": ""
+              },
+              "nppes_credentials": {
+                "description": ""
+              },
+              "nppes_provider_gender": {
+                "description": ""
+              },
+              "nppes_entity_code": {
+                "description": ""
+              },
+              "nppes_provider_street1": {
+                "description": ""
+              },
+              "nppes_provider_street2": {
+                "description": ""
+              },
+              "nppes_provider_city": {
+                "description": ""
+              },
+              "nppes_provider_zip": {
+                "description": ""
+              },
+              "nppes_provider_ruca": {
+                "description": ""
+              },
+              "nppes_provider_state": {
+                "description": ""
+              },
+              "nppes_provider_country": {
+                "description": ""
+              },
+              "provider_type": {
+                "description": ""
+              },
+              "medicare_participation_indicator": {
+                "description": ""
+              },
+              "number_of_hcpcs": {
+                "description": ""
+              },
+              "total_services": {
+                "description": ""
+              },
+              "total_unique_benes": {
+                "description": ""
+              },
+              "total_submitted_chrg_amt": {
+                "description": ""
+              },
+              "total_medicare_allowed_amt": {
+                "description": ""
+              },
+              "total_medicare_payment_amt": {
+                "description": ""
+              },
+              "total_medicare_stnd_amt": {
+                "description": ""
+              },
+              "drug_suppress_indicator": {
+                "description": ""
+              },
+              "number_of_drug_hcpcs": {
+                "description": ""
+              },
+              "total_drug_services": {
+                "description": ""
+              },
+              "total_drug_unique_benes": {
+                "description": ""
+              },
+              "total_drug_submitted_chrg_amt": {
+                "description": ""
+              },
+              "total_drug_medicare_allowed_amt": {
+                "description": ""
+              },
+              "total_drug_medicare_payment_amt": {
+                "description": ""
+              },
+              "total_drug_medicare_stnd_amt": {
+                "description": ""
+              },
+              "med_suppress_indicator": {
+                "description": ""
+              },
+              "number_of_med_hcpcs": {
+                "description": ""
+              },
+              "total_med_services": {
+                "description": ""
+              },
+              "total_med_unique_benes": {
+                "description": ""
+              },
+              "total_med_submitted_chrg_amt": {
+                "description": ""
+              },
+              "total_med_medicare_allowed_amt": {
+                "description": ""
+              },
+              "total_med_medicare_payment_amt": {
+                "description": ""
+              },
+              "total_med_medicare_stnd_amt": {
+                "description": ""
+              },
+              "beneficiary_average_age": {
+                "description": ""
+              },
+              "beneficiary_age_less_65_count": {
+                "description": ""
+              },
+              "beneficiary_age_65_74_count": {
+                "description": ""
+              },
+              "beneficiary_age_75_84_count": {
+                "description": ""
+              },
+              "beneficiary_age_greater_84_count": {
+                "description": ""
+              },
+              "beneficiary_female_count": {
+                "description": ""
+              },
+              "beneficiary_male_count": {
+                "description": ""
+              },
+              "beneficiary_race_white_count": {
+                "description": ""
+              },
+              "beneficiary_race_black_count": {
+                "description": ""
+              },
+              "beneficiary_race_api_count": {
+                "description": ""
+              },
+              "beneficiary_race_hispanic_count": {
+                "description": ""
+              },
+              "beneficiary_race_natind_count": {
+                "description": ""
+              },
+              "beneficiary_race_other_count": {
+                "description": ""
+              },
+              "beneficiary_nondual_count": {
+                "description": ""
+              },
+              "beneficiary_dual_count": {
+                "description": ""
+              },
+              "beneficiary_cc_afib_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_alzrdsd_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_asthma_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_cancer_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_chf_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_ckd_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_copd_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_depr_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_diab_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_hyperl_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_hypert_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_ihd_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_ost_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_raoa_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_schiot_percent": {
+                "description": ""
+              },
+              "beneficiary_cc_strk_percent": {
+                "description": ""
+              },
+              "beneficiary_avg_risk_score": {
+                "description": ""
+              }
+            },
+            "citations": [
+                {
+                    "batch_kwargs": {
+                        "path": "/Users/foo/data/10k.csv",
+                        "datasource": "files_datasource"
+                      }
+                }
+            ],
+            "notes": {
+              "format": "markdown",
+              "content": [
+                "#### This is an _example_ suite\n\n- This suite was made by quickly glancing at 1000 rows of your data.\n- This is **not a production suite**. It is meant to show examples of expectations.\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\n"
+              ]
+            },
+            "SampleExpectationsDatasetProfiler": {
+              "created_by": "SampleExpectationsDatasetProfiler",
+              "created_at": 1582838223.843476,
+              "batch_kwargs": {
+                "path": "/Users/foo/data/10k.csv",
+                "datasource": "files_datasource"
+              }
+            }
+          },
         "expectations": [
             {
                 "expectation_type": "expect_column_values_to_not_be_null",
@@ -273,7 +512,13 @@ def warning_suite():
 
 @pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_simple_suite(critical_suite):
-    obs = NotebookRenderer().render(critical_suite, {"path": "foo/data"})
+    obs = NotebookRenderer().render(
+        critical_suite,
+        {
+            'path': '/Users/foo/data/10k.csv',
+            'datasource': 'files_datasource'
+        }
+    )
     assert isinstance(obs, dict)
     expected = {
         "nbformat": 4,
@@ -289,7 +534,7 @@ def test_simple_suite(critical_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\ncontext.create_expectation_suite(\n    expectation_suite_name,\n    overwrite_existing=True)\n\nbatch_kwargs = {\'path\': \'../../foo/data\'}\nbatch = context.get_batch(batch_kwargs, expectation_suite_name)\nbatch.head()',
+                "source": '''from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = critical\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {\n    'path': '/Users/foo/data/10k.csv',\n    'datasource': 'files_datasource'}\nbatch = context.get_batch(batch_kwargs, suite.expectation_suite_name)\nbatch.head()''',
                 "outputs": []
             },
             {

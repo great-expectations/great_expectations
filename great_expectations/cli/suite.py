@@ -92,8 +92,15 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
         return
 
     suite = _load_suite(context, suite)
+    try:
+        batch_kwargs = suite.meta["citations"][0]["batch_kwargs"]
+    except (KeyError, IndexError) as e:
+        batch_kwargs = None
 
-    if batch_kwargs:
+    # TODO this logic needs cleaning
+    if isinstance(batch_kwargs, dict):
+        pass
+    elif batch_kwargs:
         try:
             batch_kwargs = json.loads(batch_kwargs)
             if datasource:
