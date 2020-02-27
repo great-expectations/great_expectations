@@ -31,6 +31,7 @@ class DataContextConfig(DictDot):
             stores,
             data_docs_sites,
             config_variables_file_path=None,
+            telemetry_config=None,
             commented_map=None
     ):
         if commented_map is None:
@@ -48,6 +49,7 @@ class DataContextConfig(DictDot):
         self.stores = stores
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
+        self.telemetry_config = telemetry_config
 
     @property
     def commented_map(self):
@@ -79,6 +81,7 @@ class DataContextConfig(DictDot):
             "stores": self.stores,
             "data_docs_sites": self.data_docs_sites,
             "config_variables_file_path": self.config_variables_file_path,
+            "telemetry_config": self.telemetry_config
         }
         if self.config_variables_file_path is None:
             del myself['config_variables_file_path']

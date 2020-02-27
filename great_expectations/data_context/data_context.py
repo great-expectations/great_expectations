@@ -32,6 +32,7 @@ from great_expectations.profile.basic_dataset_profiler import (
 )
 
 import great_expectations.exceptions as ge_exceptions
+from ..core.logging import initialize_telemetry
 
 from ..validator.validator import Validator
 from .templates import (
@@ -148,6 +149,12 @@ class BaseDataContext(object):
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
+
+        data_context_id = initialize_telemetry(
+            **self._project_config_with_variables_substituted.get("telemetry_config", {"enabled": True}))
+        # TODO: update data_context_id if needed
+        logger.info("Initialized DataContext",
+                    extra={"telemetry": True, "payload": "foo", "action": "initialize_context"})
 
     def _build_store(self, store_name, store_config):
         new_store = instantiate_class_from_config(
