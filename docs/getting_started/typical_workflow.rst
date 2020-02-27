@@ -280,7 +280,7 @@ Below is an example of this code snippet, with comments that explain what each l
     # options for the project's GE Data Context.
     context = ge.data_context.DataContext()
 
-    datasource = "my_production_postgres" # a datasource configured in your great_expectations.yml
+    datasource_name = "my_production_postgres" # a datasource configured in your great_expectations.yml
 
     # Tell GE how to fetch the batch of data that should be validated...
 
