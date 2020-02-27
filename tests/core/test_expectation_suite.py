@@ -203,3 +203,9 @@ def test_expectation_suite_deepcopy(baseline_suite):
     suite_deepcopy.expectations[0].meta["notes"] = "a different note"
     # deepcopy on deep attributes does not propagate
     assert baseline_suite.expectations[0].meta["notes"] == "This is an expectation."
+
+
+def test_add_citation(baseline_suite):
+    assert "citations" not in baseline_suite.meta or len(baseline_suite.meta["citations"]) == 0
+    baseline_suite.add_citation("hello!")
+    assert baseline_suite.meta["citations"][0].get("comment") == "hello!"

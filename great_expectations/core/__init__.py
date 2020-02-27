@@ -3,6 +3,7 @@ import json
 # PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 from collections import namedtuple
 from copy import deepcopy
+import datetime
 
 from six import string_types
 
@@ -471,6 +472,17 @@ class ExpectationSuite(object):
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
+
+    def add_citation(self, comment, batch_kwargs=None, batch_markers=None, batch_parameters=None, citation_date=None):
+        if "citations" not in self.meta:
+            self.meta["citations"] = []
+        self.meta["citations"].append({
+            "citation_date": citation_date or datetime.datetime.now().isoformat(),
+            "batch_kwargs": batch_kwargs,
+            "batch_markers": batch_markers,
+            "batch_parameters": batch_parameters,
+            "comment": comment
+        })
 
     def isEquivalentTo(self, other):
         """
