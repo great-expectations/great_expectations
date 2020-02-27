@@ -4,7 +4,7 @@ import uuid
 
 import time
 
-from aws_logging_handlers.S3 import S3Handler
+from .s3_logging_handler import S3Handler
 
 DEFAULT_TELEMETRY_BUCKET = "io.greatexpectations.telemetry"
 logger = logging.getLogger(__name__)
