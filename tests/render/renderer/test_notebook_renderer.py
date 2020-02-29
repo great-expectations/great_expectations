@@ -534,7 +534,25 @@ def test_simple_suite(critical_suite):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": '''from datetime import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = critical\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {\n    'path': '/Users/foo/data/10k.csv',\n    'datasource': 'files_datasource'}\nbatch = context.get_batch(batch_kwargs, suite.expectation_suite_name)\nbatch.head()''',
+                "source": '''\
+from datetime import datetime
+import great_expectations as ge
+import great_expectations.jupyter_ux
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
+
+context = ge.data_context.DataContext()
+
+# Feel free to change the name of your suite here. Renaming this will not
+# remove the other one.
+expectation_suite_name = "critical"
+suite = context.get_expectation_suite(expectation_suite_name)
+suite.expectations = []
+
+batch_kwargs = {
+    'path': '/Users/foo/data/10k.csv',
+    'datasource': 'files_datasource'}
+batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch.head()''',
                 "outputs": []
             },
             {
