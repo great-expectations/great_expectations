@@ -2,6 +2,8 @@ import os
 
 import autopep8
 import nbformat
+from dateutil import parser
+from datetime import datetime
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.render.renderer.renderer import Renderer
@@ -50,7 +52,7 @@ class NotebookRenderer(Renderer):
     def add_header(self, suite_name, batch_kwargs):
         self.add_markdown_cell(
             """# Edit Your Expectation Suite
-Use this notebook to recreate and modify your expectation suite for:
+Use this notebook to recreate and modify your expectation suite:
 
 **Expectation Suite Name**: `{}`
 
@@ -59,12 +61,8 @@ We'd love it if you **reach out to us on** the [**Great Expectations Slack Chann
             )
         )
 
-        # TODO such brittle hacks to fix paths
-        if "path" in batch_kwargs.keys():
-            base_dir = batch_kwargs["path"]
-            if not base_dir.startswith("/"):
-                batch_kwargs["path"] = os.path.join("../../", base_dir)
-
+        if not batch_kwargs:
+            batch_kwargs = dict()
         self.add_code_cell(
             """\
 from datetime import datetime
@@ -85,7 +83,7 @@ batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
 batch.head()""".format(
                 suite_name, batch_kwargs
             ),
-            lint=True
+            lint=True,
         )
 
     def add_footer(self):
@@ -187,20 +185,18 @@ context.open_data_docs(validation_result_identifier)"""
         with open(notebook_file_path, "w") as f:
             nbformat.write(notebook, f)
 
-    def render(self, suite, batch_kwargs):
+    def render(self, suite, batch_kwargs=None):
         """
         Render a notebook dict from an expectation suite.
         """
         if not isinstance(suite, ExpectationSuite):
             raise RuntimeWarning("render must be given an ExpectationSuite.")
-        # TODO check for proper BatchKwargs type
-        if not isinstance(batch_kwargs, dict):
-            raise RuntimeWarning("render must be given a dictionary of batch_kwargs.")
 
         self.notebook = nbformat.v4.new_notebook()
 
         suite_name = suite.expectation_suite_name
 
+        batch_kwargs = self._get_batch_kwargs(suite, batch_kwargs)
         self.add_header(suite_name, batch_kwargs)
         self.add_authoring_intro()
         self.add_expectation_cells_from_suite(suite.expectations)
@@ -208,11 +204,12 @@ context.open_data_docs(validation_result_identifier)"""
 
         return self.notebook
 
-    def render_to_disk(
-        self, suite, batch_kwargs, notebook_file_path
-    ):
+    def render_to_disk(self, suite, notebook_file_path, batch_kwargs=None):
         """
         Render a notebook to disk from an expectation suite.
+
+        If batch_kwargs are passed they will override any found in suite
+        citations.
 
         :param data_asset_name:
         :param batch_kwargs:
@@ -231,3 +228,39 @@ Add expectations by calling specific expectation methods on the `batch` object. 
 
 You can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/expectation_glossary.html?utm_source=notebook&utm_medium=create_expectations)**."""
         )
+
+    def _get_batch_kwargs(self, suite, batch_kwargs):
+        if isinstance(batch_kwargs, dict):
+            return self._fix_path_in_batch_kwargs(batch_kwargs)
+
+        citations = suite.meta.get("citations")
+        if not citations:
+            return self._fix_path_in_batch_kwargs(batch_kwargs)
+
+        batch_kwargs = self._find_most_recent_batch_kwargs(citations)
+        return self._fix_path_in_batch_kwargs(batch_kwargs)
+
+    @staticmethod
+    def _find_most_recent_batch_kwargs(citations):
+        most_recent_citation_date = datetime.min
+        most_recent_batch_kwargs = None
+        for citation in citations:
+            try:
+                citation_date = parser.parse(citation["citation_date"])
+                if citation_date > most_recent_citation_date:
+                    most_recent_citation_date = citation_date
+                    if "batch_kwargs" in citation:
+                        most_recent_batch_kwargs = citation["batch_kwargs"]
+            except (TypeError, KeyError) as e:
+                pass
+
+        return most_recent_batch_kwargs
+
+    @staticmethod
+    def _fix_path_in_batch_kwargs(batch_kwargs):
+        if batch_kwargs and "path" in batch_kwargs.keys():
+            base_dir = batch_kwargs["path"]
+            if not os.path.isabs(base_dir):
+                batch_kwargs["path"] = os.path.join("..", "..", base_dir)
+
+        return batch_kwargs

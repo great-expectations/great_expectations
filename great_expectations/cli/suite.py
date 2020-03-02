@@ -144,7 +144,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
     notebook_name = "{}.ipynb".format(suite.expectation_suite_name)
 
     notebook_path = os.path.join(context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
-    NotebookRenderer().render_to_disk(suite, batch_kwargs, notebook_path)
+    NotebookRenderer().render_to_disk(suite, notebook_path, batch_kwargs)
 
     cli_message(
         "To continue editing this suite, run <green>jupyter notebook {}</green>".format(
