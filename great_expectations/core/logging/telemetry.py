@@ -11,13 +11,13 @@ logger = logging.getLogger(__name__)
 
 
 class TelemetryRecord(object):
-    def __init__(self, name, datetime, data_context_id, message, action=None):
+    def __init__(self, name, datetime, data_context_id, message, payload=None):
         self._record = {
             "name": name,
             "datetime": datetime,
             "data_context_id": data_context_id,
             "message": message,
-            "action": action,
+            "payload": payload,
         }
 
     def to_json(self) -> str:
@@ -31,7 +31,7 @@ class DataContextLoggingFilter(logging.Filter):
 
     def filter(self, record: logging.LogRecord) -> int:
         record.__dict__["data_context_id"] = self._data_context_id
-        if record.__dict__["telemetry"] is True:
+        if record.__dict__.get("telemetry") is True:
             return True
         return False
 
@@ -47,7 +47,7 @@ class JsonRecordFormatter(logging.Formatter):
             datetime=self.formatTime(record=record),
             data_context_id=record.__dict__.get("data_context_id"),
             message=record.msg,
-            action=record.__dict__.get("action")
+            payload=record.__dict__.get("payload")
         )
         return telemetry_record.to_json()
 
