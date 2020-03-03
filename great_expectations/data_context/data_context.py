@@ -154,7 +154,12 @@ class BaseDataContext(object):
             **self._project_config_with_variables_substituted.get("telemetry_config", {"enabled": True}))
         # TODO: update data_context_id if needed
         logger.info("Initialized DataContext",
-                    extra={"telemetry": True, "payload": "foo", "action": "initialize_context"})
+                    extra={"telemetry": True,
+                           "payload": {
+                               "action": "initialize_context",
+                               "datasources": [datasource["class_name"] for (_, datasource)
+                                               in self._project_config.datasources.items()]
+                           }})
 
     def _build_store(self, store_name, store_config):
         new_store = instantiate_class_from_config(
@@ -534,6 +539,13 @@ class BaseDataContext(object):
             run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
             logger.info("Setting run_id to: {}".format(run_id))
 
+        logger.info("Running validation operator.", extra={
+            "telemetry": True,
+            "payload": {
+                "action": "run_validation_operator",
+                "n_assets": len(assets_to_validate)
+            }
+        })
         return self.validation_operators[validation_operator_name].run(
             assets_to_validate=assets_to_validate,
             run_id=run_id,
