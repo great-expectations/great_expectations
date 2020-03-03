@@ -3,6 +3,7 @@ branches:
   - master
   - develop
   - "/^\\d.*/"
+  - "aylr.*"
 language: python
 cache: pip
 os:
