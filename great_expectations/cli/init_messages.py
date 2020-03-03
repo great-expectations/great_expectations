@@ -18,11 +18,11 @@ First, Great Expectations will create a new directory:
     |-- expectations
     |-- great_expectations.yml
     |-- notebooks
-    |   |-- pandas
-    |   |-- spark
-    |   |-- sql
+    |   |-- pandas
+    |   |-- spark
+    |   |-- sql
     |-- plugins
-    |   |-- ...
+    |   |-- ...
     |-- uncommitted
         |-- config_variables.yml
         |-- ...
