@@ -15,16 +15,16 @@ jobs:
   include:
   - stage: test
   - os: windows
-    name: "Python 3.7 on Windows"
+    name: "Python 3.6.7 on Windows"
     language: sh
-    python: "3.7"
+    python: "3.6.7"
     before_install:
-      - choco install python3
-      - choco install postgresql
+      - choco install python --version=3.6.7
       - export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
       - pip3 install numpy scipy
       - pip3 install --upgrade pytest
       - pip3 install codecov
+      - choco install postgresql
   - stage: test
     dist: trusty
     python: 3.6
