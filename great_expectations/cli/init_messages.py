@@ -15,17 +15,17 @@ LETS_BEGIN_PROMPT = """In a few minutes you will see Great Expectations in actio
 First, Great Expectations will create a new directory:
 
     great_expectations
-    ├── expectations
-    ├── great_expectations.yml
-    ├── notebooks
-    │   ├── pandas
-    │   ├── spark
-    │   └── sql
-    ├── plugins
-    │   └── ...
-    └── uncommitted
-        ├── config_variables.yml
-        └── ...
+    |-- expectations
+    |-- great_expectations.yml
+    |-- notebooks
+    |   |-- pandas
+    |   |-- spark
+    |   |-- sql
+    |-- plugins
+    |   |-- ...
+    |-- uncommitted
+        |-- config_variables.yml
+        |-- ...
 
 OK to proceed?"""
 
