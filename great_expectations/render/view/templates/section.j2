@@ -1,4 +1,4 @@
-<div id="section-{{section_loop.index|default(1)}}" class="ge-section container-fluid mb-1 pb-1 px-0">
+<div id="section-{{section_loop.index|default(1)}}" class="ge-section container-fluid mb-1 pb-1 pl-sm-2 px-0">
     <div class="row" {{ section | render_styling_from_string_template }}>
         {% set section_loop = loop -%}
         {% for content_block in section["content_blocks"] -%}
