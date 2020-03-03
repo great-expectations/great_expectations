@@ -5,6 +5,7 @@ from collections import namedtuple
 from copy import deepcopy
 import datetime
 
+from dateutil import parser
 from six import string_types
 
 from marshmallow import Schema, fields, ValidationError, post_load, pre_dump
@@ -549,6 +550,26 @@ class ExpectationSuite(object):
             nested_update(dependencies, t)
 
         return dependencies
+
+    def get_most_recent_citation_containing_batch_kwargs(self):
+        citations = self.meta.get("citations")
+        if not citations:
+            return None
+
+        most_recent_citation_date = datetime.datetime.min
+        most_recent_citation_with_batch_kwargs = None
+
+        for citation in citations:
+            try:
+                citation_date = parser.parse(citation["citation_date"])
+                if citation_date > most_recent_citation_date:
+                    most_recent_citation_date = citation_date
+                    if "batch_kwargs" in citation and citation.get("batch_kwargs"):
+                        most_recent_citation_with_batch_kwargs = citation
+            except (TypeError, KeyError) as e:
+                pass
+
+        return most_recent_citation_with_batch_kwargs
 
 
 class ExpectationSuiteSchema(Schema):

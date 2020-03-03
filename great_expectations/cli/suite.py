@@ -82,6 +82,8 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
     """
+    batch_kwargs_json = batch_kwargs
+    batch_kwargs = None
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
@@ -92,17 +94,11 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
         return
 
     suite = _load_suite(context, suite)
-    try:
-        batch_kwargs = suite.meta["citations"][0]["batch_kwargs"]
-    except (KeyError, IndexError) as e:
-        batch_kwargs = None
+    citation = suite.get_most_recent_citation_containing_batch_kwargs()
 
-    # TODO this logic needs cleaning
-    if isinstance(batch_kwargs, dict):
-        pass
-    elif batch_kwargs:
+    if batch_kwargs_json:
         try:
-            batch_kwargs = json.loads(batch_kwargs)
+            batch_kwargs = json.loads(batch_kwargs_json)
             if datasource:
                 batch_kwargs["datasource"] = datasource
             _batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
@@ -116,7 +112,10 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
         except ValueError as ve:
             cli_message("<red>Please check that your batch_kwargs are able to load a batch.\n{}</red>".format(ve))
             sys.exit(1)
-    else:
+    elif citation:
+        batch_kwargs = citation.get("batch_kwargs")
+
+    if not batch_kwargs:
         cli_message("""
 A batch of data is required to edit the suite - let's help you to specify it."""
         )

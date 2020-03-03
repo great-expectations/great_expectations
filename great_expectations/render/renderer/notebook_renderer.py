@@ -237,24 +237,12 @@ You can see all the available expectations in the **[expectation glossary](https
         if not citations:
             return self._fix_path_in_batch_kwargs(batch_kwargs)
 
-        batch_kwargs = self._find_most_recent_batch_kwargs(citations)
+        citation = suite.get_most_recent_citation_containing_batch_kwargs()
+        if not citation:
+            return None
+
+        batch_kwargs = citation.get("batch_kwargs")
         return self._fix_path_in_batch_kwargs(batch_kwargs)
-
-    @staticmethod
-    def _find_most_recent_batch_kwargs(citations):
-        most_recent_citation_date = datetime.min
-        most_recent_batch_kwargs = None
-        for citation in citations:
-            try:
-                citation_date = parser.parse(citation["citation_date"])
-                if citation_date > most_recent_citation_date:
-                    most_recent_citation_date = citation_date
-                    if "batch_kwargs" in citation:
-                        most_recent_batch_kwargs = citation["batch_kwargs"]
-            except (TypeError, KeyError) as e:
-                pass
-
-        return most_recent_batch_kwargs
 
     @staticmethod
     def _fix_path_in_batch_kwargs(batch_kwargs):

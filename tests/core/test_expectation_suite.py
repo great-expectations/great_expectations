@@ -209,3 +209,33 @@ def test_add_citation(baseline_suite):
     assert "citations" not in baseline_suite.meta or len(baseline_suite.meta["citations"]) == 0
     baseline_suite.add_citation("hello!")
     assert baseline_suite.meta["citations"][0].get("comment") == "hello!"
+
+
+def test_get_most_recent_citation_with_batch_kwargs_with_no_citations(baseline_suite):
+    assert "citations" not in baseline_suite.meta
+    assert baseline_suite.get_most_recent_citation_containing_batch_kwargs() is None
+
+
+def test_get_most_recent_citation_with_batch_kwargs_with_citations_without_batch_kwargs(baseline_suite):
+    assert "citations" not in baseline_suite.meta
+    baseline_suite.add_citation("hello")
+    assert baseline_suite.get_most_recent_citation_containing_batch_kwargs() is None
+
+
+def test_get_most_recent_citation_with_batch_kwargs_with_multiple_citations_containing_batch_kwargs(baseline_suite):
+    assert "citations" not in baseline_suite.meta
+    baseline_suite.add_citation(
+        "first", batch_kwargs={"path": "first"}, citation_date="2000-01-01"
+    )
+    baseline_suite.add_citation(
+        "second", batch_kwargs={"path": "second"}, citation_date="2001-01-01"
+    )
+    baseline_suite.add_citation("third", citation_date="2002-01-01")
+
+    assert baseline_suite.get_most_recent_citation_containing_batch_kwargs() == {
+        "batch_kwargs": {"path": "second"},
+        "batch_markers": None,
+        "batch_parameters": None,
+        "citation_date": "2001-01-01",
+        "comment": "second",
+    }
