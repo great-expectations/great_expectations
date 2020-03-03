@@ -38,6 +38,8 @@ class DataContextConfig(DictDot):
             commented_map = CommentedMap()
         self._commented_map = commented_map
         self._config_version = config_version
+        if datasources is None:
+            datasources = {}
         self.datasources = datasources
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name

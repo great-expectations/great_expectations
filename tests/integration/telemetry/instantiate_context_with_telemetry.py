@@ -3,6 +3,7 @@
 import sys
 import time
 import socket
+import pandas as pd
 
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
@@ -19,12 +20,26 @@ def main(nap_duration=1, block_network=False, enable_telemetry=True):
     print("Beginning to construct a DataContext.")
     config = DataContextConfig(
                 config_version=1,
-                datasources={},
+                datasources={
+                    "pandas": {
+                        "class_name": "PandasDatasource"
+                    }
+                },
                 expectations_store_name="expectations",
                 validations_store_name="validations",
                 evaluation_parameter_store_name="evaluation_parameters",
                 plugins_directory=None,
-                validation_operators={},
+                validation_operators={
+                    'action_list_operator': {
+                        "class_name": "ActionListValidationOperator",
+                        "action_list": [{
+                            "name": "store_validation_result",
+                            "action": {
+                                "class_name": "StoreValidationResultAction"
+                            }
+                        }]
+                    }
+                },
                 stores={
                     "expectations": {"class_name": "ExpectationsStore"},
                     "validations": {"class_name": "ValidationsStore"},
@@ -39,9 +54,21 @@ def main(nap_duration=1, block_network=False, enable_telemetry=True):
                 },
                 commented_map=None,
             )
-    _ = BaseDataContext(config)
-
+    context = BaseDataContext(config)
     print("Done constructing a DataContext.")
+    print("Building a suite and validating.")
+    df = pd.DataFrame({"a": [1, 2, 3]})
+    context.create_expectation_suite("testing.batch")
+    batch = context.get_batch(batch_kwargs={
+        "datasource": "pandas",
+        "dataset": df
+    }, expectation_suite_name="testing.batch")
+    batch.expect_column_values_to_be_between("a", 0, 5)
+    batch.expect_column_to_exist("a")
+    batch.save_expectation_suite()
+    res = context.run_validation_operator('action_list_operator', [batch])
+    print(res)
+    print("Beginning a nap.")
     time.sleep(nap_duration)
     print("Ending a long nap.")
 
