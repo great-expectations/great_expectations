@@ -21,7 +21,8 @@ jobs:
     before_install:
       - choco install python --version=3.6.7
       - export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
-      - pip3 install numpy scipy
+      - pip3 install numpy
+      - pip3 install scipy
       - pip3 install --upgrade pytest
       - pip3 install codecov
       - choco install postgresql
