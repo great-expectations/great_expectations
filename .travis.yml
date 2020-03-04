@@ -44,7 +44,7 @@ jobs:
 #      username: __token__
 #      password:
 #        secure: "NFZm1JoTtstDCeiJ8HyHH4CPfnaXewL++ZB2251AmVFq8UmlCghzjKKgN6lUp6OGrIkgPINga/0yKhTluoSlD8Jxv/aZeyb2z3DhDenTubBbiVegQYmQbbC4ID9eXXUqx4pPvF1keq/cV7N7CZ5dV6Ru3IdAsz+cS3TixjbzUp6bBnuAWLtAJ2bRYuBlX6WJUtbmK02AvQ3I9vAeGX3Xiiab+cGQmXoKQ/FHYxc31PdffrrSAWBxmOlevBOINT+wli1U/MJVQJgw1MhYAEKGDRfsgLt6Jo4hkPRXBmHx4Jmc4VoIM+zz886yvfBUZjXLCpSJwiV9qDjoiZtuEHOdjmOZbcvCsN56a+hdc9/aF1vCv5pm1JRdaSalQEeyfRAgs/SQy24/rPSmAeGUsnGQL18w7EFTdXaG4yJLkKUHEOCZzMe0CSVkf74YbPJXBLbuVTDoD8ZehAlyyEFjau1DXAM1/EdSOBssVKWzwQbfq7EwplDDqxeQ6F+Yj7VXQPTeY4Bcn4Z7Zbn5GNimwWzaxu1Ow4eh0VIMWrjgvBUFm+PXh/V60N530cX+yavo5RPhtkhCFlGYXlVaESYtDQa3R+eovo2PORQCa4jgpXLpeyuLczgeL2hH+rIFPBmu18/KTcZtRkDhBXnSZCtKZS0UMrp8q9LIwRqmv4SXYDrceT8="
-  include:
+  allow_failures:
 #  - stage: test
   - os: windows
     name: "Experimental Python 3.6.7 on Windows"
