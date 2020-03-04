@@ -34,16 +34,6 @@ jobs:
     python: 3.6
     script:
       - git tag --annotate 0.9.2 -m 0.9.2
-    deploy:
-      provider: pypi
-      edge: true
-      on:
-        branch: master
-      distributions: sdist bdist_wheel
-      skip_existing: true
-      username: __token__
-      password:
-        secure: "NFZm1JoTtstDCeiJ8HyHH4CPfnaXewL++ZB2251AmVFq8UmlCghzjKKgN6lUp6OGrIkgPINga/0yKhTluoSlD8Jxv/aZeyb2z3DhDenTubBbiVegQYmQbbC4ID9eXXUqx4pPvF1keq/cV7N7CZ5dV6Ru3IdAsz+cS3TixjbzUp6bBnuAWLtAJ2bRYuBlX6WJUtbmK02AvQ3I9vAeGX3Xiiab+cGQmXoKQ/FHYxc31PdffrrSAWBxmOlevBOINT+wli1U/MJVQJgw1MhYAEKGDRfsgLt6Jo4hkPRXBmHx4Jmc4VoIM+zz886yvfBUZjXLCpSJwiV9qDjoiZtuEHOdjmOZbcvCsN56a+hdc9/aF1vCv5pm1JRdaSalQEeyfRAgs/SQy24/rPSmAeGUsnGQL18w7EFTdXaG4yJLkKUHEOCZzMe0CSVkf74YbPJXBLbuVTDoD8ZehAlyyEFjau1DXAM1/EdSOBssVKWzwQbfq7EwplDDqxeQ6F+Yj7VXQPTeY4Bcn4Z7Zbn5GNimwWzaxu1Ow4eh0VIMWrjgvBUFm+PXh/V60N530cX+yavo5RPhtkhCFlGYXlVaESYtDQa3R+eovo2PORQCa4jgpXLpeyuLczgeL2hH+rIFPBmu18/KTcZtRkDhBXnSZCtKZS0UMrp8q9LIwRqmv4SXYDrceT8="
 #  allow_failures:
 #  - stage: test
   - os: windows
@@ -68,6 +58,16 @@ jobs:
     script:
       - pytest --no-sqlalchemy --no-postgresql --no-spark --cov=great_expectations --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
         --slack_channel=notifications-great_expectations tests/
+    deploy:
+      provider: pypi
+      edge: true
+      on:
+        branch: master
+      distributions: sdist bdist_wheel
+      skip_existing: true
+      username: __token__
+      password:
+        secure: "NFZm1JoTtstDCeiJ8HyHH4CPfnaXewL++ZB2251AmVFq8UmlCghzjKKgN6lUp6OGrIkgPINga/0yKhTluoSlD8Jxv/aZeyb2z3DhDenTubBbiVegQYmQbbC4ID9eXXUqx4pPvF1keq/cV7N7CZ5dV6Ru3IdAsz+cS3TixjbzUp6bBnuAWLtAJ2bRYuBlX6WJUtbmK02AvQ3I9vAeGX3Xiiab+cGQmXoKQ/FHYxc31PdffrrSAWBxmOlevBOINT+wli1U/MJVQJgw1MhYAEKGDRfsgLt6Jo4hkPRXBmHx4Jmc4VoIM+zz886yvfBUZjXLCpSJwiV9qDjoiZtuEHOdjmOZbcvCsN56a+hdc9/aF1vCv5pm1JRdaSalQEeyfRAgs/SQy24/rPSmAeGUsnGQL18w7EFTdXaG4yJLkKUHEOCZzMe0CSVkf74YbPJXBLbuVTDoD8ZehAlyyEFjau1DXAM1/EdSOBssVKWzwQbfq7EwplDDqxeQ6F+Yj7VXQPTeY4Bcn4Z7Zbn5GNimwWzaxu1Ow4eh0VIMWrjgvBUFm+PXh/V60N530cX+yavo5RPhtkhCFlGYXlVaESYtDQa3R+eovo2PORQCa4jgpXLpeyuLczgeL2hH+rIFPBmu18/KTcZtRkDhBXnSZCtKZS0UMrp8q9LIwRqmv4SXYDrceT8="
 addons:
   postgresql: '9.4'
 services:
