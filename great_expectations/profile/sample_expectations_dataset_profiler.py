@@ -75,7 +75,8 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
     def _create_non_nullity_expectations(cls, dataset, column):
         not_null_result = dataset.expect_column_values_to_not_be_null(column)
         if not not_null_result.success:
-            mostly_value = max(0.001, (100.0 - not_null_result.result["unexpected_percent"] - 10) / 100.0)
+            unexpected_percent = float(not_null_result.result["unexpected_percent"])
+            mostly_value = max(0.001, (100.0 - unexpected_percent - 10) / 100.0)
             dataset.expect_column_values_to_not_be_null(column, mostly=mostly_value)
 
     @classmethod
