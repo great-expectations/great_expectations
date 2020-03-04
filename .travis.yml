@@ -3,7 +3,6 @@ branches:
   - master
   - develop
   - "/^\\d.*/"
-  - "aylr.*"
 language: python
 cache: pip
 os:
@@ -12,10 +11,10 @@ env:
   global:
     secure: kEzD0ak7sXZspOv4014PRC5+DWQirM1NsQyTfwuZt7u0flTCtYg80Sw4lOuYZmtdztXrY/XresnK6HpCUkFtwwVuODDnrOnj1nO4l4Sb9awoxZn6zo3Q5TyC/sflDrakPsxwKEvxIH1cvzWqRwzmGXc5LEqn5SJyHR8RBhx6zUSgt8KIXLkfLTu0naj4dJH0Hmu4pqjRTmekwfoFHnYJ7aWopZChvxc6Mo2FmFFhl7Zt70EKh6RRB+aUG5xwvwf5iE+YX9YUQfqnA+2ys3O3m4wWGTxwJcdt8ZoexlYjAnSrOePdVO7EvosaBQYEyyU3xS28DzKPQXGoyJLCLNuAmzpxq4yRzPCJJF4Swl0yqY4+ab2OJrNP4A7MuMrQUDdNebUA4BY6PoTM82zfVkDCxf/fDqYPgMOAlNJb+R3jUffRJVlVq/M4sCr3sbGrnzELeTAf63jNIyH0U5LNQzzQUAT/Kyiimey17YqC9RhOUTNrojTkyXJ+ckc7z24yEfT1hUo6DAMM2b0ko/iB1MT3+ujT6qxamHe5imeX+4W1PpZsqkaRgo/dvhIsYoVPFeoBkY/N7PLgIwXhBuuFCH61p2Kx+z8hs34lVZ5GYVHDjeoDEEfm3SQrOuM2uASL9rGWj5yXiUs0OtTjmmKgEBZtNQ9JWHPY0AAdnfgS/GhWm54=
 jobs:
-  include:
+  allow_failures:
   - stage: test
   - os: windows
-    name: "Python 3.6.7 on Windows"
+    name: "Experimental Python 3.6.7 on Windows"
     language: sh
     python: "3.6.7"
     before_install:
@@ -36,18 +35,18 @@ jobs:
     script:
       - pytest --no-sqlalchemy --no-postgresql --no-spark --cov=great_expectations --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
         --slack_channel=notifications-great_expectations tests/
-#  - stage: test
-#    dist: trusty
-#    python: 3.6
-#    env: PANDAS=0.22.0
-#  - stage: test
-#    dist: trusty
-#    python: 3.6
-#    env: PANDAS=0.23.4
-#  - stage: test
-#    dist: trusty
-#    python: 3.6
-
+  include:
+  - stage: test
+    dist: trusty
+    python: 3.6
+    env: PANDAS=0.22.0
+  - stage: test
+    dist: trusty
+    python: 3.6
+    env: PANDAS=0.23.4
+  - stage: test
+    dist: trusty
+    python: 3.6
 #  - stage: test
 #    dist: xenial
 #    env: PANDAS=0.25.3
@@ -55,21 +54,20 @@ jobs:
 #  - stage: test
 #    dist: bionic
 #    python: 3.8
-
-#  - stage: deploy
-#    python: 3.6
-#    script:
-#      - git tag --annotate 0.9.2 -m 0.9.2
-#    deploy:
-#      provider: pypi
-#      edge: true
-#      on:
-#        branch: master
-#      distributions: sdist bdist_wheel
-#      skip_existing: true
-#      username: __token__
-#      password:
-#        secure: "NFZm1JoTtstDCeiJ8HyHH4CPfnaXewL++ZB2251AmVFq8UmlCghzjKKgN6lUp6OGrIkgPINga/0yKhTluoSlD8Jxv/aZeyb2z3DhDenTubBbiVegQYmQbbC4ID9eXXUqx4pPvF1keq/cV7N7CZ5dV6Ru3IdAsz+cS3TixjbzUp6bBnuAWLtAJ2bRYuBlX6WJUtbmK02AvQ3I9vAeGX3Xiiab+cGQmXoKQ/FHYxc31PdffrrSAWBxmOlevBOINT+wli1U/MJVQJgw1MhYAEKGDRfsgLt6Jo4hkPRXBmHx4Jmc4VoIM+zz886yvfBUZjXLCpSJwiV9qDjoiZtuEHOdjmOZbcvCsN56a+hdc9/aF1vCv5pm1JRdaSalQEeyfRAgs/SQy24/rPSmAeGUsnGQL18w7EFTdXaG4yJLkKUHEOCZzMe0CSVkf74YbPJXBLbuVTDoD8ZehAlyyEFjau1DXAM1/EdSOBssVKWzwQbfq7EwplDDqxeQ6F+Yj7VXQPTeY4Bcn4Z7Zbn5GNimwWzaxu1Ow4eh0VIMWrjgvBUFm+PXh/V60N530cX+yavo5RPhtkhCFlGYXlVaESYtDQa3R+eovo2PORQCa4jgpXLpeyuLczgeL2hH+rIFPBmu18/KTcZtRkDhBXnSZCtKZS0UMrp8q9LIwRqmv4SXYDrceT8="
+  - stage: deploy
+    python: 3.6
+    script:
+      - git tag --annotate 0.9.2 -m 0.9.2
+    deploy:
+      provider: pypi
+      edge: true
+      on:
+        branch: master
+      distributions: sdist bdist_wheel
+      skip_existing: true
+      username: __token__
+      password:
+        secure: "NFZm1JoTtstDCeiJ8HyHH4CPfnaXewL++ZB2251AmVFq8UmlCghzjKKgN6lUp6OGrIkgPINga/0yKhTluoSlD8Jxv/aZeyb2z3DhDenTubBbiVegQYmQbbC4ID9eXXUqx4pPvF1keq/cV7N7CZ5dV6Ru3IdAsz+cS3TixjbzUp6bBnuAWLtAJ2bRYuBlX6WJUtbmK02AvQ3I9vAeGX3Xiiab+cGQmXoKQ/FHYxc31PdffrrSAWBxmOlevBOINT+wli1U/MJVQJgw1MhYAEKGDRfsgLt6Jo4hkPRXBmHx4Jmc4VoIM+zz886yvfBUZjXLCpSJwiV9qDjoiZtuEHOdjmOZbcvCsN56a+hdc9/aF1vCv5pm1JRdaSalQEeyfRAgs/SQy24/rPSmAeGUsnGQL18w7EFTdXaG4yJLkKUHEOCZzMe0CSVkf74YbPJXBLbuVTDoD8ZehAlyyEFjau1DXAM1/EdSOBssVKWzwQbfq7EwplDDqxeQ6F+Yj7VXQPTeY4Bcn4Z7Zbn5GNimwWzaxu1Ow4eh0VIMWrjgvBUFm+PXh/V60N530cX+yavo5RPhtkhCFlGYXlVaESYtDQa3R+eovo2PORQCa4jgpXLpeyuLczgeL2hH+rIFPBmu18/KTcZtRkDhBXnSZCtKZS0UMrp8q9LIwRqmv4SXYDrceT8="
 addons:
   postgresql: '9.4'
 services:
@@ -79,8 +77,8 @@ install:
 - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
 - pip install -r requirements-dev.txt
 - pip install pytest-slack
-#before_script:
-#- psql -c 'create database test_ci;' -U postgres
+before_script:
+- psql -c 'create database test_ci;' -U postgres
 script:
 - pytest --cov=great_expectations --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
   --slack_channel=notifications-great_expectations tests/
