@@ -23,7 +23,6 @@ jobs:
       - export PATH="/c/Python36:/c/Python36/Scripts:$PATH"
       - python --version
       - pip install numpy
-      - choco install numpy
       - pip install scipy
       - pip install --upgrade pytest
       - pip install codecov
