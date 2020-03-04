@@ -464,6 +464,7 @@ After you connect to the datasource, run great_expectations init to continue.
 
     return datasource_name
 
+
 def _is_windows_platform():
     """
         This is a workaround to help identify Windows and adjust the prompts accordingly.
@@ -490,12 +491,12 @@ def _collect_postgres_credentials(default_credentials={}):
     # TODO: Revisit this if we decide to fully support Windows and identify if there is a better solution
     if _is_windows_platform():
         credentials["password"] = click.prompt("What is the password for the postgres connection?",
-                                default="",
-                                show_default=False)
+                                               default="",
+                                               show_default=False)
     else:
         credentials["password"] = click.prompt("What is the password for the postgres connection?",
-                                default="",
-                                show_default=False, hide_input=True)
+                                               default="",
+                                               show_default=False, hide_input=True)
     credentials["database"] = click.prompt("What is the database name for the postgres connection?",
                             default=default_credentials.get("database", "postgres"),
                             show_default=True)
@@ -594,12 +595,12 @@ def _collect_redshift_credentials(default_credentials={}):
     # TODO: Revisit this if we decide to fully support Windows and identify if there is a better solution
     if _is_windows_platform():
         credentials["password"] = click.prompt("What is the password for the Redshift connection?",
-                                default="",
-                                show_default=False)
+                                               default="",
+                                               show_default=False)
     else:
         credentials["password"] = click.prompt("What is the password for the Redshift connection?",
-                                default="",
-                                show_default=False, hide_input=True)
+                                               default="",
+                                               show_default=False, hide_input=True)
     credentials["database"] = click.prompt("What is the database name for the Redshift connection?",
                             default=default_credentials.get("database", ""),
                             show_default=True)
