@@ -48,10 +48,8 @@ jobs:
       - python --version
 #      - choco install postgresql10 --params '/Password:' --paramsglobal
     install:
-      - pip install numpy
-      - pip install scipy
+      - pip install numpy scipy codecov
       - pip install --upgrade pytest
-      - pip install codecov
       - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
       - pip install -r requirements-dev.txt
       - pip install pytest-slack
