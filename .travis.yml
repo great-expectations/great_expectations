@@ -40,7 +40,7 @@ jobs:
   - stage: experimental
     os: windows
     name: "Python 3.6.7 on Windows"
-    language: bash
+    language: shell
     python: "3.6.7"
     before_install:
       - choco install python --version=3.6.7
@@ -48,17 +48,18 @@ jobs:
       - python --version
 #      - choco install postgresql10 --params '/Password:' --paramsglobal
     install:
-      - pip install numpy scipy codecov
+      - pip install numpy scipy pandas
       - pip install --upgrade pytest
-      - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
       - pip install -r requirements-dev.txt
       - pip install pytest-slack
     before_script:
       - python --version
 #    - psql -c 'create database test_ci;' -U postgres
     script:
-      - pytest --no-sqlalchemy --no-postgresql --no-spark --cov=great_expectations --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
+      - pytest --no-sqlalchemy --no-postgresql --no-spark --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
         --slack_channel=notifications-great_expectations tests/
+    after_success:
+      - python --version
   - stage: deploy
     python: 3.6
     script:
