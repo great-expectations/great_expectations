@@ -40,7 +40,7 @@ jobs:
   - stage: experimental
     os: windows
     name: "Python 3.6.7 on Windows"
-    language: shell
+    language: bash
     python: "3.6.7"
     before_install:
       - choco install python --version=3.6.7
@@ -48,7 +48,8 @@ jobs:
       - python --version
 #      - choco install postgresql10 --params '/Password:' --paramsglobal
     install:
-      - pip install numpy scipy pandas
+      - pip install numpy scipy
+      - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
       - pip install --upgrade pytest
       - pip install -r requirements-dev.txt
       - pip install pytest-slack
