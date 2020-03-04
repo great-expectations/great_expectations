@@ -14,7 +14,7 @@ stages:
   - test
   - experimental
   - name: deploy
-    if: branch = develop
+    if: branch = master
 jobs:
   allow_failures:
     - if: os = windows
