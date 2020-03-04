@@ -23,20 +23,9 @@ jobs:
   - stage: test
     dist: trusty
     python: 3.6
-##  - stage: test
-##    dist: xenial
-##    env: PANDAS=0.25.3
-##    python: 3.7
-##  - stage: test
-##    dist: bionic
-##    python: 3.8
-  - stage: deploy
-    python: 3.6
-    script:
-      - git tag --annotate 0.9.2 -m 0.9.2
 #  allow_failures:
-#  - stage: test
-  - os: windows
+  - stage: test
+    os: windows
     name: "Experimental Python 3.6.7 on Windows"
     language: sh
     python: "3.6.7"
@@ -58,6 +47,17 @@ jobs:
     script:
       - pytest --no-sqlalchemy --no-postgresql --no-spark --cov=great_expectations --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
         --slack_channel=notifications-great_expectations tests/
+##  - stage: test
+##    dist: xenial
+##    env: PANDAS=0.25.3
+##    python: 3.7
+##  - stage: test
+##    dist: bionic
+##    python: 3.8
+  - stage: deploy
+    python: 3.6
+    script:
+      - git tag --annotate 0.9.2 -m 0.9.2
     deploy:
       provider: pypi
       edge: true
