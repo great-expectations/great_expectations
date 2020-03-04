@@ -234,7 +234,7 @@ class SiteIndexPageRenderer(Renderer):
                 "header_row": table_header_row,
                 "table": table_rows,
                 "styling": {
-                    "classes": ["col-12", "ge-index-page-table-container", "px-4"],
+                    "classes": ["col-12", "ge-index-page-table-container"],
                     "styles": {
                         "margin-top": "10px"
                     },
@@ -279,7 +279,7 @@ class SiteIndexPageRenderer(Renderer):
                         "header_row": ["Profiling Results"],
                         "table": profiling_table_rows,
                         "styling": {
-                            "classes": ["col-12", "ge-index-page-table-container", "px-4"],
+                            "classes": ["col-12", "ge-index-page-table-container"],
                             "styles": {
                                 "margin-top": "10px"
                             },
