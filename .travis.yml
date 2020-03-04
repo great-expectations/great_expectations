@@ -60,6 +60,7 @@ jobs:
     script:
       - git tag --annotate 0.9.2 -m 0.9.2
     deploy:
+      if: branch = master
       provider: pypi
       edge: true
       on:
