@@ -2,14 +2,9 @@ from __future__ import unicode_literals
 
 import os
 import shutil
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 
-import pytest
 from click.testing import CliRunner
-from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -20,7 +15,6 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them(
     mock_webbrowser, caplog, tmp_path_factory,
@@ -35,7 +29,9 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     root_dir = str(root_dir)
     os.makedirs(os.path.join(root_dir, "data"))
     data_path = os.path.join(root_dir, "data", "Titanic.csv")
-    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    fixture_path = file_relative_path(
+        __file__, os.path.join("..", "test_sets", "Titanic.csv")
+    )
     shutil.copy(fixture_path, data_path)
 
     runner = CliRunner(mix_stderr=False)
@@ -49,6 +45,10 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     assert mock_webbrowser.call_count == 1
     assert (
         "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
+            root_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+        or "{}\\great_expectations\\uncommitted\\data_docs\\local_site\\validations\\warning\\".format(
             root_dir
         )
         in mock_webbrowser.call_args[0][0]
@@ -99,8 +99,10 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     root_dir = tmp_path_factory.mktemp("hiya")
     root_dir = str(root_dir)
     os.makedirs(os.path.join(root_dir, "data"))
-    data_path = os.path.join(root_dir, "data/Titanic.csv")
-    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    data_path = os.path.join(root_dir, "data", "Titanic.csv")
+    fixture_path = file_relative_path(
+        __file__, os.path.join("..", "test_sets", "Titanic.csv")
+    )
     shutil.copy(fixture_path, data_path)
 
     runner = CliRunner(mix_stderr=False)
@@ -113,6 +115,10 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     assert mock_webbrowser.call_count == 1
     assert (
         "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
+            root_dir
+        )
+        in mock_webbrowser.call_args[0][0]
+        or "{}\\great_expectations\\uncommitted\\data_docs\\local_site\\validations\\warning\\".format(
             root_dir
         )
         in mock_webbrowser.call_args[0][0]
