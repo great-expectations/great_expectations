@@ -478,6 +478,7 @@ def _collect_postgres_credentials(default_credentials={}):
     credentials["username"] = click.prompt("What is the username for the postgres connection?",
                             default=default_credentials.get("username", "postgres"),
                             show_default=True)
+    # TODO git bash on windows hangs on click.prompt with hidden input
     credentials["password"] = click.prompt("What is the password for the postgres connection?",
                             default="",
                             show_default=False, hide_input=True)

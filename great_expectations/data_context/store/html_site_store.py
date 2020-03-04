@@ -175,7 +175,7 @@ class HtmlSiteStore(object):
         dir_exclusions = []
 
         if not static_assets_source_dir:
-            static_assets_source_dir = file_relative_path(__file__, "../../render/view/static")
+            static_assets_source_dir = file_relative_path(__file__, os.path.join("..", "..", "render", "view", "static"))
 
         for item in os.listdir(static_assets_source_dir):
             # Directory
