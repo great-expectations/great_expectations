@@ -48,10 +48,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
             root_dir
         )
         in mock_webbrowser.call_args[0][0]
-        or "{}\\great_expectations\\uncommitted\\data_docs\\local_site\\validations\\warning\\".format(
-            root_dir
-        )
-        in mock_webbrowser.call_args[0][0]
     )
 
     assert "Great Expectations is now set up." in stdout
@@ -115,10 +111,6 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     assert mock_webbrowser.call_count == 1
     assert (
         "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
-            root_dir
-        )
-        in mock_webbrowser.call_args[0][0]
-        or "{}\\great_expectations\\uncommitted\\data_docs\\local_site\\validations\\warning\\".format(
             root_dir
         )
         in mock_webbrowser.call_args[0][0]
