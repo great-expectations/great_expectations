@@ -30,10 +30,10 @@ jobs:
 ##  - stage: test
 ##    dist: bionic
 ##    python: 3.8
-#  - stage: deploy
-#    python: 3.6
-#    script:
-#      - git tag --annotate 0.9.2 -m 0.9.2
+  - stage: deploy
+    python: 3.6
+    script:
+      - git tag --annotate 0.9.2 -m 0.9.2
     deploy:
       provider: pypi
       edge: true
