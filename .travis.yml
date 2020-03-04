@@ -14,14 +14,14 @@ jobs:
   allow_failures:
     - if: os = windows
   include:
-#  - stage: test
-#    dist: trusty
-#    python: 3.6
-#    env: PANDAS=0.22.0
-#  - stage: test
-#    dist: trusty
-#    python: 3.6
-#    env: PANDAS=0.23.4
+  - stage: test
+    dist: trusty
+    python: 3.6
+    env: PANDAS=0.22.0
+  - stage: test
+    dist: trusty
+    python: 3.6
+    env: PANDAS=0.23.4
   - stage: test
     dist: trusty
     python: 3.6
