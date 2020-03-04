@@ -55,7 +55,8 @@ jobs:
       - if [ -z "$PANDAS" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
       - pip install -r requirements-dev.txt
       - pip install pytest-slack
-#    before_script:
+    before_script:
+      - python --version
 #    - psql -c 'create database test_ci;' -U postgres
     script:
       - pytest --no-sqlalchemy --no-postgresql --no-spark --cov=great_expectations --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
