@@ -480,7 +480,8 @@ def _collect_postgres_credentials(default_credentials={}):
                             show_default=True)
     credentials["password"] = click.prompt("What is the password for the postgres connection?",
                             default="",
-                            show_default=False, hide_input=True)
+                            show_default=False, #hide_input=True
+                                           )
     credentials["database"] = click.prompt("What is the database name for the postgres connection?",
                             default=default_credentials.get("database", "postgres"),
                             show_default=True)
