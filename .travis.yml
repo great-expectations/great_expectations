@@ -26,7 +26,7 @@ jobs:
       - pip install scipy
       - pip install --upgrade pytest
       - pip install codecov
-      - choco install postgresql
+#      - choco install postgresql /Password ''
 #  - stage: test
 #    dist: trusty
 #    python: 3.6
