@@ -22,7 +22,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
     print(html_to_display)
     html_to_display = html_to_display.replace(" ", "").replace("\t", "").replace("\n", "")
     assert html_to_display == """\
-<div id="section-1" class="ge-section container-fluid mb-1 pb-1">
+<div id="section-1" class="ge-section container-fluid mb-1 pb-1 pl-sm-3 px-0">
     <div class="row" >
 <div id="content-block-1" class="col-12" >
     <div id="content-block-1-header" class="alert alert-secondary" >
@@ -52,7 +52,6 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
             </li>
         <li style="list-style-type:none;" >
                 <hr class="mt-1 mb-1" >
-                    
                 </hr>
             </li>
 </ul>
@@ -115,7 +114,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
     box-shadow:0 1px 8px rgba(0,0,0,0.5);
 }
 </style>
-<div id="section-1" class="ge-section container-fluid mb-1 pb-1">
+<div id="section-1" class="ge-section container-fluid mb-1 pb-1 pl-sm-3 px-0">
     <div class="row" >
 <div id="content-block-1" class="col-12" >
     <div id="content-block-1-header" class="alert alert-secondary" >

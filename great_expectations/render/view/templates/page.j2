@@ -42,14 +42,11 @@
     <div class="container-fluid pt-4 pb-4 pl-5 pr-5">
       <div class="row">
         {% include 'sidebar.j2' %}
-        <div class="col-md-10 col-lg-10 col-xs-12 pl-4 pr-3">
+        <div class="col-md-10 col-lg-10 col-xs-12 pl-md-4 pr-md-3">
         {% for section in sections %}
           {% set section_loop = loop -%}
           {% include 'section.j2' %}
         {% endfor %}
-        </div>
-        <div class="d-block d-sm-none col-12">
-          {% include 'ge_info.j2' %}
         </div>
       </div>
     </div>
