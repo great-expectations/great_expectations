@@ -1115,6 +1115,17 @@ class DataAsset(object):
         self._expectation_suite.evaluation_parameters.update(
             {parameter_name: parameter_value})
 
+    def add_citation(self, comment, batch_kwargs=None, batch_markers=None, batch_parameters=None, citation_date=None):
+        if batch_kwargs is None:
+            batch_kwargs = self.batch_kwargs
+        if batch_markers is None:
+            batch_markers = self.batch_markers
+        if batch_parameters is None:
+            batch_parameters = self.batch_parameters
+        self._expectation_suite.add_citation(comment, batch_kwargs=batch_kwargs, batch_markers=batch_markers,
+                                             batch_parameters=batch_parameters,
+                                             citation_date=citation_date)
+
     # PENDING DELETION: 20200130 - JPC - Ready for deletion upon release of 0.9.0 with no data_asset_name
     #
     # @property

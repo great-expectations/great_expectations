@@ -282,7 +282,6 @@ class SampleExpectationsDatasetProfiler(BasicDatasetProfilerBase):
             cls._create_expectations_for_datetime_column(dataset, column)
             profiled_columns["datetime"].append(column)
 
-
         expectation_suite = dataset.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=True)
         if not expectation_suite.meta:
             expectation_suite.meta = {"columns": meta_columns, "notes": {""}}
