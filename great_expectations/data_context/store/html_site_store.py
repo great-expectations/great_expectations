@@ -55,7 +55,7 @@ class HtmlSiteStore(object):
                     "filepath_suffix": ".html"
                 }
             ),
-            "index_page":  instantiate_class_from_config(
+            "index_page": instantiate_class_from_config(
                 config=store_backend,
                 runtime_environment=runtime_environment,
                 config_defaults={

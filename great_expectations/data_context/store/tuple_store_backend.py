@@ -71,6 +71,8 @@ class TupleStoreBackend(StoreBackend):
             ))
 
     def _convert_key_to_filepath(self, key):
+        # NOTE: This method uses a hard-coded forward slash as a separator,
+        # and then replaces that with a platform-specific separator if requested (the default)
         self._validate_key(key)
         if self.filepath_template:
             converted_string = self.filepath_template.format(*list(key))
@@ -241,8 +243,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                     )
 
                 if self.filepath_prefix and not filepath.startswith(self.filepath_prefix):
+                    logger.warning("skipping " + filepath + " because it does not start with " + self.filepath_prefix)
                     continue
                 elif self.filepath_suffix and not filepath.endswith(self.filepath_suffix):
+                    logger.warning("skipping " + filepath + " because it does not end with " + self.filepath_prefix)
                     continue
                 else:
                     key = self._convert_filepath_to_key(filepath)
