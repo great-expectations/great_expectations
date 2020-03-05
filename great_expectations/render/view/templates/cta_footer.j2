@@ -9,7 +9,7 @@
     {{ cta_footer["tooltip_icon"] | render_string_template }}
     {{ cta_footer["header"] | render_string_template }}
   </h5>
-  <div class="d-flex justify-content-center">
+  <div class="d-flex justify-content-center flex-sm-row flex-column">
     {% for cta_button in cta_footer["buttons"] %}
       <a href="{{ cta_button.link }}" class="btn btn-primary m-2" rel="noopener noreferrer" target="_blank">{{ cta_button.title }}</a>
     {% endfor %}

@@ -107,7 +107,7 @@ def test_render_section_page():
     print(rendered_doc)
 
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
-    assert rendered_doc == """<div id="section-1" class="ge-section container-fluid mb-1 pb-1">
+    assert rendered_doc == """<div id="section-1" class="ge-section container-fluid mb-1 pb-1 pl-sm-3 px-0">
     <div class="row" >
 <div id="content-block-1" >
     <div id="content-block-1-header" >
@@ -126,7 +126,7 @@ def test_render_section_page():
     <tr>
         <td id="content-block-2-cell-1-1" ><div class="show-scrollbars"><span>Number of variables</span></div></td><td id="content-block-2-cell-1-2" ><div class="show-scrollbars"><span>12</span></div></td></tr><tr>
         <td id="content-block-2-cell-2-1" ><div class="show-scrollbars"><span>Number of observations</span></div></td><td id="content-block-2-cell-2-2" ><div class="show-scrollbars"><span>891</span></div></td></tr></table>
-</div>
+</div> 
     </div>
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
