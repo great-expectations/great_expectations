@@ -1,5 +1,10 @@
 .. _changelog:
 
+develop
+-----------------
+* Improve path support in TupleStoreBackend for better cross-platform compatibility
+
+
 0.9.2
 -----------------
 * Fixes #1095
