@@ -56,6 +56,7 @@ def test_suite_new_on_context_with_no_datasources(
     assert "No datasources found in the context" in stdout
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
+
 def test_suite_new_enter_existing_suite_name_as_arg(
     caplog, data_context
 ):
@@ -405,7 +406,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args(
+def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations(
     caplog, site_builder_data_context_with_html_store_titanic_random,
 ):
     """
@@ -434,6 +435,12 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args(
     assert result.exit_code == 0
     assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
 
+    # remove the citations from the suite
+    context = DataContext(root_dir)
+    suite = context.get_expectation_suite("foo_suite")
+    suite.meta.pop("citations")
+    context.save_expectation_suite(suite)
+
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
@@ -447,6 +454,55 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args(
     assert "Select a datasource" in stdout
     assert "Which data would you like to use" in stdout
     assert "To continue editing this suite, run" in stdout
+
+    expected_notebook_path = os.path.join(root_dir, "uncommitted", "foo_suite.ipynb")
+    assert os.path.isfile(expected_notebook_path)
+
+    expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
+    assert os.path.isfile(expected_suite_path)
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_containing_citations(
+    caplog, site_builder_data_context_with_html_store_titanic_random,
+):
+    """
+    Here we verify that the "suite edit" command uses the batch kwargs found in
+    citations in the existing suite when it is called without the optional
+    arguments that specify the batch.
+
+    First, we call the "suite new" command to create the expectation suite our
+    test will edit - this step is a just a setup.
+
+    We call the "suite edit" command without any optional arguments.
+    """
+    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    os.chdir(root_dir)
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
+        input="2\n1\n1\n\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["suite", "edit", "foo_suite", "-d", root_dir, "--no-jupyter"],
+        input="2\n1\n1\n\n",
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+    stdout = result.stdout
+    assert "Select a datasource" not in stdout
+    assert "Which data would you like to use" not in stdout
+    assert "To continue editing this suite, run" in stdout
+    assert "great_expectations/uncommitted/foo_suite.ipynb" in stdout
 
     expected_notebook_path = os.path.join(root_dir, "uncommitted", "foo_suite.ipynb")
     assert os.path.isfile(expected_notebook_path)
@@ -615,7 +671,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_suite_edit_one_datasources_no_generator_with_no_additional_args(
+def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_citations(
     caplog, empty_data_context, filesystem_csv_2
 ):
     """
@@ -655,6 +711,12 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args(
 
     assert result.exit_code == 0
     assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+
+    # remove the citations from the suite
+    context = DataContext(project_root_dir)
+    suite = context.get_expectation_suite("my_new_suite")
+    suite.meta.pop("citations")
+    context.save_expectation_suite(suite)
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
