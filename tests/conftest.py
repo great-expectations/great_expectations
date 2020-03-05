@@ -471,10 +471,7 @@ def non_numeric_high_card_dataset(test_backend):
     return get_dataset(test_backend, data, schemas=schemas)
 
 
-@pytest.fixture
-def dataset(test_backend):
-    """Provide dataset fixtures that have special values and/or are otherwise useful outside
-    the standard json testing framework"""
+def dataset_sample_data(test_backend):
     # No infinities for mysql
     if test_backend == "mysql":
         data = {
@@ -484,7 +481,7 @@ def dataset(test_backend):
         }
     else:
         data = {
-            "infinities": [-np.inf, -10, -np.pi, 0, np.pi, 10/2.2, np.inf],
+            "infinities": [-np.inf, -10, -np.pi, 0, np.pi, 10 / 2.2, np.inf],
             "nulls": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
             "naturals": [1, 2, 3, 4, 5, 6, 7]
         }
@@ -515,6 +512,21 @@ def dataset(test_backend):
             "naturals": "FloatType"
         }
     }
+    return data, schemas
+
+
+@pytest.fixture
+def dataset(test_backend):
+    """Provide dataset fixtures that have special values and/or are otherwise useful outside
+    the standard json testing framework"""
+    data, schemas = dataset_sample_data(test_backend)
+    return get_dataset(test_backend, data, schemas=schemas)
+
+
+@pytest.fixture
+def pandas_dataset():
+    test_backend = "PandasDataset"
+    data, schemas = dataset_sample_data(test_backend)
     return get_dataset(test_backend, data, schemas=schemas)
 
 
