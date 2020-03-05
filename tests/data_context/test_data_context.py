@@ -512,10 +512,8 @@ def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_conte
         config_path,
     )
 
-    print(context._normalize_absolute_or_relative_path("yikes"))
-    assert "test__normalize_absolute_or_relative_path__dir0/yikes" in context._normalize_absolute_or_relative_path("yikes")
+    assert str(os.path.join("test__normalize_absolute_or_relative_path__dir0", "yikes")) in context._normalize_absolute_or_relative_path("yikes")
 
-    context._normalize_absolute_or_relative_path("/yikes")
     assert "test__normalize_absolute_or_relative_path__dir" not in context._normalize_absolute_or_relative_path("/yikes")
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
