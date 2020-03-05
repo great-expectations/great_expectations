@@ -551,25 +551,25 @@ class ExpectationSuite(object):
 
         return dependencies
 
-    def get_most_recent_citation_containing_batch_kwargs(self):
-        citations = self.meta.get("citations")
-        if not citations:
-            return None
+    def get_citations(self, sort=True, require_batch_kwargs=False):
+        citations = self.meta.get("citations", [])
+        if require_batch_kwargs:
+            citations = self._filter_citations(citations, "batch_kwargs")
+        if not sort:
+            return citations
+        return self._sort_citations(citations)
 
-        most_recent_citation_date = datetime.datetime.min
-        most_recent_citation_with_batch_kwargs = None
-
+    @staticmethod
+    def _filter_citations(citations, filter_key):
+        citations_with_bk = []
         for citation in citations:
-            try:
-                citation_date = parser.parse(citation["citation_date"])
-                if citation_date > most_recent_citation_date:
-                    most_recent_citation_date = citation_date
-                    if "batch_kwargs" in citation and citation.get("batch_kwargs"):
-                        most_recent_citation_with_batch_kwargs = citation
-            except (TypeError, KeyError) as e:
-                pass
+            if filter_key in citation and citation.get(filter_key):
+                citations_with_bk.append(citation)
+        return citations_with_bk
 
-        return most_recent_citation_with_batch_kwargs
+    @staticmethod
+    def _sort_citations(citations):
+        return sorted(citations, key=lambda x: x["citation_date"])
 
 
 class ExpectationSuiteSchema(Schema):

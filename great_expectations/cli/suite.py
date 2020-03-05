@@ -94,7 +94,8 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
         return
 
     suite = _load_suite(context, suite)
-    citation = suite.get_most_recent_citation_containing_batch_kwargs()
+    citations = suite.get_citations(sort=True, require_batch_kwargs=True)
+
 
     if batch_kwargs_json:
         try:
@@ -112,7 +113,8 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
         except ValueError as ve:
             cli_message("<red>Please check that your batch_kwargs are able to load a batch.\n{}</red>".format(ve))
             sys.exit(1)
-    elif citation:
+    elif citations:
+        citation = citations[-1]
         batch_kwargs = citation.get("batch_kwargs")
 
     if not batch_kwargs:

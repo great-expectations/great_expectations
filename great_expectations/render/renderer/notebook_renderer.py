@@ -237,10 +237,11 @@ You can see all the available expectations in the **[expectation glossary](https
         if not citations:
             return self._fix_path_in_batch_kwargs(batch_kwargs)
 
-        citation = suite.get_most_recent_citation_containing_batch_kwargs()
-        if not citation:
+        citations = suite.get_citations(sort=True, require_batch_kwargs=True)
+        if not citations:
             return None
 
+        citation = citations[-1]
         batch_kwargs = citation.get("batch_kwargs")
         return self._fix_path_in_batch_kwargs(batch_kwargs)
 

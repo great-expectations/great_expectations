@@ -4,7 +4,7 @@ Unreleased
 ----------------
 - New features on `ExpecatationSuite`
     - `.add_citation()`
-    - `get_most_recent_citation_containing_batch_kwargs()`\
+    - `get_citations()`
 - `SampleExpectationsDatasetProfiler` now leaves a citation containing the original batch kwargs
 - `great_expectations suite edit` now uses batch_kwargs from citations if they exist
 - Bugfix :: suite edit notebooks no longer blow away the existing suite while loading a batch of data
