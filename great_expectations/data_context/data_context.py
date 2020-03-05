@@ -7,6 +7,7 @@ import logging
 import os
 import shutil
 import sys
+import uuid
 import warnings
 import webbrowser
 
@@ -32,7 +33,9 @@ from great_expectations.profile.basic_dataset_profiler import (
 )
 
 import great_expectations.exceptions as ge_exceptions
-from ..core.logging import initialize_telemetry
+from ..core.logging.s3_logging_handler import S3Handler
+from ..core.logging.telemetry import telemetry_enabled_method, TelemetryRecordFormatter, DataContextLoggingFilter, \
+    DEFAULT_TELEMETRY_BUCKET, run_validation_operator_telemetry
 
 from ..validator.validator import Validator
 from .templates import (
@@ -107,6 +110,7 @@ class BaseDataContext(object):
             raise
         return True
 
+    @telemetry_enabled_method
     def __init__(self, project_config, context_root_dir=None):
         """DataContext constructor
 
@@ -119,6 +123,7 @@ class BaseDataContext(object):
         """
         if not BaseDataContext.validate_config(project_config):
             raise ge_exceptions.InvalidConfigError("Your project_config is not valid. Try using the CLI check-config command.")
+        self._initialize_telemetry(**project_config.anonymized_usage_data)
 
         self._project_config = project_config
         if context_root_dir is not None:
@@ -149,17 +154,7 @@ class BaseDataContext(object):
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
-
-        data_context_id = initialize_telemetry(
-            **self._project_config_with_variables_substituted.get("telemetry_config", {"enabled": True}))
-        # TODO: update data_context_id if needed
-        logger.info("Initialized DataContext",
-                    extra={"telemetry": True,
-                           "payload": {
-                               "action": "initialize_context",
-                               "datasources": [datasource["class_name"] for (_, datasource)
-                                               in self._project_config.datasources.items()]
-                           }})
+        self._register_telemetry_details()
 
     def _build_store(self, store_name, store_config):
         new_store = instantiate_class_from_config(
@@ -194,6 +189,30 @@ class BaseDataContext(object):
 
         for store_name, store_config in store_configs.items():
             self._build_store(store_name, store_config)
+
+    def _initialize_telemetry(self, enabled=True, data_context_id=None, telemetry_bucket=DEFAULT_TELEMETRY_BUCKET):
+        """Initialize the telemetry system."""
+        if not enabled:
+            logger.info("Telemetry is disabled; skipping initialization.")
+            return data_context_id
+
+        if data_context_id is None:
+            data_context_id = str(uuid.uuid4())
+
+        # There will be *one* telemetry logger, even though there may be multiple telemetry handlers (per context)
+        telemetry_logger = logging.getLogger("great_expectations.telemetry")
+        telemetry_handler = S3Handler("great_expectations", telemetry_bucket, compress=True)
+        telemetry_handler.setLevel(level=logging.INFO)
+        telemetry_filter = DataContextLoggingFilter(data_context=self, data_context_id=data_context_id)
+        telemetry_handler.addFilter(telemetry_filter)
+        telemetry_formatter = TelemetryRecordFormatter()
+        telemetry_handler.setFormatter(telemetry_formatter)
+        telemetry_logger.addHandler(telemetry_handler)
+        self._telemetry_filter = telemetry_filter
+        return data_context_id
+
+    def _register_telemetry_details(self):
+        self._telemetry_filter.register_telemetry_details()
 
     def add_store(self, store_name, store_config):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
@@ -513,6 +532,7 @@ class BaseDataContext(object):
         )
         return validator.get_dataset()
 
+    @telemetry_enabled_method(args_payload_fn=run_validation_operator_telemetry)
     def run_validation_operator(
             self,
             validation_operator_name,
@@ -539,13 +559,6 @@ class BaseDataContext(object):
             run_id = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
             logger.info("Setting run_id to: {}".format(run_id))
 
-        logger.info("Running validation operator.", extra={
-            "telemetry": True,
-            "payload": {
-                "action": "run_validation_operator",
-                "n_assets": len(assets_to_validate)
-            }
-        })
         return self.validation_operators[validation_operator_name].run(
             assets_to_validate=assets_to_validate,
             run_id=run_id,
@@ -665,13 +678,14 @@ class BaseDataContext(object):
         """List currently-configured datasources on this context.
 
         Returns:
-            List(dict): each dictionary includes "name" and "class_name" keys
+            List(dict): each dictionary includes "name", "class_name", and "module_name" keys
         """
         datasources = []
         for key, value in self._project_config_with_variables_substituted["datasources"].items():
             datasources.append({
                 "name": key,
-                "class_name": value["class_name"]
+                "class_name": value["class_name"],
+                "module_name": value.get("module_name", "great_expectations.datasource")
             })
         return datasources
 
@@ -910,6 +924,7 @@ class BaseDataContext(object):
         """
         return return_obj
 
+    @telemetry_enabled_method
     def build_data_docs(self, site_names=None, resource_identifiers=None):
         """
         Build Data Docs for your project.
