@@ -9,6 +9,7 @@ Unreleased
 - `great_expectations suite edit` now uses batch_kwargs from citations if they exist
 - Bugfix :: suite edit notebooks no longer blow away the existing suite while loading a batch of data
 - More robust and tested logic in `suite edit`
+- DataDocs: bugfixes and improvements for smaller viewports
 
 0.9.2
 -----------------
