@@ -5,6 +5,9 @@ from moto import mock_s3
 from mock import patch
 
 import six
+
+from great_expectations.exceptions import StoreBackendError
+
 if six.PY2:
     FileNotFoundError = IOError
 
@@ -59,6 +62,25 @@ def test_InMemoryStoreBackend():
 
     with pytest.raises(NotImplementedError):
         my_store.get_url_for_key(my_key)
+
+
+def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
+    path = str(tmp_path_factory.mktemp('test_tuple_filesystem_store_filepath_prefix_error'))
+    project_path = str(tmp_path_factory.mktemp('my_dir'))
+
+    with pytest.raises(StoreBackendError) as e:
+        TupleFilesystemStoreBackend(
+            root_directory=os.path.abspath(path),
+            base_directory=project_path,
+            filepath_prefix="invalid_prefix_ends_with/")
+    assert "filepath_prefix may not end with" in e.value.message
+
+    with pytest.raises(StoreBackendError) as e:
+        TupleFilesystemStoreBackend(
+            root_directory=os.path.abspath(path),
+            base_directory=project_path,
+            filepath_prefix="invalid_prefix_ends_with\\")
+    assert "filepath_prefix may not end with" in e.value.message
 
 
 def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
