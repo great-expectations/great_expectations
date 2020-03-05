@@ -42,7 +42,7 @@ class HtmlSiteStore(object):
                 runtime_environment=runtime_environment,
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
-                    "filepath_prefix": "expectations/",
+                    "filepath_prefix": "expectations",
                     "filepath_suffix": ".html"
                 }
             ),
@@ -51,7 +51,7 @@ class HtmlSiteStore(object):
                 runtime_environment=runtime_environment,
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
-                    "filepath_prefix": "validations/",
+                    "filepath_prefix": "validations",
                     "filepath_suffix": ".html"
                 }
             ),

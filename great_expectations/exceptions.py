@@ -20,6 +20,10 @@ class DataContextError(GreatExpectationsError):
     pass
 
 
+class StoreBackendError(DataContextError):
+    pass
+
+
 class UnavailableMetricError(GreatExpectationsError):
     pass
 

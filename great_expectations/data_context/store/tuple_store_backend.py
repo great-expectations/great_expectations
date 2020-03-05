@@ -9,6 +9,7 @@ from six import string_types
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.util import safe_mmkdir
+from great_expectations.exceptions import StoreBackendError
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,12 @@ class TupleStoreBackend(StoreBackend):
             raise ValueError("filepath_suffix may only be used when filepath_template is None")
 
         self.filepath_template = filepath_template
+        if filepath_prefix and len(filepath_prefix) > 0:
+            # Validate that the filepath prefix does not end with a forbidden substring
+            if filepath_prefix[-1] in self.forbidden_substrings:
+                raise StoreBackendError("Unable to initialize TupleStoreBackend: filepath_prefix may not end with a "
+                                        "forbidden substring. Current forbidden substrings are " +
+                                        str(forbidden_substrings))
         self.filepath_prefix = filepath_prefix
         self.filepath_suffix = filepath_suffix
 
@@ -80,24 +87,26 @@ class TupleStoreBackend(StoreBackend):
             converted_string = '/'.join(key)
 
         if self.filepath_prefix:
-            converted_string = self.filepath_prefix + converted_string
+            converted_string = self.filepath_prefix + "/" + converted_string
         if self.filepath_suffix:
             converted_string += self.filepath_suffix
         if self.platform_specific_separator:
-            converted_string = os.path.join(*converted_string.split('/'))
+            converted_string = os.path.normpath(converted_string)
 
         return converted_string
 
     def _convert_filepath_to_key(self, filepath):
-        # filepath_template (for now) is always specified with forward slashes, but it is then
-        # used to (1) dynamically construct and evaluate a regex, and (2) split the provided (observed) filepath
+        if self.platform_specific_separator:
+            filepath = os.path.normpath(filepath)
+
         if self.filepath_prefix:
-            if not filepath.startswith(self.filepath_prefix):
+            if not filepath.startswith(self.filepath_prefix) and len(filepath) >= len(self.filepath_prefix) + 1:
                 # If filepath_prefix is set, we expect that it is the first component of a valid filepath.
                 raise ValueError("filepath must start with the filepath_prefix when one is set by the store_backend")
             else:
                 # Remove the prefix before processing
-                filepath = filepath[len(self.filepath_prefix):]
+                # Also remove the separator that was added, which may have been platform-dependent
+                filepath = filepath[len(self.filepath_prefix) + 1:]
 
         if self.filepath_suffix:
             if not filepath.endswith(self.filepath_suffix):
@@ -108,6 +117,8 @@ class TupleStoreBackend(StoreBackend):
                 filepath = filepath[:-len(self.filepath_suffix)]
 
         if self.filepath_template:
+            # filepath_template is always specified with forward slashes, but it is then
+            # used to (1) dynamically construct and evaluate a regex, and (2) split the provided (observed) filepath
             if self.platform_specific_separator:
                 filepath_template = os.path.join(*self.filepath_template.split('/'))
                 filepath_template = filepath_template.replace('\\', '\\\\')
@@ -138,6 +149,7 @@ class TupleStoreBackend(StoreBackend):
 
             new_key = tuple(new_key)
         else:
+            filepath = os.path.normpath(filepath)
             new_key = tuple(filepath.split(os.sep))
 
         return new_key
