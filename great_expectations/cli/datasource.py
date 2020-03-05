@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import sys
+import platform
 
 import click
 
@@ -464,6 +465,15 @@ After you connect to the datasource, run great_expectations init to continue.
     return datasource_name
 
 
+def _should_hide_input():
+    """
+        This is a workaround to help identify Windows and adjust the prompts accordingly
+        since hidden prompts may freeze in certain Windows terminals
+    """
+    if 'windows' in platform.platform().lower():
+        return False
+    return True
+
 def _collect_postgres_credentials(default_credentials={}):
     credentials = {
         "drivername": "postgres"
@@ -478,9 +488,11 @@ def _collect_postgres_credentials(default_credentials={}):
     credentials["username"] = click.prompt("What is the username for the postgres connection?",
                             default=default_credentials.get("username", "postgres"),
                             show_default=True)
+    # This is a minimal workaround we're doing to deal with hidden input problems using Git Bash on Windows
+    # TODO: Revisit this if we decide to fully support Windows and identify if there is a better solution
     credentials["password"] = click.prompt("What is the password for the postgres connection?",
-                            default="",
-                            show_default=False, hide_input=True)
+                                           default="",
+                                           show_default=False, hide_input=_should_hide_input())
     credentials["database"] = click.prompt("What is the database name for the postgres connection?",
                             default=default_credentials.get("database", "postgres"),
                             show_default=True)
@@ -575,9 +587,11 @@ def _collect_redshift_credentials(default_credentials={}):
     credentials["username"] = click.prompt("What is the username for the Redshift connection?",
                             default=default_credentials.get("username", ""),
                             show_default=True)
+    # This is a minimal workaround we're doing to deal with hidden input problems using Git Bash on Windows
+    # TODO: Revisit this if we decide to fully support Windows and identify if there is a better solution
     credentials["password"] = click.prompt("What is the password for the Redshift connection?",
-                            default="",
-                            show_default=False, hide_input=True)
+                                           default="",
+                                           show_default=False, hide_input=_should_hide_input())
     credentials["database"] = click.prompt("What is the database name for the Redshift connection?",
                             default=default_credentials.get("database", ""),
                             show_default=True)
