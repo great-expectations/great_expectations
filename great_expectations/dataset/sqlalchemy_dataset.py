@@ -295,7 +295,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if custom_sql is not None and self.engine.dialect.name.lower() == "bigquery":
             if generated_table_name is not None and self.engine.dialect.dataset_id is None:
-                raise ValueError("No BigQuery dataset specified. Use biquery_temp_table batch_kwarg or a specify a default dataset in engine url")
+                raise ValueError("No BigQuery dataset specified. Use bigquery_temp_table batch_kwarg or a specify a "
+                                 "default dataset in engine url")
+
+        if (custom_sql is not None and self.engine.dialect.name.lower() == "snowflake" and
+                generated_table_name is not None):
+            raise ValueError("No snowflake table_name specified. Snowflake with a query batch_kwarg will create "
+                             "a transient table, so you must provide a user-selected name.")
 
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql)
@@ -614,9 +620,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         """
 
         if self.engine.dialect.name.lower() == "bigquery":
+            logger.info("Creating table %s" % table_name)
             stmt = "CREATE OR REPLACE TABLE `{table_name}` AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql)
-
+        elif self.engine.dialect.name.lower() == "snowflake":
+            logger.info("Creating transient table %s" % table_name)
+            stmt = "CREATE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql)
         elif self.engine.dialect.name == "mysql":
             stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql)
