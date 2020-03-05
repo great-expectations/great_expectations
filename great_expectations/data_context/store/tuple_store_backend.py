@@ -255,10 +255,8 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                     )
 
                 if self.filepath_prefix and not filepath.startswith(self.filepath_prefix):
-                    logger.warning("skipping " + filepath + " because it does not start with " + self.filepath_prefix)
                     continue
                 elif self.filepath_suffix and not filepath.endswith(self.filepath_suffix):
-                    logger.warning("skipping " + filepath + " because it does not end with " + self.filepath_prefix)
                     continue
                 else:
                     key = self._convert_filepath_to_key(filepath)
