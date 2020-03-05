@@ -12,6 +12,7 @@ develop
 * Bugfix :: suite edit notebooks no longer blow away the existing suite while loading a batch of data
 * More robust and tested logic in `suite edit`
 * DataDocs: bugfixes and improvements for smaller viewports
+* Bugfix :: fix for bug that crashes SampleExpectationsDatasetProfiler if unexpected_percent is of type decimal.Decimal (`#1109 <https://github.com/great-expectations/great_expectations/issues/1109>`_)
 
 
 0.9.2
