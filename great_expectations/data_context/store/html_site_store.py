@@ -42,7 +42,7 @@ class HtmlSiteStore(object):
                 runtime_environment=runtime_environment,
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
-                    "filepath_prefix": "expectations/",
+                    "filepath_prefix": "expectations",
                     "filepath_suffix": ".html"
                 }
             ),
@@ -51,11 +51,11 @@ class HtmlSiteStore(object):
                 runtime_environment=runtime_environment,
                 config_defaults={
                     "module_name": "great_expectations.data_context.store",
-                    "filepath_prefix": "validations/",
+                    "filepath_prefix": "validations",
                     "filepath_suffix": ".html"
                 }
             ),
-            "index_page":  instantiate_class_from_config(
+            "index_page": instantiate_class_from_config(
                 config=store_backend,
                 runtime_environment=runtime_environment,
                 config_defaults={
@@ -175,7 +175,7 @@ class HtmlSiteStore(object):
         dir_exclusions = []
 
         if not static_assets_source_dir:
-            static_assets_source_dir = file_relative_path(__file__, "../../render/view/static")
+            static_assets_source_dir = file_relative_path(__file__, os.path.join("..", "..", "render", "view", "static"))
 
         for item in os.listdir(static_assets_source_dir):
             # Directory

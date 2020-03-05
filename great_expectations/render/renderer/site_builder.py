@@ -103,7 +103,7 @@ class SiteBuilder(object):
         custom_styles_directory = None
         plugins_directory = data_context.plugins_directory
         if plugins_directory and os.path.isdir(os.path.join(plugins_directory, "custom_data_docs", "styles")):
-            custom_styles_directory = os.path.join(plugins_directory, "custom_data_docs/styles")
+            custom_styles_directory = os.path.join(plugins_directory, "custom_data_docs", "styles")
 
         # The site builder is essentially a frontend store. We'll open up three types of backends using the base
         # type of the configuration defined in the store_backend section
@@ -197,7 +197,6 @@ class SiteBuilder(object):
             site_section_builder.build(resource_identifiers=resource_identifiers)
 
         return self.site_index_builder.build()
-
 
     def get_resource_url(self, resource_identifier=None):
         """
