@@ -1,3 +1,4 @@
+import uuid
 from copy import deepcopy
 import logging
 
@@ -31,7 +32,7 @@ class DataContextConfig(DictDot):
             stores,
             data_docs_sites,
             config_variables_file_path=None,
-            telemetry_config=None,
+            anonymized_usage_data=None,
             commented_map=None
     ):
         if commented_map is None:
@@ -51,7 +52,14 @@ class DataContextConfig(DictDot):
         self.stores = stores
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
-        self.telemetry_config = telemetry_config
+        if anonymized_usage_data is None:
+            anonymized_usage_data = {
+                "enabled": True,
+                "data_context_id": str(uuid.uuid4())
+            }
+        if not anonymized_usage_data["data_context_id"]:
+            anonymized_usage_data["data_context_id"] = str(uuid.uuid4())
+        self.anonymized_usage_data = anonymized_usage_data
 
     @property
     def commented_map(self):
@@ -83,7 +91,7 @@ class DataContextConfig(DictDot):
             "stores": self.stores,
             "data_docs_sites": self.data_docs_sites,
             "config_variables_file_path": self.config_variables_file_path,
-            "telemetry_config": self.telemetry_config
+            "anonymized_usage_data": self.anonymized_usage_data
         }
         if self.config_variables_file_path is None:
             del myself['config_variables_file_path']

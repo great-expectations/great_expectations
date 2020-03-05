@@ -47,7 +47,7 @@ def main(nap_duration=1, block_network=False, enable_telemetry=True):
                 },
                 data_docs_sites={},
                 config_variables_file_path=None,
-                telemetry_config={
+                anonymized_usage_data={
                     "enabled": enable_telemetry,
                     "data_context_id": None,  # Leaving this as none causes a new id to be generated
                     "telemetry_bucket": "priv.greatexpectations.telemetry"
