@@ -76,8 +76,6 @@ def init(target_directory, view):
             sys.exit(1)
         else:
             try:
-                cli_message("Target directory: " + target_directory)
-                sys.exit(0)
                 context = DataContext.create(target_directory)
                 cli_message(ONBOARDING_COMPLETE)
                 # TODO if this is correct, ensure this is covered by a test
