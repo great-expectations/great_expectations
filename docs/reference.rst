@@ -52,6 +52,7 @@ Integrations
 
    /reference/integrations/redshift
    /reference/integrations/bigquery
+   /reference/integrations/snowflake
 
 ******************
 Advanced Features

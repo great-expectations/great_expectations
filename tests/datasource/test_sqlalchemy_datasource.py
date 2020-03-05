@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 
 import os
@@ -170,3 +172,34 @@ def test_sqlalchemy_source_limit(sqlitedb_engine):
     assert limited_dataset._table.name.startswith("ge_tmp_")  # we have generated a temporary table
     assert len(limited_dataset.head(10)) == 1  # and it is only one row long
     assert limited_dataset.head(10)['col_1'][0] == 3  # offset should have been applied
+
+
+def test_sqlalchemy_datasource_query_and_table_handling(sqlitedb_engine):
+    # MANUALLY SET DIALECT NAME FOR TEST
+    datasource = SqlAlchemyDatasource('SqlAlchemy', engine=sqlitedb_engine)
+    with mock.patch("great_expectations.dataset.sqlalchemy_dataset.SqlAlchemyBatchReference.__init__",
+                    return_value=None) as mock_batch:
+        datasource.get_batch({
+            "query": "select * from foo;"
+        })
+    mock_batch.assert_called_once_with(engine=sqlitedb_engine, schema=None, query="select * from foo;", table_name=None)
+
+    # Normally, we do not allow both query and table_name
+    with mock.patch("great_expectations.dataset.sqlalchemy_dataset.SqlAlchemyBatchReference.__init__",
+                    return_value=None) as mock_batch:
+        datasource.get_batch({
+            "query": "select * from foo;",
+            "table_name": "bar"
+        })
+    mock_batch.assert_called_once_with(engine=sqlitedb_engine, schema=None, query="select * from foo;", table_name=None)
+
+    # Snowflake should allow *both* query *and* table_name
+    sqlitedb_engine.dialect.name = "snowflake"
+    with mock.patch("great_expectations.dataset.sqlalchemy_dataset.SqlAlchemyBatchReference.__init__",
+                    return_value=None) as mock_batch:
+        datasource.get_batch({
+            "query": "select * from foo;",
+            "table_name": "bar"
+        })
+    mock_batch.assert_called_once_with(engine=sqlitedb_engine, schema=None, query="select * from foo;",
+                                       table_name="bar")
