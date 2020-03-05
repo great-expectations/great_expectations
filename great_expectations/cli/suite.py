@@ -10,17 +10,17 @@ from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.datasource import (
     create_expectation_suite as create_expectation_suite_impl,
+)
+from great_expectations.cli.datasource import (
+    get_batch_kwargs,
     select_datasource,
-    get_batch_kwargs
 )
 from great_expectations.cli.util import (
     _offer_to_install_new_template,
     cli_message,
 )
 from great_expectations.data_asset import DataAsset
-from great_expectations.render.renderer.notebook_renderer import (
-    NotebookRenderer,
-)
+from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 
 try:
     json_parse_exception = json.decoder.JSONDecodeError
@@ -47,7 +47,7 @@ def suite():
     "--datasource",
     "-ds",
     default=None,
-    help="""The name of the datasource. The datasource must contain a single BatchKwargGenerator that can list data assets in the datasource """
+    help="""The name of the datasource. The datasource must contain a single BatchKwargGenerator that can list data assets in the datasource """,
 )
 @click.option(
     "--batch-kwargs",
@@ -96,7 +96,6 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
     suite = _load_suite(context, suite)
     citations = suite.get_citations(sort=True, require_batch_kwargs=True)
 
-
     if batch_kwargs_json:
         try:
             batch_kwargs = json.loads(batch_kwargs_json)
@@ -105,20 +104,31 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
             _batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
             assert isinstance(_batch, DataAsset)
         except json_parse_exception as je:
-            cli_message("<red>Please check that your batch_kwargs are valid JSON.\n{}</red>".format(je))
+            cli_message(
+                "<red>Please check that your batch_kwargs are valid JSON.\n{}</red>".format(
+                    je
+                )
+            )
             sys.exit(1)
         except ge_exceptions.DataContextError:
-            cli_message("<red>Please check that your batch_kwargs are able to load a batch.</red>")
+            cli_message(
+                "<red>Please check that your batch_kwargs are able to load a batch.</red>"
+            )
             sys.exit(1)
         except ValueError as ve:
-            cli_message("<red>Please check that your batch_kwargs are able to load a batch.\n{}</red>".format(ve))
+            cli_message(
+                "<red>Please check that your batch_kwargs are able to load a batch.\n{}</red>".format(
+                    ve
+                )
+            )
             sys.exit(1)
     elif citations:
         citation = citations[-1]
         batch_kwargs = citation.get("batch_kwargs")
 
     if not batch_kwargs:
-        cli_message("""
+        cli_message(
+            """
 A batch of data is required to edit the suite - let's help you to specify it."""
         )
 
@@ -134,17 +144,24 @@ A batch of data is required to edit the suite - let's help you to specify it."""
             sys.exit(1)
 
         if batch_kwargs is None:
-            datasource_name, batch_kwarg_generator, data_asset, batch_kwargs = get_batch_kwargs(
+            (
+                datasource_name,
+                batch_kwarg_generator,
+                data_asset,
+                batch_kwargs,
+            ) = get_batch_kwargs(
                 context,
                 datasource_name=data_source.name,
                 generator_name=None,
                 generator_asset=None,
-                additional_batch_kwargs=additional_batch_kwargs
+                additional_batch_kwargs=additional_batch_kwargs,
             )
 
     notebook_name = "{}.ipynb".format(suite.expectation_suite_name)
 
-    notebook_path = os.path.join(context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name)
+    notebook_path = os.path.join(
+        context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
+    )
     NotebookRenderer().render_to_disk(suite, notebook_path, batch_kwargs)
 
     cli_message(
@@ -184,7 +201,7 @@ def _load_suite(context, suite_name):
 @click.option(
     "--view/--no-view",
     help="By default open in browser unless you specify the --no-view flag",
-    default=True
+    default=True,
 )
 @click.option(
     "--batch-kwargs",
@@ -227,15 +244,20 @@ def suite_new(suite, directory, view, batch_kwargs):
             open_docs=view,
         )
         if success:
-            cli_message("A new Expectation suite '{}' was added to your project".format(suite_name))
+            cli_message(
+                "A new Expectation suite '{}' was added to your project".format(
+                    suite_name
+                )
+            )
     except (
         ge_exceptions.DataContextError,
         ge_exceptions.ProfilerError,
         IOError,
-        SQLAlchemyError
+        SQLAlchemyError,
     ) as e:
         cli_message("<red>{}</red>".format(e))
         sys.exit(1)
+
 
 @suite.command(name="list")
 @click.option(
