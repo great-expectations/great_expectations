@@ -64,6 +64,12 @@ class DatasetProfiler(DataAssetProfiler):
         batch_kwargs = data_asset.batch_kwargs
         expectation_suite = cls.add_meta(expectation_suite, batch_kwargs)
         validation_results = data_asset.validate(expectation_suite, run_id=run_id, result_format="SUMMARY")
+        expectation_suite.add_citation(
+            comment=str(cls.__name__) + " added a citation based on the current batch.",
+            batch_kwargs=data_asset.batch_kwargs,
+            batch_markers=data_asset.batch_markers,
+            batch_parameters=data_asset.batch_parameters
+        )
         return expectation_suite, validation_results
 
     @classmethod
