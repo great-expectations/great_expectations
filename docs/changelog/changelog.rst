@@ -2,6 +2,7 @@
 
 develop
 -----------------
+* Add support for transient table creation in snowflake (#1012)
 * Improve path support in TupleStoreBackend for better cross-platform compatibility
 * New features on `ExpecatationSuite`
     - `.add_citation()`
