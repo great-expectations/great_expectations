@@ -61,7 +61,6 @@ def test_InMemoryStoreBackend():
         my_store.get_url_for_key(my_key)
 
 
-
 def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
     path = str(tmp_path_factory.mktemp('test_FilesystemStoreBackend_two_way_string_conversion__dir'))
     project_path = str(tmp_path_factory.mktemp('my_dir'))
