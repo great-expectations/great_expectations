@@ -372,6 +372,47 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(condition=PY2, reason="Py2")
+def test_cli_init_on_new_project_with_broken_excel_file(caplog, tmp_path_factory):
+    project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
+    os.makedirs(os.path.join(project_dir, "data"))
+    data_path = os.path.join(project_dir, "data", "broken_excel_file.xls")
+    fixture_path = file_relative_path(__file__, "../test_sets/broken_excel_file.xls")
+    shutil.copy(fixture_path, data_path)
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["init", "-d", project_dir],
+        input="Y\n1\n1\n{}\n\n\nn\n".format(data_path, catch_exceptions=False),
+    )
+    stdout = result.output
+
+    assert len(stdout) < 3000, "CLI output is unreasonably long."
+    assert "Always know what to expect from your data" in stdout
+    assert "What data would you like Great Expectations to connect to" in stdout
+    assert "What are you processing your files with" in stdout
+    assert "Enter the path (relative or absolute) of a data file" in stdout
+    assert "Cannot load file." in stdout
+    assert "- Please check the file and try again or select a different data file." in stdout
+    assert "- Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'" in stdout
+    assert "Try again? [Y/n]:" in stdout
+    assert "[{}]:".format(data_path) in stdout
+    assert "We have saved your setup progress. When you are ready, run great_expectations init to continue." in stdout
+
+    assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
+    config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
+    assert os.path.isfile(config_path)
+
+    config = yaml.load(open(config_path, "r"))
+    data_source_class = config["datasources"]["files_datasource"]["data_asset_type"][
+        "class_name"
+    ]
+    assert data_source_class == "PandasDataset"
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
 def _delete_and_recreate_dir(directory):
     shutil.rmtree(directory)
     assert not os.path.isdir(directory)
