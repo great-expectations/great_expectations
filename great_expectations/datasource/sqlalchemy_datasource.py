@@ -182,6 +182,9 @@ class SqlAlchemyDatasource(Datasource):
                                "adding limit and offset directly to the generated query.")
             if "bigquery_temp_table" in batch_kwargs:
                 table_name = batch_kwargs.get("bigquery_temp_table")
+            elif self.engine.dialect.name.lower() == "snowflake":
+                # Snowflake uses a transient table, so we expect a table_name to be provided
+                table_name = batch_kwargs.get("table_name")
             else:
                 table_name = None
 
