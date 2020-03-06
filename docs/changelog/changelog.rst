@@ -2,7 +2,7 @@
 
 develop
 -----------------
-
+* Add error handling to `init` flow for cases where user tries using a broken file
 
 0.9.3
 -----------------
