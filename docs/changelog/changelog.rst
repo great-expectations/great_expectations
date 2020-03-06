@@ -1,5 +1,24 @@
 .. _changelog:
 
+develop
+-----------------
+
+
+0.9.3
+-----------------
+* Add support for transient table creation in snowflake (#1012)
+* Improve path support in TupleStoreBackend for better cross-platform compatibility
+* New features on `ExpecatationSuite`
+    - `.add_citation()`
+    - `get_citations()`
+* `SampleExpectationsDatasetProfiler` now leaves a citation containing the original batch kwargs
+* `great_expectations suite edit` now uses batch_kwargs from citations if they exist
+* Bugfix :: suite edit notebooks no longer blow away the existing suite while loading a batch of data
+* More robust and tested logic in `suite edit`
+* DataDocs: bugfixes and improvements for smaller viewports
+* Bugfix :: fix for bug that crashes SampleExpectationsDatasetProfiler if unexpected_percent is of type decimal.Decimal (`#1109 <https://github.com/great-expectations/great_expectations/issues/1109>`_)
+
+
 0.9.2
 -----------------
 * Fixes #1095
