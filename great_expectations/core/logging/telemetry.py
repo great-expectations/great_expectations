@@ -1,5 +1,5 @@
 import logging
-import json
+import requests
 import sys
 import platform
 import time
@@ -53,7 +53,7 @@ class TelemetryRecordFormatter(logging.Formatter):
     default_msec_format = "%s.%03dZ"
 
     def format(self, record):
-        return json.dumps({
+        return {
             "event_time": self.formatTime(record=record),
             "data_context_id": record.__dict__.get("data_context_id"),
             "message": record.msg,
@@ -63,7 +63,22 @@ class TelemetryRecordFormatter(logging.Formatter):
             "version_info": record.__dict__.get("version_info", None),
             "anonymized_datasources": record.__dict__.get("anonymized_datasources", None),
             "event_payload": record.__dict__.get("event_payload", None)
-        })
+        }
+
+
+class HTTPDataHandler(logging.Handler):
+    def __init__(self, url):
+        super(HTTPDataHandler, self).__init__()
+        self._url = url
+
+    def emit(self, record):
+        """
+        Emit a record.
+        """
+        try:
+            requests.post(self._url, json=self.format(record))
+        except Exception:
+            self.handleError(record)
 
 
 def telemetry_enabled_method(func=None, args_payload_fn=None, result_payload_fn=None):
