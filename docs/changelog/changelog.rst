@@ -4,6 +4,7 @@ develop
 -----------------
 * Update CLI `init` flow to support snowflake transient tables
 * Use filename for default expectation suite name in CLI `init`
+* Tables created by SqlAlchemyDataset use a shorter name with 8 hex characters of randomness instead of a full uuid
 
 
 0.9.3
