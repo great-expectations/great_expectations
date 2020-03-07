@@ -1122,6 +1122,59 @@ class SparkDFDataset(MetaSparkDFDataset):
         )
 
     @DocInherit
+    @MetaSparkDFDataset.column_pair_map_expectation
+    def expect_column_pair_values_A_to_be_greater_than_B(
+        self,
+        column_A,
+        column_B,
+        or_equal=None,
+        parse_strings_as_datetimes=None,
+        allow_cross_type_comparisons=None,
+        ignore_row_if="both_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # FIXME
+        if allow_cross_type_comparisons:
+            raise NotImplementedError
+
+        column_A_name = column_A.schema.names[1]
+        column_B_name = column_B.schema.names[1]
+
+        if parse_strings_as_datetimes:
+            _udf = udf(parse, sparktypes.TimestampType())
+            # Create new columns for comparison without replacing original values.
+            (timestamp_column_A, timestamp_column_B) = (
+                "__ts_{0}".format(column_A_name),
+                "__ts_{0}".format(column_B_name),
+            )
+            temp_column_A = column_A.withColumn(timestamp_column_A, _udf(column_A_name))
+            temp_column_B = column_B.withColumn(timestamp_column_B, _udf(column_B_name))
+            # Use the new columns to compare instead of original columns.
+            (column_A_name, column_B_name) = (timestamp_column_A, timestamp_column_B)
+
+        else:
+            temp_column_A = column_A
+            temp_column_B = column_B
+
+        join_df = temp_column_A.join(
+            temp_column_B, temp_column_A["__row"] == temp_column_B["__row"], how="inner"
+        )
+
+        if or_equal:
+            return join_df.withColumn(
+                "__success",
+                when(col(column_A_name) >= col(column_B_name), True).otherwise(False),
+            )
+        else:
+            return join_df.withColumn(
+                "__success",
+                when(col(column_A_name) > col(column_B_name), True).otherwise(False),
+            )
+
+    @DocInherit
     @MetaSparkDFDataset.multicolumn_map_expectation
     def expect_multicolumn_values_to_be_unique(
         self,
