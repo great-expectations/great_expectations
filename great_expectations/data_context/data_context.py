@@ -33,9 +33,8 @@ from great_expectations.profile.basic_dataset_profiler import (
 )
 
 import great_expectations.exceptions as ge_exceptions
-from ..core.logging.s3_logging_handler import S3Handler
 from ..core.logging.telemetry import telemetry_enabled_method, TelemetryRecordFormatter, DataContextLoggingFilter, \
-    DEFAULT_TELEMETRY_BUCKET, run_validation_operator_telemetry
+    DEFAULT_TELEMETRY_BUCKET, run_validation_operator_telemetry, HTTPDataHandler
 
 from ..validator.validator import Validator
 from .templates import (
@@ -201,7 +200,9 @@ class BaseDataContext(object):
 
         # There will be *one* telemetry logger, even though there may be multiple telemetry handlers (per context)
         telemetry_logger = logging.getLogger("great_expectations.telemetry")
-        telemetry_handler = S3Handler("great_expectations", telemetry_bucket, compress=True)
+        telemetry_handler = HTTPDataHandler(
+            url="https://lq3ydlmxy5.execute-api.us-east-1.amazonaws.com/dev/great_expectations/v1/telemetry",
+        )
         telemetry_handler.setLevel(level=logging.INFO)
         telemetry_filter = DataContextLoggingFilter(data_context=self, data_context_id=data_context_id)
         telemetry_handler.addFilter(telemetry_filter)
