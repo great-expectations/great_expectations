@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 import platform
+import uuid
 
 import click
 
@@ -499,6 +500,7 @@ def _collect_postgres_credentials(default_credentials={}):
 
     return credentials
 
+
 def _collect_snowflake_credentials(default_credentials={}):
     credentials = {
         "drivername": "snowflake"
@@ -512,31 +514,40 @@ def _collect_snowflake_credentials(default_credentials={}):
     credentials["password"] = click.prompt("What is the password for the snowflake connection?",
                             default="",
                             show_default=False, hide_input=True)
-    credentials["host"] = click.prompt("What is the account name for the snowflake connection?",
+    credentials["host"] = click.prompt("What is the account name for the snowflake connection (include region -- ex "
+                                       "'ABCD.us-east-1')?",
                         default=default_credentials.get("host", ""),
                         show_default=True)
 
 
     # optional
-
-    #TODO: database is optional, but it is not a part of query
-    credentials["database"] = click.prompt("What is database name for the snowflake connection?",
-                        default=default_credentials.get("database", ""),
-                        show_default=True)
-
-    # # TODO: schema_name is optional, but it is not a part of query and there is no obvious way to pass it
-    # credentials["schema_name"] = click.prompt("What is schema name for the snowflake connection?",
-    #                     default=default_credentials.get("schema_name", ""),
-    #                     show_default=True)
+    database = click.prompt("What is database name for the snowflake connection? (optional -- leave blank for none)",
+                            default=default_credentials.get("database", ""),
+                            show_default=True)
+    if len(database) > 0:
+        credentials["database"] = database
 
     credentials["query"] = {}
-    credentials["query"]["warehouse"] = click.prompt("What is warehouse name for the snowflake connection?",
+    schema = click.prompt("What is schema name for the snowflake connection? (optional -- leave "
+                          "blank for none)",
+                          default=default_credentials.get("schema_name", ""),
+                          show_default=True)
+    if len(schema) > 0:
+        credentials["query"]["schema"] = schema
+    warehouse = click.prompt("What is warehouse name for the snowflake connection? (optional "
+                                                     "-- leave blank for none)",
                                                      default=default_credentials.get("warehouse", ""),
                                                      show_default=True)
-    credentials["query"]["role"] = click.prompt("What is role name for the snowflake connection?",
-                                                default=default_credentials.get("role", ""), show_default=True)
+    if len(warehouse) > 0:
+        credentials["query"]["warehouse"] = warehouse
+
+    role = click.prompt("What is role name for the snowflake connection? (optional -- leave blank for none)",
+                        default=default_credentials.get("role", ""), show_default=True)
+    if len(role) > 0:
+        credentials["query"]["role"] = role
 
     return credentials
+
 
 def _collect_mysql_credentials(default_credentials={}):
 
@@ -779,10 +790,9 @@ def get_batch_kwargs(context,
         )
 
     elif isinstance(context.get_datasource(datasource_name), SqlAlchemyDatasource):
-        generator_asset, batch_kwargs = _load_query_as_data_asset_from_sqlalchemy_datasource(context,
-                                                                                             datasource_name,
-                                                                                             generator_name=generator_name,
-                                                                                             additional_batch_kwargs=additional_batch_kwargs)
+        generator_asset, batch_kwargs = _get_batch_kwargs_for_sqlalchemy_datasource(context,
+                                                                                    datasource_name,
+                                                                                    additional_batch_kwargs=additional_batch_kwargs)
     else:
         raise ge_exceptions.DataContextError("Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(datasource_name, str(type(context.get_datasource(datasource_name)))))
 
@@ -874,6 +884,15 @@ Name the new expectation suite"""
             default_expectation_suite_name = "{}.warning".format(generator_asset)
         elif "query" in batch_kwargs:
             default_expectation_suite_name = "query.warning"
+        elif "path" in batch_kwargs:
+            try:
+                # Try guessing a filename
+                filename = os.path.split(os.path.normpath(batch_kwargs["path"]))[1]
+                # Take all but the last part after the period
+                filename = ".".join(filename.split(".")[:-1])
+                default_expectation_suite_name = str(filename) + ".warning"
+            except (OSError, IndexError):
+                default_expectation_suite_name = "warning"
         else:
             default_expectation_suite_name = "warning"
         while True:
@@ -1051,15 +1070,12 @@ We could not determine the format of the file. What is it?
     return (generator_asset, batch_kwargs)
 
 
-def _load_query_as_data_asset_from_sqlalchemy_datasource(context, datasource_name,
-                                                         generator_name=None,
-                                                         additional_batch_kwargs=None):
+def _get_batch_kwargs_for_sqlalchemy_datasource(context, datasource_name,
+                                                additional_batch_kwargs=None):
     msg_prompt_query = """
 Enter an SQL query
 """
-    msg_prompt_data_asset_name = """
-    Give your new data asset a short name
-"""
+
     msg_prompt_enter_data_asset_name = "\nWhich table would you like to use? (Choose one)\n"
 
     msg_prompt_enter_data_asset_name_suffix = "    Don't see the table in the list above? Just type the SQL query\n"
@@ -1079,8 +1095,31 @@ Enter an SQL query
 
     data_asset_names_to_display = available_data_asset_names_str[:5]
     choices = "\n".join(["    {}. {}".format(i, name) for i, name in enumerate(data_asset_names_to_display, 1)])
-    prompt = msg_prompt_enter_data_asset_name + choices + "\n" + msg_prompt_enter_data_asset_name_suffix.format(
+    prompt = msg_prompt_enter_data_asset_name + choices + os.linesep + msg_prompt_enter_data_asset_name_suffix.format(
         len(data_asset_names_to_display))
+
+    # Some backends require named temporary table parameters. We specifically elicit those and add them
+    # where appropriate.
+    temp_table_kwargs = dict()
+    datasource = context.get_datasource(datasource_name)
+    if datasource.engine.dialect.name.lower() == "snowflake":
+        # snowflake requires special handling
+        table_name = click.prompt("In Snowflake, GE may need to create a transient table "
+                                  "to use for validation." + os.linesep + "Please enter a name to use for that table: ",
+                                  default="ge_tmp_" + str(uuid.uuid4())[:8],
+                                  show_default=True)
+        temp_table_kwargs = {
+            "snowflake_transient_table": table_name,
+        }
+    elif datasource.engine.dialect.name.lower() == "bigquery":
+        # bigquery also requires special handling
+        table_name = click.prompt("GE will create a table based on your query to use for "
+                                  "validation." + os.linesep + "Please enter a name for this table: ",
+                                  default="ge_tmp_" + str(uuid.uuid4())[:8],
+                                  show_default=True)
+        temp_table_kwargs = {
+            "bigquery_temp_table": table_name,
+        }
 
     while True:
         try:
@@ -1105,12 +1144,13 @@ Enter an SQL query
 
             if query is None:
                 batch_kwargs = temp_generator.build_batch_kwargs(generator_asset, **additional_batch_kwargs)
+                batch_kwargs.update(temp_table_kwargs)
             else:
                 batch_kwargs = {
                     "query": query,
                     "datasource": datasource_name
                 }
-
+                batch_kwargs.update(temp_table_kwargs)
                 Validator(batch=datasource.get_batch(batch_kwargs), expectation_suite=ExpectationSuite("throwaway")).get_dataset()
 
             break

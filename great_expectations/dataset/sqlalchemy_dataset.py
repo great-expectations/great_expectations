@@ -249,7 +249,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             #was used for a temp table and raising an error
             schema = None
             # dashes are special characters in most databases so use underscores
-            table_name = "ge_tmp_" + str(uuid.uuid4()).replace("-", "_")
+            table_name = "ge_tmp_" + str(uuid.uuid4())[:8]
             generated_table_name = table_name
         else:
             generated_table_name = None
@@ -291,7 +291,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if schema is not None and custom_sql is not None:
             # temporary table will be written to temp schema, so don't allow
             # a user-defined schema
-            raise ValueError("Cannot specify both schema and custom_sql.")
+            # NOTE: 20200306 - JPC - Previously, this would disallow both custom_sql (a query) and a schema, but
+            # that is overly restrictive -- snowflake could have had a schema specified, for example, in which to create
+            # a temporary table.
+            # raise ValueError("Cannot specify both schema and custom_sql.")
+            pass
 
         if custom_sql is not None and self.engine.dialect.name.lower() == "bigquery":
             if generated_table_name is not None and self.engine.dialect.dataset_id is None:
@@ -300,11 +304,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if (custom_sql is not None and self.engine.dialect.name.lower() == "snowflake" and
                 generated_table_name is not None):
-            raise ValueError("No snowflake table_name specified. Snowflake with a query batch_kwarg will create "
+            raise ValueError("No snowflake_transient_table specified. Snowflake with a query batch_kwarg will create "
                              "a transient table, so you must provide a user-selected name.")
 
         if custom_sql:
-            self.create_temporary_table(table_name, custom_sql)
+            self.create_temporary_table(table_name, custom_sql, schema_name=schema)
 
             if generated_table_name is not None and self.engine.dialect.name.lower() == "bigquery":
                 logger.warning("Created permanent table {table_name}".format(
@@ -611,7 +615,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return self.engine.execute(query).scalar()
 
-    def create_temporary_table(self, table_name, custom_sql):
+    def create_temporary_table(self, table_name, custom_sql, schema_name=None):
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         WARNING: this feature is new in v0.4.
@@ -620,12 +624,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         """
 
         if self.engine.dialect.name.lower() == "bigquery":
-            logger.info("Creating table %s" % table_name)
             stmt = "CREATE OR REPLACE TABLE `{table_name}` AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql)
         elif self.engine.dialect.name.lower() == "snowflake":
             logger.info("Creating transient table %s" % table_name)
-            stmt = "CREATE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
+            if schema_name is not None:
+                table_name = schema_name + "." + table_name
+            stmt = "CREATE OR REPLACE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql)
         elif self.engine.dialect.name == "mysql":
             stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
