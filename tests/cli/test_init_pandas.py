@@ -237,7 +237,8 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
         input="Y\n1\n1\n{}\n\n\n\n".format(data_path, catch_exceptions=False),
     )
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(project_dir) \
+           in mock_webbrowser.call_args[0][0]
 
     context = DataContext(os.path.join(project_dir, DataContext.GE_DIR))
     assert isinstance(context, DataContext)

@@ -3,6 +3,8 @@
 develop
 -----------------
 * Update CLI `init` flow to support snowflake transient tables
+* Use filename for default expectation suite name in CLI `init`
+
 
 0.9.3
 -----------------

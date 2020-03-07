@@ -121,7 +121,7 @@ def test_suite_new_answer_suite_name_prompts_with_name_of_existing_suite(
     assert result.exit_code == 0
     assert "already exists. If you intend to edit the suite" in stdout
     assert "Enter the path" in stdout
-    assert "Name the new expectation suite [warning]" in stdout
+    assert "Name the new expectation suite [f1.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
@@ -179,7 +179,7 @@ def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
 
     assert result.exit_code == 0
     assert "Enter the path" in stdout
-    assert "Name the new expectation suite [warning]" in stdout
+    assert "Name the new expectation suite [f1.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
