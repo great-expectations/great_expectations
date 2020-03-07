@@ -2,7 +2,7 @@
 
 develop
 -----------------
-
+* Update CLI `init` flow to support snowflake transient tables
 
 0.9.3
 -----------------
