@@ -4,7 +4,7 @@
 We cannot stress enough that we want this to be a safe, comfortable and inclusive environment. Please read our [code of conduct](https://github.com/great-expectations/great_expectations/blob/develop/CODE_OF_CONDUCT.md) if you need more information on this guideline.
 
 ## Keep timezones in mind and be respectful of peoples’ time.
-People on Slack are distributed and might be in a very different time zone from you, so don't use @channel @here (this is reserved for admins anyways). Before you @-mention someone, think about what timezone they are in and if you are likely to disturb them. You can check someone's timezone in their profile.
+People on Slack are distributed and might be in a very different time zone from you, so don't use @channel @here (this is reserved for admins anyways). Before you @-mention someone, think about what timezone they are in and if you are likely to disturb them. You can check someone's timezone in their profile. As of today, the core GE team is based solely in the United States but the community is world wide.
 
 If you post in off hours be patient, Someone will get back to you once the sun comes up.
 
@@ -18,10 +18,10 @@ If you post in off hours be patient, Someone will get back to you once the sun c
 
 **Know your support channel:
 <ul>
-<li>#beginners: If you are just getting started this is your place to be!</li>
-<li>#support: Having trouble with customizing your expectations, an integration or anything else .beyond just getting started? Post here.</li>
-<li>#expectation-requests: Have a good idea for an expectation? Post it here. </li>
-<li>#contributors-contributing: For previous, current and prospective contributors to talk about potential contributions and to help each other with contributions.  </li>
+	<li>#beginners: If you are just getting started this is your place to be!</li>
+	<li>#support: Having trouble with customizing your expectations, an integration or anything else .beyond just getting started? Post here.</li>
+	<li>#expectation-requests: Have a good idea for an expectation? Post it here. </li>
+	<li>#contributors-contributing: For previous, current and prospective contributors to talk about potential contributions and to help each other with contributions.  </li>
 </ul>
 ##Use Public Channels, Not Private Groups
 Slack is about communication, so use public channels whenever possible. This is good for transparency, but also keeps the community vibrant and alive. You also have an opportunity to help someone else who might find your conversation helpful or encouraging.
