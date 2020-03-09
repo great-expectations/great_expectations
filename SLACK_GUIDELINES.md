@@ -8,7 +8,7 @@ People on Slack are distributed and might be in a very different time zone from 
 
 If you post in off hours be patient, Someone will get back to you once the sun comes up.
 
-##Asking for help.
+## Asking for help 
 
 - Do your best to try and solve the problem first as your efforts will help us more easily answer the question.
 - Head over to our [Documentation](https://docs.greatexpectations.io/en/latest/)
