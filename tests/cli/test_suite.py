@@ -318,7 +318,10 @@ def test_suite_edit_without_suite_name_raises_error(caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, "suite edit", catch_exceptions=False)
     assert result.exit_code == 2
-    assert 'Error: Missing argument "SUITE".' in result.stderr
+    assert (
+        'Error: Missing argument "SUITE".' in result.stderr
+        or "Error: Missing argument 'SUITE'." in result.stderr
+    )
 
 
 def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
