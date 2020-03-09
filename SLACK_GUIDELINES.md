@@ -23,7 +23,7 @@ If you post in off hours be patient, Someone will get back to you once the sun c
 	<li>#expectation-requests: Have a good idea for an expectation? Post it here. </li>
 	<li>#contributors-contributing: For previous, current and prospective contributors to talk about potential contributions and to help each other with contributions.  </li>
 </ul>
-##Use Public Channels, Not Private Groups
+## Use Public Channels, Not Private Groups
 Slack is about communication, so use public channels whenever possible. This is good for transparency, but also keeps the community vibrant and alive. You also have an opportunity to help someone else who might find your conversation helpful or encouraging.
 
 
