@@ -2,7 +2,9 @@
 
 develop
 -----------------
-
+* Docs typo fixes
+* Jupyter notebook improvements
+* `great_expectations init` improvements
 
 0.9.3
 -----------------
