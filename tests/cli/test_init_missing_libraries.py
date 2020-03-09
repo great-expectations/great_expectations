@@ -84,7 +84,6 @@ great_expectations/
     uncommitted/
         config_variables.yml
         data_docs/
-        samples/
         validations/
 """
     )
@@ -201,7 +200,6 @@ great_expectations/
     uncommitted/
         config_variables.yml
         data_docs/
-        samples/
         validations/
 """
     )

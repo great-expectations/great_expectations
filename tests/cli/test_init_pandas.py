@@ -129,7 +129,6 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
                     warning/
                         9999.9999/
                             foobarbazguid.html
-        samples/
         validations/
             warning/
                 9999.9999/
