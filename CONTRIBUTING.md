@@ -112,3 +112,21 @@ In addition to running existing tests to make sure your code change works, pleas
     * `expect_column_pair_values...` for `@column_pair_map_expectation`
 
 These guidelines should be followed consistently for methods and variables exposed in the API. They aren't intended to be strict rules for every internal line of code in every function.
+
+## Release Checklist
+
+GE core team members use this checklist to ship releases.
+
+- [ ] merge all approved PRs into `develop`
+- [ ] make a new branch from `develop` called something  like `release-prep`
+- [ ] in this branch update the version number in the `.travis.yml` file (look in the deploy section)
+- [ ] update the changelog.rst: move all things under `develop` under a new heading w/ the new release number. Leave the develop header for the next release
+- [ ] Submit this as a PR against `develop`
+- [ ] After successful checks, get it approved and merged
+- [ ] Create a PR from `develop` into `master`
+- [ ] After successful checks, merge the PR
+- [ ] Wait for all the builds to complete (including the deploy job)
+- [ ] Check [PyPI](https://pypi.org/project/great-expectations/#history) for the new release
+- [ ] [Create the release on GitHub](https://github.com/great-expectations/great_expectations/releases) with the version number. Copy the changelog notes into the release notes.
+- [ ] Verify RTD builds new release version
+- [ ] Socialize the relase on GE slack by copying the changelog with an optional nice personal message (thank people if you can)
