@@ -49,8 +49,10 @@ def main(nap_duration=1, block_network=False, enable_telemetry=True):
                 config_variables_file_path=None,
                 anonymized_usage_data={
                     "enabled": enable_telemetry,
-                    "data_context_id": None,  # Leaving this as none causes a new id to be generated
-                    "telemetry_bucket": "priv.greatexpectations.telemetry"
+                    # Leaving data_context_id as none would cause a new id to be generated
+                    "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
+                    "telemetry_url": "https://mn3i9tgx0b.execute-api.us-east-1.amazonaws.com/test/great_expectations"
+                                     "/v1/telemetry",
                 },
                 commented_map=None,
             )
@@ -83,7 +85,11 @@ if __name__ == '__main__':
         nap_duration = 1
 
     try:
-        block_network = bool(sys.argv[2])
+        res = sys.argv[2]
+        if res in ["y", "yes", "True", "true", "t", "T"]:
+            block_network = True
+        else:
+            block_network = False
     except IndexError:
         block_network = False
     except ValueError:
