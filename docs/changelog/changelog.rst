@@ -7,6 +7,7 @@ develop
 * removed obsolete config error handling
 * Simpler messaging in valiation notebooks
 * replaced hacky loop with suite list call in notebooks
+* CLI suite new now supports `--empty` flag that generates an empty suite and opens a notebook
 
 
 0.9.3
