@@ -4,9 +4,8 @@ from __future__ import unicode_literals
 import json
 import os
 
-import pytest
+import mock
 from click.testing import CliRunner
-from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -28,9 +27,7 @@ Commands:
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_suite_new_on_context_with_no_datasources(
-    caplog, empty_data_context
-):
+def test_suite_new_on_context_with_no_datasources(caplog, empty_data_context):
     """
     We call the "suite new" command on a data context that has no datasources
     configured.
@@ -46,9 +43,7 @@ def test_suite_new_on_context_with_no_datasources(
     context = DataContext(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli,
-        ["suite", "new", "-d", root_dir, "--no-view"],
-        catch_exceptions=False,
+        cli, ["suite", "new", "-d", root_dir, "--no-view"], catch_exceptions=False,
     )
     stdout = result.stdout
 
@@ -57,8 +52,9 @@ def test_suite_new_on_context_with_no_datasources(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_new_enter_existing_suite_name_as_arg(
-    caplog, data_context
+    mock_subprocess, caplog, data_context
 ):
     """
     We call the "suite new" command with the name of an existing expectation suite in the --suite argument
@@ -68,6 +64,7 @@ def test_suite_new_enter_existing_suite_name_as_arg(
 
     not_so_empty_data_context = data_context
     project_root_dir = not_so_empty_data_context.root_directory
+    os.mkdir(os.path.join(project_root_dir, "uncommitted"))
 
     root_dir = project_root_dir
     os.chdir(root_dir)
@@ -85,8 +82,9 @@ def test_suite_new_enter_existing_suite_name_as_arg(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_new_answer_suite_name_prompts_with_name_of_existing_suite(
-    caplog, data_context, filesystem_csv_2
+    mock_subprocess, caplog, data_context, filesystem_csv_2
 ):
     """
     We call the "suite new" command without the suite name argument
@@ -103,6 +101,7 @@ def test_suite_new_answer_suite_name_prompts_with_name_of_existing_suite(
 
     not_so_empty_data_context = data_context
     project_root_dir = not_so_empty_data_context.root_directory
+    os.mkdir(os.path.join(project_root_dir, "uncommitted"))
 
     root_dir = project_root_dir
     os.chdir(root_dir)
@@ -138,8 +137,70 @@ def test_suite_new_answer_suite_name_prompts_with_name_of_existing_suite(
     assert os.path.isfile(expected_suite_path)
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+def test_suite_new_empty_suite_creates_empty_suite(
+    mock_subprocess, caplog, data_context, filesystem_csv_2
+):
+    """
+    Running "suite new --empty" should make an empty suite
+    """
+    project_root_dir = data_context.root_directory
+    os.mkdir(os.path.join(project_root_dir, "uncommitted"))
+    root_dir = project_root_dir
+    os.chdir(root_dir)
+    runner = CliRunner(mix_stderr=False)
+    csv = os.path.join(filesystem_csv_2, "f1.csv")
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--empty", "--suite", "foo", "--no-view"],
+        input=f"{csv}\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+    assert "Enter the path" in stdout
+    assert "Name the new expectation suite" not in stdout
+    assert (
+        "Great Expectations will choose a couple of columns and generate expectations"
+        not in stdout
+    )
+    assert "Generating example Expectation Suite..." not in stdout
+    assert "The following Data Docs sites were built" not in stdout
+    assert "A new Expectation suite 'foo' was added to your project" in stdout
+
+    expected_suite_path = os.path.join(root_dir, "expectations", "foo.json")
+    assert os.path.isfile(expected_suite_path)
+
+    expected_notebook = os.path.join(root_dir, "uncommitted", "foo.ipynb")
+    assert os.path.isfile(expected_notebook)
+
+    assert mock_subprocess.call_count == 1
+    call_args = mock_subprocess.call_args[0][0]
+    assert call_args[0] == "jupyter"
+    assert call_args[1] == "notebook"
+    assert expected_notebook in call_args[2]
+
+    context = DataContext(root_dir)
+    assert "foo" in context.list_expectation_suite_names()
+    suite = context.get_expectation_suite("foo")
+    assert suite.expectations == []
+    citations = suite.get_citations()
+    citations[0].pop("citation_date")
+    assert citations[0] == {
+        "batch_kwargs": {"datasource": "mydatasource", "path": csv},
+        "batch_markers": None,
+        "batch_parameters": None,
+        "comment": "New suite added via CLI",
+    }
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
-    caplog, empty_data_context, filesystem_csv_2
+    mock_subprocess, caplog, empty_data_context, filesystem_csv_2
 ):
     """
     We call the "suite new" command without the suite name argument
@@ -206,8 +267,9 @@ def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_new_multiple_datasources_with_generator_without_suite_name_argument(
-    caplog, site_builder_data_context_with_html_store_titanic_random,
+    mock_subprocess, caplog, site_builder_data_context_with_html_store_titanic_random,
 ):
     """
     We call the "suite new" command without the suite name argument
@@ -231,12 +293,18 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
     stdout = result.stdout
 
     assert result.exit_code == 0
-    assert """Select a datasource
+    assert (
+        """Select a datasource
     1. random
-    2. titanic""" in stdout
-    assert """Which data would you like to use?
+    2. titanic"""
+        in stdout
+    )
+    assert (
+        """Which data would you like to use?
     1. f1 (file)
-    2. f2 (file)""" in stdout
+    2. f2 (file)"""
+        in stdout
+    )
     assert "Name the new expectation suite [f1.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
@@ -264,8 +332,9 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
-    caplog, site_builder_data_context_with_html_store_titanic_random,
+    mock_subprocess, caplog, site_builder_data_context_with_html_store_titanic_random,
 ):
     """
     We call the "suite new" command with the suite name argument
@@ -409,8 +478,9 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations(
-    caplog, site_builder_data_context_with_html_store_titanic_random,
+    mock_subprocess, caplog, site_builder_data_context_with_html_store_titanic_random,
 ):
     """
     Here we verify that the "suite edit" command helps the user to specify the batch
@@ -466,8 +536,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_containing_citations(
-    caplog, site_builder_data_context_with_html_store_titanic_random,
+    mock_subprocess, caplog, site_builder_data_context_with_html_store_titanic_random,
 ):
     """
     Here we verify that the "suite edit" command uses the batch kwargs found in
@@ -515,8 +586,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
-    caplog, site_builder_data_context_with_html_store_titanic_random,
+    mock_subprocess, caplog, site_builder_data_context_with_html_store_titanic_random,
 ):
     """
     Here we verify that when the "suite edit" command is called with batch_kwargs arg
@@ -588,7 +660,6 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(condition=PY2, reason="different error messages in py2")
 def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error(
     caplog, titanic_data_context,
 ):
@@ -674,8 +745,9 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_citations(
-    caplog, empty_data_context, filesystem_csv_2
+    mock_subprocess, caplog, empty_data_context, filesystem_csv_2
 ):
     """
     Here we verify that the "suite edit" command helps the user to specify the batch
@@ -744,66 +816,52 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_suite_list_with_zero_suites(
-    caplog, empty_data_context
-):
+def test_suite_list_with_zero_suites(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
-        cli,
-        "suite list -d {}".format(project_dir),
-        catch_exceptions=False,
+        cli, "suite list -d {}".format(project_dir), catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert ("No expectation suites available" in result.output)
+    assert "No expectation suites available" in result.output
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
-def test_suite_list_with_one_suite(
-    caplog, empty_data_context
-):
+
+def test_suite_list_with_one_suite(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context.create_expectation_suite("a.warning")
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
-    cli,
-        "suite list -d {}".format(project_dir),
-        catch_exceptions=False,
+        cli, "suite list -d {}".format(project_dir), catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert ("1 expectation suite available" in result.output)
-    assert ("\ta.warning" in result.output)
+    assert "1 expectation suite available" in result.output
+    assert "\ta.warning" in result.output
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_suite_list_with_multiple_suites(
-        caplog, empty_data_context
-):
+def test_suite_list_with_multiple_suites(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context.create_expectation_suite("a.warning")
     context.create_expectation_suite("b.warning")
     context.create_expectation_suite("c.warning")
 
-
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
-    cli,
-        "suite list -d {}".format(project_dir),
-        catch_exceptions=False,
+        cli, "suite list -d {}".format(project_dir), catch_exceptions=False,
     )
     output = result.output
-    print(output)
     assert result.exit_code == 0
     assert "3 expectation suites available:" in output
     assert "\ta.warning" in output
     assert "\tb.warning" in output
     assert "\tc.warning" in output
-
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
