@@ -64,10 +64,6 @@ class UnsupportedConfigVersionError(GreatExpectationsError):
     pass
 
 
-class ZeroDotSevenConfigVersionError(GreatExpectationsError):
-    pass
-
-
 class ProfilerError(GreatExpectationsError):
     pass
 
