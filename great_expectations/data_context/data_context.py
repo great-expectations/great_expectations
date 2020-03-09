@@ -34,7 +34,7 @@ from great_expectations.profile.basic_dataset_profiler import (
 
 import great_expectations.exceptions as ge_exceptions
 from ..core.logging.telemetry import telemetry_enabled_method, TelemetryRecordFormatter, DataContextLoggingFilter, \
-    DEFAULT_TELEMETRY_BUCKET, run_validation_operator_telemetry, HTTPDataHandler
+    DEFAULT_TELEMETRY_URL, run_validation_operator_telemetry, HTTPDataHandler
 
 from ..validator.validator import Validator
 from .templates import (
@@ -109,7 +109,7 @@ class BaseDataContext(object):
             raise
         return True
 
-    @telemetry_enabled_method
+    @telemetry_enabled_method(method_name="data_context.__init__")
     def __init__(self, project_config, context_root_dir=None):
         """DataContext constructor
 
@@ -122,8 +122,6 @@ class BaseDataContext(object):
         """
         if not BaseDataContext.validate_config(project_config):
             raise ge_exceptions.InvalidConfigError("Your project_config is not valid. Try using the CLI check-config command.")
-        self._initialize_telemetry(**project_config.anonymized_usage_data)
-
         self._project_config = project_config
         if context_root_dir is not None:
             self._context_root_directory = os.path.abspath(context_root_dir)
@@ -133,6 +131,10 @@ class BaseDataContext(object):
         # Init plugin support
         if self.plugins_directory is not None:
             sys.path.append(self.plugins_directory)
+
+        # We want to have directories set up before initializing telemetry so that we can obtain a context instance id
+        self._in_memory_instance_id = None  # This variable *may* be used in case we cannot save an instance id
+        self._initialize_telemetry(**project_config.anonymized_usage_data)
 
         # Init data sources
         self._datasources = {}
@@ -153,6 +155,7 @@ class BaseDataContext(object):
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
+
         self._register_telemetry_details()
 
     def _build_store(self, store_name, store_config):
@@ -189,20 +192,19 @@ class BaseDataContext(object):
         for store_name, store_config in store_configs.items():
             self._build_store(store_name, store_config)
 
-    def _initialize_telemetry(self, enabled=True, data_context_id=None, telemetry_bucket=DEFAULT_TELEMETRY_BUCKET):
+    def _initialize_telemetry(self, enabled=True, data_context_id=None, telemetry_url=DEFAULT_TELEMETRY_URL):
         """Initialize the telemetry system."""
         if not enabled:
             logger.info("Telemetry is disabled; skipping initialization.")
+            self._telemetry_filter = None
             return data_context_id
 
         if data_context_id is None:
             data_context_id = str(uuid.uuid4())
 
-        # There will be *one* telemetry logger, even though there may be multiple telemetry handlers (per context)
+        # There will be *one* telemetry logger, even though there may be multiple telemetry handlers (one per context)
         telemetry_logger = logging.getLogger("great_expectations.telemetry")
-        telemetry_handler = HTTPDataHandler(
-            url="https://lq3ydlmxy5.execute-api.us-east-1.amazonaws.com/dev/great_expectations/v1/telemetry",
-        )
+        telemetry_handler = HTTPDataHandler(url=telemetry_url)
         telemetry_handler.setLevel(level=logging.INFO)
         telemetry_filter = DataContextLoggingFilter(data_context=self, data_context_id=data_context_id)
         telemetry_handler.addFilter(telemetry_filter)
@@ -213,7 +215,8 @@ class BaseDataContext(object):
         return data_context_id
 
     def _register_telemetry_details(self):
-        self._telemetry_filter.register_telemetry_details()
+        if self._telemetry_filter:
+            self._telemetry_filter.register_telemetry_details()
 
     def add_store(self, store_name, store_config):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
@@ -351,6 +354,20 @@ class BaseDataContext(object):
     def expectations_store_name(self):
         return self._project_config_with_variables_substituted["expectations_store_name"]
 
+    @property
+    def instance_id(self):
+
+        instance_id = self._project_config_with_variables_substituted.get("instance_id")
+        if instance_id is None:
+            if self._in_memory_instance_id is not None:
+                return self._in_memory_instance_id
+            instance_id = str(uuid.uuid4())
+            try:
+                self.save_config_variable("instance_id", instance_id)
+            except ge_exceptions.InvalidConfigError:
+                self._in_memory_instance_id = instance_id
+        return instance_id
+
     #####
     #
     # Internal helper methods
@@ -359,23 +376,26 @@ class BaseDataContext(object):
 
     def _load_config_variables_file(self):
         """Get all config variables from the default location."""
-        if not hasattr(self, "root_directory"):
-            # A BaseDataContext does not have a directory in which to look
-            return {}
-
         config_variables_file_path = self.get_config().config_variables_file_path
         if config_variables_file_path:
             try:
-                with open(os.path.join(self.root_directory,
-                                       substitute_config_variable(config_variables_file_path, {})),
-                          "r") as config_variables_file:
+                # If the user specifies the config variable path with an environment variable, we want to substitute it
+                defined_path = substitute_config_variable(config_variables_file_path, {})
+                if not os.path.abspath(config_variables_file_path):
+                    # A BaseDataContext will not have a root directory; in that case use the current directory
+                    # for any non-absolute path
+                    root_directory = self.root_directory or os.curdir()
+                else:
+                    root_directory = ""
+                var_path = os.path.join(root_directory, defined_path)
+                with open(var_path, "r") as config_variables_file:
                     return yaml.load(config_variables_file) or {}
             except IOError as e:
                 if e.errno != errno.ENOENT:
                     raise
                 logger.debug("Generating empty config variables file.")
                 # TODO this might be the comment problem?
-                base_config_variables_store = yaml.load("{}")
+                base_config_variables_store = yaml.load('{}')
                 base_config_variables_store.yaml_set_start_comment(CONFIG_VARIABLES_INTRO)
                 return base_config_variables_store
         else:
@@ -533,7 +553,8 @@ class BaseDataContext(object):
         )
         return validator.get_dataset()
 
-    @telemetry_enabled_method(args_payload_fn=run_validation_operator_telemetry)
+    @telemetry_enabled_method(method_name="data_context.run_validation_operator",
+                              args_payload_fn=run_validation_operator_telemetry)
     def run_validation_operator(
             self,
             validation_operator_name,
@@ -925,7 +946,7 @@ class BaseDataContext(object):
         """
         return return_obj
 
-    @telemetry_enabled_method
+    @telemetry_enabled_method(method_name="data_context.build_data_docs")
     def build_data_docs(self, site_names=None, resource_identifiers=None):
         """
         Build Data Docs for your project.

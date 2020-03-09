@@ -6,10 +6,12 @@ import time
 from hashlib import md5
 from functools import wraps
 
+from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
 from great_expectations.datasource import anonymize_datasource_class_name
 
-DEFAULT_TELEMETRY_BUCKET = "io.greatexpectations.telemetry"
+DEFAULT_TELEMETRY_URL = "https://xvqc3q1sdj.execute-api.us-east-1.amazonaws.com/prod/great_expectations/v1/telemetry"
+TELEMETRY_DEV_URL = "https://lq3ydlmxy5.execute-api.us-east-1.amazonaws.com/dev/great_expectations/v1/telemetry"
 logger = logging.getLogger(__name__)
 telemetry_logger = logging.getLogger("great_expectations.telemetry")
 telemetry_logger.setLevel(logging.INFO)
@@ -21,10 +23,12 @@ class DataContextLoggingFilter(logging.Filter):
     allow telemetry-specific messages through."""
     def __init__(self, data_context, data_context_id):
         self._data_context_id = data_context_id
+        self._data_context_instance_id = data_context.instance_id
         self._platform_system = platform.system()
         self._platform_release = platform.release()
         self._version_info = sys.version_info
         self._data_context = data_context
+        self._ge_version = ge_version
         self._anonymized_datasources = []
 
     def register_telemetry_details(self):
@@ -38,6 +42,8 @@ class DataContextLoggingFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> int:
         if record.__dict__.get("telemetry") is True:
             record.__dict__["data_context_id"] = self._data_context_id
+            record.__dict__["data_context_instance_id"] = self._data_context_instance_id
+            record.__dict__["ge_version"] = self._ge_version
             record.__dict__["platform.system"] = self._platform_system
             record.__dict__["platform.release"] = self._platform_release
             record.__dict__["version_info"] = self._version_info
@@ -56,7 +62,9 @@ class TelemetryRecordFormatter(logging.Formatter):
         return {
             "event_time": self.formatTime(record=record),
             "data_context_id": record.__dict__.get("data_context_id"),
-            "message": record.msg,
+            "data_context_instance_id": record.__dict__.get("data_context_instance_id"),
+            "ge_version": record.__dict__.get("ge_version"),
+            "method": record.msg,
             "success": record.__dict__.get("success", None),
             "platform.system": record.__dict__.get("platform.system", None),
             "platform.release": record.__dict__.get("platform.release", None),
@@ -77,12 +85,16 @@ class HTTPDataHandler(logging.Handler):
         """
         try:
             requests.post(self._url, json=self.format(record))
+        # noinspection PyBroadException
         except Exception:
             self.handleError(record)
 
 
-def telemetry_enabled_method(func=None, args_payload_fn=None, result_payload_fn=None):
+def telemetry_enabled_method(func=None, method_name=None, args_payload_fn=None, result_payload_fn=None):
     if callable(func):
+        if method_name is None:
+            method_name = func.__name__
+
         @wraps(func)
         def telemetry_wrapped_method(*args, **kwargs):
             event_payload = {}
@@ -94,17 +106,20 @@ def telemetry_enabled_method(func=None, args_payload_fn=None, result_payload_fn=
                 if result_payload_fn is not None:
                     nested_update(event_payload, result_payload_fn(res))
                 extra["success"] = True
-                telemetry_logger.info(func.__name__, extra=extra)
+                telemetry_logger.info(method_name, extra=extra)
                 return res
             except Exception:
                 extra["success"] = False
-                telemetry_logger.info(func.__name__, extra=extra)
+                telemetry_logger.info(method_name, extra=extra)
                 raise
 
         return telemetry_wrapped_method
     else:
         def telemetry_wrapped_method_partial(func):
-            return telemetry_enabled_method(func, args_payload_fn=args_payload_fn, result_payload_fn=result_payload_fn)
+            return telemetry_enabled_method(func,
+                                            method_name=method_name,
+                                            args_payload_fn=args_payload_fn,
+                                            result_payload_fn=result_payload_fn)
         return telemetry_wrapped_method_partial
 
 
