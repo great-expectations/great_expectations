@@ -14,7 +14,7 @@ If you post in off hours be patient, Someone will get back to you once the sun c
 - Head over to our [Documentation](https://docs.greatexpectations.io/en/latest/)
 - Checkout [Discuss](https://discuss.greatexpectations.io/) this is where we want most of our problem solving, discussion, updates, etc to go because it helps keep a more visible record for GE users.
 
-####Asking your question in Slack
+#### Asking your question in Slack
 
 **Know your support channel:
 <ul>
