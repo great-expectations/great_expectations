@@ -290,6 +290,7 @@ def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_
             ),
             show_default=True
         )
+
         if path.startswith("./"):
             path = path[2:]
 
@@ -314,7 +315,6 @@ def _add_pandas_datasource(context, passthrough_generator_only=True, prompt_for_
                 }
             }
         )
-
 
     context.add_datasource(name=datasource_name, class_name='PandasDatasource', **configuration)
     return datasource_name
@@ -415,7 +415,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
 """What is the url/connection string for the sqlalchemy connection?
 (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
 """,
-                show_default=False)
+                show_default=False).strip()
             credentials = {
                 "url": sqlalchemy_url
             }
@@ -481,13 +481,13 @@ def _collect_postgres_credentials(default_credentials={}):
 
     credentials["host"] = click.prompt("What is the host for the postgres connection?",
                         default=default_credentials.get("host", "localhost"),
-                        show_default=True)
+                        show_default=True).strip()
     credentials["port"] = click.prompt("What is the port for the postgres connection?",
                         default=default_credentials.get("port", "5432"),
-                        show_default=True)
+                        show_default=True).strip()
     credentials["username"] = click.prompt("What is the username for the postgres connection?",
                             default=default_credentials.get("username", "postgres"),
-                            show_default=True)
+                            show_default=True).strip()
     # This is a minimal workaround we're doing to deal with hidden input problems using Git Bash on Windows
     # TODO: Revisit this if we decide to fully support Windows and identify if there is a better solution
     credentials["password"] = click.prompt("What is the password for the postgres connection?",
@@ -495,7 +495,7 @@ def _collect_postgres_credentials(default_credentials={}):
                                            show_default=False, hide_input=_should_hide_input())
     credentials["database"] = click.prompt("What is the database name for the postgres connection?",
                             default=default_credentials.get("database", "postgres"),
-                            show_default=True)
+                            show_default=True).strip()
 
     return credentials
 
@@ -508,13 +508,13 @@ def _collect_snowflake_credentials(default_credentials={}):
 
     credentials["username"] = click.prompt("What is the user login name for the snowflake connection?",
                         default=default_credentials.get("username", ""),
-                        show_default=True)
+                        show_default=True).strip()
     credentials["password"] = click.prompt("What is the password for the snowflake connection?",
                             default="",
                             show_default=False, hide_input=True)
     credentials["host"] = click.prompt("What is the account name for the snowflake connection?",
                         default=default_credentials.get("host", ""),
-                        show_default=True)
+                        show_default=True).strip()
 
 
     # optional
@@ -522,7 +522,7 @@ def _collect_snowflake_credentials(default_credentials={}):
     #TODO: database is optional, but it is not a part of query
     credentials["database"] = click.prompt("What is database name for the snowflake connection?",
                         default=default_credentials.get("database", ""),
-                        show_default=True)
+                        show_default=True).strip()
 
     # # TODO: schema_name is optional, but it is not a part of query and there is no obvious way to pass it
     # credentials["schema_name"] = click.prompt("What is schema name for the snowflake connection?",
@@ -532,7 +532,7 @@ def _collect_snowflake_credentials(default_credentials={}):
     credentials["query"] = {}
     credentials["query"]["warehouse"] = click.prompt("What is warehouse name for the snowflake connection?",
                                                      default=default_credentials.get("warehouse", ""),
-                                                     show_default=True)
+                                                     show_default=True).strip()
     credentials["query"]["role"] = click.prompt("What is role name for the snowflake connection?",
                                                 default=default_credentials.get("role", ""), show_default=True)
 
@@ -550,19 +550,19 @@ def _collect_mysql_credentials(default_credentials={}):
 
     credentials["host"] = click.prompt("What is the host for the MySQL connection?",
                         default=default_credentials.get("host", "localhost"),
-                        show_default=True)
+                        show_default=True).strip()
     credentials["port"] = click.prompt("What is the port for the MySQL connection?",
                         default=default_credentials.get("port", "3306"),
-                        show_default=True)
+                        show_default=True).strip()
     credentials["username"] = click.prompt("What is the username for the MySQL connection?",
                             default=default_credentials.get("username", ""),
-                            show_default=True)
+                            show_default=True).strip()
     credentials["password"] = click.prompt("What is the password for the MySQL connection?",
                             default="",
                             show_default=False, hide_input=True)
     credentials["database"] = click.prompt("What is the database name for the MySQL connection?",
                             default=default_credentials.get("database", ""),
-                            show_default=True)
+                            show_default=True).strip()
 
     return credentials
 
@@ -580,13 +580,13 @@ def _collect_redshift_credentials(default_credentials={}):
 
     credentials["host"] = click.prompt("What is the host for the Redshift connection?",
                         default=default_credentials.get("host", ""),
-                        show_default=True)
+                        show_default=True).strip()
     credentials["port"] = click.prompt("What is the port for the Redshift connection?",
                         default=default_credentials.get("port", "5439"),
-                        show_default=True)
+                        show_default=True).strip()
     credentials["username"] = click.prompt("What is the username for the Redshift connection?",
                             default=default_credentials.get("username", ""),
-                            show_default=True)
+                            show_default=True).strip()
     # This is a minimal workaround we're doing to deal with hidden input problems using Git Bash on Windows
     # TODO: Revisit this if we decide to fully support Windows and identify if there is a better solution
     credentials["password"] = click.prompt("What is the password for the Redshift connection?",
@@ -594,7 +594,7 @@ def _collect_redshift_credentials(default_credentials={}):
                                            show_default=False, hide_input=_should_hide_input())
     credentials["database"] = click.prompt("What is the database name for the Redshift connection?",
                             default=default_credentials.get("database", ""),
-                            show_default=True)
+                            show_default=True).strip()
 
     # optional
 
@@ -631,7 +631,7 @@ def _add_spark_datasource(context, passthrough_generator_only=True, prompt_for_d
                 readable=True
             ),
             show_default=True
-        )
+        ).strip()
         if path.startswith("./"):
             path = path[2:]
 
