@@ -1,4 +1,4 @@
-#Slack Guidlines:
+# Slack Guidelines:
 
 ## Be Nice. Be Respectful.
 We cannot stress enough that we want this to be a safe, comfortable and inclusive environment. Please read our [code of conduct](https://github.com/great-expectations/great_expectations/blob/develop/CODE_OF_CONDUCT.md) if you need more information on this guideline.
