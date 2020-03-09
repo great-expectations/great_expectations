@@ -142,7 +142,7 @@ context.open_data_docs(validation_result_identifier)"""
         if expectations_by_column["table_expectations"]:
             for exp in expectations_by_column["table_expectations"]:
                 kwargs_string = self._build_kwargs_string(exp)
-                code = "batch.{}({})".format(exp["expectation_type"], kwargs_string)
+                code = "batch.{}({}, include_config=False)".format(exp["expectation_type"], kwargs_string)
                 self.add_code_cell(code, lint=True)
         else:
             self.add_markdown_cell(
@@ -161,7 +161,7 @@ context.open_data_docs(validation_result_identifier)"""
             for exp in expectations:
                 kwargs_string = self._build_kwargs_string(exp)
                 meta_args = self._build_meta_arguments(exp.meta)
-                code = "batch.{}({}{})".format(
+                code = "batch.{}({}{}, include_config=False)".format(
                     exp["expectation_type"], kwargs_string, meta_args
                 )
                 self.add_code_cell(code, lint=True)
