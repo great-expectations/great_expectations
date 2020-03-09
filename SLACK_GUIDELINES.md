@@ -27,7 +27,7 @@ If you post in off hours be patient, Someone will get back to you once the sun c
 Slack is about communication, so use public channels whenever possible. This is good for transparency, but also keeps the community vibrant and alive. You also have an opportunity to help someone else who might find your conversation helpful or encouraging.
 
 
-##Promoting Products or Services
+## Promoting Products or Services
 Great Expectations is a piece of the puzzle when it comes to being a data practitioner and so we want our community to be aware of the other pieces that make up the whole picture. If you plan on sharing an awesome tool or service you have no association with jump into #tools-services. If you are promoting your own please abide by the following rules.
 
 1. You're allowed to;
