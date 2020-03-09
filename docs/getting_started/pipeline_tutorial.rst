@@ -2,6 +2,9 @@
 Tutorial - Add Great Expectations to a Data Pipeline
 =======================================================
 
+
+`<https://github.com/superconductive/ge_tutorials>`__
+
 blah blah blah blah blah blah
 blah blah blah blah blah blah
 blah blah blah blah blah blah
