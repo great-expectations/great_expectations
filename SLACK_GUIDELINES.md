@@ -44,25 +44,25 @@ Great Expectations is a piece of the puzzle when it comes to being a data practi
 **\#contributors-contributing**
 For previous, current and prospective contributors to talk about potential contributions and to help each other with contributions.
 
-**\#beginners**
+**\#beginners**<br/>
 Judgement free question zone! If you’re having trouble getting started with GE this is a perfect place to ask. Community help is encouraged here :)
 
-**\#job-openings**. 
+**\#job-openings**<br/>
 Looking to hire someone in the community? Post your job here:
 
-**\#expectation-requests**
+**\#expectation-requests**<br/>
 Have a good idea for an expectation? Post it here.
 
-**\#support**
+**\#support**<br/>
 Looking for support for great expectations? Post your questions here.
 
-**\#announcements**
+**\#announcements**<br/>
 Any announcements related to the Great Expectations and the community will be posted here exclusively by admins (have something you think is announcement worthy? DM @Kyle-Eaton). 
 
-**\#general** 
+**\#general**<br/>
 A place to talk shop about data news, articles, conferences, data horror stories and really just anything in the data world.  
 
-**\#documentation** 
+**\#documentation**<br/>
 Have questions or suggestions for our documentation? Post here.
 
 
