@@ -1601,7 +1601,7 @@ class DataContext(BaseDataContext):
             ge_exceptions.DataContextError,
             ge_exceptions.InvalidDataContextConfigError
         ) as e:
-            logger.warning(e)
+            logger.debug(e)
 
 
 class ExplorerDataContext(DataContext):
