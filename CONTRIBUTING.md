@@ -127,6 +127,12 @@ GE core team members use this checklist to ship releases.
 - [ ] After successful checks, merge the PR
 - [ ] Wait for all the builds to complete (including the deploy job)
 - [ ] Check [PyPI](https://pypi.org/project/great-expectations/#history) for the new release
+- [ ] Create an annotated git tag by
+    - [ ] check out master
+    - [ ] pull down master
+    - [ ] ensure you have a clean master
+    - [ ] run `git tag -a 0.9.3 -m "0.9.3 release"` with the correct new version
+    - [ ] push the tag up by running `git push origin 0.9.3` with the correct new version
 - [ ] [Create the release on GitHub](https://github.com/great-expectations/great_expectations/releases) with the version number. Copy the changelog notes into the release notes.
 - [ ] Verify RTD builds new release version
 - [ ] Socialize the relase on GE slack by copying the changelog with an optional nice personal message (thank people if you can)
