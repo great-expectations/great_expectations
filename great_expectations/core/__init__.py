@@ -13,6 +13,7 @@ from marshmallow import Schema, fields, ValidationError, post_load, pre_dump
 from great_expectations import __version__ as ge_version
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import nested_update
+from great_expectations.jupyter_ux import in_jupyter_notebook
 from great_expectations.types import DictDot
 
 from great_expectations.exceptions import InvalidExpectationConfigurationError, InvalidExpectationKwargsError, \
@@ -652,6 +653,10 @@ class ExpectationValidationResult(object):
             return False
 
     def __repr__(self):
+        if in_jupyter_notebook():
+            json_dict = self.to_json_dict()
+            json_dict.pop("expectation_config")
+            return json.dumps(json_dict, indent=2)
         return json.dumps(self.to_json_dict(), indent=2)
 
     def __str__(self):
