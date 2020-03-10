@@ -83,7 +83,7 @@ class BaseDataContext(object):
     PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
     PROFILING_ERROR_CODE_NO_GENERATOR_FOUND = 4
     PROFILING_ERROR_CODE_MULTIPLE_GENERATORS_FOUND = 5
-    UNCOMMITTED_DIRECTORIES = ["data_docs", "samples", "validations"]
+    UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
         "expectations",
