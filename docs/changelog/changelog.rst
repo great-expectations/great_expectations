@@ -2,7 +2,11 @@
 
 develop
 -----------------
-* Add error handling to `init` flow for cases where user tries using a broken file
+* Better error message when config substitution variable is missing
+* removed an unused directory in the GE folder
+* removed obsolete config error handling
+* add error handling to `init` flow for cases where user tries using a broken file
+
 
 0.9.3
 -----------------

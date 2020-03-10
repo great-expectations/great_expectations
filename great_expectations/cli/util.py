@@ -46,28 +46,3 @@ def is_sane_slack_webhook(url):
         return False
 
     return "https://hooks.slack.com/" in url.strip()
-
-
-def _offer_to_install_new_template(err, ge_dir):
-    ge_dir = os.path.abspath(ge_dir)
-    cli_message("<red>{}</red>".format(err.message))
-    ge_yml = os.path.join(ge_dir, DataContext.GE_YML)
-    archived_yml = ge_yml + ".archive"
-
-    if click.confirm(NEW_TEMPLATE_PROMPT.format(ge_yml, archived_yml), default=True):
-        # archive existing project config
-        shutil.move(ge_yml, archived_yml)
-        DataContext.write_project_template_to_disk(ge_dir)
-
-        cli_message(
-            NEW_TEMPLATE_INSTALLED.format("file://" + ge_yml, "file://" + archived_yml)
-        )
-    else:
-        cli_message(
-            """\nOK. To continue, you will need to upgrade your config file to the latest format.
-  - Please see the docs here: <blue>https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html</blue>
-  - We are super sorry about this breaking change! :]
-  - If you are running into any problems, please reach out on Slack and we can
-    help you in realtime: https://greatexpectations.io/slack"""
-        )
-    sys.exit(0)

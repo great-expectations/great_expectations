@@ -15,10 +15,7 @@ from great_expectations.cli.datasource import (
     get_batch_kwargs,
     select_datasource,
 )
-from great_expectations.cli.util import (
-    _offer_to_install_new_template,
-    cli_message,
-)
+from great_expectations.cli.util import cli_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 
@@ -88,9 +85,6 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
-        return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
         return
 
     suite = _load_suite(context, suite)
@@ -220,9 +214,6 @@ def suite_new(suite, directory, view, batch_kwargs):
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
-        return
 
     if batch_kwargs is not None:
         batch_kwargs = json.loads(batch_kwargs)
@@ -272,9 +263,6 @@ def suite_list(directory):
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
-        return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
         return
 
     suite_names = context.list_expectation_suite_names()
