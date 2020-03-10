@@ -7,27 +7,12 @@ import sys
 from datetime import datetime
 
 import tzlocal
-from IPython import get_ipython
 from IPython.core.display import display, HTML
 
 from great_expectations.render.renderer import ProfilingResultsColumnSectionRenderer, \
     ExpectationSuiteColumnSectionRenderer
 from great_expectations.render.types import RenderedSectionContent
 from great_expectations.render.view import DefaultJinjaSectionView
-
-
-# function to determine if code is being run from a Jupyter notebook
-def in_jupyter_notebook():
-    try:
-        shell = get_ipython().__class__.__name__
-        if shell == 'ZMQInteractiveShell':
-            return True   # Jupyter notebook or qtconsole
-        elif shell == 'TerminalInteractiveShell':
-            return False  # Terminal running IPython
-        else:
-            return False  # Other type (?)
-    except NameError:
-        return False      # Probably standard Python interpreter
 
 
 def set_data_source(context, data_source_type=None):

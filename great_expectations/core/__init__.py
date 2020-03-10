@@ -8,12 +8,12 @@ import datetime
 from dateutil import parser
 from six import string_types
 
+from IPython import get_ipython
 from marshmallow import Schema, fields, ValidationError, post_load, pre_dump
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import nested_update
-from great_expectations.jupyter_ux import in_jupyter_notebook
 from great_expectations.types import DictDot
 
 from great_expectations.exceptions import InvalidExpectationConfigurationError, InvalidExpectationKwargsError, \
@@ -30,6 +30,20 @@ RESULT_FORMATS = [
 
 EvaluationParameterIdentifier = namedtuple("EvaluationParameterIdentifier", ["expectation_suite_name", "metric_name",
                                                                              "metric_kwargs_id"])
+
+
+# function to determine if code is being run from a Jupyter notebook
+def in_jupyter_notebook():
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            return True   # Jupyter notebook or qtconsole
+        elif shell == 'TerminalInteractiveShell':
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False      # Probably standard Python interpreter
 
 
 def get_metric_kwargs_id(metric_name, metric_kwargs):
