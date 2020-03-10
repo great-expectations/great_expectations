@@ -422,7 +422,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
                 "metadata": {},
             },
             {
@@ -534,7 +534,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
                 "metadata": {},
             },
             {
@@ -544,7 +544,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No column level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_column_...`.",
+                "source": "No column level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_column_...`.",
                 "metadata": {},
             },
             {
@@ -634,7 +634,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
                 "metadata": {},
             },
             {
@@ -746,7 +746,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
                 "metadata": {},
             },
             {
@@ -855,7 +855,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
                 "metadata": {},
             },
             {
@@ -967,7 +967,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
                 "metadata": {},
             },
             {
@@ -1076,7 +1076,7 @@ batch.head()""",
             },
             {
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. The all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
                 "metadata": {},
             },
             {
