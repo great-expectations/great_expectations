@@ -531,7 +531,6 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
                     warning/
                         9999.9999/
                             foobarbazguid.html
-        samples/
         validations/
             warning/
                 9999.9999/
