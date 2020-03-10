@@ -787,6 +787,7 @@ def create_expectation_suite(
     batch_kwargs=None,
     expectation_suite_name=None,
     additional_batch_kwargs=None,
+    empty_suite=False,
     show_intro_message=False,
     open_docs=False
 ):
@@ -794,25 +795,12 @@ def create_expectation_suite(
     """
     Create a new expectation suite.
 
-    :param context:
-    :param datasource_name:
-    :param generator_name:
-    :param generator_asset:
-    :param batch_kwargs:
-    :param expectation_suite_name:
-    :param additional_batch_kwargs:
     :return: a tuple: (success, suite name)
     """
 
-    msg_intro = """
-<cyan>========== Create sample Expectations ==========</cyan>
-
-
-"""
-
+    msg_intro = "\n<cyan>========== Create sample Expectations ==========</cyan>\n\n"
     msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
     """
-
     msg_prompt_what_will_profiler_do = """
 Great Expectations will choose a couple of columns and generate expectations about them
 to demonstrate some examples of assertions you can make about your data. 
@@ -828,7 +816,7 @@ Name the new expectation suite"""
 
     msg_suite_already_exists = "<red>An expectation suite named `{}` already exists. If you intend to edit the suite please use `great_expectations suite edit {}`.</red>"
 
-    if show_intro_message:
+    if show_intro_message and not empty_suite:
         cli_message(msg_intro)
 
     data_source = select_datasource(context, datasource_name=datasource_name)
@@ -877,6 +865,12 @@ Name the new expectation suite"""
                 )
             else:
                 break
+
+    if empty_suite:
+        suite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=False)
+        suite.add_citation(comment="New suite added via CLI", batch_kwargs=batch_kwargs)
+        context.save_expectation_suite(suite, expectation_suite_name)
+        return True, expectation_suite_name
 
     profiler = SampleExpectationsDatasetProfiler
 
