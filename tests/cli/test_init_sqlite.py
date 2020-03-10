@@ -163,7 +163,6 @@ great_expectations/
                     warning/
                         9999.9999/
                             foobarbazguid.html
-        samples/
         validations/
             warning/
                 9999.9999/
