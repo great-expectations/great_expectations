@@ -248,7 +248,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             #NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             #was used for a temp table and raising an error
             schema = None
-            # dashes are special characters in most databases so use underscores
             table_name = "ge_tmp_" + str(uuid.uuid4())[:8]
             generated_table_name = table_name
         else:
@@ -622,6 +621,32 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         It hasn't been tested in all SQL dialects, and may change based on community feedback.
         :param custom_sql:
         """
+
+        ###
+        # NOTE: 20200310 - The update to support snowflake transient table creation revealed several
+        # import cases that are not fully handled.
+        # The snowflake-related change updated behavior to allow both custom_sql and schema to be specified. But
+        # the underlying incomplete handling of schema remains.
+        #
+        # Several cases we need to consider:
+        #
+        # 1. Distributed backends (e.g. Snowflake and BigQuery) often use a `<database>.<schema>.<table>`
+        # syntax, but currently we are biased towards only allowing schema.table
+        #
+        # 2. In the wild, we see people using several ways to declare the schema they want to use:
+        # a. In the connection string, the original RFC only specifies database, but schema is supported by some
+        # backends (Snowflake) as a query parameter.
+        # b. As a default for a user (the equivalent of USE SCHEMA being provided at the beginning of a session)
+        # c. As part of individual queries.
+        #
+        # 3. We currently don't make it possible to select from a table in one query, but create a temporary table in
+        # another schema, except for with BigQuery and (now) snowflake, where you can specify the table name (and
+        # potentially trip of database, schema, table) in the batch_kwargs.
+        #
+        # The SqlAlchemyDataset interface essentially predates the batch_kwargs concept and so part of what's going
+        # on, I think, is a mismatch between those. I think we should rename custom_sql -> "temp_table_query" or
+        # similar, for example.
+        ###
 
         if self.engine.dialect.name.lower() == "bigquery":
             stmt = "CREATE OR REPLACE TABLE `{table_name}` AS {custom_sql}".format(

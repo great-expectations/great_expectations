@@ -100,16 +100,6 @@ def test_only_connection_string(sa):
     SqlAlchemyDataset('test_engine', connection_string='sqlite://')
 
 
-# NOTE: 20200306: The behavior of allowing both custom_sql and schema is currently expected
-# def test_schema_custom_sql_error(sa):
-#     engine = sa.create_engine('sqlite://')
-#
-#     with pytest.raises(ValueError) as err:
-#         SqlAlchemyDataset('test_schema_custom', schema='example', engine=engine,
-#                           custom_sql='SELECT * FROM example.fake')
-#         assert "Cannot specify both schema and custom_sql." in str(err.value)
-
-
 def test_sqlalchemydataset_raises_error_on_missing_table_name(sa):
     with pytest.raises(ValueError) as ve:
         SqlAlchemyDataset(table_name=None, engine="foo", connection_string='bar')
