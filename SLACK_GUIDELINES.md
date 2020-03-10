@@ -41,7 +41,7 @@ Great Expectations is a piece of the puzzle when it comes to being a data practi
 
 ## All Channels
 
-**\#contributors-contributing**
+**\#contributors-contributing**<br/>
 For previous, current and prospective contributors to talk about potential contributions and to help each other with contributions.
 
 **\#beginners**<br/>
