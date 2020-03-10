@@ -47,7 +47,7 @@ For previous, current and prospective contributors to talk about potential contr
 **\#beginners**
 Judgement free question zone! If you’re having trouble getting started with GE this is a perfect place to ask. Community help is encouraged here :)
 
-**\#job-openings**
+**\#job-openings**. 
 Looking to hire someone in the community? Post your job here:
 
 **\#expectation-requests**
