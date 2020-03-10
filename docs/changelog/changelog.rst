@@ -5,6 +5,7 @@ develop
 * Better error message when config substitution variable is missing
 * removed an unused directory in the GE folder
 * removed obsolete config error handling
+* validate result dict when instantiating an ExpectationValidationResult (`#1133 <https://github.com/great-expectations/great_expectations/issues/1133>`_)
 
 
 0.9.3
