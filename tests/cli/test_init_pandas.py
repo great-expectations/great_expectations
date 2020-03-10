@@ -74,6 +74,7 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
     guid_safe_obs_tree = re.sub(
         r"[a-z0-9]{32}(?=\.(json|html))", "foobarbazguid", date_safe_obs_tree
     )
+    print(guid_safe_obs_tree)
     assert (
         guid_safe_obs_tree
         == """great_expectations/
@@ -133,9 +134,6 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
                         warning/
                             9999.9999/
                                 foobarbazguid.html
-                    warning/
-                        9999.9999/
-                            foobarbazguid.html
         validations/
             Titanic/
                 warning/
