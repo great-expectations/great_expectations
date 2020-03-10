@@ -12,7 +12,8 @@ from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import (
     PluginModuleNotFoundError,
     PluginClassNotFoundError,
-    InvalidConfigError)
+    MissingConfigVariableError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -165,7 +166,12 @@ def substitute_config_variable(template_str, config_variables_dict):
             else:
                 return template_str[:match.start()] + config_variable_value + template_str[match.end():]
 
-        raise InvalidConfigError("Unable to find match for config variable {:s}. See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets".format(match.group(1)))
+        raise MissingConfigVariableError(
+                    f"""\n\nUnable to find a match for config substitution variable: `{match.group(1)}`.
+Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
+See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets""",
+                    missing_config_variable=match.group(1)
+                )
 
     return template_str
 

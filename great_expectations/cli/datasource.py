@@ -13,10 +13,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
-from great_expectations.cli.util import (
-    _offer_to_install_new_template,
-    cli_message,
-)
+from great_expectations.cli.util import cli_message
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
@@ -94,8 +91,6 @@ def datasource_new(directory):
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
 
     datasource_name, data_source_type = add_datasource(context)
 
@@ -122,8 +117,6 @@ def datasource_list(directory):
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
 
 
 @datasource.command(name="profile")
@@ -154,7 +147,7 @@ def datasource_list(directory):
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
 def datasource_profile(datasource, generator_name, data_assets, profile_all_data_assets, directory, view, additional_batch_kwargs):
     """
-    Profile a datasource
+    Profile a datasource (Beta)
 
     If the optional data_assets and profile_all_data_assets arguments are not specified, the profiler will check
     if the number of data assets in the datasource exceeds the internally defined limit. If it does, it will
@@ -169,14 +162,11 @@ def datasource_profile(datasource, generator_name, data_assets, profile_all_data
     :param additional_batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
     :return:
     """
-
+    cli_message("<yellow>Warning - this is a BETA feature.</yellow>")
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
-        return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
         return
 
     if additional_batch_kwargs is not None:
@@ -1138,11 +1128,7 @@ def profile_datasource(
     logging.getLogger(
         "great_expectations.profile.basic_dataset_profiler"
     ).setLevel(logging.INFO)
-    msg_intro = """
-<cyan>========== Profiling ==========</cyan>
-
-Profiling '{0:s}' will create expectations and documentation.
-"""
+    msg_intro = "Profiling '{0:s}' will create expectations and documentation."
 
     msg_confirm_ok_to_proceed = """Would you like to profile '{0:s}'?"""
 
@@ -1177,7 +1163,7 @@ The datasource might be empty or a generator not configured in the config file.<
 
 Great Expectations is building Data Docs from the data you just profiled!"""
 
-    cli_message(msg_intro.format(datasource_name, rtd_url_ge_version))
+    cli_message(msg_intro.format(datasource_name))
 
     if data_assets:
         data_assets = [item.strip() for item in data_assets.split(",")]
