@@ -162,7 +162,7 @@ class DataContextConfigSchema(Schema):
         # When migrating from 0.7.x to 0.8.0
         if data['config_version'] == 0 and (
                 "validations_store" in list(data.keys()) or "validations_stores" in list(data.keys())):
-            raise ge_exceptions.ZeroDotSevenConfigVersionError(
+            raise ge_exceptions.UnsupportedConfigVersionError(
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
             )
         elif data['config_version'] < MINIMUM_SUPPORTED_CONFIG_VERSION:

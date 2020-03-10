@@ -14,10 +14,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
-from great_expectations.cli.util import (
-    _offer_to_install_new_template,
-    cli_message,
-)
+from great_expectations.cli.util import cli_message
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
@@ -95,8 +92,6 @@ def datasource_new(directory):
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
 
     datasource_name, data_source_type = add_datasource(context)
 
@@ -123,8 +118,6 @@ def datasource_list(directory):
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
 
 
 @datasource.command(name="profile")
@@ -155,7 +148,7 @@ def datasource_list(directory):
               help='Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary')
 def datasource_profile(datasource, generator_name, data_assets, profile_all_data_assets, directory, view, additional_batch_kwargs):
     """
-    Profile a datasource
+    Profile a datasource (Beta)
 
     If the optional data_assets and profile_all_data_assets arguments are not specified, the profiler will check
     if the number of data assets in the datasource exceeds the internally defined limit. If it does, it will
@@ -170,14 +163,11 @@ def datasource_profile(datasource, generator_name, data_assets, profile_all_data
     :param additional_batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
     :return:
     """
-
+    cli_message("<yellow>Warning - this is a BETA feature.</yellow>")
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
-        return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
         return
 
     if additional_batch_kwargs is not None:
@@ -807,6 +797,7 @@ def create_expectation_suite(
     batch_kwargs=None,
     expectation_suite_name=None,
     additional_batch_kwargs=None,
+    empty_suite=False,
     show_intro_message=False,
     open_docs=False
 ):
@@ -814,25 +805,12 @@ def create_expectation_suite(
     """
     Create a new expectation suite.
 
-    :param context:
-    :param datasource_name:
-    :param generator_name:
-    :param generator_asset:
-    :param batch_kwargs:
-    :param expectation_suite_name:
-    :param additional_batch_kwargs:
     :return: a tuple: (success, suite name)
     """
 
-    msg_intro = """
-<cyan>========== Create sample Expectations ==========</cyan>
-
-
-"""
-
+    msg_intro = "\n<cyan>========== Create sample Expectations ==========</cyan>\n\n"
     msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
     """
-
     msg_prompt_what_will_profiler_do = """
 Great Expectations will choose a couple of columns and generate expectations about them
 to demonstrate some examples of assertions you can make about your data. 
@@ -848,7 +826,7 @@ Name the new expectation suite"""
 
     msg_suite_already_exists = "<red>An expectation suite named `{}` already exists. If you intend to edit the suite please use `great_expectations suite edit {}`.</red>"
 
-    if show_intro_message:
+    if show_intro_message and not empty_suite:
         cli_message(msg_intro)
 
     data_source = select_datasource(context, datasource_name=datasource_name)
@@ -906,6 +884,12 @@ Name the new expectation suite"""
                 )
             else:
                 break
+
+    if empty_suite:
+        suite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=False)
+        suite.add_citation(comment="New suite added via CLI", batch_kwargs=batch_kwargs)
+        context.save_expectation_suite(suite, expectation_suite_name)
+        return True, expectation_suite_name
 
     profiler = SampleExpectationsDatasetProfiler
 
@@ -1178,11 +1162,7 @@ def profile_datasource(
     logging.getLogger(
         "great_expectations.profile.basic_dataset_profiler"
     ).setLevel(logging.INFO)
-    msg_intro = """
-<cyan>========== Profiling ==========</cyan>
-
-Profiling '{0:s}' will create expectations and documentation.
-"""
+    msg_intro = "Profiling '{0:s}' will create expectations and documentation."
 
     msg_confirm_ok_to_proceed = """Would you like to profile '{0:s}'?"""
 
@@ -1217,7 +1197,7 @@ The datasource might be empty or a generator not configured in the config file.<
 
 Great Expectations is building Data Docs from the data you just profiled!"""
 
-    cli_message(msg_intro.format(datasource_name, rtd_url_ge_version))
+    cli_message(msg_intro.format(datasource_name))
 
     if data_assets:
         data_assets = [item.strip() for item in data_assets.split(",")]

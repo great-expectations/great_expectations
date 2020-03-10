@@ -15,10 +15,7 @@ from great_expectations.cli.datasource import (
     get_batch_kwargs,
     select_datasource,
 )
-from great_expectations.cli.util import (
-    _offer_to_install_new_template,
-    cli_message,
-)
+from great_expectations.cli.util import cli_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.render.renderer.notebook_renderer import NotebookRenderer
 
@@ -82,15 +79,16 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
     """
+    _suite_edit(suite, datasource, directory, jupyter, batch_kwargs)
+
+
+def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
     batch_kwargs_json = batch_kwargs
     batch_kwargs = None
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
-        return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
         return
 
     suite = _load_suite(context, suite)
@@ -164,11 +162,9 @@ A batch of data is required to edit the suite - let's help you to specify it."""
     )
     NotebookRenderer().render_to_disk(suite, notebook_path, batch_kwargs)
 
-    cli_message(
-        "To continue editing this suite, run <green>jupyter notebook {}</green>".format(
-            notebook_path
-        )
-    )
+    if not jupyter:
+        cli_message("To continue editing this suite, run <green>jupyter "
+                    f"notebook {notebook_path}</green>")
 
     if jupyter:
         subprocess.call(["jupyter", "notebook", notebook_path])
@@ -192,11 +188,18 @@ def _load_suite(context, suite_name):
 
 @suite.command(name="new")
 @click.option("--suite", "-es", default=None, help="Expectation suite name.")
+@click.option("--empty", "empty", flag_value=True, help="Create an empty suite.")
 @click.option(
     "--directory",
     "-d",
     default=None,
     help="The project's great_expectations directory.",
+)
+@click.option(
+    "--jupyter/--no-jupyter",
+    is_flag=True,
+    help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
+    default=True,
 )
 @click.option(
     "--view/--no-view",
@@ -208,20 +211,19 @@ def _load_suite(context, suite_name):
     default=None,
     help="Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary",
 )
-def suite_new(suite, directory, view, batch_kwargs):
+def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
     """
     Create a new expectation suite.
 
     Great Expectations will choose a couple of columns and generate expectations about them
     to demonstrate some examples of assertions you can make about your data.
+
+    If you wish to skip the examples, add the `--empty` flag.
     """
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
-        return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
         return
 
     if batch_kwargs is not None:
@@ -240,6 +242,7 @@ def suite_new(suite, directory, view, batch_kwargs):
             batch_kwargs=batch_kwargs,
             expectation_suite_name=suite,
             additional_batch_kwargs={"limit": 1000},
+            empty_suite=empty,
             show_intro_message=False,
             open_docs=view,
         )
@@ -249,6 +252,8 @@ def suite_new(suite, directory, view, batch_kwargs):
                     suite_name
                 )
             )
+            if jupyter:
+                cli_message("<green>Because you requested an empty suite, we'll open a notebook for you now to edit it!</green>\n\n")
     except (
         ge_exceptions.DataContextError,
         ge_exceptions.ProfilerError,
@@ -257,6 +262,8 @@ def suite_new(suite, directory, view, batch_kwargs):
     ) as e:
         cli_message("<red>{}</red>".format(e))
         sys.exit(1)
+
+    _suite_edit(suite_name, datasource_name, directory, jupyter=jupyter, batch_kwargs=batch_kwargs)
 
 
 @suite.command(name="list")
@@ -272,9 +279,6 @@ def suite_list(directory):
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
-        return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
         return
 
     suite_names = context.list_expectation_suite_names()
