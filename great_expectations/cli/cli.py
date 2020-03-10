@@ -4,7 +4,7 @@ import logging
 import click
 
 from great_expectations import __version__ as ge_version
-from great_expectations.cli.cli_logging import _set_up_logger, logger
+from great_expectations.cli.cli_logging import _set_up_logger
 from great_expectations.cli.datasource import datasource
 from great_expectations.cli.docs import docs
 from great_expectations.cli.init import init
@@ -40,7 +40,7 @@ In addition, the CLI supports the following special commands:
 
 - great_expectations docs build : compile documentation from expectations
 """
-    _set_up_logger()
+    logger = _set_up_logger()
     if verbose:
         # Note we are explicitly not using a logger in all CLI output to have
         # more control over console UI.
