@@ -13,10 +13,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.init_messages import NO_DATASOURCES_FOUND
-from great_expectations.cli.util import (
-    _offer_to_install_new_template,
-    cli_message,
-)
+from great_expectations.cli.util import cli_message
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
@@ -94,8 +91,6 @@ def datasource_new(directory):
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
 
     datasource_name, data_source_type = add_datasource(context)
 
@@ -122,8 +117,6 @@ def datasource_list(directory):
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
         return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
 
 
 @datasource.command(name="profile")
@@ -174,9 +167,6 @@ def datasource_profile(datasource, generator_name, data_assets, profile_all_data
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
-        return
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, context.root_directory)
         return
 
     if additional_batch_kwargs is not None:
