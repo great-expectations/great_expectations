@@ -5,6 +5,8 @@ develop
 * Better error message when config substitution variable is missing
 * removed an unused directory in the GE folder
 * removed obsolete config error handling
+* Simpler messaging in valiation notebooks
+* replaced hacky loop with suite list call in notebooks
 
 
 0.9.3
