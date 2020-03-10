@@ -16,12 +16,12 @@ If you post in off hours be patient, Someone will get back to you once the sun c
 
 #### Asking your question in Slack
 
-**Know your support channel:
+**Know your support channel:**
 <ul>
 	<li>#beginners: If you are just getting started this is your place to be!</li>
 	<li>#support: Having trouble with customizing your expectations, an integration or anything else .beyond just getting started? Post here.</li>
 	<li>#expectation-requests: Have a good idea for an expectation? Post it here. </li>
-	<li>#contributors-contributing: For previous, current and prospective contributors to talk about potential contributions and to help each other with contributions.  </li>
+	<li>#contributors-contributing: For previous, current and prospective contributors to talk about potential contributions and to help each other with contributions.</li>
 </ul>
 ## Use Public Channels, Not Private Groups
 Slack is about communication, so use public channels whenever possible. This is good for transparency, but also keeps the community vibrant and alive. You also have an opportunity to help someone else who might find your conversation helpful or encouraging.
@@ -39,7 +39,7 @@ Great Expectations is a piece of the puzzle when it comes to being a data practi
 4. **No Soliciting. Do not cold DM our users to promote your product. If we receive a valid soliciting complaint about you, we will remove you from the community. 
 5. Have any questions about our promotional rules or want to run what you plan to share by us? DM @Kyle Eaton
 
-## Channels
+## All Channels
 
 **\#contributors-contributing**
 For previous, current and prospective contributors to talk about potential contributions and to help each other with contributions.
