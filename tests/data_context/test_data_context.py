@@ -339,7 +339,6 @@ project_path/
         uncommitted/
             config_variables.yml
             data_docs/
-            samples/
             validations/
                 titanic/
                     subdir_reader/
@@ -741,14 +740,6 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_vali
     assert DataContext.is_project_initialized(ge_dir) == False
 
 
-def test_data_context_is_project_initialized_returns_false_when_uncommitted_samples_dir_is_missing(empty_context):
-    ge_dir = empty_context.root_directory
-    # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GE_UNCOMMITTED_DIR, "samples"))
-
-    assert DataContext.is_project_initialized(ge_dir) == False
-
-
 def test_data_context_is_project_initialized_returns_false_when_config_variable_yml_is_missing(empty_context):
     ge_dir = empty_context.root_directory
     # mangle project
@@ -811,7 +802,6 @@ great_expectations/
     uncommitted/
         config_variables.yml
         data_docs/
-        samples/
         validations/
 """
 
@@ -838,7 +828,6 @@ great_expectations/
     uncommitted/
         config_variables.yml
         data_docs/
-        samples/
         validations/
 """
     project_path = str(tmp_path_factory.mktemp('stuff'))
@@ -862,7 +851,6 @@ def test_data_context_do_all_uncommitted_dirs_exist(tmp_path_factory):
 uncommitted/
     config_variables.yml
     data_docs/
-    samples/
     validations/
 """
     project_path = str(tmp_path_factory.mktemp('stuff'))
@@ -918,7 +906,6 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
         'notebooks'
     }
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == {
-        'samples',
         'data_docs',
         'validations'
     }

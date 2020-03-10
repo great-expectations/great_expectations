@@ -64,10 +64,6 @@ class UnsupportedConfigVersionError(GreatExpectationsError):
     pass
 
 
-class ZeroDotSevenConfigVersionError(GreatExpectationsError):
-    pass
-
-
 class ProfilerError(GreatExpectationsError):
     pass
 
@@ -75,6 +71,14 @@ class ProfilerError(GreatExpectationsError):
 class InvalidConfigError(DataContextError):
     def __init__(self, message):
         self.message = message
+
+
+class MissingConfigVariableError(InvalidConfigError):
+    def __init__(self, message, missing_config_variable=None):
+        if not missing_config_variable:
+            missing_config_variable = []
+        self.message = message
+        self.missing_config_variable = missing_config_variable
 
 
 class AmbiguousDataAssetNameError(DataContextError):
