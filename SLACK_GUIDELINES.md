@@ -39,5 +39,31 @@ Great Expectations is a piece of the puzzle when it comes to being a data practi
 4. **No Soliciting. Do not cold DM our users to promote your product. If we receive a valid soliciting complaint about you, we will remove you from the community. 
 5. Have any questions about our promotional rules or want to run what you plan to share by us? DM @Kyle Eaton
 
+## Channels
+
+**\#contributors-contributing**
+For previous, current and prospective contributors to talk about potential contributions and to help each other with contributions.
+
+**\#beginners**
+Judgement free question zone! If you’re having trouble getting started with GE this is a perfect place to ask. Community help is encouraged here :)
+
+**\#job-openings**
+Looking to hire someone in the community? Post your job here:
+
+**\#expectation-requests**
+Have a good idea for an expectation? Post it here.
+
+**\#support**
+Looking for support for great expectations? Post your questions here.
+
+**\#announcements**
+Any announcements related to the Great Expectations and the community will be posted here exclusively by admins (have something you think is announcement worthy? DM @Kyle-Eaton). 
+
+**\#general** 
+A place to talk shop about data news, articles, conferences, data horror stories and really just anything in the data world.  
+
+**\#documentation** 
+Have questions or suggestions for our documentation? Post here.
+
 
 *If you have any questions or comments about the following feel free to comment here or dm @Kyle Eaton in the [slack channel](https://greatexpectations.io/slack).
