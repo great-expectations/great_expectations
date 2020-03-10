@@ -169,6 +169,7 @@ def test_suite_new_empty_suite_creates_empty_suite(
     assert "Generating example Expectation Suite..." not in stdout
     assert "The following Data Docs sites were built" not in stdout
     assert "A new Expectation suite 'foo' was added to your project" in stdout
+    assert "Because you requested an empty suite, we'll open a notebook for you now to edit it!" in stdout
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo.json")
     assert os.path.isfile(expected_suite_path)

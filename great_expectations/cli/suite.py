@@ -252,6 +252,8 @@ def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
                     suite_name
                 )
             )
+            if jupyter:
+                cli_message("<green>Because you requested an empty suite, we'll open a notebook for you now to edit it!</green>\n\n")
     except (
         ge_exceptions.DataContextError,
         ge_exceptions.ProfilerError,
