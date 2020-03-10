@@ -77,6 +77,14 @@ class InvalidConfigError(DataContextError):
         self.message = message
 
 
+class MissingConfigVariableError(InvalidConfigError):
+    def __init__(self, message, missing_config_variable=None):
+        if not missing_config_variable:
+            missing_config_variable = []
+        self.message = message
+        self.missing_config_variable = missing_config_variable
+
+
 class AmbiguousDataAssetNameError(DataContextError):
     def __init__(self, message, candidates=None):
         self.message = message

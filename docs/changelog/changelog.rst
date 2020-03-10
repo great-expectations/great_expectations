@@ -2,7 +2,7 @@
 
 develop
 -----------------
-
+* Better error message when config substitution variable is missing
 
 0.9.3
 -----------------
