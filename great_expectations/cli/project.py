@@ -4,10 +4,7 @@ import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.util import (
-    _offer_to_install_new_template,
-    cli_message,
-)
+from great_expectations.cli.util import cli_message
 
 
 @click.group()
@@ -26,17 +23,13 @@ def project():
 def project_check_config(directory):
     """Check a config for validity and help with migrations."""
     cli_message("Checking your config files for validity...\n")
+    is_config_ok, error_message = do_config_check(directory)
+    if not is_config_ok:
+        cli_message("Unfortunately, your config appears to be invalid:\n")
+        cli_message("<red>{}</red>".format(error_message))
+        sys.exit(1)
 
-    try:
-        is_config_ok, error_message = do_config_check(directory)
-        if is_config_ok:
-            cli_message("<green>Your config file appears valid!</green>")
-        else:
-            cli_message("Unfortunately, your config appears to be invalid:\n")
-            cli_message("<red>{}</red>".format(error_message))
-            sys.exit(1)
-    except ge_exceptions.ZeroDotSevenConfigVersionError as err:
-        _offer_to_install_new_template(err, directory)
+    cli_message("<green>Your config file appears valid!</green>")
 
 
 def do_config_check(target_directory):

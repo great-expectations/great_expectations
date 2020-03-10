@@ -45,7 +45,7 @@ The following instructions provide a step-by-step overview of how to contribute 
     * Note: This will clone the `develop` branch of the great_expectations repo by default, not `master`.
 * Add the upstream remote:
     * On your local machine, cd into the great_expectations repo you cloned in the previous step.
-    * Run: `git remote add upstream git@github.com:great_expectations/gret_expectations.git`
+    * Run: `git remote add upstream git@github.com:great-expectations/great_expectations.git`
     * This sets up a remote called `upstream` to track changes to the main branch.
 * Install all relevant libraries:
     * Make a new virtual environment (e.g. using virtualenv or conda), name it "great_expectations_dev" or similar.
