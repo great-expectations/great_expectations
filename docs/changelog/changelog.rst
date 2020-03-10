@@ -2,6 +2,9 @@
 
 develop
 -----------------
+* Better error message when config substitution variable is missing
+* removed an unused directory in the GE folder
+* removed obsolete config error handling
 
 
 0.9.3
