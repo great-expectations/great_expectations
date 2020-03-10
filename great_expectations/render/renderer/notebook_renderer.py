@@ -149,7 +149,7 @@ context.open_data_docs(validation_result_identifier)"""
         if not expectations_by_column:
             self.add_markdown_cell(
                 "No column level expectations are in this suite. Feel free to "
-                "add some here. The all begin with `batch.expect_column_...`."
+                "add some here. They all begin with `batch.expect_column_...`."
             )
             return
 
@@ -168,7 +168,7 @@ context.open_data_docs(validation_result_identifier)"""
         if not expectations_by_column["table_expectations"]:
             self.add_markdown_cell(
                 "No table level expectations are in this suite. Feel free to "
-                "add some here. The all begin with `batch.expect_table_...`."
+                "add some here. They all begin with `batch.expect_table_...`."
             )
             return
 
