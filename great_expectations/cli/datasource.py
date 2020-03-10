@@ -984,53 +984,71 @@ We could not determine the format of the file. What is it?
     # We should allow a directory for Spark, but not for Pandas
     dir_okay = isinstance(datasource, SparkDFDatasource)
 
-    path = click.prompt(
-        msg_prompt_file_path,
-        type=click.Path(
-            exists=True,
-            file_okay=True,
-            dir_okay=dir_okay,
-            readable=True
-        ),
-        show_default=True
-    )
+    path = None
+    while True:
+        path = click.prompt(
+            msg_prompt_file_path,
+            type=click.Path(
+                exists=True,
+                file_okay=True,
+                dir_okay=dir_okay,
+                readable=True
+            ),
+            show_default=True,
+            default=path
+        )
 
-    path = os.path.abspath(path)
+        path = os.path.abspath(path)
 
-    batch_kwargs = {
-        "path": path,
-        "datasource": datasource_name
-    }
+        batch_kwargs = {
+            "path": path,
+            "datasource": datasource_name
+        }
 
-    reader_method = None
-    try:
-        reader_method = datasource.guess_reader_method_from_path(path)["reader_method"]
-    except BatchKwargsError:
-        pass
+        reader_method = None
+        try:
+            reader_method = datasource.guess_reader_method_from_path(path)["reader_method"]
+        except BatchKwargsError:
+            pass
 
-    if reader_method is None:
+        if reader_method is None:
 
-        while True:
+            while True:
 
-            option_selection = click.prompt(
-                msg_prompt_file_type,
-                type=click.Choice(["1", "2", "3", "4"]),
-                show_choices=False
-            )
+                option_selection = click.prompt(
+                    msg_prompt_file_type,
+                    type=click.Choice(["1", "2", "3", "4"]),
+                    show_choices=False
+                )
 
+                try:
+                    reader_method = datasource.guess_reader_method_from_path(path + "." + reader_method_file_extensions[option_selection])["reader_method"]
+                except BatchKwargsError:
+                    pass
+
+                if reader_method is not None:
+                    batch_kwargs["reader_method"] = reader_method
+                    batch = datasource.get_batch(batch_kwargs=batch_kwargs)
+                    break
+        else:
+            # TODO: read the file and confirm with user that we read it correctly (headers, columns, etc.)
             try:
-                reader_method = datasource.guess_reader_method_from_path(path + "." + reader_method_file_extensions[option_selection])["reader_method"]
-            except BatchKwargsError:
-                pass
-
-            if reader_method is not None:
-                batch_kwargs["reader_method"] = reader_method
                 batch = datasource.get_batch(batch_kwargs=batch_kwargs)
                 break
-    else:
-        # TODO: read the file and confirm with user that we read it correctly (headers, columns, etc.)
-        batch = datasource.get_batch(batch_kwargs=batch_kwargs)
-
+            except Exception as e:
+                file_load_error_message = """
+<red>Cannot load file.</red>
+  - Please check the file and try again or select a different data file.
+  - Error: {0:s}"""
+                cli_message(file_load_error_message.format(str(e)))
+                if not click.confirm(
+                    "Try again?",
+                    default=True
+                ):
+                    cli_message("""
+We have saved your setup progress. When you are ready, run great_expectations init to continue.
+""")
+                    sys.exit(1)
 
     return (generator_asset, batch_kwargs)
 
