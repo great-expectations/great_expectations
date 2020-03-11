@@ -79,11 +79,13 @@ Aggregate functions
 * :func:`expect_column_min_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_min_to_be_between>`
 * :func:`expect_column_sum_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_sum_to_be_between>`
 
-Column pairs
+Multi-column
 =============================================
 * :func:`expect_column_pair_values_A_to_be_greater_than_B <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_A_to_be_greater_than_B>`
 * :func:`expect_column_pair_values_to_be_equal <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_to_be_equal>`
 * :func:`expect_column_pair_values_to_be_in_set <great_expectations.dataset.dataset.Dataset.expect_column_pair_values_to_be_in_set>`
+* :func:`expect_multicolumn_values_to_be_unique <great_expectations.dataset.dataset.Dataset.expect_multicolumn_values_to_be_unique>`
+
 
 Distributional functions
 =============================================
