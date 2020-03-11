@@ -123,7 +123,7 @@ If an expectation suite with this name already exists for this data_asset, you w
 
 Select a sample batch of the dataset the suite will describe.
 
-``batch_kwargs`` provide detailed instructions for the datasource how to construct a batch. Each datasource accepts different types of ``batch_kwargs``:
+``batch_kwargs`` provide detailed instructions for the Datasource on how to construct a batch. Each Datasource accepts different types of ``batch_kwargs`` - regardless of Datasource type, a Datasource name must always be provided:
 
 .. content-tabs::
 
@@ -134,7 +134,10 @@ Select a sample batch of the dataset the suite will describe.
 
         .. code-block:: python
 
-            batch_kwargs = {'path': "PATH_OF_THE_FILE_YOU_WANT_TO_LOAD"}
+            batch_kwargs = {
+                'path': "PATH_OF_THE_FILE_YOU_WANT_TO_LOAD",
+                'datasource': "DATASOURCE_NAME"
+            }
 
         To instruct ``get_batch`` to read CSV files with specific options (e.g., not to interpret the first line as the
         header or to use a specific separator), add them to the ``batch_kwargs`` under the "reader_options" key.
@@ -147,17 +150,20 @@ Select a sample batch of the dataset the suite will describe.
 
             {
                 "path": "/data/npidata/npidata_pfile_20190902-20190908.csv",
+                "datasource": "files_datasource",
                 "reader_options": {
                     "sep": "|"
                 }
             }
 
-        |
         If you already loaded the data into a Pandas DataFrame called `df`, you could use following ``batch_kwargs`` to instruct the datasource to use your DataFrame as a batch:
 
         .. code-block:: python
 
-            batch_kwargs = {'dataset': df}
+            batch_kwargs = {
+                'dataset': df,
+                'datasource': 'files_datasource'
+            }
 
     .. tab-container:: tab1
         :title: pyspark
@@ -166,7 +172,10 @@ Select a sample batch of the dataset the suite will describe.
 
         .. code-block:: python
 
-            batch_kwargs = {'path': "PATH_OF_THE_FILE_YOU_WANT_TO_LOAD"}
+            batch_kwargs = {
+                'path': "PATH_OF_THE_FILE_YOU_WANT_TO_LOAD",
+                'datasource': "DATASOURCE_NAME"
+            }
 
         To instruct ``get_batch`` to read CSV files with specific options (e.g., not to interpret the first line as the
         header or to use a specific separator), add them to the ``batch_kwargs`` under the "reader_options" key.
@@ -182,21 +191,29 @@ Select a sample batch of the dataset the suite will describe.
 
         .. code-block:: python
 
-            batch_kwargs = {'table': "YOUR TABLE NAME"}
+            batch_kwargs = {
+                'table': "YOUR TABLE NAME",
+                'datasource': "DATASOURCE_NAME"
+            }
 
         If you would like to validate an entire table or view from a non-default schema in your database:
 
         .. code-block:: python
 
-            batch_kwargs = {'table': "YOUR TABLE NAME", "schema": "YOUR SCHEMA"}
+            batch_kwargs = {
+                'table': "YOUR TABLE NAME",
+                'schema': "YOUR SCHEMA",
+                'datasource': "DATASOURCE_NAME"
+            }
 
         If you would like to validate using a query to construct a temporary table:
 
         .. code-block:: python
 
-            batch_kwargs = {'query': 'SELECT YOUR_ROWS FROM YOUR_TABLE'}
-
-
+            batch_kwargs = {
+                'query': 'SELECT YOUR_ROWS FROM YOUR_TABLE',
+                'datasource': "DATASOURCE_NAME"
+            }
 
 The DataContext's ``get_batch`` method is used to load a batch of a data asset:
 
