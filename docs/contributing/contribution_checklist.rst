@@ -5,6 +5,7 @@
 Contribution checklist
 =======================
 
+#FIXME: Need input from core eng team on what they want to see here.
 
 Tests
 -------
