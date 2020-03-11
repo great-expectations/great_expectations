@@ -623,14 +623,14 @@ class ExpectationSuiteSchema(Schema):
 
 class ExpectationValidationResult(object):
     def __init__(self, success=None, expectation_config=None, result=None, meta=None, exception_info=None):
+        if result and not self.validate_result_dict(result):
+            raise InvalidCacheValueError(result)
         self.success = success
         self.expectation_config = expectation_config
         # TODO: re-add
         # assert_json_serializable(result, "result")
         if result is None:
             result = {}
-        if not self.validate_result_dict(result):
-            raise InvalidCacheValueError(result)
         self.result = result
         if meta is None:
             meta = {}
