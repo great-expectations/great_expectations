@@ -8,6 +8,9 @@ develop
 * Better error message when config substitution variable is missing
 * removed an unused directory in the GE folder
 * removed obsolete config error handling
+* Docs typo fixes
+* Jupyter notebook improvements
+* `great_expectations init` improvements
 * Simpler messaging in valiation notebooks
 * replaced hacky loop with suite list call in notebooks
 * CLI suite new now supports `--empty` flag that generates an empty suite and opens a notebook
