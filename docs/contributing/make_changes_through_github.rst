@@ -6,3 +6,6 @@ Making changes directly through Github
 ==========================================
 
 [Sam's doc goes here.]
+
+
+*last updated*: |lastupdate|

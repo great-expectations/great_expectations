@@ -90,7 +90,7 @@ Our goal is to make your experience as great as possible. Please follow these st
 Table of contents for Contributing
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    /contributing/setting_up_your_dev_environment
    /contributing/make_changes_through_github
@@ -99,7 +99,8 @@ Table of contents for Contributing
    /contributing/contributor_license_agreement
    /contributing/types_of_contributions
    /contributing/testing
-   /contributing/core_committers
+   /contributing/style_guide
+   /contributing/miscellaneous
 
 
 
