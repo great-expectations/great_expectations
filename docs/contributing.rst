@@ -92,14 +92,14 @@ Table of contents for Contributing
 .. toctree::
    :maxdepth: 1
 
-   /contributing/setting-up-your-dev-environment
+   /contributing/setting_up_your_dev_environment
    /contributing/make_changes_through_github
-   /contributing/contribution-checklist
+   /contributing/contribution_checklist
    /contributing/contributions_without_an_issue
    /contributing/contributor_license_agreement
    /contributing/types_of_contributions
    /contributing/testing
-   /contributing/core-committers
+   /contributing/core_committers
 
 
 
