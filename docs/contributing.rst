@@ -1,0 +1,106 @@
+.. _contributing:
+
+####################
+Contributing
+####################
+
+Welcome to the Great Expectations project! We're very glad you want to help out by contributing.
+
+Our goal is to make your experience as great as possible. Please follow these steps to contribute:
+
+.. raw:: html
+
+   <embed>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css">
+      <style>
+         .custom-indented-paragraph {
+            margin-left: 70px;
+         }
+      </style>
+   </embed>
+
+
+   <embed>
+      <h2><span class="fa-stack">
+         <span class="fa fa-circle-o fa-stack-2x"></span>
+         <strong class="fa-stack-1x">
+            1    
+         </strong>
+      </span> Join the community on Slack</h2>
+   </embed>
+
+.. container:: custom-indented-paragraph
+
+   Go to `greatexpectations.io/slack <https://greatexpectations.io/slack>`__ and introduce yourself in the ``#contributors`` channel.
+
+.. raw:: html
+
+   <embed>
+      <h2><span class="fa-stack">
+         <span class="fa fa-circle-o fa-stack-2x"></span>
+         <strong class="fa-stack-1x">
+            2
+         </strong>
+      </span> Set up your development environment</h2>
+   </embed>
+
+.. container:: custom-indented-paragraph
+
+   Follow `these instructions <contributing_setting_up_your_dev_environment>`_ to set up your dev environment.
+   
+   Alternatively, for small changes that don't need to be tested locally (e.g. documentation changes), you can `make changes directly through Github <contributing_make_changes_through_github>`_.
+
+.. raw:: html
+
+   <embed>
+      <h2><span class="fa-stack">
+         <span class="fa fa-circle-o fa-stack-2x"></span>
+         <strong class="fa-stack-1x">
+            3
+         </strong>
+      </span> Select a feature</h2>
+   </embed>
+
+.. container:: custom-indented-paragraph
+
+   Issues in GitHub are a great place to start. Check out the `help wanted <https://github.com/great-expectations/great_expectations/labels/help%20wanted>`__ and `good first issue <https://github.com/great-expectations/great_expectations/labels/good%20first%20issue>`__ labels. Comment to let everyone know you’re working on it. 
+   
+   The `public test grid <https://grid.greatexpectations.io>`__ is another good entry point. If there's an element in the test grid that you want to work on, please create an issue in Github to let others know that you're taking it on.
+
+   If there’s no ticket for what you want to work on, please see :ref:`_contributing_contributions_without_an_issue`.
+
+.. raw:: html
+
+   <embed>
+      <h2><span class="fa-stack">
+         <span class="fa fa-circle-o fa-stack-2x"></span>
+         <strong class="fa-stack-1x">
+            4
+         </strong>
+      </span> Start developing</h2>
+   </embed>
+
+.. container:: custom-indented-paragraph
+
+   Each `type of contribution <_contributing_types_of_contributions>`_ has its own development flow and testing requirements. When your changes are ready, run through our :ref:`contributing_contribution_checklist` for pull requests. Note that if it’s your first contribution, there is a standard `CLA`_ to sign.
+
+
+-----
+
+Table of contents for Contributing
+
+.. toctree::
+   :maxdepth: 1
+
+   /contributing/setting-up-your-dev-environment
+   /contributing/make_changes_through_github
+   /contributing/contribution-checklist
+   /contributing/contributions_without_an_issue
+   /contributing/contributor_license_agreement
+   /contributing/types_of_contributions
+   /contributing/testing
+   /contributing/core-committers
+
+
+
+*last updated*: |lastupdate|

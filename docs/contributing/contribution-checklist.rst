@@ -1,4 +1,4 @@
-.. _community_contribution_checklist:
+.. _contributing_contribution_checklist:
 
 
 
