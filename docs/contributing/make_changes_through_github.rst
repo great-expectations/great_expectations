@@ -17,6 +17,11 @@ We suggest simply editing the docs using the GitHub markdown editor, which means
 * Click the "Create Pull Request" button.
     * Optionally: Add comment to explain your change, if it’s not already in the commit message.
 * Click the next "Create Pull Request" button to create the actual PR.
+
+
+--> Contribution checklist
+
+
 * You will see a comment from the "CLA Bot" that asks you to complete the Contributor Licence Agreement form.
     * Please complete the form and comment on the PR to say that you’ve signed the form.
 * Wait for the other Continuous Integration (CI) checks to go green and watch out for a comment from the automated linter that checks for syntax and formatting issues.
