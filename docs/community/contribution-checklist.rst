@@ -1,9 +1,9 @@
-.. _tutorial_validate_data:
+.. _community_contribution_checklist:
 
 
 
-Validate Data
-==============
+Contribution checklist
+=======================
 
 Expectations describe Data Assets. Data Assets are composed of Batches. Validation checks Expectations against a Batch of data. Expectation Suites combine multiple Expectations into an overall description of a Batch.
 
