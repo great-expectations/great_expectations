@@ -249,7 +249,7 @@ def test_validate():
 
 @mock.patch('great_expectations.core.ExpectationValidationResult.validate_result_dict', return_value=False)
 @pytest.mark.xfail(condition=PY2, reason="legacy python")
-def test_validate_with_invalid_result(validate_result_dict):
+def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dict):
 
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
         my_expectation_suite = expectationSuiteSchema.loads(f.read()).data
@@ -268,7 +268,7 @@ def test_validate_with_invalid_result(validate_result_dict):
 
 @mock.patch('great_expectations.core.ExpectationValidationResult.validate_result_dict', return_value=False)
 @pytest.mark.xfail(condition=PY2, reason="legacy python")
-def test_validate_with_invalid_result_catch_exceptions(validate_result_dict):
+def test_validate_with_invalid_result(validate_result_dict):
 
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
         my_expectation_suite = expectationSuiteSchema.loads(f.read()).data
@@ -283,7 +283,7 @@ def test_validate_with_invalid_result_catch_exceptions(validate_result_dict):
 
     with mock.patch("datetime.datetime") as mock_datetime:
         mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
-        results = my_df.validate(catch_exceptions=True)
+        results = my_df.validate()  # catch_exceptions=True is default
 
     with open(file_relative_path(__file__, './test_sets/titanic_expected_data_asset_validate_results_with_exceptions.json')) as f:
         expected_results = expectationSuiteValidationResultSchema.loads(f.read()).data
