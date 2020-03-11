@@ -2,12 +2,19 @@
 
 develop
 -----------------
+* Update CLI `init` flow to support snowflake transient tables
+* Use filename for default expectation suite name in CLI `init`
+* Tables created by SqlAlchemyDataset use a shorter name with 8 hex characters of randomness instead of a full uuid
 * Better error message when config substitution variable is missing
 * removed an unused directory in the GE folder
 * removed obsolete config error handling
 * Docs typo fixes
 * Jupyter notebook improvements
 * `great_expectations init` improvements
+* Simpler messaging in valiation notebooks
+* replaced hacky loop with suite list call in notebooks
+* CLI suite new now supports `--empty` flag that generates an empty suite and opens a notebook
+* add error handling to `init` flow for cases where user tries using a broken file
 
 
 0.9.3
