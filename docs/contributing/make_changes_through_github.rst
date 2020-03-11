@@ -8,4 +8,6 @@ Making changes directly through Github
 [Sam's doc goes here.]
 
 
+Add details here.
+
 *last updated*: |lastupdate|

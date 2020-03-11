@@ -1,5 +1,3 @@
-.. _contributing:
-
 ####################
 Contributing
 ####################
@@ -58,16 +56,16 @@ Our goal is to make your experience as great as possible. Please follow these st
          <strong class="fa-stack-1x">
             3
          </strong>
-      </span> Select a feature</h2>
+      </span> Identify the type of contribution that you want to make</h2>
    </embed>
 
 .. container:: custom-indented-paragraph
 
    Issues in GitHub are a great place to start. Check out the `help wanted <https://github.com/great-expectations/great_expectations/labels/help%20wanted>`__ and `good first issue <https://github.com/great-expectations/great_expectations/labels/good%20first%20issue>`__ labels. Comment to let everyone know you’re working on it. 
    
-   The `public test grid <https://grid.greatexpectations.io>`__ is another good entry point. If there's an element in the test grid that you want to work on, please create an issue in Github to let others know that you're taking it on.
+   The `public test grid <https://grid.greatexpectations.io>`__ is another good entry point. If there's an element in the test grid that you want to work on, please create an issue in Github to let others know that you're taking it on. (#FIXME: This can't go live yet.)
 
-   If there’s no ticket for what you want to work on, please see :ref:`_contributing_contributions_without_an_issue`.
+   If there’s no ticket for what you want to work on, please see :ref:`Contributions without an issue`.
 
 .. raw:: html
 
@@ -82,7 +80,9 @@ Our goal is to make your experience as great as possible. Please follow these st
 
 .. container:: custom-indented-paragraph
 
-   Each `type of contribution <_contributing_types_of_contributions>`_ has its own development flow and testing requirements. When your changes are ready, run through our :ref:`contributing_contribution_checklist` for pull requests. Note that if it’s your first contribution, there is a standard `CLA`_ to sign.
+   Each `type of contribution <_contributing_types_of_contributions>`_ has its own development flow and testing requirements. When your changes are ready, run through our :ref:`contributing_contribution_checklist` for pull requests.
+   
+   Note that if it’s your first contribution, there is a standard :ref:`Contributor license agreement (CLA)` to sign.
 
 
 -----
@@ -96,7 +96,6 @@ Table of contents for Contributing
    /contributing/make_changes_through_github
    /contributing/contribution_checklist
    /contributing/contributions_without_an_issue
-   /contributing/contributor_license_agreement
    /contributing/types_of_contributions
    /contributing/testing
    /contributing/style_guide
