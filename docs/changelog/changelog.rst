@@ -2,6 +2,9 @@
 
 develop
 -----------------
+* Update CLI `init` flow to support snowflake transient tables
+* Use filename for default expectation suite name in CLI `init`
+* Tables created by SqlAlchemyDataset use a shorter name with 8 hex characters of randomness instead of a full uuid
 * Better error message when config substitution variable is missing
 * removed an unused directory in the GE folder
 * removed obsolete config error handling

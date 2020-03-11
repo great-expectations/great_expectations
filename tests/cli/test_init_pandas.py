@@ -37,14 +37,15 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
     )
     stdout = result.output
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(project_dir) \
+           in mock_webbrowser.call_args[0][0]
 
     assert len(stdout) < 3000, "CLI output is unreasonably long."
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "What are you processing your files with" in stdout
     assert "Enter the path (relative or absolute) of a data file" in stdout
-    assert "Name the new expectation suite [warning]" in stdout
+    assert "Name the new expectation suite [Titanic.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
         in stdout
@@ -52,7 +53,7 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert "A new Expectation suite 'warning' was added to your project" in stdout
+    assert "A new Expectation suite 'Titanic.warning' was added to your project" in stdout
     assert "Great Expectations is now set up" in stdout
 
     assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
@@ -73,13 +74,15 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
     guid_safe_obs_tree = re.sub(
         r"[a-z0-9]{32}(?=\.(json|html))", "foobarbazguid", date_safe_obs_tree
     )
+    print(guid_safe_obs_tree)
     assert (
         guid_safe_obs_tree
         == """great_expectations/
     .gitignore
     great_expectations.yml
     expectations/
-        warning.json
+        Titanic/
+            warning.json
     notebooks/
         pandas/
             validation_playground.ipynb
@@ -99,7 +102,8 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
             local_site/
                 index.html
                 expectations/
-                    warning.html
+                    Titanic/
+                        warning.html
                 static/
                     fonts/
                         HKGrotesk/
@@ -126,13 +130,15 @@ def test_cli_init_on_new_project(mock_webbrowser, caplog, tmp_path_factory):
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
                 validations/
-                    warning/
-                        9999.9999/
-                            foobarbazguid.html
+                    Titanic/
+                        warning/
+                            9999.9999/
+                                foobarbazguid.html
         validations/
-            warning/
-                9999.9999/
-                    foobarbazguid.json
+            Titanic/
+                warning/
+                    9999.9999/
+                        foobarbazguid.json
 """
     )
 
@@ -148,7 +154,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
     # mangle the project to remove all traces of a suite and validations
     _remove_all_datasources(ge_dir)
-    os.remove(os.path.join(ge_dir, "expectations", "warning.json"))
+    os.remove(os.path.join(ge_dir, "expectations", "Titanic", "warning.json"))
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
     validations_dir = os.path.join(ge_dir, uncommitted_dir, "validations")
     shutil.rmtree(validations_dir)
@@ -175,7 +181,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "Enter the path (relative or absolute) of a data file" in stdout
-    assert "Name the new expectation suite [warning]:" in stdout
+    assert "Name the new expectation suite [Titanic.warning]:" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
@@ -236,7 +242,8 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
         input="Y\n1\n1\n{}\n\n\n\n".format(data_path, catch_exceptions=False),
     )
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in mock_webbrowser.call_args[0][0]
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(project_dir) \
+           in mock_webbrowser.call_args[0][0]
 
     context = DataContext(os.path.join(project_dir, DataContext.GE_DIR))
     assert isinstance(context, DataContext)
@@ -432,7 +439,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     )
     stdout = result.output
     assert mock_webbrowser.call_count == 1
-    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(project_dir) in \
+    assert "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(project_dir) in \
            mock_webbrowser.call_args[0][0]
 
     assert len(stdout) < 3000, "CLI output is unreasonably long."
@@ -446,7 +453,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     assert "Try again? [Y/n]:" in stdout
     assert "[{}]:".format(data_path) in stdout
 
-    assert "Name the new expectation suite [warning]" in stdout
+    assert "Name the new expectation suite [Titanic.warning]" in stdout
     assert (
             "Great Expectations will choose a couple of columns and generate expectations about them"
             in stdout
@@ -454,7 +461,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert "A new Expectation suite 'warning' was added to your project" in stdout
+    assert "A new Expectation suite 'Titanic.warning' was added to your project" in stdout
     assert "Great Expectations is now set up" in stdout
 
     assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
@@ -481,7 +488,8 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     .gitignore
     great_expectations.yml
     expectations/
-        warning.json
+        Titanic/
+            warning.json
     notebooks/
         pandas/
             validation_playground.ipynb
@@ -501,7 +509,8 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
             local_site/
                 index.html
                 expectations/
-                    warning.html
+                    Titanic/
+                        warning.html
                 static/
                     fonts/
                         HKGrotesk/
@@ -528,13 +537,15 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
                 validations/
-                    warning/
-                        9999.9999/
-                            foobarbazguid.html
+                    Titanic/
+                        warning/
+                            9999.9999/
+                                foobarbazguid.html
         validations/
-            warning/
-                9999.9999/
-                    foobarbazguid.json
+            Titanic/
+                warning/
+                    9999.9999/
+                        foobarbazguid.json
 """)
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
