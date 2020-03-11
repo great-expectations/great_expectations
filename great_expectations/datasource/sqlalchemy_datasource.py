@@ -51,16 +51,6 @@ class SqlAlchemyDatasource(Datasource):
 
         """
 
-        # As of 0.9.0, we do not require generators be configured
-        #     generators = {
-        #         "default": {
-        #             "class_name": "TableBatchKwargsGenerator"
-        #         },
-        #         "passthrough": {
-        #             "class_name": "PassthroughGenerator",
-        #         }
-        #     }
-
         if data_asset_type is None:
             data_asset_type = ClassConfig(
                 class_name="SqlAlchemyDataset")
@@ -145,8 +135,11 @@ class SqlAlchemyDatasource(Datasource):
             # Update credentials with anything passed during connection time
             credentials.update(dict(**kwargs))
             drivername = credentials.pop("drivername")
+            schema_name = credentials.pop("schema_name", None)
+            if schema_name is not None:
+                logger.warning("schema_name specified creating a URL with schema is not supported. Set a default "
+                               "schema on the user connecting to your database.")
             options = sqlalchemy.engine.url.URL(drivername, **credentials)
-
         return options, drivername
 
     def get_batch(self, batch_kwargs, batch_parameters=None):
@@ -155,46 +148,40 @@ class SqlAlchemyDatasource(Datasource):
             "ge_load_time": datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S.%fZ")
         })
 
-        if "schema" in batch_kwargs:
-            schema = batch_kwargs["schema"]
+        if "bigquery_temp_table" in batch_kwargs:
+            query_support_table_name = batch_kwargs.get("bigquery_temp_table")
+        elif "snowflake_transient_table" in batch_kwargs:
+            # Snowflake uses a transient table, so we expect a table_name to be provided
+            query_support_table_name = batch_kwargs.get("snowflake_transient_table")
         else:
-            schema = None
+            query_support_table_name = None
 
-        if "table" in batch_kwargs:
+        if "query" in batch_kwargs:
+            if "limit" in batch_kwargs or "offset" in batch_kwargs:
+                logger.warning("Limit and offset parameters are ignored when using query-based batch_kwargs; consider "
+                               "adding limit and offset directly to the generated query.")
+            if "query_parameters" in batch_kwargs:
+                query = Template(batch_kwargs["query"]).safe_substitute(batch_kwargs["query_parameters"])
+            else:
+                query = batch_kwargs["query"]
+            batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query, table_name=query_support_table_name,
+                                                       schema=batch_kwargs.get("schema"))
+        elif "table" in batch_kwargs:
             limit = batch_kwargs.get('limit')
             offset = batch_kwargs.get('offset')
             if limit is not None or offset is not None:
                 logger.info("Generating query from table batch_kwargs based on limit and offset")
                 raw_query = sqlalchemy.select([sqlalchemy.text("*")])\
-                    .select_from(sqlalchemy.schema.Table(batch_kwargs['table'], sqlalchemy.MetaData(), schema=schema))\
+                    .select_from(sqlalchemy.schema.Table(batch_kwargs['table'], sqlalchemy.MetaData(),
+                                                         schema=batch_kwargs.get("schema")))\
                     .offset(offset)\
                     .limit(limit)
                 query = str(raw_query.compile(self.engine, compile_kwargs={"literal_binds": True}))
-                batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query,
+                batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query, table_name=query_support_table_name,
                                                            schema=batch_kwargs.get("schema"))
             else:
                 batch_reference = SqlAlchemyBatchReference(engine=self.engine, table_name=batch_kwargs["table"],
                                                            schema=batch_kwargs.get("schema"))
-
-        elif "query" in batch_kwargs:
-            if "limit" in batch_kwargs or "offset" in batch_kwargs:
-                logger.warning("Limit and offset parameters are ignored when using query-based batch_kwargs; consider "
-                               "adding limit and offset directly to the generated query.")
-            if "bigquery_temp_table" in batch_kwargs:
-                table_name = batch_kwargs.get("bigquery_temp_table")
-            elif self.engine.dialect.name.lower() == "snowflake":
-                # Snowflake uses a transient table, so we expect a table_name to be provided
-                table_name = batch_kwargs.get("table_name")
-            else:
-                table_name = None
-
-            if "query_parameters" in batch_kwargs:
-                query = Template(batch_kwargs["query"]).safe_substitute(batch_kwargs["query_parameters"])
-            else:
-                query = batch_kwargs["query"]
-            batch_reference = SqlAlchemyBatchReference(engine=self.engine, query=query, table_name=table_name,
-                                                       schema=batch_kwargs.get("schema"))
-
         else:
             raise ValueError("Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified")
 
