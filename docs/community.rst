@@ -1,5 +1,19 @@
 .. _community:
 
+####################
+Community
+####################
+
+This is a collection of tutorials that walk you through a variety of useful Great Expectations workflows.
+
+.. toctree::
+   :maxdepth: 1
+
+   /community/getting-started-as-a-contributor
+   /community/setting-up-your-dev-environment
+   /community/contribution-checklist
+   /community/core-committers
+
 Community
 ==================
 
