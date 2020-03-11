@@ -290,6 +290,9 @@ def test_validate_with_invalid_result(validate_result_dict):
 
     del results.meta["great_expectations.__version__"]
 
+    for result in results.results:
+        result.exception_info.pop("exception_traceback")
+
     assert expected_results == results
 
 
