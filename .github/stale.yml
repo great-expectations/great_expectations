@@ -11,13 +11,11 @@ jobs:
     - uses: actions/stale@v1
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        stale-issue-message: 'This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
-        stale-pr-message: 'This PR has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
+        stale-issue-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
+        stale-pr-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis PR has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
         stale-issue-label: 'stale'
         stale-pr-label: 'stale'
-        days-before-stale:
-    description: 'The number of days old an issue can be before marking it stale'
-    default: 60
-  days-before-stale: 120
-  days-before-close: 7
-  
+        days-before-stale: 120
+        days-before-close: 7
+        exempt-issue-label: 'stalebot-exempt'
+
