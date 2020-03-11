@@ -465,7 +465,7 @@ class BaseDataContext(object):
 
         Args:
             batch_kwargs: the batch_kwargs to use; must include a datasource key
-            expectation_suite_name: the name of the expectation_suite to get
+            expectation_suite_name: The ExpectationSuite or the name of the expectation_suite to get
             data_asset_type: the type of data_asset to build, with associated expectation implementations. This can
                 generally be inferred from the datasource.
             batch_parameters: optional parameters to store as the reference description of the batch. They should
@@ -473,7 +473,6 @@ class BaseDataContext(object):
 
         Returns:
             DataAsset
-
         """
         if isinstance(batch_kwargs, dict):
             batch_kwargs = BatchKwargs(batch_kwargs)
@@ -481,16 +480,26 @@ class BaseDataContext(object):
         if not isinstance(batch_kwargs, BatchKwargs):
             raise ge_exceptions.BatchKwargsError("BatchKwargs must be a BatchKwargs object or dictionary.")
 
-        if not isinstance(expectation_suite_name, (ExpectationSuiteIdentifier, string_types)):
-            raise ge_exceptions.DataContextError("expectation_suite_name must be an ExpectationSuiteIdentifier or "
-                                                 "string.")
+        if not isinstance(expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, string_types)):
+            raise ge_exceptions.DataContextError(
+                "expectation_suite_name must be an ExepctationSuite, "
+                "ExpectationSuiteIdentifier or string."
+            )
+
+        if isinstance(expectation_suite_name, ExpectationSuite):
+            expectation_suite = expectation_suite_name
+        else:
+            expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
         datasource = self.get_datasource(batch_kwargs.get("datasource"))
-        expectation_suite = self.get_expectation_suite(expectation_suite_name)
         batch = datasource.get_batch(batch_kwargs=batch_kwargs, batch_parameters=batch_parameters)
         if data_asset_type is None:
             data_asset_type = datasource.config.get("data_asset_type")
-        validator = Validator(batch=batch, expectation_suite=expectation_suite, expectation_engine=data_asset_type)
+        validator = Validator(
+            batch=batch,
+            expectation_suite=expectation_suite,
+            expectation_engine=data_asset_type
+        )
         return validator.get_dataset()
 
     def run_validation_operator(
