@@ -1,19 +1,21 @@
-# Probot Stale bot https://probot.github.io/apps/stale/
+name: Mark stale issues and pull requests
 
-# Number of days of inactivity before an issue becomes stale
-daysUntilStale: 120
-# Number of days of inactivity before a stale issue is closed
-daysUntilClose: 7
-# Issues with these labels will never be considered stale
-exemptLabels:
-  - pinned
-  - security
-# Label to use when marking an issue as stale
-staleLabel: wontfix
-# Comment to post when marking an issue as stale. Set to `false` to disable
-markComment: >
-  This issue has been automatically marked as stale because it has not had
-  recent activity. It will be closed if no further activity occurs. Thank you
-  for your contributions.
-# Comment to post when closing a stale issue. Set to `false` to disable
-closeComment: true
+on:
+  schedule:
+  - cron: "0/15 0,1,2,3,4 * * *"
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/stale@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
+        stale-pr-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis PR has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
+        stale-issue-label: 'stale'
+        stale-pr-label: 'stale'
+        days-before-stale: 120
+        days-before-close: 7
+        exempt-issue-label: 'stalebot-exempt'
+
