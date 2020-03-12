@@ -2,7 +2,7 @@
 
 develop
 -----------------
-
+* Add `sphinxcontrib-lastupdate` to `requirements-dev.txt` so that docs can be built locally.
 
 0.9.4
 -----------------
