@@ -1,3 +1,5 @@
+import copy
+
 import pytest
 
 import subprocess
@@ -11,17 +13,38 @@ import boto3
 
 from great_expectations.data_context.util import file_relative_path
 
-TELEMETRY_TEST_URL = "https://mn3i9tgx0b.execute-api.us-east-1.amazonaws.com/test/great_expectations/v1/telemetry"
+TELEMETRY_QA_URL = "https://m7hebk7006.execute-api.us-east-1.amazonaws.com/qa/great_expectations/v1/telemetry"
 
 logGroupName = "/great_expectations/telemetry"
 
 
+@pytest.fixture
+def valid_telemetry_message():
+    return {
+        "event_time": "2020-01-01T05:02:00.012Z",
+        "data_context_id": "51ff737e-33af-455a-8a11-0dc923dcbfb5",
+        "data_context_instance_id": "2d24776c-abef-4521-b182-4b18375b7259",
+        "ge_version": "0.9.4",
+        "method": "data_context.__init__",
+        "success": True,
+        "platform.system": "Darwin",
+        "platform.release": "19.3",
+        "version_info": [0, 1, "final", 4],
+        "anonymized_datasources": [
+            {
+                "parent_class": "PandasDatasource"
+            }
+        ],
+        "event_payload": {}
+    }
+
+
 @pytest.fixture(scope="session")
-def logstream():
+def logstream(valid_telemetry_message):
     client = boto3.client('logs', region_name='us-east-1')
     # Warm up a logstream
     logStreamName = None
-    requests.post(TELEMETRY_TEST_URL, json={"message": "warmup"})
+    requests.post(TELEMETRY_QA_URL, json=valid_telemetry_message)
     attempts = 0
     while attempts < 3:
         attempts += 1
@@ -39,6 +62,17 @@ def logstream():
     if logStreamName is None:
         assert False, "Unable to warm up a log stream for integration testing."
     return client, logStreamName
+
+
+def test_send_malformed_data(valid_telemetry_message):
+    # We should be able to successfully send a valid message, but find that
+    # a malformed message is not accepted
+    res = requests.post(TELEMETRY_QA_URL, json=valid_telemetry_message)
+    assert res.status_code == 201
+    invalid_telemetry_message = copy.deepcopy(valid_telemetry_message)
+    del invalid_telemetry_message["data_context_id"]
+    res = requests.post(TELEMETRY_QA_URL, json=invalid_telemetry_message)
+    assert res.status_code == 400
 
 
 def test_telemetry_transmission(logstream):
