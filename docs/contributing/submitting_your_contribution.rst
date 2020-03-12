@@ -49,11 +49,11 @@ When you’re done with your work...
 
     * Once all checks pass, a GE team member will approve your PR and merge it. 
     * GitHub will notify you of comments or a successful merge according to your notification settings.
-    * There will probably be discussion about the pull request. It's normal for a request to require some changes before merging it into the main Great Expectations project. We enjoy working with contributors to help them get their code accepted. There are many approaches to fixing a problem and it is important to find the best approach before writing too much code!
 
 7. Resolve any issues
 -----------------------
 
+    * There will probably be discussion about the pull request. It's normal for a request to require some changes before merging it into the main Great Expectations project. We enjoy working with contributors to help them get their code accepted. There are many approaches to fixing a problem and it is important to find the best approach before writing too much code!
 
 8. Do a victory dance
 ------------------------
