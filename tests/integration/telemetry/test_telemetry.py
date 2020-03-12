@@ -15,7 +15,7 @@ from great_expectations.data_context.util import file_relative_path
 
 TELEMETRY_QA_URL = "https://m7hebk7006.execute-api.us-east-1.amazonaws.com/qa/great_expectations/v1/telemetry"
 
-logGroupName = "/great_expectations/telemetry"
+logGroupName = "/great_expectations/telemetry/qa"
 
 
 @pytest.fixture
