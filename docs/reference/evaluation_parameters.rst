@@ -4,6 +4,51 @@
 Evaluation Parameters
 ######################
 
+Several cases where we want to define expectations using either dynamic values or values only available at validation
+time. For example:
+
+1. We expect that the number of rows in a computed aggregate table (or DAG node) to equal the number of unique values
+in an event table / upstream DAG node.
+2. We expect that the number of rows in one table should be within 10% of the number of rows in another table.
+3. We expect that the values in a column should be taken from a set stored in a database updated by a different system.
+
+
+
+Proposed spec:
+
+1. Exists today (see below):
+>>> providers_by_state.expect_table_row_count_to_equal(value={"$PARAMETER":
+"urn:great_expectations:validations:state_data:expect_column_proportion_of_unique_values_to_be_between.result
+.observed_value:column=name"})
+
+2. Proposed API:
+>>> providers_by_state.expect_table_row_count_to_be_between(min_value={"$PARAMETER_EXPRESSION":
+"0.9 * urn:great_expectations:validations:state_data:expect_column_proportion_of_unique_values_to_be_between.result
+.observed_value:column=name"},
+max_value={"$PARAMETER_EXPRESSION":
+"1.1 * urn:great_expectations:validations:state_data:expect_column_proportion_of_unique_values_to_be_between.result
+.observed_value:column=name"})
+
+
+3. Proposed API:
+>>> states.expect_column_distinct_values_to_equal_set(value_set={"$PARAMETER_EXPRESSION":
+"urn:great_expectations:stores:remote_metric_store:states:column=name"})
+
+WHERE
+-> "states" is the name of a KEY/METRIC exposed by the remote_metric_store (see `metric_store.py`)
+-> "column=name" are the metric kwargs in string form
+
+Then, the "remote_metric_store" provides a `set_remote_metric` or similar method that allows one to specify a method
+for the store to retrieve a metric (method TBD).
+
+
+
+
+
+------------------------
+OLD LANGUAGE
+------------------------
+
 Often, the specific parameters associated with an expectation will be derived from upstream steps in a processing
 pipeline. For example, we may want to `expect_table_row_count_to_equal` a value stored in a previous step.
 
