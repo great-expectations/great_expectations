@@ -33,17 +33,6 @@ When validating expectations, you can provide evaluation parameters based on ups
 
 >>> my_df.validate(expectation_suite=my_dag_step_config, evaluation_parameters={"upstream_row_count":upstream_row_count})
 
-Finally, the command-line tool also allows you to provide a JSON file that contains parameters to use during evaluation:
-
-.. code-block:: bash
-
-    >>> cat my_parameters_file.json
-    {
-        "upstream_row_count": 10
-    }
-    >>> great_expectations validation csv --evaluation_parameters=my_parameters_file.json dataset_file.csv expectation_suite.json
-
-
 .. _data_context_evaluation_parameter_store:
 
 ***************************************
