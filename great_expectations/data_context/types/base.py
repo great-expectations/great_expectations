@@ -114,6 +114,12 @@ class DatasourceConfig(DictDot):
         return self._module_name
 
 
+class AnonymousUsageDataConfigchema(Schema):
+    data_context_id = fields.Str()
+    enabled = fields.Boolean(default=True)
+    telemetry_url = fields.URL(allow_none=True)
+
+
 class DatasourceConfigSchema(Schema):
     class_name = fields.Str()
     # REMOVE WHEN SUPPORT FOR TYPE CONFIGURATION NO LONGER NEEDED
@@ -142,6 +148,7 @@ class DataContextConfigSchema(Schema):
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     config_variables_file_path = fields.Str(allow_none=True)
+    anonymized_usage_data = fields.Nested(AnonymousUsageDataConfigchema)
 
     # noinspection PyUnusedLocal
     @pre_dump

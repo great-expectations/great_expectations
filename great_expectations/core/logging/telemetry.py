@@ -87,7 +87,8 @@ class HTTPDataHandler(logging.Handler):
             requests.post(self._url, json=self.format(record))
         # noinspection PyBroadException
         except Exception:
-            self.handleError(record)
+            # We *always* tolerate *any* error in telemetry
+            pass
 
 
 def telemetry_enabled_method(func=None, method_name=None, args_payload_fn=None, result_payload_fn=None):
