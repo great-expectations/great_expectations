@@ -190,11 +190,14 @@ def test_suite_new_empty_suite_creates_empty_suite(
     citations = suite.get_citations()
     citations[0].pop("citation_date")
     assert citations[0] == {
-        "batch_kwargs": {"datasource": "mydatasource", "path": csv},
-        "batch_markers": None,
-        "batch_parameters": None,
-        "comment": "New suite added via CLI",
-    }
+        'batch_kwargs': {
+            'datasource': 'mydatasource',
+            'path': csv,
+            'reader_method': 'read_csv'
+        },
+        'batch_markers': None,
+        'batch_parameters': None,
+        'comment': 'New suite added via CLI'}
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
