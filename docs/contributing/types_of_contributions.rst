@@ -25,12 +25,11 @@ Plugins
 
 Plugins are ...
 
-We are actively seeking contributions for six types of plugin:
+We are actively seeking contributions for five types of plugin:
 
 * Expectations
 * DataSources
 * StoreBackends
-* ValidationOperators
 * ValidationActions
 * Renderers
 
@@ -97,23 +96,23 @@ To promote a new StoreBackend to {{maturity level X}}, we will need to add Y and
     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
 DataDocs deployment targets
-----------------------------
+*************************************
 
 
 Expectations
-----------------------------
+*************************************
 
 
 Validation operators
-----------------------------
+*************************************
 
 
 Validation actions
-----------------------------
+*************************************
 
 
 Renderers
-----------------------------
+*************************************
 
 .. raw:: html
 
@@ -123,8 +122,11 @@ Renderers
 
 
 Profilers
-----------------------------
+*************************************
 
+
+Core code changes
+----------------------------
 
 
 
