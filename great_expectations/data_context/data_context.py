@@ -276,7 +276,6 @@ class BaseDataContext(object):
         return site_urls
 
     def open_data_docs(self, resource_identifier=None):
-
         """
         A stdlib cross-platform way to open a file in a browser.
 
