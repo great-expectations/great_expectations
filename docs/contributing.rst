@@ -95,9 +95,9 @@ Table of contents for Contributing
    :maxdepth: 2
 
    /contributing/setting_up_your_dev_environment
-   /contributing/make_changes_through_github
    /contributing/contribution_checklist
    /contributing/submitting_your_contribution
+   /contributing/make_changes_through_github
    /contributing/types_of_contributions
    /contributing/contributions_without_an_issue
    /contributing/testing

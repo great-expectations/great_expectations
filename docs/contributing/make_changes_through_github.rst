@@ -50,7 +50,7 @@ Submit a pull request
 **5. Verify continuous integration checks**
 
     * Wait for the other Continuous Integration (CI) checks to go green and watch out for a comment from the automated linter that checks for syntax and formatting issues.
-    * Fix any issues that are flagged.
+    * Fix any issues that are flagged. (For documentation changes, it's unlikely that you'll have any issues.)
 
 **6. Wait for a core team member to approve and merge your PR**
 
