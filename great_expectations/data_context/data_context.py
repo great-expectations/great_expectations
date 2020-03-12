@@ -134,7 +134,9 @@ class BaseDataContext(object):
 
         # We want to have directories set up before initializing telemetry so that we can obtain a context instance id
         self._in_memory_instance_id = None  # This variable *may* be used in case we cannot save an instance id
-        self._initialize_telemetry(**project_config.anonymized_usage_data)
+        updated_usage_data = self._initialize_telemetry(**project_config.anonymized_usage_data)
+        if updated_usage_data != project_config.anonymized_usage_data:
+            project_config.anonymized_usage_data = updated_usage_data
 
         # Init data sources
         self._datasources = {}
@@ -212,7 +214,13 @@ class BaseDataContext(object):
         telemetry_handler.setFormatter(telemetry_formatter)
         telemetry_logger.addHandler(telemetry_handler)
         self._telemetry_filter = telemetry_filter
-        return data_context_id
+        current_config = {
+            "enabled": enabled,
+            "data_context_id": data_context_id,
+        }
+        if telemetry_url != DEFAULT_TELEMETRY_URL:
+            current_config["telemetry_url"] = telemetry_url
+        return current_config
 
     def _register_telemetry_details(self):
         if self._telemetry_filter:
@@ -1503,11 +1511,16 @@ class DataContext(BaseDataContext):
         self._context_root_directory = context_root_directory
 
         project_config = self._load_project_config()
-
         super(DataContext, self).__init__(
             project_config,
             context_root_directory
         )
+
+        # If the data_context_id is different on disk (or absent and so was just generated)
+        # then we should save the current data back to disk so that it will persist.
+        disk_config = self._load_project_config()
+        if disk_config != project_config:
+            self._save_project_config()
 
     def _load_project_config(self):
         """
