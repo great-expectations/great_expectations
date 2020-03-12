@@ -28,7 +28,7 @@ def anonymize_datasource_class_name(class_name, module_name):
             if not class_ == SqlAlchemyDatasource:
                 anonymized_class_info["custom_class"] = md5(class_name).hexdigest()
         elif issubclass(class_, SparkDFDatasource):
-            anonymized_class_info["parent_class"] = "SqlAlchemyDatasource"
+            anonymized_class_info["parent_class"] = "SparkDFDatasource"
             if not class_ == SparkDFDatasource:
                 anonymized_class_info["custom_class"] = md5(class_name).hexdigest()
         return anonymized_class_info
