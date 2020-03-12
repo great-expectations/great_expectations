@@ -1063,7 +1063,7 @@ We could not determine the format of the file. What is it?
   - Error: {0:s}"""
                 cli_message(file_load_error_message.format(str(e)))
                 if not click.confirm(
-                    "Try again?",
+                    "\nTry again?",
                     default=True
                 ):
                     cli_message("""
