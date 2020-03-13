@@ -64,7 +64,7 @@ jobs:
   - stage: deploy
     python: 3.6
     script:
-      - git tag --annotate 0.9.4 -m 0.9.4
+      - git tag --annotate 0.9.5 -m 0.9.5
     deploy:
       provider: pypi
       edge: true
