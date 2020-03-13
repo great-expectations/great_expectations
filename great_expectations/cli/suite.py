@@ -178,9 +178,8 @@ def _load_suite(context, suite_name):
         return suite
     except ge_exceptions.DataContextError as e:
         cli_message(
-            "<red>Could not find a suite named `{}`. Please check the name and try again.</red>".format(
-                suite_name
-            )
+            f"<red>Could not find a suite named `{suite_name}`.</red> Please check "
+            "the name by running `great_expectations suite list` and try again."
         )
         logger.info(e)
         sys.exit(1)
@@ -252,8 +251,11 @@ def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
                     suite_name
                 )
             )
-            if jupyter:
-                cli_message("<green>Because you requested an empty suite, we'll open a notebook for you now to edit it!</green>\n\n")
+            if empty:
+                if jupyter:
+                    cli_message("""<green>Because you requested an empty suite, we'll open a notebook for you now to edit it!
+If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n""")
+                _suite_edit(suite_name, datasource_name, directory, jupyter=jupyter, batch_kwargs=batch_kwargs)
     except (
         ge_exceptions.DataContextError,
         ge_exceptions.ProfilerError,
@@ -262,8 +264,6 @@ def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
     ) as e:
         cli_message("<red>{}</red>".format(e))
         sys.exit(1)
-
-    _suite_edit(suite_name, datasource_name, directory, jupyter=jupyter, batch_kwargs=batch_kwargs)
 
 
 @suite.command(name="list")
@@ -283,14 +283,14 @@ def suite_list(directory):
 
     suite_names = context.list_expectation_suite_names()
     if len(suite_names) == 0:
-        cli_message("No expectation suites available")
+        cli_message("No expectation suites found")
         return
 
     if len(suite_names) == 1:
-        cli_message("1 expectation suite available:")
+        cli_message("1 expectation suite found:")
 
     if len(suite_names) > 1:
-        cli_message("{} expectation suites available:".format(len(suite_names)))
+        cli_message("{} expectation suites found:".format(len(suite_names)))
 
     for name in suite_names:
         cli_message("\t{}".format(name))
