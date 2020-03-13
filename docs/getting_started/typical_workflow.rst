@@ -86,7 +86,7 @@ You can have multiple Datasources in a project (Data Context). For example, this
 All the Datasources that your project uses are configured in the project's configuration file ``great_expectations/great_expectations.yml``:
 
 
-.. code-block::
+.. code-block:: yaml
 
     datasources:
 
