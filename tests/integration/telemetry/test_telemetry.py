@@ -1,14 +1,11 @@
-import copy
-
 import pytest
 
+import copy
 import subprocess
 import time
 import signal
 import datetime
 import requests
-from dateutil.parser import parse
-
 import boto3
 
 from great_expectations.data_context.util import file_relative_path
@@ -18,7 +15,7 @@ TELEMETRY_QA_URL = "https://m7hebk7006.execute-api.us-east-1.amazonaws.com/qa/gr
 logGroupName = "/great_expectations/telemetry/qa"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def valid_telemetry_message():
     return {
         "event_time": "2020-01-01T05:02:00.012Z",
@@ -44,7 +41,9 @@ def logstream(valid_telemetry_message):
     client = boto3.client('logs', region_name='us-east-1')
     # Warm up a logstream
     logStreamName = None
-    requests.post(TELEMETRY_QA_URL, json=valid_telemetry_message)
+    message = copy.deepcopy(valid_telemetry_message)
+    message["method"] = "logstream.__warmup__"
+    requests.post(TELEMETRY_QA_URL, json=message)
     attempts = 0
     while attempts < 3:
         attempts += 1
