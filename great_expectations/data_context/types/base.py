@@ -57,7 +57,7 @@ class DataContextConfig(DictDot):
                 "enabled": True,
                 "data_context_id": str(uuid.uuid4())
             }
-        if not anonymized_usage_data["data_context_id"]:
+        if not anonymized_usage_data.get("data_context_id"):
             anonymized_usage_data["data_context_id"] = str(uuid.uuid4())
         self.anonymized_usage_data = anonymized_usage_data
 
@@ -114,7 +114,7 @@ class DatasourceConfig(DictDot):
         return self._module_name
 
 
-class AnonymousUsageDataConfigchema(Schema):
+class AnonymizedUsageDataConfigchema(Schema):
     data_context_id = fields.Str()
     enabled = fields.Boolean(default=True)
     telemetry_url = fields.URL(allow_none=True)
@@ -148,7 +148,7 @@ class DataContextConfigSchema(Schema):
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     config_variables_file_path = fields.Str(allow_none=True)
-    anonymized_usage_data = fields.Nested(AnonymousUsageDataConfigchema)
+    anonymized_usage_data = fields.Nested(AnonymizedUsageDataConfigchema)
 
     # noinspection PyUnusedLocal
     @pre_dump

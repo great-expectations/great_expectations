@@ -38,7 +38,6 @@ from ..core.logging.telemetry import telemetry_enabled_method, DEFAULT_TELEMETRY
 
 from ..validator.validator import Validator
 from .templates import (
-    CONFIG_VARIABLES_INTRO,
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE,
 )
@@ -194,9 +193,8 @@ class BaseDataContext(object):
         for store_name, store_config in store_configs.items():
             self._build_store(store_name, store_config)
 
-    def _initialize_telemetry(self, enabled=True, data_context_id=None, telemetry_url=None):
+    def _initialize_telemetry(self, data_context_id, enabled=True, telemetry_url=None):
         """Initialize the telemetry system."""
-        logger.debug("Beginning to initialize telemetry: passed data_context_id " + str(data_context_id))
         if not enabled:
             logger.info("Telemetry is disabled; skipping initialization.")
             self._telemetry_handler = None
@@ -214,9 +212,6 @@ class BaseDataContext(object):
             explicit_url = False
         else:
             explicit_url = True
-
-        if data_context_id is None:
-            data_context_id = str(uuid.uuid4())
 
         self._telemetry_handler = TelemetryHandler(
             data_context=self, data_context_id=data_context_id, telemetry_url=telemetry_url)
@@ -371,16 +366,12 @@ class BaseDataContext(object):
 
     @property
     def instance_id(self):
-
-        instance_id = self._project_config_with_variables_substituted.get("instance_id")
+        instance_id = self._load_config_variables_file().get("instance_id")
         if instance_id is None:
             if self._in_memory_instance_id is not None:
                 return self._in_memory_instance_id
             instance_id = str(uuid.uuid4())
-            try:
-                self.save_config_variable("instance_id", instance_id)
-            except ge_exceptions.InvalidConfigError:
-                self._in_memory_instance_id = instance_id
+            self._in_memory_instance_id = instance_id
         return instance_id
 
     #####
@@ -396,7 +387,7 @@ class BaseDataContext(object):
             try:
                 # If the user specifies the config variable path with an environment variable, we want to substitute it
                 defined_path = substitute_config_variable(config_variables_file_path, {})
-                if not os.path.abspath(config_variables_file_path):
+                if not os.path.isabs(defined_path):
                     # A BaseDataContext will not have a root directory; in that case use the current directory
                     # for any non-absolute path
                     root_directory = self.root_directory or os.curdir()
@@ -409,10 +400,7 @@ class BaseDataContext(object):
                 if e.errno != errno.ENOENT:
                     raise
                 logger.debug("Generating empty config variables file.")
-                # TODO this might be the comment problem?
-                base_config_variables_store = yaml.load('{}')
-                base_config_variables_store.yaml_set_start_comment(CONFIG_VARIABLES_INTRO)
-                return base_config_variables_store
+                return {}
         else:
             return {}
 
@@ -445,6 +433,9 @@ class BaseDataContext(object):
             logger.info("Creating new substitution_variables file at {config_variables_filepath}".format(
                 config_variables_filepath=config_variables_filepath)
             )
+            with open(config_variables_filepath, "w") as template:
+                template.write(CONFIG_VARIABLES_TEMPLATE)
+
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
