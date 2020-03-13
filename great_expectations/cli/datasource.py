@@ -802,7 +802,6 @@ def create_expectation_suite(
     show_intro_message=False,
     open_docs=False
 ):
-
     """
     Create a new expectation suite.
 
@@ -821,9 +820,6 @@ Press Enter to continue
 
     msg_prompt_expectation_suite_name = """
 Name the new expectation suite"""
-
-    msg_data_doc_intro = """
-<cyan>========== Data Docs ==========</cyan>"""
 
     msg_suite_already_exists = "<red>An expectation suite named `{}` already exists. If you intend to edit the suite please use `great_expectations suite edit {}`.</red>"
 

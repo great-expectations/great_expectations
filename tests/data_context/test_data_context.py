@@ -8,6 +8,7 @@ from ruamel.yaml import YAML
 
 from great_expectations.core import (
     ExpectationConfiguration,
+    ExpectationSuite,
     expectationSuiteSchema,
 )
 from great_expectations.data_context import (
@@ -24,9 +25,14 @@ from great_expectations.data_context.util import (
     file_relative_path,
     safe_mmkdir,
 )
+from great_expectations.dataset import Dataset
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.exceptions import DataContextError, ProfilerError, ConfigNotFoundError
+from great_expectations.exceptions import (
+    BatchKwargsError,
+    ConfigNotFoundError,
+    DataContextError,
+)
 from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import safe_remove
 
@@ -1044,16 +1050,19 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
         # Make sure we unset the environment variable we're using
         del os.environ["TEST_CONFIG_FILE_ENV"]
 
+
 def test_list_expectation_suite_with_no_suites(titanic_data_context):
     observed = titanic_data_context.list_expectation_suite_names()
     assert isinstance(observed, list)
     assert observed == []
+
 
 def test_list_expectation_suite_with_one_suite(titanic_data_context):
     titanic_data_context.create_expectation_suite('warning')
     observed = titanic_data_context.list_expectation_suite_names()
     assert isinstance(observed, list)
     assert observed == ['warning']
+
 
 def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
     titanic_data_context.create_expectation_suite('a.warning')
@@ -1064,3 +1073,47 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
     assert isinstance(observed, list)
     assert observed == ['a.warning', 'b.warning', 'c.warning']
     assert len(observed) == 3
+
+
+def test_get_batch_raises_error_when_passed_a_non_string_type_for_suite_parameter(
+    titanic_data_context,
+):
+    with pytest.raises(DataContextError):
+        titanic_data_context.get_batch({}, 99)
+
+
+def test_get_batch_raises_error_when_passed_a_non_dict_or_batch_kwarg_type_for_batch_kwarg_parameter(
+    titanic_data_context,
+):
+    with pytest.raises(BatchKwargsError):
+        titanic_data_context.get_batch(99, "foo")
+
+
+def test_get_batch_when_passed_a_suite_name(titanic_data_context):
+    context = titanic_data_context
+    root_dir = context.root_directory
+    batch_kwargs = {
+        "datasource": "mydatasource",
+        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),
+    }
+    context.create_expectation_suite("foo")
+    assert context.list_expectation_suite_names() == ["foo"]
+    batch = context.get_batch(batch_kwargs, "foo")
+    assert isinstance(batch, Dataset)
+    assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
+
+
+def test_get_batch_when_passed_a_suite(titanic_data_context):
+    context = titanic_data_context
+    root_dir = context.root_directory
+    batch_kwargs = {
+        "datasource": "mydatasource",
+        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),
+    }
+    context.create_expectation_suite("foo")
+    assert context.list_expectation_suite_names() == ["foo"]
+    suite = context.get_expectation_suite("foo")
+
+    batch = context.get_batch(batch_kwargs, suite)
+    assert isinstance(batch, Dataset)
+    assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
