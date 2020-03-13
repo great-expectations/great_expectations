@@ -2,13 +2,13 @@ name: stalebot
 
 on:
   schedule:
-  - cron: "0 * * * *"
+    - cron: "0 * * * *"
+  issues:
+    types: [opened]
 
 jobs:
   stale:
-
     runs-on: ubuntu-latest
-
     steps:
 #    - uses: actions/stale@v1.1.0
     - uses: Dolibarr/stale@043d7ad
