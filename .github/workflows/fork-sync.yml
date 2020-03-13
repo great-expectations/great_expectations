@@ -1,0 +1,29 @@
+name: fork-sync
+
+on:
+  schedule:
+  - cron: '0 0 * * *'  # every day at midnight
+
+jobs:
+  fork-sync:
+    runs-on: ubuntu-latest
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+    - name: Fork Sync
+      uses: TG908/fork-sync@v1.1.4
+      with:
+        # Owner of the forked repository
+        owner: great-expectations
+        # Token for the github API
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        # Branch to track
+        head: develop
+        # Branch to keep updated
+        base: develop
+        # Merge method to use
+        merge_method: rebase
+        # The title of the pull request
+        pr_title: Fork Sync - ${{ GITHUB_RUN_NUMBER }}
+        # The message in the pull request
+        pr_message: Run id - ${{ GITHUB_RUN_ID }}
