@@ -93,11 +93,18 @@ class SiteBuilder(object):
                  site_name=None,
                  site_index_builder=None,
                  site_section_builders=None,
-                 runtime_environment=None
+                 runtime_environment=None,
                  ):
         self.site_name = site_name
         self.data_context = data_context
         self.store_backend = store_backend
+
+        telemetry_config = data_context.get_config_with_variables_substituted().get('anonymized_usage_data')
+        data_context_id = None
+        if telemetry_config and telemetry_config.get("enabled") and telemetry_config.get("data_context_id"):
+            data_context_id = telemetry_config.get("data_context_id")
+
+        self.data_context_id = data_context_id
 
         # set custom_styles_directory if present
         custom_styles_directory = None
@@ -123,7 +130,8 @@ class SiteBuilder(object):
                 "data_context": data_context,
                 "custom_styles_directory": custom_styles_directory,
                 "target_store": self.target_store,
-                "site_name": self.site_name
+                "site_name": self.site_name,
+                "data_context_id": self.data_context_id
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -170,7 +178,8 @@ class SiteBuilder(object):
                 runtime_environment={
                     "data_context": data_context,
                     "target_store": self.target_store,
-                    "custom_styles_directory": custom_styles_directory
+                    "custom_styles_directory": custom_styles_directory,
+                    "data_context_id": self.data_context_id
                 },
                 config_defaults={
                     "name": site_section_name,
@@ -225,12 +234,14 @@ class DefaultSiteSectionBuilder(object):
             validation_results_limit=None,
             renderer=None,
             view=None,
+            data_context_id=None
     ):
         self.name = name
         self.source_store = data_context.stores[source_store_name]
         self.target_store = target_store
         self.run_id_filter = run_id_filter
         self.validation_results_limit = validation_results_limit
+        self.data_context_id = data_context_id
 
         if renderer is None:
             raise exceptions.InvalidConfigError(
@@ -336,6 +347,7 @@ class DefaultSiteIndexBuilder(object):
             validation_results_limit=None,
             renderer=None,
             view=None,
+            data_context_id=None
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
         self.name = name
@@ -344,6 +356,7 @@ class DefaultSiteIndexBuilder(object):
         self.target_store = target_store
         self.show_cta_footer = show_cta_footer
         self.validation_results_limit = validation_results_limit
+        self.data_context_id = data_context_id
 
         if renderer is None:
             renderer = {
