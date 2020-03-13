@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+import uuid
 
 PROJECT_HELP_COMMENT = """
 # Welcome to Great Expectations! Always know what to expect from your data.
@@ -17,8 +19,7 @@ config_version: 1
 datasources: {}
 """
 
-CONFIG_VARIABLES_INTRO = """
-# This config file supports variable substitution which enables: 1) keeping
+CONFIG_VARIABLES_INTRO = """# This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes
 # such as staging vs prod.
 #
@@ -31,10 +32,12 @@ CONFIG_VARIABLES_INTRO = """
 # If the substitution value comes from the config variables file, it can be a
 # simple (non-nested) value or a nested value such as a dictionary. If it comes
 # from an environment variable, it must be a simple value. Read more at:
-# https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets"""
+# https://docs.greatexpectations.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets
+
+"""
 
 # This junky fake key keeps ruaml.yml from nuking the important comment block
-CONFIG_VARIABLES_TEMPLATE = "ge_comment_preservation_key: 1" + CONFIG_VARIABLES_INTRO
+CONFIG_VARIABLES_TEMPLATE = CONFIG_VARIABLES_INTRO + "instance_id: " + str(uuid.uuid4()) + os.linesep
 
 PROJECT_OPTIONAL_CONFIG_COMMENT = CONFIG_VARIABLES_INTRO + """
 config_variables_file_path: uncommitted/config_variables.yml
@@ -114,6 +117,9 @@ data_docs_sites:
     site_index_builder:
         class_name: DefaultSiteIndexBuilder
         show_cta_footer: True
+        
+anonymized_usage_data:
+  enabled: True
 """
 
 PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT
