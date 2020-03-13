@@ -2,7 +2,7 @@ name: Mark stale issues and pull requests
 
 on:
   schedule:
-  - cron: "55 * * * *"
+  - cron: "50 * * * *"
 
 jobs:
   stale:
@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/stale@v1.1.0
+#    - uses: actions/stale@v1.1.0
+    - uses: Dolibarr/stale@043d7ad
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
