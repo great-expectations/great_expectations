@@ -2,6 +2,10 @@
 
 develop
 -----------------
+
+
+0.9.5
+-----------------
 * Fixed unexpected behavior with suite edit, data docs and jupyter
 * pytest pinned to 5.3.5
 
