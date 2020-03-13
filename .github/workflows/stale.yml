@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: "0 * * * *"
   issues:
-    types: [opened]
+    types: [opened, reopened]
 
 jobs:
   stale:
