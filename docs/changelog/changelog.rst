@@ -5,6 +5,12 @@ develop
 * DataDocs: Expectation Suite name on Validation Result pages now link to Expectation Suite page
 * `great_expectations init`: cli now asks user if csv has header when adding a Spark Datasource with csv file
 
+0.9.5
+-----------------
+* Fixed unexpected behavior with suite edit, data docs and jupyter
+* pytest pinned to 5.3.5
+
+
 0.9.4
 -----------------
 * Update CLI `init` flow to support snowflake transient tables
