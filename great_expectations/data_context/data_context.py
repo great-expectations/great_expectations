@@ -33,8 +33,8 @@ from great_expectations.profile.basic_dataset_profiler import (
 )
 
 import great_expectations.exceptions as ge_exceptions
-from ..core.logging.telemetry import telemetry_enabled_method, TelemetryRecordFormatter, DataContextLoggingFilter, \
-    DEFAULT_TELEMETRY_URL, run_validation_operator_telemetry, HTTPDataHandler
+from ..core.logging.telemetry import telemetry_enabled_method, DEFAULT_TELEMETRY_URL, \
+    run_validation_operator_telemetry, TelemetryHandler
 
 from ..validator.validator import Validator
 from .templates import (
@@ -194,37 +194,43 @@ class BaseDataContext(object):
         for store_name, store_config in store_configs.items():
             self._build_store(store_name, store_config)
 
-    def _initialize_telemetry(self, enabled=True, data_context_id=None, telemetry_url=DEFAULT_TELEMETRY_URL):
+    def _initialize_telemetry(self, enabled=True, data_context_id=None, telemetry_url=None):
         """Initialize the telemetry system."""
+        logger.debug("Beginning to initialize telemetry: passed data_context_id " + str(data_context_id))
         if not enabled:
             logger.info("Telemetry is disabled; skipping initialization.")
-            self._telemetry_filter = None
-            return data_context_id
+            self._telemetry_handler = None
+            current_config = {
+                "enabled": enabled,
+            }
+            if data_context_id:
+                current_config["data_context_id"] = data_context_id
+            if telemetry_url:
+                current_config["telemetry_url"] = telemetry_url
+            return current_config
+
+        if telemetry_url is None:
+            telemetry_url = DEFAULT_TELEMETRY_URL
+            explicit_url = False
+        else:
+            explicit_url = True
 
         if data_context_id is None:
             data_context_id = str(uuid.uuid4())
 
-        # There will be *one* telemetry logger, even though there may be multiple telemetry handlers (one per context)
-        telemetry_logger = logging.getLogger("great_expectations.telemetry")
-        telemetry_handler = HTTPDataHandler(url=telemetry_url)
-        telemetry_handler.setLevel(level=logging.INFO)
-        telemetry_filter = DataContextLoggingFilter(data_context=self, data_context_id=data_context_id)
-        telemetry_handler.addFilter(telemetry_filter)
-        telemetry_formatter = TelemetryRecordFormatter()
-        telemetry_handler.setFormatter(telemetry_formatter)
-        telemetry_logger.addHandler(telemetry_handler)
-        self._telemetry_filter = telemetry_filter
+        self._telemetry_handler = TelemetryHandler(
+            data_context=self, data_context_id=data_context_id, telemetry_url=telemetry_url)
         current_config = {
             "enabled": enabled,
             "data_context_id": data_context_id,
         }
-        if telemetry_url != DEFAULT_TELEMETRY_URL:
+        if telemetry_url != DEFAULT_TELEMETRY_URL or explicit_url:
             current_config["telemetry_url"] = telemetry_url
         return current_config
 
     def _register_telemetry_details(self):
-        if self._telemetry_filter:
-            self._telemetry_filter.register_telemetry_details()
+        if self._telemetry_handler:
+            self._telemetry_handler.register_telemetry_details()
 
     def add_store(self, store_name, store_config):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
