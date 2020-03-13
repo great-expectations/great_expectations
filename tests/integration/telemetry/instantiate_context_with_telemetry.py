@@ -3,11 +3,14 @@
 import sys
 import time
 import socket
+import logging
+
 import pandas as pd
 
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
 
+logging.basicConfig(level=logging.DEBUG)
 
 def guard(*args, **kwargs):
     raise ConnectionError("Internet Access is Blocked!")
@@ -51,8 +54,7 @@ def main(nap_duration=1, block_network=False, enable_telemetry=True):
                     "enabled": enable_telemetry,
                     # Leaving data_context_id as none would cause a new id to be generated
                     "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
-                    "telemetry_url": "https://mn3i9tgx0b.execute-api.us-east-1.amazonaws.com/test/great_expectations"
-                                     "/v1/telemetry",
+                    "telemetry_url": "https://m7hebk7006.execute-api.us-east-1.amazonaws.com/qa/great_expectations/v1/telemetry",
                 },
                 commented_map=None,
             )
