@@ -308,7 +308,10 @@ class DefaultSiteSectionBuilder(object):
 
             try:
                 rendered_content = self.renderer_class.render(resource)
-                viewable_content = self.view_class.render(rendered_content)
+                viewable_content = self.view_class.render(
+                    rendered_content,
+                    data_context_id=self.data_context_id
+                )
             except Exception as e:
                 logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
                 continue
@@ -584,7 +587,10 @@ class DefaultSiteIndexBuilder(object):
 
         try:
             rendered_content = self.renderer_class.render(index_links_dict)
-            viewable_content = self.view_class.render(rendered_content)
+            viewable_content = self.view_class.render(
+                rendered_content,
+                data_context_id=self.data_context_id
+            )
         except Exception as e:
             logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
             return None
