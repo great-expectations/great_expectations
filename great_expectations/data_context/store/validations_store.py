@@ -10,7 +10,7 @@ class ValidationsStore(Store):
     _key_class = ValidationResultIdentifier
 
     def __init__(self, store_backend=None, runtime_environment=None):
-        self._expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema(strict=True)
+        self._expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
 
         if store_backend is not None:
             store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
@@ -33,7 +33,7 @@ class ValidationsStore(Store):
         super(ValidationsStore, self).__init__(store_backend=store_backend, runtime_environment=runtime_environment)
 
     def serialize(self, key, value):
-        return self._expectationSuiteValidationResultSchema.dumps(value).data
+        return self._expectationSuiteValidationResultSchema.dumps(value)
 
     def deserialize(self, key, value):
-        return self._expectationSuiteValidationResultSchema.loads(value).data
+        return self._expectationSuiteValidationResultSchema.loads(value)

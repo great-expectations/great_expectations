@@ -422,7 +422,7 @@ def validate(
         )
     else:
         if isinstance(expectation_suite, dict):
-            expectation_suite = expectationSuiteSchema.load(expectation_suite).data
+            expectation_suite = expectationSuiteSchema.load(expectation_suite)
         if data_asset_name is not None:
             raise ValueError("When providing an expectation suite, data_asset_name cannot also be provided.")
         if expectation_suite_name is not None:
