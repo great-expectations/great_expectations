@@ -17,4 +17,4 @@ See :ref:`datasource_reference` for more detail about configuring and using data
 
 See datasource module docs :ref:`datasource_module` for more detail about available datasources.
 
-*last updated*: |lastupdate|
+
