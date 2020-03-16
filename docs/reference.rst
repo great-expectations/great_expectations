@@ -89,4 +89,4 @@ Supporting Resources
 
    /reference/supporting_resources
 
-*last updated*: |lastupdate|
+
