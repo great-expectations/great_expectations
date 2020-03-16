@@ -176,11 +176,10 @@ def test_base_class_expectation():
     assert df.expect_column_values_to_be_between("aaa", min_value=1, max_value=5).success is True
 
 
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_validate():
 
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read()).data
+        my_expectation_suite = expectationSuiteSchema.loads(f.read())
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
@@ -195,7 +194,7 @@ def test_validate():
         results = my_df.validate(catch_exceptions=False)
 
     with open(file_relative_path(__file__, './test_sets/titanic_expected_data_asset_validate_results.json')) as f:
-        expected_results = expectationSuiteValidationResultSchema.loads(f.read()).data
+        expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
     del results.meta["great_expectations.__version__"]
 

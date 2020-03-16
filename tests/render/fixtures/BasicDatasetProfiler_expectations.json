@@ -1,5 +1,4 @@
 {
-  "data_asset_name": "my_datasource/my_generator/titanic_data",
   "expectation_suite_name": "default",
   "meta": {
     "great_expectations.__version__": "0.7.0-beta"

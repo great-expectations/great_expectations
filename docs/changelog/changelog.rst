@@ -2,7 +2,11 @@
 
 develop
 -----------------
-
+* Update marshmallow dependency to >3. NOTE: as of this release, you MUST use marshamllow >3.0, which REQUIRES python 3.
+  - Schema checking is now stricter for expectation suites, and data_asset_name must not be present as a top-level
+    key in expectation suite json. It is safe to remove.
+  - Similarly, datasource configuration must now adhere strictly to the required schema, including having any
+    required credentials stored in the "credentials" dictionary.
 
 0.9.5
 -----------------
