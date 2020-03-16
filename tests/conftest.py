@@ -678,6 +678,11 @@ def site_builder_data_context_with_html_store_titanic_random(tmp_path_factory, f
     context.profile_datasource("random")
     context.profile_datasource(context.list_datasources()[0]["name"])
 
+    context._project_config.anonymized_usage_data = {
+        "enabled": True,
+        "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c"
+    }
+
     return context
 
 
