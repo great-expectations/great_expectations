@@ -15,9 +15,10 @@ def _set_up_logger():
     # Log to console with a simple formatter; used by CLI
     formatter = logging.Formatter("%(message)s")
     handler = logging.StreamHandler()
-    handler.setLevel(level=logging.WARNING)
+
     handler.setFormatter(formatter)
     module_logger = logging.getLogger("great_expectations")
     module_logger.addHandler(handler)
+    module_logger.setLevel(level=logging.WARNING)
 
     return module_logger
