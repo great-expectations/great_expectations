@@ -176,12 +176,13 @@ def test_compile_evaluation_parameter_dependencies(data_context):
 def test_list_datasources(data_context):
     datasources = data_context.list_datasources()
 
-    assert OrderedDict(datasources) == OrderedDict([
+    assert datasources == [
         {
             'name': 'mydatasource',
-            'class_name': 'PandasDatasource'
+            'class_name': 'PandasDatasource',
+            'module_name': 'great_expectations.datasource',
         }
-    ])
+    ]
 
     data_context.add_datasource("second_pandas_source",
                            module_name="great_expectations.datasource",
@@ -190,16 +191,18 @@ def test_list_datasources(data_context):
 
     datasources = data_context.list_datasources()
 
-    assert OrderedDict(datasources) == OrderedDict([
+    assert datasources == [
         {
             'name': 'mydatasource',
-            'class_name': 'PandasDatasource'
+            'class_name': 'PandasDatasource',
+            'module_name': 'great_expectations.datasource',
         },
         {
             'name': 'second_pandas_source',
-            'class_name': 'PandasDatasource'
+            'class_name': 'PandasDatasource',
+            'module_name': 'great_expectations.datasource',
         }
-    ])
+    ]
 
 
 def test_data_context_get_validation_result(titanic_data_context):
