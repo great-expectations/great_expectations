@@ -1,3 +1,4 @@
+import os
 import sys
 
 import click
@@ -37,9 +38,10 @@ def tap_new(suite, tap_filename, directory, datasource=None):
     datasource = _get_datasource(context, datasource)
     suite = load_expectation_suite(context, suite)
     _, _, _, batch_kwargs = get_batch_kwargs(context, datasource.name)
-    cli_message(f"<cyan>BatchKwargs: {batch_kwargs}</cyan>")
 
-    _write_tap_file_to_disk(batch_kwargs, context_directory, suite, tap_filename)
+    tap_filename = _write_tap_file_to_disk(
+        batch_kwargs, context_directory, suite, tap_filename
+    )
     cli_message(
         f"""<green>A new tap has been generated! Open {tap_filename} in an editor to tweak it</green>"""
     )
@@ -77,10 +79,13 @@ def _load_template():
 
 
 def _write_tap_file_to_disk(batch_kwargs, context_directory, suite, tap_filename):
-    template = _load_template()
-    template = template.format(
+    tap_file_path = os.path.abspath(os.path.join(context_directory, "..", tap_filename))
+
+    template = _load_template().format(
         tap_filename, context_directory, suite.expectation_suite_name, batch_kwargs
     )
     linted_code = lint_code(template)
-    with open(tap_filename, "w") as f:
+    with open(tap_file_path, "w") as f:
         f.write(linted_code)
+
+    return tap_file_path

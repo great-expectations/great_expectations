@@ -27,6 +27,7 @@ This is a list of the most common commands you'll use in order of how much you'l
 * ``great_expectations suite new``
 * ``great_expectations suite list``
 * ``great_expectations docs build``
+* ``great_expectations tap new``
 * ``great_expectations datasource list``
 * ``great_expectations datasource new``
 * ``great_expectations datasource profile``
@@ -332,6 +333,62 @@ If you are using a database you will be guided through a series of prompts that 
 For details on profiling, see this :ref:`reference document<profiling_reference>`
 
 .. caution:: Profiling is a beta feature and is not guaranteed to be stable. YMMV
+
+
+great_expectations tap
+=======================
+
+All command line operations for working with taps are here.
+A tap is an executable python file that runs validations that you can create to aid deployment of validations.
+
+``great_expectations tap new``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Creating a tap requires a valid suite name and tap filename.
+This is the name of a a python file that this command will write to.
+
+
+.. note::
+    Taps are a beta feature to speed up deployment.
+    Please
+    `open a new issue <https://github.com/great-expectations/great_expectations/issues/new>`__
+    if you discover a use case that does not yet work
+    or have ideas how to make this feature better!
+
+.. code-block:: bash
+
+    $ great_expectations tap new npi.warning npi.warning.py
+
+    Enter the path (relative or absolute) of a data file
+    : data/npi.csv
+    A new tap has been generated! Open time_series_confirmed.py in an editor to tweak it
+
+You will now see a new tap file on your filesystem.
+
+This can be run by invoking it with:
+
+.. code-block:: bash
+
+    $ python  npi.warning.py
+    Validation Suceeded!
+    $ echo $?
+    0
+
+This posix-compatible exits with a status of ``0`` if validation is successful and a status of ``1`` if validation failed.
+
+A failure will look like:
+
+.. code-block:: bash
+
+    $ python  npi.warning.py
+    Validation Failed!
+    $ echo $?
+    1
+
+This makes adding this to your existing pipeline or scheduler such as cron easy.
+
+If you are using a database you will be guided through a series of prompts that collects and verifies connection details and credentials.
+
 
 
 Miscellaneous
