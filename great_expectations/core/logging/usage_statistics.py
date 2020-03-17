@@ -10,7 +10,7 @@ import jsonschema
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
-from great_expectations.datasource import anonymize_datasource_class_name
+from great_expectations.datasource import DatasourceAnonymizer
 
 DEFAULT_USAGE_STATISTICS_URL = "https://4tdy72oi8f.execute-api.us-east-1.amazonaws.com/prod/great_expectations/v1/usage_statistics"
 logger = logging.getLogger(__name__)
@@ -112,6 +112,7 @@ usage_statistics_record_schema = {
 class UsageStatisticsHandler(object):
 
     def __init__(self, data_context, data_context_id, usage_statistics_url):
+        self._datasource_anonymizer = DatasourceAnonymizer()
         self._data_context_id = data_context_id
         self._data_context_instance_id = data_context.instance_id
         self._platform_system = platform.system()
@@ -127,7 +128,7 @@ class UsageStatisticsHandler(object):
         """Adds information that may be available only after full data context construction, but is useful to
         calculate only one time (for example, anonymization)."""
         self._anonymized_datasources = [
-            anonymize_datasource_class_name(datasource["class_name"], datasource["module_name"])
+            self._datasource_anonymizer.anonymize_datasource_class_name(datasource["class_name"], datasource["module_name"])
             for datasource in self._data_context.list_datasources()
         ]
 
