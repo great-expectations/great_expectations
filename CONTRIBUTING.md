@@ -45,7 +45,7 @@ The following instructions provide a step-by-step overview of how to contribute 
     * Note: This will clone the `develop` branch of the great_expectations repo by default, not `master`.
 * Add the upstream remote:
     * On your local machine, cd into the great_expectations repo you cloned in the previous step.
-    * Run: `git remote add upstream git@github.com:great_expectations/gret_expectations.git`
+    * Run: `git remote add upstream git@github.com:great-expectations/great_expectations.git`
     * This sets up a remote called `upstream` to track changes to the main branch.
 * Install all relevant libraries:
     * Make a new virtual environment (e.g. using virtualenv or conda), name it "great_expectations_dev" or similar.
@@ -112,3 +112,27 @@ In addition to running existing tests to make sure your code change works, pleas
     * `expect_column_pair_values...` for `@column_pair_map_expectation`
 
 These guidelines should be followed consistently for methods and variables exposed in the API. They aren't intended to be strict rules for every internal line of code in every function.
+
+## Release Checklist
+
+GE core team members use this checklist to ship releases.
+
+- [ ] merge all approved PRs into `develop`
+- [ ] make a new branch from `develop` called something  like `release-prep`
+- [ ] in this branch update the version number in the `.travis.yml` file (look in the deploy section)
+- [ ] update the changelog.rst: move all things under `develop` under a new heading w/ the new release number. Leave the develop header for the next release
+- [ ] Submit this as a PR against `develop`
+- [ ] After successful checks, get it approved and merged
+- [ ] Create a PR from `develop` into `master`
+- [ ] After successful checks, merge the PR
+- [ ] Wait for all the builds to complete (including the deploy job)
+- [ ] Check [PyPI](https://pypi.org/project/great-expectations/#history) for the new release
+- [ ] Create an annotated git tag by
+    - [ ] check out master
+    - [ ] pull down master
+    - [ ] ensure you have a clean master
+    - [ ] run `git tag -a 0.9.3 -m "0.9.3"` with the correct new version
+    - [ ] push the tag up by running `git push origin 0.9.3` with the correct new version
+- [ ] [Create the release on GitHub](https://github.com/great-expectations/great_expectations/releases) with the version number. Copy the changelog notes into the release notes.
+- [ ] Verify RTD builds new release version
+- [ ] Socialize the relase on GE slack by copying the changelog with an optional nice personal message (thank people if you can)

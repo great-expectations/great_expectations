@@ -36,4 +36,4 @@ WarningAndFailureExpectationSuitesValidationOperator
     :undoc-members:
     :show-inheritance:
 
-*last updated*: |lastupdate|
+

@@ -11,7 +11,11 @@ import datetime
 
 from marshmallow import ValidationError
 from six import PY3, string_types
-from collections import namedtuple, Hashable, Counter, defaultdict
+from collections import namedtuple, Counter, defaultdict
+try:
+    from collections.abc import Hashable
+except ImportError:  # Python 2.7
+    from collections import Hashable
 
 from great_expectations import __version__ as ge_version
 from great_expectations.data_asset.util import (

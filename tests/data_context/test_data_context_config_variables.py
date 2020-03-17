@@ -3,7 +3,10 @@ import os
 import pytest
 
 from great_expectations.data_context.util import substitute_config_variable
-from great_expectations.exceptions import InvalidConfigError
+from great_expectations.exceptions import (
+    InvalidConfigError,
+    MissingConfigVariableError,
+)
 
 
 def test_config_variables_on_context_without_config_variables_filepath_configured(data_context_without_config_variables_filepath_configured):
@@ -82,7 +85,11 @@ def test_substitute_config_variable():
     assert substitute_config_variable("abc$arg0", config_variables_dict) == "abcval_of_arg_0"
     assert substitute_config_variable("${arg0}", config_variables_dict) == "val_of_arg_0"
     assert substitute_config_variable("hhhhhhh", config_variables_dict) == "hhhhhhh"
-    with pytest.raises(InvalidConfigError) as exc:
-        substitute_config_variable("abc${arg1}", config_variables_dict)  # does NOT equal "abc${arg1}"
-    assert exc.value.message.startswith("Unable to find match for config variable arg1")
+    with pytest.raises(MissingConfigVariableError) as exc:
+        substitute_config_variable("abc${arg1} def${foo}", config_variables_dict)  # does NOT equal "abc${arg1}"
+    assert """Unable to find a match for config substitution variable: `arg1`.
+Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
+See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets""" in exc.value.message
     assert substitute_config_variable("${arg2}", config_variables_dict) == config_variables_dict["arg2"]
+    assert exc.value.missing_config_variable == "arg1"
+

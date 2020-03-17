@@ -4,12 +4,12 @@ from __future__ import unicode_literals
 import json
 import os
 
-import pytest
+import mock
 from click.testing import CliRunner
-from six import PY2
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.core import ExpectationSuite
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
@@ -28,46 +28,56 @@ Commands:
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_on_context_with_no_datasources(
-    caplog, empty_data_context
+    mock_webbrowser, mock_subprocess, caplog, empty_data_context
 ):
     """
     We call the "suite new" command on a data context that has no datasources
     configured.
 
-    The command should exit with a clear error message
+    The command should:
+    - exit with a clear error message
+    - NOT open Data Docs
+    - NOT open jupyter
     """
-
-    not_so_empty_data_context = empty_data_context
-    project_root_dir = not_so_empty_data_context.root_directory
+    project_root_dir = empty_data_context.root_directory
 
     root_dir = project_root_dir
-    os.chdir(root_dir)
-    context = DataContext(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli,
-        ["suite", "new", "-d", root_dir, "--no-view"],
-        catch_exceptions=False,
+        cli, ["suite", "new", "-d", root_dir], catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert result.exit_code == 1
     assert "No datasources found in the context" in stdout
+
+    assert mock_webbrowser.call_count == 0
+    assert mock_subprocess.call_count == 0
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_enter_existing_suite_name_as_arg(
-    caplog, data_context
+    mock_webbrowser, mock_subprocess, caplog, data_context
 ):
     """
-    We call the "suite new" command with the name of an existing expectation suite in the --suite argument
+    We call the "suite new" command with the name of an existing expectation
+    suite in the --suite argument
 
-    The command should exit with a clear error message
+    The command should:
+    - exit with a clear error message
+    - NOT open Data Docs
+    - NOT open jupyter
     """
 
     not_so_empty_data_context = data_context
     project_root_dir = not_so_empty_data_context.root_directory
+    os.mkdir(os.path.join(project_root_dir, "uncommitted"))
 
     root_dir = project_root_dir
     os.chdir(root_dir)
@@ -82,46 +92,48 @@ def test_suite_new_enter_existing_suite_name_as_arg(
 
     assert result.exit_code == 1
     assert "already exists. If you intend to edit the suite" in stdout
+
+    assert mock_webbrowser.call_count == 0
+    assert mock_subprocess.call_count == 0
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_answer_suite_name_prompts_with_name_of_existing_suite(
-    caplog, data_context, filesystem_csv_2
+    mock_webbrowser, mock_subprocess, caplog, data_context, filesystem_csv_2
 ):
     """
     We call the "suite new" command without the suite name argument
 
-    The command should prompt us to enter the name of the expectation suite that will be
-    created.
+    The command should:
 
-    We answer the prompt with the name of an existing expectation suite.
-
-    The command should display an error message and let us retry until we answer
+    - prompt us to enter the name of the expectation suite that will be
+    created. We answer the prompt with the name of an existing expectation suite.
+    - display an error message and let us retry until we answer
     with a name that is not "taken".
-
+    - create an example suite
+    - NOT open jupyter
+    - open DataDocs to the new example suite page
     """
-
     not_so_empty_data_context = data_context
-    project_root_dir = not_so_empty_data_context.root_directory
+    root_dir = not_so_empty_data_context.root_directory
+    os.mkdir(os.path.join(root_dir, "uncommitted"))
 
-    root_dir = project_root_dir
-    os.chdir(root_dir)
-    context = DataContext(root_dir)
     runner = CliRunner(mix_stderr=False)
+    csv_path = os.path.join(filesystem_csv_2, "f1.csv")
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--no-view"],
-        input="{0:s}\nmy_dag_node.default\nmy_new_suite\n\n".format(
-            os.path.join(filesystem_csv_2, "f1.csv")
-        ),
+        ["suite", "new", "-d", root_dir],
+        input=f"{csv_path}\nmy_dag_node.default\nmy_new_suite\n\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
-
     assert result.exit_code == 0
     assert "already exists. If you intend to edit the suite" in stdout
     assert "Enter the path" in stdout
-    assert "Name the new expectation suite [warning]" in stdout
+    assert "Name the new expectation suite [f1.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
         in stdout
@@ -130,29 +142,174 @@ def test_suite_new_answer_suite_name_prompts_with_name_of_existing_suite(
     assert "Building" in stdout
     assert "The following Data Docs sites were built" in stdout
     assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
-
-    # this context fixture does not have Data Docs sites configures, so we are not checking
-    # the HTML files - the other test cases do it.
+    assert "open a notebook for you now" not in stdout
 
     expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
     assert os.path.isfile(expected_suite_path)
+
+    assert mock_subprocess.call_count == 0
+    assert mock_webbrowser.call_count == 1
+
+    foo = os.path.join(
+        root_dir, "uncommitted/data_docs/local_site/validations/my_new_suite/"
+    )
+    assert f"file://{foo}" in mock_webbrowser.call_args[0][0]
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_empty_suite_creates_empty_suite(
+    mock_webbroser, mock_subprocess, caplog, data_context, filesystem_csv_2
+):
+    """
+    Running "suite new --empty" should:
+    - make an empty suite
+    - open jupyter
+    - NOT open data docs
+    """
+    project_root_dir = data_context.root_directory
+    os.mkdir(os.path.join(project_root_dir, "uncommitted"))
+    root_dir = project_root_dir
+    os.chdir(root_dir)
+    runner = CliRunner(mix_stderr=False)
+    csv = os.path.join(filesystem_csv_2, "f1.csv")
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--empty", "--suite", "foo"],
+        input=f"{csv}\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+    assert "Enter the path" in stdout
+    assert "Name the new expectation suite" not in stdout
+    assert (
+        "Great Expectations will choose a couple of columns and generate expectations"
+        not in stdout
+    )
+    assert "Generating example Expectation Suite..." not in stdout
+    assert "The following Data Docs sites were built" not in stdout
+    assert "A new Expectation suite 'foo' was added to your project" in stdout
+    assert (
+        "Because you requested an empty suite, we'll open a notebook for you now to edit it!"
+        in stdout
+    )
+
+    expected_suite_path = os.path.join(root_dir, "expectations", "foo.json")
+    assert os.path.isfile(expected_suite_path)
+
+    expected_notebook = os.path.join(root_dir, "uncommitted", "foo.ipynb")
+    assert os.path.isfile(expected_notebook)
+
+    context = DataContext(root_dir)
+    assert "foo" in context.list_expectation_suite_names()
+    suite = context.get_expectation_suite("foo")
+    assert suite.expectations == []
+    citations = suite.get_citations()
+    citations[0].pop("citation_date")
+    assert citations[0] == {
+        "batch_kwargs": {"datasource": "mydatasource", "path": csv},
+        "batch_markers": None,
+        "batch_parameters": None,
+        "comment": "New suite added via CLI",
+    }
+
+    assert mock_subprocess.call_count == 1
+    call_args = mock_subprocess.call_args[0][0]
+    assert call_args[0] == "jupyter"
+    assert call_args[1] == "notebook"
+    assert expected_notebook in call_args[2]
+
+    assert mock_webbroser.call_count == 0
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_empty_suite_creates_empty_suite_with_no_jupyter(
+    mock_webbroser, mock_subprocess, caplog, data_context, filesystem_csv_2
+):
+    """
+    Running "suite new --empty --no-jupyter" should:
+    - make an empty suite
+    - NOT open jupyter
+    - NOT open data docs
+    """
+    project_root_dir = data_context.root_directory
+    os.mkdir(os.path.join(project_root_dir, "uncommitted"))
+    root_dir = project_root_dir
+    os.chdir(root_dir)
+    runner = CliRunner(mix_stderr=False)
+    csv = os.path.join(filesystem_csv_2, "f1.csv")
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--empty", "--suite", "foo", "--no-jupyter"],
+        input=f"{csv}\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+    assert "Enter the path" in stdout
+    assert "Name the new expectation suite" not in stdout
+    assert (
+        "Great Expectations will choose a couple of columns and generate expectations"
+        not in stdout
+    )
+    assert "Generating example Expectation Suite..." not in stdout
+    assert "The following Data Docs sites were built" not in stdout
+    assert "A new Expectation suite 'foo' was added to your project" in stdout
+    assert "open a notebook for you now" not in stdout
+
+    expected_suite_path = os.path.join(root_dir, "expectations", "foo.json")
+    assert os.path.isfile(expected_suite_path)
+
+    expected_notebook = os.path.join(root_dir, "uncommitted", "foo.ipynb")
+    assert os.path.isfile(expected_notebook)
+
+    context = DataContext(root_dir)
+    assert "foo" in context.list_expectation_suite_names()
+    suite = context.get_expectation_suite("foo")
+    assert suite.expectations == []
+    citations = suite.get_citations()
+    citations[0].pop("citation_date")
+    assert citations[0] == {
+        "batch_kwargs": {"datasource": "mydatasource", "path": csv},
+        "batch_markers": None,
+        "batch_parameters": None,
+        "comment": "New suite added via CLI",
+    }
+
+    assert mock_subprocess.call_count == 0
+    assert mock_webbroser.call_count == 0
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
-    caplog, empty_data_context, filesystem_csv_2
+    mock_webbrowser, mock_subprocess, caplog, empty_data_context, filesystem_csv_2
 ):
     """
     We call the "suite new" command without the suite name argument
 
-    The data context has one datasource, so the command does not prompt us to choose.
-    The datasource has no generator configured, so we are prompted only to enter the path
-    (and not to choose from the generator's list of available data assets).
+    The command should:
 
-    We enter the path of the file we want the command to use as the batch to create the
-    expectation suite.
-
-    The command should prompt us to enter the name of the expectation suite that will be
-    created.
+    - NOT prompt us to choose a datasource (because there is only one)
+    - prompt us only to enter the path (The datasource has no generator
+     configured and not to choose from the generator's list of available data
+     assets).
+    - We enter the path of the file we want the command to use as the batch to
+    create the expectation suite.
+    - prompt us to enter the name of the expectation suite that will be
+    created
+    - open Data Docs
+    - NOT open jupyter
     """
     empty_data_context.add_datasource(
         "my_datasource",
@@ -160,8 +317,8 @@ def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
         class_name="PandasDatasource",
     )
 
-    not_so_empty_data_context = empty_data_context
-    project_root_dir = not_so_empty_data_context.root_directory
+    context = empty_data_context
+    project_root_dir = context.root_directory
 
     root_dir = project_root_dir
     os.chdir(root_dir)
@@ -169,7 +326,7 @@ def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--no-view"],
+        ["suite", "new", "-d", root_dir],
         input="{0:s}\nmy_new_suite\n\n".format(
             os.path.join(filesystem_csv_2, "f1.csv")
         ),
@@ -179,64 +336,6 @@ def test_suite_new_one_datasource_without_generator_without_suite_name_argument(
 
     assert result.exit_code == 0
     assert "Enter the path" in stdout
-    assert "Name the new expectation suite [warning]" in stdout
-    assert (
-        "Great Expectations will choose a couple of columns and generate expectations"
-        in stdout
-    )
-    assert "Generating example Expectation Suite..." in stdout
-    assert "Building" in stdout
-    assert "The following Data Docs sites were built" in stdout
-    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
-
-    obs_urls = context.get_docs_sites_urls()
-
-    assert len(obs_urls) == 1
-    assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]
-    )
-
-    expected_index_path = os.path.join(
-        root_dir, "uncommitted", "data_docs", "local_site", "index.html"
-    )
-    assert os.path.isfile(expected_index_path)
-
-    expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
-    assert os.path.isfile(expected_suite_path)
-    assert_no_logging_messages_or_tracebacks(caplog, result)
-
-
-def test_suite_new_multiple_datasources_with_generator_without_suite_name_argument(
-    caplog, site_builder_data_context_with_html_store_titanic_random,
-):
-    """
-    We call the "suite new" command without the suite name argument
-
-    The data context has two datasources - we choose one of them. It has a generator
-    configured. We choose to use the generator and select a generator asset from the list.
-
-    The command should prompt us to enter the name of the expectation suite that will be
-    created.
-    """
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
-    os.chdir(root_dir)
-    context = DataContext(root_dir)
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["suite", "new", "-d", root_dir, "--no-view"],
-        input="1\n1\n1\nmy_new_suite\n\n",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-
-    assert result.exit_code == 0
-    assert """Select a datasource
-    1. random
-    2. titanic""" in stdout
-    assert """Which data would you like to use?
-    1. f1 (file)
-    2. f2 (file)""" in stdout
     assert "Name the new expectation suite [f1.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations"
@@ -261,17 +360,31 @@ def test_suite_new_multiple_datasources_with_generator_without_suite_name_argume
 
     expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
     assert os.path.isfile(expected_suite_path)
+
+    assert mock_webbrowser.call_count == 1
+    assert mock_subprocess.call_count == 0
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
-    caplog, site_builder_data_context_with_html_store_titanic_random,
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_multiple_datasources_with_generator_without_suite_name_argument(
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    site_builder_data_context_with_html_store_titanic_random,
 ):
     """
-    We call the "suite new" command with the suite name argument
+    We call the "suite new" command without the suite name argument
 
-    The data context has two datasources - we choose one of them. It has a generator
-    configured. We choose to use the generator and select a generator asset from the list.
+    - The data context has two datasources - we choose one of them.
+    - It has a generator configured. We choose to use the generator and select a
+    generator asset from the list.
+    - The command should prompt us to enter the name of the expectation suite
+    that will be created.
+    - open Data Docs
+    - NOT open jupyter
     """
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     os.chdir(root_dir)
@@ -279,7 +392,80 @@ def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
+        ["suite", "new", "-d", root_dir],
+        input="1\n1\n1\nmy_new_suite\n\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+    assert (
+        """Select a datasource
+    1. random
+    2. titanic"""
+        in stdout
+    )
+    assert (
+        """Which data would you like to use?
+    1. f1 (file)
+    2. f2 (file)"""
+        in stdout
+    )
+    assert "Name the new expectation suite [f1.warning]" in stdout
+    assert (
+        "Great Expectations will choose a couple of columns and generate expectations"
+        in stdout
+    )
+    assert "Generating example Expectation Suite..." in stdout
+    assert "Building" in stdout
+    assert "The following Data Docs sites were built" in stdout
+    assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
+
+    obs_urls = context.get_docs_sites_urls()
+
+    assert len(obs_urls) == 1
+    assert (
+        "great_expectations/uncommitted/data_docs/local_site/index.html" in obs_urls[0]
+    )
+
+    expected_index_path = os.path.join(
+        root_dir, "uncommitted", "data_docs", "local_site", "index.html"
+    )
+    assert os.path.isfile(expected_index_path)
+
+    expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
+    assert os.path.isfile(expected_suite_path)
+
+    assert mock_webbrowser.call_count == 1
+    assert mock_subprocess.call_count == 0
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    site_builder_data_context_with_html_store_titanic_random,
+):
+    """
+    We call the "suite new" command with the suite name argument
+
+    - The data context has two datasources - we choose one of them.
+    - It has a generator configured. We choose to use the generator and select
+    a generator asset from the list.
+    - open Data Docs
+    - NOT open jupyter
+    """
+    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    os.chdir(root_dir)
+    context = DataContext(root_dir)
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--suite", "foo_suite"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -311,19 +497,35 @@ def test_suite_new_multiple_datasources_with_generator_with_suite_name_argument(
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
     assert os.path.isfile(expected_suite_path)
+
+    assert mock_webbrowser.call_count == 1
+    assert mock_subprocess.call_count == 0
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_suite_edit_without_suite_name_raises_error(caplog):
+def test_suite_edit_without_suite_name_raises_error():
+    """This is really only testing click missing arguments"""
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, "suite edit", catch_exceptions=False)
     assert result.exit_code == 2
-    assert 'Error: Missing argument "SUITE".' in result.stderr
+    assert (
+        'Error: Missing argument "SUITE".' in result.stderr
+        or "Error: Missing argument 'SUITE'." in result.stderr
+    )
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
-    caplog, empty_data_context
+    mock_webbrowser, mock_subprocess, caplog, empty_data_context
 ):
+    """
+    The command should:
+    - exit with a clear error message
+    - NOT open Data Docs
+    - NOT open jupyter
+    """
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context.create_expectation_suite("foo")
@@ -337,13 +539,24 @@ def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
     stdout = result.output
     assert result.exit_code == 1
     assert "Please check that your batch_kwargs are valid JSON." in stdout
-    # assert "Expecting value" in stdout # The exact message in the exception varies in Py 2, Py 3
+
+    assert mock_webbrowser.call_count == 0
+    assert mock_subprocess.call_count == 0
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_error(
-    caplog, empty_data_context
+    mock_webbrowser, mock_subprocess, caplog, empty_data_context
 ):
+    """
+    The command should:
+    - exit with a clear error message
+    - NOT open Data Docs
+    - NOT open jupyter
+    """
     project_dir = empty_data_context.root_directory
 
     context = DataContext(project_dir)
@@ -361,12 +574,24 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
     assert result.exit_code == 1
     assert "To continue editing this suite" not in stdout
     assert "Please check that your batch_kwargs are able to load a batch." in stdout
+
+    assert mock_webbrowser.call_count == 0
+    assert mock_subprocess.call_count == 0
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_suite_name_raises_error(
-    caplog, empty_data_context
+    mock_webbrowser, mock_subprocess, caplog, empty_data_context
 ):
+    """
+    The command should:
+    - exit with a clear error message
+    - NOT open Data Docs
+    - NOT open jupyter
+    """
     project_dir = empty_data_context.root_directory
     assert not empty_data_context.list_expectation_suites()
 
@@ -377,16 +602,26 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
         catch_exceptions=False,
     )
     assert result.exit_code == 1
-    assert (
-        "Could not find a suite named `not_a_real_suite`. Please check the name and try again"
-        in result.output
-    )
+    assert "Could not find a suite named `not_a_real_suite`." in result.output
+    assert "by running `great_expectations suite list`" in result.output
+
+    assert mock_webbrowser.call_count == 0
+    assert mock_subprocess.call_count == 0
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
-    caplog, empty_data_context
+    mock_webbrowser, mock_subprocess, caplog, empty_data_context
 ):
+    """
+    The command should:
+    - exit with a clear error message
+    - NOT open Data Docs
+    - NOT open jupyter
+    """
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context.create_expectation_suite("foo")
@@ -395,7 +630,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite edit foo -d {} --datasource not_real".format(project_dir),
+        f"suite edit foo -d {project_dir} --datasource not_real",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -403,11 +638,20 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
         "Unable to load datasource `not_real` -- no configuration found or invalid configuration."
         in result.output
     )
+
+    assert mock_webbrowser.call_count == 0
+    assert mock_subprocess.call_count == 0
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations(
-    caplog, site_builder_data_context_with_html_store_titanic_random,
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    site_builder_data_context_with_html_store_titanic_random,
 ):
     """
     Here we verify that the "suite edit" command helps the user to specify the batch
@@ -421,50 +665,67 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
 
     The data context has two datasources - we choose one of them. It has a generator
     configured. We choose to use the generator and select a generator asset from the list.
+
+    The command should:
+    - NOT open Data Docs
+    - open jupyter
     """
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
+        ["suite", "new", "-d", root_dir, "--suite", "foo_suite"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 0
-    assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
+    assert mock_webbrowser.call_count == 1
+    assert mock_subprocess.call_count == 0
+    mock_webbrowser.reset_mock()
+    mock_subprocess.reset_mock()
 
     # remove the citations from the suite
     context = DataContext(root_dir)
     suite = context.get_expectation_suite("foo_suite")
+    assert isinstance(suite, ExpectationSuite)
     suite.meta.pop("citations")
     context.save_expectation_suite(suite)
 
+    # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "edit", "foo_suite", "-d", root_dir, "--no-jupyter"],
+        ["suite", "edit", "foo_suite", "-d", root_dir,],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
 
     assert result.exit_code == 0
     stdout = result.stdout
+    assert "A batch of data is required to edit the suite" in stdout
     assert "Select a datasource" in stdout
     assert "Which data would you like to use" in stdout
-    assert "To continue editing this suite, run" in stdout
 
     expected_notebook_path = os.path.join(root_dir, "uncommitted", "foo_suite.ipynb")
     assert os.path.isfile(expected_notebook_path)
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
     assert os.path.isfile(expected_suite_path)
+
+    assert mock_webbrowser.call_count == 0
+    assert mock_subprocess.call_count == 1
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_containing_citations(
-    caplog, site_builder_data_context_with_html_store_titanic_random,
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    site_builder_data_context_with_html_store_titanic_random,
 ):
     """
     Here we verify that the "suite edit" command uses the batch kwargs found in
@@ -475,24 +736,33 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     test will edit - this step is a just a setup.
 
     We call the "suite edit" command without any optional arguments.
+
+    The command should:
+    - NOT open Data Docs
+    - NOT open jupyter
     """
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
+        ["suite", "new", "-d", root_dir, "--suite", "foo_suite"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    assert mock_webbrowser.call_count == 1
+    assert mock_subprocess.call_count == 0
+    mock_subprocess.reset_mock()
+    mock_webbrowser.reset_mock()
     assert result.exit_code == 0
-    assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
+    context = DataContext(root_dir)
+    suite = context.get_expectation_suite("foo_suite")
+    assert isinstance(suite, ExpectationSuite)
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "edit", "foo_suite", "-d", root_dir, "--no-jupyter"],
+        ["suite", "edit", "foo_suite", "-d", root_dir],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -501,19 +771,26 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     stdout = result.stdout
     assert "Select a datasource" not in stdout
     assert "Which data would you like to use" not in stdout
-    assert "To continue editing this suite, run" in stdout
-    assert "great_expectations/uncommitted/foo_suite.ipynb" in stdout
 
     expected_notebook_path = os.path.join(root_dir, "uncommitted", "foo_suite.ipynb")
     assert os.path.isfile(expected_notebook_path)
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
     assert os.path.isfile(expected_suite_path)
+
+    assert mock_webbrowser.call_count == 0
+    assert mock_subprocess.call_count == 1
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
-    caplog, site_builder_data_context_with_html_store_titanic_random,
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    site_builder_data_context_with_html_store_titanic_random,
 ):
     """
     Here we verify that when the "suite edit" command is called with batch_kwargs arg
@@ -529,6 +806,10 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
 
     The data context has two datasources - we choose one of them. It has a generator
     configured. We choose to use the generator and select a generator asset from the list.
+
+    The command should:
+    - NOT open Data Docs
+    - open jupyter
     """
     root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     runner = CliRunner(mix_stderr=False)
@@ -540,6 +821,10 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     )
     stdout = result.stdout
     assert result.exit_code == 0
+    assert mock_webbrowser.call_count == 0
+    assert mock_subprocess.call_count == 0
+    mock_subprocess.reset_mock()
+    mock_webbrowser.reset_mock()
     assert "A new Expectation suite 'foo_suite' was added to your project" in stdout
 
     batch_kwargs = {
@@ -564,7 +849,6 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
             "foo_suite",
             "-d",
             root_dir,
-            "--no-jupyter",
             "--batch-kwargs",
             batch_kwargs_arg_str,
         ],
@@ -575,19 +859,23 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert result.exit_code == 0
     assert "Select a datasource" not in stdout
     assert "Which data would you like to use" not in stdout
-    assert "To continue editing this suite, run" in stdout
 
     expected_notebook_path = os.path.join(root_dir, "uncommitted", "foo_suite.ipynb")
     assert os.path.isfile(expected_notebook_path)
 
     expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
     assert os.path.isfile(expected_suite_path)
+
+    assert mock_webbrowser.call_count == 0
+    assert mock_subprocess.call_count == 1
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(condition=PY2, reason="different error messages in py2")
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error(
-    caplog, titanic_data_context,
+    mock_webbrowser, mock_subprocess, caplog, titanic_data_context,
 ):
     """
     Given:
@@ -597,7 +885,10 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
     great_expectations suite edit foo --batch-kwargs '{"path": "data/10k.csv"}'
 
     Then:
-    - The user should see a nice error and the program halts before notebook compilation.
+    - The user should see a nice error and the program halts before notebook
+    compilation.
+    - NOT open Data Docs
+    - NOT open jupyter
     '"""
     project_dir = titanic_data_context.root_directory
     context = DataContext(project_dir)
@@ -622,11 +913,17 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
     assert result.exit_code == 1
     assert "Please check that your batch_kwargs are able to load a batch." in stdout
     assert "Unable to load datasource `None`" in stdout
+
+    assert mock_webbrowser.call_count == 0
+    assert mock_subprocess.call_count == 0
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_batch_kwargs(
-    caplog, titanic_data_context,
+    mock_webbrowser, mock_subprocess, caplog, titanic_data_context,
 ):
     """
     Given:
@@ -637,6 +934,8 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
 
     Then:
     - The user gets a working notebook
+    - NOT open Data Docs
+    - open jupyter
     """
     project_dir = titanic_data_context.root_directory
     context = DataContext(project_dir)
@@ -656,23 +955,28 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
             json.dumps(batch_kwargs),
             "--datasource",
             "mydatasource",
-            "--no-jupyter",
         ],
         catch_exceptions=False,
     )
     stdout = result.output
+    assert stdout == ""
     assert result.exit_code == 0
-    assert "To continue editing this suite, run" in stdout
 
     expected_notebook_path = os.path.join(project_dir, "uncommitted", "foo.ipynb")
     assert os.path.isfile(expected_notebook_path)
     expected_suite_path = os.path.join(project_dir, "expectations", "foo.json")
     assert os.path.isfile(expected_suite_path)
+
+    assert mock_webbrowser.call_count == 0
+    assert mock_subprocess.call_count == 1
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_citations(
-    caplog, empty_data_context, filesystem_csv_2
+    mock_webbrowser, mock_subprocess, caplog, empty_data_context, filesystem_csv_2
 ):
     """
     Here we verify that the "suite edit" command helps the user to specify the batch
@@ -701,14 +1005,17 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--no-view"],
+        ["suite", "new", "-d", root_dir],
         input="{0:s}\nmy_new_suite\n\n".format(
             os.path.join(filesystem_csv_2, "f1.csv")
         ),
         catch_exceptions=False,
     )
     stdout = result.stdout
-
+    assert mock_webbrowser.call_count == 1
+    assert mock_subprocess.call_count == 0
+    mock_subprocess.reset_mock()
+    mock_webbrowser.reset_mock()
     assert result.exit_code == 0
     assert "A new Expectation suite 'my_new_suite' was added to your project" in stdout
 
@@ -721,7 +1028,7 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "edit", "my_new_suite", "-d", root_dir, "--no-jupyter"],
+        ["suite", "edit", "my_new_suite", "-d", root_dir],
         input="{0:s}\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
         catch_exceptions=False,
     )
@@ -731,76 +1038,64 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     assert "Select a datasource" not in stdout
     assert "Which data would you like to use" not in stdout
     assert "Enter the path" in stdout
-    assert "To continue editing this suite, run" in stdout
 
     expected_notebook_path = os.path.join(root_dir, "uncommitted", "my_new_suite.ipynb")
     assert os.path.isfile(expected_notebook_path)
 
     expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
     assert os.path.isfile(expected_suite_path)
+
+    assert mock_webbrowser.call_count == 0
+    assert mock_subprocess.call_count == 1
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_suite_list_with_zero_suites(
-    caplog, empty_data_context
-):
+def test_suite_list_with_zero_suites(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
-        cli,
-        "suite list -d {}".format(project_dir),
-        catch_exceptions=False,
+        cli, "suite list -d {}".format(project_dir), catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert ("No expectation suites available" in result.output)
+    assert "No expectation suites found" in result.output
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
-def test_suite_list_with_one_suite(
-    caplog, empty_data_context
-):
+
+def test_suite_list_with_one_suite(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context.create_expectation_suite("a.warning")
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
-    cli,
-        "suite list -d {}".format(project_dir),
-        catch_exceptions=False,
+        cli, "suite list -d {}".format(project_dir), catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert ("1 expectation suite available" in result.output)
-    assert ("\ta.warning" in result.output)
+    assert "1 expectation suite found" in result.output
+    assert "\ta.warning" in result.output
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_suite_list_with_multiple_suites(
-        caplog, empty_data_context
-):
+def test_suite_list_with_multiple_suites(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context.create_expectation_suite("a.warning")
     context.create_expectation_suite("b.warning")
     context.create_expectation_suite("c.warning")
 
-
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
-    cli,
-        "suite list -d {}".format(project_dir),
-        catch_exceptions=False,
+        cli, "suite list -d {}".format(project_dir), catch_exceptions=False,
     )
     output = result.output
-    print(output)
     assert result.exit_code == 0
-    assert "3 expectation suites available:" in output
+    assert "3 expectation suites found:" in output
     assert "\ta.warning" in output
     assert "\tb.warning" in output
     assert "\tc.warning" in output
-
 
     assert_no_logging_messages_or_tracebacks(caplog, result)

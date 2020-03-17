@@ -12,7 +12,7 @@ from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
 from great_expectations.datasource import anonymize_datasource_class_name
 
-DEFAULT_USAGE_STATISTICS_URL = "https://xvqc3q1sdj.execute-api.us-east-1.amazonaws.com/prod/great_expectations/v1/usage_statistics"
+DEFAULT_USAGE_STATISTICS_URL = "https://4tdy72oi8f.execute-api.us-east-1.amazonaws.com/prod/great_expectations/v1/usage_statistics"
 logger = logging.getLogger(__name__)
 
 

@@ -79,7 +79,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""".format(
                 suite_name, batch_kwargs
             ),
@@ -92,7 +92,7 @@ batch.head()""".format(
 ## Save & Review Your Expectations
 
 Let's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.
-If you decide not to save some expectations that you created, use [remove_expectaton method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).
+If you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).
 
 Let's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans."""
         )
@@ -139,21 +139,19 @@ context.open_data_docs(validation_result_identifier)"""
     def add_expectation_cells_from_suite(self, expectations):
         expectations_by_column = self._get_expectations_by_column(expectations)
         self.add_markdown_cell("### Table Expectation(s)")
-        if expectations_by_column["table_expectations"]:
-            for exp in expectations_by_column["table_expectations"]:
-                kwargs_string = self._build_kwargs_string(exp)
-                code = "batch.{}({})".format(exp["expectation_type"], kwargs_string)
-                self.add_code_cell(code, lint=True)
-        else:
-            self.add_markdown_cell(
-                "No table level expectations are in this suite. Feel free to "
-                "add some here. The all begin with `batch.expect_table_...`."
-            )
-
+        self._add_table_level_expectations(expectations_by_column)
         # Remove the table expectations since they are dealt with
         expectations_by_column.pop("table_expectations")
-
         self.add_markdown_cell("### Column Expectation(s)")
+        self._add_column_level_expectations(expectations_by_column)
+
+    def _add_column_level_expectations(self, expectations_by_column):
+        if not expectations_by_column:
+            self.add_markdown_cell(
+                "No column level expectations are in this suite. Feel free to "
+                "add some here. They all begin with `batch.expect_column_...`."
+            )
+            return
 
         for column, expectations in expectations_by_column.items():
             self.add_markdown_cell("#### `{}`".format(column))
@@ -165,6 +163,19 @@ context.open_data_docs(validation_result_identifier)"""
                     exp["expectation_type"], kwargs_string, meta_args
                 )
                 self.add_code_cell(code, lint=True)
+
+    def _add_table_level_expectations(self, expectations_by_column):
+        if not expectations_by_column["table_expectations"]:
+            self.add_markdown_cell(
+                "No table level expectations are in this suite. Feel free to "
+                "add some here. They all begin with `batch.expect_table_...`."
+            )
+            return
+
+        for exp in expectations_by_column["table_expectations"]:
+            kwargs_string = self._build_kwargs_string(exp)
+            code = "batch.{}({})".format(exp["expectation_type"], kwargs_string)
+            self.add_code_cell(code, lint=True)
 
     @staticmethod
     def _build_meta_arguments(meta):
