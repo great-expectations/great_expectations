@@ -56,4 +56,4 @@ Resources
 * We follow the
   `Sphinx guide for sections <http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#sections>`__.
 
-*last updated*: |lastupdate|
+

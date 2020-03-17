@@ -11,4 +11,4 @@ Other than standard web request data, we don’t collect any data data that coul
 
 Please reach out `on Slack <https://greatexpectations.io/slack>`__ if you have any questions or comments.
 
-*last updated*: |lastupdate|
+
