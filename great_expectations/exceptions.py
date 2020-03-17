@@ -1,4 +1,5 @@
 from marshmallow import ValidationError
+import json
 
 
 class GreatExpectationsError(Exception):
@@ -105,6 +106,18 @@ class InvalidValidationResultError(GreatExpectationsError):
 
 class GreatExpectationsTypeError(TypeError):
     pass
+
+
+class InvalidCacheValueError(GreatExpectationsError):
+    def __init__(self, result_dict):
+        template = """\
+Error: Invalid result values were found when trying to instantiate an ExpectationValidationResult.
+- Invalid result values are likely caused by inconsistent cache values.
+- Great Expectations enables caching by default.
+- Please ensure that caching behavior is consistent between the underlying Dataset (e.g. Spark) and Great Expectations. 
+Result: {}
+"""
+        self.message = template.format(json.dumps(result_dict, indent=2))
 
 
 class ConfigNotFoundError(DataContextError):
