@@ -18,7 +18,7 @@ To add a BigQuery datasource do this:
         "bigquery://project-name"
 
 
-5. Paste in this connection string and finish out the cli prompts.
+5. Paste in this connection string and finish out the interactive prompts.
 6. Should you need to modify your connection string you can manually edit the
    ``great_expectations/uncommitted/config_variables.yml`` file.
 
@@ -58,7 +58,3 @@ Follow the `Google Cloud library guide <https://googleapis.dev/python/google-api
 for authentication.
 
 Install the pybigquery package for the BigQuery sqlalchemy dialect (``pip install pybigquery``)
-
-*Last updated*: |lastupdate|
-
-*last updated*: |lastupdate|
