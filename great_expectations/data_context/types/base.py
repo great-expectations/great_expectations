@@ -114,7 +114,7 @@ class DatasourceConfig(DictDot):
         return self._module_name
 
 
-class AnonymizedUsageDataConfigchema(Schema):
+class AnonymizedUsageStatisticsConfigchema(Schema):
     data_context_id = fields.Str()
     enabled = fields.Boolean(default=True)
     usage_statistics_url = fields.URL(allow_none=True)
@@ -148,7 +148,7 @@ class DataContextConfigSchema(Schema):
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     config_variables_file_path = fields.Str(allow_none=True)
-    anonymized_usage_statistics = fields.Nested(AnonymizedUsageDataConfigchema)
+    anonymized_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigchema)
 
     # noinspection PyUnusedLocal
     @pre_dump
