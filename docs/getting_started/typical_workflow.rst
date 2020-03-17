@@ -14,7 +14,7 @@ Once the setup is complete, the workflow looks like a loop over the following st
 
 The article focuses on the "What" and the "Why" of each step in this workflow, and touches on the "How" only briefly. The exact details of configuring and executing these steps are intentionally left out - they can be found in the tutorials and reference linked from each section.
 
-If you have not installed Great Expectations and executed the CLI init command, as described in this :ref:`tutorial<tutorial_init>`, we recommend you do so before reading the rest of the article. This will make a lot of concepts mentioned below more familiar to you.
+If you have not installed Great Expectations and executed the :ref:`command line interface (CLI) <command_line>` init command, as described in this :ref:`tutorial <tutorial_init>`, we recommend you do so before reading the rest of the article. This will make a lot of concepts mentioned below more familiar to you.
 
 
 Setting up a project
@@ -24,7 +24,7 @@ To use Great Expectations in a new data project, a :ref:`Data Context<data_conte
 You will see references to the Data Context throughout the documentation.
 A Data Context provides the core services used in a Great Expectations project.
 
-The command line interface (CLI) command ``init`` does the initialization. Run this command in the terminal in the root of your project's repo:
+The :ref:`CLI <command_line>` command ``init`` does the initialization. Run this command in the terminal in the root of your project's repo:
 
 .. code-block:: bash
 
@@ -104,7 +104,7 @@ All the Datasources that your project uses are configured in the project's confi
 
 
 
-The easiest way to add a datasource to the project is to use the CLI convenience command:
+The easiest way to add a datasource to the project is to use the :ref:`CLI <command_line>` convenience command:
 
 .. code-block:: bash
 
@@ -120,7 +120,7 @@ This is beyond the scope of this article.
 
 After a team member adds a new Datasource to the Data Context, they commit the updated configuration file into the version control in order to make the change available to the rest of the team.
 
-Because ``great_expectations/great_expectations.yml`` is committed into version control, the CLI command **does not store the credentials in this file**.
+Because ``great_expectations/great_expectations.yml`` is committed into version control, the :ref:`CLI <command_line>` command **does not store the credentials in this file**.
 Instead it saves them in a separate file: ``uncommitted/config_variables.yml`` which is not committed into version control.
 
 This means that that when another team member checks out the updated configuration file with the newly added Datasource, they must add their own credentials to their ``uncommitted/config_variables.yml`` or in environment variables.
@@ -182,7 +182,7 @@ Create
 ********************************************
 
 
-While you could hand-author an Expectation Suite by writing a JSON file, just like with other features it is easier to let CLI save you time and typos.
+While you could hand-author an Expectation Suite by writing a JSON file, just like with other features it is easier to let :ref:`CLI <command_line>` save you time and typos.
 Run this command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory:
 
 
@@ -226,7 +226,7 @@ The screenshot below shows the Python method and the Data Docs view for the same
 
 .. image:: ../images/exp_html_python_side_by_side.png
 
-The Great Expectations CLI command ``suite edit`` generates a Jupyter notebook to edit a suite.
+The Great Expectations :ref:`CLI <command_line>` command ``suite edit`` generates a Jupyter notebook to edit a suite.
 This command saves you time by generating boilerplate that loads a batch of data and builds a cell for every expectation in the suite.
 This makes editing suites a breeze.
 
@@ -238,8 +238,8 @@ For example, to edit a suite called ``movieratings.ratings`` you would run:
 
 These generated Jupyter notebooks can be discarded and should not be kept in source control since they are auto-generated at will, and may contain snippets of actual data.
 
-To make this easier still, the Data Docs page for each Expectation Suite has the CLI command syntax for you.
-Simply press the "How to Edit This Suite" button, and copy/paste the CLI command into your terminal.
+To make this easier still, the Data Docs page for each Expectation Suite has the :ref:`CLI <command_line>` command syntax for you.
+Simply press the "How to Edit This Suite" button, and copy/paste the :ref:`CLI <command_line>` command into your terminal.
 
 .. image:: ../images/edit_e_s_popup.png
 

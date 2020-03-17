@@ -1,3 +1,5 @@
+.. _command_line:
+
 ###################################
 The Great Expectations Command Line
 ###################################
@@ -19,7 +21,7 @@ Basics
 ======
 
 There are a few commands that are critical to your everyday usage of Great Expectations.
-In the order of how much you'll probably use them are:
+This is a list of the most common commands you'll use in order of how much you'll probably use them:
 
 * ``great_expectations suite edit``
 * ``great_expectations suite new``
@@ -35,7 +37,8 @@ Each noun command and each verb sub-command has a description, and should help y
 
 .. note::
 
-	 All Great Expectations commands have help text. As with most *nix utilities, you can try adding ``--help`` to the end, for example ``great_expectations suite new --help``.
+    All Great Expectations commands have help text. As with most *nix utilities, you can try adding ``--help`` to the end.
+    For example, by running ``great_expectations suite new --help`` you'll see help output for that specific command.
 
 .. code-block:: bash
 
@@ -66,25 +69,24 @@ Each noun command and each verb sub-command has a description, and should help y
       project     project operations
       suite       expectation suite operations
 
-Let's create a tiny Great Expectations project to step through each of these commands in context.
 
 great_expectations init
 ==============================
 
-The first thing we'll want to do is add Great Expectations in our project by running the ``great_expectations init`` command in your project directory after installing Great Expectations.
+To add Great Expectations to your project run the ``great_expectations init`` command in your project directory.
 This will run you through a very short interactive experience to
 connect to your data, show you some sample expectations, and open Data Docs.
 
 .. note::
 
-  	You can install the python package by typing ``pip install great_expectations``, if you don't have it already.
+  	You can install the Great Expectations python package by typing ``pip install great_expectations``, if you don't have it already.
 
 .. code-block:: bash
 
     $ great_expectations init
       ...
 
-You've got the entire Great Expectations directory structure now with all the code you need to get started.
+After this command has completed, you will have the entire Great Expectations directory structure with all the code you need to get started protecting your pipelines and data.
 
 great_expectations docs
 ==============================
@@ -111,8 +113,7 @@ All command line operations for working with expectation suites are here.
 ``great_expectations suite list``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``great_expectations suite new`` command creates expectation suites.
-Running ``great_expectations suite list`` by itself gives a list of available expectation suites:
+Running ``great_expectations suite list`` gives a list of available expectation suites in your project:
 
 .. code-block:: bash
 
@@ -129,7 +130,7 @@ Create a new expectation suite.
 Just as writing SQL queries is far better with access to data, so are writing expectations.
 These are best written interactively against some data.
 
-To this end, this command interactively helps you choose some data, creates a sample suite, and opens up Data Docs.
+To this end, this command interactively helps you choose some data, creates the new suite, adds sample expectations to it, and opens up Data Docs.
 
 .. important::
 
@@ -158,7 +159,7 @@ To this end, this command interactively helps you choose some data, creates a sa
        file:///Users/dickens/Desktop/great_expectations/uncommitted/data_docs/local_site/index.html
     A new Expectation suite 'npi.warning' was added to your project
 
-To edit this suite you can click the **How to edit** button in Data Docs, or run ``great_expectations suite edit npi.warning``.
+To edit this suite you can click the **How to edit** button in Data Docs, or run the command: ``great_expectations suite edit npi.warning``.
 This will generate a jupyter notebook and allow you to add, remove or adjust any expectations in the sample suite.
 
 .. important::
@@ -170,7 +171,7 @@ This will generate a jupyter notebook and allow you to add, remove or adjust any
 
     They are put in your ``great_expectations/uncommitted`` directory and you can delete them at any time.
 
-    Because they can expose actual data, we stronly suggest leaving them in the ``uncommitted`` directory to avoid potential data leaks into source control.
+    Because they can expose actual data, we strongly suggest leaving them in the ``uncommitted`` directory to avoid potential data leaks into source control.
 
 
 ``great_expectations suite new --suite <SUITE_NAME>``
@@ -190,7 +191,7 @@ If you already know the name of the suite you want to create you can skip one of
 ``great_expectations suite new --empty``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you prefer to skip the examples and start writing expectations in an empty suite directly in a jupyter notebook, add the ``--empty`` flag.
+If you prefer to skip the example expectations and start writing expectations in a new empty suite directly in a jupyter notebook, add the ``--empty`` flag.
 
 .. code-block:: bash
 
@@ -223,7 +224,7 @@ If you prefer to disable Great Expectations from automatically opening the gener
     A new Expectation suite 'npi.warning' was added to your project
     To continue editing this suite, run jupyter notebook /Users/taylor/Desktop/great_expectations/uncommitted/npi.warning.ipynb
 
-You can then run juypter yourself.
+You can then run jupyter.
 
 
 ``great_expectations suite edit``
@@ -272,14 +273,14 @@ If you prefer to disable Great Expectations from automatically opening the gener
     $ great_expectations suite edit npi.warning --no-jupyter
     To continue editing this suite, run jupyter notebook /Users/dickens/Desktop/great_expectations/uncommitted/npi.warning.ipynb
 
-You can then run juypter yourself.
+You can then run jupyter.
 
 
 
 great_expectations datasource
 ==============================
 
-All command line operations for working with datasources are here.
+All command line operations for working with :ref:`datasources <datasource>` are here.
 A datasource is a connection to data and a processing engine.
 Examples of a datasource are:
 - csv files processed in pandas or Spark
@@ -336,9 +337,9 @@ For details on profiling, see this :ref:`reference document<profiling_reference>
 Miscellaneous
 ======================
 
-* ``great_expectations project check`` checks your ``great_expectations/great_expectations.yml`` for validity. This is handy for version migrations.
+* ``great_expectations project check`` checks your ``great_expectations/great_expectations.yml`` for validity. This is handy for occasional Great Expectations version migrations.
 
 Acknowledgements
 ======================
 
-This article was heavily inspired by the phenomenal `Rails Command Line Guide <https://guides.rubyonrails.org/command_line.html>`.
+This article was heavily inspired by the phenomenal Rails Command Line Guide https://guides.rubyonrails.org/command_line.html.
