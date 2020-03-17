@@ -20,9 +20,7 @@ def test_tap_help_output(caplog,):
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_tap_new_on_context_with_no_datasources(
-    caplog, empty_data_context
-):
+def test_tap_new_on_context_with_no_datasources(caplog, empty_data_context):
     """
     We call the "tap new" command on a data context that has no datasources
     configured.
@@ -43,9 +41,7 @@ def test_tap_new_on_context_with_no_datasources(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_tap_new_with_non_existant_suite(
-    caplog, empty_data_context
-):
+def test_tap_new_with_non_existant_suite(caplog, empty_data_context):
     """
     We call the "tap new" command on a data context that has a datasource
     configured and no suites.
@@ -125,9 +121,7 @@ def test_tap_new_on_context_with_1_datasources_with_no_datasource_option_prompts
     root_dir = empty_data_context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli,
-        f"tap new not_a_suite tap.py -d {root_dir}",
-        catch_exceptions=False,
+        cli, f"tap new not_a_suite tap.py -d {root_dir}", catch_exceptions=False,
     )
     stdout = result.stdout
     print(stdout)

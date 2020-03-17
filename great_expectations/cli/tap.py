@@ -47,25 +47,37 @@ def tap_new(suite, tap_filename, directory, csv=None, datasource=None):
     suite = load_expectation_suite(context, suite)
 
     n_expectations = len(suite.expectations)
-    cli_message(f"Loaded suite {suite.expectation_suite_name} that has {n_expectations} expectations.")
+    cli_message(
+        f"Loaded suite {suite.expectation_suite_name} that has {n_expectations} expectations."
+    )
 
-    batch_kwargs = {"datasource": datasource.name, "path": csv,
-            "reader_method": "read_csv"}
+    batch_kwargs = {
+        "datasource": datasource.name,
+        "path": csv,
+        "reader_method": "read_csv",
+    }
     template = _load_template()
-    template = template.format(tap_filename, directory, suite.expectation_suite_name, batch_kwargs)
+    template = template.format(
+        tap_filename, directory, suite.expectation_suite_name, batch_kwargs
+    )
 
     cli_message(f"<yellow>{template}</yellow>")
 
     with open(tap_filename, "w") as f:
         f.write(template)
-    cli_message(f"""<green>A new tap has been made! Open {tap_filename} in an editor to tweak it</green>""")
+    cli_message(
+        f"""<green>A new tap has been made! Open {tap_filename} in an editor to tweak it</green>"""
+    )
 
     # _debugging_stuff(tap_filename)
 
 
 def _file_batch_kwargs(datasource, csv):
-    return {"datasource": datasource, "path": os.path.abspath(csv),
-            "reader_method": "read_csv"}
+    return {
+        "datasource": datasource,
+        "path": os.path.abspath(csv),
+        "reader_method": "read_csv",
+    }
 
 
 def _debugging_stuff(tap_filename):
