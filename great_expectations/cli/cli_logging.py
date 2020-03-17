@@ -19,6 +19,6 @@ def _set_up_logger():
     handler.setFormatter(formatter)
     module_logger = logging.getLogger("great_expectations")
     module_logger.addHandler(handler)
-    module_logger.setLevel(level=logging.WARNING)
+    module_logger.setLevel(level=logging.CRITICAL)
 
     return module_logger
