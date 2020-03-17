@@ -1,14 +1,16 @@
-import os
-import subprocess
 import sys
 
 import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli.datasource import select_datasource
+from great_expectations.cli.datasource import (
+    get_batch_kwargs,
+    select_datasource,
+)
 from great_expectations.cli.util import cli_message, load_expectation_suite
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.util import lint_code
 
 
 @click.group()
@@ -21,77 +23,64 @@ def tap():
 @click.argument("suite")
 @click.argument("tap_filename")
 @click.option("--datasource", default=None)
-@click.option("--csv", default=None)
 @click.option(
     "--directory",
     "-d",
     default=None,
     help="The project's great_expectations directory.",
 )
-def tap_new(suite, tap_filename, directory, csv=None, datasource=None):
-    """BETA! Create a new tap file."""
+def tap_new(suite, tap_filename, directory, datasource=None):
+    """BETA! Create a new tap file for easy deployments."""
+    _validate_tap_filename(tap_filename)
+    context = _get_context(directory)
+    context_directory = context.root_directory
+    datasource = _get_datasource(context, datasource)
+    suite = load_expectation_suite(context, suite)
+    _, _, _, batch_kwargs = get_batch_kwargs(context, datasource.name)
+    cli_message(f"<cyan>BatchKwargs: {batch_kwargs}</cyan>")
+
+    _write_tap_file_to_disk(batch_kwargs, context_directory, suite, tap_filename)
+    cli_message(
+        f"""<green>A new tap has been generated! Open {tap_filename} in an editor to tweak it</green>"""
+    )
+
+
+def _validate_tap_filename(tap_filename):
     if not tap_filename.endswith(".py"):
-        cli_message("<red>Tap filename must end in .py. Please correct and re-run</red>")
+        cli_message(
+            "<red>Tap filename must end in .py. Please correct and re-run</red>"
+        )
         exit(1)
 
+
+def _get_context(directory):
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
         cli_message("<red>{}</red>".format(err.message))
-        return
+        exit(1)
+    return context
 
-    directory = context.root_directory
+
+def _get_datasource(context, datasource):
     datasource = select_datasource(context, datasource_name=datasource)
-
     if not datasource:
         cli_message("<red>No datasources found in the context.</red>")
         sys.exit(1)
-
-    # Note this will exit if no suite is found.
-    suite = load_expectation_suite(context, suite)
-
-    n_expectations = len(suite.expectations)
-    cli_message(
-        f"Loaded suite {suite.expectation_suite_name} that has {n_expectations} expectations."
-    )
-
-    batch_kwargs = {
-        "datasource": datasource.name,
-        "path": csv,
-        "reader_method": "read_csv",
-    }
-    template = _load_template()
-    template = template.format(
-        tap_filename, directory, suite.expectation_suite_name, batch_kwargs
-    )
-
-    cli_message(f"<yellow>{template}</yellow>")
-
-    with open(tap_filename, "w") as f:
-        f.write(template)
-    cli_message(
-        f"""<green>A new tap has been made! Open {tap_filename} in an editor to tweak it</green>"""
-    )
-
-    # _debugging_stuff(tap_filename)
-
-
-def _file_batch_kwargs(datasource, csv):
-    return {
-        "datasource": datasource,
-        "path": os.path.abspath(csv),
-        "reader_method": "read_csv",
-    }
-
-
-def _debugging_stuff(tap_filename):
-    print("\n\n")
-    subprocess.call(["cat", tap_filename])
-    print("\n\n")
-    subprocess.call(["python", tap_filename])
+    return datasource
 
 
 def _load_template():
     with open(file_relative_path(__file__, "tap_template.py"), "r") as f:
         template = f.read()
     return template
+
+
+def _write_tap_file_to_disk(batch_kwargs, context_directory, suite, tap_filename):
+    template = _load_template()
+    template = template.format(
+        tap_filename, context_directory, suite.expectation_suite_name, batch_kwargs
+    )
+    linted_code = lint_code(template)
+    with open(tap_filename, "w") as f:
+        f.write(linted_code)

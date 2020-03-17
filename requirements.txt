@@ -18,3 +18,4 @@ future>=0.16
 jinja2>=2.10
 marshmallow>=2.0,<3.0
 autopep8>=1.4.4
+black==19.10b0

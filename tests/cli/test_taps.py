@@ -14,7 +14,7 @@ def test_tap_help_output(caplog,):
     assert result.exit_code == 0
     assert (
         """Commands:
-  new  BETA! Create a new tap file"""
+  new  BETA! Create a new tap file for easy deployments"""
         in result.stdout
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)
