@@ -81,7 +81,11 @@ def test_cli_init_on_new_project(
     context = DataContext(ge_dir)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
-        {"class_name": "SqlAlchemyDatasource", "name": "titanic"}
+        {
+            "class_name": "SqlAlchemyDatasource",
+            "name": "titanic",
+            "module_name": "great_expectations.datasource"
+        }
     ]
 
     first_suite = context.list_expectation_suites()[0]
@@ -291,7 +295,11 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
     context = DataContext(ge_dir)
     assert context.list_datasources() == [
-        {"class_name": "SqlAlchemyDatasource", "name": "sqlite"}
+        {
+            "class_name": "SqlAlchemyDatasource",
+            "name": "sqlite",
+            "module_name": "great_expectations.datasource"
+        }
     ]
     assert context.list_expectation_suites()[0].expectation_suite_name == "my_suite"
     assert len(context.list_expectation_suites()) == 1
@@ -350,7 +358,11 @@ def initialized_sqlite_project(
     assert isinstance(context, DataContext)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
-        {"class_name": "SqlAlchemyDatasource", "name": "titanic"}
+        {
+            "class_name": "SqlAlchemyDatasource",
+            "name": "titanic",
+            "module_name": "great_expectations.datasource"
+        }
     ]
     return project_dir
 
