@@ -23,7 +23,7 @@ Datasources
 
 Datasources tell Great Expectations where your data lives and how to get it.
 
-Using the CLI command ``great_expectations datasource new`` is the easiest way to
+Using the :ref:`CLI <command_line>` command ``great_expectations datasource new`` is the easiest way to
 add a new datasource.
 
 The `datasources` section declares which :ref:`datasource` objects should be available in the DataContext.
@@ -364,5 +364,3 @@ new directory or use this template:
         store_backend:
           class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
-
-
