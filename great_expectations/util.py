@@ -3,7 +3,7 @@ import importlib
 import json
 import logging
 
-import black as black
+import black
 from six import string_types
 
 from great_expectations.core import expectationSuiteSchema
