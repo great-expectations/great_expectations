@@ -155,4 +155,4 @@ else relevant for understanding it:
             }
        )
 
-*last updated*: |lastupdate|
+

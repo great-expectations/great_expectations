@@ -2,6 +2,7 @@
     "expectation_suite_name": "my_dag_node.default",
     "data_asset_type": "Dataset",
     "meta": {
+        "great_expectations.__version__": "0.9.4"
     },
     "expectations": [
         {

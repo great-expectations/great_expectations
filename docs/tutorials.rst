@@ -15,4 +15,4 @@ This is a collection of tutorials that walk you through a variety of useful Grea
    /tutorials/publishing_data_docs_to_s3
    /tutorials/saving_metrics
 
-*last updated*: |lastupdate|
+

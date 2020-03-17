@@ -27,7 +27,15 @@ evaluation_parameter_store_name: evaluation_parameter_store
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 
-data_docs_sites: {}
+data_docs_sites:
+  local_site:
+    class_name: SiteBuilder
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site/
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
+      show_cta_footer: true
 
 stores:
   expectations_store:

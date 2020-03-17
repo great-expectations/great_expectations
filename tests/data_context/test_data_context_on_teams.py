@@ -18,7 +18,8 @@ def test_incomplete_uncommitted():
                 "./fixtures/contexts/incomplete_uncommitted/great_expectations",
             )
         )
-    assert (
-        exc.value.message
-        == "Unable to find match for config variable my_postgres_db. See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets"
-    )
+        assert (
+            "Unable to find match for config variable my_postgres_db. See "
+            "https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets"
+            in exc.value.message
+        )

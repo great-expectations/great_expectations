@@ -193,13 +193,13 @@ def test_sqlalchemy_datasource_query_and_table_handling(sqlitedb_engine):
         })
     mock_batch.assert_called_once_with(engine=sqlitedb_engine, schema=None, query="select * from foo;", table_name=None)
 
-    # Snowflake should allow *both* query *and* table_name
+    # Snowflake should require query *and* snowflake_transient_table
     sqlitedb_engine.dialect.name = "snowflake"
     with mock.patch("great_expectations.dataset.sqlalchemy_dataset.SqlAlchemyBatchReference.__init__",
                     return_value=None) as mock_batch:
         datasource.get_batch({
             "query": "select * from foo;",
-            "table_name": "bar"
+            "snowflake_transient_table": "bar"
         })
     mock_batch.assert_called_once_with(engine=sqlitedb_engine, schema=None, query="select * from foo;",
                                        table_name="bar")
