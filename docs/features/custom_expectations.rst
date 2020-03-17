@@ -22,4 +22,4 @@ even profiling workflows that make Great Expectations stand out. See the guide o
 for more information on building expectations and updating DataContext configurations to automatically load batches
 of data with custom Data Assets.
 
-*last updated*: |lastupdate|
+

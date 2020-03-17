@@ -30,4 +30,4 @@ This is how you always know what to expect from your data.
 
 For more detail on how to control expectation output, please see :ref:`standard_arguments` and :ref:`result_format`.
 
-*last updated*: |lastupdate|
+
