@@ -31,5 +31,3 @@ assembled by the generator, "batch_markers" that provide more detailed metadata 
 workflows, and optionally "batch_parameters" that include information such as an asset or partition name.
 
 See more detailed documentation on the :ref:`generator_module`.
-
-*last updated*: |lastupdate|

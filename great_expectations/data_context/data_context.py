@@ -544,7 +544,7 @@ class BaseDataContext(object):
 
         if not isinstance(expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, string_types)):
             raise ge_exceptions.DataContextError(
-                "expectation_suite_name must be an ExepctationSuite, "
+                "expectation_suite_name must be an ExpectationSuite, "
                 "ExpectationSuiteIdentifier or string."
             )
 
