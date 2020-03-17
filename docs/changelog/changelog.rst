@@ -2,6 +2,8 @@
 
 develop
 -----------------
+* New CLI command: `tap new` that generates an executable python file to expedite deployments.
+* bugfix in TableBatchKwargsGenerator docs
 
 
 0.9.6
@@ -11,6 +13,7 @@ develop
 * `great_expectations init`: cli now asks user if csv has header when adding a Spark Datasource with csv file
 * Improve support for using GCP Storage Bucket as a Data Docs Site backend (thanks @hahmed)
 * fix notebook renderer handling for expectations with no column kwarg and table not in their name (`#1194 <https://github.com/great-expectations/great_expectations/issues/1194>`_)
+
 
 0.9.5
 -----------------
@@ -649,4 +652,3 @@ to top-level names.
 * API and examples for custom expectations are available
 * New output formats are available for all expectations
 * Significant improvements to test suite and compatibility
-
