@@ -43,9 +43,9 @@ def test_setting_config_variables_is_visible_immediately(data_context_with_varia
     assert config_variables["replace_me"] == {"n1": "v1"}
 
     # the context's config has two config variables - one using the ${} syntax and the other - $.
-    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"][
+    assert context.get_config_with_variables_substituted().datasources["mydatasource"]["generators"][
                "mygenerator"]["reader_options"]["test_variable_sub1"] == {"n1": "v1"}
-    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"][
+    assert context.get_config_with_variables_substituted().datasources["mydatasource"]["generators"][
                "mygenerator"]["reader_options"]["test_variable_sub2"] == {"n1": "v1"}
 
     # verify that we can save a config variable in the config variables file
@@ -58,15 +58,15 @@ def test_setting_config_variables_is_visible_immediately(data_context_with_varia
     # verify that the value of the config variable is immediately updated.
     # verify that the config variable will be substituted with the value from the file if the
     # env variable is not set (for both ${} and $ syntax variations)
-    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"][
+    assert context.get_config_with_variables_substituted().datasources["mydatasource"]["generators"][
         "mygenerator"]["reader_options"]["test_variable_sub1"] == {"n2": "v2"}
-    assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"][
+    assert context.get_config_with_variables_substituted().datasources["mydatasource"]["generators"][
         "mygenerator"]["reader_options"]["test_variable_sub2"] == {"n1": "v1"}
 
     try:
         # verify that the value of the env var takes precedence over the one from the config variables file
         os.environ["replace_me_2"] = "value_from_env_var"
-        assert context.get_config_with_variables_substituted()["datasources"]["mydatasource"]["generators"]["mygenerator"][
+        assert context.get_config_with_variables_substituted().datasources["mydatasource"]["generators"]["mygenerator"][
                    "reader_options"]["test_variable_sub1"] == "value_from_env_var"
     except Exception:
         raise
