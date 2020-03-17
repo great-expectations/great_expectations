@@ -10,13 +10,13 @@ import boto3
 
 from great_expectations.data_context.util import file_relative_path
 
-TELEMETRY_QA_URL = "https://m7hebk7006.execute-api.us-east-1.amazonaws.com/qa/great_expectations/v1/telemetry"
+USAGE_STATISTICS_QA_URL = "https://m7hebk7006.execute-api.us-east-1.amazonaws.com/qa/great_expectations/v1/usage_statistics"
 
-logGroupName = "/great_expectations/telemetry/qa"
+logGroupName = "/great_expectations/usage_statistics/qa"
 
 
 @pytest.fixture(scope="session")
-def valid_telemetry_message():
+def valid_usage_statistics_message():
     return {
         "event_time": "2020-01-01T05:02:00.012Z",
         "data_context_id": "51ff737e-33af-455a-8a11-0dc923dcbfb5",
@@ -37,13 +37,13 @@ def valid_telemetry_message():
 
 
 @pytest.fixture(scope="session")
-def logstream(valid_telemetry_message):
+def logstream(valid_usage_statistics_message):
     client = boto3.client('logs', region_name='us-east-1')
     # Warm up a logstream
     logStreamName = None
-    message = copy.deepcopy(valid_telemetry_message)
+    message = copy.deepcopy(valid_usage_statistics_message)
     message["method"] = "logstream.__warmup__"
-    requests.post(TELEMETRY_QA_URL, json=message)
+    requests.post(USAGE_STATISTICS_QA_URL, json=message)
     attempts = 0
     while attempts < 3:
         attempts += 1
@@ -63,18 +63,18 @@ def logstream(valid_telemetry_message):
     return client, logStreamName
 
 
-def test_send_malformed_data(valid_telemetry_message):
+def test_send_malformed_data(valid_usage_statistics_message):
     # We should be able to successfully send a valid message, but find that
     # a malformed message is not accepted
-    res = requests.post(TELEMETRY_QA_URL, json=valid_telemetry_message)
+    res = requests.post(USAGE_STATISTICS_QA_URL, json=valid_usage_statistics_message)
     assert res.status_code == 201
-    invalid_telemetry_message = copy.deepcopy(valid_telemetry_message)
-    del invalid_telemetry_message["data_context_id"]
-    res = requests.post(TELEMETRY_QA_URL, json=invalid_telemetry_message)
+    invalid_usage_statistics_message = copy.deepcopy(valid_usage_statistics_message)
+    del invalid_usage_statistics_message["data_context_id"]
+    res = requests.post(USAGE_STATISTICS_QA_URL, json=invalid_usage_statistics_message)
     assert res.status_code == 400
 
 
-def test_telemetry_transmission(logstream):
+def test_usage_statistics_transmission(logstream):
     client, logStreamName = logstream
     pre_events = client.get_log_events(
         logGroupName=logGroupName,
@@ -82,7 +82,7 @@ def test_telemetry_transmission(logstream):
         limit=100,
     )
     p = subprocess.Popen(
-        ["python", file_relative_path(__file__, "./instantiate_context_with_telemetry.py"), "0"],
+        ["python", file_relative_path(__file__, "./instantiate_context_with_usage_statistics.py"), "0"],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     outs, errs = p.communicate()
@@ -110,7 +110,7 @@ def test_send_completes_on_kill(logstream):
         logStreamName=logStreamName,
         limit=100,
     )
-    """Test that having telemetry enabled does not negatively impact kill signals or cause loss of queued telemetry. """
+    """Test that having usage statistics enabled does not negatively impact kill signals or cause loss of queued usage statistics. """
     # Execute process that initializes data context
     acceptable_startup_time = 6
     acceptable_shutdown_time = 1
@@ -118,7 +118,7 @@ def test_send_completes_on_kill(logstream):
     start = datetime.datetime.now()
     # Instruct the process to wait for 30 seconds after initializing before completing.
     p = subprocess.Popen(
-        ["python", file_relative_path(__file__, "./instantiate_context_with_telemetry.py"),
+        ["python", file_relative_path(__file__, "./instantiate_context_with_usage_statistics.py"),
          str(nap_time), "False", "True"],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
@@ -152,7 +152,7 @@ def test_send_completes_on_kill(logstream):
 
 
 def test_graceful_failure_with_no_internet():
-    """Test that having telemetry enabled does not negatively impact kill signals or cause loss of queued telemetry. """
+    """Test that having usage statistics enabled does not negatively impact kill signals or cause loss of queued usage statistics. """
 
     # Execute process that initializes data context
     # NOTE - JPC - 20200227 - this is crazy long (not because of logging I think, but worth revisiting)
@@ -162,7 +162,7 @@ def test_graceful_failure_with_no_internet():
     start = datetime.datetime.now()
     # Instruct the process to wait for 30 seconds after initializing before completing.
     p = subprocess.Popen(
-        ["python", file_relative_path(__file__, "./instantiate_context_with_telemetry.py"),
+        ["python", file_relative_path(__file__, "./instantiate_context_with_usage_statistics.py"),
          str(nap_time), "True", "True"],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )

@@ -118,7 +118,7 @@ data_docs_sites:
         class_name: DefaultSiteIndexBuilder
         show_cta_footer: True
         
-anonymized_usage_data:
+anonymized_usage_statistics:
   enabled: True
 """
 
