@@ -350,6 +350,10 @@ class BaseDataContext(object):
         return self.get_config_with_variables_substituted()
 
     @property
+    def anonymized_usage_statistics(self):
+        return self._project_config_with_variables_substituted.anonymized_usage_statistics
+
+    @property
     def stores(self):
         """A single holder for all Stores in this context"""
         return self._stores
