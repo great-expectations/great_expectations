@@ -151,4 +151,4 @@ Useful deployment patterns include:
 For certain deployment patterns, it may be useful to parameterize expectations, and supply evaluation parameters at \
 validation time. See :ref:`evaluation_parameters` for more information.
 
-*last updated*: |lastupdate|
+

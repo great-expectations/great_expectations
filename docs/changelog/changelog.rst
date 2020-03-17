@@ -5,6 +5,12 @@ develop
 * validate result dict when instantiating an ExpectationValidationResult (`#1133 <https://github.com/great-expectations/great_expectations/issues/1133>`_)
 
 
+0.9.5
+-----------------
+* Fixed unexpected behavior with suite edit, data docs and jupyter
+* pytest pinned to 5.3.5
+
+
 0.9.4
 -----------------
 * Update CLI `init` flow to support snowflake transient tables
@@ -637,4 +643,4 @@ to top-level names.
 * New output formats are available for all expectations
 * Significant improvements to test suite and compatibility
 
-*Last updated*: |lastupdate|
+
