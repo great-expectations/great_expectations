@@ -101,8 +101,8 @@ class SiteBuilder(object):
 
         telemetry_config = data_context.get_config_with_variables_substituted().get('anonymized_usage_data')
         data_context_id = None
-        if telemetry_config and telemetry_config.get("enabled") and telemetry_config.get("data_context_id"):
-            data_context_id = telemetry_config.get("data_context_id")
+        if usage_statistics_config and usage_statistics_config.get("enabled") and usage_statistics_config.get("data_context_id"):
+            data_context_id = usage_statistics_config.get("data_context_id")
 
         self.data_context_id = data_context_id
 
@@ -427,7 +427,7 @@ class DefaultSiteIndexBuilder(object):
         return index_links_dict
 
     def get_calls_to_action(self):
-        telemetry = None
+        usage_statistics = None
         db_driver = None
         datasource_classes_by_name = self.data_context.list_datasources()
 
@@ -444,7 +444,7 @@ class DefaultSiteIndexBuilder(object):
                     pass
 
             datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
-            telemetry = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
+            usage_statistics = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
                 "ge-init-datadocs-v2",
                 datasource_type,
                 db_driver,
@@ -452,10 +452,10 @@ class DefaultSiteIndexBuilder(object):
 
         return {
             "header": "To continue exploring Great Expectations check out one of these tutorials...",
-            "buttons": self._get_call_to_action_buttons(telemetry)
+            "buttons": self._get_call_to_action_buttons(usage_statistics)
         }
 
-    def _get_call_to_action_buttons(self, telemetry):
+    def _get_call_to_action_buttons(self, usage_statistics):
         """
         Build project and user specific calls to action buttons.
 
@@ -498,9 +498,9 @@ class DefaultSiteIndexBuilder(object):
         results.append(customize_data_docs)
         results.append(s3_team_site)
 
-        if telemetry:
+        if usage_statistics:
             for button in results:
-                button.link = button.link + telemetry
+                button.link = button.link + usage_statistics
 
         return results
 

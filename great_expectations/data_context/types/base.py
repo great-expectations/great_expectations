@@ -32,7 +32,7 @@ class DataContextConfig(DictDot):
             stores,
             data_docs_sites,
             config_variables_file_path=None,
-            anonymized_usage_data=None,
+            anonymized_usage_statistics=None,
             commented_map=None
     ):
         if commented_map is None:
@@ -52,14 +52,14 @@ class DataContextConfig(DictDot):
         self.stores = stores
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
-        if anonymized_usage_data is None:
-            anonymized_usage_data = {
+        if anonymized_usage_statistics is None:
+            anonymized_usage_statistics = {
                 "enabled": True,
                 "data_context_id": str(uuid.uuid4())
             }
-        if not anonymized_usage_data.get("data_context_id"):
-            anonymized_usage_data["data_context_id"] = str(uuid.uuid4())
-        self.anonymized_usage_data = anonymized_usage_data
+        if not anonymized_usage_statistics.get("data_context_id"):
+            anonymized_usage_statistics["data_context_id"] = str(uuid.uuid4())
+        self.anonymized_usage_statistics = anonymized_usage_statistics
 
     @property
     def commented_map(self):
@@ -91,7 +91,7 @@ class DataContextConfig(DictDot):
             "stores": self.stores,
             "data_docs_sites": self.data_docs_sites,
             "config_variables_file_path": self.config_variables_file_path,
-            "anonymized_usage_data": self.anonymized_usage_data
+            "anonymized_usage_statistics": self.anonymized_usage_statistics
         }
         if self.config_variables_file_path is None:
             del myself['config_variables_file_path']
@@ -117,7 +117,7 @@ class DatasourceConfig(DictDot):
 class AnonymizedUsageDataConfigchema(Schema):
     data_context_id = fields.Str()
     enabled = fields.Boolean(default=True)
-    telemetry_url = fields.URL(allow_none=True)
+    usage_statistics_url = fields.URL(allow_none=True)
 
 
 class DatasourceConfigSchema(Schema):
@@ -148,7 +148,7 @@ class DataContextConfigSchema(Schema):
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     config_variables_file_path = fields.Str(allow_none=True)
-    anonymized_usage_data = fields.Nested(AnonymizedUsageDataConfigchema)
+    anonymized_usage_statistics = fields.Nested(AnonymizedUsageDataConfigchema)
 
     # noinspection PyUnusedLocal
     @pre_dump

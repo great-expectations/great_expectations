@@ -33,8 +33,8 @@ from great_expectations.profile.basic_dataset_profiler import (
 )
 
 import great_expectations.exceptions as ge_exceptions
-from ..core.logging.telemetry import telemetry_enabled_method, DEFAULT_TELEMETRY_URL, \
-    run_validation_operator_telemetry, TelemetryHandler
+from ..core.logging.usage_statistics import usage_statistics_enabled_method, DEFAULT_USAGE_STATISTICS_URL, \
+    run_validation_operator_usage_statistics, UsageStatisticsHandler
 
 from ..validator.validator import Validator
 from .templates import (
@@ -108,7 +108,7 @@ class BaseDataContext(object):
             raise
         return True
 
-    @telemetry_enabled_method(method_name="data_context.__init__")
+    @usage_statistics_enabled_method(method_name="data_context.__init__")
     def __init__(self, project_config, context_root_dir=None):
         """DataContext constructor
 
@@ -131,11 +131,11 @@ class BaseDataContext(object):
         if self.plugins_directory is not None:
             sys.path.append(self.plugins_directory)
 
-        # We want to have directories set up before initializing telemetry so that we can obtain a context instance id
+        # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
         self._in_memory_instance_id = None  # This variable *may* be used in case we cannot save an instance id
-        updated_usage_data = self._initialize_telemetry(**project_config.anonymized_usage_data)
-        if updated_usage_data != project_config.anonymized_usage_data:
-            project_config.anonymized_usage_data = updated_usage_data
+        updated_usage_statistics = self._initialize_usage_statistics(**project_config.anonymized_usage_statistics)
+        if updated_usage_statistics != project_config.anonymized_usage_statistics:
+            project_config.anonymized_usage_statistics = updated_usage_statistics
 
         # Init data sources
         self._datasources = {}
@@ -157,7 +157,7 @@ class BaseDataContext(object):
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
 
-        self._register_telemetry_details()
+        self._register_usage_statistics_details()
 
     def _build_store(self, store_name, store_config):
         new_store = instantiate_class_from_config(
@@ -193,39 +193,39 @@ class BaseDataContext(object):
         for store_name, store_config in store_configs.items():
             self._build_store(store_name, store_config)
 
-    def _initialize_telemetry(self, data_context_id, enabled=True, telemetry_url=None):
-        """Initialize the telemetry system."""
+    def _initialize_usage_statistics(self, data_context_id, enabled=True, usage_statistics_url=None):
+        """Initialize the usage statistics system."""
         if not enabled:
-            logger.info("Telemetry is disabled; skipping initialization.")
-            self._telemetry_handler = None
+            logger.info("Usage statistics is disabled; skipping initialization.")
+            self._usage_statistics_handler = None
             current_config = {
                 "enabled": enabled,
             }
             if data_context_id:
                 current_config["data_context_id"] = data_context_id
-            if telemetry_url:
-                current_config["telemetry_url"] = telemetry_url
+            if usage_statistics_url:
+                current_config["usage_statistics_url"] = usage_statistics_url
             return current_config
 
-        if telemetry_url is None:
-            telemetry_url = DEFAULT_TELEMETRY_URL
+        if usage_statistics_url is None:
+            usage_statistics_url = DEFAULT_USAGE_STATISTICS_URL
             explicit_url = False
         else:
             explicit_url = True
 
-        self._telemetry_handler = TelemetryHandler(
-            data_context=self, data_context_id=data_context_id, telemetry_url=telemetry_url)
+        self._usage_statistics_handler = UsageStatisticsHandler(
+            data_context=self, data_context_id=data_context_id, usage_statistics_url=usage_statistics_url)
         current_config = {
             "enabled": enabled,
             "data_context_id": data_context_id,
         }
-        if telemetry_url != DEFAULT_TELEMETRY_URL or explicit_url:
-            current_config["telemetry_url"] = telemetry_url
+        if usage_statistics_url != DEFAULT_USAGE_STATISTICS_URL or explicit_url:
+            current_config["usage_statistics_url"] = usage_statistics_url
         return current_config
 
-    def _register_telemetry_details(self):
-        if self._telemetry_handler:
-            self._telemetry_handler.register_telemetry_details()
+    def _register_usage_statistics_details(self):
+        if self._usage_statistics_handler:
+            self._usage_statistics_handler.register_usage_statistics_details()
 
     def add_store(self, store_name, store_config):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
@@ -558,8 +558,8 @@ class BaseDataContext(object):
         )
         return validator.get_dataset()
 
-    @telemetry_enabled_method(method_name="data_context.run_validation_operator",
-                              args_payload_fn=run_validation_operator_telemetry)
+    @usage_statistics_enabled_method(method_name="data_context.run_validation_operator",
+                                     args_payload_fn=run_validation_operator_usage_statistics)
     def run_validation_operator(
             self,
             validation_operator_name,
@@ -951,7 +951,7 @@ class BaseDataContext(object):
         """
         return return_obj
 
-    @telemetry_enabled_method(method_name="data_context.build_data_docs")
+    @usage_statistics_enabled_method(method_name="data_context.build_data_docs")
     def build_data_docs(self, site_names=None, resource_identifiers=None):
         """
         Build Data Docs for your project.
