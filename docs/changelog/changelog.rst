@@ -2,7 +2,8 @@
 
 develop
 -----------------
-
+* DataDocs: Expectation Suite name on Validation Result pages now link to Expectation Suite page
+* `great_expectations init`: cli now asks user if csv has header when adding a Spark Datasource with csv file
 
 0.9.5
 -----------------
