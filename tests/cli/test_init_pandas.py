@@ -189,7 +189,11 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
     context = DataContext(ge_dir)
     assert context.list_datasources() == [
-        {"name": "files_datasource", "class_name": "PandasDatasource"}
+        {
+            "name": "files_datasource",
+            "class_name": "PandasDatasource",
+            "module_name": "great_expectations.datasource",
+        }
     ]
     assert context.list_expectation_suites()[0].expectation_suite_name == "my_suite"
     assert len(context.list_expectation_suites()) == 1

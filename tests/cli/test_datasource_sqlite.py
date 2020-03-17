@@ -49,7 +49,7 @@ def test_cli_datasorce_list(empty_data_context, empty_sqlite_db, caplog):
         assert len(stdout) >= 60 and len(stdout) <= 75
     else:
         assert (
-            "[{'name': 'wow_a_datasource', 'class_name': 'SqlAlchemyDatasource'}]"
+            "[{'name': 'wow_a_datasource', 'class_name': 'SqlAlchemyDatasource', 'module_name': 'great_expectations.datasource'}]"
             in stdout
         )
 
@@ -74,7 +74,11 @@ def _add_datasource_and_credentials_to_context(context, datasource_name, sqlite_
 
     expected_datasources = original_datasources
     expected_datasources.append(
-        {"name": datasource_name, "class_name": "SqlAlchemyDatasource"}
+        {
+            "name": datasource_name,
+            "class_name": "SqlAlchemyDatasource",
+            "module_name": "great_expectations.datasource",
+        }
     )
 
     assert context.list_datasources() == expected_datasources
@@ -110,7 +114,11 @@ def _add_datasource__with_two_generators_and_credentials_to_context(context, dat
 
     expected_datasources = original_datasources
     expected_datasources.append(
-        {"name": datasource_name, "class_name": "SqlAlchemyDatasource"}
+        {
+            "name": datasource_name,
+            "class_name": "SqlAlchemyDatasource",
+            "module_name": "great_expectations.datasource",
+        }
     )
 
     assert context.list_datasources() == expected_datasources

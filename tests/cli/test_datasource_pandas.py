@@ -43,7 +43,11 @@ def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
     )
 
     assert context.list_datasources() == [
-        {"name": "wow_a_datasource", "class_name": "PandasDatasource"}
+        {
+            "name": "wow_a_datasource",
+            "class_name": "PandasDatasource",
+            "module_name": "great_expectations.datasource",
+        }
     ]
 
     runner = CliRunner(mix_stderr=False)
@@ -61,7 +65,7 @@ def test_cli_datasorce_list(caplog, empty_data_context, filesystem_csv_2):
         assert len(stdout) >= 60 and len(stdout) <= 70
     else:
         assert (
-            "[{'name': 'wow_a_datasource', 'class_name': 'PandasDatasource'}]" in stdout
+            "[{'name': 'wow_a_datasource', 'class_name': 'PandasDatasource', 'module_name': 'great_expectations.datasource'}]" in stdout
         )
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
