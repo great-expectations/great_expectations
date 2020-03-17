@@ -257,7 +257,7 @@ def test_site_builder_usage_statistics_disabled(site_builder_data_context_with_h
         "enabled": False,
         "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c"
     }
-    data_context_id = context.get_config_with_variables_substituted()["anonymized_usage_data"]["data_context_id"]
+    data_context_id = context.anonymized_usage_statistics["data_context_id"]
 
     sites = site_builder_data_context_with_html_store_titanic_random._project_config_with_variables_substituted.data_docs_sites
     local_site_config = sites["local_site"]
