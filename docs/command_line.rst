@@ -260,7 +260,7 @@ To this end, this command interactively helps you choose some data, generates a 
 
     They are put in your ``great_expectations/uncommitted`` directory and you can delete them at any time.
 
-    Because they can expose actual data, we stronly suggest leaving them in the ``uncommitted`` directory to avoid potential data leaks into source control.
+    Because they can expose actual data, we strongly suggest leaving them in the ``uncommitted`` directory to avoid potential data leaks into source control.
 
 
 ``great_expectations suite edit <SUITE_NAME> --no-jupyter``
