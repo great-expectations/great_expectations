@@ -226,7 +226,11 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     context = DataContext(ge_dir)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
-        {"class_name": "SqlAlchemyDatasource", "name": "titanic"}
+        {
+            "class_name": "SqlAlchemyDatasource",
+            "name": "titanic",
+            "module_name": "great_expectations.datasource",
+        }
     ]
 
     first_suite = context.list_expectation_suites()[0]
