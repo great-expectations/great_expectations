@@ -16,7 +16,7 @@ def guard(*args, **kwargs):
     raise ConnectionError("Internet Access is Blocked!")
 
 
-def main(nap_duration=1, block_network=False, enable_telemetry=True):
+def main(nap_duration=1, block_network=False, enable_usage_statistics=True):
     if block_network:
         socket.socket = guard
 
@@ -50,11 +50,11 @@ def main(nap_duration=1, block_network=False, enable_telemetry=True):
                 },
                 data_docs_sites={},
                 config_variables_file_path=None,
-                anonymized_usage_data={
-                    "enabled": enable_telemetry,
+                anonymized_usage_statistics={
+                    "enabled": enable_usage_statistics,
                     # Leaving data_context_id as none would cause a new id to be generated
                     "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
-                    "telemetry_url": "https://m7hebk7006.execute-api.us-east-1.amazonaws.com/qa/great_expectations/v1/telemetry",
+                    "usage_statistics_url": "https://m7hebk7006.execute-api.us-east-1.amazonaws.com/qa/great_expectations/v1/usage_statistics",
                 },
                 commented_map=None,
             )
@@ -101,13 +101,13 @@ if __name__ == '__main__':
     try:
         res = sys.argv[3]
         if res in ["y", "yes", "True", "true", "t", "T"]:
-            enable_telemetry = True
+            enable_usage_statistics = True
         else:
-            enable_telemetry = False
+            enable_usage_statistics = False
     except IndexError:
-        enable_telemetry = True
+        enable_usage_statistics = True
     except ValueError:
-        print("Unrecognized value for telemetry_enabled. Setting to True.")
-        enable_telemetry = True
+        print("Unrecognized value for usage_statistics_enabled. Setting to True.")
+        enable_usage_statistics = True
 
-    main(nap_duration, block_network=block_network, enable_telemetry=enable_telemetry)
+    main(nap_duration, block_network=block_network, enable_usage_statistics=enable_usage_statistics)

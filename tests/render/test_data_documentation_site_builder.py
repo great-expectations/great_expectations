@@ -214,7 +214,7 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
 
 
 @freeze_time("09/24/2019 23:18:36")
-def test_site_builder_telemetry_enabled(site_builder_data_context_with_html_store_titanic_random):
+def test_site_builder_usage_statistics_enabled(site_builder_data_context_with_html_store_titanic_random):
     context = site_builder_data_context_with_html_store_titanic_random
 
     sites = site_builder_data_context_with_html_store_titanic_random._project_config_with_variables_substituted.get('data_docs_sites', [])
@@ -251,9 +251,9 @@ def test_site_builder_telemetry_enabled(site_builder_data_context_with_html_stor
 
 
 @freeze_time("09/24/2019 23:18:36")
-def test_site_builder_telemetry_disabled(site_builder_data_context_with_html_store_titanic_random):
+def test_site_builder_usage_statistics_disabled(site_builder_data_context_with_html_store_titanic_random):
     context = site_builder_data_context_with_html_store_titanic_random
-    context._project_config.anonymized_usage_data = {
+    context._project_config.anonymized_usage_statistics = {
         "enabled": False,
         "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c"
     }

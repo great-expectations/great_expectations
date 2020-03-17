@@ -2,7 +2,7 @@ import pytest
 from contextlib import contextmanager
 from moto import mock_s3
 
-from great_expectations.core.logging import S3_TELEMETRY_BUCKET
+from great_expectations.core.logging import S3_USAGE_STATISTICS_BUCKET
 
 import boto3
 
@@ -18,14 +18,14 @@ def logging_wrapper():
 
 @pytest.fixture(scope="module")
 def logging_bucket():
-    bucket = S3_TELEMETRY_BUCKET
+    bucket = S3_USAGE_STATISTICS_BUCKET
     with mock_s3():
         conn = boto3.resource('s3', region_name='us-east-1')
         conn.create_bucket(Bucket=bucket)
         yield bucket
 
 
-def test_basic_telemetry(logging_bucket):
+def test_basic_usage_statistics(logging_bucket):
     with logging_wrapper():
         logger = logging.getLogger("great_expectations.test.module")
         s3_handler = S3Handler("great_expectations", logging_bucket, compress=True)
