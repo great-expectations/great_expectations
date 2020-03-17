@@ -642,4 +642,4 @@ to top-level names.
 * New output formats are available for all expectations
 * Significant improvements to test suite and compatibility
 
-*Last updated*: |lastupdate|
+

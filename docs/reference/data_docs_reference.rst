@@ -474,4 +474,4 @@ Dependencies
 
 Data Docs is implemented in the :py:mod:`great_expectations.render` module.
 
-*last updated*: |lastupdate|
+

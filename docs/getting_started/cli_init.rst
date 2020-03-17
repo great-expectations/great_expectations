@@ -30,4 +30,4 @@ Once you have decided which data you will use, you are ready to start. Run this 
 
 After you complete the `init` command, read this article to get a more complete picture of how data teams use Great Expectations:  :ref:`typical_workflow`.
 
-*last updated*: |lastupdate|
+

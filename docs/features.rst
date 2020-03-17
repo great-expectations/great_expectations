@@ -23,4 +23,4 @@ and our `blog <https://greatexpectations.io/blog>`__ for more information on how
    /features/batch_kwargs_generator
    /features/ge_on_teams
 
-*last updated*: |lastupdate|
+
