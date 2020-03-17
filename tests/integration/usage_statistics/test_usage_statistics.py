@@ -10,9 +10,9 @@ import boto3
 
 from great_expectations.data_context.util import file_relative_path
 
-USAGE_STATISTICS_QA_URL = "https://m7hebk7006.execute-api.us-east-1.amazonaws.com/qa/great_expectations/v1/telemetry"
+USAGE_STATISTICS_QA_URL = "https://2j6l8hs162.execute-api.us-east-1.amazonaws.com/qa/great_expectations/v1/usage_statistics"
 
-logGroupName = "/great_expectations/telemetry/qa"
+logGroupName = "/great_expectations/usage_statistics/qa"
 
 
 @pytest.fixture(scope="session")
