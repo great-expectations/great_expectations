@@ -1530,7 +1530,7 @@ class DataContext(BaseDataContext):
         # If the data_context_id is different on disk (or absent and so was just generated)
         # then we should save the current data back to disk so that it will persist.
         disk_config = self._load_project_config()
-        if disk_config != project_config:
+        if disk_config.anonymized_usage_statistics != project_config.anonymized_usage_statistics:
             self._save_project_config()
 
     def _load_project_config(self):
