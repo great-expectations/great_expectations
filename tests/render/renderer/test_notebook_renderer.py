@@ -406,7 +406,7 @@ suite.expectations = []
 batch_kwargs = {
     'path': '/home/foo/data/10k.csv',
     'datasource': 'files_datasource'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -518,7 +518,7 @@ suite.expectations = []
 batch_kwargs = {
     'path': '/home/foo/data/10k.csv',
     'datasource': 'files_datasource'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -618,7 +618,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -730,7 +730,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {'foo': 'bar', 'datasource': 'things'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -839,7 +839,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -949,7 +949,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {'foo': 'bar', 'datasource': 'things'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -1058,7 +1058,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {'path': '../../3.csv', 'datasource': '3'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },
@@ -1221,7 +1221,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {'path': '../../foo/data'}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""",
                 "outputs": [],
             },

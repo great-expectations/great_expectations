@@ -79,7 +79,7 @@ suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
 
 batch_kwargs = {}
-batch = context.get_batch(batch_kwargs, suite.expectation_suite_name)
+batch = context.get_batch(batch_kwargs, suite)
 batch.head()""".format(
                 suite_name, batch_kwargs
             ),

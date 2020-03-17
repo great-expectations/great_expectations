@@ -117,4 +117,4 @@ View Module
     :undoc-members:
     :show-inheritance:
 
-*last updated*: |lastupdate|
+
