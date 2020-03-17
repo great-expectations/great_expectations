@@ -30,6 +30,10 @@ def tap():
 )
 def tap_new(suite, tap_filename, directory, csv=None, datasource=None):
     """BETA! Create a new tap file."""
+    if not tap_filename.endswith(".py"):
+        cli_message("<red>Tap filename must end in .py. Please correct and re-run</red>")
+        exit(1)
+
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
@@ -43,7 +47,7 @@ def tap_new(suite, tap_filename, directory, csv=None, datasource=None):
         cli_message("<red>No datasources found in the context.</red>")
         sys.exit(1)
 
-    # Note this can exit if no suite is found.
+    # Note this will exit if no suite is found.
     suite = load_expectation_suite(context, suite)
 
     n_expectations = len(suite.expectations)

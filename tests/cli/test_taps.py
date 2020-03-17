@@ -20,6 +20,27 @@ def test_tap_help_output(caplog,):
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+def test_tap_new_with_filename_not_ending_in_py_raises_helpful_error(caplog, empty_data_context):
+    """
+    We call the "tap new" command with a bogus filename
+
+    The command should:
+    - exit with a clear error message
+    """
+    context = empty_data_context
+    root_dir = context.root_directory
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli, f"tap new sweet_suite tap -d {root_dir}", catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 1
+    assert "Tap filename must end in .py. Please correct and re-run" in stdout
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
 def test_tap_new_on_context_with_no_datasources(caplog, empty_data_context):
     """
     We call the "tap new" command on a data context that has no datasources
