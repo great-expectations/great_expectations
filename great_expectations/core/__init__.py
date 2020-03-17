@@ -17,7 +17,7 @@ from great_expectations.core.util import nested_update
 from great_expectations.types import DictDot
 
 from great_expectations.exceptions import InvalidExpectationConfigurationError, InvalidExpectationKwargsError, \
-    UnavailableMetricError, ParserError
+    UnavailableMetricError, ParserError, InvalidCacheValueError
 
 logger = logging.getLogger(__name__)
 
@@ -623,6 +623,8 @@ class ExpectationSuiteSchema(Schema):
 
 class ExpectationValidationResult(object):
     def __init__(self, success=None, expectation_config=None, result=None, meta=None, exception_info=None):
+        if result and not self.validate_result_dict(result):
+            raise InvalidCacheValueError(result)
         self.success = success
         self.expectation_config = expectation_config
         # TODO: re-add
@@ -675,6 +677,20 @@ class ExpectationValidationResult(object):
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
+
+    def validate_result_dict(self, result):
+        if result.get("unexpected_count") and result["unexpected_count"] < 0:
+            return False
+        if result.get("unexpected_percent") and (result["unexpected_percent"] < 0 or result["unexpected_percent"] > 100):
+            return False
+        if result.get("missing_percent") and (result["missing_percent"] < 0 or result["missing_percent"] > 100):
+            return False
+        if result.get("unexpected_percent_nonmissing") and (
+                result["unexpected_percent_nonmissing"] < 0 or result["unexpected_percent_nonmissing"] > 100):
+            return False
+        if result.get("missing_count") and result["missing_count"] < 0:
+            return False
+        return True
 
     def to_json_dict(self):
         myself = expectationValidationResultSchema.dump(self).data
