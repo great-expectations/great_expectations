@@ -139,16 +139,16 @@ class BaseDataContext(object):
 
         # Init data sources
         self._datasources = {}
-        for datasource in self._project_config_with_variables_substituted["datasources"].keys():
+        for datasource in self._project_config_with_variables_substituted.datasources.keys():
             self.get_datasource(datasource)
 
         # Init stores
         self._stores = dict()
-        self._init_stores(self._project_config_with_variables_substituted["stores"])
+        self._init_stores(self._project_config_with_variables_substituted.stores)
 
         # Init validation operators
         self.validation_operators = {}
-        for validation_operator_name, validation_operator_config in self._project_config_with_variables_substituted["validation_operators"].items():
+        for validation_operator_name, validation_operator_config in self._project_config_with_variables_substituted.validation_operators.items():
             self.add_validation_operator(
                 validation_operator_name,
                 validation_operator_config,
@@ -254,7 +254,7 @@ class BaseDataContext(object):
 
         self._project_config["validation_operators"][validation_operator_name] = validation_operator_config
         new_validation_operator = instantiate_class_from_config(
-            config=self._project_config_with_variables_substituted["validation_operators"][validation_operator_name],
+            config=self._project_config_with_variables_substituted.validation_operators[validation_operator_name],
             runtime_environment={
                 "data_context": self,
             },
@@ -295,7 +295,7 @@ class BaseDataContext(object):
         site_urls = []
 
         site_names = None
-        sites = self._project_config_with_variables_substituted.get('data_docs_sites', [])
+        sites = self._project_config_with_variables_substituted.data_docs_sites
         if sites:
             logger.debug("Found data_docs_sites.")
 
@@ -342,7 +342,7 @@ class BaseDataContext(object):
     def plugins_directory(self):
         """The directory in which custom plugin modules should be placed."""
         return self._normalize_absolute_or_relative_path(
-            self._project_config_with_variables_substituted["plugins_directory"]
+            self._project_config_with_variables_substituted.plugins_directory
         )
 
     @property
@@ -361,7 +361,7 @@ class BaseDataContext(object):
 
     @property
     def expectations_store_name(self):
-        return self._project_config_with_variables_substituted["expectations_store_name"]
+        return self._project_config_with_variables_substituted.expectations_store_name
 
     @property
     def instance_id(self):
@@ -407,7 +407,9 @@ class BaseDataContext(object):
         if not config:
             config = self._project_config
 
-        return substitute_all_config_variables(config, self._load_config_variables_file())
+        return DataContextConfig(
+            **substitute_all_config_variables(config, self._load_config_variables_file())
+        )
 
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
@@ -623,7 +625,7 @@ class BaseDataContext(object):
         # context provides. Datasources should not see unsubstituted variables in their config.
         if initialize:
             datasource = self._build_datasource_from_config(
-                name, self._project_config_with_variables_substituted["datasources"][name])
+                name, self._project_config_with_variables_substituted.datasources[name])
             self._datasources[name] = datasource
         else:
             datasource = None
@@ -682,9 +684,9 @@ class BaseDataContext(object):
         """
         if datasource_name in self._datasources:
             return self._datasources[datasource_name]
-        elif datasource_name in self._project_config_with_variables_substituted["datasources"]:
+        elif datasource_name in self._project_config_with_variables_substituted.datasources:
             datasource_config = copy.deepcopy(
-                self._project_config_with_variables_substituted["datasources"][datasource_name])
+                self._project_config_with_variables_substituted.datasources[datasource_name])
         else:
             raise ValueError(
                 "Unable to load datasource `%s` -- no configuration found or invalid configuration." % datasource_name
@@ -708,7 +710,7 @@ class BaseDataContext(object):
             List(dict): each dictionary includes "name", "class_name", and "module_name" keys
         """
         datasources = []
-        for key, value in self._project_config_with_variables_substituted["datasources"].items():
+        for key, value in self._project_config_with_variables_substituted.datasources.items():
             datasources.append({
                 "name": key,
                 "class_name": value["class_name"],
@@ -851,11 +853,11 @@ class BaseDataContext(object):
 
     @property
     def evaluation_parameter_store_name(self):
-        return self._project_config_with_variables_substituted["evaluation_parameter_store_name"]
+        return self._project_config_with_variables_substituted.evaluation_parameter_store_name
 
     @property
     def validations_store_name(self):
-        return self._project_config_with_variables_substituted["validations_store_name"]
+        return self._project_config_with_variables_substituted.validations_store_name
 
     @property
     def validations_store(self):
@@ -978,7 +980,7 @@ class BaseDataContext(object):
 
         index_page_locator_infos = {}
 
-        sites = self._project_config_with_variables_substituted.get('data_docs_sites', [])
+        sites = self._project_config_with_variables_substituted.data_docs_sites
         if sites:
             logger.debug("Found data_docs_sites. Building sites...")
 
