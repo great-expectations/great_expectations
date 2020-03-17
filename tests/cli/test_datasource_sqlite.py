@@ -282,7 +282,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert len(validation.results) == 51
 
     assert "Preparing column 1 of 7" in caplog.messages[0]
-    assert len(caplog.messages) == 7
+    assert len(caplog.messages) == 10
     assert_no_tracebacks(result)
 
 
@@ -342,7 +342,7 @@ def test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg(
     )
 
     assert "Preparing column 1 of 7" in caplog.messages[0]
-    assert len(caplog.messages) == 7
+    assert len(caplog.messages) == 10
     assert_no_tracebacks(result)
 
 
@@ -393,7 +393,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert len(validation.results) == 51
 
     assert "Preparing column 1 of 7" in caplog.messages[0]
-    assert len(caplog.messages) == 7
+    assert len(caplog.messages) == 10
     assert_no_tracebacks(result)
 
 
@@ -468,7 +468,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     assert row_count_validation_results[0].result["observed_value"] == 97
 
     assert "Preparing column 1 of 7" in caplog.messages[0]
-    assert len(caplog.messages) == 7
+    assert len(caplog.messages) == 10
     assert_no_tracebacks(result)
 
 
@@ -527,7 +527,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert len(validation.results) == 51
 
     assert "Preparing column 1 of 7" in caplog.messages[0]
-    assert len(caplog.messages) == 7
+    assert len(caplog.messages) == 10
     assert_no_tracebacks(result)
 
 
