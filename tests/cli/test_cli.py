@@ -17,6 +17,7 @@ def test_cli_command_entrance(caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, catch_exceptions=False)
     assert result.exit_code == 0
+    print(result.output)
     assert (
         result.output
         == """Usage: cli [OPTIONS] COMMAND [ARGS]...

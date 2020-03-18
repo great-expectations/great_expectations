@@ -18,6 +18,7 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
    intro
    getting_started
    expectation_glossary
+   command_line
    tutorials
    features
    reference
@@ -31,5 +32,3 @@ Index
 
 * :ref:`genindex`
 * :ref:`modindex`
-
-
