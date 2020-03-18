@@ -30,7 +30,10 @@ from great_expectations.core import ExpectationSuiteValidationResult, Expectatio
         "module_name": "great_expectations.data_context.store"
     }
 ])
-def param_store(request):
+def param_store(request, test_backends):
+    if "postgresql" not in test_backends:
+        pytest.skip("skipping fixture because postgresql not selected")
+
     return instantiate_class_from_config(
         config=request.param,
         config_defaults={
