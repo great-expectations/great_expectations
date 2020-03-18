@@ -258,8 +258,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                     continue
                 elif self.filepath_suffix and not filepath.endswith(self.filepath_suffix):
                     continue
-                else:
-                    key = self._convert_filepath_to_key(filepath)
+                key = self._convert_filepath_to_key(filepath)
                 if key:
                     key_list.append(key)
 
@@ -363,9 +362,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 self.prefix,
             )
             if self.filepath_prefix and not s3_object_key.startswith(self.filepath_prefix):
-                # There can be other keys located in the same bucket; they are *not* our keys
                 continue
-
+            elif self.filepath_suffix and not s3_object_key.endswith(self.filepath_suffix):
+                continue
             key = self._convert_filepath_to_key(s3_object_key)
             if key:
                 key_list.append(key)
@@ -467,14 +466,20 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_name,
                 self.prefix,
             )
-
+            if self.filepath_prefix and not gcs_object_key.startswith(self.filepath_prefix):
+                continue
+            elif self.filepath_suffix and not gcs_object_key.endswith(self.filepath_suffix):
+                continue
             key = self._convert_filepath_to_key(gcs_object_key)
             if key:
                 key_list.append(key)
 
         return key_list
 
+    def get_url_for_key(self, key, protocol=None):
+        path = self._convert_key_to_filepath(key)
+        return "https://storage.googleapis.com/" + self.bucket + "/" + path
+
     def _has_key(self, key):
         all_keys = self.list_keys()
         return key in all_keys
-

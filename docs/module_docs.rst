@@ -17,4 +17,4 @@ Module docs
    /module_docs/validation_operators_module
    /module_docs/great_expectations_module
 
-*last updated*: |lastupdate|
+
