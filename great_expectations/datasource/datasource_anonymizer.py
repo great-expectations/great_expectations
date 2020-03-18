@@ -6,6 +6,8 @@ from great_expectations.util import load_class
 class DatasourceAnonymizer(Anonymizer):
     def anonymize_datasource_class_name(self, class_name, module_name):
         try:
+            if module_name is None:
+                module_name = "great_expectations.datasource"
             class_ = load_class(class_name=class_name, module_name=module_name)
 
             # Get a baseline:
