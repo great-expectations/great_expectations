@@ -2,6 +2,7 @@
 
 develop
 -----------------
+* Docs: update Usage Statistics section with info on new anonymized event tracking
 
 
 0.9.5
