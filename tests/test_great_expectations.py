@@ -247,11 +247,10 @@ def test_validate():
 
 
 @mock.patch('great_expectations.core.ExpectationValidationResult.validate_result_dict', return_value=False)
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dict):
 
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read()).data
+        my_expectation_suite = expectationSuiteSchema.loads(f.read())
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
@@ -266,11 +265,10 @@ def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dic
 
 
 @mock.patch('great_expectations.core.ExpectationValidationResult.validate_result_dict', return_value=False)
-@pytest.mark.xfail(condition=PY2, reason="legacy python")
 def test_validate_with_invalid_result(validate_result_dict):
 
     with open(file_relative_path(__file__, "./test_sets/titanic_expectations.json")) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read()).data
+        my_expectation_suite = expectationSuiteSchema.loads(f.read())
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
