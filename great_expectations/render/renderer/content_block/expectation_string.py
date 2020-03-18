@@ -630,7 +630,10 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             elif params["max_value"] is None:
                 template_str = "fraction of unique values must be at least $min_value."
             else:
-                template_str = "fraction of unique values must be between $min_value and $max_value."
+                if params["min_value"] != params["max_value"]:
+                    template_str = "fraction of unique values must be between $min_value and $max_value."
+                else:
+                    template_str = "fraction of unique values must be exactly $min_value."
 
         if include_column_name:
             template_str = "$column " + template_str

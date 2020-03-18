@@ -32,12 +32,12 @@ Within the table of contents, each section has specific role to play.
 * *Community* helps expand the Great Expectations community by explaining how to get in touch to ask questions, make contributions, etc.
 * *Core concepts* are always phrased as nouns. These docs provide more examples of usage, and deeper explanations for why Great Expectations is set up the way it is.
 * *reference* are always phrased as verbs: "Creating custom Expectations", "Deploying Great Expectations in Spark", etc. They help users accomplish specific goals that go beyond the generic Getting Started tutorials.
-* *Changelog and roadmap* 
+* *Changelog and roadmap*
 * *Module docs*
 
 **CLI**
 
-The CLI has some conventions of its own.
+The :ref:`CLI <command_line>` has some conventions of its own.
 
 * The CLI never writes to disk without asking first.
 * Questions are always phrased as conversational sentences.
@@ -48,12 +48,10 @@ The CLI has some conventions of its own.
 * Within those constraints, shorter is better. When in doubt, shorten.
 * Clickable links (usually to documentation) are blue.
 * Copyable bash commands are green.
-* All top-level bash commands must be verbs: "build documentation", not "documentation"
+* All top-level bash commands must be nouns: "docs build", not "build docs"
 
 
 Resources
 ===========
 * We follow the
   `Sphinx guide for sections <http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#sections>`__.
-
-

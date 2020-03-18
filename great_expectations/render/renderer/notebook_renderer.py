@@ -23,14 +23,15 @@ class NotebookRenderer(Renderer):
         # TODO probably replace this with Suite logic at some point
         expectations_by_column = {"table_expectations": []}
         for exp in expectations:
-            if "_table_" in exp["expectation_type"]:
-                expectations_by_column["table_expectations"].append(exp)
-            else:
+            if "column" in exp["kwargs"]:
                 col = exp["kwargs"]["column"]
 
                 if col not in expectations_by_column.keys():
                     expectations_by_column[col] = []
                 expectations_by_column[col].append(exp)
+            else:
+                expectations_by_column["table_expectations"].append(exp)
+
         return expectations_by_column
 
     @classmethod
