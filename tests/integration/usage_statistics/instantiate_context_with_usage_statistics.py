@@ -50,7 +50,7 @@ def main(nap_duration=1, block_network=False, enable_usage_statistics=True):
                 },
                 data_docs_sites={},
                 config_variables_file_path=None,
-                anonymized_usage_statistics={
+                anonymous_usage_statistics={
                     "enabled": enable_usage_statistics,
                     # Leaving data_context_id as none would cause a new id to be generated
                     "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",

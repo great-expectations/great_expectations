@@ -9,7 +9,9 @@ os:
 - linux
 env:
   global:
-    secure: kEzD0ak7sXZspOv4014PRC5+DWQirM1NsQyTfwuZt7u0flTCtYg80Sw4lOuYZmtdztXrY/XresnK6HpCUkFtwwVuODDnrOnj1nO4l4Sb9awoxZn6zo3Q5TyC/sflDrakPsxwKEvxIH1cvzWqRwzmGXc5LEqn5SJyHR8RBhx6zUSgt8KIXLkfLTu0naj4dJH0Hmu4pqjRTmekwfoFHnYJ7aWopZChvxc6Mo2FmFFhl7Zt70EKh6RRB+aUG5xwvwf5iE+YX9YUQfqnA+2ys3O3m4wWGTxwJcdt8ZoexlYjAnSrOePdVO7EvosaBQYEyyU3xS28DzKPQXGoyJLCLNuAmzpxq4yRzPCJJF4Swl0yqY4+ab2OJrNP4A7MuMrQUDdNebUA4BY6PoTM82zfVkDCxf/fDqYPgMOAlNJb+R3jUffRJVlVq/M4sCr3sbGrnzELeTAf63jNIyH0U5LNQzzQUAT/Kyiimey17YqC9RhOUTNrojTkyXJ+ckc7z24yEfT1hUo6DAMM2b0ko/iB1MT3+ujT6qxamHe5imeX+4W1PpZsqkaRgo/dvhIsYoVPFeoBkY/N7PLgIwXhBuuFCH61p2Kx+z8hs34lVZ5GYVHDjeoDEEfm3SQrOuM2uASL9rGWj5yXiUs0OtTjmmKgEBZtNQ9JWHPY0AAdnfgS/GhWm54=
+  - secure: kEzD0ak7sXZspOv4014PRC5+DWQirM1NsQyTfwuZt7u0flTCtYg80Sw4lOuYZmtdztXrY/XresnK6HpCUkFtwwVuODDnrOnj1nO4l4Sb9awoxZn6zo3Q5TyC/sflDrakPsxwKEvxIH1cvzWqRwzmGXc5LEqn5SJyHR8RBhx6zUSgt8KIXLkfLTu0naj4dJH0Hmu4pqjRTmekwfoFHnYJ7aWopZChvxc6Mo2FmFFhl7Zt70EKh6RRB+aUG5xwvwf5iE+YX9YUQfqnA+2ys3O3m4wWGTxwJcdt8ZoexlYjAnSrOePdVO7EvosaBQYEyyU3xS28DzKPQXGoyJLCLNuAmzpxq4yRzPCJJF4Swl0yqY4+ab2OJrNP4A7MuMrQUDdNebUA4BY6PoTM82zfVkDCxf/fDqYPgMOAlNJb+R3jUffRJVlVq/M4sCr3sbGrnzELeTAf63jNIyH0U5LNQzzQUAT/Kyiimey17YqC9RhOUTNrojTkyXJ+ckc7z24yEfT1hUo6DAMM2b0ko/iB1MT3+ujT6qxamHe5imeX+4W1PpZsqkaRgo/dvhIsYoVPFeoBkY/N7PLgIwXhBuuFCH61p2Kx+z8hs34lVZ5GYVHDjeoDEEfm3SQrOuM2uASL9rGWj5yXiUs0OtTjmmKgEBZtNQ9JWHPY0AAdnfgS/GhWm54=
+  - secure: n3gs26Ig7/X1XeB7cv1fAQi9GZDdSFPWeGthTU0ASFA9NAO8agnvRCuGALY8Ni6GFQlpoKndYAnnkETzdQoECwKhwweeKWTzUOSqOuk+z2nVj1Zzy6QHokb3vh3Hcb2c/ZGjAG2X6C+ByhVWLxgWRLSmJ3jfVA0eGyVaRQhTNuHkv0FWxlCPAHjLCcXMbHuCVOMY1hsFvRfBNlKsNrbL8E59qmAztQU5wJOvyTb6zRe9wJi6Q8hhrbDQd0I6e3dI2N4YjjbMWt11Zp65vJKAWMBxcvcSazc0+Ub5bU3BjF+etqMb21CwYEPg1gCo07MZTek2ho2/EInUnb1NU4Zzi/MQSEfWNAF9VNUPCHQnUBDd/JFF0h73nVoy08wPiaA4KKtmn4gJnmF3RWs8MxcqzeyyBd8CVnH78cJY/kRk4pCvUAAoih8GKJOSvpIyoe/uPypSw5M4JrBaoh54RIm4/feBVb/emIMYnsa13z3vzQaUIEMjiC9HWJamBfiWoAcMIpIHckGA/9DFgsKXRxwG5u9BrkGyRsqT8c07SXdI/WdYjCJRbnCMPIl1LKzWILJpy0dbm7sd1Jl2sTJlYI6esz0t0fz4/jGCYoOts3VzKGPLHgI4SA+flrdpB1Ge6KGX2uOpQEfdezSkBr3TLKyxEX2RFrtNs9TBav3nmY/BQ5M=
+  - secure: R94TEyU/1HZio2aSN66w13YqEN45EGyNuJwRvbshNFqe3K/tnOzIX4cN7HZ4Rb2IiKW9C/lg8RuVq9cD30uKoIin8QHBZjVCLx3s6fYqqX/aLAmLEQioIxiMFcsJwldwahufOmVW3DBgHD2bGbr2YFEKwwzmOq+wPAknxBfo1h/A7+6C/icuYbXFVV6EuRpKgjK8Gp1Op2fFnDXygXbyypwSy1jaT5+hIX07sWE/f8+BaIglG6p4ZQp92sNr1YiOWd+Ax/Fuz6oCQytX3WopWUVJwlQE+ZK7KOZqJWF8LFgr6vZwNu1yUF4dbVdR+LSRJ+yuHocIhXM0xisznWTRiCRqUv0/iAHSFMjeEZuZrzqQXAJgb0rGejGlo4sqd1TooPcHRam21nzlreKTdmGeRZbdu/S9AUqP7qqBGpYpPUihART+HHe8B3jjTHa+IlHmQnNBvuUVGi5wGBmmwG2fA8rrQ0P1yyJMnXbHHofCiY9UK7P1NtNh5IwNRuvK9xdvc8NMleKMRvBGaoZGVpPu6spasBxRYqHt/e31fwIkmx80srk24l7gAYevqXSdohjNs4ego0uQwRbzz7Hmj2/Vtq+2lEXi8gQ/yOmiyhC0aGk3XVN/7SwTqytYtcG37l+xHu8ix4qS8JQhIFcNd0SCZCOIo8cEkUJYHOKcHY5VcIk=
 stages:
   - name: test
   - name: deploy
@@ -60,11 +62,11 @@ jobs:
       - pytest --no-sqlalchemy --no-postgresql --no-spark --slack_hook=$SLACK_WEBHOOK --slack_report_link=$TRAVIS_BUILD_WEB_URL
         --slack_channel=notifications-great_expectations tests/
     after_success:
-      - python --version
+    - python --version
   - stage: deploy
     python: 3.6
     script:
-      - git tag --annotate 0.9.5 -m 0.9.5 || echo "tag exists, skipping"
+      - git tag --annotate 0.9.6 -m 0.9.6 || echo "tag exists, skipping"
     deploy:
       provider: pypi
       edge: true

@@ -99,10 +99,10 @@ class SiteBuilder(object):
         self.data_context = data_context
         self.store_backend = store_backend
 
-        usage_statistics_config = data_context.anonymized_usage_statistics
+        usage_statistics_config = data_context.anonymous_usage_statistics
         data_context_id = None
-        if usage_statistics_config and usage_statistics_config.get("enabled") and usage_statistics_config.get("data_context_id"):
-            data_context_id = usage_statistics_config.get("data_context_id")
+        if usage_statistics_config and usage_statistics_config.enabled and usage_statistics_config.data_context_id:
+            data_context_id = usage_statistics_config.data_context_id
 
         self.data_context_id = data_context_id
 

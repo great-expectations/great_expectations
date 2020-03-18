@@ -24,8 +24,8 @@ from great_expectations.dataset import (
 )
 from great_expectations.profile import ColumnsExistProfiler
 
-expectationValidationResultSchema = ExpectationValidationResultSchema(strict=True)
-expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema(strict=True)
+expectationValidationResultSchema = ExpectationValidationResultSchema()
+expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
@@ -498,7 +498,7 @@ def evaluate_json_test(data_asset, expectation_type, test):
 
     # Check results
     if test['exact_match_out'] is True:
-        assert expectationValidationResultSchema.load(test['out']).data == result
+        assert expectationValidationResultSchema.load(test['out']) == result
     else:
         # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
         # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how

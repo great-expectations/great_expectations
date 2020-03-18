@@ -13,6 +13,7 @@ from great_expectations.exceptions import DatasourceInitializationError
 from great_expectations.types import ClassConfig
 from great_expectations.core.batch import Batch
 from great_expectations.core.util import nested_update
+from great_expectations.types.configurations import ClassConfigSchema, classConfigSchema
 
 logger = logging.getLogger(__name__)
 
@@ -52,14 +53,9 @@ class SqlAlchemyDatasource(Datasource):
         """
 
         if data_asset_type is None:
-            data_asset_type = ClassConfig(
-                class_name="SqlAlchemyDataset")
+            data_asset_type = {"class_name": "SqlAlchemyDataset"}
         else:
-            try:
-                data_asset_type = ClassConfig(**data_asset_type)
-            except TypeError:
-                # In this case, we allow the passed config, for now, in case they're using a legacy string-only config
-                pass
+            data_asset_type = classConfigSchema.dump(ClassConfig(**data_asset_type))
 
         configuration = kwargs
         configuration["data_asset_type"] = data_asset_type
@@ -133,7 +129,6 @@ class SqlAlchemyDatasource(Datasource):
             options = credentials["url"]
         else:
             # Update credentials with anything passed during connection time
-            credentials.update(dict(**kwargs))
             drivername = credentials.pop("drivername")
             schema_name = credentials.pop("schema_name", None)
             if schema_name is not None:
