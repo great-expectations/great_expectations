@@ -243,7 +243,6 @@ def run_validation_operator_usage_statistics(
         data_context_id = data_context.data_context_id
     except AttributeError:
         data_context_id = None
-    logger.debug("run_validation_operator_usage_statistics found data_context_id: " + str(data_context_id))
     anonymizer = _anonymizers.get(data_context_id, None)
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
