@@ -10,7 +10,7 @@ class ExpectationsStore(Store):
     _key_class = ExpectationSuiteIdentifier
 
     def __init__(self, store_backend=None, runtime_environment=None):
-        self._expectationSuiteSchema = ExpectationSuiteSchema(strict=True)
+        self._expectationSuiteSchema = ExpectationSuiteSchema()
 
         if store_backend is not None:
             store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
@@ -30,7 +30,7 @@ class ExpectationsStore(Store):
         super(ExpectationsStore, self).__init__(store_backend=store_backend, runtime_environment=runtime_environment)
 
     def serialize(self, key, value):
-        return self._expectationSuiteSchema.dumps(value).data
+        return self._expectationSuiteSchema.dumps(value)
 
     def deserialize(self, key, value):
-        return self._expectationSuiteSchema.loads(value).data
+        return self._expectationSuiteSchema.loads(value)

@@ -25,8 +25,8 @@ class AssetConfigurationSchema(Schema):
     table = fields.Str()
     schema = fields.Str()
 
-    @post_load(pass_many=False)
-    def make_asset_configuration(self, data):
+    @post_load
+    def make_asset_configuration(self, data, **kwargs):
         return AssetConfiguration(**data)
 
 
@@ -77,7 +77,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             assets = {}
         try:
             self._assets = {
-                asset_name: assetConfigurationSchema.load(asset_config).data for
+                asset_name: assetConfigurationSchema.load(asset_config) for
                 (asset_name, asset_config) in assets.items()
             }
         except ValidationError as err:
