@@ -116,7 +116,7 @@ class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String()
+    class_name = fields.String(required=True)
     module_name = fields.String(allow_none=True)
     data_asset_type = fields.Nested(ClassConfigSchema)
     # TODO: Update to generator-specific
@@ -127,9 +127,6 @@ class DatasourceConfigSchema(Schema):
     # noinspection PyUnusedLocal
     @post_load
     def make_datasource_config(self, data, **kwargs):
-        # Why this validation isn't working natively, I don't know
-        if "class_name" not in data:
-            raise ValidationError("missing field: class_name")
         return DatasourceConfig(**data)
 
 
