@@ -32,7 +32,7 @@ class DataContextConfig(DictDot):
             stores,
             data_docs_sites,
             config_variables_file_path=None,
-            anonymized_usage_statistics=None,
+            anonymous_usage_statistics=None,
             commented_map=None
     ):
         if commented_map is None:
@@ -52,11 +52,11 @@ class DataContextConfig(DictDot):
         self.stores = stores
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
-        if anonymized_usage_statistics is None:
-            anonymized_usage_statistics = AnonymizedUsageStatisticsConfig()
-        elif isinstance(anonymized_usage_statistics, dict):
-            anonymized_usage_statistics = AnonymizedUsageStatisticsConfig(**anonymized_usage_statistics)
-        self.anonymized_usage_statistics = anonymized_usage_statistics
+        if anonymous_usage_statistics is None:
+            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
+        elif isinstance(anonymous_usage_statistics, dict):
+            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(**anonymous_usage_statistics)
+        self.anonymous_usage_statistics = anonymous_usage_statistics
 
     @property
     def commented_map(self):
@@ -217,7 +217,7 @@ class DataContextConfigSchema(Schema):
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     config_variables_file_path = fields.Str(allow_none=True)
-    anonymized_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
+    anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
 
     # noinspection PyMethodMayBeStatic
     # noinspection PyUnusedLocal

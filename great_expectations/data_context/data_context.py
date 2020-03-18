@@ -134,7 +134,7 @@ class BaseDataContext(object):
 
         # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
         self._in_memory_instance_id = None  # This variable *may* be used in case we cannot save an instance id
-        self._initialize_usage_statistics(project_config.anonymized_usage_statistics)
+        self._initialize_usage_statistics(project_config.anonymous_usage_statistics)
 
         # Init data sources
         self._datasources = {}
@@ -330,8 +330,8 @@ class BaseDataContext(object):
         return self.get_config_with_variables_substituted()
 
     @property
-    def anonymized_usage_statistics(self):
-        return self._project_config_with_variables_substituted.anonymized_usage_statistics
+    def anonymous_usage_statistics(self):
+        return self._project_config_with_variables_substituted.anonymous_usage_statistics
 
     @property
     def stores(self):
@@ -349,7 +349,7 @@ class BaseDataContext(object):
 
     @property
     def data_context_id(self):
-        return self._project_config_with_variables_substituted.anonymized_usage_statistics.data_context_id
+        return self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
 
     @property
     def instance_id(self):
@@ -1507,7 +1507,7 @@ class DataContext(BaseDataContext):
             project_config,
             context_root_directory
         )
-        if project_config.anonymized_usage_statistics.explicit_id is False:
+        if project_config.anonymous_usage_statistics.explicit_id is False:
             self._save_project_config()
 
     def _load_project_config(self):
