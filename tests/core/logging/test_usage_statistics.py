@@ -45,8 +45,10 @@ def in_memory_data_context_config():
 
 def test_consistent_name_anonymization(in_memory_data_context_config):
     context = BaseDataContext(in_memory_data_context_config)
-    payload = run_validation_operator_usage_statistics(context, "action_list_operator", assets_to_validate=[(
-        {"__fake_batch_kwargs": "mydatasource"}, "__fake_expectation_suite_name")], run_id="foo")
+    assert context.data_context_id == "6a52bdfa-e182-455b-a825-e69f076e67d6"
+    payload = run_validation_operator_usage_statistics(
+        context, "action_list_operator",
+        assets_to_validate=[({"__fake_batch_kwargs": "mydatasource"}, "__fake_expectation_suite_name")], run_id="foo")
     assert payload["n_assets"] == 1
     # For a *specific* data_context_id, all names will be consistently anonymized
-    assert payload["validation_operator_name"] == "9c71a58ca61757cb04b9a2d008416400"
+    assert payload["validation_operator_name"] == '5bb011891aa7d41401e57759d5f5cb01'
