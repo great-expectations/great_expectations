@@ -66,7 +66,8 @@ Check out [The Era of DIY Data Validation is Over]() for more details.
 -->
 ![ooooo ahhhh](./readme_assets/terminal.gif)
 
-**Tests are docs and docs are tests**
+**Tests are docs and docs are tests** <span style="color:red">&#183; This feature is in alpha
+</span>
 
 Many data teams struggle to maintain up-to-date data documentation. Great Expectations solves this problem by rendering Expectations directly into clean, human-readable documentation. 
 
