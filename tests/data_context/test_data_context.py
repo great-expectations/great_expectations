@@ -34,6 +34,7 @@ from great_expectations.exceptions import (
     DataContextError,
 )
 from great_expectations.util import gen_directory_tree_str
+from tests.integration.usage_statistics.test_integration_usage_statistics import USAGE_STATISTICS_QA_URL
 from tests.test_utils import safe_remove
 
 try:
@@ -492,6 +493,11 @@ def basic_data_context_config():
                 "class_name": "ActionListValidationOperator",
                 "action_list": []
             }
+        },
+        "anonymized_usage_statistics": {
+            "enabled": True,
+            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
+            "usage_statistics_url": USAGE_STATISTICS_QA_URL
         }
     })
 

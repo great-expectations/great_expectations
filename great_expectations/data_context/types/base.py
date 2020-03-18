@@ -63,7 +63,7 @@ class DataContextConfig(DictDot):
     @classmethod
     def from_commented_map(cls, commented_map):
         try:
-            config = dataContextConfigSchema.load(commented_map).data
+            config = dataContextConfigSchema.load(commented_map)
             return cls(commented_map=commented_map, **config)
         except ValidationError:
             logger.error("Encountered errors during loading data context config. See ValidationError for more details.")
@@ -71,7 +71,7 @@ class DataContextConfig(DictDot):
 
     def to_yaml(self, outfile):
         commented_map = deepcopy(self.commented_map)
-        commented_map.update(dataContextConfigSchema.dump(self).data)
+        commented_map.update(dataContextConfigSchema.dump(self))
         yaml.dump(commented_map, outfile)
 
     def as_dict(self):
@@ -94,11 +94,22 @@ class DataContextConfig(DictDot):
 
 
 class DatasourceConfig(DictDot):
-    def __init__(self, class_name, module_name=None, data_asset_type=None, generators=None):
+    def __init__(self, class_name, module_name=None, data_asset_type=None, generators=None, credentials=None,
+                 reader_method=None, limit=None, **kwargs):
+        # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
         self._module_name = module_name
-        self.data_asset_type = data_asset_type,
-        self.generators = generators
+        self.data_asset_type = data_asset_type
+        if generators is not None:
+            self.generators = generators
+        if credentials is not None:
+            self.credentials = credentials
+        if reader_method is not None:
+            self.reader_method = reader_method
+        if limit is not None:
+            self.limit = limit
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     @property
     def class_name(self):
@@ -180,24 +191,29 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
 
 
 class DatasourceConfigSchema(Schema):
-    class_name = fields.Str()
-    # REMOVE WHEN SUPPORT FOR TYPE CONFIGURATION NO LONGER NEEDED
-    type = fields.Str(allow_none=True)
-    module_name = fields.Str(allow_none=True)
+    class Meta:
+        unknown = INCLUDE
+
+    class_name = fields.String()
+    module_name = fields.String(allow_none=True)
     data_asset_type = fields.Nested(ClassConfigSchema)
     # TODO: Update to generator-specific
     # generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))
-    generators = fields.Dict(keys=fields.Str(), values=fields.Dict())
+    generators = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     credentials = fields.Raw(allow_none=True)
 
     # noinspection PyUnusedLocal
     @post_load
     def make_datasource_config(self, data, **kwargs):
+        # Why this validation isn't working natively, I don't know
+        if "class_name" not in data:
+            raise ValidationError("missing field: class_name")
         return DatasourceConfig(**data)
 
 
 class DataContextConfigSchema(Schema):
-    config_version = fields.Number(validate=lambda x: 0 < x < 100, error_messages={"invalid": "BLARG!"})
+    config_version = fields.Number(validate=lambda x: 0 < x < 100, error_messages={"invalid": "config version must "
+                                                                                              "be a number."})
     datasources = fields.Dict(keys=fields.Str(), values=fields.Nested(DatasourceConfigSchema))
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
@@ -209,14 +225,6 @@ class DataContextConfigSchema(Schema):
     config_variables_file_path = fields.Str(allow_none=True)
     anonymized_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
 
-    # noinspection PyUnusedLocal
-    @pre_dump
-    def handle_nested_dictionaries(self, data, **kwargs):
-        # PY2 support -> this local handling will be unnecessary when we can upgrade to marshmallow 3
-        datasources = {name: datasourceConfigSchema.dump(config).data for name, config in data['datasources'].items()}
-        data['datasources'] = datasources
-        return data
-
     # noinspection PyMethodMayBeStatic
     # noinspection PyUnusedLocal
     def handle_error(self, exc, data, **kwargs):
@@ -226,7 +234,7 @@ class DataContextConfigSchema(Schema):
                                                           exc)
 
     @validates_schema
-    def validate_schema(self, data):
+    def validate_schema(self, data, **kwargs):
         if 'config_version' not in data:
             raise ge_exceptions.InvalidDataContextConfigError(
                 "The key `config_version` is missing; please check your config file.",
@@ -262,5 +270,5 @@ class DataContextConfigSchema(Schema):
             )
 
 
-dataContextConfigSchema = DataContextConfigSchema(strict=True)
-datasourceConfigSchema = DatasourceConfigSchema(strict=True)
+dataContextConfigSchema = DataContextConfigSchema()
+datasourceConfigSchema = DatasourceConfigSchema()
