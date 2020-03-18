@@ -7,7 +7,8 @@ Usage Statistics
 
 We use CDN fetch rates to get a sense of total community usage of Great Expectations. Specifically, we host images and style sheets on a public CDN and count the number of unique IPs from which resources are fetched.
 
-In addition, we also collect usage statistics when certain Great Expectations methods are called. These methods are decorated with `@usage_statistics_enabled_method` and when called, will emit usage statistics messages with the following schema:
+In addition, Great Expectations performs simple event tracking by emitting usage statistics messages when certain Great Expectations methods are called.\
+We do not track credentials, the contents of Expectations or Validation results, or names. These methods are decorated with `@usage_statistics_enabled_method` and when called, will emit messages with the following schema:
 
 .. code-block:: python
 
@@ -103,25 +104,92 @@ In addition, we also collect usage statistics when certain Great Expectations me
        }
     }
 
-All decorated methods will emit the above required fields; the only field unique to each method is the `event_payload`.
+All decorated methods will emit the above fields. The only fields unique to each method are the `method` and `event_payload` fields.
 
 Great Expectations currently emits usage statistics for the following methods:
 
-    * `data_context.__init__`
-        * event_payload: `{}`
-    * `data_context.run_validation_operator`
-          * event_payload:
-          .. code-block:: python
+* `DataContext.__init__`
+    * event_payload: `{}`
+    * message example:
+    .. code-block:: python
 
-              {
-                "validation_operator_name": MD5 hash of validation operator name,
-                "n_assets": number of assets validated
-              }
+        {
+             "event_payload": {},
+             "method": "data_context.__init__",
+             "success": true,
+             "event_time": "2020-03-17T23:11:02.042Z",
+             "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
+             "data_context_instance_id": "5439e0cc-e95b-4bf2-aa6f-703400697f88",
+             "ge_version": "0.9.1+200.g9ae4e7700",
+             "platform.system": "Darwin",
+             "platform.release": "19.3.0",
+             "version_info": [3, 7, 4, "final", 0],
+             "anonymized_datasources": [
+                {"parent_class": "PandasDatasource"}
+             ]
+        }
 
-    * `data_context.build_data_docs`
-          * event_payload: `{}`
+* `DataContext.run_validation_operator`
+      * event_payload:
+      .. code-block:: python
 
-Other than standard web request data, we don’t collect any data data that could be used to identify individual users. You can suppress the images by changing ``static_images_dir`` in ``great_expectations/render/view/templates/top_navbar.j2``.
+          {
+            "validation_operator_name": MD5 hash of validation operator name,
+            "n_assets": number of assets validated
+          }
+      * message example:
+      .. code-block:: python
+
+          {
+             'event_payload': {
+                  'validation_operator_name': 'e9cadb1ef634807b784f572776d653ba',
+                  'n_assets': 1
+             },
+             'method': 'data_context.run_validation_operator',
+             'success': True,
+             'event_time': '2020-03-17T23:11:02.441Z',
+             'data_context_id': '705dd2a2-27f8-470f-9ebe-e7058fd7a534',
+             'data_context_instance_id': '5439e0cc-e95b-4bf2-aa6f-703400697f88',
+             'ge_version': '0.9.1+200.g9ae4e7700',
+             'platform.system': 'Darwin',
+             'platform.release': '19.3.0',
+             'version_info': [3, 7, 4, 'final', 0],
+             'anonymized_datasources': [
+                  {'parent_class': 'PandasDatasource'}
+             ]
+          }
+
+* `DataContext.build_data_docs`
+    * event_payload: `{}`
+    * message example:
+    .. code-block:: python
+
+        {
+             "event_payload": {},
+             "method": "data_context.build_data_docs",
+             "success": true,
+             "event_time": "2020-03-16T23:11:02.042Z",
+             "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
+             "data_context_instance_id": "5439e0cc-e95b-4bf2-aa6f-703400697f88",
+             "ge_version": "0.9.1+200.g9ae4e7700",
+             "platform.system": "Darwin",
+             "platform.release": "19.3.0",
+             "version_info": [3, 7, 4, "final", 0],
+             "anonymized_datasources": [
+                {"parent_class": "PandasDatasource"}
+             ]
+        }
+
+Other than standard web request data, we don’t collect any data data that could be used to identify individual users.
+You can suppress the images by changing ``static_images_dir`` in ``great_expectations/render/view/templates/top_navbar.j2``.
+
+You can opt out of event tracking at any time by adding the following to the top of your project’s `great_expectations/great_expectations.yml` file:
+
+.. code-block:: yaml
+
+    anonymized_usage_statistics:
+      enabled: false
+
 
 Please reach out `on Slack <https://greatexpectations.io/slack>`__ if you have any questions or comments.
 
