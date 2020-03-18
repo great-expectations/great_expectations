@@ -34,3 +34,6 @@ class DataContextKey(object):
 
     def __hash__(self):
         return hash(self.to_tuple())
+
+    def __repr__(self):
+        return self.__class__.__name__ + "::" + "/".join(self.to_tuple())

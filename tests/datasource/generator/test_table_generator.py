@@ -82,8 +82,9 @@ def test_db_introspection(postgresql_sqlalchemy_datasource, caplog):
     assert batch_kwargs.table == table_name
     assert batch_kwargs.schema == "public"
     assert batch_kwargs.limit == 10
-    assert ["Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "
-            "use new supplemental kwargs."] == [rec.message for rec in caplog.records]
+    assert [rec.message for rec in caplog.records] == [
+        "Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "
+        "use new supplemental kwargs."]
 
 
 def test_query_generator_view(sqlite_view_engine):

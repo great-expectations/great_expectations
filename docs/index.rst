@@ -32,4 +32,4 @@ Index
 * :ref:`genindex`
 * :ref:`modindex`
 
-*last updated*: |lastupdate|
+

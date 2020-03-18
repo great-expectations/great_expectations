@@ -178,4 +178,4 @@ In validation mode, they can be overridden using flags:
 
     great_expectations validation csv my_dataset.csv my_expectations.json --result_format=BOOLEAN_ONLY --catch_exceptions=False --include_config=True
 
-*last updated*: |lastupdate|
+

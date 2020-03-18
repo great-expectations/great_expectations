@@ -59,6 +59,6 @@ for authentication.
 
 Install the pybigquery package for the BigQuery sqlalchemy dialect (``pip install pybigquery``)
 
-*Last updated*: |lastupdate|
 
-*last updated*: |lastupdate|
+
+

@@ -23,4 +23,4 @@ Changelog
 
    /changelog/changelog
 
-*last updated*: |lastupdate|
+
