@@ -67,9 +67,11 @@ Check out [The Era of DIY Data Validation is Over]() for more details.
 ![ooooo ahhhh](./readme_assets/terminal.gif)
 
 **Tests are docs and docs are tests**  
+<small>
 ```diff 
 - This feature is in alpha
 ```
+</small>
 
 Many data teams struggle to maintain up-to-date data documentation. Great Expectations solves this problem by rendering Expectations directly into clean, human-readable documentation. 
 
