@@ -18,8 +18,8 @@ CURRENT_CONFIG_VERSION = 1
 MINIMUM_SUPPORTED_CONFIG_VERSION = 1
 DEFAULT_USAGE_STATISTICS_URL = "https://4tdy72oi8f.execute-api.us-east-1.amazonaws.com/prod/great_expectations/v1/usage_statistics"
 
-class DataContextConfig(DictDot):
 
+class DataContextConfig(DictDot):
     def __init__(
             self,
             config_version,
@@ -54,11 +54,17 @@ class DataContextConfig(DictDot):
         self.config_variables_file_path = config_variables_file_path
         if anonymized_usage_statistics is None:
             anonymized_usage_statistics = AnonymizedUsageStatisticsConfig()
+        elif isinstance(anonymized_usage_statistics, dict):
+            anonymized_usage_statistics = AnonymizedUsageStatisticsConfig(**anonymized_usage_statistics)
         self.anonymized_usage_statistics = anonymized_usage_statistics
 
     @property
     def commented_map(self):
         return self._commented_map
+
+    @property
+    def config_version(self):
+        return self._config_version
 
     @classmethod
     def from_commented_map(cls, commented_map):
@@ -73,24 +79,6 @@ class DataContextConfig(DictDot):
         commented_map = deepcopy(self.commented_map)
         commented_map.update(dataContextConfigSchema.dump(self))
         yaml.dump(commented_map, outfile)
-
-    def as_dict(self):
-        myself = {
-            "config_version": self._config_version,
-            "datasources": self.datasources,
-            "expectations_store_name": self.expectations_store_name,
-            "validations_store_name": self.validations_store_name,
-            "evaluation_parameter_store_name": self.evaluation_parameter_store_name,
-            "plugins_directory": self.plugins_directory,
-            "validation_operators": self.validation_operators,
-            "stores": self.stores,
-            "data_docs_sites": self.data_docs_sites,
-            "config_variables_file_path": self.config_variables_file_path,
-            "anonymized_usage_statistics": self.anonymized_usage_statistics
-        }
-        if self.config_variables_file_path is None:
-            del myself['config_variables_file_path']
-        return myself
 
 
 class DatasourceConfig(DictDot):
@@ -171,12 +159,14 @@ class AnonymizedUsageStatisticsConfig(DictDot):
     @usage_statistics_url.setter
     def usage_statistics_url(self, usage_statistics_url):
         self._usage_statistics_url = usage_statistics_url
+        self._explicit_url = True
 
 
 class AnonymizedUsageStatisticsConfigSchema(Schema):
     data_context_id = fields.UUID(required=False)
     enabled = fields.Boolean(default=True)
     usage_statistics_url = fields.URL(allow_none=True)
+    _explicit_url = fields.Boolean(required=False)
 
     # noinspection PyUnusedLocal
     @post_load()
@@ -186,8 +176,12 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
     # noinspection PyUnusedLocal
     @post_dump()
     def filter_implicit(self, data, **kwargs):
-        if not self.explicit_url:
+        if data["_explicit_url"]:
+            del data["_explicit_url"]
+        else:
+            del data["_explicit_url"]
             del data["usage_statistics_url"]
+        return data
 
 
 class DatasourceConfigSchema(Schema):
