@@ -1,6 +1,6 @@
 .. _changelog:
 
-develop
+0.9.6
 -----------------
 * validate result dict when instantiating an ExpectationValidationResult (`#1133 <https://github.com/great-expectations/great_expectations/issues/1133>`_)
 * DataDocs: Expectation Suite name on Validation Result pages now link to Expectation Suite page
