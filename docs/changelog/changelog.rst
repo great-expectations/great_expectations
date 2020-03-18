@@ -1,5 +1,9 @@
 .. _changelog:
 
+develop
+-----------------
+
+
 0.9.6
 -----------------
 * validate result dict when instantiating an ExpectationValidationResult (`#1133 <https://github.com/great-expectations/great_expectations/issues/1133>`_)
