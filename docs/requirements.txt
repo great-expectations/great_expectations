@@ -2,4 +2,4 @@ sphinx>=2.1
 sybil>=1.2.1
 sphinx_rtd_theme>=0.4.3
 sphinxcontrib-contentui>=0.2.4
-sphinxcontrib-lastupdate>=1.1
+sphinx-gitstamp>=0.3.1

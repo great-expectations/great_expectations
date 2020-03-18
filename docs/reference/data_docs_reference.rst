@@ -176,7 +176,7 @@ Building Data Docs
 Using the CLI
 ===============
 
-The great_expectations CLI can build comprehensive Data Docs from expectation
+The :ref:`Great Expectations CLI <command_line>` can build comprehensive Data Docs from expectation
 suites available to the configured context and validations available in the
 ``great_expectations/uncommitted`` directory.
 
@@ -473,5 +473,3 @@ Dependencies
 * Vega-Embed 4.0.0
 
 Data Docs is implemented in the :py:mod:`great_expectations.render` module.
-
-*last updated*: |lastupdate|

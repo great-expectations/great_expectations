@@ -40,7 +40,7 @@ extensions = [
     # 'sphinx.ext.mathjax'
     'sphinx.ext.napoleon',
     'sphinxcontrib.contentui',
-    'sphinxcontrib.lastupdate',
+    'sphinx_gitstamp',
     'sphinx.ext.autosectionlabel'
 ]
 
@@ -58,8 +58,9 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'great_expectations'
-copyright = u'2019, The Great Expectations Team'
+copyright = u'2020, The Great Expectations Team. '
 author = u'The Great Expectations Team'
+gitstamp_fmt = "%d %b %Y"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
