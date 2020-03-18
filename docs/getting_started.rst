@@ -24,4 +24,4 @@ Once Great Expectations is installed, follow this tutorial for a quick start.
    /getting_started/typical_workflow
 
 
-*last updated*: |lastupdate|
+

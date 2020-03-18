@@ -7,6 +7,7 @@ import logging
 import os
 import shutil
 import sys
+import uuid
 import warnings
 import webbrowser
 
@@ -21,6 +22,7 @@ from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     dataContextConfigSchema,
+    AnonymizedUsageStatisticsConfig,
     datasourceConfigSchema, DatasourceConfig)
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -32,10 +34,11 @@ from great_expectations.profile.basic_dataset_profiler import (
 )
 
 import great_expectations.exceptions as ge_exceptions
+from ..core.logging.usage_statistics import usage_statistics_enabled_method, \
+    run_validation_operator_usage_statistics, UsageStatisticsHandler
 
 from ..validator.validator import Validator
 from .templates import (
-    CONFIG_VARIABLES_INTRO,
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE,
 )
@@ -106,6 +109,7 @@ class BaseDataContext(object):
             raise
         return True
 
+    @usage_statistics_enabled_method(method_name="data_context.__init__")
     def __init__(self, project_config, context_root_dir=None):
         """DataContext constructor
 
@@ -118,7 +122,6 @@ class BaseDataContext(object):
         """
         if not BaseDataContext.validate_config(project_config):
             raise ge_exceptions.InvalidConfigError("Your project_config is not valid. Try using the CLI check-config command.")
-
         self._project_config = project_config
         if context_root_dir is not None:
             self._context_root_directory = os.path.abspath(context_root_dir)
@@ -129,18 +132,22 @@ class BaseDataContext(object):
         if self.plugins_directory is not None:
             sys.path.append(self.plugins_directory)
 
+        # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
+        self._in_memory_instance_id = None  # This variable *may* be used in case we cannot save an instance id
+        self._initialize_usage_statistics(project_config.anonymized_usage_statistics)
+
         # Init data sources
         self._datasources = {}
-        for datasource in self._project_config_with_variables_substituted["datasources"].keys():
+        for datasource in self._project_config_with_variables_substituted.datasources.keys():
             self.get_datasource(datasource)
 
         # Init stores
         self._stores = dict()
-        self._init_stores(self._project_config_with_variables_substituted["stores"])
+        self._init_stores(self._project_config_with_variables_substituted.stores)
 
         # Init validation operators
         self.validation_operators = {}
-        for validation_operator_name, validation_operator_config in self._project_config_with_variables_substituted["validation_operators"].items():
+        for validation_operator_name, validation_operator_config in self._project_config_with_variables_substituted.validation_operators.items():
             self.add_validation_operator(
                 validation_operator_name,
                 validation_operator_config,
@@ -148,6 +155,8 @@ class BaseDataContext(object):
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
+
+        self._register_usage_statistics_details()
 
     def _build_store(self, store_name, store_config):
         new_store = instantiate_class_from_config(
@@ -183,6 +192,21 @@ class BaseDataContext(object):
         for store_name, store_config in store_configs.items():
             self._build_store(store_name, store_config)
 
+    def _initialize_usage_statistics(self, usage_statistics_config: AnonymizedUsageStatisticsConfig):
+        """Initialize the usage statistics system."""
+        if not usage_statistics_config.enabled:
+            logger.info("Usage statistics is disabled; skipping initialization.")
+            self._usage_statistics_handler = None
+
+        self._usage_statistics_handler = UsageStatisticsHandler(
+            data_context=self,
+            data_context_id=usage_statistics_config.data_context_id,
+            usage_statistics_url=usage_statistics_config.usage_statistics_url)
+
+    def _register_usage_statistics_details(self):
+        if self._usage_statistics_handler:
+            self._usage_statistics_handler.register_usage_statistics_details()
+
     def add_store(self, store_name, store_config):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
@@ -210,7 +234,7 @@ class BaseDataContext(object):
 
         self._project_config["validation_operators"][validation_operator_name] = validation_operator_config
         new_validation_operator = instantiate_class_from_config(
-            config=self._project_config_with_variables_substituted["validation_operators"][validation_operator_name],
+            config=self._project_config_with_variables_substituted.validation_operators[validation_operator_name],
             runtime_environment={
                 "data_context": self,
             },
@@ -251,7 +275,7 @@ class BaseDataContext(object):
         site_urls = []
 
         site_names = None
-        sites = self._project_config_with_variables_substituted.get('data_docs_sites', [])
+        sites = self._project_config_with_variables_substituted.data_docs_sites
         if sites:
             logger.debug("Found data_docs_sites.")
 
@@ -298,12 +322,16 @@ class BaseDataContext(object):
     def plugins_directory(self):
         """The directory in which custom plugin modules should be placed."""
         return self._normalize_absolute_or_relative_path(
-            self._project_config_with_variables_substituted["plugins_directory"]
+            self._project_config_with_variables_substituted.plugins_directory
         )
 
     @property
     def _project_config_with_variables_substituted(self):
         return self.get_config_with_variables_substituted()
+
+    @property
+    def anonymized_usage_statistics(self):
+        return self._project_config_with_variables_substituted.anonymized_usage_statistics
 
     @property
     def stores(self):
@@ -317,7 +345,21 @@ class BaseDataContext(object):
 
     @property
     def expectations_store_name(self):
-        return self._project_config_with_variables_substituted["expectations_store_name"]
+        return self._project_config_with_variables_substituted.expectations_store_name
+
+    @property
+    def data_context_id(self):
+        return self._project_config_with_variables_substituted.anonymized_usage_statistics.data_context_id
+
+    @property
+    def instance_id(self):
+        instance_id = self._load_config_variables_file().get("instance_id")
+        if instance_id is None:
+            if self._in_memory_instance_id is not None:
+                return self._in_memory_instance_id
+            instance_id = str(uuid.uuid4())
+            self._in_memory_instance_id = instance_id
+        return instance_id
 
     #####
     #
@@ -327,25 +369,25 @@ class BaseDataContext(object):
 
     def _load_config_variables_file(self):
         """Get all config variables from the default location."""
-        if not hasattr(self, "root_directory"):
-            # A BaseDataContext does not have a directory in which to look
-            return {}
-
         config_variables_file_path = self.get_config().config_variables_file_path
         if config_variables_file_path:
             try:
-                with open(os.path.join(self.root_directory,
-                                       substitute_config_variable(config_variables_file_path, {})),
-                          "r") as config_variables_file:
+                # If the user specifies the config variable path with an environment variable, we want to substitute it
+                defined_path = substitute_config_variable(config_variables_file_path, {})
+                if not os.path.isabs(defined_path):
+                    # A BaseDataContext will not have a root directory; in that case use the current directory
+                    # for any non-absolute path
+                    root_directory = self.root_directory or os.curdir()
+                else:
+                    root_directory = ""
+                var_path = os.path.join(root_directory, defined_path)
+                with open(var_path, "r") as config_variables_file:
                     return yaml.load(config_variables_file) or {}
             except IOError as e:
                 if e.errno != errno.ENOENT:
                     raise
                 logger.debug("Generating empty config variables file.")
-                # TODO this might be the comment problem?
-                base_config_variables_store = yaml.load("{}")
-                base_config_variables_store.yaml_set_start_comment(CONFIG_VARIABLES_INTRO)
-                return base_config_variables_store
+                return {}
         else:
             return {}
 
@@ -353,7 +395,9 @@ class BaseDataContext(object):
         if not config:
             config = self._project_config
 
-        return substitute_all_config_variables(config, self._load_config_variables_file())
+        return DataContextConfig(
+            **substitute_all_config_variables(config, self._load_config_variables_file())
+        )
 
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
@@ -378,6 +422,9 @@ class BaseDataContext(object):
             logger.info("Creating new substitution_variables file at {config_variables_filepath}".format(
                 config_variables_filepath=config_variables_filepath)
             )
+            with open(config_variables_filepath, "w") as template:
+                template.write(CONFIG_VARIABLES_TEMPLATE)
+
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
@@ -501,6 +548,8 @@ class BaseDataContext(object):
         )
         return validator.get_dataset()
 
+    @usage_statistics_enabled_method(method_name="data_context.run_validation_operator",
+                                     args_payload_fn=run_validation_operator_usage_statistics)
     def run_validation_operator(
             self,
             validation_operator_name,
@@ -565,7 +614,7 @@ class BaseDataContext(object):
         # context provides. Datasources should not see unsubstituted variables in their config.
         if initialize:
             datasource = self._build_datasource_from_config(
-                name, self._project_config_with_variables_substituted["datasources"][name])
+                name, self._project_config_with_variables_substituted.datasources[name])
             self._datasources[name] = datasource
         else:
             datasource = None
@@ -620,9 +669,9 @@ class BaseDataContext(object):
         """
         if datasource_name in self._datasources:
             return self._datasources[datasource_name]
-        elif datasource_name in self._project_config_with_variables_substituted["datasources"]:
+        elif datasource_name in self._project_config_with_variables_substituted.datasources:
             datasource_config = copy.deepcopy(
-                self._project_config_with_variables_substituted["datasources"][datasource_name])
+                self._project_config_with_variables_substituted.datasources[datasource_name])
         else:
             raise ValueError(
                 "Unable to load datasource `%s` -- no configuration found or invalid configuration." % datasource_name
@@ -643,13 +692,14 @@ class BaseDataContext(object):
         """List currently-configured datasources on this context.
 
         Returns:
-            List(dict): each dictionary includes "name" and "class_name" keys
+            List(dict): each dictionary includes "name", "class_name", and "module_name" keys
         """
         datasources = []
-        for key, value in self._project_config_with_variables_substituted["datasources"].items():
+        for key, value in self._project_config_with_variables_substituted.datasources.items():
             datasources.append({
                 "name": key,
-                "class_name": value["class_name"]
+                "class_name": value["class_name"],
+                "module_name": value.get("module_name", "great_expectations.datasource")
             })
         return datasources
 
@@ -788,11 +838,11 @@ class BaseDataContext(object):
 
     @property
     def evaluation_parameter_store_name(self):
-        return self._project_config_with_variables_substituted["evaluation_parameter_store_name"]
+        return self._project_config_with_variables_substituted.evaluation_parameter_store_name
 
     @property
     def validations_store_name(self):
-        return self._project_config_with_variables_substituted["validations_store_name"]
+        return self._project_config_with_variables_substituted.validations_store_name
 
     @property
     def validations_store(self):
@@ -888,6 +938,7 @@ class BaseDataContext(object):
         """
         return return_obj
 
+    @usage_statistics_enabled_method(method_name="data_context.build_data_docs")
     def build_data_docs(self, site_names=None, resource_identifiers=None):
         """
         Build Data Docs for your project.
@@ -914,7 +965,7 @@ class BaseDataContext(object):
 
         index_page_locator_infos = {}
 
-        sites = self._project_config_with_variables_substituted.get('data_docs_sites', [])
+        sites = self._project_config_with_variables_substituted.data_docs_sites
         if sites:
             logger.debug("Found data_docs_sites. Building sites...")
 
@@ -1452,11 +1503,12 @@ class DataContext(BaseDataContext):
         self._context_root_directory = context_root_directory
 
         project_config = self._load_project_config()
-
         super(DataContext, self).__init__(
             project_config,
             context_root_directory
         )
+        if project_config.anonymized_usage_statistics.explicit_id is False:
+            self._save_project_config()
 
     def _load_project_config(self):
         """

@@ -57,4 +57,4 @@ Replace names in ``<>`` with the desired name. For example:
 
   urn:great_expectations:validations:dickens_data:expect_column_proportion_of_unique_values_to_be_between.result.observed_value:column=Title
 
-*last updated*: |lastupdate|
+

@@ -93,11 +93,18 @@ class SiteBuilder(object):
                  site_name=None,
                  site_index_builder=None,
                  site_section_builders=None,
-                 runtime_environment=None
+                 runtime_environment=None,
                  ):
         self.site_name = site_name
         self.data_context = data_context
         self.store_backend = store_backend
+
+        usage_statistics_config = data_context.anonymized_usage_statistics
+        data_context_id = None
+        if usage_statistics_config and usage_statistics_config.get("enabled") and usage_statistics_config.get("data_context_id"):
+            data_context_id = usage_statistics_config.get("data_context_id")
+
+        self.data_context_id = data_context_id
 
         # set custom_styles_directory if present
         custom_styles_directory = None
@@ -123,7 +130,8 @@ class SiteBuilder(object):
                 "data_context": data_context,
                 "custom_styles_directory": custom_styles_directory,
                 "target_store": self.target_store,
-                "site_name": self.site_name
+                "site_name": self.site_name,
+                "data_context_id": self.data_context_id
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -170,7 +178,8 @@ class SiteBuilder(object):
                 runtime_environment={
                     "data_context": data_context,
                     "target_store": self.target_store,
-                    "custom_styles_directory": custom_styles_directory
+                    "custom_styles_directory": custom_styles_directory,
+                    "data_context_id": self.data_context_id
                 },
                 config_defaults={
                     "name": site_section_name,
@@ -225,12 +234,14 @@ class DefaultSiteSectionBuilder(object):
             validation_results_limit=None,
             renderer=None,
             view=None,
+            data_context_id=None
     ):
         self.name = name
         self.source_store = data_context.stores[source_store_name]
         self.target_store = target_store
         self.run_id_filter = run_id_filter
         self.validation_results_limit = validation_results_limit
+        self.data_context_id = data_context_id
 
         if renderer is None:
             raise exceptions.InvalidConfigError(
@@ -297,7 +308,10 @@ class DefaultSiteSectionBuilder(object):
 
             try:
                 rendered_content = self.renderer_class.render(resource)
-                viewable_content = self.view_class.render(rendered_content)
+                viewable_content = self.view_class.render(
+                    rendered_content,
+                    data_context_id=self.data_context_id
+                )
             except Exception as e:
                 logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
                 continue
@@ -336,6 +350,7 @@ class DefaultSiteIndexBuilder(object):
             validation_results_limit=None,
             renderer=None,
             view=None,
+            data_context_id=None
     ):
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
         self.name = name
@@ -344,6 +359,7 @@ class DefaultSiteIndexBuilder(object):
         self.target_store = target_store
         self.show_cta_footer = show_cta_footer
         self.validation_results_limit = validation_results_limit
+        self.data_context_id = data_context_id
 
         if renderer is None:
             renderer = {
@@ -411,7 +427,7 @@ class DefaultSiteIndexBuilder(object):
         return index_links_dict
 
     def get_calls_to_action(self):
-        telemetry = None
+        usage_statistics = None
         db_driver = None
         datasource_classes_by_name = self.data_context.list_datasources()
 
@@ -428,7 +444,7 @@ class DefaultSiteIndexBuilder(object):
                     pass
 
             datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[last_datasource_class_name].value
-            telemetry = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
+            usage_statistics = "?utm_source={}&utm_medium={}&utm_campaign={}".format(
                 "ge-init-datadocs-v2",
                 datasource_type,
                 db_driver,
@@ -436,10 +452,10 @@ class DefaultSiteIndexBuilder(object):
 
         return {
             "header": "To continue exploring Great Expectations check out one of these tutorials...",
-            "buttons": self._get_call_to_action_buttons(telemetry)
+            "buttons": self._get_call_to_action_buttons(usage_statistics)
         }
 
-    def _get_call_to_action_buttons(self, telemetry):
+    def _get_call_to_action_buttons(self, usage_statistics):
         """
         Build project and user specific calls to action buttons.
 
@@ -482,9 +498,9 @@ class DefaultSiteIndexBuilder(object):
         results.append(customize_data_docs)
         results.append(s3_team_site)
 
-        if telemetry:
+        if usage_statistics:
             for button in results:
-                button.link = button.link + telemetry
+                button.link = button.link + usage_statistics
 
         return results
 
@@ -571,7 +587,10 @@ class DefaultSiteIndexBuilder(object):
 
         try:
             rendered_content = self.renderer_class.render(index_links_dict)
-            viewable_content = self.view_class.render(rendered_content)
+            viewable_content = self.view_class.render(
+                rendered_content,
+                data_context_id=self.data_context_id
+            )
         except Exception as e:
             logger.error("Exception occurred during data docs rendering: ", e, exc_info=True)
             return None

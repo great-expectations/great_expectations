@@ -4,11 +4,13 @@ import os
 import json
 import shutil
 
+from freezegun import freeze_time
+
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier, \
     ExpectationSuiteIdentifier
 from great_expectations.render.renderer.site_builder import SiteBuilder
 
-from great_expectations.data_context.util import safe_mmkdir
+from great_expectations.data_context.util import safe_mmkdir, instantiate_class_from_config, file_relative_path
 
 
 @pytest.mark.rendered_output
@@ -211,3 +213,81 @@ def test_configuration_driven_site_builder(site_builder_data_context_with_html_s
                                         "index.html") == html_url
 
 
+@freeze_time("09/24/2019 23:18:36")
+def test_site_builder_usage_statistics_enabled(site_builder_data_context_with_html_store_titanic_random):
+    context = site_builder_data_context_with_html_store_titanic_random
+
+    sites = site_builder_data_context_with_html_store_titanic_random._project_config_with_variables_substituted.data_docs_sites
+    local_site_config = sites["local_site"]
+    site_builder = instantiate_class_from_config(
+        config=local_site_config,
+        runtime_environment={
+            "data_context": context,
+            "root_directory": context.root_directory,
+            "site_name": "local_site"
+        },
+        config_defaults={
+            "module_name": "great_expectations.render.renderer.site_builder"
+        }
+    )
+    site_builder_return_obj = site_builder.build()
+    index_page_path = site_builder_return_obj[0]
+    links_dict = site_builder_return_obj[1]
+    expectation_suite_pages = [
+        file_relative_path(index_page_path, expectation_suite_link_dict["filepath"]) for expectation_suite_link_dict in links_dict["expectations_links"]
+    ]
+    profiling_results_pages = [
+        file_relative_path(index_page_path, profiling_link_dict["filepath"]) for profiling_link_dict in links_dict["profiling_links"]
+    ]
+
+    page_paths_to_check = [index_page_path] + expectation_suite_pages + profiling_results_pages
+
+    expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=2019-09-24T23:18:36&dataContextId=f43d4897-385f-4366-82b0-1a8eda2bf79c"
+
+    for page_path in page_paths_to_check:
+        with open(page_path) as f:
+            page_contents = f.read()
+            assert expected_logo_url in page_contents
+
+
+@freeze_time("09/24/2019 23:18:36")
+def test_site_builder_usage_statistics_disabled(site_builder_data_context_with_html_store_titanic_random):
+    context = site_builder_data_context_with_html_store_titanic_random
+    context._project_config.anonymized_usage_statistics = {
+        "enabled": False,
+        "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c"
+    }
+    data_context_id = context.anonymized_usage_statistics["data_context_id"]
+
+    sites = site_builder_data_context_with_html_store_titanic_random._project_config_with_variables_substituted.data_docs_sites
+    local_site_config = sites["local_site"]
+    site_builder = instantiate_class_from_config(
+        config=local_site_config,
+        runtime_environment={
+            "data_context": context,
+            "root_directory": context.root_directory,
+            "site_name": "local_site"
+        },
+        config_defaults={
+            "module_name": "great_expectations.render.renderer.site_builder"
+        }
+    )
+    site_builder_return_obj = site_builder.build()
+    index_page_path = site_builder_return_obj[0]
+    links_dict = site_builder_return_obj[1]
+    expectation_suite_pages = [
+        file_relative_path(index_page_path, expectation_suite_link_dict["filepath"]) for expectation_suite_link_dict in links_dict["expectations_links"]
+    ]
+    profiling_results_pages = [
+        file_relative_path(index_page_path, profiling_link_dict["filepath"]) for profiling_link_dict in links_dict["profiling_links"]
+    ]
+
+    page_paths_to_check = [index_page_path] + expectation_suite_pages + profiling_results_pages
+
+    expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=2019-09-24T23:18:36"
+
+    for page_path in page_paths_to_check:
+        with open(page_path) as f:
+            page_contents = f.read()
+            assert expected_logo_url in page_contents
+            assert data_context_id not in page_contents
