@@ -6,7 +6,7 @@ develop
 * DataDocs: Expectation Suite name on Validation Result pages now link to Expectation Suite page
 * `great_expectations init`: cli now asks user if csv has header when adding a Spark Datasource with csv file
 * validate result dict when instantiating an ExpectationValidationResult (`#1133 <https://github.com/great-expectations/great_expectations/issues/1133>`_)
-* fix `#1194 <https://github.com/great-expectations/great_expectations/issues/1194>`_
+* fix notebook renderer handling for expectations with no column kwarg and table not in their name (`#1194 <https://github.com/great-expectations/great_expectations/issues/1194>`_)
 
 
 0.9.5
@@ -646,5 +646,4 @@ to top-level names.
 * API and examples for custom expectations are available
 * New output formats are available for all expectations
 * Significant improvements to test suite and compatibility
-
 
