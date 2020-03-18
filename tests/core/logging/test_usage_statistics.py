@@ -35,7 +35,7 @@ def in_memory_data_context_config():
                 "action_list": []
             }
         },
-        "anonymized_usage_statistics": {
+        "anonymous_usage_statistics": {
             "enabled": True,
             "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
             "usage_statistics_url": USAGE_STATISTICS_QA_URL
