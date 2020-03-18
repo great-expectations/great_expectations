@@ -22,7 +22,7 @@ from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     dataContextConfigSchema,
-)
+    AnonymizedUsageStatisticsConfig)
 from great_expectations.data_context.util import (
     file_relative_path,
     substitute_config_variable,
@@ -33,7 +33,7 @@ from great_expectations.profile.basic_dataset_profiler import (
 )
 
 import great_expectations.exceptions as ge_exceptions
-from ..core.logging.usage_statistics import usage_statistics_enabled_method, DEFAULT_USAGE_STATISTICS_URL, \
+from ..core.logging.usage_statistics import usage_statistics_enabled_method, \
     run_validation_operator_usage_statistics, UsageStatisticsHandler
 
 from ..validator.validator import Validator
@@ -133,9 +133,7 @@ class BaseDataContext(object):
 
         # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
         self._in_memory_instance_id = None  # This variable *may* be used in case we cannot save an instance id
-        updated_usage_statistics = self._initialize_usage_statistics(**project_config.anonymized_usage_statistics)
-        if updated_usage_statistics != project_config.anonymized_usage_statistics:
-            project_config.anonymized_usage_statistics = updated_usage_statistics
+        self._initialize_usage_statistics(project_config.anonymized_usage_statistics)
 
         # Init data sources
         self._datasources = {}
@@ -193,35 +191,16 @@ class BaseDataContext(object):
         for store_name, store_config in store_configs.items():
             self._build_store(store_name, store_config)
 
-    def _initialize_usage_statistics(self, data_context_id, enabled=True, usage_statistics_url=None):
+    def _initialize_usage_statistics(self, usage_statistics_config: AnonymizedUsageStatisticsConfig):
         """Initialize the usage statistics system."""
-        if not enabled:
+        if not usage_statistics_config.enabled:
             logger.info("Usage statistics is disabled; skipping initialization.")
             self._usage_statistics_handler = None
-            current_config = {
-                "enabled": enabled,
-            }
-            if data_context_id:
-                current_config["data_context_id"] = data_context_id
-            if usage_statistics_url:
-                current_config["usage_statistics_url"] = usage_statistics_url
-            return current_config
-
-        if usage_statistics_url is None:
-            usage_statistics_url = DEFAULT_USAGE_STATISTICS_URL
-            explicit_url = False
-        else:
-            explicit_url = True
 
         self._usage_statistics_handler = UsageStatisticsHandler(
-            data_context=self, data_context_id=data_context_id, usage_statistics_url=usage_statistics_url)
-        current_config = {
-            "enabled": enabled,
-            "data_context_id": data_context_id,
-        }
-        if usage_statistics_url != DEFAULT_USAGE_STATISTICS_URL or explicit_url:
-            current_config["usage_statistics_url"] = usage_statistics_url
-        return current_config
+            data_context=self,
+            data_context_id=usage_statistics_config.data_context_id,
+            usage_statistics_url=usage_statistics_config.usage_statistics_url)
 
     def _register_usage_statistics_details(self):
         if self._usage_statistics_handler:
@@ -366,6 +345,10 @@ class BaseDataContext(object):
     @property
     def expectations_store_name(self):
         return self._project_config_with_variables_substituted.expectations_store_name
+
+    @property
+    def data_context_id(self):
+        return self._project_config_with_variables_substituted.anonymized_usage_statistics.data_context_id
 
     @property
     def instance_id(self):
@@ -1526,11 +1509,7 @@ class DataContext(BaseDataContext):
             project_config,
             context_root_directory
         )
-
-        # If the data_context_id is different on disk (or absent and so was just generated)
-        # then we should save the current data back to disk so that it will persist.
-        disk_config = self._load_project_config()
-        if disk_config.anonymized_usage_statistics != project_config.anonymized_usage_statistics:
+        if project_config.anonymized_usage_statistics.explicit_id is False:
             self._save_project_config()
 
     def _load_project_config(self):

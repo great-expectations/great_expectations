@@ -2,7 +2,7 @@ import uuid
 from copy import deepcopy
 import logging
 
-from marshmallow import Schema, fields, ValidationError, pre_dump, post_load, validates_schema
+from marshmallow import Schema, fields, ValidationError, pre_dump, post_load, validates_schema, post_dump
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
@@ -16,7 +16,7 @@ yaml = YAML()
 
 CURRENT_CONFIG_VERSION = 1
 MINIMUM_SUPPORTED_CONFIG_VERSION = 1
-
+DEFAULT_USAGE_STATISTICS_URL = "https://4tdy72oi8f.execute-api.us-east-1.amazonaws.com/prod/great_expectations/v1/usage_statistics"
 
 class DataContextConfig(DictDot):
 
@@ -53,12 +53,7 @@ class DataContextConfig(DictDot):
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
         if anonymized_usage_statistics is None:
-            anonymized_usage_statistics = {
-                "enabled": True,
-                "data_context_id": str(uuid.uuid4())
-            }
-        if not anonymized_usage_statistics.get("data_context_id"):
-            anonymized_usage_statistics["data_context_id"] = str(uuid.uuid4())
+            anonymized_usage_statistics = AnonymizedUsageStatisticsConfig()
         self.anonymized_usage_statistics = anonymized_usage_statistics
 
     @property
@@ -114,10 +109,74 @@ class DatasourceConfig(DictDot):
         return self._module_name
 
 
-class AnonymizedUsageStatisticsConfigchema(Schema):
-    data_context_id = fields.Str()
+class AnonymizedUsageStatisticsConfig(DictDot):
+    def __init__(self, enabled=True, data_context_id=None, usage_statistics_url=None):
+        self._enabled = enabled
+        if data_context_id is None:
+            data_context_id = str(uuid.uuid4())
+            self._explicit_id = False
+        else:
+            self._explicit_id = True
+
+        self._data_context_id = data_context_id
+        if usage_statistics_url is None:
+            usage_statistics_url = DEFAULT_USAGE_STATISTICS_URL
+            self._explicit_url = False
+        else:
+            self._explicit_url = True
+        self._usage_statistics_url = usage_statistics_url
+
+    @property
+    def enabled(self):
+        return self._enabled
+
+    @enabled.setter
+    def enabled(self, enabled):
+        if not isinstance(enabled, bool):
+            raise ValueError("usage statistics enabled property must be boolean")
+        self._enabled = enabled
+
+    @property
+    def data_context_id(self):
+        return self._data_context_id
+
+    @data_context_id.setter
+    def data_context_id(self, data_context_id):
+        try:
+            uuid.UUID(data_context_id)
+        except ValueError:
+            raise ge_exceptions.InvalidConfigError("data_context_id must be a valid uuid")
+        self._data_context_id = data_context_id
+        self._explicit_id = True
+
+    @property
+    def explicit_id(self):
+        return self._explicit_id
+
+    @property
+    def usage_statistics_url(self):
+        return self._usage_statistics_url
+
+    @usage_statistics_url.setter
+    def usage_statistics_url(self, usage_statistics_url):
+        self._usage_statistics_url = usage_statistics_url
+
+
+class AnonymizedUsageStatisticsConfigSchema(Schema):
+    data_context_id = fields.UUID(required=False)
     enabled = fields.Boolean(default=True)
     usage_statistics_url = fields.URL(allow_none=True)
+
+    # noinspection PyUnusedLocal
+    @post_load()
+    def make_usage_statistics_config(self, data, **kwargs):
+        return AnonymizedUsageStatisticsConfig(**data)
+
+    # noinspection PyUnusedLocal
+    @post_dump()
+    def filter_implicit(self, data, **kwargs):
+        if not self.explicit_url:
+            del data["usage_statistics_url"]
 
 
 class DatasourceConfigSchema(Schema):
@@ -148,7 +207,7 @@ class DataContextConfigSchema(Schema):
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     config_variables_file_path = fields.Str(allow_none=True)
-    anonymized_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigchema)
+    anonymized_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
 
     # noinspection PyUnusedLocal
     @pre_dump

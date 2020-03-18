@@ -4,17 +4,17 @@ import logging
 import requests
 import sys
 import platform
-from hashlib import md5
 from functools import wraps
 import jsonschema
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core import nested_update
-from great_expectations.datasource import DatasourceAnonymizer
+from great_expectations.core.logging.anonymizer import Anonymizer
+from great_expectations.datasource.datasource_anonymizer import DatasourceAnonymizer
 
-DEFAULT_USAGE_STATISTICS_URL = "https://4tdy72oi8f.execute-api.us-east-1.amazonaws.com/prod/great_expectations/v1/usage_statistics"
 logger = logging.getLogger(__name__)
 
+_anonymizers = dict()
 
 usage_statistics_record_schema = {
    "schema": {
@@ -112,7 +112,7 @@ usage_statistics_record_schema = {
 class UsageStatisticsHandler(object):
 
     def __init__(self, data_context, data_context_id, usage_statistics_url):
-        self._datasource_anonymizer = DatasourceAnonymizer()
+        self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
         self._data_context_id = data_context_id
         self._data_context_instance_id = data_context.instance_id
         self._platform_system = platform.system()
@@ -239,9 +239,18 @@ def run_validation_operator_usage_statistics(
         run_id=None,
         **kwargs
 ):
+    try:
+        data_context_id = data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+    logger.debug("run_validation_operator_usage_statistics found data_context_id: " + str(data_context_id))
+    anonymizer = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
     payload = {}
     try:
-        payload["validation_operator_name"] = md5(validation_operator_name.encode("utf-8")).hexdigest()
+        payload["validation_operator_name"] = anonymizer.anonymize(validation_operator_name)
     except TypeError as e:
         logger.warning("run_validation_operator_usage_statistics: Unable to create validation_operator_name hash")
     try:
