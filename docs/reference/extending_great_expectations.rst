@@ -24,4 +24,4 @@ your dataset see consistent documentation no matter which backend is implementin
 `@DocInherit` overrides your function's __get__ method with one that will replace the local docstring with the
 docstring from its parent. It is defined in `Dataset.util`.
 
-*last updated*: |lastupdate|
+

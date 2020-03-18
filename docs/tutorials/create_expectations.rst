@@ -30,10 +30,9 @@ We will describe the Create, Review and Edit steps in brief:
 Create an Expectation Suite
 ----------------------------------------
 
+Expectation Suites are saved as JSON files, so you *could* create a new suite by writing a file directly. However the preferred way is to let the CLI save you time and typos.  If you cannot use the :ref:`CLI <command_line>` in your environment (e.g., in a Databricks cluster), you can create and edit an Expectation Suite in a notebook. Jump to this section for details: :ref:`Jupyter Notebook for Creating and Editing Expectation Suites`.
 
-Expectation Suites are saved as JSON files, so you *could* create a new suite by writing a file directly. However the preferred way is to let the CLI save you time and typos.  If you cannot use the CLI in your environment (e.g., in a Databricks cluster), you can create and edit an Expectation Suite in a notebook. Jump to this section for details: :ref:`Jupyter Notebook for Creating and Editing Expectation Suites`.
-
-To continue with the CLI, run this command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory:
+To continue with the :ref:`CLI <command_line>`, run this command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory:
 
 
 .. code-block:: bash
@@ -72,7 +71,7 @@ Take a look at the screenshot below. It shows the HTML view and the Python metho
 
 .. image:: ../images/exp_html_python_side_by_side .png
 
-The CLI provides a command that, given an Expectation Suite, generates a Jupyter notebook to edit it. It takes care of generating a cell for every expectation in the suite and of getting a sample batch of data. The HTML page for each Expectation Suite has the CLI command syntax in order to make it easier for users.
+The :ref:`CLI <command_line>` provides a command that, given an Expectation Suite, generates a Jupyter notebook to edit it. It takes care of generating a cell for every expectation in the suite and of getting a sample batch of data. The HTML page for each Expectation Suite has the CLI command syntax in order to make it easier for users.
 
 .. image:: ../images/edit_e_s_popup.png
 
@@ -87,10 +86,10 @@ To understand this auto-generated notebook in more depth, jump to this section: 
 Jupyter Notebook for Creating and Editing Expectation Suites
 ------------------------------------------------------------
 
-If you used the CLI `suite new` command to create an Expectation Suite and then the `suite edit` command to edit it, then the CLI generated a notebook in the ``great_expectations/uncommitted/`` folder for you. There is no need to check this notebook in to version control. Next time you decide to
-edit this Expectation Suite, use the CLI again to generate a new notebook that reflects the expectations in the suite at that time.
+If you used the :ref:`CLI <command_line>` `suite new` command to create an Expectation Suite and then the `suite edit` command to edit it, then the CLI generated a notebook in the ``great_expectations/uncommitted/`` folder for you. There is no need to check this notebook in to version control. Next time you decide to
+edit this Expectation Suite, use the :ref:`CLI <command_line>` again to generate a new notebook that reflects the expectations in the suite at that time.
 
-If you do not use the CLI, create a new notebook in the``great_expectations/notebooks/`` folder in your project.
+If you do not use the :ref:`CLI <command_line>`, create a new notebook in the``great_expectations/notebooks/`` folder in your project.
 
 
 1. Setup
@@ -301,7 +300,3 @@ To view the expectation suite you just created as HTML, rebuild the data docs an
     # and open the site in the browser
     context.build_data_docs()
     context.open_data_docs(validation_result_identifier)
-
-
-
-*last updated*: |lastupdate|
