@@ -171,6 +171,8 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
     # noinspection PyUnusedLocal
     @post_load()
     def make_usage_statistics_config(self, data, **kwargs):
+        if "data_context_id" in data:
+            data["data_context_id"] = str(data["data_context_id"])
         return AnonymizedUsageStatisticsConfig(**data)
 
     # noinspection PyUnusedLocal
