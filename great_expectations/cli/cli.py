@@ -10,6 +10,7 @@ from great_expectations.cli.docs import docs
 from great_expectations.cli.init import init
 from great_expectations.cli.project import project
 from great_expectations.cli.suite import suite
+from great_expectations.cli.validation_operator import validation_operator
 
 
 # TODO: consider using a specified-order supporting class for help (but wasn't working with python 2)
@@ -52,6 +53,7 @@ cli.add_command(docs)
 cli.add_command(init)
 cli.add_command(project)
 cli.add_command(suite)
+cli.add_command(validation_operator)
 
 
 def main():
