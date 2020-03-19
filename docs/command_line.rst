@@ -343,7 +343,7 @@ A tap is an executable python file that runs validations that you can create to 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Creating a tap requires a valid suite name and tap filename.
-This is the name of a a python file that this command will write to.
+This is the name of a python file that this command will write to.
 
 
 .. note::
