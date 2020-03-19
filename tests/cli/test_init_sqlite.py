@@ -259,14 +259,15 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert not context.list_expectation_suites()
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["init", "-d", project_dir],
-        input="2\n5\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
-            titanic_sqlite_db_file
-        ),
-        catch_exceptions=False,
-    )
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        result = runner.invoke(
+            cli,
+            ["init", "-d", project_dir],
+            input="2\n5\nsqlite\nsqlite:///{}\n1\nmy_suite\n\n".format(
+                titanic_sqlite_db_file
+            ),
+            catch_exceptions=False,
+        )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -374,9 +375,10 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert len(context.list_datasources()) == 2
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
-    )
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        result = runner.invoke(
+            cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
+        )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -399,9 +401,10 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     project_dir = initialized_sqlite_project
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
-    )
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        result = runner.invoke(
+            cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
+        )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -424,9 +427,10 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     project_dir = initialized_sqlite_project
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli, ["init", "-d", project_dir], input="Y\n", catch_exceptions=False,
-    )
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        result = runner.invoke(
+            cli, ["init", "-d", project_dir], input="Y\n", catch_exceptions=False,
+        )
     stdout = result.stdout
 
     assert result.exit_code == 0
@@ -464,12 +468,13 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert context.list_expectation_suites() == []
 
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["init", "-d", project_dir],
-        input="1\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
-        catch_exceptions=False,
-    )
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        result = runner.invoke(
+            cli,
+            ["init", "-d", project_dir],
+            input="1\nsink_me\n\n\n".format(os.path.join(project_dir, "data/Titanic.csv")),
+            catch_exceptions=False,
+        )
     stdout = result.stdout
 
     assert result.exit_code == 0
