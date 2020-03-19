@@ -33,7 +33,7 @@ See [Down with Pipeline Debt!](https://medium.com/@expectgreatdata/down-with-pip
 Key features
 --------------------------------------------------
 
-###Expectations
+### Expectations
 
 Expectations are assertions for data. They are the workhorse abstraction in Great Expectations, covering all kinds of common data issues, including:
 - `expect_column_values_to_not_be_null`
@@ -51,12 +51,12 @@ Expectations are <!--[declarative, flexible and extensible]()--> declarative, fl
 <<animated gif showing typing an Expectation in a notebook cell, running it, and getting an informative result>>
 -->
 
-###**Batteries-included data validation**
-<small>
+### Batteries-included data validation
+
 ```diff 
 ! This feature is in beta
 ```
-</small>
+
 
 Expectations are a great start, but it takes more to get to production-ready data validation. Where are Expectations stored? How do they get updated? How do you securely connect to production data systems? How do you notify team members and triage when data validation fails?
 
@@ -71,12 +71,12 @@ Check out [The Era of DIY Data Validation is Over]() for more details.
 -->
 ![ooooo ahhhh](./readme_assets/terminal.gif)
 
-###**Tests are docs and docs are tests**  
-<small>
+### Tests are docs and docs are tests
+
 ```diff 
 - This feature is in alpha
 ```
-</small>
+
 
 Many data teams struggle to maintain up-to-date data documentation. Great Expectations solves this problem by rendering Expectations directly into clean, human-readable documentation. 
 
@@ -92,12 +92,12 @@ Check out [Down with Documentation Rot!]() for more details.
 ![Your tests are your docs and your docs are your tests](./readme_assets/test-are-docs.jpg)
 
 
-###**Automated data profiling**
-<small>
+### Automated data profiling
+
 ```diff 
 - This feature is in alpha
 ```
-</small>
+
 
 Wouldn't it be great if your tests could write themselves? Run your data through one of Great Expectations' data profilers and it will automatically generate Expectations and data documentation. Profiling provides the double benefit of helping you explore data faster, and capturing knowledge for future documentation and testing.
 
@@ -117,7 +117,7 @@ Visit our gallery of expectations and documentation generated via automatic data
 You can also test out profiling on your own data [here]().
 -->
 
-###**Pluggable and extensible**
+### Pluggable and extensible
 
 Every component of the framework is designed to be extensible: Expectations, storage, profilers, renderers for documentation, actions taken after validation, etc.  This design choice gives a lot of creative freedom to developers working with Great Expectations.
 
