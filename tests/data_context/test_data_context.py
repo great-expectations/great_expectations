@@ -104,7 +104,7 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
 ):
     """Test datasources with and without generators."""
     context = empty_data_context
-    connection_kwargs = {"drivername": "sqlite"}
+    connection_kwargs = {"credentials": {"drivername": "sqlite"}}
 
     context.add_datasource(
         "first",
@@ -600,7 +600,7 @@ def test_data_context_updates_expectation_suite_names(data_context):
                 "expectations",
                 "a_new_new_suite_name.json"
                 ), 'r') as suite_file:
-        loaded_suite = expectationSuiteSchema.load(json.load(suite_file)).data
+        loaded_suite = expectationSuiteSchema.load(json.load(suite_file))
         assert loaded_suite.expectation_suite_name == 'a_new_new_suite_name'
 
     #   3. Using the new name but having the context draw that from the suite
@@ -781,10 +781,10 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(tmp_pat
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
     shutil.rmtree(uncommitted_dir)
 
-    # re-run create to simulate onboarding
-    DataContext.create(project_path)
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        # re-run create to simulate onboarding
+        DataContext.create(project_path)
     obs = gen_directory_tree_str(ge_dir)
-    print(obs)
 
     assert os.path.isdir(uncommitted_dir), "No uncommitted directory created"
     assert obs == """\
@@ -841,12 +841,12 @@ great_expectations/
 
     DataContext.create(project_path)
     fixture = gen_directory_tree_str(ge_dir)
-    print(fixture)
 
     assert fixture == expected
 
-    # re-run create to simulate onboarding
-    DataContext.create(project_path)
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
+        # re-run create to simulate onboarding
+        DataContext.create(project_path)
 
     obs = gen_directory_tree_str(ge_dir)
     assert obs == expected

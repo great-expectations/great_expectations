@@ -130,7 +130,6 @@ def test_expectation_suite_equivalence(baseline_suite, identical_suite, equivale
 
 def test_expectation_suite_dictionary_equivalence(baseline_suite):
     assert baseline_suite.isEquivalentTo({
-        "data_asset_name": {"datasource": "my_source", "generator": "my_generator", "generator_asset": "my_asset"},
         "expectation_suite_name": "warning",
         "expectations": [{
             "expectation_type": "expect_column_values_to_be_in_set",
@@ -158,7 +157,6 @@ def test_expectation_suite_dictionary_equivalence(baseline_suite):
     }) is True
 
     assert baseline_suite.isEquivalentTo({
-        "data_asset_name": {"datasource": "my_source", "generator": "my_generator", "generator_asset": "my_asset"},
         "expectation_suite_name": "warning",
         "expectations": [{
             "expectation_type": "expect_column_values_to_be_in_set",

@@ -16,7 +16,7 @@ tzlocal>=1.2
 pypandoc>=1.4
 future>=0.16
 jinja2>=2.10
-marshmallow>=2.0,<3.0
+marshmallow>3.0
 sqlalchemy>=1.2
 pyspark>=2.3.2
 psycopg2-binary>=2.7.6
@@ -32,3 +32,4 @@ freezegun>=0.3.12
 google-cloud-storage>=1.20.0
 pybigquery>=0.4.11
 autopep8>=1.4.4
+black==19.10b0

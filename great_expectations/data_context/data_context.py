@@ -21,7 +21,7 @@ from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     dataContextConfigSchema,
-)
+    datasourceConfigSchema, DatasourceConfig)
 from great_expectations.data_context.util import (
     file_relative_path,
     substitute_config_variable,
@@ -557,6 +557,7 @@ class BaseDataContext(object):
         else:
             config = kwargs
 
+        config = datasourceConfigSchema.load(config)
         self._project_config["datasources"][name] = config
 
         # We perform variable substitution in the datasource's config here before using the config
@@ -591,13 +592,9 @@ class BaseDataContext(object):
         return self._project_config
 
     def _build_datasource_from_config(self, name, config):
-        if "type" in config:
-            warnings.warn("Using type configuration to build datasource. Please update to using class_name.")
-            type_ = config.pop("type")
-            datasource_class = self._get_datasource_class_from_type(type_)
-            config.update({
-                "class_name": datasource_class.__name__
-            })
+        # We convert from the type back to a dictionary for purposes of instantiation
+        if isinstance(config, DatasourceConfig):
+            config = datasourceConfigSchema.dump(config)
         config.update({
             "name": name
         })
