@@ -189,7 +189,7 @@ You can opt out of event tracking at any time by adding the following to the top
 
     anonymized_usage_statistics:
       enabled: false
+      data_context_id: 705dd2a2-27f8-470f-9ebe-e7058fd7a534
 
 
 Please reach out `on Slack <https://greatexpectations.io/slack>`__ if you have any questions or comments.
-
