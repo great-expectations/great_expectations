@@ -17,7 +17,7 @@ The article focuses on the "What" and the "Why" of each step in this workflow, a
 If you have not installed Great Expectations and executed the :ref:`command line interface (CLI) <command_line>` init command, as described in this :ref:`tutorial <tutorial_init>`, we recommend you do so before reading the rest of the article. This will make a lot of concepts mentioned below more familiar to you.
 
 
-Setting up a project
+Setting Up a Project
 ----------------------------------------
 
 To use Great Expectations in a new data project, a :ref:`Data Context<data_context>` needs to be initialized.
@@ -125,7 +125,7 @@ Instead it saves them in a separate file: ``uncommitted/config_variables.yml`` w
 
 This means that that when another team member checks out the updated configuration file with the newly added Datasource, they must add their own credentials to their ``uncommitted/config_variables.yml`` or in environment variables.
 
-Setting up Data Docs
+Setting Up Data Docs
 ----------------------------------------------------------
 
 :ref:`Data Docs<data_docs>` is a feature of Great Expectations that creates data documentation by compiling expectations and validation results into HTML.
@@ -167,7 +167,7 @@ The site's configuration defines what to compile and where to store results.
 Data Docs is very customizable - see the :ref:`Data Docs Reference<data_docs_reference>` for more information.
 
 
-Authoring expectation suites
+Authoring Expectation Suites
 ----------------------------------------------------------
 
 Earlier in this article we said that capturing and documenting the team's shared understanding of its data as expectations is the core part of this typical workflow.
@@ -243,15 +243,125 @@ Simply press the "How to Edit This Suite" button, and copy/paste the :ref:`CLI <
 
 .. image:: ../images/edit_e_s_popup.png
 
-
-Deploying automated testing into a pipeline
--------------------------------------------
+Validating Data using Great Expectations
+----------------------------------------
 
 So far, your team members used Great Expectations to capture and document their expectations about your data.
 
-It is time for your team to benefit from Great Expectations' automated testing that systematically surfaces errors, discrepancies and surprises lurking in your data.
-A data engineer can add a :ref:`Validation Operators<validation_operators_and_actions>` to your pipeline and configure it.
-These Validation Operators evaluate the new batches of data that flow through your pipeline against the expectations your team defined in the previous sections.
+It is time for your team to benefit from Great Expectations' automated testing that systematically surfaces errors, discrepancies and surprises lurking in your data, allowing you and your team to be more proactive when data changes.
+
+We typically see two main deployment patterns that we will explore in depth below.
+
+1. Great Expectations is **deployed adjacent to your existing data pipeline**.
+2. Great Expectations is **embedded into your existing data pipeline**.
+
+Deploying automated testing adjacent to a data pipeline
+*******************************************************
+
+You might find yourself in a situation where you do not have the engineering resources, skills, desire, or permissions to embed Great Expectations into your pipeline.
+As long as your data is accessible you can still reap the benefits of automated data testing.
+
+.. note:: This is a fast and convenient way to get the benefits of automated data testing without requiring engineering efforts to build Great Expectations into your pipelines.
+
+A tap is an executable python file that runs validates a batch of data against an expectation suite.
+Taps are a convenient way to generate a data validation script that can be run manually or via a scheduler.
+
+Let's make a new tap using the ``tap new`` command.
+
+To do this we\'ll specify the name of the suite and the name of the new python file we want to create.
+For this example, let\'s say we want to validate a batch of data against the ``movieratings.ratings`` expectation suite, and we want to make a new file called ``movieratings.ratings_tap.py``
+
+.. code-block:: bash
+
+    $ great_expectations tap new movieratings.ratings movieratings.ratings_tap.py
+    This is a BETA feature which may change.
+
+    Which table would you like to use? (Choose one)
+        1. ratings (table)
+        Don\'t see the table in the list above? Just type the SQL query
+    : 1
+    A new tap has been generated!
+    To run this tap, run: python movieratings.ratings_tap.py
+    You can edit this script or place this code snippet in your pipeline.
+
+If you open the generated tap file you'll see it's only a few lines of code to get validations running!
+It will look like this:
+
+.. code-block:: python
+
+    """
+    A basic generated Great Expectations tap that validates a single batch of data.
+
+    Data that is validated is controlled by BatchKwargs, which can be adjusted in
+    this script.
+
+    Data are validated by use of the `ActionListValidationOperator` which is
+    configured by default. The default configuration of this Validation Operator
+    saves validation results to your results store and then updates Data Docs.
+
+    This makes viewing validation results easy for you and your team.
+
+    Usage:
+    - Run this file: `python movieratings.ratings_tap.py`.
+    - This can be run manually or via a scheduler such as cron.
+    - If your pipeline runner supports python snippets you can paste this into your
+    pipeline.
+    """
+    import sys
+    import great_expectations as ge
+
+    # tap configuration
+    context = ge.DataContext()
+    suite = context.get_expectation_suite("movieratings.ratings_tap")
+    # You can modify your BatchKwargs to select different data
+    batch_kwargs = {
+        "table": "ratings",
+        "schema": "movieratings",
+        "datasource": "movieratings",
+    }
+
+    # tap validation process
+    batch = context.get_batch(batch_kwargs, suite)
+    results = context.run_validation_operator("action_list_operator", [batch])
+
+    if not results["success"]:
+        print("Validation Failed!")
+        sys.exit(1)
+
+    print("Validation Succeeded!")
+    sys.exit(0)
+
+To run this and validate a batch of data, run:
+
+.. code-block:: bash
+
+    $ python movieratings.ratings_tap.py
+    Validation Succeeded!
+
+This can easily be run manually anytime you want to check your data.
+It can also easily be run on a schedule basis with a scheduler such as cron.
+
+You'll want to view the detailed data quality reports in Data Docs by running ``great_expectations docs build``.
+
+For example, if you wanted to run this script nightly at 04:00, you'd add something like this to your crontab.
+
+.. code-block:: bash
+
+    $ crontab -e
+    0 4 * * * /full/path/to/python /full/path/to/movieratings.ratings_tap.py
+
+If you don't have access to a scheduler, you can always make checking your data part of your daily routine.
+Once you experience how much time and pain this saves you, we recommend geting engineering resources to embed Great Expectations validations into your pipeline.
+
+Embedding automated testing into a data pipeline
+************************************************
+
+.. note:: This is an ideal way to deploy automated data testing if you want to take automated interventions based on the results of data validation.
+  For example, you may want your pipeline to quarantine data that does not meet your expectations.
+
+
+A data engineer can add a :ref:`Validation Operator<validation_operators_and_actions>` to your pipeline and configure it.
+These :ref:`Validation Operators<validation_operators_and_actions>` evaluate the new batches of data that flow through your pipeline against the expectations your team defined in the previous sections.
 
 While data pipelines can be implemented with various technologies, at their core they are all DAGs (directed acyclic graphs) of computations and transformations over data.
 
@@ -316,7 +426,7 @@ Below is an example of this code snippet, with comments that explain what each l
         # meet your expectations.
 
 
-Responding to validation results
+Responding to Validation Results
 ----------------------------------------
 
 A :ref:`Validation Operator<validation_operators_and_actions>` is deployed at a particular point in your data pipeline.
