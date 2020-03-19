@@ -134,7 +134,7 @@ Great Expectations currently emits usage statistics for the following methods:
       .. code-block:: python
 
           {
-            "validation_operator_name": MD5 hash of validation operator name,
+            "validation_operator_name": MD5 hash of validation operator name, salted with data context id
             "n_assets": number of assets validated
           }
       * message example:
@@ -192,5 +192,4 @@ You can opt out of event tracking at any time by adding the following to the top
 
 
 Please reach out `on Slack <https://greatexpectations.io/slack>`__ if you have any questions or comments.
-
 
