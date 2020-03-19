@@ -32,6 +32,7 @@ def tap():
 )
 def tap_new(suite, tap_filename, directory, datasource=None):
     """BETA! Create a new tap file for easy deployments."""
+    cli_message("<yellow>This is a BETA feature which may change. If you have ideas please file a GitHub issue!</yellow>")
     _validate_tap_filename(tap_filename)
     context = _get_context(directory)
     context_directory = context.root_directory
@@ -43,7 +44,10 @@ def tap_new(suite, tap_filename, directory, datasource=None):
         batch_kwargs, context_directory, suite, tap_filename
     )
     cli_message(
-        f"""<green>A new tap has been generated! Open {tap_filename} in an editor to tweak it</green>"""
+        f"""\
+<green>A new tap has been generated!</green>
+To run this tap, run: <green>python {tap_filename}</green>
+You can edit this script or place this code snippet in your pipeline."""
     )
 
 

@@ -11,8 +11,10 @@ saves validation results to your results store and then updates Data Docs.
 This makes viewing validation results easy for you and your team.
 
 Usage:
-- Run this file: `python time_series_confirmed.py`.
+- Run this file: `python {0}`.
 - This can be run manually or via a scheduler such as cron.
+- If your pipeline runner supports python snippets you can paste this into your
+pipeline.
 """
 import sys
 import great_expectations as ge
@@ -20,6 +22,7 @@ import great_expectations as ge
 # tap configuration
 context = ge.DataContext("{1}")
 suite = context.get_expectation_suite("{2}")
+# You can modify your BatchKwargs to select different data
 batch_kwargs = {3}
 
 # tap validation process
