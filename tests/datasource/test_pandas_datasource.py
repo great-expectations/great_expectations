@@ -10,6 +10,7 @@ from six import PY2, PY3
 import shutil
 
 from great_expectations.core.batch import Batch
+from great_expectations.data_context.types.base import DataContextConfigSchema
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.datasource import PandasDatasource
@@ -40,7 +41,6 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
             }
         }
     )
-
 
     assert datasource.get_available_data_asset_names() == {'subdir_reader': {'names': [('test', 'file')],
                                                                         'is_complete_list':
@@ -95,7 +95,8 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
     with open(os.path.join(data_context.root_directory, "great_expectations.yml"), "r") as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
-    assert data_context_file_config["datasources"][name] == data_context_config["datasources"][name]
+    assert data_context_file_config["datasources"][name] == DataContextConfigSchema().dump(data_context_config)[
+        "datasources"][name]
 
     # We should have added a default generator built from the default config
     assert data_context_file_config["datasources"][name]["generators"]["subdir_reader"]["class_name"] == \

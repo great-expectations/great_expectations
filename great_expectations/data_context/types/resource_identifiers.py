@@ -208,5 +208,5 @@ class SiteSectionIdentifier(DataContextKey):
             )
 
 
-expectationSuiteIdentifierSchema = ExpectationSuiteIdentifierSchema(strict=True)
-validationResultIdentifierSchema = ValidationResultIdentifierSchema(strict=True)
+expectationSuiteIdentifierSchema = ExpectationSuiteIdentifierSchema()
+validationResultIdentifierSchema = ValidationResultIdentifierSchema()

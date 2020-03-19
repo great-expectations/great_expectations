@@ -22,7 +22,7 @@ def test_recursively_convert_to_json_serializable():
     asset.expect_column_kl_divergence_to_be_less_than("x", part, .6)
 
     # Dumping this JSON object verifies that everything is serializable
-    json.dumps(expectationSuiteSchema.dump(asset.get_expectation_suite()).data, indent=2)
+    json.dumps(expectationSuiteSchema.dump(asset.get_expectation_suite()), indent=2)
 
     x = {
         'w': [
