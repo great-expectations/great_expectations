@@ -362,7 +362,7 @@ class ExpectationConfiguration(DictDot):
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
-                    other = expectationConfigurationSchema.load(other).data
+                    other = expectationConfigurationSchema.load(other)
                 except ValidationError:
                     logger.debug("Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
                                  "dict other could not be instantiated as an ExpectationConfiguration")
@@ -397,7 +397,7 @@ class ExpectationConfiguration(DictDot):
         return json.dumps(self.to_json_dict(), indent=2)
 
     def to_json_dict(self):
-        myself = expectationConfigurationSchema.dump(self).data
+        myself = expectationConfigurationSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
         myself['kwargs'] = convert_to_json_serializable(myself['kwargs'])
@@ -511,7 +511,7 @@ class ExpectationSuite(object):
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
-                    other = expectationSuiteSchema.load(other).data
+                    other = expectationSuiteSchema.load(other)
                 except ValidationError:
                     logger.debug("Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
                                  "dict other could not be instantiated as an ExpectationConfiguration")
@@ -547,7 +547,7 @@ class ExpectationSuite(object):
         return json.dumps(self.to_json_dict(), indent=2)
 
     def to_json_dict(self):
-        myself = expectationSuiteSchema.dump(self).data
+        myself = expectationSuiteSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
         myself['expectations'] = convert_to_json_serializable(myself['expectations'])
@@ -693,7 +693,7 @@ class ExpectationValidationResult(object):
         return True
 
     def to_json_dict(self):
-        myself = expectationValidationResultSchema.dump(self).data
+        myself = expectationValidationResultSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
         if 'result' in myself:
@@ -812,7 +812,7 @@ class ExpectationSuiteValidationResult(DictDot):
         myself['evaluation_parameters'] = convert_to_json_serializable(myself['evaluation_parameters'])
         myself['statistics'] = convert_to_json_serializable(myself['statistics'])
         myself['meta'] = convert_to_json_serializable(myself['meta'])
-        myself = expectationSuiteValidationResultSchema.dump(myself).data
+        myself = expectationSuiteValidationResultSchema.dump(myself)
         return myself
 
     def get_metric(self, metric_name, **kwargs):
@@ -868,7 +868,7 @@ class ExpectationSuiteValidationResultSchema(Schema):
         return ExpectationSuiteValidationResult(**data)
 
 
-expectationConfigurationSchema = ExpectationConfigurationSchema(strict=True)
-expectationSuiteSchema = ExpectationSuiteSchema(strict=True)
-expectationValidationResultSchema = ExpectationValidationResultSchema(strict=True)
-expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema(strict=True)
+expectationConfigurationSchema = ExpectationConfigurationSchema()
+expectationSuiteSchema = ExpectationSuiteSchema()
+expectationValidationResultSchema = ExpectationValidationResultSchema()
+expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()

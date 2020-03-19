@@ -9,6 +9,7 @@ from ..exceptions import BatchKwargsError
 
 from .datasource import Datasource
 from great_expectations.types import ClassConfig
+from ..types.configurations import classConfigSchema
 
 logger = logging.getLogger(__name__)
 
@@ -46,35 +47,11 @@ class SparkDFDatasource(Datasource):
             A complete datasource configuration.
 
         """
-        # No more default generators
-
-        # PENDING DELETION - JPC - 20200130
-        # if generators is None:
-        #     # Provide a gentle way to build a datasource with a sane default,
-        #     # including ability to specify the base_directory
-        #     base_directory = kwargs.pop("base_directory", "/data")
-        #     reader_options = kwargs.pop("reader_options", {})
-        #     generators = {
-        #         "default": {
-        #             "class_name": "SubdirReaderBatchKwargsGenerator",
-        #             "base_directory": base_directory,
-        #             "reader_options": reader_options
-        #         },
-        #         "passthrough": {
-        #             "class_name": "PassthroughGenerator",
-        #         }
-        #     }
 
         if data_asset_type is None:
-            data_asset_type = ClassConfig(
-                class_name="SparkDFDataset"
-            )
+            data_asset_type = {"class_name": "SparkDFDataset"}
         else:
-            try:
-                data_asset_type = ClassConfig(**data_asset_type)
-            except TypeError:
-                # In this case, we allow the passed config, for now, in case they're using a legacy string-only config
-                pass
+            data_asset_type = classConfigSchema.dump(ClassConfig(**data_asset_type))
 
         if spark_config is None:
             spark_config = {}
