@@ -19,3 +19,4 @@ jobs:
         exempt-labels: 'awaiting-approval, security, stalebot-exempt'
         days-before-stale: 120
         days-before-close: 7
+        dry-run: false
